@@ -1,0 +1,281 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Addons.Interactive;
+using Discord.Commands;
+using Discord.WebSocket;
+using Fergun.Attributes;
+using Fergun.Attributes.Preconditions;
+using Fergun.Extensions;
+using Fergun.Services;
+using Victoria;
+
+namespace Fergun.Modules
+{
+    [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
+    [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
+    [Disabled(264445053596991498)]
+    [UserMustBeInVoice(ErrorMessage = "UserNotInVC")]
+    public class Music : FergunBase
+    {
+        private readonly MusicService _musicService;
+
+        public Music(MusicService musicService)
+        {
+            _musicService = musicService;
+        }
+
+        [RequireBotPermission(GuildPermission.Connect, ErrorMessage = "BotRequireConnect")]
+        [Command("join", RunMode = RunMode.Async)]
+        [Summary("joinSummary")]
+        public async Task<RuntimeResult> Join()
+        {
+            var user = Context.User as SocketGuildUser;
+            await SendEmbedAsync(await _musicService.JoinAsync(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel));
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("leave")]
+        [Summary("leaveSummary")]
+        [Alias("disconnect")]
+        public async Task Leave()
+        {
+            var user = Context.User as SocketGuildUser;
+            bool connected = await _musicService.LeaveAsync(Context.Guild, user.VoiceChannel);
+            await SendEmbedAsync(!connected ? Locate("BotNotConnected") : $"{Locate("LeftVC")} **{user.VoiceChannel.Name}**");
+        }
+
+        [Command("loop")]
+        [Summary("loopSummary")]
+        public async Task Loop([Summary("loopParam1")] uint? count = null)
+        {
+            await SendEmbedAsync(_musicService.Loop(count, Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [LongRunning]
+        [Command("lyrics", RunMode = RunMode.Async)]
+        [Summary("lyricsSummary")]
+        [Alias("l")]
+        public async Task Lyrics([Remainder][Summary("lyricsParam1")] string query = null)
+        {
+            bool keepHeaders = false;
+            if (string.IsNullOrWhiteSpace(query) || query.ToLowerInvariant().Trim() == "-headers")
+            {
+                query = null;
+            }
+            else if (query.EndsWith("-headers", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Substring(0, query.Length - 8);
+                keepHeaders = true;
+            }
+            var result = await _musicService.GetLyricsAsync(query, keepHeaders, Context.Guild,
+                Context.Channel as ITextChannel, Context.User.Activity as SpotifyGame);
+
+            if (result.Item1 != null)
+            {
+                await SendEmbedAsync($"\u26a0 {result.Item1}");
+                return;
+            }
+            var pages = new List<PaginatedMessage.Page>();
+            foreach (var item in result.Item2.Skip(2))
+            {
+                pages.Add(new PaginatedMessage.Page
+                {
+                    Description = item,
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        new EmbedFieldBuilder { Name = "Links", Value = result.Item2.ElementAt(1) }
+                    },
+                });
+            }
+
+            var pager = new PaginatedMessage
+            {
+                Color = new Color(FergunConfig.EmbedColor),
+                Title = result.Item2.First(),
+                Pages = pages,
+                Options = new PaginatedAppearanceOptions
+                {
+                    FooterFormat = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}",
+                    Timeout = TimeSpan.FromMinutes(10),
+                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
+                }
+            };
+
+            await PagedReplyAsync(pager, ReactionList.Default);
+        }
+
+        [Command("move")]
+        [Summary("moveSummary")]
+        public async Task Move()
+        {
+            var user = Context.User as SocketGuildUser;
+            await SendEmbedAsync(await _musicService.MoveAsync(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel));
+        }
+
+        [Command("nowplaying")]
+        [Summary("nowplayingSummary")]
+        [Alias("np")]
+        public async Task Nowplaying()
+        {
+            await SendEmbedAsync(_musicService.GetCurrentTrack(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("pause")]
+        [Summary("pauseSummary")]
+        public async Task Pause()
+        {
+            await SendEmbedAsync(await _musicService.PauseOrResumeAsync(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [RequireBotPermission(GuildPermission.Speak, ErrorMessage = "BotRequireSpeak")]
+        [LongRunning]
+        [Command("play", RunMode = RunMode.Async)]
+        [Summary("playSummary")]
+        [Alias("p")]
+        public async Task<RuntimeResult> Play([Remainder][Summary("playParam1")] string query)
+        {
+            var user = Context.User as SocketGuildUser;
+            //await ReplyAsync(await _musicService.PlayAsync(query, Context.GuildId));
+            var (result, tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            if (tracks == null)
+                await SendEmbedAsync(result);
+            else
+            {
+                LavaTrack SelectedTrack;
+                bool TrackSelection = GetGuild()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
+                if (TrackSelection)
+                {
+                    string list = "";
+                    // Limit to 10, for now
+                    int count = tracks.Count > 10 ? 10 : tracks.Count;
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        list += $"{i + 1}. [{tracks[i].Title}]({tracks[i].Url}) ({tracks[i].Duration.ToShortForm()})\n";
+                    }
+
+                    var builder = new EmbedBuilder()
+                        .WithAuthor(user)
+                        .WithTitle(Locate("SelectTrack"))
+                        .WithDescription(list)
+                        .WithColor(FergunConfig.EmbedColor);
+                    await ReplyAsync(null, false, builder.Build());
+
+                    var response = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
+
+                    if (response == null)
+                    {
+                        return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("SearchCanceled")}");
+                    }
+                    if (!int.TryParse(response.Content, out int option))
+                    {
+                        return FergunResult.FromError($"{Locate("InvalidOption")} {Locate("SearchCanceled")}");
+                    }
+                    if (option < 1 || option > count)
+                    {
+                        return FergunResult.FromError($"{Locate("OutOfIndex")} {Locate("SearchCanceled")}");
+                    }
+                    SelectedTrack = tracks[option - 1];
+                }
+                else
+                {
+                    // people don't know how to select a track...
+                    SelectedTrack = tracks[0];
+                }
+                var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, SelectedTrack);
+                await SendEmbedAsync(result2);
+            }
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("queue")]
+        [Summary("queueSummary")]
+        public async Task Queue()
+        {
+            await SendEmbedAsync(_musicService.GetQueue(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("remove")]
+        [Summary("removeSummary")]
+        [Alias("delete")]
+        public async Task Remove([Summary("removeParam1")] int index)
+        {
+            await SendEmbedAsync(_musicService.RemoveAt(Context.Guild, Context.Channel as ITextChannel, index));
+        }
+
+        [Command("replay")]
+        [Summary("replaySummary")]
+        public async Task Replay()
+        {
+            await SendEmbedAsync(await _musicService.ReplayAsync(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("resume")]
+        [Summary("resumeSummary")]
+        public async Task Resume()
+        {
+            await SendEmbedAsync(await _musicService.ResumeAsync(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("seek")]
+        [Summary("seekSummary")]
+        [Alias("skipto", "goto")]
+        public async Task Seek([Summary("seekParam1")] string time)
+        {
+            await SendEmbedAsync(await _musicService.SeekAsync(Context.Guild, Context.Channel as ITextChannel, time));
+        }
+
+        [Command("shuffle")]
+        [Summary("shuffleSummary")]
+        public async Task Shuffle()
+        {
+            await SendEmbedAsync(_musicService.Shuffle(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("skip")]
+        [Summary("skipSummary")]
+        [Alias("skip")]
+        public async Task Skip()
+        {
+            await SendEmbedAsync(await _musicService.SkipAsync(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("stop")]
+        [Summary("stopSummary")]
+        public async Task Stop()
+        {
+            await SendEmbedAsync(await _musicService.StopAsync(Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        [Command("volume")]
+        [Summary("volumeSummary")]
+        public async Task Volume([Summary("volumeParam1")] int volume)
+        {
+            await SendEmbedAsync(await _musicService.SetVolumeAsync(volume, Context.Guild, Context.Channel as ITextChannel));
+        }
+
+        //[Command("artwork")]
+        //[Summary("artworkSummary")]
+        //public async Task Artwork()
+        //{
+        //
+        //    (bool success, string message) = await _musicService.GetArtworkAsync(Context.Guild);
+        //    if (!success)
+        //    {
+        //        await SimpleEmbed(message);
+        //    }
+        //    else
+        //    {
+        //        EmbedBuilder builder = new EmbedBuilder()
+        //            .WithTitle("Artwork")
+        //            .WithImageUrl(message)
+        //            .WithColor(FergunConfig.EmbedColor);
+
+        //        await ReplyAsync("", false, builder.Build());
+        //    }
+        //}
+    }
+}

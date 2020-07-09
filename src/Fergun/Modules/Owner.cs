@@ -1,0 +1,328 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Addons.Interactive;
+using Discord.Commands;
+using Discord.WebSocket;
+using Fergun.Attributes;
+using Fergun.Extensions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+
+namespace Fergun.Modules
+{
+    [RequireOwner(ErrorMessage = "BotOwnerOnly")]
+    public class Owner : FergunBase
+    {
+        [LongRunning]
+        [Command("bash", RunMode = RunMode.Async)]
+        [Summary("bashSummary")]
+        [Alias("sh")]
+        public async Task Bash([Remainder] string command)
+        {
+            string result = command.Bash();
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                await SendEmbedAsync("No output.");
+            }
+            else
+            {
+                await ReplyAsync($"```{result.Truncate(DiscordConfig.MaxMessageSize - 6)}```");
+            }
+        }
+
+        [Command("blacklist")]
+        [Summary("blacklistSummary")]
+        public async Task Blacklist([Summary("blacklistParam1")] ulong id,
+            [Remainder, Summary("blacklistParam2")] string reason = null)
+        {
+            var user = FergunClient.Database.Find<BlacklistEntity>("Blacklist", x => x.ID == id);
+            if (user == null)
+            {
+                FergunClient.Database.InsertRecord("Blacklist", new BlacklistEntity(id, reason));
+                if (reason == null)
+                {
+                    await SendEmbedAsync(string.Format(Locate("UserBlacklisted"), id));
+                }
+                else
+                {
+                    await SendEmbedAsync(string.Format(Locate("UserBlacklistedWithReason"), id, reason));
+                }
+            }
+            else
+            {
+                await FergunClient.Database.DeleteRecordAsync("Blacklist", user);
+                await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), id));
+            }
+        }
+
+        [Command("botgame")]
+        [Summary("botgameSummary")]
+        public async Task Botgame([Remainder, Summary("botgameParam1")] string text)
+        {
+            await Context.Client.SetGameAsync(text);
+            if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
+            {
+                await Context.Message.AddReactionAsync(new Emoji("\u2705"));
+            }
+        }
+
+        [Command("botstatus")]
+        [Summary("botstatusSummary")]
+        public async Task Botstatus([Summary("botstatusParam1")] uint status)
+        {
+            if (status <= 5)
+            {
+                await Context.Client.SetStatusAsync((UserStatus)status);
+                if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
+                {
+                    await Context.Message.AddReactionAsync(new Emoji("\u2705"));
+                }
+            }
+        }
+
+        [Command("botcolor")]
+        [Summary("botcolorSummary")]
+        public async Task<RuntimeResult> Color([Remainder, Summary("botcolorParam1")] string color)
+        {
+            if (!uint.TryParse(color, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint newcolor))
+            {
+                if (!uint.TryParse(color, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out newcolor))
+                {
+                    return FergunResult.FromError(Locate("InvalidColor"));
+                }
+            }
+            FergunConfig.EmbedColor = newcolor;
+            if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
+            {
+                await Context.Message.AddReactionAsync(new Emoji("\u2705"));
+            }
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("eval", RunMode = RunMode.Async)]
+        [Summary("evalSummary")]
+        public async Task Eval([Remainder, Summary("evalParam1")] string code)
+        {
+            Stopwatch sw = new Stopwatch();
+            code = code.Trim('`'); //Remove code block tags
+            bool silent = false;
+            if (code.EndsWith("-s", StringComparison.OrdinalIgnoreCase))
+            {
+                silent = true;
+                code = code.Substring(0, code.Length - 2);
+            }
+            if (!silent)
+            {
+                await Context.Channel.TriggerTypingAsync();
+                sw.Start();
+            }
+
+            IEnumerable<Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location));
+
+            IEnumerable<string> namespaces = Assembly.GetEntryAssembly()?.GetTypes()
+                .Where(x => !string.IsNullOrWhiteSpace(x.Namespace)).Select(x => x.Namespace).Distinct();
+
+            namespaces = namespaces
+                .Append("System")
+                .Append("System.IO")
+                .Append("System.Math")
+                .Append("System.Diagnostics")
+                .Append("System.Linq")
+                .Append("System.Collections.Generic")
+                .Append("Discord")
+                .Append("Discord.WebSocket")
+                .Append("Fergun.Extensions");
+
+            var options = ScriptOptions.Default
+                .WithReferences(assemblies.Select(x => MetadataReference.CreateFromFile(x.Location)))
+                .AddImports(namespaces);
+            //options.AddReferences(references);
+
+            var script = CSharpScript.Create(code, options, typeof(EvaluationEnvironment));
+            script.Compile();
+            object returnValue;
+            string returnType = null;
+            try
+            {
+                var globals = new EvaluationEnvironment(Context);
+                var scriptState = await script.RunAsync(globals);
+                returnValue = scriptState?.ReturnValue;
+                returnType = returnValue?.GetType()?.Name ?? "none";
+            }
+            catch (CompilationErrorException e)
+            {
+                returnValue = e.Message;
+                returnType = e.GetType()?.Name ?? "none";
+            }
+            if (silent)
+            {
+                return;
+            }
+            sw.Stop();
+
+            if (returnValue == null)
+            {
+                await SendEmbedAsync(Locate("EvalNoReturnValue"));
+                return;
+            }
+
+            string value = returnValue.ToString();
+            if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 6)
+            {
+                var pages = new List<PaginatedMessage.Page>();
+
+                foreach (var item in value.SplitToLines(EmbedBuilder.MaxDescriptionLength - 6))
+                {
+                    pages.Add(new PaginatedMessage.Page()
+                    {
+                        Description = $"```{item.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase)}```"
+                    });
+                }
+
+                var pager = new PaginatedMessage()
+                {
+                    Author = new EmbedAuthorBuilder()
+                    {
+                        Name = Context.User.ToString(),
+                        IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
+                    },
+                    Title = Locate("EvalResults"),
+                    Pages = pages,
+                    Fields = new List<EmbedFieldBuilder>()
+                    {
+                        new EmbedFieldBuilder()
+                        .WithName(Locate("Type"))
+                        .WithValue($"```{returnType}```")
+                    },
+                    Color = new Color(FergunConfig.EmbedColor),
+                    Options = new PaginatedAppearanceOptions()
+                    {
+                        FooterFormat = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}",
+                        Timeout = TimeSpan.FromMinutes(10),
+                        ActionOnTimeout = ActionOnTimeout.DeleteReactions
+                    }
+                };
+
+                await PagedReplyAsync(pager, ReactionList.Default);
+            }
+            else
+            {
+                var builder = new EmbedBuilder()
+                    .WithTitle(Locate("EvalResults"))
+                    .AddField(Locate("Input"), $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
+                    .AddField(Locate("Output"), $"```{returnValue.ToString().Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase)}```")
+                    .AddField(Locate("Type"), $"```{returnType}```")
+                    .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
+                    .WithColor(FergunConfig.EmbedColor);
+
+                await ReplyAsync(null, false, builder.Build());
+            }
+        }
+
+        [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
+        [Command("forceprefix")]
+        [Summary("forceprefixSummary")]
+        public async Task<RuntimeResult> Forceprefix([Summary("prefixParam1")] string newPrefix)
+        {
+            var currentGuild = GetGuild();
+            string prefix = currentGuild?.Prefix ?? FergunConfig.GlobalPrefix;
+
+            if (newPrefix == prefix)
+            {
+                return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
+            }
+            if (currentGuild == null)
+            {
+                currentGuild = new Guild(Context.Guild.Id, newPrefix);
+            }
+            else
+            {
+                if (newPrefix == FergunConfig.GlobalPrefix)
+                {
+                    currentGuild.Prefix = null; //Default prefix
+                }
+                else
+                {
+                    currentGuild.Prefix = newPrefix;
+                }
+            }
+            FergunClient.Database.UpdateRecord("Guilds", currentGuild);
+            await SendEmbedAsync($"{Locate("NewPrefix")} \"{newPrefix}\"");
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("globalprefix")]
+        [Summary("globalprefixSummary")]
+        public async Task<RuntimeResult> Globalprefix([Summary("globalprefixParam1")] string newPrefix)
+        {
+            string globalprefix = FergunConfig.GlobalPrefix;
+            if (newPrefix == globalprefix)
+            {
+                return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
+            }
+
+            FergunConfig.GlobalPrefix = newPrefix;
+            await SendEmbedAsync($"{Locate("NewGlobalPrefix")} \"{newPrefix}\"");
+
+            return FergunResult.FromSuccess();
+        }
+
+        // TODO: Close the music player if there's any, and other pending commands during the bot disconnection
+
+        [Command("logout")]
+        [Summary("logoutSummary")]
+        [Alias("die")]
+        public async Task<RuntimeResult> Logout()
+        {
+            await ReplyAsync("Bye bye");
+            await Context.Client.SetStatusAsync(UserStatus.Invisible);
+            //await Context.Client.LogoutAsync();
+            await Context.Client.StopAsync();
+            //Utility.TessEngine.Dispose();
+            Cache.Dispose();
+            Environment.Exit(0);
+
+            return FergunResult.FromError("Wait. This line was not supposed to be reached.");
+        }
+
+        [Command("restart")]
+        [Summary("restartSummary")]
+        public async Task<RuntimeResult> Restart()
+        {
+            if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
+            {
+                await Context.Message.AddReactionAsync(new Emoji("\u2705"));
+            }
+            //Utility.TessEngine.Dispose();
+            Process.Start(AppDomain.CurrentDomain.FriendlyName);
+            Cache.Dispose();
+            Environment.Exit(0);
+
+            return FergunResult.FromError("Wait. This line was not supposed to be reached.");
+        }
+    }
+
+    public sealed class EvaluationEnvironment
+    {
+        public SocketCommandContext Context { get; }
+
+        public SocketUserMessage Message => Context.Message;
+        public ISocketMessageChannel Channel => Context.Channel;
+        public SocketGuild Guild => Context.Guild;
+        public SocketUser User => Context.User;
+        public DiscordSocketClient Client => Context.Client;
+
+        public EvaluationEnvironment(SocketCommandContext context)
+        {
+            Context = context;
+        }
+    }
+}

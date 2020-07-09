@@ -1,0 +1,28 @@
+﻿[*.cs]
+
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1054: Uri parameters should not be strings
+dotnet_diagnostic.CA1054.severity = none
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none
+
+# CA1062: Validate arguments of public methods
+dotnet_diagnostic.CA1062.severity = none
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# CA2227: Collection properties should be read only
+dotnet_diagnostic.CA2227.severity = none
+
+# IDE0057: Use range operator
+csharp_style_prefer_range_operator = false:suggestion
+
+# IDE0056: Use index operator
+csharp_style_prefer_index_operator = false:suggestion
+
+# CA1308: Normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = none

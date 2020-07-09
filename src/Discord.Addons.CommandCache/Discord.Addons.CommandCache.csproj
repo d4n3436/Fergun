@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>2.1.0</Version>
+    <Authors>Iwuh</Authors>
+    <Company>Iwuh</Company>
+    <Description>Automatically delete command responses when the user's message is deleted.</Description>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Iwuh/Discord.Addons.CommandCache</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Iwuh/Discord.Addons.CommandCache</RepositoryUrl>
+    <RepositoryType />
+    <PackageTags>discord.net discord</PackageTags>
+    <PackageReleaseNotes>Update to latest Discord.NET version.</PackageReleaseNotes>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net.Commands" Version="2.3.0-dev-20200618.6" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="2.3.0-dev-20200618.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.5" />
+  </ItemGroup>
+
+</Project>

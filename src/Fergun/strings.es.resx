@@ -1,0 +1,1907 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="CommandList" xml:space="preserve">
+    <value>Lista de comandos</value>
+  </data>
+	<data name="EntertainmentCommands" xml:space="preserve">
+    <value>Comandos de entretenimiento</value>
+  </data>
+	<data name="HelpFooter" xml:space="preserve">
+    <value>Fergun {0} - Cantidad total de comandos: {1}</value>
+  </data>
+	<data name="ModerationCommands" xml:space="preserve">
+    <value>Comandos de moderación</value>
+  </data>
+	<data name="MusicCommands" xml:space="preserve">
+    <value>Comandos de música</value>
+  </data>
+	<data name="Notes" xml:space="preserve">
+    <value>Notas:</value>
+  </data>
+	<data name="NotesInfo" xml:space="preserve">
+    <value>Usa `{0}help [comando]` para obtener mas información sobre un comando. </value>
+  </data>
+	<data name="OtherCommands" xml:space="preserve">
+    <value>Otros comandos</value>
+  </data>
+	<data name="TextCommands" xml:space="preserve">
+    <value>Comandos de texto</value>
+  </data>
+	<data name="UtilityCommands" xml:space="preserve">
+    <value>Comandos de utilidad</value>
+  </data>
+	<data name="UpcomingCommands" xml:space="preserve">
+    <value>Próximos comandos</value>
+  </data>
+	<data name="CommandNotFound" xml:space="preserve">
+    <value>Comando no encontrado. Usa `{0}help` para ver la lista de comandos.</value>
+  </data>
+	<data name="HelpNoDescription" xml:space="preserve">
+    <value>(Descripción no disponible)</value>
+  </data>
+	<data name="HelpOptional" xml:space="preserve">
+    <value>(Opcional)</value>
+  </data>
+	<data name="HelpUsage" xml:space="preserve">
+    <value>Uso:</value>
+  </data>
+	<data name="HelpAlias" xml:space="preserve">
+    <value>Alias:</value>
+  </data>
+	<data name="HelpParameters" xml:space="preserve">
+    <value>Parámetros:</value>
+  </data>
+	<data name="mojibakeSummary" xml:space="preserve">
+    <value>Muestra caráctereres unicode aleatorios.</value>
+  </data>
+	<data name="mojibakeParam1" xml:space="preserve">
+    <value>El tamaño del resultado.</value>
+  </data>
+	<data name="naziSummary" xml:space="preserve">
+    <value>Imprime un símbolo nazi.</value>
+  </data>
+	<data name="naziParam1" xml:space="preserve">
+    <value>El texto a usar.</value>
+  </data>
+	<data name="3orMoreChars" xml:space="preserve">
+    <value>El texto debe tener 3 o mas carácteres.</value>
+  </data>
+	<data name="TooLongToDisplay" xml:space="preserve">
+    <value>El texto resultante es demasiado largo para ser mostrados ({0})</value>
+  </data>
+	<data name="normalizeSummary" xml:space="preserve">
+    <value>Normaliza un texto.</value>
+  </data>
+	<data name="normalizeParam1" xml:space="preserve">
+    <value>El texto a normalizar.</value>
+  </data>
+	<data name="randomizeSummary" xml:space="preserve">
+    <value>Aleatoriza un texto.</value>
+  </data>
+	<data name="randomizeParam1" xml:space="preserve">
+    <value>El texto a aleatorizar.</value>
+  </data>
+	<data name="repeatSummary" xml:space="preserve">
+    <value>Repite un texto un número de veces.</value>
+  </data>
+	<data name="repeatParam1" xml:space="preserve">
+    <value>Las veces a repetir.</value>
+  </data>
+	<data name="repeatParam2" xml:space="preserve">
+    <value>El texto a repetir.</value>
+  </data>
+	<data name="reverseSummary" xml:space="preserve">
+    <value>Invierte un texto.</value>
+  </data>
+	<data name="reverseParam1" xml:space="preserve">
+    <value>El texto a invertir.</value>
+  </data>
+	<data name="reverselinesSummary" xml:space="preserve">
+    <value>Invierte el orden de las líneas de un texto.</value>
+  </data>
+	<data name="reverselinesParam1" xml:space="preserve">
+    <value>El texto a invertir sus líneas.</value>
+  </data>
+	<data name="reversewordsSummary" xml:space="preserve">
+    <value>Invierte el orden de las palabras de un texto.</value>
+  </data>
+	<data name="reversewordsParam1" xml:space="preserve">
+    <value>El texto a invertir sus palabras.</value>
+  </data>
+	<data name="sarcasmSummary" xml:space="preserve">
+    <value>tEXto sARcaStIco.</value>
+  </data>
+	<data name="sarcasmParam1" xml:space="preserve">
+    <value>El texto a convertir.</value>
+  </data>
+	<data name="swastikaSummary" xml:space="preserve">
+    <value>Imprime un símbolo de esvástica.</value>
+  </data>
+	<data name="swastikaParam1" xml:space="preserve">
+    <value>El texto a usar.</value>
+  </data>
+	<data name="vaporwaveSummary" xml:space="preserve">
+    <value>Convierte un texto a vaporwave.</value>
+  </data>
+	<data name="vaporwaveParam1" xml:space="preserve">
+    <value>El texto a convertir.</value>
+  </data>
+	<data name="avatarSummary" xml:space="preserve">
+    <value>Retorna el avatar del usuario actual, o de un usuario en específico, si se pasa alguno.</value>
+  </data>
+	<data name="avatarParam1" xml:space="preserve">
+    <value>El usuario a obtener su avatar.</value>
+  </data>
+	<data name="base64encodeSummary" xml:space="preserve">
+    <value>Codifica un texto a Base64.</value>
+  </data>
+	<data name="base64encodeParam1" xml:space="preserve">
+    <value>El texto a codificar.</value>
+  </data>
+	<data name="base64decodeSummary" xml:space="preserve">
+    <value>Decodifica un texto en Base64.</value>
+  </data>
+	<data name="base64decodeParam1" xml:space="preserve">
+    <value>El texto a decodificar.</value>
+  </data>
+	<data name="base64decodeInvalid" xml:space="preserve">
+    <value>Texto codificado inválido.</value>
+  </data>
+	<data name="choiceSummary" xml:space="preserve">
+    <value>Escoje una opción de una lista.</value>
+  </data>
+	<data name="choiceParam1" xml:space="preserve">
+    <value>Una lista separada por espacios de opciones.</value>
+  </data>
+	<data name="IChoose" xml:space="preserve">
+    <value>Yo escojo...</value>
+  </data>
+	<data name="OneChoice" xml:space="preserve">
+    <value>
+...porque solo me distes una opción</value>
+  </data>
+	<data name="helpSummary" xml:space="preserve">
+    <value>Muestra el menú de ayuda o la información de un comando, si se pasa alguno.</value>
+  </data>
+	<data name="helpParam1" xml:space="preserve">
+    <value>El comando a obtener su información.</value>
+  </data>
+	<data name="identifySummary" xml:space="preserve">
+    <value>Identifica una imagen con Microsoft CaptionBot.</value>
+  </data>
+	<data name="identifyParam1" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="NoUrlPassed" xml:space="preserve">
+    <value>El no especifiar una url hará que el comando busque en los últimos 100 mensajes por un link o un archivo adjunto.</value>
+  </data>
+	<data name="AttachNotImage" xml:space="preserve">
+    <value>El archivo adjunto no es una imagen.</value>
+  </data>
+	<data name="ImageNotFound" xml:space="preserve">
+    <value>No se pudo encontrar alguna url o archivo adjunto en los últimos 50 mensajes.</value>
+  </data>
+	<data name="UrlNotImage" xml:space="preserve">
+    <value>La url no es una imagen válida.</value>
+  </data>
+	<data name="imgSummary" xml:space="preserve">
+    <value>Busca una imagen con DuckDuckGo.</value>
+  </data>
+	<data name="imgParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="NoResultsFound" xml:space="preserve">
+    <value>No se encontró resultados.</value>
+  </data>
+	<data name="IfNSFW" xml:space="preserve">
+    <value>Si la búsqueda es NSFW, usa el comando en un canal NSFW.</value>
+  </data>
+	<data name="ImageSearch" xml:space="preserve">
+    <value>Búsqueda de imagen</value>
+  </data>
+	<data name="UrbanFooter" xml:space="preserve">
+    <value>Urban Dictionary - Página {0} de {1}</value>
+  </data>
+	<data name="ImageSearchCap" xml:space="preserve">
+    <value>Límite de búsqueda de imágenes alcanzada :(</value>
+  </data>
+	<data name="ocrSummary" xml:space="preserve">
+    <value>Realiza OCR  a una imagen con OCR.SPACE</value>
+  </data>
+	<data name="ocrParam1" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="ImageTooLarge" xml:space="preserve">
+    <value>La imagen es demasiado grande.</value>
+  </data>
+	<data name="OcrEmpty" xml:space="preserve">
+    <value>El OCR no dió resultados.</value>
+  </data>
+	<data name="ocr2Summary" xml:space="preserve">
+    <value>Realiza OCR a una imagen con Tesseract.</value>
+  </data>
+	<data name="ocr2Param1" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="StatusCode" xml:space="preserve">
+    <value>Código de estado:</value>
+  </data>
+	<data name="pingSummary" xml:space="preserve">
+    <value>Obtiene la latencia al enviar un mensaje y la latencia de la API / Websocket de Discord.</value>
+  </data>
+	<data name="resizeSummary" xml:space="preserve">
+    <value>Redimensiona una imagen con waifu2x.</value>
+  </data>
+	<data name="resizeParam1" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="AnErrorOcurred" xml:space="preserve">
+    <value>Ocurrió un error.</value>
+  </data>
+	<data name="ResizeResults" xml:space="preserve">
+    <value>Resultados de redimensión</value>
+  </data>
+	<data name="screenshotSummary" xml:space="preserve">
+    <value>Toma una captura de pantalla a un sitio web.</value>
+  </data>
+	<data name="screenshotParam1" xml:space="preserve">
+    <value>El sitio web a tomar una captura de pantalla.</value>
+  </data>
+	<data name="serverinfoSummary" xml:space="preserve">
+    <value>Retorna información del servidor.</value>
+  </data>
+	<data name="ServerInfo" xml:space="preserve">
+    <value>Información de servidor</value>
+  </data>
+	<data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+	<data name="Owner" xml:space="preserve">
+    <value>Dueño</value>
+  </data>
+	<data name="RoleCount" xml:space="preserve">
+    <value>Número de roles</value>
+  </data>
+	<data name="UserCount" xml:space="preserve">
+    <value>Número de usuarios</value>
+  </data>
+	<data name="VerificationLevel" xml:space="preserve">
+    <value>Nivel de verificación</value>
+  </data>
+	<data name="None" xml:space="preserve">
+    <value>(Nada)</value>
+  </data>
+	<data name="CreatedAt" xml:space="preserve">
+    <value>Creado en</value>
+  </data>
+	<data name="snipeSummary" xml:space="preserve">
+    <value>Muestra el último mensaje eliminado en el canal actual.</value>
+  </data>
+	<data name="NothingToSnipe" xml:space="preserve">
+    <value>Nada que mostrar en {0}</value>
+  </data>
+	<data name="translateSummary" xml:space="preserve">
+    <value>Traduce un texto.</value>
+  </data>
+	<data name="translateParam1" xml:space="preserve">
+    <value>El idioma de destino en el código ISO (en, es, br, etc.)</value>
+  </data>
+	<data name="translateParam2" xml:space="preserve">
+    <value>El texto a trducir.</value>
+  </data>
+	<data name="InvalidLanguage" xml:space="preserve">
+    <value>Idioma de destino inválido. Los códigos de idioma válidos son:</value>
+  </data>
+	<data name="GoogleIPBanned" xml:space="preserve">
+    <value>Google me dió IP ban :( lol</value>
+  </data>
+	<data name="ttsSummary" xml:space="preserve">
+    <value>Texto a voz.</value>
+  </data>
+	<data name="ttsParam1" xml:space="preserve">
+    <value>El idioma de destino en el código ISO (en, es, br, etc.), Inglés por defecto en caso de idioma inválido.</value>
+  </data>
+	<data name="ttsParam2" xml:space="preserve">
+    <value>El texto a convertir a voz.</value>
+  </data>
+	<data name="urbanSummary" xml:space="preserve">
+    <value>Búsqueda en Urban Dictionary.</value>
+  </data>
+	<data name="urbanParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="NoResults" xml:space="preserve">
+    <value>Sin resultados.</value>
+  </data>
+	<data name="By" xml:space="preserve">
+    <value>Por</value>
+  </data>
+	<data name="Example" xml:space="preserve">
+    <value>Ejemplo</value>
+  </data>
+	<data name="NoExample" xml:space="preserve">
+    <value>(Sin ejemplo proporcionado)</value>
+  </data>
+	<data name="userinfoSummary" xml:space="preserve">
+    <value>Retorna información del usuario actual, o de un usuario en específico, si se pasa alguno.</value>
+  </data>
+	<data name="userinfoParam1" xml:space="preserve">
+    <value>El usuario a obtener su información.</value>
+  </data>
+	<data name="UserInfo" xml:space="preserve">
+    <value>Información del usuario</value>
+  </data>
+	<data name="Activity" xml:space="preserve">
+    <value>Actividad</value>
+  </data>
+	<data name="IsBot" xml:space="preserve">
+    <value>Es bot</value>
+  </data>
+	<data name="GuildJoinDate" xml:space="preserve">
+    <value>Dia de ingreso al servidor</value>
+  </data>
+	<data name="UserNotFound" xml:space="preserve">
+    <value>El usuario no fue encontrado.</value>
+  </data>
+	<data name="wikipediaSummary" xml:space="preserve">
+    <value>Busca un artículo en Wikipedia</value>
+  </data>
+	<data name="wikipediaParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="WikipediaSearch" xml:space="preserve">
+    <value>Búsqueda en Wikipedia</value>
+  </data>
+	<data name="xkcdSummary" xml:space="preserve">
+    <value>Retorna un comic de xkcd aleatorio o uno en específico si un número es pasado.</value>
+  </data>
+	<data name="xkcdParam1" xml:space="preserve">
+    <value>El número de cómic.</value>
+  </data>
+	<data name="InvalidxkcdNumber" xml:space="preserve">
+    <value>El número debe estar entre 1 y {0}.</value>
+  </data>
+	<data name="youtubeSummary" xml:space="preserve">
+    <value>Busca un video en YouTube</value>
+  </data>
+	<data name="youtubeParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="YouTubeNoResults" xml:space="preserve">
+    <value>No se encontró resultados.</value>
+  </data>
+	<data name="ytrandomSummary" xml:space="preserve">
+    <value>Retorna un video "aleatorio" de YouTube</value>
+  </data>
+	<data name="EmptyCache" xml:space="preserve">
+    <value>Sin videos en el caché
+Creando el caché...</value>
+  </data>
+	<data name="banSummary" xml:space="preserve">
+    <value>Banea un usuario.</value>
+  </data>
+	<data name="banParam1" xml:space="preserve">
+    <value>El usuario a banear.</value>
+  </data>
+	<data name="banParam2" xml:space="preserve">
+    <value>La razón del baneo.</value>
+  </data>
+	<data name="BanSameUser" xml:space="preserve">
+    <value>Que? Te quieres banear a ti mismo?</value>
+  </data>
+	<data name="BanMyself" xml:space="preserve">
+    <value>No me banearé lol</value>
+  </data>
+	<data name="BanHigherRole" xml:space="preserve">
+    <value>No puedo banear a esa persona..</value>
+  </data>
+	<data name="AlreadyBanned" xml:space="preserve">
+    <value>El usuario ya está baneado.</value>
+  </data>
+	<data name="Banned" xml:space="preserve">
+    <value>El usuario {0} fue baneado.</value>
+  </data>
+	<data name="BanError" xml:space="preserve">
+    <value>No se pudo banear al usuario.
+Código de error:</value>
+  </data>
+	<data name="clearSummary" xml:space="preserve">
+    <value>Elimina los últimos x mensajes en el canal actual.</value>
+  </data>
+	<data name="clearParam1" xml:space="preserve">
+    <value>El número de mensajes a eliminar.</value>
+  </data>
+	<data name="clearParam2" xml:space="preserve">
+    <value>Información del usuario</value>
+  </data>
+	<data name="NumberOutOfIndex" xml:space="preserve">
+    <value>El número debe estar entre {0} y {1}.</value>
+  </data>
+	<data name="ClearNotFound" xml:space="preserve">
+    <value>No se pudo encontrar algún mensaje de {0} en los últimos {1} mensajes.</value>
+  </data>
+	<data name="By2" xml:space="preserve">
+    <value>por</value>
+  </data>
+	<data name="hackbanSummary" xml:space="preserve">
+    <value>Hackbanea un usuario.</value>
+  </data>
+	<data name="hackbanParam1" xml:space="preserve">
+    <value>La ID del usuario a hackbanear.</value>
+  </data>
+	<data name="hackbanParam2" xml:space="preserve">
+    <value>La razón del hackbaneo.</value>
+  </data>
+	<data name="Hackbanned" xml:space="preserve">
+    <value>El usuario {0} fue hackbaneado.</value>
+  </data>
+	<data name="HackbanError" xml:space="preserve">
+    <value>No se pudo hackbanear al usuario.
+Código de error:</value>
+  </data>
+	<data name="kickSummary" xml:space="preserve">
+    <value>Expulsa un usuario.</value>
+  </data>
+	<data name="kickParam1" xml:space="preserve">
+    <value>El usuario a expulsar.</value>
+  </data>
+	<data name="kickParam2" xml:space="preserve">
+    <value>La razón de la expulsión.</value>
+  </data>
+	<data name="Kicked" xml:space="preserve">
+    <value>El usuario {0} fue expulsado.</value>
+  </data>
+	<data name="nickSummary" xml:space="preserve">
+    <value>Cambia el nickname de un usuario.</value>
+  </data>
+	<data name="nickParam1" xml:space="preserve">
+    <value>El usuario a cambiar su nickname.</value>
+  </data>
+	<data name="nickParam2" xml:space="preserve">
+    <value>El nuevo nickname. Deja esto vacío para eliminar el nickname.</value>
+  </data>
+	<data name="unbanSummary" xml:space="preserve">
+    <value>Desbanea un usuario.</value>
+  </data>
+	<data name="unbanParam1" xml:space="preserve">
+    <value>La ID del usuario a desbanear.</value>
+  </data>
+	<data name="Unbanned" xml:space="preserve">
+    <value>El usuario {0} fue desbaneado.</value>
+  </data>
+	<data name="triviaSummary" xml:space="preserve">
+    <value>Hora de trivia!</value>
+  </data>
+	<data name="triviaParam1" xml:space="preserve">
+    <value>La categoría a seleccionar. Especifica "categories" para ver la lista de categorias o "leaderboard"/"ranks" para ver la tabla de clasificación.</value>
+  </data>
+	<data name="CategoryList" xml:space="preserve">
+    <value>Lista de categorías</value>
+  </data>
+	<data name="TriviaLeaderboard" xml:space="preserve">
+    <value>Tabla de clasificación de Trivia</value>
+  </data>
+	<data name="AllQuestionsAnswered" xml:space="preserve">
+    <value>Parece que respondistes todas las preguntas en la categoría especificada, selecciona otra categoría.</value>
+  </data>
+	<data name="TriviaError" xml:space="preserve">
+    <value>Ocurrió un error. Código de error</value>
+  </data>
+	<data name="Category" xml:space="preserve">
+    <value>Categoría</value>
+  </data>
+	<data name="Type" xml:space="preserve">
+    <value>Tipo</value>
+  </data>
+	<data name="Difficulty" xml:space="preserve">
+    <value>Dificultad</value>
+  </data>
+	<data name="Question" xml:space="preserve">
+    <value>Pregunta</value>
+  </data>
+	<data name="Options" xml:space="preserve">
+    <value>Opciones</value>
+  </data>
+	<data name="TimeLeft" xml:space="preserve">
+    <value>Tienes {0} segundos para responder.</value>
+  </data>
+	<data name="InvalidOption" xml:space="preserve">
+    <value>Opcion invalida!</value>
+  </data>
+	<data name="Lost1Point" xml:space="preserve">
+    <value>Perdiste 1 punto.</value>
+  </data>
+	<data name="CorrectAnswer" xml:space="preserve">
+    <value>Respuesta correcta!</value>
+  </data>
+	<data name="Won1Point" xml:space="preserve">
+    <value>Ganaste 1 punto.</value>
+  </data>
+	<data name="TheAnswerIs" xml:space="preserve">
+    <value>La respuesta es</value>
+  </data>
+	<data name="TimesUp" xml:space="preserve">
+    <value>Se acabó el tiempo!</value>
+  </data>
+	<data name="Points" xml:space="preserve">
+    <value>Puntos</value>
+  </data>
+	<data name="joinSummary" xml:space="preserve">
+    <value>Ingresa a un canal de voz.</value>
+  </data>
+	<data name="UserNotInVC" xml:space="preserve">
+    <value>Debes conectarte a un canal de voz.</value>
+  </data>
+	<data name="NowConnected" xml:space="preserve">
+    <value>Conectado a</value>
+  </data>
+	<data name="leaveSummary" xml:space="preserve">
+    <value>Deja un canal de voz.</value>
+  </data>
+	<data name="LeaveNotInVC" xml:space="preserve">
+    <value>Ingresa al canal donde está el bot para hacerlo salir.</value>
+  </data>
+	<data name="LeftVC" xml:space="preserve">
+    <value>El bot ha salido de</value>
+  </data>
+	<data name="moveSummary" xml:space="preserve">
+    <value>Mueve el bot donde está el usuario actual.</value>
+  </data>
+	<data name="MoveNotInVC" xml:space="preserve">
+    <value>Entra a un canal de voz donde quieras que el bot esté.</value>
+  </data>
+	<data name="playSummary" xml:space="preserve">
+    <value>Busca y reproduce un video de YouTube.</value>
+  </data>
+	<data name="playParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="SelectTrack" xml:space="preserve">
+    <value>Envía un número de la lista</value>
+  </data>
+	<data name="SearchCanceled" xml:space="preserve">
+    <value>Búsqueda cancelada.</value>
+  </data>
+	<data name="OutOfIndex" xml:space="preserve">
+    <value>Opción fuera de índice.</value>
+  </data>
+	<data name="SearchTimeout" xml:space="preserve">
+    <value>No has respondido antes del límite de tiempo!</value>
+  </data>
+	<data name="replaySummary" xml:space="preserve">
+    <value>Vuelve a reproducir el video que está en curso, si hay alguno.</value>
+  </data>
+	<data name="pauseSummary" xml:space="preserve">
+    <value>Pausa el reproductor.</value>
+  </data>
+	<data name="resumeSummary" xml:space="preserve">
+    <value>Reanuda la reproducción.</value>
+  </data>
+	<data name="stopSummary" xml:space="preserve">
+    <value>Detiene el reproductor.</value>
+  </data>
+	<data name="skipSummary" xml:space="preserve">
+    <value>Salta la pista actual, si hay alguno</value>
+  </data>
+	<data name="volumeSummary" xml:space="preserve">
+    <value>Establece el volumen del reproductor.</value>
+  </data>
+	<data name="volumeParam1" xml:space="preserve">
+    <value>El volumen a establecer (2 - 150)</value>
+  </data>
+	<data name="queueSummary" xml:space="preserve">
+    <value>Muestra la cola de reproducción.</value>
+  </data>
+	<data name="shuffleSummary" xml:space="preserve">
+    <value>Aleatoriza la cola de reproducción.</value>
+  </data>
+	<data name="removeSummary" xml:space="preserve">
+    <value>Elimina una pista en la cola en el índice especificado.</value>
+  </data>
+	<data name="removeParam1" xml:space="preserve">
+    <value>El índice de la pista a eliminar.</value>
+  </data>
+	<data name="lyricsSummary" xml:space="preserve">
+    <value>Muestra la letra de la canción especificada, o de la canción actual en el reproductor si no se pasa alguna canción.</value>
+  </data>
+	<data name="lyricsParam1" xml:space="preserve">
+    <value>La canción a buscar su letra.</value>
+  </data>
+	<data name="artworkSummary" xml:space="preserve">
+    <value>Muestra el artwork de la pista actual en el reproductor.</value>
+  </data>
+	<data name="NoTracks" xml:space="preserve">
+    <value>Sin mas pistas para reproducir.</value>
+  </data>
+	<data name="NowPlaying" xml:space="preserve">
+    <value>Reproduciendo ahora</value>
+  </data>
+	<data name="PlayerError" xml:space="preserve">
+    <value>Ocurrió un error</value>
+  </data>
+	<data name="PlayerStuck" xml:space="preserve">
+    <value>El reproductor se quedó atascado en la pista {0} por {1} segundos.</value>
+  </data>
+	<data name="PlayerMoved" xml:space="preserve">
+    <value>Movido de **{0}** a **{1}**</value>
+  </data>
+	<data name="PlayerNoMatches" xml:space="preserve">
+    <value>No se encontraron resultados.</value>
+  </data>
+	<data name="PlayerPlaylistAdded" xml:space="preserve">
+    <value>Playlist **{0}** ({1} pistas) ({2}) ha sido agregado a la cola.</value>
+  </data>
+	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
+    <value>Añadido a la cola {0} pistas ({1})
+
+Reproduciendo ahora: {2} ({3})</value>
+  </data>
+	<data name="PlayerTrackAdded" xml:space="preserve">
+    <value>{0} ({1}) ha sido añadido a la cola.</value>
+  </data>
+	<data name="PlayerNowPlaying" xml:space="preserve">
+    <value>Reproduciendo ahora: {0} ({1})</value>
+  </data>
+	<data name="InvalidTrack" xml:space="preserve">
+    <value>Pista inválida.</value>
+  </data>
+	<data name="Replaying" xml:space="preserve">
+    <value>Volviendo a reproducir</value>
+  </data>
+	<data name="EmptyQueue" xml:space="preserve">
+    <value>La cola está vacia.</value>
+  </data>
+	<data name="PlayerNotPlaying" xml:space="preserve">
+    <value>El reproductor no está reproduciendo nada.</value>
+  </data>
+	<data name="PlayerStopped" xml:space="preserve">
+    <value>El reproductor fue detenido.</value>
+  </data>
+	<data name="PlayerTrackSkipped" xml:space="preserve">
+    <value>Saltado: {0}
+
+Reproduciendo ahora: {1} ({2})</value>
+  </data>
+	<data name="VolumeOutOfIndex" xml:space="preserve">
+    <value>Usa un número entre 2 y 150.</value>
+  </data>
+	<data name="VolumeSetted" xml:space="preserve">
+    <value>Volumen establecido a:</value>
+  </data>
+	<data name="PlayerPaused" xml:space="preserve">
+    <value>El reproductor está pausado ahora.</value>
+  </data>
+	<data name="PlaybackResumed" xml:space="preserve">
+    <value>Reproducción reanudada.</value>
+  </data>
+	<data name="PlayerNotPaused" xml:space="preserve">
+    <value>El reproductor no está pausado.</value>
+  </data>
+	<data name="CurrentlyPlaying" xml:space="preserve">
+    <value>Reproduciendo actualmente: {0} ({1} de {2})</value>
+  </data>
+	<data name="MusicInQueue" xml:space="preserve">
+    <value>Pistas en la cola:</value>
+  </data>
+	<data name="Queue1Item" xml:space="preserve">
+    <value>Solo hay 1 item en la cola.</value>
+  </data>
+	<data name="QueueShuffled" xml:space="preserve">
+    <value>La cola fue aleatorizada.</value>
+  </data>
+	<data name="IndexOutOfRange" xml:space="preserve">
+    <value>Índice fuera de rango.</value>
+  </data>
+	<data name="TrackRemoved" xml:space="preserve">
+    <value>Pista: **{0}** en la posición {1} fue eliminada.</value>
+  </data>
+	<data name="LyricsNotFound" xml:space="preserve">
+    <value>No se pudo encontrar la letra para {0}</value>
+  </data>
+	<data name="Incorrect" xml:space="preserve">
+    <value>Incorrecto!</value>
+  </data>
+	<data name="botgameSummary" xml:space="preserve">
+    <value>Establece el estado de juego del bot.</value>
+  </data>
+	<data name="botgameParam1" xml:space="preserve">
+    <value>El texto a establecer.</value>
+  </data>
+	<data name="BotOwnerOnly" xml:space="preserve">
+    <value>Solo el dueño del bot puede usar esto.</value>
+  </data>
+	<data name="botstatusSummary" xml:space="preserve">
+    <value>Establece el estado del bot.</value>
+  </data>
+	<data name="botstatusParam1" xml:space="preserve">
+    <value>El estado a establecer (0 - 5).</value>
+  </data>
+	<data name="codeSummary" xml:space="preserve">
+    <value>Muestra el código fuente de un comando.</value>
+  </data>
+	<data name="codeParam1" xml:space="preserve">
+    <value>El comando a obtener su código.</value>
+  </data>
+	<data name="botcolorSummary" xml:space="preserve">
+    <value>Establece el color de los embeds.</value>
+  </data>
+	<data name="botcolorParam1" xml:space="preserve">
+    <value>El nuevo color en hexadecimal o decimal.</value>
+  </data>
+	<data name="InvalidColor" xml:space="preserve">
+    <value>Color inválido.</value>
+  </data>
+	<data name="cringeSummary" xml:space="preserve">
+    <value>Acabas de postear cringe...</value>
+  </data>
+	<data name="globalprefixSummary" xml:space="preserve">
+    <value>Establece el prefijo global del bot.</value>
+  </data>
+	<data name="globalprefixParam1" xml:space="preserve">
+    <value>El nuevo prefijo global.</value>
+  </data>
+	<data name="CurrentGlobalPrefix" xml:space="preserve">
+    <value>El prefijo global actual es:</value>
+  </data>
+	<data name="PrefixSameCurrentTarget" xml:space="preserve">
+    <value>El prefijo de destino y el prefijo actual son iguales.</value>
+  </data>
+	<data name="NewGlobalPrefix" xml:space="preserve">
+    <value>El nuevo prefijo global es:</value>
+  </data>
+	<data name="inviteSummary" xml:space="preserve">
+    <value>Envía el link de invitación del bot.</value>
+  </data>
+	<data name="prefixSummary" xml:space="preserve">
+    <value>Establece el prefijo del bot.</value>
+  </data>
+	<data name="prefixParam1" xml:space="preserve">
+    <value>El nuevo prefijo.</value>
+  </data>
+	<data name="CurrentPrefix" xml:space="preserve">
+    <value>El prefijo actual es:</value>
+  </data>
+	<data name="NewPrefix" xml:space="preserve">
+    <value>El nuevo prefijo del servidor es:</value>
+  </data>
+	<data name="restartSummary" xml:space="preserve">
+    <value>Reinicia el bot.</value>
+  </data>
+	<data name="saySummary" xml:space="preserve">
+    <value>Dice algo.</value>
+  </data>
+	<data name="sayParam1" xml:space="preserve">
+    <value>El texto a decir.</value>
+  </data>
+	<data name="uptimeSummary" xml:space="preserve">
+    <value>Muestra el tiempo de actividad del bot.</value>
+  </data>
+	<data name="waveSummary" xml:space="preserve">
+    <value>hmm</value>
+  </data>
+	<data name="languageSummary" xml:space="preserve">
+    <value>Establece el idioma del bot.</value>
+  </data>
+	<data name="NewLanguage" xml:space="preserve">
+    <value>El idioma del bot ahora es: Español</value>
+  </data>
+	<data name="PaginatorFooter" xml:space="preserve">
+    <value>Página {0} de {1}</value>
+  </data>
+	<data name="FailedExecution" xml:space="preserve">
+    <value>Error al ejecutar</value>
+  </data>
+	<data name="nowplayingSummary" xml:space="preserve">
+    <value>Obtiene la pista actual en el reproductor.</value>
+  </data>
+	<data name="changelogSummary" xml:space="preserve">
+    <value>Muestra el registro de cambios del bot.</value>
+  </data>
+	<data name="TempDisabled" xml:space="preserve">
+    <value>Deshabilitado temporalmente.</value>
+  </data>
+	<data name="inspirobotSummary" xml:space="preserve">
+    <value>Obtiene algunas frases inspiradoras.</value>
+  </data>
+	<data name="PermissionRequired" xml:space="preserve">
+    <value>Necesito el permiso `{0}` para ejecutar este comando.</value>
+  </data>
+	<data name="ManageMessages" xml:space="preserve">
+    <value>Gestionar mensajes</value>
+  </data>
+	<data name="Connect" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
+	<data name="Speak" xml:space="preserve">
+    <value>Hablar</value>
+  </data>
+	<data name="evalSummary" xml:space="preserve">
+    <value>Evalúa código.</value>
+  </data>
+	<data name="evalParam1" xml:space="preserve">
+    <value>El código a evaluar.</value>
+  </data>
+	<data name="ScreenshotNSFW" xml:space="preserve">
+    <value>La captura de la página puede tener contenido NSFW y no será mostrado. Intenta usar el comando en un canal NSFW o usa otra url.</value>
+  </data>
+	<data name="BotNotConnected" xml:space="preserve">
+    <value>El bot no está conectado a un canal de voz.</value>
+  </data>
+	<data name="CreationCanceled" xml:space="preserve">
+    <value>Creación cancelada.</value>
+  </data>
+	<data name="AIDungeonWelcome" xml:space="preserve">
+    <value>Bienvenido a AI Dungeon</value>
+  </data>
+	<data name="ModeSelect" xml:space="preserve">
+    <value>Asegúrate de leer la información y los comandos con `{0}aid info` antes de continuar.
+
+Selecciona un modo (Ingresa un número o un nombre):</value>
+  </data>
+	<data name="CharacterSelect" xml:space="preserve">
+    <value>Selecciona un personaje (Ingresa un número o un nombre)</value>
+  </data>
+	<data name="AttachFiles" xml:space="preserve">
+    <value>Adjuntar archivos</value>
+  </data>
+	<data name="EvalResults" xml:space="preserve">
+    <value>Resultados del Eval</value>
+  </data>
+	<data name="Output" xml:space="preserve">
+    <value>Salida</value>
+  </data>
+	<data name="EvalFooter" xml:space="preserve">
+    <value>Ejecutado en {0}ms</value>
+  </data>
+	<data name="EvalNoReturnValue" xml:space="preserve">
+    <value>Código ejecutado sin ningún valor de retorno.</value>
+  </data>
+	<data name="NSFWOnly" xml:space="preserve">
+    <value>Este comando solo puede usarse en un canal NSFW.</value>
+  </data>
+	<data name="UserOnWait" xml:space="preserve">
+    <value>Espera unos segundos antes de usar este comando!</value>
+  </data>
+	<data name="snipeParam1" xml:space="preserve">
+    <value>Un canal en específico a buscar.</value>
+  </data>
+	<data name="IDNotFound" xml:space="preserve">
+    <value>ID no encontrada.</value>
+  </data>
+	<data name="IDNotPublic" xml:space="preserve">
+    <value>Esta ID de historia no es pública y no podrás usarla. Pide al dueño de la ID ({0}) que lo haga público con `makepublic &lt;ID&gt;`</value>
+  </data>
+	<data name="IDOnWait" xml:space="preserve">
+    <value>Debes esperar que la historia se genere antes de usar esta ID!</value>
+  </data>
+	<data name="GeneratingNewAdventure" xml:space="preserve">
+    <value>Generando una nueva aventura
+con el modo: **{0}**
+y el personaje: **{1}**...</value>
+  </data>
+	<data name="CustomChararacterCreation" xml:space="preserve">
+    <value>Creación personalizada de personaje</value>
+  </data>
+	<data name="CustomCharacterPrompt" xml:space="preserve">
+    <value>Ingresa un texto que describa quién eres y las primeras dos oraciones de dónde empiezas.
+Este aviso expirará en 5 minutos. y el número máximo de carácteres es 140.</value>
+  </data>
+	<data name="GeneratingNewCustomAdventure" xml:space="preserve">
+    <value>Generando una nueva aventura con el texto personalizado...</value>
+  </data>
+	<data name="GeneratingStory" xml:space="preserve">
+    <value>Generando historia...</value>
+  </data>
+	<data name="EditingStoryContext" xml:space="preserve">
+    <value>Editando el contexto de la historia...</value>
+  </data>
+	<data name="TheAIWillNowRemember" xml:space="preserve">
+    <value>La IA ahora recordará:</value>
+  </data>
+	<data name="AlteringLastOutput" xml:space="preserve">
+    <value>Alterando la última salida...</value>
+  </data>
+	<data name="ChangedLastOutput" xml:space="preserve">
+    <value>Cambiada la última salida a:</value>
+  </data>
+	<data name="NotIDOwner" xml:space="preserve">
+    <value>No eres el dueño de esta ID.</value>
+  </data>
+	<data name="IDAlreadyPublic" xml:space="preserve">
+    <value>La ID ya es pública.</value>
+  </data>
+	<data name="IDNowPublic" xml:space="preserve">
+    <value>La ID ahora es pública y todos pueden usarla. Puedes volver a establecerlo como privado con `makeprivate &lt;ID&gt;`</value>
+  </data>
+	<data name="IDAlreadyPrivate" xml:space="preserve">
+    <value>La ID ya es privada.</value>
+  </data>
+	<data name="IDNowPrivate" xml:space="preserve">
+    <value>La ID ahora es privada y solo tú puedes usarla. Puedes volver a establecerlo como público con `makepublic &lt;ID&gt;`</value>
+  </data>
+	<data name="NoIDs" xml:space="preserve">
+    <value>{0} no tiene ningun(a) ID de aventura.</value>
+  </data>
+	<data name="IDList" xml:space="preserve">
+    <value>Lista de IDs para {0}</value>
+  </data>
+	<data name="IsPublic" xml:space="preserve">
+    <value>Es pública</value>
+  </data>
+	<data name="IDListFooter" xml:space="preserve">
+    <value>Usa 'idinfo &lt;ID&gt;' para obtener información de una ID de aventura.</value>
+  </data>
+	<data name="IDInfo" xml:space="preserve">
+    <value>Información de la ID de aventura</value>
+  </data>
+	<data name="AboutAIDText" xml:space="preserve">
+    <value>AI Dungeon es la primera aventura de texto generada por IA. Usando un modelo de aprendizaje automático de parámetros 1.5B llamado GPT-2, AI Dungeon genera la historia y los resultados de tus acciones mientras juegas en este mundo virtual. A diferencia de prácticamente todos los demás juegos existentes, no estás limitado por la imaginación del desarrollador en lo que puedes hacer. Cualquier cosa que puedas expresar en lenguaje puede ser tu acción y el maestro de mazmorras de IA decidirá cómo responderá el mundo a tus acciones.</value>
+  </data>
+	<data name="AIDHowToPlayText" xml:space="preserve">
+    <value>Las reglas de AI Dungeon son simples:
+1. El juego pone "Tú" al frente de cada acción, por lo que cada acción debe comenzar con un verbo. Ex. "atacar al dragón", "convocar un sándwich", etc.
+2. Como excepción a lo anterior: si pone su acción entre comillas Ej. "¿Te unirás a mí en mi búsqueda?", Entonces el juego agregará "Tú dices" al frente.</value>
+  </data>
+	<data name="AboutAIDTitle" xml:space="preserve">
+    <value>Sobre AI Dungeon</value>
+  </data>
+	<data name="AIDHelp" xml:space="preserve">
+    <value>Ayuda de AI Dungeon</value>
+  </data>
+	<data name="AIDHowToPlayTitle" xml:space="preserve">
+    <value>Cómo jugar</value>
+  </data>
+	<data name="Commands" xml:space="preserve">
+    <value>Comandos</value>
+  </data>
+	<data name="AIDCommandList" xml:space="preserve">
+    <value>`info`: Muestra este menú.
+
+`new`: Crea una nueva aventura.
+
+`continue &lt;ID&gt; [Do|Say|Story] [Text...]`: Continúa la aventura con el texto ingresado. Si no se da un texto, la IA generará una historia.
+
+`undo &lt;ID&gt;`: Deshace la última acción.
+
+`redo &lt;ID&gt;`: Rehace la última acción deshecha.
+
+`alter &lt;ID&gt; &lt;newOutput...&gt;`: Edita la última respuesta de la IA.
+
+`remember &lt;ID&gt; &lt;text...&gt;`:  Agrega texto en el contexto de la memoria.
+
+`retry &lt;ID&gt;`: Reintenta la última acción y genera una nueva respuesta.
+
+`idlist [user]`: Muestra las IDs de un usuario.
+
+`idinfo &lt;ID&gt;`: Muestra información acerca de una ID.
+
+`makepublic | makeprivate &lt;ID&gt;`: Hace pública o privada una ID.
+
+`delete &lt;ID&gt;`: Elimina una ID.</value>
+  </data>
+	<data name="AIDTips" xml:space="preserve">
+    <value>Intenta usar palabras nuevas con frecuencia, la IA se vuelve más creativa con variedad.
+Recuerda comenzar con "do" junto a un verbo, ex: Atacar el orco.
+Usa el comando undo para eliminar tu última entrada junta a la respuesta de la IA.
+¡Las oraciones largas para acciones no son un problema! ¡Se creativo!
+¿Quieres más historia para generar? Usa el comando continue sin ningún texto.
+Usa el comando remember para editar el contexto de la historia que la IA siempre recuerda.
+Intenta usar palabras nuevas con frecuencia, la IA se vuelve más creativa con variedad.
+Puedes usar Say luego de el texto para hablar.</value>
+  </data>
+	<data name="In" xml:space="preserve">
+    <value>En</value>
+  </data>
+	<data name="configSummary" xml:space="preserve">
+    <value>Muestra un embed con las opciones configuración del bot a nivel de servidor.</value>
+  </data>
+	<data name="AdminRequired" xml:space="preserve">
+    <value>Debes ser un administrador para usar este comando!</value>
+  </data>
+	<data name="Loading" xml:space="preserve">
+    <value>Cargando...</value>
+  </data>
+	<data name="FergunConfiguration" xml:space="preserve">
+    <value>Configración de Fergun</value>
+  </data>
+	<data name="ConfigCanceled" xml:space="preserve">
+    <value>Configuración cancelada.</value>
+  </data>
+	<data name="CantDoThat" xml:space="preserve">
+    <value>No puedo hacer eso.</value>
+  </data>
+	<data name="softbanSummary" xml:space="preserve">
+    <value>Softbanea un usuario (kick + eliminar los mensajes del usuario).</value>
+  </data>
+	<data name="softbanParam1" xml:space="preserve">
+    <value>El usuario a softbanear.</value>
+  </data>
+	<data name="softbanParam2" xml:space="preserve">
+    <value>El número de días a eliminar sus últimos mensajes. 7 por defecto.</value>
+  </data>
+	<data name="softbanParam3" xml:space="preserve">
+    <value>La razón del softbaneo.</value>
+  </data>
+	<data name="SoftbanSameUser" xml:space="preserve">
+    <value>Que? Te quieres softbanear a ti mismo?</value>
+  </data>
+	<data name="SoftbanMyself" xml:space="preserve">
+    <value>No me voy a softbanear lol</value>
+  </data>
+	<data name="SoftbanHigherRole" xml:space="preserve">
+    <value>No puedo softbanear a esa persona..</value>
+  </data>
+	<data name="Softbanned" xml:space="preserve">
+    <value>El usuario {0} fue softbaneado.</value>
+  </data>
+	<data name="SoftbanError" xml:space="preserve">
+    <value>No se pudo softbanear al usuario.
+Código de error:</value>
+  </data>
+	<data name="AIDCommands" xml:space="preserve">
+    <value>AI Dungeon (usa {0}aid &lt;comando&gt;)</value>
+  </data>
+	<data name="RevertingLastAction" xml:space="preserve">
+    <value>Revirtiendo la última acción...</value>
+  </data>
+	<data name="140CharsMax" xml:space="preserve">
+    <value>Máximo 140 carácteres.</value>
+  </data>
+	<data name="InviteLink" xml:space="preserve">
+    <value>Link de invitación</value>
+  </data>
+	<data name="Version" xml:space="preserve">
+    <value>1.2.9</value>
+  </data>
+	<data name="NoManageMessages" xml:space="preserve">
+    <value>Algunos comandos funcionan mejor con el permiso `Gestionar mensajes` (`img`, `urban`, `config`)</value>
+  </data>
+	<data name="InvalidText" xml:space="preserve">
+    <value>Texto inválido.</value>
+  </data>
+	<data name="clearRemarks" xml:space="preserve">
+    <value>Si se pasa un usuario, el comando intentará eliminar todos los mensajes del usuario en los últimos `count` mensajes.</value>
+  </data>
+	<data name="BanMembers" xml:space="preserve">
+    <value>Banear miembros</value>
+  </data>
+	<data name="KickMembers" xml:space="preserve">
+    <value>Expulsar miembros</value>
+  </data>
+	<data name="UserNotBanned" xml:space="preserve">
+    <value>El usuario no está baneado.</value>
+  </data>
+	<data name="BotMention" xml:space="preserve">
+    <value>Mi prefijo aquí es `{0}`. Usa `{0}help` para ver mi lista de comandos y `{0}prefix` para cambiar el prefijo.</value>
+  </data>
+	<data name="NotSupportedInDM" xml:space="preserve">
+    <value>No creo que puedas usar eso aquí.</value>
+  </data>
+	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
+    <value>No puedo obtener información de un canal de MD. Pasa una ID de un servidor.</value>
+  </data>
+	<data name="tcdneSummary" xml:space="preserve">
+    <value>Este gato no existe</value>
+  </data>
+	<data name="tpdneSummary" xml:space="preserve">
+    <value>Esta persona no existe</value>
+  </data>
+	<data name="YTSearchCap" xml:space="preserve">
+    <value>Límite de búsqueda de YouTube alcanzada :(</value>
+  </data>
+	<data name="CreatingVideoCache" xml:space="preserve">
+    <value>Alguien ya está creando un caché de video, espera..</value>
+  </data>
+	<data name="User" xml:space="preserve">
+    <value>Usuario</value>
+  </data>
+	<data name="editsnipeSummary" xml:space="preserve">
+    <value>Muestra el último mensaje editado en el canal actual.</value>
+  </data>
+	<data name="reactionSummary" xml:space="preserve">
+    <value>Agrega una reacción a un mensaje.</value>
+  </data>
+	<data name="reactionParam1" xml:space="preserve">
+    <value>La reacción a agregar (solo una)</value>
+  </data>
+	<data name="reactionParam2" xml:space="preserve">
+    <value>La ID del mensaje a agregar la reacción (debe ser del mismo canal donde el comando es ejecutado).</value>
+  </data>
+	<data name="InvalidMessageID" xml:space="preserve">
+    <value>ID de mensaje inválido. El mensaje debe ser de este canal.</value>
+  </data>
+	<data name="InvalidReaction" xml:space="preserve">
+    <value>Emoji/Emote inválido.</value>
+  </data>
+	<data name="BadArgumentCount" xml:space="preserve">
+    <value>Cantidad de parámetros invalida. Usa `{0}help {1}` para obtener mas información del comando.</value>
+  </data>
+	<data name="CommandParseFailed" xml:space="preserve">
+    <value>Error al analizar los parámetros del comando. Algún parametro es inválido o el orden de los argumentos es incorrecto.
+Usa `{0}help {1}` para obtener mas información del comando.</value>
+  </data>
+	<data name="TranslationResults" xml:space="preserve">
+    <value>Resultados de traducción</value>
+  </data>
+	<data name="SourceLanguage" xml:space="preserve">
+    <value>Lenguaje de origen (Detectado)</value>
+  </data>
+	<data name="TargetLanguage" xml:space="preserve">
+    <value>Lenguaje de destino</value>
+  </data>
+	<data name="Result" xml:space="preserve">
+    <value>Resultado</value>
+  </data>
+	<data name="ErrorType" xml:space="preserve">
+    <value>Tipo de error</value>
+  </data>
+	<data name="ErrorMessage" xml:space="preserve">
+    <value>Mensaje del error</value>
+  </data>
+	<data name="seekSummary" xml:space="preserve">
+    <value>Cambia la posición de reproducción de la pista a la especificada.</value>
+  </data>
+	<data name="seekParam1" xml:space="preserve">
+    <value>La posición del reproductor en el segundo número n o un tiempo válido con el formato `m:ss`, `mm:ss`, `h:mm:ss` o `hh:mm:ss`.</value>
+  </data>
+	<data name="CannotSeek" xml:space="preserve">
+    <value>No puedo cambiar la posición de esta pista.</value>
+  </data>
+	<data name="SeekHigherOrEqual" xml:space="preserve">
+    <value>El segundo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1})</value>
+  </data>
+	<data name="SeekComplete" xml:space="preserve">
+    <value>Saltado al segundo {0} ({1} de {2})</value>
+  </data>
+	<data name="ErrorInTranslation" xml:space="preserve">
+    <value>Ocurrió un error en la API de traducción.</value>
+  </data>
+	<data name="statsSummary" xml:space="preserve">
+    <value>Muestra las estadísticas del bot.</value>
+  </data>
+	<data name="AdventureDeleted" xml:space="preserve">
+    <value>La aventura fue eliminada.</value>
+  </data>
+	<data name="CPUUsage" xml:space="preserve">
+    <value>Uso de CPU</value>
+  </data>
+	<data name="RAMUsage" xml:space="preserve">
+    <value>Uso de RAM</value>
+  </data>
+	<data name="Library" xml:space="preserve">
+    <value>Librería</value>
+  </data>
+	<data name="BotVersion" xml:space="preserve">
+    <value>Versión del bot</value>
+  </data>
+	<data name="WebsocketPing" xml:space="preserve">
+    <value>Ping de Websocket</value>
+  </data>
+	<data name="BotOwner" xml:space="preserve">
+    <value>Dueño del bot</value>
+  </data>
+	<data name="CurrentNewNickEqual" xml:space="preserve">
+    <value>El nickname actual y el nuevo nickname son iguales.</value>
+  </data>
+	<data name="Yes" xml:space="preserve">
+    <value>Si</value>
+  </data>
+	<data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+	<data name="True" xml:space="preserve">
+    <value>Verdadero</value>
+  </data>
+	<data name="False" xml:space="preserve">
+    <value>Falso</value>
+  </data>
+	<data name="ConfigList" xml:space="preserve">
+    <value>Auto traducir resultados de Captionbot (`identify`)
+Auto traducir resultados de entrada y salida de AI Dungeon
+Selección de pista para `play`</value>
+  </data>
+	<data name="ConfigPrompt" xml:space="preserve">
+    <value>Ingresa un número para cambiar su valor y 'e' para cerrar la configuración.</value>
+  </data>
+	<data name="FergunConfig" xml:space="preserve">
+    <value>Configuración de Fergun</value>
+  </data>
+	<data name="Option" xml:space="preserve">
+    <value>Opción</value>
+  </data>
+	<data name="Value" xml:space="preserve">
+    <value>Valor</value>
+  </data>
+	<data name="MissingPermissions" xml:space="preserve">
+    <value>No tienes los permisos necesarios para ejecutar este comando.</value>
+  </data>
+	<data name="UserBlacklisted" xml:space="preserve">
+    <value>El usuario {0} fue agregado a la lista negra.</value>
+  </data>
+	<data name="UserBlacklistedWithReason" xml:space="preserve">
+    <value>El usuario {0} fue agregado a la lista negra con la razón: {1}</value>
+  </data>
+	<data name="UserBlacklistRemoved" xml:space="preserve">
+    <value>El usuario {0} fue eliminado de la lista negra.</value>
+  </data>
+	<data name="blacklistSummary" xml:space="preserve">
+    <value>Agrega un usuario a la lista negra, o lo elimina de ella.</value>
+  </data>
+	<data name="blacklistParam1" xml:space="preserve">
+    <value>La ID del usuario a agregar a la lista negra.</value>
+  </data>
+	<data name="blacklistParam2" xml:space="preserve">
+    <value>La razón de ser incluido a la lista negra.</value>
+  </data>
+	<data name="Blacklisted" xml:space="preserve">
+    <value>Estás en la lista negra.</value>
+  </data>
+	<data name="BlacklistedWithReason" xml:space="preserve">
+    <value>Estás en la lista negra con la razón: {0}</value>
+  </data>
+	<data name="Changelog0.9" xml:space="preserve">
+    <value>- Agregado soporte a nuevos idiomas.
+- Nuevo idioma (español)
+- Nuevos comandos (`language`, `xkcd`, `nowplaying`, `snipe`, `changelog`)
+- `ytrandom` ahora funciona mucho mejor.
+- Ahora la lista de comandos y el comando de ayuda son dinámicos.
+- Se corrigieron algunos errores.</value>
+  </data>
+	<data name="Changelog1.0" xml:space="preserve">
+    <value>- Sistema y comandos de AI Dungeon, incluyendo un sistema de ID de historias y traducción automática.
+- Sistema de configuración para algunos comandos a nivel de servidor.
+
+- Nuevos comandos:
+AI Dungeon: `info`, `new`, `continue`, `revert`, `remember`, `alter`, `makepublic`, `makeprivate`, `idlist`, `idinfo`, `delete`
+Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `seek`, `stats`, `blacklist`, `ocrtranslate`, `roleinfo`
+
+- Soporte a canales de MD.
+- Ahora el bot usa una base de datos adecuada.
+- Más correcciones de errores.</value>
+  </data>
+	<data name="BadArgumentCountAid" xml:space="preserve">
+    <value>Cantidad de parámetros inválida. Usa `{0}aid info` para obtener mas información del comando.</value>
+  </data>
+	<data name="UserRequireBanMembers" xml:space="preserve">
+    <value>Necesitas el permiso `Banear miembros` para usar este comando.</value>
+  </data>
+	<data name="BotRequireBanMembers" xml:space="preserve">
+    <value>Necesito el permiso `Banear miembros` para ejecutar este comando</value>
+  </data>
+	<data name="UserRequireManageMessages" xml:space="preserve">
+    <value>Necesitas el permiso `Manejar mensajes` para usar este comando.</value>
+  </data>
+	<data name="BotRequireManageMessages" xml:space="preserve">
+    <value>Necesito el permiso `Manejar mensajes` para ejecutar este comando</value>
+  </data>
+	<data name="UserRequireKickMembers" xml:space="preserve">
+    <value>Necesitas el permiso `Expulsar miembros` para usar este comando.</value>
+  </data>
+	<data name="BotRequireKickMembers" xml:space="preserve">
+    <value>Necesito el permiso `Expulsar miembros` para ejecutar este comando.</value>
+  </data>
+	<data name="UserRequireManageNicknames" xml:space="preserve">
+    <value>Necesitas el permiso `Gestionar apodos` para usar este comando.</value>
+  </data>
+	<data name="BotRequireManageNicknames" xml:space="preserve">
+    <value>ID de mensaje inválido. El mensaje debe ser de este canal.</value>
+  </data>
+	<data name="UserNotLowerHierarchy" xml:space="preserve">
+    <value>El/La usuario(a) especificado(a) debe ser inferior en jerarquía.</value>
+  </data>
+	<data name="BotRequireConnect" xml:space="preserve">
+    <value>Necesito el permiso `Conectar` para entrar al canal de voz.</value>
+  </data>
+	<data name="BotRequireSpeak" xml:space="preserve">
+    <value>Necesito el permiso `Hablar` para continuar.</value>
+  </data>
+	<data name="MoveSameChannel" xml:space="preserve">
+    <value>Ve al canal de voz donde quieres que vaya.</value>
+  </data>
+	<data name="ProcessingTime" xml:space="preserve">
+    <value>Tiempo de procesado: {0}ms</value>
+  </data>
+	<data name="OcrResults" xml:space="preserve">
+    <value>Resultados de OCR</value>
+  </data>
+	<data name="BotRequireAttachFiles" xml:space="preserve">
+    <value>Necesito el permiso `Adjuntar archivos` para ejecutar este comando.</value>
+  </data>
+	<data name="OcrApiError" xml:space="preserve">
+    <value>Error en el API de OCR.</value>
+  </data>
+	<data name="forceprefixSummary" xml:space="preserve">
+    <value>Fuerza el prefijo en este servidor.</value>
+  </data>
+	<data name="FirstTip" xml:space="preserve">
+    <value>Usa {0}aid continue &lt;ID&gt; [texto] para continuar tu aventura.</value>
+  </data>
+	<data name="PrefixTooLong" xml:space="preserve">
+    <value>La razón de ser incluido a la lista negra.</value>
+  </data>
+	<data name="InvalidUrl" xml:space="preserve">
+    <value>URL inválida.</value>
+  </data>
+	<data name="ocrtranslateSummary" xml:space="preserve">
+    <value>OCR y traducción.</value>
+  </data>
+	<data name="ocrtranslateParam1" xml:space="preserve">
+    <value>El idioma de destino en el código ISO (en, es, br, etc.)</value>
+  </data>
+	<data name="ocrtranslateParam2" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="Input" xml:space="preserve">
+    <value>Entrada</value>
+  </data>
+	<data name="RoleNotFound" xml:space="preserve">
+    <value>Rol no encontrado.</value>
+  </data>
+	<data name="RoleInfo" xml:space="preserve">
+    <value>Información de rol</value>
+  </data>
+	<data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+	<data name="IsMentionable" xml:space="preserve">
+    <value>Es mencionable</value>
+  </data>
+	<data name="Permissions" xml:space="preserve">
+    <value>Permisos</value>
+  </data>
+	<data name="MemberCount" xml:space="preserve">
+    <value>Cantidad de miembros</value>
+  </data>
+	<data name="Mention" xml:space="preserve">
+    <value>Mención</value>
+  </data>
+	<data name="roleinfoSummary" xml:space="preserve">
+    <value>Obtiene información sobre un rol.</value>
+  </data>
+	<data name="roleinfoParam1" xml:space="preserve">
+    <value>El rol a obtener información (no es necesario mencionarlo).</value>
+  </data>
+	<data name="logoutSummary" xml:space="preserve">
+    <value>Desconecta el bot.</value>
+  </data>
+	<data name="nothingSummary" xml:space="preserve">
+    <value>El mejor comando.</value>
+  </data>
+	<data name="someoneSummary" xml:space="preserve">
+    <value>Retorna un usuario aleatorio.</value>
+  </data>
+	<data name="ActiveClients" xml:space="preserve">
+    <value>Clientes activos</value>
+  </data>
+	<data name="Low" xml:space="preserve">
+    <value>Bajo</value>
+  </data>
+	<data name="Medium" xml:space="preserve">
+    <value>Medio</value>
+  </data>
+	<data name="High" xml:space="preserve">
+    <value>Alto</value>
+  </data>
+	<data name="Extreme" xml:space="preserve">
+    <value>Extremo</value>
+  </data>
+	<data name="IsHoisted" xml:space="preserve">
+    <value>Es un rol separado</value>
+  </data>
+	<data name="Position" xml:space="preserve">
+    <value>Posición</value>
+  </data>
+	<data name="ServerFeatures" xml:space="preserve">
+    <value>Mejoras</value>
+  </data>
+	<data name="BoostTier" xml:space="preserve">
+    <value>Nivel de mejora</value>
+  </data>
+	<data name="BoostCount" xml:space="preserve">
+    <value>Cantidad de mejoras</value>
+  </data>
+	<data name="SeekTimeHigherOrEqual" xml:space="preserve">
+    <value>El tiempo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1})</value>
+  </data>
+	<data name="SeekTimeComplete" xml:space="preserve">
+    <value>Saltado a {0} de {1}</value>
+  </data>
+	<data name="SeekInvalidFormat" xml:space="preserve">
+    <value>Debes pasar un número o un texto con el formato `m:ss`, `mm:ss`, `h:mm:ss` o `hh:mm:ss`.</value>
+  </data>
+	<data name="Ratelimited" xml:space="preserve">
+    <value>Espera {0} segundos antes de volver a usar este comando!</value>
+  </data>
+	<data name="ObjectNotFound" xml:space="preserve">
+    <value>El objeto no fue encontrado.</value>
+  </data>
+	<data name="MultipleMatches" xml:space="preserve">
+    <value>Se encontraron múltiples coincidencias.</value>
+  </data>
+	<data name="Roles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+	<data name="BoostingSince" xml:space="preserve">
+    <value>Mejorando desde</value>
+  </data>
+	<data name="AlreadyConnected" xml:space="preserve">
+    <value>El bot ya está conectado a un canal de voz.</value>
+  </data>
+	<data name="InvalidFileType" xml:space="preserve">
+    <value>Tipo de archivo invalido.</value>
+  </data>
+	<data name="OwnerCommands" xml:space="preserve">
+    <value>Comandos del dueño</value>
+  </data>
+	<data name="Vote" xml:space="preserve">
+    <value>Puedes votar por mi [aquí]({0}). Gracias.</value>
+  </data>
+	<data name="voteSummary" xml:space="preserve">
+    <value>Muestra un embed con el link de votación.</value>
+  </data>
+	<data name="TotalServers" xml:space="preserve">
+    <value>Servidores totales</value>
+  </data>
+	<data name="TotalUsers" xml:space="preserve">
+    <value>Usuarios totales</value>
+  </data>
+	<data name="Links" xml:space="preserve">
+    <value>[Invitación]({0}) | [Página de DBL]({1}) | [Link de Votación]({2}) | [Servidor de Soporte]({3})</value>
+  </data>
+	<data name="ContactInfo" xml:space="preserve">
+    <value>Si tiene algún reporte de bug, pregunta o sugerencia, puedes entrar al [servidor de soporte]({0}) o contactarme vía mensaje directo ({1}).</value>
+  </data>
+	<data name="RedoingLastAction" xml:space="preserve">
+    <value>Rehaciendo la última acción...</value>
+  </data>
+	<data name="CommandParseFailedAid" xml:space="preserve">
+    <value>Error al analizar los parámetros del comando. Algún parametro es inválido o el orden de los argumentos es incorrecto.
+Usa `{0}aid info` para obtener mas información del comando.</value>
+  </data>
+	<data name="SelfNoIDs" xml:space="preserve">
+    <value>No tienes ninguna ID de aventura.
+Puedes usar el comando `new` para crear una nueva aventura.</value>
+  </data>
+	<data name="QueueExcess" xml:space="preserve">
+    <value>..y {0} pistas mas!</value>
+  </data>
+	<data name="Changelog1.1" xml:space="preserve">
+    <value>- Se rehizo el módulo AI Dungeon y el wrapper de la API 2 veces debido a los constantes cambios en la API.
+- Nuevos comandos (`vote`, `report`, `bash`, `channelinfo`)
+- Los comandos del dueño ahora tienen su propio módulo.
+- Ahora se muestra el tiempo de cooldown de los comandos.
+- Ahora el bot esta alojado en un VPS.
+- Actualizado Discord.Net a la rama de desarrollo.
+- Se limitó la cola de música a 10 pistas.
+- `seek` ahora permite un tiempo con el formato` mm: ss` o `hh: mm: ss` como 30:45 o 6:23:12.
+- Se corrigió un error que causaba que el bot se desconectara de un canal de voz cuando Discord solicita una reconexión.
+- Se corrigió un error en `wikipedia` que devolvía el error 404 cuando no se encontraba un artículo en el idioma actual del bot.
+...y más correcciones de errores.</value>
+  </data>
+	<data name="ErrorSentToOwner" xml:space="preserve">
+    <value>El dueño ha sido notificado acerca del error y el problema será investigado.</value>
+  </data>
+	<data name="bashSummary" xml:space="preserve">
+    <value>Ejecuta un comando de bash.</value>
+  </data>
+	<data name="reportSummary" xml:space="preserve">
+    <value>Muestra la información de reporte.</value>
+  </data>
+	<data name="ErrorOnAPI" xml:space="preserve">
+    <value>Ocurrió un error mientras se llamaba a la API.</value>
+  </data>
+	<data name="Topic" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+	<data name="IsNSFW" xml:space="preserve">
+    <value>Es NSFW</value>
+  </data>
+	<data name="SlowMode" xml:space="preserve">
+    <value>Modo pausado</value>
+  </data>
+	<data name="ChannelInfo" xml:space="preserve">
+    <value>Información del canal</value>
+  </data>
+	<data name="channelinfoSummary" xml:space="preserve">
+    <value>Muestra información acerca de un canal.</value>
+  </data>
+	<data name="OcrtrResults" xml:space="preserve">
+    <value>Resultados de OCR y traducción</value>
+  </data>
+	<data name="NoChoices" xml:space="preserve">
+    <value>Debes pasar al menos una opción.</value>
+  </data>
+	<data name="ChannelNotFound" xml:space="preserve">
+    <value>Canal no encontrado.</value>
+  </data>
+	<data name="channelinfoParam1" xml:space="preserve">
+    <value>El canal a obtener la información.</value>
+  </data>
+	<data name="UserRequireManageServer" xml:space="preserve">
+    <value>Necesitas el permiso `Gestionar servidor` para usar este comando.</value>
+  </data>
+	<data name="badtranslatorSummary" xml:space="preserve">
+    <value>Pasa un texto a través de un traductor malo.</value>
+  </data>
+	<data name="badtranslatorParam1" xml:space="preserve">
+    <value>El texto a usar.</value>
+  </data>
+	<data name="LanguageChain" xml:space="preserve">
+    <value>Cadena de idiomas</value>
+  </data>
+	<data name="Versions" xml:space="preserve">
+    <value>0.8
+0.9
+1.0
+1.1
+1.1.5
+1.2
+1.2.3
+1.2.4
+1.2.7
+1.2.9</value>
+  </data>
+	<data name="VersionNotFound" xml:space="preserve">
+    <value>Versión no encontrada. Las versiones son: {0}</value>
+  </data>
+	<data name="OtherVersions" xml:space="preserve">
+    <value>Otras versiones: {0}</value>
+  </data>
+	<data name="Changelog1.1.5" xml:space="preserve">
+    <value>- Nuevo comando: `badtranslator`
+- Se ha añadido la opción de seleccionar una pista antes de reproducir en `play` (desactivado por defecto, puedes activarlo en `config`).
+
+- `img` está de vuelta y ahora utiliza DuckDuckGo para la búsqueda de imágenes.
+- `changelog` ahora te permite pasar una versión específica por lo que no muestra todos los cambios de versión a la vez.
+- `serverinfo` ahora muestra el icono del servidor animado, si hay uno.
+
+- Editado los requisitos de permisos para `config`, `prefix` y `language`.
+- Limpieza en las clases de configuración y servidor.</value>
+  </data>
+	<data name="changelogParam1" xml:space="preserve">
+    <value>Una versión específica a ver.</value>
+  </data>
+	<data name="Changelog0.8" xml:space="preserve">
+    <value>- ...</value>
+  </data>
+	<data name="DeletedMessages" xml:space="preserve">
+    <value>Eliminado {0} mensajes.</value>
+  </data>
+	<data name="DeletedMessagesByUser" xml:space="preserve">
+    <value>Eliminado {0} mensajes por {1}.</value>
+  </data>
+	<data name="calcSummary" xml:space="preserve">
+    <value>Evalúa una expresion matemática.</value>
+  </data>
+	<data name="calcParam1" xml:space="preserve">
+    <value>La expresión a evaluar.</value>
+  </data>
+	<data name="InvalidExpression" xml:space="preserve">
+    <value>Expresión inválida.</value>
+  </data>
+	<data name="CalcResults" xml:space="preserve">
+    <value>Resultados de calc</value>
+  </data>
+	<data name="LoopUpdated" xml:space="preserve">
+    <value>El reproductor fue actualizado para repetir la pista {0} veces. Usa este comando sin parámetros para deshabilitar la repetición de pistas.</value>
+  </data>
+	<data name="LoopNoValuePassed" xml:space="preserve">
+    <value>Pasa el número de veces que quieres repetir la pista, ej:
+`{0}loop 5`</value>
+  </data>
+	<data name="NowLooping" xml:space="preserve">
+    <value>Ahora la pista actual se repetirá {0} veces.
+Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</value>
+  </data>
+	<data name="LoopEnded" xml:space="preserve">
+    <value>La repetición para la pista: {0} ha terminado.</value>
+  </data>
+	<data name="loopSummary" xml:space="preserve">
+    <value>Repite la pista en reproducción un número de veces.</value>
+  </data>
+	<data name="loopParam1" xml:space="preserve">
+    <value>El número de veces a repetir la pista.</value>
+  </data>
+	<data name="LoopDisabled" xml:space="preserve">
+    <value>La repetición de la pista fue deshabilitada.</value>
+  </data>
+	<data name="LyricsQueryNotPassed" xml:space="preserve">
+    <value>Debes reproducir una pista con el bot o pasar el nombre de una pista.</value>
+  </data>
+	<data name="LyricsByGenius" xml:space="preserve">
+    <value>Letra por Genius</value>
+  </data>
+	<data name="PaginatorHelp" xml:space="preserve">
+    <value>Esto es un paginador. Reacciona a los íconos respectivos para cambiar la página.</value>
+  </data>
+	<data name="ArtistPage" xml:space="preserve">
+    <value>Página del artista</value>
+  </data>
+	<data name="AdventureDeletionPrompt" xml:space="preserve">
+    <value>Reacciona al emoji debajo para eliminar la aventura.</value>
+  </data>
+	<data name="ReactTimeout" xml:space="preserve">
+    <value>No reaccionaste antes del límite de tiempo!</value>
+  </data>
+	<data name="LanguageSelection" xml:space="preserve">
+    <value>Selección de idioma</value>
+  </data>
+	<data name="LanguagePrompt" xml:space="preserve">
+    <value>Reacciona al idioma que quieres establecer.</value>
+  </data>
+	<data name="lyricsRemarks" xml:space="preserve">
+    <value>Usa `-headers` al final del comando para mantener los tags (`[info]`).</value>
+  </data>
+	<data name="Changelog1.2" xml:space="preserve">
+    <value>- Nuevos comandos: `calc` y `loop` (en comando número 100!).
+- Rehecho `lyrics` desde el comienzo. Hize mi propio parser que funciona mucho mejor que la integrada en Victoria.
+El nuevo parser también permite pasar el nombre una canción específica en vez de tener que reproducir una pista primero.
+
+- `help` ahora muestra los tipos de los parámetros del comando actual.
+- `stats` ahora muestra el uso de la memoria bot junto a todo el proceso de uso de la memoria.
+- `urban` ahora muestra los enlaces a las palabras.
+- Añadido mejor interactividad a `language`, `config`, `trivia` y `aid delete`, ahora manejando las respuestas con reacciones.
+- Mejor sistema de paginación para `img`, `urban` y `lyrics`.
+- Ahora Lavalink se actualiza automáticamente a las builds de desarrollo.
+
+- Limpieza en la funcionalidad de localización, ahora todos los módulos utilizan una base de comandos personalizado que incluye los métodos necesarios para la localización.
+- Arreglos de errores pequeños y optimizaciones.</value>
+  </data>
+	<data name="HelpFooter2" xml:space="preserve">
+    <value>&lt;&gt; = Obligatorio | [] = Opcional | No escribas estos símbolos con el comando.</value>
+  </data>
+	<data name="invertSummary" xml:space="preserve">
+    <value>Invierte (convierte a negativo) una imagen.</value>
+  </data>
+	<data name="invertParam1" xml:space="preserve">
+    <value>La url de una imagen a usar.</value>
+  </data>
+	<data name="Changelog1.2.3" xml:space="preserve">
+		<value>Esta actualización contiene arreglos de errores que dejaron la 1.2 y algunos cambios que fueron retrasados de la 1.2 para ser mejorados.
+
+- Nuevo comando: `invert`
+- Agregado los idiomas Ruso y Turco (he usado Google Translate por lo que puede haber muchos errores).
+- Agregado información sobre los parámetros obligatorios y opcionales en `help`.
+- Agregado un sistema simple de caché para `img`, `tts` y `urban`.
+
+- Ahora `urban` y `badtranslator` pueden buscar / traducir palabras aleatorias por ti (usa los comandos sin pasar nada).
+- Ahora el bot sólo entrara al estado de escribiendo para los comandos largos.
+
+- Arreglado un bug en `img` que ocurria cuando el embed intentaba usar una imágen "inválida".
+- Arreglado un bug en `ocr` que ocurria cuando la imagen era muy grande.
+- Arreglado un bug en `badtranslator` que hacía que el comando fallaso sin razón alguna.
+- Arreglado un bug con el paginador que parpadeaba en ciertas circunstancias.
+- Arreglado algunos errores con el parser de `lyrics`.</value>
+	</data>
+	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
+		<value>Los mensajes deben tener menos de dos semanas de antigüedad.</value>
+	</data>
+	<data name="SomeMessagesNotDeleted" xml:space="preserve">
+		<value>No se pudieron eliminar {0} mensajes porque tienen mas de dos semanas de antigüedad.</value>
+	</data>
+	<data name="Changelog1.2.4" xml:space="preserve">
+		<value>- Agregado un servicio de reliabilidad para prevenir puntos muertos (deadlocks) y un script de auto-reinicio que se ejecuta cuando el bot tiene un error el cual no se puede recuperar (crash).
+
+- Limitado la longitud máxima del texto en `lyrics`.
+
+- Arreglado un bug en `invert` que fallaba con algunas imágenes.
+- Arreglado un bug en `clear` que mostraba una advertencia sobre mensajes que no se pudieron eliminar aún si los mensajes eliminados tienen una antigüedad menor a dos semanas.
+- Arreglado un bug en `trivia` que mostraba un mensaje que se acabó el tiempo sin importar de la entrada.</value>
+	</data>
+	<data name="GuildNotFound" xml:space="preserve">
+		<value>Servidor no encontrado.</value>
+	</data>
+	<data name="ErrorParsingLyrics" xml:space="preserve">
+		<value>Ocurrió un error mientras se extraía la letra de {0}.
+Tal vez es un instrumental?</value>
+	</data>
+	<data name="MustBeLowerThan" xml:space="preserve">
+		<value>El parámetro `{0}` debe ser menor que {1}.</value>
+	</data>
+	<data name="InvalidID" xml:space="preserve">
+		<value>ID inválida.</value>
+	</data>
+	<data name="HastebinLink" xml:space="preserve">
+		<value>Link de Hastebin</value>
+	</data>
+	<data name="NotAvailable" xml:space="preserve">
+		<value>No disponible.</value>
+	</data>
+	<data name="WaitingQueue" xml:space="preserve">
+		<value>Esperando que la cola se vacíe...</value>
+	</data>
+	<data name="NewOutputPrompt" xml:space="preserve">
+		<value>La salida antigua es:
+{0}
+Ingresa la nueva salida.</value>
+	</data>
+	<data name="GeneratingNewResponse" xml:space="preserve">
+		<value>Generando una nueva respuesta...</value>
+	</data>
+	<data name="InputTypes" xml:space="preserve">
+		<value>Opciones de entrada</value>
+	</data>
+	<data name="InputTypesList" xml:space="preserve">
+		<value>Do: Una acción que quieres tomar en la historia. Siempre comienza por una acción, ej. "Buscar el tesoro perdido". Este es el tipo de entrada por defecto si ningúno es detectado.
+
+Say: Puedes usar esto para hablar, ej. "Déjalos solos!".
+
+Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
+	</data>
+	<data name="Changelog1.2.7" xml:space="preserve">
+		<value>- Nuevos comandos: `color` y `retry`.
+
+- Agregado un servicio de caché de comandos, ahora puedes editar un mensaje a un nuevo comando y Fergun actualizará su respuesta o enviará una nueva.
+
+- Actualizado el módulo y wrapper de API de AI Dungeon, arreglado algunos bugs con las respuestas y actualizado los comandos `idinfo` y `alter`.
+
+- Ahora `userinfo` y `avatar` mostrarán la info/avatar del usuario que no esta en el servidor pasando su ID.
+- Ahora `userinfo` y `avatar` mostrarán el avatar por defecto si el usuario no tiene un avatar.
+- Ahora `lyrics` mostrará la letra de la canción que está reproduciendo en tu actividad de Spotify.
+- Ahora `lyrics` muestra correctamente el nombre de la canción cuando ocurre un error.
+- Ahora es posible usar `softban` con una ID de usuario.
+- Ahora algunos comandos subirán sus resultados a Hastebin cuando el contenido es demasiado largo.
+
+- Arreglado algunos bugs en `tpdne`, `tcdne`, `repeat`, el servicio de comandos y el sistema de paginación.</value>
+	</data>
+	<data name="Members" xml:space="preserve">
+		<value>Miembros</value>
+	</data>
+	<data name="Online" xml:space="preserve">
+		<value>En línea</value>
+	</data>
+	<data name="Idle" xml:space="preserve">
+		<value>Ausente</value>
+	</data>
+	<data name="DnD" xml:space="preserve">
+		<value>No molestar</value>
+	</data>
+	<data name="Offline" xml:space="preserve">
+		<value>Desconectado</value>
+	</data>
+	<data name="ChannelCount" xml:space="preserve">
+		<value>Número de canales</value>
+	</data>
+	<data name="Region" xml:space="preserve">
+		<value>Región</value>
+	</data>
+	<data name="DefaultChannel" xml:space="preserve">
+		<value>Canal por defecto</value>
+	</data>
+	<data name="LanguageNotFound" xml:space="preserve">
+		<value>Idioma no encontrado.</value>
+	</data>
+	<data name="CategoryCount" xml:space="preserve">
+		<value>Número de categorías</value>
+	</data>
+	<data name="Changelog1.2.9" xml:space="preserve">
+		<value>- Agregado un traductor de reserva que será usado automáticamente cuando el principal falle.
+- Aumentado el intervalo de limpieza del caché de comandos.
+
+- Arreglado un bug en `new` que prevenía que se muestre el texto inicial.
+- Arreglado un bug en el embed del paginador que prevenía que se muestre el avatar del usuario si el usuaio no tenía uno puesto.
+- Arreglado otros bugs menores.
+
+- Ahora Fergun responderá a los mensajes de comandos si antes el mensaje no contenia comandos.
+- Ahora `ping` muestra la latencia de la base de datos.
+
+- Reducido el uso de memoria.</value>
+	</data>
+</root>

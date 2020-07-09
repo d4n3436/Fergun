@@ -1,0 +1,2 @@
+# Fergun
+A discord bot.
