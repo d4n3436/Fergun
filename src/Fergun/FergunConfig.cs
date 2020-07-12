@@ -8,6 +8,7 @@ namespace Fergun
         ObjectId ObjectId { get; set; }
     }
 
+    [BsonIgnoreExtraElements]
     public class BaseConfig : IIdentity
     {
         [BsonId]
@@ -33,6 +34,14 @@ namespace Fergun
         public bool AidAutoTranslateDefault { get; set; }
         public bool TrackSelectionDefault { get; set; }
     }
+
+    //public class FergunConfig2
+    //{
+    //    private FergunConfig2() { }
+
+    //    private FergunConfig2 _instance;
+    //    public FergunConfig2 Config => _instance ??= new FergunConfig2();
+    //}
 
     public static class FergunConfig
     {
@@ -172,6 +181,7 @@ namespace Fergun
         */
     }
 
+    [BsonIgnoreExtraElements]
     public class Guild : IIdentity
     {
         public Guild(ulong id)
@@ -206,6 +216,7 @@ namespace Fergun
         public bool TrackSelection { get; set; } = FergunConfig.TrackSelectionDefault;
     }
 
+    [BsonIgnoreExtraElements]
     public class AidAdventure : IIdentity
     {
         public AidAdventure(uint id, ulong ownerid, bool isPublic)
@@ -224,6 +235,7 @@ namespace Fergun
 
     // TODO: Merge TriviaPlayer and BlacklistEntity to User
 
+    [BsonIgnoreExtraElements]
     public class TriviaPlayer : IIdentity
     {
         public TriviaPlayer(ulong id)
@@ -242,6 +254,7 @@ namespace Fergun
         public int Points { get; set; } = 0;
     }
 
+    [BsonIgnoreExtraElements]
     public class BlacklistEntity : IIdentity
     {
         public BlacklistEntity(ulong id)

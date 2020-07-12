@@ -45,13 +45,13 @@ namespace Fergun.Modules
         private static bool _isCreatingCache = false;
         private static XkcdResponse _lastComic = null;
         private static DateTime _timeToCheckComic;
-        private readonly CommandService _cmdService;
+        private static CommandService _cmdService;
 
-        //public static TesseractEngine TessEngine => new TesseractEngine("./tessdata", "eng", EngineMode.LstmOnly);
-        public static List<CachedPages> ImgCache => new List<CachedPages>();
-        private static List<CachedTts> TtsCache => new List<CachedTts>();
-        private static List<CachedPages> UrbanCache => new List<CachedPages>();
-        private static List<string> VideoCache => new List<string>();
+        //public static TesseractEngine TessEngine { get; } = new TesseractEngine("./tessdata", "eng", EngineMode.LstmOnly);
+        public static List<CachedPages> ImgCache { get; } = new List<CachedPages>();
+        private static List<CachedTts> TtsCache { get; } = new List<CachedTts>();
+        private static List<CachedPages> UrbanCache { get; } = new List<CachedPages>();
+        private static List<string> VideoCache { get; } = new List<string>();
         public static Emote OnlineEmote { get; set; } = Emote.Parse("<:online:726601254016647241>");
         public static Emote IdleEmote { get; set; } = Emote.Parse("<:idle:726601265563566111>");
         public static Emote DndEmote { get; set; } = Emote.Parse("<:dnd:726601274434519090>");
@@ -64,7 +64,7 @@ namespace Fergun.Modules
 
         public Utility(CommandService commands)
         {
-            _cmdService = commands;
+            _cmdService ??= commands;
         }
 
         [Command("avatar")]
@@ -74,9 +74,9 @@ namespace Fergun.Modules
             user ??= Context.User;
 
             string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
-            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
             {
                 using (Bitmap img = new Bitmap(response))
@@ -124,23 +124,16 @@ namespace Fergun.Modules
             
             List<string> languageChain = new List<string>();
             int chainCount = 7;
-            Language originalLang = null;
-            Language targetLang;
+            string originalLang = null;
+            string targetLang;
             SimpleTranslationResult result;
             for (int i = 0; i < chainCount; i++)
             {
                 // TODO: Skip repeated languages
                 // Translate to the original language in the last iteration, otherwise get a random language
-                while (true)
-                {
-                    targetLang = i == chainCount - 1 ? originalLang : GoogleTranslator.LanguagesSupported[RngInstance.Next(0, GoogleTranslator.LanguagesSupported.Length)];
-                    if (Translators.SupportedBingLanguages.Contains(targetLang.ISO639))
-                    {
-                        break;
-                    }
-                }
+                targetLang = i == chainCount - 1 ? originalLang : Translators.SupportedLanguages[RngInstance.Next(0, Translators.SupportedLanguages.Count)];
 
-                result = await TranslateSimpleAsync(text, targetLang.ISO639, "");
+                result = await TranslateSimpleAsync(text, targetLang, "");
                 if (result.Error != null)
                 {
                     return FergunResult.FromError(Locate(result.Error));
@@ -148,11 +141,11 @@ namespace Fergun.Modules
                 if (i == 0)
                 {
                     // The detected language fallbacks to English if not found.
-                    originalLang = result.Source;
-                    languageChain.Add(originalLang.ISO639);
+                    originalLang = result.Source.ISO639;
+                    languageChain.Add(originalLang);
                 }
                 text = result.Text;
-                languageChain.Add(targetLang.ISO639);
+                languageChain.Add(targetLang);
             }
 
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength)
@@ -239,7 +232,7 @@ namespace Fergun.Modules
                     .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
                     .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -257,7 +250,7 @@ namespace Fergun.Modules
 
             builder.AddField(Locate("Name"), channel.Name, true);
             builder.AddField(Locate("Topic"), string.IsNullOrEmpty(channel.Topic) ? Locate("None") : channel.Topic, true); //I use IsNullOrEmpty because topic is "" and not null.
-            builder.AddField(Locate("IsNSFW"), Locate(channel.IsNsfw ? "Yes" : "No"), true);
+            builder.AddField(Locate("IsNSFW"), Locate(channel.IsNsfw), true);
 
             builder.AddField("ID", channel.Id, true);
             builder.AddField(Locate("SlowMode"), TimeSpan.FromSeconds(channel.SlowModeInterval).ToShortForm2(), true);
@@ -269,7 +262,7 @@ namespace Fergun.Modules
 
             builder.WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -337,10 +330,10 @@ namespace Fergun.Modules
         [LongRunning]
         [Command("config", RunMode = RunMode.Async)]
         [Summary("configSummary")]
-        [Alias("settings")]
+        [Alias("configuration", "settings")]
         public async Task<RuntimeResult> Config()
         {
-            Console.WriteLine($"Executing \"config\" in {Context.Guild.Name} for {Context.User}");
+            //Console.WriteLine($"Executing \"config\" in {Context.Guild.Name} for {Context.User}");
 
             var currentGuild = GetGuild() ?? new Guild(Context.Guild.Id);
 
@@ -423,13 +416,13 @@ namespace Fergun.Modules
             else
             {
                 builder.WithAuthor(message.Author)
-                    .WithDescription(message.Content)
+                    .WithDescription(message.Content.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
             }
             builder.WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
         }
 
         [Command("help")]
@@ -461,7 +454,7 @@ namespace Fergun.Modules
                     .AddField(Locate("OwnerCommands"), string.Join(", ", ownerCommands))
                     .AddField(Locate("Notes"), string.Format(Locate("NotesInfo"), GetPrefix()));
 
-                string version = "v" + Locate("Version");
+                string version = $"v{FergunClient.Version}";
                 if (FergunClient.IsDebugMode)
                 {
                     version += "-dev";
@@ -553,10 +546,10 @@ namespace Fergun.Modules
             var cached = ImgCache.Find(x => x.Query == query && x.IsNsfw == isNsfwChannel);
             if (cached == null)
             {
-                DdgResponse Search;
+                DdgResponse search;
                 try
                 {
-                    Search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
+                    search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
                 }
                 catch (HttpRequestException)
                 {
@@ -566,12 +559,12 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(e.Message);
                 }
-                if (Search.Results.Count == 0)
+                if (search.Results.Count == 0)
                 {
                     return FergunResult.FromError(Locate("NoResultsFound"));
                 }
 
-                foreach (var item in Search.Results)
+                foreach (var item in search.Results)
                 {
                     pages.Add(new PaginatedMessage.Page()
                     {
@@ -605,7 +598,7 @@ namespace Fergun.Modules
                 }
             };
 
-            await PagedReplyAsync(pager, ReactionList.All);
+            await PagedReplyAsync(pager, new ReactionList(true, true, true, true, true, true, false));
 
             return FergunResult.FromSuccess();
         }
@@ -682,7 +675,7 @@ namespace Fergun.Modules
                     .WithFooter(string.Format(Locate("ProcessingTime"), processTime))
                     .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -752,7 +745,7 @@ namespace Fergun.Modules
         //        .WithFooter(string.Format(Locate("ProcessingTime"), sw.ElapsedMilliseconds))
         //        .WithColor(FergunConfig.EmbedColor);
 
-        //    await ReplyAsync(null, false, builder.Build());
+        //    await ReplyAsync(embed: builder.Build());
         //    return FergunResult.FromSuccess();
         //}
 
@@ -766,7 +759,7 @@ namespace Fergun.Modules
         {
             if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", GoogleTranslator.LanguagesSupported.Select(x => Format.Code(x.ISO639)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Translators.SupportedLanguages.Select(x => Format.Code(x)))}");
             }
 
             string errorReason;
@@ -810,7 +803,7 @@ namespace Fergun.Modules
                 .WithFooter(string.Format(Locate("ProcessingTime"), processTime + sw.ElapsedMilliseconds))
                 .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -873,7 +866,7 @@ namespace Fergun.Modules
                 .WithImageUrl(resultUrl)
                 .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
 
@@ -886,15 +879,15 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("RoleInfo"))
 
-                .AddField(Locate("Name"), role.IsEveryone ? $"`{role.Name}`" : role.Name, true)
+                .AddField(Locate("Name"), role.IsEveryone ? Format.Code(role.Name) : role.Name, true)
                 .AddField(Locate("Color"), $"{role.Color} ({role.Color.R}, {role.Color.G}, {role.Color.B})", true)
-                .AddField(Locate("IsMentionable"), Locate(role.IsMentionable ? "Yes" : "No"), true)
+                .AddField(Locate("IsMentionable"), Locate(role.IsMentionable), true)
 
                 .AddField("ID", role.Id, true)
-                .AddField(Locate("IsHoisted"), Locate(role.IsHoisted ? "Yes" : "No"), true)
+                .AddField(Locate("IsHoisted"), Locate(role.IsHoisted), true)
                 .AddField(Locate("Position"), role.Position, true)
 
-                .AddField(Locate("Permissions"), role.Permissions.ToList().Count == 0 ? Locate("None") : '`' + string.Join("`, `", role.Permissions.ToList()) + '`', false)
+                .AddField(Locate("Permissions"), role.Permissions.RawValue == 0 ? Locate("None") : Format.Code(string.Join("`, `", role.Permissions.ToList())), false)
 
                 .AddField(Locate("MemberCount"), role.Members.Count(), true)
                 .AddField(Locate("CreatedAt"), role.CreatedAt, true)
@@ -902,7 +895,7 @@ namespace Fergun.Modules
 
                 .WithColor(role.Color);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -1066,7 +1059,7 @@ namespace Fergun.Modules
             //{
             //}
             builder.WithColor(FergunConfig.EmbedColor);
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
 
@@ -1085,13 +1078,13 @@ namespace Fergun.Modules
             else
             {
                 builder.WithAuthor(message.Author)
-                    .WithDescription(message.Content)
+                    .WithDescription(message.Content.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
             }
             builder.WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
         }
 
         [LongRunning]
@@ -1103,7 +1096,7 @@ namespace Fergun.Modules
         {
             if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", GoogleTranslator.LanguagesSupported.Select(x => Format.Code(x.ISO639)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Translators.SupportedLanguages.Select(x => Format.Code(x)))}");
             }
 
             var result = await TranslateSimpleAsync(text, target);
@@ -1130,7 +1123,7 @@ namespace Fergun.Modules
                 .WithThumbnailUrl("https://fergun.is-inside.me/u7fSdkx8.png")
                 .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -1338,7 +1331,7 @@ namespace Fergun.Modules
                 .AddField("ID", user.Id, false)
                 .AddField(Locate("Activity"), activity, true)
                 .AddField(Locate("ActiveClients"), user.ActiveClients.Count == 0 ? "?" : string.Join(" ", clients), true)
-                .AddField(Locate("IsBot"), Locate(user.IsBot ? "Yes" : "No"), false)
+                .AddField(Locate("IsBot"), Locate(user.IsBot), false)
                 .AddField(Locate("CreatedAt"), user.CreatedAt)
                 .AddField(Locate("GuildJoinDate"), guildUser?.JoinedAt?.ToString() ?? "N/A")
                 .AddField(Locate("BoostingSince"), guildUser?.PremiumSince?.ToString() ?? "N/A")
@@ -1346,7 +1339,7 @@ namespace Fergun.Modules
                 .WithThumbnailUrl(avatarUrl)
                 .WithColor(new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B));
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -1443,13 +1436,13 @@ namespace Fergun.Modules
             {
                 string decodedUrl;
                 // Microsoft bug..
-                if (article.Originalimage.Source != null && Uri.IsWellFormedUriString(decodedUrl = Uri.UnescapeDataString(article.Originalimage.Source), UriKind.Absolute))
+                if (article.Originalimage?.Source != null && Uri.IsWellFormedUriString(decodedUrl = Uri.UnescapeDataString(article.Originalimage.Source), UriKind.Absolute))
                 {
                     builder.ThumbnailUrl = decodedUrl;
                 }
             }
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
 
@@ -1481,7 +1474,7 @@ namespace Fergun.Modules
                 .WithFooter(xkcd.Alt.Truncate(EmbedFooterBuilder.MaxFooterTextLength))
                 .WithTimestamp(new DateTime(int.Parse(xkcd.Year), int.Parse(xkcd.Month), int.Parse(xkcd.Day)));
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
 
@@ -1504,48 +1497,55 @@ namespace Fergun.Modules
                 await Context.Channel.TriggerTypingAsync();
                 Console.WriteLine($"Creating video cache in {(Context.IsPrivate ? $"{Context.Channel}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User}");
 
-                List<Task> tasks = new List<Task>();
-                while (tasks.Count < FergunConfig.VideoCacheSize)
-                {
-                    tasks.Add(Task.Run(async () =>
-                    {
-                        while (true)
-                        {
-                            string randStr = RandomString(RngInstance.Next(5, 7));
-                            //var items = await YTClient.SearchVideosAsync(rand, 1);
-                            var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
-                            if (items.Count != 0)
-                            {
-                                lock (_videoCacheLock)
-                                {
-                                    string randomId = items[RngInstance.Next(items.Count)].Id;
-                                    VideoCache.Add(randomId);
-                                    Console.WriteLine($"Added 1 item to Video cache (random string: {randStr}, search count: {items.Count}, selected id: {randomId}), total count: {VideoCache.Count}");
-                                }
-                                break;
-                            }
-                            else
-                            {
-                                Console.WriteLine($"No videos found on {randStr}");
-                            }
-                        }
-                    }));
-                }
+                List<Task> tasks = CreateVideoTasks();
+                
                 await Task.WhenAll(tasks);
                 _isCreatingCache = false;
             }
             string url;
             lock (_videoCacheLock)
             {
-                int r = RngInstance.Next(VideoCache.Count);
-                url = $"https://www.youtube.com/watch?v={VideoCache[r]}";
-                VideoCache.RemoveAt(r);
+                int randomInt = RngInstance.Next(VideoCache.Count);
+                url = $"https://www.youtube.com/watch?v={VideoCache[randomInt]}";
+                VideoCache.RemoveAt(randomInt);
             }
             await ReplyAsync(url);
             return FergunResult.FromSuccess();
         }
 
         // Helper methods
+
+        private static List<Task> CreateVideoTasks()
+        {
+            List<Task> tasks = new List<Task>();
+            while (tasks.Count < FergunConfig.VideoCacheSize)
+            {
+                tasks.Add(Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        string randStr = RandomString(RngInstance.Next(5, 7));
+                        //var items = await YTClient.SearchVideosAsync(rand, 1);
+                        var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
+                        if (items.Count != 0)
+                        {
+                            lock (_videoCacheLock)
+                            {
+                                string randomId = items[RngInstance.Next(items.Count)].Id;
+                                VideoCache.Add(randomId);
+                                Console.WriteLine($"Added 1 item to Video cache (random string: {randStr}, search count: {items.Count}, selected id: {randomId}), total count: {VideoCache.Count}");
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No videos found on {randStr}");
+                        }
+                    }
+                }));
+            }
+            return tasks;
+        }
 
         private static async Task<long?> GetUrlContentLengthAsync(string url)
         {
@@ -1601,7 +1601,6 @@ namespace Fergun.Modules
             }
             catch (WebException)
             {
-                // TODO: Default to Tesseract OCR on error.
                 return ("OcrApiError", null);
             }
 

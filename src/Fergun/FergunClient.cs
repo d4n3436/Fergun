@@ -13,7 +13,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBotsList.Api;
 using DiscordBotsList.Api.Objects;
-using Fergun.APIs;
+using Fergun.APIs.DiscordBots;
 using Fergun.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Victoria;
@@ -27,14 +27,14 @@ namespace Fergun
         public static List<IMessage> EditedMessages { get; } = new List<IMessage>();
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
-        public static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static AuthDiscordBotListApi DblApi { get; private set; }
         public static IDblSelfBot DblBot { get; private set; } = null;
         public static string DblBotPage { get; private set; }
         public static string SupportServer { get; set; } = "https://discord.gg/5w5GEKE";
         public static string InviteLink { get; set; }
 
-        public static Dictionary<string, string> Languages => new Dictionary<string, string>
+        public static Dictionary<string, string> Languages { get; } = new Dictionary<string, string>
         {
             { "es", "🇪🇸" },
             { "en", "🇺🇸" },
@@ -46,6 +46,23 @@ namespace Fergun
         public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
 
         public static IReadOnlyList<string> WordList => _wordlist;
+
+        public const string Version = "1.2.9";
+
+        public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>()
+        { 
+            "0.8",
+            "0.9",
+            "1.0",
+            "1.1",
+            "1.1.5",
+            "1.2",
+            "1.2.3",
+            "1.2.4",
+            "1.2.7"
+        };
+
+        public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
 
         public const ulong InvitePermissions =
 
@@ -82,10 +99,9 @@ namespace Fergun
 
         private static string[] _dbCredentials;
         private static bool _hasCredentials;
-        public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
         private static readonly object _messageLock = new object();
         private static bool _firstConnect = true;
-        private static DiscordBots _discordBots;
+        private static DiscordBotsApi _discordBots;
 
         public FergunClient()
         {
@@ -176,7 +192,7 @@ namespace Fergun
                     string password = Console.ReadLine();
                     Console.Write("Enter DB host (leave empty for local): ");
                     string host = Console.ReadLine();
-                    Database = new FergunDB("FergunDB", user, password);
+                    Database = new FergunDB("FergunDB", user, password, host);
                 }
             }
             else
@@ -240,7 +256,7 @@ namespace Fergun
             {
                 ProcessStartInfo process = new ProcessStartInfo
                 {
-                    FileName = "java",
+                    FileName = @"C:\Program Files\Java\jdk-13.0.2\bin\java.exe",//"java",
                     Arguments = $"-jar \"{Path.Combine(AppContext.BaseDirectory, "Lavalink")}/Lavalink.jar\"",
                     WorkingDirectory = Path.Combine(AppContext.BaseDirectory, "Lavalink"),
                     UseShellExecute = true,
@@ -376,14 +392,14 @@ namespace Fergun
                     DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
 
                     DblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
-                    _discordBots = new DiscordBots(FergunConfig.DiscordBotsApiToken);
+                    _discordBots = new DiscordBotsApi(FergunConfig.DiscordBotsApiToken);
 
                     await TryUpdateBotListStatsAsync();
                 }
                 Uptime = DateTime.UtcNow;
                 _firstConnect = false;
             }
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", IsDebugMode ? "FergunDev is online!" : "Fergun is online!"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
         }
 
         private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)

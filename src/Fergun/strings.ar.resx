@@ -174,12 +174,6 @@
 	<data name="mojibakeParam1" xml:space="preserve">
     <value>طول النتيجة.</value>
   </data>
-	<data name="naziSummary" xml:space="preserve">
-    <value>طباعة رمز نازي.</value>
-  </data>
-	<data name="naziParam1" xml:space="preserve">
-    <value>النص المطلوب استخدامه.</value>
-  </data>
 	<data name="3orMoreChars" xml:space="preserve">
     <value>يجب أن يحتوي النص على 3 أحرف أو أكثر.</value>
   </data>
@@ -230,12 +224,6 @@
   </data>
 	<data name="sarcasmParam1" xml:space="preserve">
     <value>النص المطلوب تحويله.</value>
-  </data>
-	<data name="swastikaSummary" xml:space="preserve">
-    <value>يطبع رمز الصليب المعقوف.</value>
-  </data>
-	<data name="swastikaParam1" xml:space="preserve">
-    <value>النص المطلوب استخدامه.</value>
   </data>
 	<data name="vaporwaveSummary" xml:space="preserve">
     <value>يحول النص إلى vaporwave.</value>
@@ -316,7 +304,7 @@
     <value>بحث في الصور</value>
   </data>
 	<data name="UrbanFooter" xml:space="preserve">
-    <value>Urban Urban - صفحة {0} من {1}</value>
+    <value>Urban Dictionary - صفحة {0} من {1}</value>
   </data>
 	<data name="ImageSearchCap" xml:space="preserve">
     <value>تم الوصول إلى الحد الأقصى لبحث الصور :(</value>
@@ -343,7 +331,7 @@
     <value>رمز الحالة:</value>
   </data>
 	<data name="pingSummary" xml:space="preserve">
-    <value>الحصول على الكمون عند إرسال رسالة ووقت الاستجابة لـ Discord Websocket / API.</value>
+    <value>يحصل الكمون في إرسال رسالة والكمون من قاعدة البيانات.</value>
   </data>
 	<data name="resizeSummary" xml:space="preserve">
     <value>يغير حجم الصورة مع waifu2x.</value>
@@ -400,7 +388,7 @@
     <value>يترجم النص.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>اللغة الهدف في كود ISO (en ، es ، br ، إلخ.)</value>
+    <value>اللغة الهدف في رمز ISO (`en` ،` es` ، `br` ، إلخ) ، تتراجع إلى اللغة الإنجليزية إذا كان الهدف غير صالح.</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>النص المراد ترجمته.</value>
@@ -415,7 +403,7 @@
     <value>النص إلى الكلام.</value>
   </data>
 	<data name="ttsParam1" xml:space="preserve">
-    <value>اللغة الهدف في رمز ISO (en ، es ، br ، إلخ.) ، تكون اللغة الافتراضية هي الإنجليزية إذا كان الهدف غير صالح.</value>
+    <value>اللغة الهدف في رمز ISO (`en` ،` es` ، `br` ، إلخ) ، تتراجع إلى اللغة الإنجليزية إذا كان الهدف غير صالح.</value>
   </data>
 	<data name="ttsParam2" xml:space="preserve">
     <value>النص المطلوب تحويله إلى كلام.</value>
@@ -508,9 +496,6 @@
 	<data name="BanMyself" xml:space="preserve">
     <value>لن أحظر نفسي ههههههههه</value>
   </data>
-	<data name="BanHigherRole" xml:space="preserve">
-    <value>لا يمكنني حظر هذا الشخص ..</value>
-  </data>
 	<data name="AlreadyBanned" xml:space="preserve">
     <value>المستخدم محظور بالفعل.</value>
   </data>
@@ -551,10 +536,6 @@
 	<data name="Hackbanned" xml:space="preserve">
     <value>تم اختراق المستخدم {0}.</value>
   </data>
-	<data name="HackbanError" xml:space="preserve">
-    <value>لا يمكن اختراق المستخدم.
-خطا بالكود:</value>
-  </data>
 	<data name="kickSummary" xml:space="preserve">
     <value>يركل مستخدمًا.</value>
   </data>
@@ -565,7 +546,7 @@
     <value>سبب الركلة.</value>
   </data>
 	<data name="Kicked" xml:space="preserve">
-    <value>تم طرد المستخدم {0}</value>
+    <value>تم طرد المستخدم {0}.</value>
   </data>
 	<data name="nickSummary" xml:space="preserve">
     <value>يغير لقب المستخدم.</value>
@@ -652,7 +633,7 @@
     <value>تحتاج إلى الاتصال بقناة صوتية.</value>
   </data>
 	<data name="NowConnected" xml:space="preserve">
-    <value>متصل الآن بـ</value>
+    <value>متصل الآن بـ {0}.</value>
   </data>
 	<data name="leaveSummary" xml:space="preserve">
     <value>يترك قناة صوتية.</value>
@@ -661,7 +642,7 @@
     <value>انضم إلى القناة التي يتواجد فيها البوت لجعله يغادر.</value>
   </data>
 	<data name="LeftVC" xml:space="preserve">
-    <value>غادر بوت الآن</value>
+    <value>وقد غادر بوت الآن {0}.</value>
   </data>
 	<data name="moveSummary" xml:space="preserve">
     <value>ينقل البوت إلى القناة الصوتية للمستخدم الحالي.</value>
@@ -745,7 +726,7 @@
     <value>تم النقل من ** {0} ** إلى ** {1} **</value>
   </data>
 	<data name="PlayerNoMatches" xml:space="preserve">
-    <value>لم يتم العثور على تطابق.</value>
+    <value>لم يتم العثور على تطابق. حاول استخدام وصلة يوتيوب أو ارتباط ملف MP3.</value>
   </data>
 	<data name="PlayerPlaylistAdded" xml:space="preserve">
     <value>تمت إضافة قائمة التشغيل ** {0} ** ({1} المسارات) ({2}) إلى قائمة الانتظار.</value>
@@ -1168,9 +1149,6 @@
 	<data name="InviteLink" xml:space="preserve">
     <value>رابط الدعوة</value>
   </data>
-	<data name="Version" xml:space="preserve">
-    <value>1.2.9</value>
-  </data>
 	<data name="NoManageMessages" xml:space="preserve">
     <value>ستعمل بعض الأوامر بشكل أفضل مع إذن `إدارة الرسائل` (` img`، `urban`،` config`)
 </value>
@@ -1326,7 +1304,7 @@
 تتبع اختيار `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">
-    <value>أدخل رقمًا لتغيير قيمته و "e" لإنهاء هذه المطالبة.</value>
+    <value>استخدام ردود الفعل لتمكين أو تعطيل خيار.</value>
   </data>
 	<data name="FergunConfig" xml:space="preserve">
     <value>تكوين Fergun</value>
@@ -1608,8 +1586,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="bashSummary" xml:space="preserve">
     <value>يدير أمر باش.</value>
   </data>
-	<data name="reportSummary" xml:space="preserve">
-    <value>يظهر معلومات التقرير.</value>
+	<data name="supportSummary" xml:space="preserve">
+    <value>يظهر معلومات الدعم.</value>
   </data>
 	<data name="ErrorOnAPI" xml:space="preserve">
     <value>حدث خطأ أثناء استدعاء API.</value>
@@ -1654,18 +1632,6 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
   </data>
 	<data name="LanguageChain" xml:space="preserve">
     <value>سلسلة لغة</value>
-  </data>
-	<data name="Versions" xml:space="preserve">
-    <value>0.8
-0.9
-1.0
-1.1
-1.1.5
-1.2
-1.2.3
-1.2.4
-1.2.7
-1.2.9</value>
   </data>
 	<data name="VersionNotFound" xml:space="preserve">
     <value> نسخة غير موجود. الإصدارات هي: {0}</value>

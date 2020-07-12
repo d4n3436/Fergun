@@ -201,7 +201,7 @@ namespace Fergun.Modules
 
             await Context.Guild.AddBanAsync(user.Id, (int)days, reason);
             await Context.Guild.RemoveBanAsync(user.Id);
-            await SendEmbedAsync(string.Format(Locate("Softbanned"), $"{user.Username}#{user.Discriminator}"));
+            await SendEmbedAsync(string.Format(Locate("Softbanned"), user.ToString()));
 
             return FergunResult.FromSuccess();
         }

@@ -39,12 +39,12 @@ namespace Fergun.Modules
 
         [Command("leave")]
         [Summary("leaveSummary")]
-        [Alias("disconnect")]
+        [Alias("disconnect", "quit", "exit")]
         public async Task Leave()
         {
             var user = Context.User as SocketGuildUser;
             bool connected = await _musicService.LeaveAsync(Context.Guild, user.VoiceChannel);
-            await SendEmbedAsync(!connected ? Locate("BotNotConnected") : $"{Locate("LeftVC")} **{user.VoiceChannel.Name}**");
+            await SendEmbedAsync(!connected ? Locate("BotNotConnected") : string.Format(Locate("LeftVC"), Format.Bold(user.VoiceChannel.Name)));
         }
 
         [Command("loop")]
@@ -58,7 +58,7 @@ namespace Fergun.Modules
         [Command("lyrics", RunMode = RunMode.Async)]
         [Summary("lyricsSummary")]
         [Alias("l")]
-        public async Task Lyrics([Remainder][Summary("lyricsParam1")] string query = null)
+        public async Task Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
             bool keepHeaders = false;
             if (string.IsNullOrWhiteSpace(query) || query.ToLowerInvariant().Trim() == "-headers")
@@ -135,26 +135,28 @@ namespace Fergun.Modules
         [Command("play", RunMode = RunMode.Async)]
         [Summary("playSummary")]
         [Alias("p")]
-        public async Task<RuntimeResult> Play([Remainder][Summary("playParam1")] string query)
+        public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = Context.User as SocketGuildUser;
             //await ReplyAsync(await _musicService.PlayAsync(query, Context.GuildId));
             var (result, tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
             if (tracks == null)
+            {
                 await SendEmbedAsync(result);
+            }
             else
             {
-                LavaTrack SelectedTrack;
-                bool TrackSelection = GetGuild()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
-                if (TrackSelection)
+                LavaTrack selectedTrack;
+                bool trackSelection = GetGuild()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
+                if (trackSelection)
                 {
                     string list = "";
                     // Limit to 10, for now
-                    int count = tracks.Count > 10 ? 10 : tracks.Count;
+                    int count = Math.Min(10, tracks.Count);
 
                     for (int i = 0; i < count; i++)
                     {
-                        list += $"{i + 1}. [{tracks[i].Title}]({tracks[i].Url}) ({tracks[i].Duration.ToShortForm()})\n";
+                        list += $"{i + 1}. {tracks[i].ToTrackLink()}\n";
                     }
 
                     var builder = new EmbedBuilder()
@@ -162,7 +164,8 @@ namespace Fergun.Modules
                         .WithTitle(Locate("SelectTrack"))
                         .WithDescription(list)
                         .WithColor(FergunConfig.EmbedColor);
-                    await ReplyAsync(null, false, builder.Build());
+
+                    await ReplyAsync(embed: builder.Build());
 
                     var response = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
 
@@ -178,14 +181,14 @@ namespace Fergun.Modules
                     {
                         return FergunResult.FromError($"{Locate("OutOfIndex")} {Locate("SearchCanceled")}");
                     }
-                    SelectedTrack = tracks[option - 1];
+                    selectedTrack = tracks[option - 1];
                 }
                 else
                 {
                     // people don't know how to select a track...
-                    SelectedTrack = tracks[0];
+                    selectedTrack = tracks[0];
                 }
-                var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, SelectedTrack);
+                var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, selectedTrack);
                 await SendEmbedAsync(result2);
             }
             return FergunResult.FromSuccess();
@@ -193,6 +196,7 @@ namespace Fergun.Modules
 
         [Command("queue")]
         [Summary("queueSummary")]
+        [Alias("q")]
         public async Task Queue()
         {
             await SendEmbedAsync(_musicService.GetQueue(Context.Guild, Context.Channel as ITextChannel));
@@ -237,7 +241,7 @@ namespace Fergun.Modules
 
         [Command("skip")]
         [Summary("skipSummary")]
-        [Alias("skip")]
+        [Alias("s")]
         public async Task Skip()
         {
             await SendEmbedAsync(await _musicService.SkipAsync(Context.Guild, Context.Channel as ITextChannel));
@@ -265,7 +269,7 @@ namespace Fergun.Modules
         //    (bool success, string message) = await _musicService.GetArtworkAsync(Context.Guild);
         //    if (!success)
         //    {
-        //        await SimpleEmbed(message);
+        //        await SendEmbedAsync(message);
         //    }
         //    else
         //    {
@@ -274,7 +278,7 @@ namespace Fergun.Modules
         //            .WithImageUrl(message)
         //            .WithColor(FergunConfig.EmbedColor);
 
-        //        await ReplyAsync("", false, builder.Build());
+        //        await ReplyAsync(embed: builder.Build());
         //    }
         //}
     }

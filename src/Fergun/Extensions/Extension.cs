@@ -12,6 +12,7 @@ using Discord.WebSocket;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Victoria;
 
 namespace Fergun.Extensions
 {
@@ -122,6 +123,11 @@ namespace Fergun.Extensions
                                  .FirstOrDefault()?
                                  .Trim('*')?
                                  .ToLowerInvariant() ?? ".jpg";
+        }
+
+        public static string ToTrackLink(this LavaTrack track, bool withTime = true)
+        {
+            return Format.Url(track.Title, track.Url) + (withTime ? $" ({track.Duration.ToShortForm()})" : "");
         }
 
         public static string Dump(this object obj, int maxDepth = 2)

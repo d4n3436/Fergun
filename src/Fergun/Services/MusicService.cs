@@ -145,7 +145,7 @@ namespace Fergun.Services
                 builder.WithDescription(Localizer.Locate("NoTracks", args.Player.TextChannel))
                     .WithColor(FergunConfig.EmbedColor);
 
-                await args.Player.TextChannel.SendMessageAsync(null, false, builder.Build());
+                await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Queue now empty in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
                 return;
             }
@@ -154,7 +154,7 @@ namespace Fergun.Services
             builder.WithTitle(Localizer.Locate("NowPlaying", args.Player.TextChannel))
                 .WithDescription($"[{nextTrack.Title}]({nextTrack.Url}) ({nextTrack.Duration.ToShortForm()})")
                 .WithColor(FergunConfig.EmbedColor);
-            await args.Player.TextChannel.SendMessageAsync(null, false, builder.Build());
+            await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Now playing: {nextTrack.Title} ({nextTrack.Url}) in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
         }
 
@@ -163,7 +163,7 @@ namespace Fergun.Services
             var builder = new EmbedBuilder()
                 .WithDescription($"\u26A0 {Localizer.Locate("PlayerError", args.Player.TextChannel)}:```{args.ErrorMessage}```")
                 .WithColor(FergunConfig.EmbedColor);
-            await args.Player.TextChannel.SendMessageAsync(null, false, builder.Build());
+            await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
         }
 
@@ -172,7 +172,7 @@ namespace Fergun.Services
             var builder = new EmbedBuilder()
                 .WithDescription($"\u26A0 {string.Format(Localizer.Locate("PlayerStuck", args.Player.TextChannel), args.Player.Track.Title, args.Threshold.TotalSeconds)}")
                 .WithColor(FergunConfig.EmbedColor);
-            await args.Player.TextChannel.SendMessageAsync(null, false, builder.Build());
+            await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
         }
 
@@ -181,7 +181,7 @@ namespace Fergun.Services
             if (_lavaNode.HasPlayer(guild))
                 return Localizer.Locate("AlreadyConnected", textChannel);
             await _lavaNode.JoinAsync(voiceChannel, textChannel);
-            return $"{Localizer.Locate("NowConnected", textChannel)} **{voiceChannel.Name}**";
+            return string.Format(Localizer.Locate("NowConnected", textChannel), Format.Bold(voiceChannel.Name));
         }
 
         public async Task<bool> LeaveAsync(IGuild guild, SocketVoiceChannel voiceChannel)
@@ -210,7 +210,7 @@ namespace Fergun.Services
             return string.Format(Localizer.Locate("PlayerMoved", textChannel), oldChannel, voiceChannel);
         }
 
-        public async Task<(string result, IReadOnlyList<LavaTrack> tracks)> PlayAsync(string query, IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
+        public async Task<(string, IReadOnlyList<LavaTrack>)> PlayAsync(string query, IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
         {
             var search = await _lavaNode.SearchYouTubeAsync(query);
 
@@ -227,14 +227,15 @@ namespace Fergun.Services
 
             if (search.Playlist.Name != null)
             {
-                player = _lavaNode.HasPlayer(guild)
-                ? _lavaNode.GetPlayer(guild)
-                : await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                if (!_lavaNode.TryGetPlayer(guild, out player))
+                {
+                    await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                    player = _lavaNode.GetPlayer(guild);
+                }
 
                 TimeSpan time = TimeSpan.Zero;
                 if (player.PlayerState == PlayerState.Playing)
                 {
-
                     int trackCount = Math.Min(10, search.Tracks.Count);
                     foreach (LavaTrack track in search.Tracks.Take(10))
                     {
@@ -268,9 +269,11 @@ namespace Fergun.Services
                     return (null, search.Tracks);
                 }
 
-                player = _lavaNode.HasPlayer(guild)
-                ? _lavaNode.GetPlayer(guild)
-                : await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                if (!_lavaNode.TryGetPlayer(guild, out player))
+                {
+                    await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                    player = _lavaNode.GetPlayer(guild);
+                }
                 if (player.PlayerState == PlayerState.Playing)
                 {
                     player.Queue.Enqueue(track);
@@ -286,9 +289,11 @@ namespace Fergun.Services
 
         public async Task<string> PlayTrack(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel, LavaTrack track)
         {
-            LavaPlayer player = _lavaNode.HasPlayer(guild)
-                ? _lavaNode.GetPlayer(guild)
-                : await _lavaNode.JoinAsync(voiceChannel, textChannel);
+            if (!_lavaNode.TryGetPlayer(guild, out var player))
+            {
+                await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                player = _lavaNode.GetPlayer(guild);
+            }
             if (track == null)
                 return Localizer.Locate("InvalidTrack", textChannel);
             if (player.PlayerState == PlayerState.Playing)
@@ -313,7 +318,7 @@ namespace Fergun.Services
             else if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
             await player.SeekAsync(TimeSpan.Zero);
-            return $"{Localizer.Locate("Replaying", textChannel)} [{player.Track.Title}]({player.Track.Url}) ({player.Track.Duration.ToShortForm()})";
+            return $"{Localizer.Locate("Replaying", textChannel)} {player.Track.ToTrackLink()}";
         }
 
         public async Task<string> SeekAsync(IGuild guild, ITextChannel textChannel, string time)
@@ -321,13 +326,8 @@ namespace Fergun.Services
             bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
-            if (player == null)
-                return Localizer.Locate("PlayerError", textChannel);
-
-            if (!player.Track.CanSeek)
-            {
+            if (player?.Track?.Duration == null || !player.Track.CanSeek)
                 return Localizer.Locate("CannotSeek", textChannel);
-            }
 
             if (uint.TryParse(time, out uint second))
             {

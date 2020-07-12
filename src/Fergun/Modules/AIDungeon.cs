@@ -27,7 +27,7 @@ namespace Fergun.Modules
 
         public AIDungeon()
         {
-            API = new APIs.AIDungeon.AIDungeon(FergunConfig.AiDungeonToken);
+            API ??= new APIs.AIDungeon.AIDungeon(FergunConfig.AiDungeonToken);
         }
 
         [Command("info")]
@@ -43,7 +43,7 @@ namespace Fergun.Modules
                 //.AddField("Tips", "- " + string.Join("\n- ", GetValue("AIDTips").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)))
                 .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
         }
 
         [Command("new", RunMode = RunMode.Async)]
@@ -505,7 +505,7 @@ namespace Fergun.Modules
                 .WithDescription(Locate("RevertingLastAction"))
                 .WithColor(FergunConfig.EmbedColor);
 
-            var msg = await ReplyAsync(null, false, builder.Build());
+            var msg = await ReplyAsync(embed: builder.Build());
 
             // await Context.Channel.TriggerTypingAsync();
 
@@ -574,7 +574,7 @@ namespace Fergun.Modules
                 .WithDescription(Locate("RedoingLastAction"))
                 .WithColor(FergunConfig.EmbedColor);
 
-            var msg = await ReplyAsync(null, false, builder.Build());
+            var msg = await ReplyAsync(embed: builder.Build());
 
             // await Context.Channel.TriggerTypingAsync();
 
@@ -643,7 +643,7 @@ namespace Fergun.Modules
                 .WithDescription(Locate("EditingStoryContext"))
                 .WithColor(FergunConfig.EmbedColor);
 
-            var msg = await ReplyAsync(null, false, builder.Build());
+            var msg = await ReplyAsync(embed: builder.Build());
 
             // Show the translated text or the original in the embed?
             if (AutoTranslate())
@@ -816,7 +816,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("retry")]
+        [Command("retry", RunMode = RunMode.Async)]
         public async Task<RuntimeResult> Retry(uint adventureId)
         {
             string checkResult = await CheckIdAsync(adventureId);
@@ -942,10 +942,11 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle(string.Format(Locate("IDList"), user.ToString()))
                 .AddField("ID", string.Join("\n", adventures.Select(x => x.ID)), true)
-                .AddField(Locate("IsPublic"), string.Join("\n", adventures.Select(x => x.IsPublic)), true)
+                .AddField(Locate("IsPublic"), string.Join("\n", adventures.Select(x => Locate(x.IsPublic))), true)
                 .WithFooter(Locate("IDListFooter"))
                 .WithColor(FergunConfig.EmbedColor);
-            await ReplyAsync(null, false, builder.Build());
+
+            await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
 
@@ -978,13 +979,13 @@ namespace Fergun.Modules
             {
                 initialPrompt = "???";
             }
-            else if (historyList.Count == 1)
-            {
-                initialPrompt = historyList[0].Text;
-            }
             else
             {
-                initialPrompt = historyList[0].Text + historyList[1].Text;
+                initialPrompt = historyList[0].Text;
+                if (historyList.Count > 1)
+                {
+                    initialPrompt += historyList[1].Text;
+                }
             }
 
             var idOwner = Context.IsPrivate ? null : Context.Guild.GetUser(currentAdventure.OwnerID);
@@ -992,7 +993,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("IDInfo"))
                 .WithDescription(initialPrompt)
-                .AddField(Locate("IsPublic"), Locate(currentAdventure.IsPublic ? "Yes" : "No"), true)
+                .AddField(Locate("IsPublic"), Locate(currentAdventure.IsPublic), true)
                 .AddField(Locate("Owner"), idOwner?.ToString() ?? Locate("NotAvailable"), true)
                 .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:")
                 .WithTimestamp(historyList[0].CreatedAt)

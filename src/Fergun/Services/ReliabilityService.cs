@@ -17,28 +17,28 @@ namespace Fergun.Services
     // [Bash (Unix)] https://stackoverflow.com/a/697064
     public class ReliabilityService
     {
-        // --- Begin Configuration Section ---
-        // How long should we wait on the client to reconnect before resetting?
-        private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(30);
-
-        // Should we attempt to reset the client? Set this to false if your client is still locking up.
-        private static readonly bool _attemptReset = true;
-
         // Change log levels if desired:
-        private static readonly LogSeverity _debug = LogSeverity.Debug;
-        private static readonly LogSeverity _info = LogSeverity.Info;
-        private static readonly LogSeverity _critical = LogSeverity.Critical;
-        // --- End Configuration Section ---
+        private const LogSeverity _debug = LogSeverity.Debug;
+        private const LogSeverity _info = LogSeverity.Info;
+        private const LogSeverity _critical = LogSeverity.Critical;
 
         private readonly DiscordSocketClient _client;
         private readonly Func<LogMessage, Task> _logger;
         private CancellationTokenSource _cts;
 
-        public ReliabilityService(DiscordSocketClient client, Func<LogMessage, Task> logger = null)
+        // How long should we wait on the client to reconnect before resetting?
+        private readonly TimeSpan _timeout;
+
+        // Should we attempt to reset the client? Set this to false if your client is still locking up.
+        private readonly bool _attemptReset = true;
+
+        public ReliabilityService(DiscordSocketClient client, Func<LogMessage, Task> logger = null, TimeSpan? timeout = null, bool attemptReset = true)
         {
             _cts = new CancellationTokenSource();
             _client = client;
             _logger = logger ?? (_ => Task.CompletedTask);
+            _timeout = timeout ?? TimeSpan.FromSeconds(30);
+            _attemptReset = attemptReset;
 
             _client.Connected += ConnectedAsync;
             _client.Disconnected += DisconnectedAsync;

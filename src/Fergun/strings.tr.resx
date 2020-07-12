@@ -174,12 +174,6 @@
 	<data name="mojibakeParam1" xml:space="preserve">
     <value>Sonuç uzunluğu.</value>
   </data>
-	<data name="naziSummary" xml:space="preserve">
-    <value>Nazi sembolü yazdırır.</value>
-  </data>
-	<data name="naziParam1" xml:space="preserve">
-    <value>Kullanılacak metin.</value>
-  </data>
 	<data name="3orMoreChars" xml:space="preserve">
     <value>Metin 3 veya daha fazla karakter içermelidir.</value>
   </data>
@@ -230,12 +224,6 @@
   </data>
 	<data name="sarcasmParam1" xml:space="preserve">
     <value>Dönüştürülecek metin.</value>
-  </data>
-	<data name="swastikaSummary" xml:space="preserve">
-    <value>Gamalı haç sembolü yazdırır.</value>
-  </data>
-	<data name="swastikaParam1" xml:space="preserve">
-    <value>Kullanılacak metin.</value>
   </data>
 	<data name="vaporwaveSummary" xml:space="preserve">
     <value>Bir metni vaporwave'e dönüştürür.</value>
@@ -343,7 +331,7 @@
     <value>Durum kodu:</value>
   </data>
 	<data name="pingSummary" xml:space="preserve">
-    <value>İleti gönderme gecikmesini ve Discord Websocket / API'nin gecikmesini alır.</value>
+    <value>Bir mesaj ve Veritabanı gecikme gönderme gecikmeyi alır.</value>
   </data>
 	<data name="resizeSummary" xml:space="preserve">
     <value>Bir görüntüyü waifu2x ile yeniden boyutlandırır.</value>
@@ -400,7 +388,7 @@
     <value>Bir metni çevirir.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>ISO kodunda hedef dil (en, es, br, vb.)</value>
+    <value>ISO kodundaki (`en`, `es`, `br`, vb.) Hedef dil, hedef geçersizse İngilizce'ye döner.</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>Çevrilecek metin.</value>
@@ -415,7 +403,7 @@
     <value>Konuşma metni.</value>
   </data>
 	<data name="ttsParam1" xml:space="preserve">
-    <value>ISO kodundaki (en, es, br, vb.) Hedef dil, hedef geçersizse varsayılan olarak İngilizce'dir.</value>
+    <value>ISO kodundaki (`en`, `es`, `br`, vb.) Hedef dil, hedef geçersizse İngilizce'ye döner.</value>
   </data>
 	<data name="ttsParam2" xml:space="preserve">
     <value>Dönüştürülecek metin.</value>
@@ -524,10 +512,6 @@ Hata kodu:</value>
 	<data name="Hackbanned" xml:space="preserve">
     <value>{0} kullanıcısı hackbanned.</value>
   </data>
-	<data name="HackbanError" xml:space="preserve">
-    <value>Kullanıcı hackban bulunamadı.
-Hata kodu:</value>
-  </data>
 	<data name="kickSummary" xml:space="preserve">
     <value>Bir kullanıcıyı vurur.</value>
   </data>
@@ -558,9 +542,6 @@ Hata kodu:</value>
 	<data name="ytrandomSummary" xml:space="preserve">
     <value>"Rastgele" bir YouTube videosu döndürür.</value>
   </data>
-	<data name="BanHigherRole" xml:space="preserve">
-    <value>O kişiyi yasaklayamam ...</value>
-  </data>
 	<data name="AlreadyBanned" xml:space="preserve">
     <value>Kullanıcı zaten yasaklanmış.</value>
   </data>
@@ -574,7 +555,7 @@ Hata kodu:</value>
     <value>tarafından</value>
   </data>
 	<data name="Kicked" xml:space="preserve">
-    <value>{0} kullanıcısı tekmelendi</value>
+    <value>{0} kullanıcısı tekmelendi.</value>
   </data>
 	<data name="nickSummary" xml:space="preserve">
     <value>Kullanıcının takma adını değiştirir.</value>
@@ -592,7 +573,7 @@ Hata kodu:</value>
     <value>Seçilecek kategori. Kategori listesini görmek için "kategoriler" veya skor tablosunu görmek için "büyük şerit" / "sıralar" belirtin.</value>
   </data>
 	<data name="CategoryList" xml:space="preserve">
-    <value>Kategori Listesi$$</value>
+    <value>Kategori Listesi</value>
   </data>
 	<data name="TriviaLeaderboard" xml:space="preserve">
     <value>Diğer bilgiler afiş</value>
@@ -652,7 +633,7 @@ Hata kodu:</value>
     <value>Bir ses kanalına bağlanmanız gerekir.</value>
   </data>
 	<data name="NowConnected" xml:space="preserve">
-    <value>Şimdi bağlı</value>
+    <value>Şimdi bağlı {0}.</value>
   </data>
 	<data name="leaveSummary" xml:space="preserve">
     <value>Bir ses kanalı bırakır.</value>
@@ -661,7 +642,7 @@ Hata kodu:</value>
     <value>Botun ayrılmak için bulunduğu kanala katılın.</value>
   </data>
 	<data name="LeftVC" xml:space="preserve">
-    <value>Bot şimdi ayrıldı</value>
+    <value>Bot şimdi {0} bıraktı.</value>
   </data>
 	<data name="moveSummary" xml:space="preserve">
     <value>Botu geçerli kullanıcının bulunduğu ses kanalına taşır.</value>
@@ -745,7 +726,7 @@ Hata kodu:</value>
     <value>** {0} ** 'den ** {1} **' ye taşındı</value>
   </data>
 	<data name="PlayerNoMatches" xml:space="preserve">
-    <value>Hiçbir sonuç bulunamadı.</value>
+    <value>Hiçbir sonuç bulunamadı. Bir Youtube bağlantı veya bir mp3 dosyası bağlantısını kullanmayı deneyin.</value>
   </data>
 	<data name="PlayerPlaylistAdded" xml:space="preserve">
     <value>Oynatma listesi ** {0} ** ({1} parça) ({2}) kuyruğa eklendi.</value>
@@ -1167,9 +1148,6 @@ Hata kodu:</value>
 	<data name="InviteLink" xml:space="preserve">
     <value>Davet bağlantısı</value>
   </data>
-	<data name="Version" xml:space="preserve">
-    <value>1.2.9</value>
-  </data>
 	<data name="NoManageMessages" xml:space="preserve">
     <value>Bazı komutlar `` Mesajları Yönet '' izniyle daha iyi çalışır (`img`,` kentsel`, `config`)</value>
   </data>
@@ -1285,7 +1263,7 @@ AI Dungeon giriş ve çıkışını otomatik çevir
 "Oynat" için parça seçimi</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">
-    <value>Değerini değiştirmek için bir sayı girin ve bu istemi sonlandırmak için 'e' girin.</value>
+    <value>Bir seçeneği etkinleştirmek veya devre dışı bırakmak için tepkiler kullanın.</value>
   </data>
 	<data name="FergunConfig" xml:space="preserve">
     <value>Fergun yapılandırması</value>
@@ -1601,8 +1579,8 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
 	<data name="bashSummary" xml:space="preserve">
     <value>Bir bash komutu çalıştırır.</value>
   </data>
-	<data name="reportSummary" xml:space="preserve">
-    <value>Rapor bilgilerini gösterir.</value>
+	<data name="supportSummary" xml:space="preserve">
+    <value>destek bilgisi gösterir.</value>
   </data>
 	<data name="ErrorOnAPI" xml:space="preserve">
     <value>API çağrılırken bir hata oluştu.</value>
@@ -1639,18 +1617,6 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
   </data>
 	<data name="LanguageChain" xml:space="preserve">
     <value>Dil zinciri</value>
-  </data>
-	<data name="Versions" xml:space="preserve">
-    <value>0.8
-0.9
-1.0
-1.1
-1.1.5
-1.2
-1.2.3
-1.2.4
-1.2.7
-1.2.9</value>
   </data>
 	<data name="VersionNotFound" xml:space="preserve">
     <value>Sürüm bulunamadı. Sürümler: {0}</value>
@@ -1732,7 +1698,7 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
 - Küçük hata düzeltmeleri ve optimizasyonlar.</value>
   </data>
 	<data name="HelpFooter2" xml:space="preserve">
-    <value>&lt;&gt; = Zorunlu | [] = İsteğe bağlı | Komutu yazarken bu sembolleri yazmayın.</value>
+    <value>&lt;&gt; = gereklidir | [] = İsteğe bağlı | Komutu yazarken bu sembolleri yazmayın.</value>
   </data>
 	<data name="invertSummary" xml:space="preserve">
     <value>Görüntüyü tersine çevirir (reddeder).</value>

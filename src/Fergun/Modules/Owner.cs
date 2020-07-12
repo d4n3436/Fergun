@@ -57,7 +57,7 @@ namespace Fergun.Modules
             }
             else
             {
-                await FergunClient.Database.DeleteRecordAsync("Blacklist", user);
+                FergunClient.Database.DeleteRecord("Blacklist", user);
                 await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), id));
             }
         }
@@ -89,7 +89,7 @@ namespace Fergun.Modules
 
         [Command("botcolor")]
         [Summary("botcolorSummary")]
-        public async Task<RuntimeResult> Color([Remainder, Summary("botcolorParam1")] string color)
+        public async Task<RuntimeResult> Botcolor([Remainder, Summary("botcolorParam1")] string color)
         {
             if (!uint.TryParse(color, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint newcolor))
             {
@@ -223,7 +223,7 @@ namespace Fergun.Modules
                     .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
                     .WithColor(FergunConfig.EmbedColor);
 
-                await ReplyAsync(null, false, builder.Build());
+                await ReplyAsync(embed: builder.Build());
             }
         }
 

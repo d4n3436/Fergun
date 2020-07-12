@@ -174,12 +174,6 @@
 	<data name="mojibakeParam1" xml:space="preserve">
     <value>Длина результата.</value>
   </data>
-	<data name="naziSummary" xml:space="preserve">
-    <value>Печатает нацистский символ.</value>
-  </data>
-	<data name="naziParam1" xml:space="preserve">
-    <value>Текст для использования.</value>
-  </data>
 	<data name="3orMoreChars" xml:space="preserve">
     <value>Текст должен содержать 3 или более символов.</value>
   </data>
@@ -230,12 +224,6 @@
   </data>
 	<data name="sarcasmParam1" xml:space="preserve">
     <value>Текст для конвертации.</value>
-  </data>
-	<data name="swastikaSummary" xml:space="preserve">
-    <value>Печатает символ свастики.</value>
-  </data>
-	<data name="swastikaParam1" xml:space="preserve">
-    <value>Текст для использования.</value>
   </data>
 	<data name="vaporwaveSummary" xml:space="preserve">
     <value>Преобразует текст в steamwave.</value>
@@ -316,7 +304,7 @@
     <value>Выполняет OCR для изображения.</value>
   </data>
 	<data name="pingSummary" xml:space="preserve">
-    <value>Получает задержку при отправке сообщения и задержку Discord Websocket / API.</value>
+    <value>Получает задержку в отправке сообщения и латентность базы данных.</value>
   </data>
 	<data name="identifySummary" xml:space="preserve">
     <value>Определяет изображение с помощью Microsoft CaptionBot.</value>
@@ -400,7 +388,7 @@
     <value>Переводит текст.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>Целевой язык в коде ISO (en, es, br и т. Д.)</value>
+    <value>Целевой язык в коде ISO (`en`, `es`, `br` и т. Д.), Отступает на английский, если цель неверна.</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>Текст для перевода.</value>
@@ -415,7 +403,7 @@
     <value>Текст в речь.</value>
   </data>
 	<data name="ttsParam1" xml:space="preserve">
-    <value>Язык назначения в коде ISO (en, es, br и т. Д.) По умолчанию используется английский, если цель недействительна.</value>
+    <value>Целевой язык в коде ISO (`en`, `es`, `br` и т. Д.), Отступает на английский, если цель неверна.</value>
   </data>
 	<data name="ttsParam2" xml:space="preserve">
     <value>Текст для конвертации.</value>
@@ -489,9 +477,6 @@
   </data>
 	<data name="BanMyself" xml:space="preserve">
     <value>Я не буду банить себя лол</value>
-  </data>
-	<data name="BanHigherRole" xml:space="preserve">
-    <value>Я не могу забанить этого человека ..</value>
   </data>
 	<data name="AlreadyBanned" xml:space="preserve">
     <value>Пользователь уже забанен.</value>
@@ -572,15 +557,11 @@
 	<data name="Hackbanned" xml:space="preserve">
     <value>Пользователь {0} был взломан.</value>
   </data>
-	<data name="HackbanError" xml:space="preserve">
-    <value>Не удалось взломать пользователя.
-Код ошибки:</value>
-  </data>
 	<data name="kickParam2" xml:space="preserve">
     <value>Причина удара.</value>
   </data>
 	<data name="Kicked" xml:space="preserve">
-    <value>Пользователь {0} был выгнан</value>
+    <value>Пользователь {0} был выгнан.</value>
   </data>
 	<data name="nickParam1" xml:space="preserve">
     <value>Пользователь меняет свой ник.</value>
@@ -655,7 +636,7 @@
     <value>Вам необходимо подключиться к голосовому каналу.</value>
   </data>
 	<data name="NowConnected" xml:space="preserve">
-    <value>Теперь подключен к</value>
+    <value>Теперь подключен к {0}.</value>
   </data>
 	<data name="leaveSummary" xml:space="preserve">
     <value>Оставляет голосовой канал.</value>
@@ -664,7 +645,7 @@
     <value>Присоединяйтесь к каналу, в котором находится бот, чтобы он ушел.</value>
   </data>
 	<data name="LeftVC" xml:space="preserve">
-    <value>Бот уже ушел</value>
+    <value>Bot теперь осталось {0}.</value>
   </data>
 	<data name="moveSummary" xml:space="preserve">
     <value>Перемещает бота на голосовой канал, которым является текущий пользователь.</value>
@@ -748,7 +729,7 @@
     <value>Перемещено с ** {0} ** на ** {1} **</value>
   </data>
 	<data name="PlayerNoMatches" xml:space="preserve">
-    <value>Ничего не найдено.</value>
+    <value>Совпадений не найдено. Попробуйте использовать ссылку Youtube или ссылку mp3 файл.</value>
   </data>
 	<data name="PlayerPlaylistAdded" xml:space="preserve">
     <value>Плейлист ** {0} ** ({1} дорожек) ({2}) добавлен в очередь.</value>
@@ -1170,9 +1151,6 @@
 	<data name="InviteLink" xml:space="preserve">
     <value>Пригласить ссылку</value>
   </data>
-	<data name="Version" xml:space="preserve">
-    <value>1.2.9</value>
-  </data>
 	<data name="NoManageMessages" xml:space="preserve">
     <value>Некоторые команды работают лучше с разрешением «Управление сообщениями» («img», «urban», «config»)</value>
   </data>
@@ -1322,7 +1300,7 @@
 Выбор трека для `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">
-    <value>Введите число, чтобы изменить его значение, и «e», чтобы завершить эту подсказку.</value>
+    <value>Используйте реакции, чтобы включить или выключить опцию.</value>
   </data>
 	<data name="FergunConfig" xml:space="preserve">
     <value>Конфигурация Fergun</value>
@@ -1604,8 +1582,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="bashSummary" xml:space="preserve">
     <value>Запускает команду bash.</value>
   </data>
-	<data name="reportSummary" xml:space="preserve">
-    <value>Показывает информацию отчета.</value>
+	<data name="supportSummary" xml:space="preserve">
+    <value>Показывает информацию поддержки.</value>
   </data>
 	<data name="Topic" xml:space="preserve">
     <value>Тема</value>
@@ -1645,18 +1623,6 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
   </data>
 	<data name="LanguageChain" xml:space="preserve">
     <value>Языковая цепочка</value>
-  </data>
-	<data name="Versions" xml:space="preserve">
-    <value>0.8
-0.9
-1.0
-1.1
-1.1.5
-1.2
-1.2.3
-1.2.4
-1.2.7
-1.2.9</value>
   </data>
 	<data name="VersionNotFound" xml:space="preserve">
     <value>Версия не найдена. Версии: {0}</value>
@@ -1765,7 +1731,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Небольшие исправления ошибок и оптимизации.</value>
   </data>
 	<data name="HelpFooter2" xml:space="preserve">
-    <value>&lt;&gt; = Обязательное | [] = Опция | Не вводите эти символы при написании команды.</value>
+    <value>&lt;&gt; = необходимые | [] = По желанию | Не вводите эти символы при написании команды.</value>
   </data>
 	<data name="invertSummary" xml:space="preserve">
     <value>Инвертирует (отрицает) изображение.</value>

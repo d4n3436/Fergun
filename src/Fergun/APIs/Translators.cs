@@ -73,11 +73,11 @@ namespace Fergun.APIs
                     break;
             }
 
-            if (SupportedBingLanguages.IndexOf(toLanguage) == -1)
+            if (SupportedLanguages.IndexOf(toLanguage) == -1)
             {
                 throw new ArgumentException("Invalid target language.", nameof(toLanguage));
             }
-            if (fromLanguage != "auto-detect" && SupportedBingLanguages.IndexOf(fromLanguage) == -1)
+            if (fromLanguage != "auto-detect" && SupportedLanguages.IndexOf(fromLanguage) == -1)
             {
                 throw new ArgumentException("Invalid source language.", nameof(fromLanguage));
             }
@@ -165,7 +165,7 @@ namespace Fergun.APIs
             return new string(input.Reverse().ToArray());
         }
 
-        public static IList<string> SupportedBingLanguages => _bingLanguageCodes;
+        public static IList<string> SupportedLanguages => _bingLanguageCodes;
 
         private static readonly string[] _bingLanguageCodes =
         {
@@ -174,26 +174,23 @@ namespace Fergun.APIs
             "bn",
             "bs",
             "bg",
-            "yue",
             "ca",
-            "zh-Hans",
-            "zh-Hant",
+            "zh-CN",
+            "zh-TW",
             "hr",
             "cs",
             "da",
             "nl",
             "en",
             "et",
-            "fj",
-            "fil",
             "fi",
             "fr",
             "de",
+            "el",
             "gu",
             "ht",
             "he",
             "hi",
-            "mww",
             "hu",
             "is",
             "id",
@@ -202,45 +199,34 @@ namespace Fergun.APIs
             "ja",
             "kn",
             "kk",
-            "sw",
-            "tlh-Latn",
-            "tlh-Piqd",
             "ko",
             "lv",
             "lt",
             "mg",
-            "ms",
             "ml",
             "mt",
             "mi",
             "mr",
-            "nb",
             "fa",
             "pl",
-            "pt-br",
-            "pt-pt",
+            "pt",
             "pa",
-            "otq",
             "ro",
             "ru",
             "sm",
-            "sr-Cyrl",
-            "sr-Latn",
             "sk",
             "sl",
             "es",
+            "sw",
             "sv",
-            "ty",
             "ta",
             "te",
             "th",
-            "to",
             "tr",
             "uk",
             "ur",
             "vi",
-            "cy",
-            "yua"
+            "cy"
         };
     }
 }

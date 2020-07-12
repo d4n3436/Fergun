@@ -174,12 +174,6 @@
 	<data name="mojibakeParam1" xml:space="preserve">
     <value>El tamaño del resultado.</value>
   </data>
-	<data name="naziSummary" xml:space="preserve">
-    <value>Imprime un símbolo nazi.</value>
-  </data>
-	<data name="naziParam1" xml:space="preserve">
-    <value>El texto a usar.</value>
-  </data>
 	<data name="3orMoreChars" xml:space="preserve">
     <value>El texto debe tener 3 o mas carácteres.</value>
   </data>
@@ -230,12 +224,6 @@
   </data>
 	<data name="sarcasmParam1" xml:space="preserve">
     <value>El texto a convertir.</value>
-  </data>
-	<data name="swastikaSummary" xml:space="preserve">
-    <value>Imprime un símbolo de esvástica.</value>
-  </data>
-	<data name="swastikaParam1" xml:space="preserve">
-    <value>El texto a usar.</value>
   </data>
 	<data name="vaporwaveSummary" xml:space="preserve">
     <value>Convierte un texto a vaporwave.</value>
@@ -344,7 +332,7 @@
     <value>Código de estado:</value>
   </data>
 	<data name="pingSummary" xml:space="preserve">
-    <value>Obtiene la latencia al enviar un mensaje y la latencia de la API / Websocket de Discord.</value>
+    <value>Obtiene la latencia al enviar un mensaje y la latencia de la base de datos.</value>
   </data>
 	<data name="resizeSummary" xml:space="preserve">
     <value>Redimensiona una imagen con waifu2x.</value>
@@ -401,10 +389,10 @@
     <value>Traduce un texto.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>El idioma de destino en el código ISO (en, es, br, etc.)</value>
+    <value>El idioma de destino en el código ISO (en, es, br, etc.), Inglés por defecto en caso de idioma inválido.</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
-    <value>El texto a trducir.</value>
+    <value>El texto a traducir.</value>
   </data>
 	<data name="InvalidLanguage" xml:space="preserve">
     <value>Idioma de destino inválido. Los códigos de idioma válidos son:</value>
@@ -470,7 +458,7 @@
     <value>Búsqueda en Wikipedia</value>
   </data>
 	<data name="xkcdSummary" xml:space="preserve">
-    <value>Retorna un comic de xkcd aleatorio o uno en específico si un número es pasado.</value>
+    <value>Retorna un comic de xkcd aleatorio o uno en específico, si un número es pasado.</value>
   </data>
 	<data name="xkcdParam1" xml:space="preserve">
     <value>El número de cómic.</value>
@@ -492,7 +480,7 @@
   </data>
 	<data name="EmptyCache" xml:space="preserve">
     <value>Sin videos en el caché
-Creando el caché...</value>
+Creando caché...</value>
   </data>
 	<data name="banSummary" xml:space="preserve">
     <value>Banea un usuario.</value>
@@ -508,9 +496,6 @@ Creando el caché...</value>
   </data>
 	<data name="BanMyself" xml:space="preserve">
     <value>No me banearé lol</value>
-  </data>
-	<data name="BanHigherRole" xml:space="preserve">
-    <value>No puedo banear a esa persona..</value>
   </data>
 	<data name="AlreadyBanned" xml:space="preserve">
     <value>El usuario ya está baneado.</value>
@@ -551,10 +536,6 @@ Código de error:</value>
   </data>
 	<data name="Hackbanned" xml:space="preserve">
     <value>El usuario {0} fue hackbaneado.</value>
-  </data>
-	<data name="HackbanError" xml:space="preserve">
-    <value>No se pudo hackbanear al usuario.
-Código de error:</value>
   </data>
 	<data name="kickSummary" xml:space="preserve">
     <value>Expulsa un usuario.</value>
@@ -650,7 +631,7 @@ Código de error:</value>
     <value>Debes conectarte a un canal de voz.</value>
   </data>
 	<data name="NowConnected" xml:space="preserve">
-    <value>Conectado a</value>
+    <value>Conectado a {0}.</value>
   </data>
 	<data name="leaveSummary" xml:space="preserve">
     <value>Deja un canal de voz.</value>
@@ -659,7 +640,7 @@ Código de error:</value>
     <value>Ingresa al canal donde está el bot para hacerlo salir.</value>
   </data>
 	<data name="LeftVC" xml:space="preserve">
-    <value>El bot ha salido de</value>
+    <value>El bot ha salido de {0}.</value>
   </data>
 	<data name="moveSummary" xml:space="preserve">
     <value>Mueve el bot donde está el usuario actual.</value>
@@ -743,7 +724,7 @@ Código de error:</value>
     <value>Movido de **{0}** a **{1}**</value>
   </data>
 	<data name="PlayerNoMatches" xml:space="preserve">
-    <value>No se encontraron resultados.</value>
+    <value>No se encontraron resultados. Prueba usando un link de YouTube o un link de un archivo mp3.</value>
   </data>
 	<data name="PlayerPlaylistAdded" xml:space="preserve">
     <value>Playlist **{0}** ({1} pistas) ({2}) ha sido agregado a la cola.</value>
@@ -1167,9 +1148,6 @@ Código de error:</value>
 	<data name="InviteLink" xml:space="preserve">
     <value>Link de invitación</value>
   </data>
-	<data name="Version" xml:space="preserve">
-    <value>1.2.9</value>
-  </data>
 	<data name="NoManageMessages" xml:space="preserve">
     <value>Algunos comandos funcionan mejor con el permiso `Gestionar mensajes` (`img`, `urban`, `config`)</value>
   </data>
@@ -1318,7 +1296,7 @@ Auto traducir resultados de entrada y salida de AI Dungeon
 Selección de pista para `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">
-    <value>Ingresa un número para cambiar su valor y 'e' para cerrar la configuración.</value>
+    <value>Usa las reacciones para habilitar o deshabilitar una opción.</value>
   </data>
 	<data name="FergunConfig" xml:space="preserve">
     <value>Configuración de Fergun</value>
@@ -1601,8 +1579,8 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
 	<data name="bashSummary" xml:space="preserve">
     <value>Ejecuta un comando de bash.</value>
   </data>
-	<data name="reportSummary" xml:space="preserve">
-    <value>Muestra la información de reporte.</value>
+	<data name="supportSummary" xml:space="preserve">
+    <value>Muestra la información de soporte.</value>
   </data>
 	<data name="ErrorOnAPI" xml:space="preserve">
     <value>Ocurrió un error mientras se llamaba a la API.</value>
@@ -1645,18 +1623,6 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
   </data>
 	<data name="LanguageChain" xml:space="preserve">
     <value>Cadena de idiomas</value>
-  </data>
-	<data name="Versions" xml:space="preserve">
-    <value>0.8
-0.9
-1.0
-1.1
-1.1.5
-1.2
-1.2.3
-1.2.4
-1.2.7
-1.2.9</value>
   </data>
 	<data name="VersionNotFound" xml:space="preserve">
     <value>Versión no encontrada. Las versiones son: {0}</value>
@@ -1765,7 +1731,7 @@ El nuevo parser también permite pasar el nombre una canción específica en vez
 - Arreglos de errores pequeños y optimizaciones.</value>
   </data>
 	<data name="HelpFooter2" xml:space="preserve">
-    <value>&lt;&gt; = Obligatorio | [] = Opcional | No escribas estos símbolos con el comando.</value>
+    <value>&lt;&gt; = Requerido | [] = Opcional | No escribas estos símbolos con el comando.</value>
   </data>
 	<data name="invertSummary" xml:space="preserve">
     <value>Invierte (convierte a negativo) una imagen.</value>

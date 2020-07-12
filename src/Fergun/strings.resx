@@ -174,12 +174,6 @@
 	<data name="mojibakeParam1" xml:space="preserve">
     <value>The result length.</value>
   </data>
-	<data name="naziSummary" xml:space="preserve">
-    <value>Prints a nazi symbol.</value>
-  </data>
-	<data name="naziParam1" xml:space="preserve">
-    <value>The text to use.</value>
-  </data>
 	<data name="3orMoreChars" xml:space="preserve">
     <value>The text must have 3 or more characters.</value>
   </data>
@@ -230,12 +224,6 @@
   </data>
 	<data name="sarcasmParam1" xml:space="preserve">
     <value>The text to convert.</value>
-  </data>
-	<data name="swastikaSummary" xml:space="preserve">
-    <value>Prints a swastika symbol.</value>
-  </data>
-	<data name="swastikaParam1" xml:space="preserve">
-    <value>The text to use.</value>
   </data>
 	<data name="vaporwaveSummary" xml:space="preserve">
     <value>Converts a text to vaporwave.</value>
@@ -344,7 +332,7 @@
     <value>Status code:</value>
   </data>
 	<data name="pingSummary" xml:space="preserve">
-    <value>Gets the latency in sending a message and the latency of the Discord Websocket / API.</value>
+    <value>Gets the latency in sending a message and the latency of the Database.</value>
   </data>
 	<data name="resizeSummary" xml:space="preserve">
     <value>Resizes an image with waifu2x.</value>
@@ -392,7 +380,7 @@
     <value>Created at</value>
   </data>
 	<data name="snipeSummary" xml:space="preserve">
-    <value>Shows the last deleted message in the current channel.</value>
+    <value>Shows the last deleted message in the current channel or the specified.</value>
   </data>
 	<data name="NothingToSnipe" xml:space="preserve">
     <value>Nothing to snipe in {0}</value>
@@ -401,7 +389,7 @@
     <value>Translates a text.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>The target language in ISO code (en, es, br, etc.)</value>
+    <value>The target language in ISO code (`en`, `es`, `br`, etc.)</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>The text to translate.</value>
@@ -416,7 +404,7 @@
     <value>Text to speech.</value>
   </data>
 	<data name="ttsParam1" xml:space="preserve">
-    <value>The target language in ISO code (en, es, br, etc.), defaults to English if the target is invalid.</value>
+    <value>The target language in ISO code (`en`, `es`, `br`, etc.), fallbacks to English if the target is invalid.</value>
   </data>
 	<data name="ttsParam2" xml:space="preserve">
     <value>The text to convert.</value>
@@ -470,7 +458,7 @@
     <value>Wikipedia Search</value>
   </data>
 	<data name="xkcdSummary" xml:space="preserve">
-    <value>Returns a random xkcd comic or a specific comic if a number is passed.</value>
+    <value>Returns a random xkcd comic or a specific comic, if a number is passed.</value>
   </data>
 	<data name="xkcdParam1" xml:space="preserve">
     <value>The comic number.</value>
@@ -508,9 +496,6 @@ Creating cache...</value>
   </data>
 	<data name="BanMyself" xml:space="preserve">
     <value>I won't ban myself lol</value>
-  </data>
-	<data name="BanHigherRole" xml:space="preserve">
-    <value>I can't ban that person..</value>
   </data>
 	<data name="AlreadyBanned" xml:space="preserve">
     <value>The user is already banned.</value>
@@ -552,10 +537,6 @@ Error code:</value>
 	<data name="Hackbanned" xml:space="preserve">
     <value>User {0} was hackbanned.</value>
   </data>
-	<data name="HackbanError" xml:space="preserve">
-    <value>Could not hackban the user.
-Error code:</value>
-  </data>
 	<data name="kickSummary" xml:space="preserve">
     <value>Kicks an user.</value>
   </data>
@@ -566,7 +547,7 @@ Error code:</value>
     <value>The reason of the kick.</value>
   </data>
 	<data name="Kicked" xml:space="preserve">
-    <value>User {0} was kicked</value>
+    <value>User {0} was kicked.</value>
   </data>
 	<data name="nickSummary" xml:space="preserve">
     <value>Changes the nickname of an user.</value>
@@ -653,7 +634,7 @@ Error code:</value>
     <value>You need to connect to a voice channel.</value>
   </data>
 	<data name="NowConnected" xml:space="preserve">
-    <value>Now connected to</value>
+    <value>Now connected to {0}.</value>
   </data>
 	<data name="leaveSummary" xml:space="preserve">
     <value>Leaves a voice channel.</value>
@@ -662,7 +643,7 @@ Error code:</value>
     <value>Join the channel the bot is in to make it leave.</value>
   </data>
 	<data name="LeftVC" xml:space="preserve">
-    <value>Bot has now left</value>
+    <value>Bot has now left {0}.</value>
   </data>
 	<data name="moveSummary" xml:space="preserve">
     <value>Moves the bot to the voice channel the current user is.</value>
@@ -746,7 +727,7 @@ Error code:</value>
     <value>Moved from **{0}** to **{1}**</value>
   </data>
 	<data name="PlayerNoMatches" xml:space="preserve">
-    <value>No matches found.</value>
+    <value>No matches found. Try using a Youtube link or a mp3 file link.</value>
   </data>
 	<data name="PlayerPlaylistAdded" xml:space="preserve">
     <value>Playlist **{0}** ({1} tracks) ({2}) has been added to the queue.</value>
@@ -1167,9 +1148,6 @@ Error code:</value>
 	<data name="InviteLink" xml:space="preserve">
     <value>Invite link</value>
   </data>
-	<data name="Version" xml:space="preserve">
-    <value>1.2.9</value>
-  </data>
 	<data name="NoManageMessages" xml:space="preserve">
     <value>Some commands work better with the `Manage Messages` permission (`img`, `urban`, `config`)</value>
   </data>
@@ -1319,7 +1297,7 @@ Auto translate AI Dungeon input &amp; output
 Track selection for `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">
-    <value>Enter a number to change its value and 'e' to end this prompt.</value>
+    <value>Use the reactions to enable or disable an option.</value>
   </data>
 	<data name="FergunConfig" xml:space="preserve">
     <value>Fergun configuration</value>
@@ -1601,8 +1579,8 @@ You can use the `new` command to create a new adventure.</value>
 	<data name="bashSummary" xml:space="preserve">
     <value>Runs a bash command.</value>
   </data>
-	<data name="reportSummary" xml:space="preserve">
-    <value>Shows the report info.</value>
+	<data name="supportSummary" xml:space="preserve">
+    <value>Shows the support info.</value>
   </data>
 	<data name="ErrorOnAPI" xml:space="preserve">
     <value>An error occurred while calling the API.</value>
@@ -1645,18 +1623,6 @@ You can use the `new` command to create a new adventure.</value>
   </data>
 	<data name="LanguageChain" xml:space="preserve">
     <value>Language chain</value>
-  </data>
-	<data name="Versions" xml:space="preserve">
-    <value>0.8
-0.9
-1.0
-1.1
-1.1.5
-1.2
-1.2.3
-1.2.4
-1.2.7
-1.2.9</value>
   </data>
 	<data name="VersionNotFound" xml:space="preserve">
     <value>Version not found. The versions are: {0}</value>
@@ -1766,7 +1732,7 @@ This prevents duplicating the localization methods for each module, and the resp
 - Small bug fixes and optimizations.</value>
   </data>
 	<data name="HelpFooter2" xml:space="preserve">
-    <value>&lt;&gt; = Obligatory | [] = Optional | Do not type these symbols when writing the command.</value>
+    <value>&lt;&gt; = Required | [] = Optional | Do not type these symbols when writing the command.</value>
   </data>
 	<data name="invertSummary" xml:space="preserve">
     <value>Inverts (negates) an image.</value>

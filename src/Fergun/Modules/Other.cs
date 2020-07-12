@@ -56,10 +56,11 @@ namespace Fergun.Modules
         [ThreadStatic]
         private static Random _rngInstance;
 
-        private readonly CommandService _cmdService;
+        private static CommandService _cmdService;
+
         public Other(CommandService commands)
         {
-            _cmdService = commands;
+            _cmdService ??= commands;
         }
 
         private static Random RngInstance => _rngInstance ??= new Random();
@@ -69,18 +70,16 @@ namespace Fergun.Modules
         [Alias("update")]
         public async Task<RuntimeResult> Changelog([Summary("changelogParam1")] string version = null)
         {
-            string[] versions = Locate("Versions").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-            version ??= Locate("Version");
-            if (versions.FirstOrDefault(x => x == version) == null)
+            version ??= FergunClient.Version;
+            if (version != FergunClient.Version && FergunClient.PreviousVersions.FirstOrDefault(x => x == version) == null)
             {
-                return FergunResult.FromError(string.Format(Locate("VersionNotFound"), string.Join(", ", versions)));
+                return FergunResult.FromError(string.Format(Locate("VersionNotFound"), string.Join(", ", FergunClient.PreviousVersions.Append(FergunClient.Version))));
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Changelog")
                 .AddField($"v{version}", Locate($"Changelog{version}"))
-                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", versions.Where(x => x != version))))
+                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", FergunClient.PreviousVersions.Where(x => x != version).Append(FergunClient.Version))))
                 .WithColor(FergunConfig.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
@@ -279,7 +278,11 @@ namespace Fergun.Modules
                 IEmote emote;
                 if (reaction.Length > 2)
                 {
-                    emote = Emote.Parse(reaction);
+                    if (!Emote.TryParse(reaction, out Emote tempEmote))
+                    {
+                        return FergunResult.FromError(Locate("InvalidReaction"));
+                    }
+                    emote = tempEmote;
                 }
                 else
                 {
@@ -323,6 +326,7 @@ namespace Fergun.Modules
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
             var cpuUsage = (int)await GetCpuUsageForProcessAsync();
             string cpu;
+            string totalRam;
             string totalRamUsage;
             string processRamUsage;
             if (FergunClient.IsLinux)
@@ -332,6 +336,7 @@ namespace Fergun.Modules
                 string output = "free -m".Bash();
                 var lines = output.Split("\n");
                 var memory = lines[1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                totalRam = memory[1];
                 totalRamUsage = memory[2];
 
                 int ProcessId = Process.GetCurrentProcess().Id;
@@ -339,6 +344,7 @@ namespace Fergun.Modules
             }
             else
             {
+                totalRam = "?";
                 cpu = "Intel Core i5-7400 CPU @ 3.00GHz";
                 totalRamUsage = "?";
                 processRamUsage = (Process.GetCurrentProcess().NonpagedSystemMemorySize64 / 1024).ToString();
@@ -351,7 +357,7 @@ namespace Fergun.Modules
             {
                 totalUsers += guild.MemberCount;
             }
-            string version = "v" + Locate("Version");
+            string version = $"v{FergunClient.Version}";
             if (FergunClient.IsDebugMode)
             {
                 version += "-dev";
@@ -367,7 +373,7 @@ namespace Fergun.Modules
 
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
-                .AddField(Locate("RAMUsage"), $"{processRamUsage}MB / {totalRamUsage}MB / 985MB", true) // TODO: Find way to get the total RAM on windows / linux
+                .AddField(Locate("RAMUsage"), $"{processRamUsage}MB / {totalRamUsage}MB / {totalRam}MB", true) // TODO: Find a way to get the total RAM on windows
 
                 .AddField(Locate("Library"), $"Discord.Net\nv{DiscordConfig.Version}", true)
                 .AddField("\u200b", "\u200b", true)
@@ -396,7 +402,7 @@ namespace Fergun.Modules
         }
 
         [Command("support")]
-        [Summary("reportSummary")]
+        [Summary("supportSummary")]
         [Alias("bugs", "contact", "report")]
         public async Task Support()
         {
