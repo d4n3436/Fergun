@@ -566,12 +566,16 @@ namespace Fergun.Modules
 
                 foreach (var item in search.Results)
                 {
-                    pages.Add(new PaginatedMessage.Page()
+                    string imageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(item.Image));
+                    if (Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
                     {
-                        Title = item.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                        ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(item.Image)),
-                        Url = item.Url
-                    });
+                        pages.Add(new PaginatedMessage.Page()
+                        {
+                            Title = item.Title.Truncate(EmbedBuilder.MaxTitleLength),
+                            ImageUrl = imageUrl,
+                            Url = item.Url
+                        });
+                    }
                 }
                 ImgCache.Add(new CachedPages(query, pages, isNsfwChannel));
             }

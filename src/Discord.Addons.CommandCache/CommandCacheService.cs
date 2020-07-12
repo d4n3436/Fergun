@@ -268,6 +268,17 @@ namespace Discord.Addons.CommandCache
 
         private async Task OnMessageModified(Cacheable<IMessage, ulong> cacheable, SocketMessage after, ISocketMessageChannel channel)
         {
+            // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
+            if (after?.Content == null || after.Author.IsBot)
+            {
+                return;
+            }
+            var before = await cacheable.GetOrDownloadAsync();
+            if (before?.Content == null || before.Content == after.Content)
+            {
+                return;
+            }
+
             if (TryGetValue(cacheable.Id, out ConcurrentBag<ulong> messages))
             {
                 await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found {messages.Count} response(s) associated to message {cacheable.Id} in cache."));

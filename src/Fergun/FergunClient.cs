@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -256,13 +257,28 @@ namespace Fergun
             {
                 ProcessStartInfo process = new ProcessStartInfo
                 {
-                    FileName = @"C:\Program Files\Java\jdk-13.0.2\bin\java.exe",//"java",
+
+                    FileName = "java",
                     Arguments = $"-jar \"{Path.Combine(AppContext.BaseDirectory, "Lavalink")}/Lavalink.jar\"",
                     WorkingDirectory = Path.Combine(AppContext.BaseDirectory, "Lavalink"),
                     UseShellExecute = true,
                     CreateNoWindow = false,
                     WindowStyle = ProcessWindowStyle.Minimized
                 };
+                if (!IsLinux)
+                {
+                    // Try to get the java exe path
+                    var enviromentPath = Environment.GetEnvironmentVariable("PATH");
+                    var paths = enviromentPath.Split(Path.PathSeparator);
+                    var exePath = paths.Select(x => Path.Combine(x, "java.exe"))
+                        .Where(x => File.Exists(x))
+                        .FirstOrDefault();
+
+                    if (exePath != null)
+                    {
+                        process.FileName = exePath;
+                    }
+                }
                 Process.Start(process);
                 await Task.Delay(2000);
             }

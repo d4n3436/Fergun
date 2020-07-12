@@ -79,7 +79,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Changelog")
                 .AddField($"v{version}", Locate($"Changelog{version}"))
-                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", FergunClient.PreviousVersions.Where(x => x != version).Append(FergunClient.Version))))
+                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", FergunClient.PreviousVersions.Append(FergunClient.Version).Where(x => x != version))))
                 .WithColor(FergunConfig.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
