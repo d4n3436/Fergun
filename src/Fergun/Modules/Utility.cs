@@ -121,17 +121,27 @@ namespace Fergun.Modules
                 }
                 builder.AddField(Locate("Input"), text);
             }
-            
+
             List<string> languageChain = new List<string>();
             int chainCount = 7;
             string originalLang = null;
-            string targetLang;
             SimpleTranslationResult result;
+
             for (int i = 0; i < chainCount; i++)
             {
-                // TODO: Skip repeated languages
-                // Translate to the original language in the last iteration, otherwise get a random language
-                targetLang = i == chainCount - 1 ? originalLang : Translators.SupportedLanguages[RngInstance.Next(0, Translators.SupportedLanguages.Count)];
+                string targetLang;
+                if (i == chainCount - 1)
+                {
+                    targetLang = originalLang;
+                }
+                else
+                {
+                    // Get unique and random languages.
+                    do
+                    {
+                        targetLang = Translators.SupportedLanguages[RngInstance.Next(Translators.SupportedLanguages.Count)];
+                    } while (languageChain.Contains(targetLang));
+                }
 
                 result = await TranslateSimpleAsync(text, targetLang, "");
                 if (result.Error != null)
@@ -140,8 +150,13 @@ namespace Fergun.Modules
                 }
                 if (i == 0)
                 {
-                    // The detected language fallbacks to English if not found.
                     originalLang = result.Source.ISO639;
+
+                    // Fallback to English if the detected language is not supported by Bing.
+                    if (Translators.SupportedLanguages.IndexOf(originalLang) == -1)
+                    {
+                        originalLang = "en";
+                    }
                     languageChain.Add(originalLang);
                 }
                 text = result.Text;
@@ -151,7 +166,7 @@ namespace Fergun.Modules
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength)
             {
                 var response = await Hastebin.UploadAsync(text);
-                text = Format.Code(Locate("HastebinLink"), response.GetLink());
+                text = Format.Url(Locate("HastebinLink"), response.GetLink());
             }
 
             builder.AddField(Locate("LanguageChain"), string.Join(" -> ", languageChain))
