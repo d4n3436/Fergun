@@ -191,7 +191,7 @@ namespace Fergun.APIs.AIDungeon
         public AdventureListInputRequest Input { get; set; } = new AdventureListInputRequest();
     }
 
-    public partial class AdventureListInputRequest
+    public class AdventureListInputRequest
     {
         [JsonProperty("contentType")]
         public string ContentType { get; set; } = "adventure";
@@ -265,23 +265,21 @@ namespace Fergun.APIs.AIDungeon
                 Type = action.ToString().ToLowerInvariant()
             };
 
-            if (!string.IsNullOrEmpty(text))
+            if (!string.IsNullOrEmpty(text) &&
+                action != ActionType.Continue &&
+                action != ActionType.Undo &&
+                action != ActionType.Redo &&
+                action != ActionType.Retry)
             {
-                if (action != ActionType.Continue && action != ActionType.Undo && action != ActionType.Redo && action != ActionType.Retry)
-                {
-                    inputData.Text = text;
-                }
+                inputData.Text = text;
             }
 
-            if (actionId != 0)
+            if (actionId != 0 && action == ActionType.Alter)
             {
-                if (action == ActionType.Alter)
-                {
-                    inputData.ActionId = actionId.ToString();
+                inputData.ActionId = actionId.ToString();
 
-                    // Alter command is special :)
-                    Query = "mutation ($input: ContentActionInput) {\n  doAlterAction(input: $input) {\n    id\n    historyList\n    __typename\n  }\n}\n";
-                }
+                // Alter command is special :)
+                Query = "mutation ($input: ContentActionInput) {\n  doAlterAction(input: $input) {\n    id\n    historyList\n    __typename\n  }\n}\n";
             }
             Variables = new ActionVariables
             {
@@ -299,13 +297,13 @@ namespace Fergun.APIs.AIDungeon
         public string Query { get; set; } = "mutation ($input: ContentActionInput) {\n  doContentAction(input: $input)\n}\n";
     }
 
-    public partial class ActionVariables
+    public class ActionVariables
     {
         [JsonProperty("input")]
         public InputData Input { get; set; }
     }
 
-    public partial class InputData
+    public class InputData
     {
         [JsonProperty("actionId", NullValueHandling = NullValueHandling.Ignore)]
         public string ActionId { get; set; }
@@ -319,6 +317,77 @@ namespace Fergun.APIs.AIDungeon
 
         [JsonProperty("id")]
         public string Id { get; set; }
+    }
+
+    public class WebSocketActionRequest
+    {
+        public WebSocketActionRequest(uint adventureId, ActionType action, string text = "", uint actionId = 0)
+        {
+            var inputData = new InputData
+            {
+                Id = $"adventure:{adventureId}",
+                Type = action.ToString().ToLowerInvariant()
+            };
+
+            if (!string.IsNullOrEmpty(text) &&
+                action != ActionType.Continue &&
+                action != ActionType.Undo &&
+                action != ActionType.Redo &&
+                action != ActionType.Retry)
+            {
+                inputData.Text = text;
+            }
+
+            if (actionId != 0 && action == ActionType.Alter)
+            {
+                inputData.ActionId = actionId.ToString();
+            }
+
+            Payload = new WebSocketActionPayload
+            {
+                Variables = new ActionVariables
+                {
+                    Input = inputData
+                }
+            };
+        }
+
+        [JsonProperty("id")]
+        public string Id { get; set; } = "2";
+
+        [JsonProperty("type")]
+        public string Type { get; set; } = "start";
+
+        [JsonProperty("payload")]
+        public WebSocketActionPayload Payload { get; set; }
+    }
+
+    public class WebSocketActionPayload
+    {
+        [JsonProperty("variables")]
+        public ActionVariables Variables { get; set; }
+
+        [JsonProperty("extensions")]
+        public ActionExtensions Extensions { get; set; } = new ActionExtensions();
+
+        [JsonProperty("operationName")]
+        public string OperationName { get; set; } = null;
+
+        [JsonProperty("query")]
+        public string Query { get; set; } = "mutation ($input: ContentActionInput) {  sendAction(input: $input) {    id    actionLoading    memory    died    gameState    __typename  }}";
+
+        [JsonProperty("auth")]
+        public ActionAuth Auth { get; set; } = new ActionAuth();
+    }
+
+    public class ActionAuth
+    {
+        [JsonProperty("token")]
+        public string Token { get; set; } = "hello";
+    }
+
+    public class ActionExtensions
+    {
     }
 
     public class DeleteRequest

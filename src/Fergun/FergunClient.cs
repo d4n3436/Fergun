@@ -48,7 +48,7 @@ namespace Fergun
 
         public static IReadOnlyList<string> WordList => _wordlist;
 
-        public const string Version = "1.2.9";
+        public const string Version = "1.3";
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>()
         { 
@@ -60,7 +60,8 @@ namespace Fergun
             "1.2",
             "1.2.3",
             "1.2.4",
-            "1.2.7"
+            "1.2.7",
+            "1.2.9"
         };
 
         public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
@@ -115,13 +116,23 @@ namespace Fergun
                 ExclusiveBulkDelete = true,
                 GatewayIntents = 
                 GatewayIntents.Guilds |
+
+                // Moderation commands
                 GatewayIntents.GuildBans |
+
+                // General + Moderation commands
                 GatewayIntents.GuildMessages |
+
+                // Commands that uses paginators
                 GatewayIntents.GuildMessageReactions |
+
+                // Music commands
                 GatewayIntents.GuildVoiceStates |
 
+                // DM support
                 GatewayIntents.DirectMessages |
                 GatewayIntents.DirectMessageReactions
+
                 //GatewayIntents.GuildPresences
                 //GatewayIntents.GuildEmojis
                 //GatewayIntents.GuildMembers
@@ -190,7 +201,7 @@ namespace Fergun
                     Console.Write("Enter DB User: ");
                     string user = Console.ReadLine();
                     Console.Write("Enter DB Password: ");
-                    string password = Console.ReadLine();
+                    string password = ReadPassword();
                     Console.Write("Enter DB host (leave empty for local): ");
                     string host = Console.ReadLine();
                     Database = new FergunDB("FergunDB", user, password, host);
@@ -270,13 +281,11 @@ namespace Fergun
                     // Try to get the java exe path
                     var enviromentPath = Environment.GetEnvironmentVariable("PATH");
                     var paths = enviromentPath.Split(Path.PathSeparator);
-                    var exePath = paths.Select(x => Path.Combine(x, "java.exe"))
-                        .Where(x => File.Exists(x))
-                        .FirstOrDefault();
+                    var exePath = paths.FirstOrDefault(x => File.Exists(Path.Combine(x, "java.exe")));
 
                     if (exePath != null)
                     {
-                        process.FileName = exePath;
+                        process.FileName = Path.Combine(exePath, "java.exe");
                     }
                 }
                 Process.Start(process);
@@ -395,6 +404,20 @@ namespace Fergun
                 .AddSingleton(new CommandCacheService(_client, CommandCacheService.UNLIMITED,
                 message => _ = _cmdHandlingService.HandleCommandAsync(message), log => _ = _logService.LogAsync(log), 14400000, 4))
                 .BuildServiceProvider();
+        }
+
+        private static string ReadPassword()
+        {
+            string password = string.Empty;
+            while (true)
+            {
+                var keyInfo = Console.ReadKey(true);
+                if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    return password;
+                }
+                password += keyInfo.KeyChar;
+            }
         }
 
         private async Task ClientReady()

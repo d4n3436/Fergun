@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Fergun.Attributes.Preconditions;
 using Discord;
 using Discord.Commands;
+using Fergun.Attributes.Preconditions;
+using Fergun.Extensions;
 
 namespace Fergun.Modules
 {
@@ -30,8 +31,8 @@ namespace Fergun.Modules
                 return FergunResult.FromSuccess();
             }
 
-            var BanList = await Context.Guild.GetBansAsync();
-            if (BanList.Any(x => x.User.Id == user.Id))
+            var banList = await Context.Guild.GetBansAsync();
+            if (banList.Any(x => x.User.Id == user.Id))
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
@@ -105,8 +106,8 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Hackban([Summary("hackbanParam1")] ulong userId,
             [Remainder, Summary("hackbanParam2")] string reason = null)
         {
-            var BanList = await Context.Guild.GetBansAsync();
-            if (BanList.Any(x => x.User.Id == userId))
+            var banList = await Context.Guild.GetBansAsync();
+            if (banList.Any(x => x.User.Id == userId))
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
@@ -114,6 +115,14 @@ namespace Fergun.Modules
             if (user == null)
             {
                 return FergunResult.FromError(Locate("InvalidID"));
+            }
+            var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, userId);
+            if (guildUser != null)
+            {
+                if (Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
+                {
+                    return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
+                }
             }
 
             await Context.Guild.AddBanAsync(userId, 0, reason);
@@ -125,13 +134,12 @@ namespace Fergun.Modules
         [RequireBotPermission(GuildPermission.KickMembers, ErrorMessage = "BotRequireKickMembers")]
         [Command("kick")]
         [Summary("kickSummary")]
-        public async Task<RuntimeResult> Kick(
+        public async Task Kick(
             [Summary("kickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IGuildUser user,
             [Remainder, Summary("kickParam2")] string reason = null)
         {
             await user.KickAsync(reason);
             await SendEmbedAsync(string.Format(Locate("Kicked"), user.Mention));
-            return FergunResult.FromSuccess();
         }
 
         [RequireUserPermission(GuildPermission.ManageNicknames, ErrorMessage = "UserRequireManageNicknames")]
@@ -193,6 +201,14 @@ namespace Fergun.Modules
             if (banList.Any(x => x.User.Id == user.Id))
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
+            }
+            var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id);
+            if (guildUser != null)
+            {
+                if (Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
+                {
+                    return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
+                }
             }
             if (days > 7)
             {

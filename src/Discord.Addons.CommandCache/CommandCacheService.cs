@@ -12,12 +12,12 @@ namespace Discord.Addons.CommandCache
     /// <summary>
     /// A thread-safe class used to automatically modify or delete response messages when the command message is modified or deleted.
     /// </summary>
-    public class CommandCacheService : ICommandCache<ulong, ConcurrentBag<ulong>>, IDisposable
+    public class CommandCacheService : ICommandCache<ulong, ulong>, IDisposable
     {
         public const int UNLIMITED = -1; // POWEEEEEEERRRRRRRR
 
-        private readonly ConcurrentDictionary<ulong, ConcurrentBag<ulong>> _cache
-            = new ConcurrentDictionary<ulong, ConcurrentBag<ulong>>();
+        private readonly ConcurrentDictionary<ulong, ulong> _cache
+            = new ConcurrentDictionary<ulong, ulong>();
         private readonly int _max;
         private Timer _autoClear;
         private readonly Func<LogMessage, Task> _logger;
@@ -74,7 +74,7 @@ namespace Discord.Addons.CommandCache
         /// <summary>
         /// Gets all the values in the cache. Will claim all locks until the operation is complete.
         /// </summary>
-        public IEnumerable<ConcurrentBag<ulong>> Values => _cache.Values;
+        public IEnumerable<ulong> Values => _cache.Values;
 
         /// <summary>
         /// Gets the number of command/response sets in the cache.
@@ -85,15 +85,10 @@ namespace Discord.Addons.CommandCache
         /// Adds a key and multiple values to the cache, or extends the existing values if the key already exists.
         /// </summary>
         /// <param name="key">The id of the command message.</param>
-        /// <param name="values">The ids of the response messages.</param>
+        /// <param name="value">The ids of the response messages.</param>
         /// <exception cref="ArgumentNullException">Thrown if values is null.</exception>
-        public void Add(ulong key, ConcurrentBag<ulong> values)
+        public void Add(ulong key, ulong value)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values), "The supplied collection can not be null.");
-            }
-
             if (_max != UNLIMITED && _count >= _max)
             {
                 int removeCount = _count - _max + 1;
@@ -114,45 +109,18 @@ namespace Discord.Addons.CommandCache
             }
 
             // TryAdd will return false if the key already exists, in which case we don't want to increment the count.
-            if (_cache.TryAdd(key, values))
+            if (!_cache.ContainsKey(value))
             {
                 Interlocked.Increment(ref _count);
             }
-            else
-            {
-                _cache[key].AddMany(values);
-            }
+            _cache[key] = value;
         }
 
         /// <summary>
         /// Adds a new set to the cache, or extends the existing values if the key already exists.
         /// </summary>
         /// <param name="pair">The key, and its values.</param>
-        public void Add(KeyValuePair<ulong, ConcurrentBag<ulong>> pair) => Add(pair.Key, pair.Value);
-
-        /// <summary>
-        /// Adds a new key and value to the cache, or extends the values of an existing key.
-        /// </summary>
-        /// <param name="key">The id of the command message.</param>
-        /// <param name="value">The id of the response message.</param>
-        public void Add(ulong key, ulong value)
-        {            
-            if (!TryGetValue(key, out ConcurrentBag<ulong> bag))
-            {
-                Add(key, new ConcurrentBag<ulong>() { value });
-            }
-            else
-            {
-                bag.Add(value);
-            }
-        }
-
-        /// <summary>
-        /// Adds a key and multiple values to the cache, or extends the existing values if the key already exists.
-        /// </summary>
-        /// <param name="key">The id of the command message.</param>
-        /// <param name="values">The ids of the response messages.</param>
-        public void Add(ulong key, params ulong[] values) => Add(key, new ConcurrentBag<ulong>(values));
+        public void Add(KeyValuePair<ulong, ulong> pair) => Add(pair.Key, pair.Value);
 
         /// <summary>
         /// Adds a command message and response to the cache using the message objects.
@@ -177,7 +145,7 @@ namespace Discord.Addons.CommandCache
         /// <returns>Whether or not the key was found.</returns>
         public bool ContainsKey(ulong key) => _cache.ContainsKey(key);
 
-        public IEnumerator<KeyValuePair<ulong, ConcurrentBag<ulong>>> GetEnumerator() => _cache.GetEnumerator();
+        public IEnumerator<KeyValuePair<ulong, ulong>> GetEnumerator() => _cache.GetEnumerator();
 
         /// <summary>
         /// Removes a set from the cache by key.
@@ -186,7 +154,7 @@ namespace Discord.Addons.CommandCache
         /// <returns>Whether or not the removal operation was successful.</returns>
         public bool Remove(ulong key)
         {
-            var success = _cache.TryRemove(key, out ConcurrentBag<ulong> _);
+            var success = _cache.TryRemove(key, out _);
             if (success) Interlocked.Decrement(ref _count);
             return success;
         }
@@ -197,7 +165,7 @@ namespace Discord.Addons.CommandCache
         /// <param name="key">The key to search for.</param>
         /// <param name="value">The values of the set (0 if the key is not found).</param>
         /// <returns>Whether or not key was found in the cache.</returns>
-        public bool TryGetValue(ulong key, out ConcurrentBag<ulong> value) => _cache.TryGetValue(key, out value);
+        public bool TryGetValue(ulong key, out ulong value) => _cache.TryGetValue(key, out value);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -248,19 +216,16 @@ namespace Discord.Addons.CommandCache
 
         private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)
         {
-            if (TryGetValue(cacheable.Id, out ConcurrentBag<ulong> messages))
+            if (TryGetValue(cacheable.Id, out ulong messageId))
             {
-                foreach (var messageId in messages)
+                var message = await channel.GetMessageAsync(messageId);
+                if (message != null)
                 {
-                    var message = await channel.GetMessageAsync(messageId);
-                    if (message != null)
-                    {
-                        await message.DeleteAsync();
-                    }
-                    else
-                    {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"{cacheable.Id} deleted but {messageId} does not exist."));
-                    }
+                    await message.DeleteAsync();
+                }
+                else
+                {
+                    await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"{cacheable.Id} deleted but {messageId} does not exist."));
                 }
                 Remove(cacheable.Id);
             }
@@ -273,10 +238,8 @@ namespace Discord.Addons.CommandCache
             var before = await cacheable.GetOrDownloadAsync();
             if (before?.Content == null || before.Content == after.Content) return;
 
-            if (TryGetValue(cacheable.Id, out ConcurrentBag<ulong> messages))
+            if (TryGetValue(cacheable.Id, out ulong responseId))
             {
-                await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found {messages.Count} response(s) associated to message {cacheable.Id} in cache."));
-                messages.TryPeek(out ulong responseId);
                 var response = await channel.GetMessageAsync(responseId);
                 if (response == null)
                 {
@@ -291,15 +254,19 @@ namespace Discord.Addons.CommandCache
                         _ = response.DeleteAsync();
                         Remove(cacheable.Id);
                     }
-                    else if (response.Reactions.Count > 0)
+                    else
                     {
-                        bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
+                        await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to message {cacheable.Id} in cache."));
+                        if (response.Reactions.Count > 0)
+                        {
+                            bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
 
-                        // RemoveReactionsAsync() is slow...
-                        if (manageMessages)
-                            await response.RemoveAllReactionsAsync();
-                        else
-                            await (response as IUserMessage).RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                            // RemoveReactionsAsync() is slow...
+                            if (manageMessages)
+                                await response.RemoveAllReactionsAsync();
+                            else
+                                await (response as IUserMessage).RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                        }
                     }
                 }
             }

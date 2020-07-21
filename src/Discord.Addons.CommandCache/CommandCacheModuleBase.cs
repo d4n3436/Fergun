@@ -37,7 +37,7 @@ namespace Discord.Addons.CommandCache
     /// An extension of <see cref="ModuleBase{T}"/> that facilitates use of <see cref="CommandCacheService"/>.
     /// </summary>
     /// <typeparam name="TCommandContext">The <see cref="ICommandContext"/> implementation to use.</typeparam>
-    public abstract class CommandCacheModuleBase<TCommandContext> : CommandCacheModuleBase<CommandCacheService, ulong, ConcurrentBag<ulong>, TCommandContext>
+    public abstract class CommandCacheModuleBase<TCommandContext> : CommandCacheModuleBase<CommandCacheService, ulong, ulong, TCommandContext>
         where TCommandContext : class, ICommandContext
     {
         /// <summary>
@@ -51,12 +51,10 @@ namespace Discord.Addons.CommandCache
         /// <returns>A task that represents the send or edit operation. The task contains the sent or edited message.</returns>
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null)
         {
-            IUserMessage response = null;
-            if (Cache.TryGetValue(Context.Message.Id, out ConcurrentBag<ulong> messages))
+            IUserMessage response;
+            bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
+            if (found && (response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId)) != null)
             {
-                messages.TryPeek(out ulong messageId);
-                response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId).ConfigureAwait(false);
-
                 await response.ModifyAsync(x =>
                 {
                     x.Content = message;

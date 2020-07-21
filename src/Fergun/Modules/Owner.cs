@@ -20,6 +20,10 @@ namespace Fergun.Modules
     [RequireOwner(ErrorMessage = "BotOwnerOnly")]
     public class Owner : FergunBase
     {
+        private static IEnumerable<Assembly> _scriptAssemblies;
+        private static IEnumerable<string> _scriptNamespaces;
+        private static ScriptOptions _scriptOptions;
+
         [LongRunning]
         [Command("bash", RunMode = RunMode.Async)]
         [Summary("bashSummary")]
@@ -124,13 +128,11 @@ namespace Fergun.Modules
                 sw.Start();
             }
 
-            IEnumerable<Assembly> assemblies = AppDomain.CurrentDomain.GetAssemblies()
+            _scriptAssemblies ??= AppDomain.CurrentDomain.GetAssemblies()
                 .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location));
 
-            IEnumerable<string> namespaces = Assembly.GetEntryAssembly()?.GetTypes()
-                .Where(x => !string.IsNullOrWhiteSpace(x.Namespace)).Select(x => x.Namespace).Distinct();
-
-            namespaces = namespaces
+            _scriptNamespaces ??= Assembly.GetEntryAssembly()?.GetTypes()?
+                .Where(x => !string.IsNullOrWhiteSpace(x.Namespace))?.Select(x => x.Namespace)?.Distinct()
                 .Append("System")
                 .Append("System.IO")
                 .Append("System.Math")
@@ -138,16 +140,13 @@ namespace Fergun.Modules
                 .Append("System.Linq")
                 .Append("System.Collections.Generic")
                 .Append("Discord")
-                .Append("Discord.WebSocket")
-                .Append("Fergun.Extensions");
+                .Append("Discord.WebSocket");
 
-            var options = ScriptOptions.Default
-                .WithReferences(assemblies.Select(x => MetadataReference.CreateFromFile(x.Location)))
-                .AddImports(namespaces);
-            //options.AddReferences(references);
+            _scriptOptions ??= ScriptOptions.Default
+                .AddReferences(_scriptAssemblies)
+                .AddImports(_scriptNamespaces);
 
-            var script = CSharpScript.Create(code, options, typeof(EvaluationEnvironment));
-            script.Compile();
+            var script = CSharpScript.Create(code, _scriptOptions, typeof(EvaluationEnvironment));
             object returnValue;
             string returnType = null;
             try
@@ -239,6 +238,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
             }
+            currentGuild ??= new Guild(Context.Guild.Id, newPrefix);
             if (currentGuild == null)
             {
                 currentGuild = new Guild(Context.Guild.Id, newPrefix);
@@ -255,7 +255,7 @@ namespace Fergun.Modules
                 }
             }
             FergunClient.Database.UpdateRecord("Guilds", currentGuild);
-            await SendEmbedAsync($"{Locate("NewPrefix")} \"{newPrefix}\"");
+            await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
         }
 
@@ -263,14 +263,13 @@ namespace Fergun.Modules
         [Summary("globalprefixSummary")]
         public async Task<RuntimeResult> Globalprefix([Summary("globalprefixParam1")] string newPrefix)
         {
-            string globalprefix = FergunConfig.GlobalPrefix;
-            if (newPrefix == globalprefix)
+            if (newPrefix == FergunConfig.GlobalPrefix)
             {
                 return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
             }
 
             FergunConfig.GlobalPrefix = newPrefix;
-            await SendEmbedAsync($"{Locate("NewGlobalPrefix")} \"{newPrefix}\"");
+            await SendEmbedAsync(string.Format(Locate("NewGlobalPrefix"), newPrefix));
 
             return FergunResult.FromSuccess();
         }
@@ -313,7 +312,6 @@ namespace Fergun.Modules
     public sealed class EvaluationEnvironment
     {
         public SocketCommandContext Context { get; }
-
         public SocketUserMessage Message => Context.Message;
         public ISocketMessageChannel Channel => Context.Channel;
         public SocketGuild Guild => Context.Guild;

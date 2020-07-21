@@ -47,6 +47,7 @@ namespace Fergun
             // See Dependency Injection guide for more information.
 
             _cmdService.AddTypeReader(typeof(IUser), new Readers.UserTypeReader<IUser>());
+            _cmdService.AddTypeReader(typeof(IGuildUser), new Readers.UserTypeReader<IGuildUser>());
 
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
@@ -190,7 +191,7 @@ namespace Fergun
                     break;
 
                 case CommandError.Unsuccessful:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}", _services);
+                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength), _services);
                     break;
 
                 case CommandError.Exception when result is ExecuteResult execResult:
@@ -265,12 +266,11 @@ namespace Fergun
 
         private static async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, IServiceProvider services, string text = null)
         {
-            IUserMessage response = null;
-            if (services.GetRequiredService<CommandCacheService>().TryGetValue(userMessage.Id, out ConcurrentBag<ulong> messages))
-            {
-                messages.TryPeek(out ulong messageId);
-                response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId);
+            IUserMessage response;
+            bool found = services.GetRequiredService<CommandCacheService>().TryGetValue(userMessage.Id, out ulong messageId);
 
+            if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId)) != null)
+            {
                 //if (response.Reactions.Count > 0)
                 //{
                 //    bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
@@ -281,13 +281,11 @@ namespace Fergun
                 //    else
                 //        await response.RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
                 //}
-
                 await response.ModifyAsync(x =>
                 {
                     x.Content = text;
                     x.Embed = embed;
                 });
-
                 response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId);
             }
             else

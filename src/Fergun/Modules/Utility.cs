@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -27,6 +28,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using org.mariuszgromada.math.mxparser;
 using YoutubeExplode;
+
 //using Tesseract;
 
 namespace Fergun.Modules
@@ -37,21 +39,21 @@ namespace Fergun.Modules
         [ThreadStatic]
         private static Random _rngInstance;
 
+        // A regex i copied and pasted from somewhere (yep)
+        private static readonly Regex _linkParser = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex _bracketReplacer = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _deepAiClient = new HttpClient();
         private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
-        private static readonly object _videoCacheLock = new object();
         private static bool _isCreatingCache = false;
         private static XkcdResponse _lastComic = null;
         private static DateTime _timeToCheckComic;
         private static CommandService _cmdService;
 
         //public static TesseractEngine TessEngine { get; } = new TesseractEngine("./tessdata", "eng", EngineMode.LstmOnly);
-        public static List<CachedPages> ImgCache { get; } = new List<CachedPages>();
-        private static List<CachedTts> TtsCache { get; } = new List<CachedTts>();
-        private static List<CachedPages> UrbanCache { get; } = new List<CachedPages>();
-        private static List<string> VideoCache { get; } = new List<string>();
+        public static ConcurrentBag<CachedPages> ImgCache { get; } = new ConcurrentBag<CachedPages>();
+        public static ConcurrentBag<CachedPages> UrbanCache { get; } = new ConcurrentBag<CachedPages>();
+        private static ConcurrentBag<string> VideoCache { get; } = new ConcurrentBag<string>();
         public static Emote OnlineEmote { get; set; } = Emote.Parse("<:online:726601254016647241>");
         public static Emote IdleEmote { get; set; } = Emote.Parse("<:idle:726601265563566111>");
         public static Emote DndEmote { get; set; } = Emote.Parse("<:dnd:726601274434519090>");
@@ -73,8 +75,11 @@ namespace Fergun.Modules
         {
             user ??= Context.User;
 
-            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
-            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
+            // Prevent getting error 404 while downloading the avatar getting the user from REST.
+            var restUser = await Context.Client.Rest.GetUserAsync(user.Id);
+
+            string avatarUrl = restUser.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? restUser.GetDefaultAvatarUrl();
+            string thumbnail = restUser.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? restUser.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
@@ -92,7 +97,7 @@ namespace Fergun.Modules
                 Color = new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B)
             };
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
         }
 
         [LongRunning]
@@ -174,7 +179,7 @@ namespace Fergun.Modules
                 .WithThumbnailUrl("https://fergun.is-inside.me/gXEDLZVr.png")
                 .WithColor(FergunConfig.EmbedColor);
 
-            await ReplyAsync(null, false, builder.Build());
+            await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -184,14 +189,12 @@ namespace Fergun.Modules
         [Alias("b64decode", "b64d")]
         public async Task<RuntimeResult> Base64decode([Remainder, Summary("base64decodeParam1")] string text)
         {
-            try
-            {
-                await ReplyAsync(Encoding.UTF8.GetString(Convert.FromBase64String(text)), allowedMentions: AllowedMentions.None);
-            }
-            catch (FormatException)
+            if (!text.IsBase64())
             {
                 return FergunResult.FromError(Locate("base64decodeInvalid"));
             }
+
+            await ReplyAsync(Encoding.UTF8.GetString(Convert.FromBase64String(text)), allowedMentions: AllowedMentions.None);
             return FergunResult.FromSuccess();
         }
 
@@ -204,13 +207,14 @@ namespace Fergun.Modules
             if (encoded.Length > DiscordConfig.MaxMessageSize)
             {
                 var response = await Hastebin.UploadAsync(encoded);
-                await ReplyAsync($"{Hastebin.ApiEndpoint}/{response.Key}");
+                await ReplyAsync(response.GetLink());
             }
             else
             {
                 await ReplyAsync(encoded);
             }
         }
+
         [Command("calc", RunMode = RunMode.Async)]
         [Summary("calcSummary")]
         [Alias("calculate")]
@@ -220,21 +224,16 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("InvalidExpression"));
             }
-            string result;
+
             Stopwatch sw = Stopwatch.StartNew();
-            try
-            {
-                Expression ex = new Expression(expression);
-                result = ex.calculate().ToString();
-            }
-            catch (Exception e)
-            {
-                return FergunResult.FromError(e.Message);
-            }
-            finally
-            {
-                sw.Stop();
-            }
+            Expression ex = new Expression(expression);
+            //if (!ex.checkSyntax())
+            //{
+            //    return FergunResult.FromError(ex.getErrorMessage());
+            //}
+            string result = ex.calculate().ToString();
+            sw.Stop();
+
             if (result.Length > EmbedFieldBuilder.MaxFieldValueLength)
             {
                 result = result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 3) + "...";
@@ -509,7 +508,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
         {
             string errorReason;
-            (url, errorReason) = await GetLastUrl(50, true, url);
+            (url, errorReason) = await GetLastUrlAsync(50, true, url);
             if (url == null)
             {
                 return FergunResult.FromError(Locate(errorReason));
@@ -558,7 +557,7 @@ namespace Fergun.Modules
 
             var pages = new List<PaginatedMessage.Page>();
 
-            var cached = ImgCache.Find(x => x.Query == query && x.IsNsfw == isNsfwChannel);
+            var cached = ImgCache.FirstOrDefault(x => x.Query == query && x.IsNsfw == isNsfwChannel);
             if (cached == null)
             {
                 DdgResponse search;
@@ -568,9 +567,9 @@ namespace Fergun.Modules
                 }
                 catch (HttpRequestException)
                 {
-                    return FergunResult.FromError(Locate("AnErrorOcurred"));
+                    return FergunResult.FromError(Locate("AnErrorOccurred"));
                 }
-                catch (Exception e)
+                catch (TokenNotFoundException e)
                 {
                     return FergunResult.FromError(e.Message);
                 }
@@ -630,13 +629,13 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Invert([Remainder, Summary("invertParam1")] string url = null)
         {
             string errorReason;
-            (url, errorReason) = await GetLastUrl(50, true, url);
+            (url, errorReason) = await GetLastUrlAsync(50, true, url);
             if (url == null)
             {
                 return FergunResult.FromError(Locate(errorReason));
             }
 
-            using (Stream response = await _httpClient.GetStreamAsync(url))
+            using (Stream response = await _httpClient.GetStreamAsync(new Uri(url)))
             using (Bitmap img = new Bitmap(response))
             using (Bitmap inverted = img.InvertColor())
             using (Stream invertedFile = new MemoryStream())
@@ -665,7 +664,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
             string errorReason;
-            (url, errorReason) = await GetLastUrl(50, true, url);
+            (url, errorReason) = await GetLastUrlAsync(50, true, url);
             if (url == null)
             {
                 return FergunResult.FromError(Locate(errorReason));
@@ -782,7 +781,7 @@ namespace Fergun.Modules
             }
 
             string errorReason;
-            (url, errorReason) = await GetLastUrl(50, true, url);
+            (url, errorReason) = await GetLastUrlAsync(50, true, url);
             if (url == null)
             {
                 return FergunResult.FromError(Locate(errorReason));
@@ -851,7 +850,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Resize([Summary("resizeParam1")] string url = null)
         {
             string errorReason;
-            (url, errorReason) = await GetLastUrl(50, true, url);
+            (url, errorReason) = await GetLastUrlAsync(50, true, url);
             if (url == null)
             {
                 return FergunResult.FromError(Locate(errorReason));
@@ -877,7 +876,7 @@ namespace Fergun.Modules
             string resultUrl = token.Value<string>("output_url");
             if (string.IsNullOrWhiteSpace(resultUrl))
             {
-                return FergunResult.FromError(Locate("AnErrorOcurred"));
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
             var builder = new EmbedBuilder()
@@ -1164,25 +1163,19 @@ namespace Fergun.Modules
                 text = $"{target} {text}";
                 target = "en";
             }
-            byte[] bytes = null;
-            var cached = TtsCache.Find(x => x.Language == target && x.Text == text);
-            if (cached == null)
+
+            Stream stream;
+            try
             {
-                try
-                {
-                    bytes = await GoogleTTS.GetTtsAsync(text, target);
-                }
-                catch (HttpRequestException)
-                {
-                    return FergunResult.FromError(Locate("AnErrorOcurred"));
-                }
-                cached = new CachedTts(target, text, bytes);
-                TtsCache.Add(cached);
+                stream = await GoogleTTS.GetTtsStreamAsync(text, target);
             }
-            using (var stream = new MemoryStream(cached.Tts))
+            catch (HttpRequestException)
             {
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
+
+            await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
+
             return FergunResult.FromSuccess();
         }
 
@@ -1206,7 +1199,7 @@ namespace Fergun.Modules
             }
             else
             {
-                cached = UrbanCache.Find(x => x.Query == query);
+                cached = UrbanCache.FirstOrDefault(x => x.Query == query);
                 if (cached == null)
                 {
                     search = urban.SearchWord(query);
@@ -1308,10 +1301,13 @@ namespace Fergun.Modules
         {
             user ??= Context.User;
 
-            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            // Prevent getting error 404 while downloading the avatar getting the user from REST.
+            var restUser = await Context.Client.Rest.GetUserAsync(user.Id);
+
+            string avatarUrl = restUser.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? restUser.GetDefaultAvatarUrl();
+            string thumbnail = restUser.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? restUser.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
-            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
             {
                 using (Bitmap img = new Bitmap(response))
@@ -1335,13 +1331,13 @@ namespace Fergun.Modules
             }
             var guildUser = user as IGuildUser;
 
-            List<string> clients = new List<string>();
+            string clients = "?";
             if (user.ActiveClients.Count > 0)
             {
-                clients = user.ActiveClients.Select(x =>
+                clients = string.Join(" ", user.ActiveClients.Select(x =>
                 x == ClientType.Desktop ? "🖥" :
                 x == ClientType.Mobile ? "📱" :
-                x == ClientType.Web ? "🌐" : "").ToList();
+                x == ClientType.Web ? "🌐" : ""));
             }
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("UserInfo"))
@@ -1349,7 +1345,7 @@ namespace Fergun.Modules
                 .AddField("Nickname", guildUser?.Nickname ?? Locate("None"), false)
                 .AddField("ID", user.Id, false)
                 .AddField(Locate("Activity"), activity, true)
-                .AddField(Locate("ActiveClients"), user.ActiveClients.Count == 0 ? "?" : string.Join(" ", clients), true)
+                .AddField(Locate("ActiveClients"), clients, true)
                 .AddField(Locate("IsBot"), Locate(user.IsBot), false)
                 .AddField(Locate("CreatedAt"), user.CreatedAt)
                 .AddField(Locate("GuildJoinDate"), guildUser?.JoinedAt?.ToString() ?? "N/A")
@@ -1516,19 +1512,22 @@ namespace Fergun.Modules
                 await Context.Channel.TriggerTypingAsync();
                 Console.WriteLine($"Creating video cache in {(Context.IsPrivate ? $"{Context.Channel}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User}");
 
-                List<Task> tasks = CreateVideoTasks();
-                
-                await Task.WhenAll(tasks);
-                _isCreatingCache = false;
+                var tasks = CreateVideoTasks();
+                try
+                {
+                    await Task.WhenAll(tasks);
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    _isCreatingCache = false;
+                }
             }
-            string url;
-            lock (_videoCacheLock)
-            {
-                int randomInt = RngInstance.Next(VideoCache.Count);
-                url = $"https://www.youtube.com/watch?v={VideoCache[randomInt]}";
-                VideoCache.RemoveAt(randomInt);
-            }
-            await ReplyAsync(url);
+            VideoCache.TryTake(out string id);
+            await ReplyAsync($"https://www.youtube.com/watch?v={id}");
             return FergunResult.FromSuccess();
         }
 
@@ -1537,23 +1536,20 @@ namespace Fergun.Modules
         private static List<Task> CreateVideoTasks()
         {
             List<Task> tasks = new List<Task>();
-            while (tasks.Count < FergunConfig.VideoCacheSize)
+            for (int i = 0; i < FergunConfig.VideoCacheSize; i++)
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    while (true)
+                    for (int i = 0; i < 10; i++)
                     {
                         string randStr = RandomString(RngInstance.Next(5, 7));
                         //var items = await YTClient.SearchVideosAsync(rand, 1);
                         var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
                         if (items.Count != 0)
                         {
-                            lock (_videoCacheLock)
-                            {
-                                string randomId = items[RngInstance.Next(items.Count)].Id;
-                                VideoCache.Add(randomId);
-                                Console.WriteLine($"Added 1 item to Video cache (random string: {randStr}, search count: {items.Count}, selected id: {randomId}), total count: {VideoCache.Count}");
-                            }
+                            string randomId = items[RngInstance.Next(items.Count)].Id;
+                            VideoCache.Add(randomId);
+                            Console.WriteLine($"Added 1 item to Video cache (random string: {randStr}, search count: {items.Count}, selected id: {randomId}), total count: {VideoCache.Count}");
                             break;
                         }
                         else
@@ -1665,6 +1661,10 @@ namespace Fergun.Modules
                 useBing = true;
             }
             catch (HttpRequestException)
+            {
+                useBing = true;
+            }
+            catch (NullReferenceException)
             {
                 useBing = true;
             }
@@ -1781,7 +1781,7 @@ namespace Fergun.Modules
         /// <param name="onlyImage">Get only urls of images.</param>
         /// <param name="maxSize">The maximum file size in bytes, 8 MB by default.</param>
         /// <returns>The url on success, or null and the error reason.</returns>
-        private async Task<(string, string)> GetLastUrl(int messagesToSearch, bool onlyImage, string url = null, long maxSize = 8000000)
+        private async Task<(string, string)> GetLastUrlAsync(int messagesToSearch, bool onlyImage, string url = null, long maxSize = 8000000)
         {
             long? size = null;
             //If the message that executed the command contains any suitable attachment or url
@@ -1808,9 +1808,6 @@ namespace Fergun.Modules
                 return (url, null);
             }
 
-            // A regex i copied and pasted from somewhere (yep)
-            Regex linkParser = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
             //Get the last x messages of the current channel
             var messages = await Context.Channel.GetMessagesAsync(messagesToSearch).FlattenAsync();
 
@@ -1818,7 +1815,7 @@ namespace Fergun.Modules
             var filtered = messages.FirstOrDefault(x =>
             x.Attachments.Any(y => !onlyImage || y.Width != null && y.Height != null)
             || x.Embeds.Any(y => !onlyImage || y.Image != null || y.Thumbnail != null)
-            || linkParser.IsMatch(x.Content));
+            || _linkParser.IsMatch(x.Content));
 
             //If there's no results, return nothing
             if (filtered == null)
@@ -1874,7 +1871,7 @@ namespace Fergun.Modules
             }
             else
             {
-                string match = linkParser.Match(filtered.Content).Value;
+                string match = _linkParser.Match(filtered.Content).Value;
                 if (onlyImage && !await IsImageUrlAsync(match))
                 {
                     return (null, "ImageNotFound");
@@ -1921,19 +1918,5 @@ namespace Fergun.Modules
         public Language Source { get; set; }
         public Language Target { get; set; }
         public string Text { get; set; }
-    }
-
-    public class CachedTts
-    {
-        public CachedTts(string language, string text, byte[] tts)
-        {
-            Language = language;
-            Text = text;
-            Tts = tts;
-        }
-
-        public string Language { get; set; }
-        public string Text { get; set; }
-        public byte[] Tts { get; set; }
     }
 }

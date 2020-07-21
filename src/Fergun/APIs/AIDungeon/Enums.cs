@@ -13,9 +13,9 @@
         Say,
 
         /// <summary>
-        /// Describe the place, also called Story.
+        /// Describe the place.
         /// </summary>
-        Describe,
+        Story,
 
         /// <summary>
         /// Generate more story (no input).

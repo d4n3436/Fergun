@@ -339,7 +339,7 @@
 	<data name="resizeParam1" xml:space="preserve">
     <value>Kullanılacak bir resmin URL'si.</value>
   </data>
-	<data name="AnErrorOcurred" xml:space="preserve">
+	<data name="AnErrorOccurred" xml:space="preserve">
     <value>Bir hata oluştu.</value>
   </data>
 	<data name="ResizeResults" xml:space="preserve">
@@ -844,7 +844,7 @@ Hata kodu:</value>
     <value>Hedef önek ve geçerli önek aynıdır.</value>
   </data>
 	<data name="NewGlobalPrefix" xml:space="preserve">
-    <value>Yeni global önek:</value>
+    <value>Yeni küresel öneki: "{0}"</value>
   </data>
 	<data name="inviteSummary" xml:space="preserve">
     <value>Bot davet bağlantısını gönderir.</value>
@@ -859,7 +859,7 @@ Hata kodu:</value>
     <value>Geçerli önek:</value>
   </data>
 	<data name="NewPrefix" xml:space="preserve">
-    <value>Yeni lonca öneki:</value>
+    <value>Yeni lonca öneki: "{0}"</value>
   </data>
 	<data name="restartSummary" xml:space="preserve">
     <value>Botu yeniden başlatır.</value>
@@ -932,12 +932,12 @@ Hata kodu:</value>
     <value>AI Dungeon'a Hoşgeldiniz</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>Devam etmeden önce bilgileri ve komutları `{0} yardım bilgisi 'ile okuduğunuzdan emin olun.
+    <value>Devam etmeden önce `{0}aid info` ile bilgi ve komutları okuduğunuzdan emin olun.
 
-Bir mod seçin (Bir numara veya ad girin):</value>
+Bir mod seçin:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
-    <value>Bir karakter seçin (Bir numara veya ad girin)</value>
+    <value>Bir karakter seçin</value>
   </data>
 	<data name="AttachFiles" xml:space="preserve">
     <value>Dosyaları ekle</value>
@@ -1075,7 +1075,9 @@ Bilgi istemi 5 dakika içinde zaman aşımına uğrar ve maks. karakter sayısı
 
 `makepublic | makeprivate &lt;ID&gt; `: Bir kimliği genel veya özel yapar.
 
-`delete &lt;ID&gt;`: Bir kimliği kaldırır.</value>
+`delete &lt;ID&gt;`: Bir kimliği kaldırır.
+
+`dump &lt;ID&gt;`: bir kimlik özütleri tüm metin.</value>
   </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Sık sık yeni kelimeler kullanmayı deneyin, AI çeşitlilik ile daha yaratıcı hale gelir.
@@ -1792,9 +1794,9 @@ Belki bu bir vesile değil mi?</value>
 		<value>Sıranın boşalması bekleniyor ...</value>
 	</data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>Eski çıktı:
+		<value>Eski çıktı şöyledir:
 {0}
-Lütfen yeni çıktıyı girin.</value>
+yeni çıktının (**değil** komutu) girin.</value>
 	</data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
 		<value>Yeni bir yanıt oluşturuluyor ...</value>
@@ -1852,5 +1854,39 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Şimdi "ping" veritabanı gecikmesini gösteriyor.
 
 - Bellek kullanımını azalttı.</value>
+	</data>
+	<data name="DumpingAdventure" xml:space="preserve">
+		<value>macera Damping...</value>
+	</data>
+	<data name="EditCanceled" xml:space="preserve">
+		<value>Düzenleme iptal edildi.</value>
+	</data>
+	<data name="Changelog1.3" xml:space="preserve">
+		<value>- Yeni komut: `dump`.
+
+- AI Dungeon API'sini WebSockets'i kullanacak şekilde güncellendi. Şimdi tepki süreleri çok daha hızlı.
+- Sayı veya ad göndermek yerine reaksiyonları kullanmak için `yeni` komutu güncellendi.
+- AI Dungeon modülü için uygun kimlik kuyruğu desteği eklendi.
+
+- "ocr2" kaldırıldı.
+
+- Komut önbelleğindeki bazı komutlarda 2 kez yanıt veren bir hata düzeltildi çünkü komut mesajı bir gömme veya bir görüntü / video önizlemesi içerecek şekilde "güncellendi".
+- Önbellek sonuçlarının kaydedilmesini engelleyen "img`," urban "ve" ytrandom` komutları için önbelleğin başlatılmasındaki bir hata düzeltildi.
+- Karakter seçeneğinin rastgele seçilmesine neden olmayan yeni bir hata düzeltildi.
+- Avatar bulunamadığı için komutların başarısız olmasına neden olan `` avatar`` ve `kullanıcı`daki bir hata düzeltildi (Discord önbelleğe alınan avatarı döndürdü).
+- Gömme "geçersiz" bir URL görüntüsü kullanmaya çalıştığında oluşan "img" deki bir hata düzeltildi (bu sefer "geçersiz" URL'ler basitçe silinecektir).
+- "hackban" ve "hackban" daki, yasaklanamayan bir guild kullanıcı kimliğini geçtiğinde komutların başarısız olmasına neden olan ve 403 hatası döndüren bir hata düzeltildi.
+- Hedef dil bulunamadığı için komutun başarısız olmasına neden olan "badtranslator" daki bir hata düzeltildi.
+- Komutun nadir durumlarda sonsuz bir döngüye girmesine neden olan "badtranslator" daki bir hata düzeltildi.
+- Video önbelleği oluşturulurken bir hata oluşursa, komutun kendisini kilitlemesine neden olan `ytrandom`daki bir hata düzeltildi.
+- Metin 1024 karakterden daha büyük olduğunda ortaya çıkan `snipe` ve` editsnipe`daki bir hata düzeltildi.
+- Makale resmini kullanmaya çalışırken oluşan "wikipedia" daki bir hata düzeltildi.
+- Değişiklik günlüğünde sürüm numaralarının kaydedilme biçimi nedeniyle görüntülenmesini engelleyen bir hata düzeltildi.
+- Oyuncu durumu geçersiz olduğunda oluşan "atlama" ve "arama" hatalarını düzeltti.
+- `` Trivia '' da kod çözme yerine metnin kodlanmasına neden olan bir hata düzeltildi.
+
+- Şimdi "badtranslator" ın yinelenen dilleri olmayacak.
+
+- Bellek kullanımını azaltır *.</value>
 	</data>
 </root>

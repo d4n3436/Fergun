@@ -74,9 +74,8 @@ namespace Fergun.Modules
         public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketReaction> criterion, ReactionList Reactions)
         {
             IUserMessage response;
-            if (Cache.TryGetValue(Context.Message.Id, out ConcurrentBag<ulong> messages))
+            if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
-                messages.TryPeek(out ulong messageId);
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId).ConfigureAwait(false);
 
                 response = await Interactive.SendPaginatedMessageAsync(Context, pager, Reactions, criterion, response).ConfigureAwait(false);

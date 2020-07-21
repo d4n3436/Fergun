@@ -35,14 +35,6 @@ namespace Fergun
         public bool TrackSelectionDefault { get; set; }
     }
 
-    //public class FergunConfig2
-    //{
-    //    private FergunConfig2() { }
-
-    //    private FergunConfig2 _instance;
-    //    public FergunConfig2 Config => _instance ??= new FergunConfig2();
-    //}
-
     public static class FergunConfig
     {
         private static bool _tokenUsed = false;
@@ -199,7 +191,12 @@ namespace Fergun
             Language = language;
         }
 
-        public Guild(ulong id, string prefix, string language, bool captionbotAutoTranslate, bool aidAutoTranslate, bool trackSelection) : this(id, prefix, language)
+        public Guild(ulong id,
+                     string prefix,
+                     string language,
+                     bool captionbotAutoTranslate,
+                     bool aidAutoTranslate,
+                     bool trackSelection) : this(id, prefix, language)
         {
             CaptionbotAutoTranslate = captionbotAutoTranslate;
             AidAutoTranslate = aidAutoTranslate;

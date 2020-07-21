@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -62,7 +63,7 @@ namespace Fergun.APIs.DuckDuckGo
             {
                 return match.Groups[1].Value;
             }
-            throw new Exception("Token not found.");
+            throw new TokenNotFoundException("Token not found.");
         }
 
         private static HttpRequestMessage GenerateRequestMessage(HttpMethod method, Uri uri)
@@ -79,6 +80,26 @@ namespace Fergun.APIs.DuckDuckGo
             request.Headers.AcceptLanguage.ParseAdd("en-US,en;q=0.9");
 
             return request;
+        }
+    }
+
+    [Serializable]
+    public class TokenNotFoundException : Exception
+    {
+        public TokenNotFoundException()
+        { }
+
+        public TokenNotFoundException(string message)
+            : base(message)
+        { }
+
+        public TokenNotFoundException(string message, Exception innerException)
+            : base(message, innerException)
+        { }
+
+        protected TokenNotFoundException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+        {
+            throw new NotImplementedException();
         }
     }
 

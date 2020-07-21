@@ -343,7 +343,7 @@ namespace Fergun.APIs.AIDungeon
         public List<History> HistoryList { get; set; }
 
         [JsonProperty("weeklyContest")]
-        public bool WeeklyContext { get; set; }
+        public bool? WeeklyContext { get; set; }
 
         [JsonProperty("__typename")]
         public string Typename { get; set; }
@@ -506,23 +506,31 @@ namespace Fergun.APIs.AIDungeon
         public object DoAlterAction { get; set; }
     }
 
-    /*
-    public class ActionResponse : IResponse
+    public partial class WebSocketActionResponse
+    {
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("payload")]
+        public WebSocketPayload Payload { get; set; }
+    }
+
+    public partial class WebSocketPayload
     {
         [JsonProperty("data")]
-        public ActionData Data { get; set; }
-
-        [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
-        public List<ErrorInfo> Errors { get; set; }
+        public WebSocketData Data { get; set; }
     }
 
-    public class ActionData
+    public partial class WebSocketData
     {
-        [JsonProperty("performUserAction")]
-        public UserAction UserAction { get; set; }
+        [JsonProperty("subscribeContent")]
+        public SubscribeContent SubscribeContent { get; set; }
     }
 
-    public class UserAction
+    public partial class SubscribeContent
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -530,13 +538,45 @@ namespace Fergun.APIs.AIDungeon
         [JsonProperty("historyList")]
         public List<History> HistoryList { get; set; }
 
-        [JsonProperty("memoryList")]
-        public List<History> MemoryList { get; set; }
+        [JsonProperty("quests")]
+        public List<QuestData> Quests { get; set; }
+
+        [JsonProperty("error")]
+        public WebSocketError Error { get; set; }
+
+        [JsonProperty("memory")]
+        public string Memory { get; set; }
+
+        [JsonProperty("mode")]
+        public string Mode { get; set; }
+
+        [JsonProperty("actionLoading")]
+        public bool ActionLoading { get; set; }
+
+        [JsonProperty("characters")]
+        public List<string> Characters { get; set; }
+
+        [JsonProperty("gameState")]
+        public string GameState { get; set; }
+
+        [JsonProperty("thirdPerson")]
+        public bool ThirdPerson { get; set; }
 
         [JsonProperty("__typename")]
         public string Typename { get; set; }
+
+        [JsonProperty("died", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Died { get; set; }
     }
-    */
+
+    public partial class WebSocketError
+    {
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("time")]
+        public long Time { get; set; }
+    }
 
     public class History
     {
@@ -547,7 +587,7 @@ namespace Fergun.APIs.AIDungeon
         public string AdventureId { get; set; }
 
         [JsonProperty("type")]
-        public string Type { get; set; } // describe, ...
+        public string Type { get; set; }
 
         [JsonProperty("userId")]
         public string UserId { get; set; }
@@ -570,11 +610,11 @@ namespace Fergun.APIs.AIDungeon
         [JsonProperty("questData")]
         public QuestData QuestData { get; set; } // this can be null
 
-        [JsonProperty("undone")]
-        public bool Undone { get; set; }
+        [JsonProperty("undone", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Undone { get; set; }
 
-        [JsonProperty("died")]
-        public bool Died { get; set; }
+        [JsonProperty("died", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Died { get; set; }
 
         [JsonProperty("createdAt")]
         public DateTimeOffset CreatedAt { get; set; }
@@ -585,11 +625,8 @@ namespace Fergun.APIs.AIDungeon
         [JsonProperty("deletedAt")]
         public DateTimeOffset? DeletedAt { get; set; }
 
-        //[JsonProperty("input")]
-        //public string Input { get; set; }
-
-        //[JsonProperty("output")]
-        //public string Output { get; set; }
+        [JsonProperty("undoneAt")]
+        public DateTimeOffset? UndoneAt { get; set; }
     }
 
     public partial class QuestData
@@ -597,8 +634,8 @@ namespace Fergun.APIs.AIDungeon
         [JsonProperty("quest")]
         public string Quest { get; set; }
 
-        [JsonProperty("completed")]
-        public bool Completed { get; set; }
+        [JsonProperty("completed", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Completed { get; set; }
     }
 
     public class DeleteResponse : IResponse

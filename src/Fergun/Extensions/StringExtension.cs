@@ -60,6 +60,12 @@ namespace Fergun.Extensions
             return containsKeywords.Any(keyword => input.IndexOf(keyword, comparisonType) >= 0);
         }
 
+        public static bool IsBase64(this string s)
+        {
+            Span<byte> buffer = new Span<byte>(new byte[s.Length]);
+            return Convert.TryFromBase64String(s, buffer, out int _);
+        }
+
         public static string ToTitleCase(this string s)
         {
             return string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + (s.Length > 1 ? s.Substring(1).ToLowerInvariant() : "");

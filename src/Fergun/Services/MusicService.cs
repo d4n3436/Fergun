@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Fergun.Services
         private const uint _maxLoops = 20;
         private readonly GeniusApi _geniusApi;
 
-        private static readonly Dictionary<ulong, uint> _loopDict = new Dictionary<ulong, uint>();
+        private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
 
         public MusicService(DiscordSocketClient client, LogService logService)
         {
@@ -83,7 +84,7 @@ namespace Fergun.Services
         {
             if (_loopDict.ContainsKey(args.GuildId))
             {
-                _loopDict.Remove(args.GuildId);
+                _loopDict.TryRemove(args.GuildId, out _);
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Websocket closed the connection on guild ID {args.GuildId} with code {args.Code} and reason: {args.Reason}"));
             //if (_lavaNode.HasPlayer(_client.GetGuild(args.GuildId)))
@@ -126,7 +127,7 @@ namespace Fergun.Services
             {
                 if (_loopDict[guildId] == 0)
                 {
-                    _loopDict.Remove(guildId);
+                    _loopDict.TryRemove(guildId, out _);
                     var builder2 = new EmbedBuilder()
                         .WithDescription(string.Format(Localizer.Locate("LoopEnded", args.Player.TextChannel), $"[{args.Track.Title}]({args.Track.Url})"))
                         .WithColor(FergunConfig.EmbedColor);
@@ -191,7 +192,7 @@ namespace Fergun.Services
             {
                 if (_loopDict.ContainsKey(guild.Id))
                 {
-                    _loopDict.Remove(guild.Id);
+                    _loopDict.TryRemove(guild.Id, out _);
                 }
                 await _lavaNode.LeaveAsync(voiceChannel);
             }
@@ -368,7 +369,7 @@ namespace Fergun.Services
             await player.StopAsync();
             if (_loopDict.ContainsKey(guild.Id))
             {
-                _loopDict.Remove(guild.Id);
+                _loopDict.TryRemove(guild.Id, out _);
             }
             return Localizer.Locate("PlayerStopped", textChannel);
         }
@@ -518,18 +519,7 @@ namespace Fergun.Services
             bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (query == null)
             {
-                if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                {
-                    if (spotify != null)
-                    {
-                        query = $"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}";
-                    }
-                    else
-                    {
-                        return (Localizer.Locate("LyricsQueryNotPassed", textChannel), null);
-                    }
-                }
-                else
+                if (hasPlayer && player.PlayerState == PlayerState.Playing)
                 {
                     if (player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase))
                     {
@@ -540,6 +530,14 @@ namespace Fergun.Services
                         query = $"{player.Track.Author} - {player.Track.Title}";
                     }
                 }
+                else
+                {
+                    if (spotify == null)
+                    {
+                        return (Localizer.Locate("LyricsQueryNotPassed", textChannel), null);
+                    }
+                    query = $"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}";
+                }
             }
             query = query.Trim();
             GeniusResponse genius;
@@ -549,11 +547,11 @@ namespace Fergun.Services
             }
             catch (HttpRequestException)
             {
-                return (Localizer.Locate("AnErrorOcurred", textChannel), null);
+                return (Localizer.Locate("AnErrorOccurred", textChannel), null);
             }
             if (genius.Meta.Status != 200)
             {
-                return (Localizer.Locate("AnErrorOcurred", textChannel), null);
+                return (Localizer.Locate("AnErrorOccurred", textChannel), null);
             }
             if (genius.Response.Hits.Count == 0)
             {
@@ -585,7 +583,7 @@ namespace Fergun.Services
             var artworkLink = await player.Track.FetchArtworkAsync();
             if (string.IsNullOrEmpty(artworkLink))
             {
-                return (false, Localizer.Locate("AnErrorOcurred", textChannel));
+                return (false, Localizer.Locate("AnErrorOccurred", textChannel));
             }
             else
                 return (true, artworkLink);
@@ -601,7 +599,7 @@ namespace Fergun.Services
             {
                 if (_loopDict.ContainsKey(guild.Id))
                 {
-                    _loopDict.Remove(guild.Id);
+                    _loopDict.TryRemove(guild.Id, out _);
                     return Localizer.Locate("LoopDisabled", textChannel);
                 }
                 return string.Format(Localizer.Locate("LoopNoValuePassed", textChannel), Localizer.GetPrefix(textChannel));
@@ -619,7 +617,7 @@ namespace Fergun.Services
                 _loopDict[guild.Id] = countValue;
                 return string.Format(Localizer.Locate("LoopUpdated", textChannel), countValue);
             }
-            _loopDict.Add(guild.Id, countValue);
+            _loopDict.TryAdd(guild.Id, countValue);
             return string.Format(Localizer.Locate("NowLooping", textChannel), countValue);
         }
 
@@ -649,7 +647,7 @@ namespace Fergun.Services
             foreach (var part in doc)
             {
                 string text = part.InnerText;
-                if (part.ParentNode != null && part.ParentNode.OuterHtml == $"<i>{text}</i>")
+                if (part.ParentNode?.OuterHtml == $"<i>{text}</i>")
                 {
                     text = Format.Italics(text.Replace("*", string.Empty, StringComparison.OrdinalIgnoreCase));
                 }

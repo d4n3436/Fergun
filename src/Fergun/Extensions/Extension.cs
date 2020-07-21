@@ -81,6 +81,27 @@ namespace Fergun.Extensions
             }
         }
 
+        // Copy pasted from SocketGuildUser Hiearchy property to be used with RestGuildUser
+        public static int GetHierarchy(this IGuildUser user)
+        {
+            if (user.Guild.OwnerId == user.Id)
+            {
+                return int.MaxValue;
+            }
+
+            int num = 0;
+            for (int i = 0; i < user.Guild.Roles.Count; i++)
+            {
+                IRole role = user.Guild.Roles.ElementAt(i);
+                if (role != null && role.Position > num)
+                {
+                    num = role.Position;
+                }
+            }
+
+            return num;
+        }
+
         public static void Shuffle<T>(this IList<T> list)
         {
             var rng = new Random();

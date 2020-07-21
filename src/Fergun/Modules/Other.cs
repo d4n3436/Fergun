@@ -64,7 +64,7 @@ namespace Fergun.Modules
         }
 
         private static Random RngInstance => _rngInstance ??= new Random();
-        //private static readonly List<ulong> WaitList = new List<ulong>();
+
         [Command("changelog")]
         [Summary("changelogSummary")]
         [Alias("update")]
@@ -78,9 +78,15 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Changelog")
-                .AddField($"v{version}", Locate($"Changelog{version}"))
+                //.AddField($"v{version}", Locate($"Changelog{version}"))
                 .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", FergunClient.PreviousVersions.Append(FergunClient.Version).Where(x => x != version))))
                 .WithColor(FergunConfig.EmbedColor);
+
+            var split = Locate($"Changelog{version}").SplitToLines(EmbedFieldBuilder.MaxFieldValueLength).ToList();
+            for (int i = 0; i < split.Count; i++)
+            {
+                builder.AddField(i == 0 ? $"v{version}" : "\u200b", split[i]);
+            }
 
             await ReplyAsync(embed: builder.Build());
 
@@ -202,7 +208,7 @@ namespace Fergun.Modules
 
             foreach (var lang in FergunClient.Languages)
             {
-                data = data.AddCallBack(new Emoji(lang.Value), async (_, _1) => await HandleLanguageUpdateAsync(lang.Key));
+                data.AddCallBack(new Emoji(lang.Value), async (_, _1) => await HandleLanguageUpdateAsync(lang.Key));
             }
 
             message = await InlineReactionReplyAsync(data);
@@ -488,36 +494,30 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(Locate("NotSupportedInDM"));
                 }
-                string CurrentuserList = "";
-                string CurrentpointsList = "";
-                int CurrentUsers = 0;
-                var PlayerList = FergunClient.Database.LoadRecords<TriviaPlayer>("TriviaStats").OrderByDescending(x => x.Points);
-                foreach (var player in PlayerList.Take(15))
+                string userList = "";
+                string pointsList = "";
+                int totalUsers = 0;
+                var playerList = FergunClient.Database.LoadRecords<TriviaPlayer>("TriviaStats").OrderByDescending(x => x.Points);
+                foreach (var player in playerList.Take(15))
                 {
                     var user = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, player.ID);
                     if (user != null)
                     {
-                        CurrentUsers++;
-                        CurrentuserList += $"{user}\n";
-
-                        CurrentpointsList += $"{player.Points}\n";
+                        totalUsers++;
+                        userList += $"{user}\n";
+                        pointsList += $"{player.Points}\n";
                     }
                 }
 
                 builder.WithTitle(Locate("TriviaLeaderboard"))
-                    .AddField(Locate("User"), CurrentUsers > 0 ? CurrentuserList : "?", true)
-                    .AddField(Locate("Points"), CurrentUsers > 0 ? CurrentpointsList : "?", true)
+                    .AddField(Locate("User"), totalUsers == 0 ? "?" : userList, true)
+                    .AddField(Locate("Points"), totalUsers == 0 ? "?" : pointsList, true)
                     .WithColor(FergunConfig.EmbedColor);
                 await ReplyAsync(embed: builder.Build());
 
                 return FergunResult.FromSuccess();
             }
-            //if (WaitList.Contains(Context.User.Id))
-            //{
-            //    return FergunResult.FromSuccess();
-            //}
 
-            //WaitList.Add(Context.User.Id);
             int index = 0;
             if (category != null)
             {
@@ -527,12 +527,10 @@ namespace Fergun.Modules
                     index = 0;
                 }
             }
-            //var trivia = Api.RequestQuestions(1, QuestionDifficulty.Undefined, QuestionType.Undefined, ResponseEncoding.url3986, category == null ? 0 : (uint)index + 9);
             var trivia = TriviaApi.RequestQuestions(1, category == null ? QuestionCategory.Any : (QuestionCategory)(index + 9), encoding: ResponseEncoding.url3986);
 
             if (trivia.ResponseCode != 0)
             {
-                //WaitList.Remove(Context.User.Id);
                 return FergunResult.FromError(trivia.ResponseCode == 4 ? Locate("AllQuestionsAnswered") : $"{Locate("TriviaError")} {trivia.ResponseCode}: {responseCodes[trivia.ResponseCode]}");
             }
             var question = trivia.Questions[0];
@@ -546,7 +544,7 @@ namespace Fergun.Modules
 
             string optionsText = "";
             for (int i = 0; i < options.Count; i++)
-                optionsText += $"{i + 1}. {Uri.EscapeDataString(options[i])}\n";
+                optionsText += $"{i + 1}. {Uri.UnescapeDataString(options[i])}\n";
             bool hasReacted = false;
             IUserMessage message = null;
 
@@ -569,13 +567,12 @@ namespace Fergun.Modules
                 {
                     currentPlayer.Points--;
                     builder.Title = $"❌ {Locate("Incorrect")}";
-                    builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.EscapeDataString(question.CorrectAnswer))}";
+                    builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
                 }
 
                 builder.WithFooter($"{Locate("Points")}: {currentPlayer.Points}");
                 builder.WithColor(FergunConfig.EmbedColor);
                 FergunClient.Database.UpdateRecord("TriviaStats", currentPlayer);
-                //WaitList.Remove(Context.User.Id);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
             }
 
@@ -583,10 +580,10 @@ namespace Fergun.Modules
 
             builder.WithAuthor(Context.User)
                .WithTitle("Trivia")
-               .AddField(Locate("Category"), Uri.EscapeDataString(question.Category), true)
-               .AddField(Locate("Type"), Uri.EscapeDataString(question.Type), true)
-               .AddField(Locate("Difficulty"), Uri.EscapeDataString(question.Difficulty), true)
-               .AddField(Locate("Question"), Uri.EscapeDataString(question.Question))
+               .AddField(Locate("Category"), Uri.UnescapeDataString(question.Category), true)
+               .AddField(Locate("Type"), Uri.UnescapeDataString(question.Type), true)
+               .AddField(Locate("Difficulty"), Uri.UnescapeDataString(question.Difficulty), true)
+               .AddField(Locate("Question"), Uri.UnescapeDataString(question.Question))
                .AddField(Locate("Options"), optionsText)
                .WithFooter(string.Format(Locate("TimeLeft"), time))
                .WithColor(FergunConfig.EmbedColor);
@@ -602,8 +599,9 @@ namespace Fergun.Modules
 
             for (int i = 0; i < options.Count; i++)
             {
+                // i have to pass the option to a temp var because passing the value directly throws ArgumentOutOfRangeException for some reason
                 string option = options[i];
-                data = data.AddCallBack(new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) =>
+                data.AddCallBack(new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) =>
                 {
                     hasReacted = true;
                     await HandleTriviaReactionAsync(option);

@@ -340,7 +340,7 @@
 	<data name="resizeParam1" xml:space="preserve">
     <value>La url de una imagen a usar.</value>
   </data>
-	<data name="AnErrorOcurred" xml:space="preserve">
+	<data name="AnErrorOccurred" xml:space="preserve">
     <value>Ocurrió un error.</value>
   </data>
 	<data name="ResizeResults" xml:space="preserve">
@@ -845,7 +845,7 @@ Reproduciendo ahora: {1} ({2})</value>
     <value>El prefijo de destino y el prefijo actual son iguales.</value>
   </data>
 	<data name="NewGlobalPrefix" xml:space="preserve">
-    <value>El nuevo prefijo global es:</value>
+    <value>El nuevo prefijo global es: "{0}"</value>
   </data>
 	<data name="inviteSummary" xml:space="preserve">
     <value>Envía el link de invitación del bot.</value>
@@ -860,7 +860,7 @@ Reproduciendo ahora: {1} ({2})</value>
     <value>El prefijo actual es:</value>
   </data>
 	<data name="NewPrefix" xml:space="preserve">
-    <value>El nuevo prefijo del servidor es:</value>
+    <value>El nuevo prefijo del servidor es: "{0}"</value>
   </data>
 	<data name="restartSummary" xml:space="preserve">
     <value>Reinicia el bot.</value>
@@ -934,10 +934,10 @@ Reproduciendo ahora: {1} ({2})</value>
 	<data name="ModeSelect" xml:space="preserve">
     <value>Asegúrate de leer la información y los comandos con `{0}aid info` antes de continuar.
 
-Selecciona un modo (Ingresa un número o un nombre):</value>
+Selecciona un modo:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
-    <value>Selecciona un personaje (Ingresa un número o un nombre)</value>
+    <value>Selecciona un personaje</value>
   </data>
 	<data name="AttachFiles" xml:space="preserve">
     <value>Adjuntar archivos</value>
@@ -1075,7 +1075,9 @@ Este aviso expirará en 5 minutos. y el número máximo de carácteres es 140.</
 
 `makepublic | makeprivate &lt;ID&gt;`: Hace pública o privada una ID.
 
-`delete &lt;ID&gt;`: Elimina una ID.</value>
+`delete &lt;ID&gt;`: Elimina una ID.
+
+`dump &lt;ID&gt;`: Extrae todo el texto de una ID.</value>
   </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Intenta usar palabras nuevas con frecuencia, la IA se vuelve más creativa con variedad.
@@ -1796,7 +1798,7 @@ Tal vez es un instrumental?</value>
 	<data name="NewOutputPrompt" xml:space="preserve">
 		<value>La salida antigua es:
 {0}
-Ingresa la nueva salida.</value>
+Ingresa la nueva salida (**no** el comando).</value>
 	</data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
 		<value>Generando una nueva respuesta...</value>
@@ -1869,5 +1871,39 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Ahora `ping` muestra la latencia de la base de datos.
 
 - Reducido el uso de memoria.</value>
+	</data>
+	<data name="DumpingAdventure" xml:space="preserve">
+		<value>Volcando la aventura...</value>
+	</data>
+	<data name="EditCanceled" xml:space="preserve">
+		<value>Edición cancelada.</value>
+	</data>
+	<data name="Changelog1.3" xml:space="preserve">
+		<value>- Nuevo comando: `dump`.
+
+- Actualizado la API de AI Dungeon para usar WebSocketss. Ahora los tiempos de respuestas son mucho más rápidos.
+- Actualizado el comando `new` para usar reacciones en vez de tener que enviar números o nombres.
+- Agregado soporte adecuado de colas para el módulo de AI Dungeon.
+
+- Eliminado `ocr2`.
+
+- Arreglado un bug en la caché de comandos que hacía que el bot respondiera 2 veces en algunos comandos porque el mensaje del comando se "actualizaba" para incluir una imagen o un embed.
+- Arreglado un bug en la inicialización de la caché de los comandos `img`, `urban` and `ytrandom` que prevenía que los resultados sean guardados.
+- Arreglado un bug en `new` que causaba que la opción seleccionada no fuera la correcta.
+- Arreglado un bug en `avatar` y `user` que causaba que los comandos fallasen porque el avatar no era encontrado (Discord retornaba el avatar de la caché).
+- Arreglado un bug en `img` que ocurría cuando el embed intentaba usar una imágen "inválida" (esta vez las imágenes "inválidas" serán simplemente descartadas).
+- Arreglado un bug en `ban` y `hackban` que causaba que los comandos fallasen cuando se pasaba una ID de un usuario que está en el servidor y que no puede ser baneado, retornando error 403.
+- Arreglado un bug en `badtranslator` que causaba que el comando fallase porque el idioma objetivo no era encontrado.
+- Arreglado un bug en `badtranslator` que causaba que el comando entrara en un bucle infinito en raras ocasiones.
+- Arreglado un bug en `ytrandom` que causaba que el comando se bloqueara a si mismo si ocurría un error mientras se creaba la caché de videos.
+- Arreglado un bug en `snipe` y `editsnipe` que ocurría cuando el texto era mayor a 1024 carácteres.
+- Arreglado un bug en `wikipedia` que ocurría cuando se intentaba usar la imagen del artículo.
+- Arreglado un bug en `changelog` que evitabar ver el changelog debido a la manera en que las versiones eran guardadas.
+- Arreglado un bug en `skip` y `seek` que ocurría cuando el estado del reproductor era inválido.
+- Arreglado un bug en `trivia` que causaba que el texto fuera codificado en vez de decodificado.
+
+- Ahora `badtranslator` no tendrá idiomas duplicados.
+
+- Reducido *mas* el uso de memoria.</value>
 	</data>
 </root>

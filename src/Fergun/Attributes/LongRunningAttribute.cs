@@ -17,10 +17,10 @@ namespace Fergun.Attributes
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo _, IServiceProvider services)
         {
-            if (services.GetRequiredService<CommandCacheService>().TryGetValue(context.Message.Id, out ConcurrentBag<ulong> messages))
+            IUserMessage response;
+            bool found = services.GetRequiredService<CommandCacheService>().TryGetValue(context.Message.Id, out ulong messageId);
+            if (found && (response = (IUserMessage)await context.Channel.GetMessageAsync(messageId)) != null)
             {
-                messages.TryPeek(out ulong messageId);
-                var response = (IUserMessage)await context.Channel.GetMessageAsync(messageId);
                 await response.ModifyAsync(x =>
                 {
                     x.Content = null;

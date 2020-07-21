@@ -10,15 +10,14 @@ namespace Fergun.Services
 {
     public class LogService
     {
-        private static string AppDirectory => AppContext.BaseDirectory;
+        private static string AppDirectory { get; } = AppContext.BaseDirectory;
         private string LogDirectory { get; }
         private string LogDirectoryName { get; }
-        //private FileStream FileHandler { get; set; }
         public string LogFile => Path.Combine(LogDirectory, $"{DateTime.Today:dd-MM-yyyy}.txt");
         private bool IsNewDay => !File.Exists(LogFile);
-        private TextWriter Writer { get; set; }
+        private static TextWriter Writer { get; set; }
 
-        private static readonly object writerLock = new object();
+        private static readonly object _writerLock = new object();
 
         public LogService(DiscordSocketClient client, CommandService cmdService)
         {
@@ -61,7 +60,7 @@ namespace Fergun.Services
         {
             if (IsNewDay)
             {
-                lock (writerLock)
+                lock (_writerLock)
                 {
                     Writer = TextWriter.Synchronized(File.AppendText(LogFile));
                 }
@@ -70,7 +69,7 @@ namespace Fergun.Services
 
             string logText = $"[{message.Source}/{message.Severity}] {message}";
 
-            lock (writerLock)
+            lock (_writerLock)
             {
                 Console.WriteLine(logText);
                 Writer.WriteLine(logText);

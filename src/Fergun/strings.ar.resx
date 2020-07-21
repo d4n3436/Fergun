@@ -339,7 +339,7 @@
 	<data name="resizeParam1" xml:space="preserve">
     <value>عنوان URL للصورة المراد استخدامها.</value>
   </data>
-	<data name="AnErrorOcurred" xml:space="preserve">
+	<data name="AnErrorOccurred" xml:space="preserve">
     <value>حدث خطأ.</value>
   </data>
 	<data name="ResizeResults" xml:space="preserve">
@@ -582,7 +582,7 @@
     <value>يبدو أنك أجبت على جميع الأسئلة في الفئة المحددة ، حدد فئة أخرى ..</value>
   </data>
 	<data name="TriviaError" xml:space="preserve">
-    <value>خطأ ocurred ل. خطا بالكود</value>
+    <value>حدث خطأ. خطا بالكود</value>
   </data>
 	<data name="Category" xml:space="preserve">
     <value>الفئة</value>
@@ -844,7 +844,7 @@
     <value>البادئة الهدف والبادئة الحالية هي نفسها.</value>
   </data>
 	<data name="NewGlobalPrefix" xml:space="preserve">
-    <value>البادئة العالمية الجديدة هي:</value>
+    <value>البادئة عالمية جديدة هي: "{0}"</value>
   </data>
 	<data name="inviteSummary" xml:space="preserve">
     <value>يرسل رابط دعوة الروبوت.</value>
@@ -859,7 +859,7 @@
     <value>البادئة الحالية هي:</value>
   </data>
 	<data name="NewPrefix" xml:space="preserve">
-    <value>بادئة النقابة الجديدة هي:</value>
+    <value>البادئة النقابة الجديدة هي: "{0}"</value>
   </data>
 	<data name="restartSummary" xml:space="preserve">
     <value>إعادة تشغيل البوت.</value>
@@ -937,7 +937,7 @@
 حدد الوضع:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
-    <value>حدد شخصية:</value>
+    <value>حدد شخصية</value>
   </data>
 	<data name="AttachFiles" xml:space="preserve">
     <value>إرفاق ملفات</value>
@@ -1057,25 +1057,27 @@
 
 `new`: يخلق مغامرة جديدة.
 
-`متابعة &lt;ID&gt; [Do | Say | Story Text ...]`: متابعة القصة بالنص الذي تقدمه. إذا لم يتم تمرير أي نص ، فإن الذكاء الاصطناعي سينشئ القصة.
+`continue &lt;ID&gt; [Do | Say | Story] [Text ...]`: متابعة القصة بالنص الذي تقدمه. إذا لم يتم تمرير أي نص ، فإن الذكاء الاصطناعي سينشئ القصة.
 
-`التراجع عن &lt;ID&gt;`: التراجع عن الإجراء الأخير.
+`&lt;undo&lt;ID`: التراجع عن الإجراء الأخير.
 
-`redo &lt;ID&gt;`: هل قمت بالتراجع عن الحادث؟ استخدم هذا الأمر لاستعادته.
+`&lt;redo &lt;ID`: هل قمت بالتراجع عن الحادث؟ استخدم هذا الأمر لاستعادته.
 
-`alter &lt;ID&gt; &lt;newOutput ...&gt;`: يقوم بتحرير الرد الأخير من AI.
+`&lt;...alter &lt;ID&gt; &lt;newOutput`: يقوم بتحرير الرد الأخير من AI.
 
-`تذكر &lt;ID&gt; &lt;text ...&gt;`: يقوم بتحرير سياق الذاكرة.
+`&lt;...remember &lt;ID&gt; &lt;text&gt;`: يقوم بتحرير سياق الذاكرة.
 
-`retry &lt;ID&gt;`: لإعادة الإجراء الأخير وإنشاء استجابة جديدة.
+`&lt;retry &lt;ID`: لإعادة الإجراء الأخير وإنشاء استجابة جديدة.
 
 `idlist [user]`: يعرض معرفات المستخدم.
 
-`idinfo &lt;ID&gt;`: يعرض معلومات حول المعرف.
+`&lt;idinfo &lt;ID`: يعرض معلومات حول المعرف.
 
-`makepublic | makeprivate &lt;ID&gt; `: يجعل المعرّف عامًا أو خاصًا.
+`&lt;makepublic | makeprivate &lt;ID `: يجعل المعرّف عامًا أو خاصًا.
 
-`حذف &lt;معرف&gt;`: إزالة معرف.</value>
+`&lt;delete &lt;ID`: إزالة معرف.
+
+`&lt;dump &lt;ID`: مقتطفات من كل نص ID.</value>
   </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>حاول استخدام كلمات جديدة كثيرًا ، فالذكاء الاصطناعي يصبح أكثر إبداعًا مع التنوع.
@@ -1804,9 +1806,9 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 		<value>في انتظار تفريغ قائمة الانتظار ...</value>
 	</data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>المخرج القديم هو:
+		<value>إخراج القديم هو:
 {0}
-الرجاء إدخال الإخراج الجديد.</value>
+الرجاء إدخال الانتاج الجديد (**لا** الأمر).</value>
 	</data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
 		<value>جارٍ إنشاء رد جديد ...</value>
@@ -1864,5 +1866,39 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - يُظهر الآن "ping" وقت استجابة قاعدة البيانات.
 
 - خفض استخدام الذاكرة.</value>
+	</data>
+	<data name="DumpingAdventure" xml:space="preserve">
+		<value>إلقاء المغامرة...</value>
+	</data>
+	<data name="EditCanceled" xml:space="preserve">
+		<value>تحرير إلغاؤها.</value>
+	</data>
+	<data name="Changelog1.3" xml:space="preserve">
+		<value>- الأمر الجديد: `تفريغ`.
+
+- تم تحديث واجهة برمجة تطبيقات AI Dungeon API لاستخدام WebSockets. الآن أوقات الاستجابة أسرع بكثير.
+- تحديث الأمر `new` لاستخدام ردود الفعل بدلاً من إرسال أرقام أو أسماء.
+- تمت إضافة دعم قائمة انتظار معرف مناسب لوحدة AI Dungeon.
+
+- تمت إزالة "ocr2".
+
+- تم إصلاح الخلل في ذاكرة التخزين المؤقت للأوامر التي جعلت الرد الآلي مرتين في بعض الأوامر لأنه تم "تحديث" رسالة الأمر لتضمين معاينة أو معاينة صورة / فيديو.
+- تم إصلاح الخلل في تهيئة ذاكرة التخزين المؤقت للأوامر "img" و "المناطق الحضرية" و "ytrandom" التي حالت دون حفظ النتائج المخبأة.
+- تم إصلاح الخلل في `new` الذي تسبب في تحديد خيار الحرف عشوائيًا بدون سبب.
+- تم إصلاح الخلل في "الصورة الرمزية" و "المستخدم" الذي تسبب في فشل الأوامر بسبب عدم العثور على الصورة الرمزية (أعاد Discord الصورة الرمزية المخزنة مؤقتًا).
+- تم إصلاح الخلل في `img` الذي حدث عندما حاول التضمين استخدام صورة عنوان URL" غير صالحة "(هذه المرة سيتم تجاهل عناوين URL" غير الصالحة ").
+- تم إصلاح الخلل في "hackban" و "hackban" الذي تسبب في فشل الأوامر عند تمرير معرف مستخدم نقابة لا يمكن حظره ، وإرجاع الخطأ 403.
+- تم إصلاح الخلل في "badtranslator" الذي تسبب في فشل الأمر نظرًا لعدم العثور على اللغة الهدف.
+- تم إصلاح الخلل في "badtranslator" الذي تسبب في إدخال الأمر في حلقة لا نهائية في حالات نادرة.
+- تم إصلاح الخلل في `ytrandom` الذي تسبب في قفل الأمر نفسه في حالة حدوث خطأ عند إنشاء ذاكرة التخزين المؤقت للفيديو.
+- تم إصلاح الخلل في "snipe" و "editsnipe" الذي حدث عندما كان النص أكبر من 1024 حرفًا.
+- تم إصلاح الخلل في "ويكيبيديا" الذي حدث عند محاولة استخدام صورة المقالة.
+- تم إصلاح الخلل في "سجل التغيير" الذي منع عرض التغيير بسبب طريقة حفظ أرقام الإصدارات.
+- إصلاح الخلل في "تخطي" و "البحث" الذي حدث عندما كانت حالة اللاعب غير صالحة.
+- تم إصلاح خطأ في `التوافه` أدى إلى تشفير النص بدلاً من فك تشفيره.
+
+- الآن لن يكون لـ "badtranslator" لغات مكررة.
+
+- خفض * استخدام * الذاكرة بشكل أكبر.</value>
 	</data>
 </root>
