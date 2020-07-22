@@ -1668,6 +1668,10 @@ namespace Fergun.Modules
             {
                 useBing = true;
             }
+            catch (ArgumentNullException)
+            {
+                useBing = true;
+            }
             if (useBing)
             {
                 try
