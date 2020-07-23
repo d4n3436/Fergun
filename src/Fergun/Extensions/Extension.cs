@@ -5,10 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Discord;
-using Discord.Net;
-using Discord.WebSocket;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -18,69 +15,6 @@ namespace Fergun.Extensions
 {
     public static class Extension
     {
-        /// <summary>
-        /// Try to delete a message.
-        /// </summary>
-        /// <param name="messageId">The message Id.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, ulong messageId)
-        {
-            var msg = await channel.GetMessageAsync(messageId);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
-
-        /// <summary>
-        /// Try to delete a message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, IMessage message)
-        {
-            var msg = await channel.GetMessageAsync(message.Id);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
-
-        /// <summary>
-        /// Try to delete this message.
-        /// </summary>
-        public static async Task<bool> TryDeleteAsync(this IMessage message)
-        {
-            if (message == null) return false;
-            var msg = await message.Channel.GetMessageAsync(message.Id);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
-
-        internal static async Task<bool> TryDeleteMessageInternalAsync(IMessage message)
-        {
-            if (message == null)
-            {
-                // The message is already deleted.
-                return false;
-            }
-
-            if (message.Channel is SocketGuildChannel guildChannel)
-            {
-                if (!guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages)
-                {
-                    // Missing permissions
-                    return false;
-                }
-            }
-            else
-            {
-                // Not possible to delete other user's messages in DM
-                if (message.Source == MessageSource.User) return false;
-            }
-
-            try
-            {
-                await message.DeleteAsync();
-                return true;
-            }
-            catch (HttpException)
-            {
-                return false;
-            }
-        }
-
         // Copy pasted from SocketGuildUser Hiearchy property to be used with RestGuildUser
         public static int GetHierarchy(this IGuildUser user)
         {

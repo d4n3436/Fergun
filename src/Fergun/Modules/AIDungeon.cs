@@ -258,7 +258,7 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = string.Format(Locate("GeneratingNewAdventure"), _modes.Keys[modeIndex], characters.Keys[characterIndex]);
 
-            await message.RemoveAllReactionsAsync();
+            _ = message.TryRemoveAllReactionsAsync();
             await ReplyAsync(embed: builder.Build());
 
             ScenarioResponse scenario;
@@ -301,7 +301,7 @@ namespace Fergun.Modules
             builder.Description = Locate("CustomCharacterPrompt");
 
             var message = await ReplyAsync(embed: builder.Build());
-            await message.RemoveAllReactionsAsync();
+            _ = message.TryRemoveAllReactionsAsync();
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
 
