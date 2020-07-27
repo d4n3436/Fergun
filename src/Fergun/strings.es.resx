@@ -133,7 +133,7 @@
     <value>Comandos de música</value>
   </data>
 	<data name="Notes" xml:space="preserve">
-    <value>Notas:</value>
+    <value>Notas</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
     <value>Usa `{0}help [comando]` para obtener mas información sobre un comando. </value>
@@ -153,20 +153,20 @@
 	<data name="CommandNotFound" xml:space="preserve">
     <value>Comando no encontrado. Usa `{0}help` para ver la lista de comandos.</value>
   </data>
-	<data name="HelpNoDescription" xml:space="preserve">
+	<data name="NoDescription" xml:space="preserve">
     <value>(Descripción no disponible)</value>
   </data>
-	<data name="HelpOptional" xml:space="preserve">
+	<data name="Optional" xml:space="preserve">
     <value>(Opcional)</value>
   </data>
-	<data name="HelpUsage" xml:space="preserve">
-    <value>Uso:</value>
+	<data name="Usage" xml:space="preserve">
+    <value>Uso</value>
   </data>
-	<data name="HelpAlias" xml:space="preserve">
-    <value>Alias:</value>
+	<data name="Alias" xml:space="preserve">
+    <value>Alias</value>
   </data>
-	<data name="HelpParameters" xml:space="preserve">
-    <value>Parámetros:</value>
+	<data name="Parameters" xml:space="preserve">
+    <value>Parámetros</value>
   </data>
 	<data name="mojibakeSummary" xml:space="preserve">
     <value>Muestra caráctereres unicode aleatorios.</value>
@@ -280,7 +280,7 @@
 	<data name="NoUrlPassed" xml:space="preserve">
     <value>El no especifiar una url hará que el comando busque en los últimos 100 mensajes por un link o un archivo adjunto.</value>
   </data>
-	<data name="AttachNotImage" xml:space="preserve">
+	<data name="AttachmentNotImage" xml:space="preserve">
     <value>El archivo adjunto no es una imagen.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
@@ -296,7 +296,7 @@
     <value>Las palabras clave a buscar.</value>
   </data>
 	<data name="NoResultsFound" xml:space="preserve">
-    <value>No se encontró resultados.</value>
+    <value>No se encontraron resultados.</value>
   </data>
 	<data name="IfNSFW" xml:space="preserve">
     <value>Si la búsqueda es NSFW, usa el comando en un canal NSFW.</value>
@@ -732,19 +732,19 @@ Código de error:</value>
 	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
     <value>Añadido a la cola {0} pistas ({1})
 
-Reproduciendo ahora: {2} ({3})</value>
+Reproduciendo ahora: {2}</value>
   </data>
 	<data name="PlayerTrackAdded" xml:space="preserve">
-    <value>{0} ({1}) ha sido añadido a la cola.</value>
+    <value>{0} ha sido añadido a la cola.</value>
   </data>
 	<data name="PlayerNowPlaying" xml:space="preserve">
-    <value>Reproduciendo ahora: {0} ({1})</value>
+    <value>Reproduciendo ahora: {0}</value>
   </data>
 	<data name="InvalidTrack" xml:space="preserve">
     <value>Pista inválida.</value>
   </data>
 	<data name="Replaying" xml:space="preserve">
-    <value>Volviendo a reproducir</value>
+    <value>Volviendo a reproducir {0}</value>
   </data>
 	<data name="EmptyQueue" xml:space="preserve">
     <value>La cola está vacia.</value>
@@ -758,13 +758,13 @@ Reproduciendo ahora: {2} ({3})</value>
 	<data name="PlayerTrackSkipped" xml:space="preserve">
     <value>Saltado: {0}
 
-Reproduciendo ahora: {1} ({2})</value>
+Reproduciendo ahora: {1}</value>
   </data>
 	<data name="VolumeOutOfIndex" xml:space="preserve">
     <value>Usa un número entre 2 y 150.</value>
   </data>
-	<data name="VolumeSetted" xml:space="preserve">
-    <value>Volumen establecido a:</value>
+	<data name="VolumeSet" xml:space="preserve">
+    <value>Volumen establecido a: {0}.</value>
   </data>
 	<data name="PlayerPaused" xml:space="preserve">
     <value>El reproductor está pausado ahora.</value>
@@ -791,7 +791,7 @@ Reproduciendo ahora: {1} ({2})</value>
     <value>Índice fuera de rango.</value>
   </data>
 	<data name="TrackRemoved" xml:space="preserve">
-    <value>Pista: **{0}** en la posición {1} fue eliminada.</value>
+    <value>La pista {0} en la posición {1} fue eliminada.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
     <value>No se pudo encontrar la letra para {0}</value>
@@ -1052,33 +1052,6 @@ Este aviso expirará en 5 minutos. y el número máximo de carácteres es 140.</
 	<data name="Commands" xml:space="preserve">
     <value>Comandos</value>
   </data>
-	<data name="AIDCommandList" xml:space="preserve">
-    <value>`info`: Muestra este menú.
-
-`new`: Crea una nueva aventura.
-
-`continue &lt;ID&gt; [Do|Say|Story] [Text...]`: Continúa la aventura con el texto ingresado. Si no se da un texto, la IA generará una historia.
-
-`undo &lt;ID&gt;`: Deshace la última acción.
-
-`redo &lt;ID&gt;`: Rehace la última acción deshecha.
-
-`alter &lt;ID&gt; &lt;newOutput...&gt;`: Edita la última respuesta de la IA.
-
-`remember &lt;ID&gt; &lt;text...&gt;`:  Agrega texto en el contexto de la memoria.
-
-`retry &lt;ID&gt;`: Reintenta la última acción y genera una nueva respuesta.
-
-`idlist [user]`: Muestra las IDs de un usuario.
-
-`idinfo &lt;ID&gt;`: Muestra información acerca de una ID.
-
-`makepublic | makeprivate &lt;ID&gt;`: Hace pública o privada una ID.
-
-`delete &lt;ID&gt;`: Elimina una ID.
-
-`dump &lt;ID&gt;`: Extrae todo el texto de una ID.</value>
-  </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Intenta usar palabras nuevas con frecuencia, la IA se vuelve más creativa con variedad.
 Recuerda comenzar con "do" junto a un verbo, ex: Atacar el orco.
@@ -1271,8 +1244,8 @@ Usa `{0}help {1}` para obtener mas información del comando.</value>
 	<data name="BotVersion" xml:space="preserve">
     <value>Versión del bot</value>
   </data>
-	<data name="WebsocketPing" xml:space="preserve">
-    <value>Ping de Websocket</value>
+	<data name="OperatingSystem" xml:space="preserve">
+    <value>Sistema Operativo</value>
   </data>
 	<data name="BotOwner" xml:space="preserve">
     <value>Dueño del bot</value>
@@ -1355,9 +1328,6 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 - Soporte a canales de MD.
 - Ahora el bot usa una base de datos adecuada.
 - Más correcciones de errores.</value>
-  </data>
-	<data name="BadArgumentCountAid" xml:space="preserve">
-    <value>Cantidad de parámetros inválida. Usa `{0}aid info` para obtener mas información del comando.</value>
   </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>Necesitas el permiso `Banear miembros` para usar este comando.</value>
@@ -1551,10 +1521,6 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Rehaciendo la última acción...</value>
   </data>
-	<data name="CommandParseFailedAid" xml:space="preserve">
-    <value>Error al analizar los parámetros del comando. Algún parametro es inválido o el orden de los argumentos es incorrecto.
-Usa `{0}aid info` para obtener mas información del comando.</value>
-  </data>
 	<data name="SelfNoIDs" xml:space="preserve">
     <value>No tienes ninguna ID de aventura.
 Puedes usar el comando `new` para crear una nueva aventura.</value>
@@ -1742,7 +1708,7 @@ El nuevo parser también permite pasar el nombre una canción específica en vez
     <value>La url de una imagen a usar.</value>
   </data>
 	<data name="Changelog1.2.3" xml:space="preserve">
-		<value>Esta actualización contiene arreglos de errores que dejaron la 1.2 y algunos cambios que fueron retrasados de la 1.2 para ser mejorados.
+    <value>Esta actualización contiene arreglos de errores que dejaron la 1.2 y algunos cambios que fueron retrasados de la 1.2 para ser mejorados.
 
 - Nuevo comando: `invert`
 - Agregado los idiomas Ruso y Turco (he usado Google Translate por lo que puede haber muchos errores).
@@ -1757,64 +1723,64 @@ El nuevo parser también permite pasar el nombre una canción específica en vez
 - Arreglado un bug en `badtranslator` que hacía que el comando fallaso sin razón alguna.
 - Arreglado un bug con el paginador que parpadeaba en ciertas circunstancias.
 - Arreglado algunos errores con el parser de `lyrics`.</value>
-	</data>
+  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
-		<value>Los mensajes deben tener menos de dos semanas de antigüedad.</value>
-	</data>
+    <value>Los mensajes deben tener menos de dos semanas de antigüedad.</value>
+  </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
-		<value>No se pudieron eliminar {0} mensajes porque tienen mas de dos semanas de antigüedad.</value>
-	</data>
+    <value>No se pudieron eliminar {0} mensajes porque tienen mas de dos semanas de antigüedad.</value>
+  </data>
 	<data name="Changelog1.2.4" xml:space="preserve">
-		<value>- Agregado un servicio de reliabilidad para prevenir puntos muertos (deadlocks) y un script de auto-reinicio que se ejecuta cuando el bot tiene un error el cual no se puede recuperar (crash).
+    <value>- Agregado un servicio de reliabilidad para prevenir puntos muertos (deadlocks) y un script de auto-reinicio que se ejecuta cuando el bot tiene un error el cual no se puede recuperar (crash).
 
 - Limitado la longitud máxima del texto en `lyrics`.
 
 - Arreglado un bug en `invert` que fallaba con algunas imágenes.
 - Arreglado un bug en `clear` que mostraba una advertencia sobre mensajes que no se pudieron eliminar aún si los mensajes eliminados tienen una antigüedad menor a dos semanas.
 - Arreglado un bug en `trivia` que mostraba un mensaje que se acabó el tiempo sin importar de la entrada.</value>
-	</data>
+  </data>
 	<data name="GuildNotFound" xml:space="preserve">
-		<value>Servidor no encontrado.</value>
-	</data>
+    <value>Servidor no encontrado.</value>
+  </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
-		<value>Ocurrió un error mientras se extraía la letra de {0}.
+    <value>Ocurrió un error mientras se extraía la letra de {0}.
 Tal vez es un instrumental?</value>
-	</data>
+  </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
-		<value>El parámetro `{0}` debe ser menor que {1}.</value>
-	</data>
+    <value>El parámetro `{0}` debe ser menor que {1}.</value>
+  </data>
 	<data name="InvalidID" xml:space="preserve">
-		<value>ID inválida.</value>
-	</data>
+    <value>ID inválida.</value>
+  </data>
 	<data name="HastebinLink" xml:space="preserve">
-		<value>Link de Hastebin</value>
-	</data>
+    <value>Link de Hastebin</value>
+  </data>
 	<data name="NotAvailable" xml:space="preserve">
-		<value>No disponible.</value>
-	</data>
+    <value>No disponible.</value>
+  </data>
 	<data name="WaitingQueue" xml:space="preserve">
-		<value>Esperando que la cola se vacíe...</value>
-	</data>
+    <value>Esperando que la cola se vacíe...</value>
+  </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>La salida antigua es:
+    <value>La salida antigua es:
 {0}
 Ingresa la nueva salida (**no** el comando).</value>
-	</data>
+  </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
-		<value>Generando una nueva respuesta...</value>
-	</data>
+    <value>Generando una nueva respuesta...</value>
+  </data>
 	<data name="InputTypes" xml:space="preserve">
-		<value>Opciones de entrada</value>
-	</data>
+    <value>Opciones de entrada</value>
+  </data>
 	<data name="InputTypesList" xml:space="preserve">
-		<value>Do: Una acción que quieres tomar en la historia. Siempre comienza por una acción, ej. "Buscar el tesoro perdido". Este es el tipo de entrada por defecto si ningúno es detectado.
+    <value>Do: Una acción que quieres tomar en la historia. Siempre comienza por una acción, ej. "Buscar el tesoro perdido". Este es el tipo de entrada por defecto si ningúno es detectado.
 
 Say: Puedes usar esto para hablar, ej. "Déjalos solos!".
 
 Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
-	</data>
+  </data>
 	<data name="Changelog1.2.7" xml:space="preserve">
-		<value>- Nuevos comandos: `color` y `retry`.
+    <value>- Nuevos comandos: `color` y `retry`.
 
 - Agregado un servicio de caché de comandos, ahora puedes editar un mensaje a un nuevo comando y Fergun actualizará su respuesta o enviará una nueva.
 
@@ -1828,39 +1794,39 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Ahora algunos comandos subirán sus resultados a Hastebin cuando el contenido es demasiado largo.
 
 - Arreglado algunos bugs en `tpdne`, `tcdne`, `repeat`, el servicio de comandos y el sistema de paginación.</value>
-	</data>
+  </data>
 	<data name="Members" xml:space="preserve">
-		<value>Miembros</value>
-	</data>
+    <value>Miembros</value>
+  </data>
 	<data name="Online" xml:space="preserve">
-		<value>En línea</value>
-	</data>
+    <value>En línea</value>
+  </data>
 	<data name="Idle" xml:space="preserve">
-		<value>Ausente</value>
-	</data>
+    <value>Ausente</value>
+  </data>
 	<data name="DnD" xml:space="preserve">
-		<value>No molestar</value>
-	</data>
+    <value>No molestar</value>
+  </data>
 	<data name="Offline" xml:space="preserve">
-		<value>Desconectado</value>
-	</data>
+    <value>Desconectado</value>
+  </data>
 	<data name="ChannelCount" xml:space="preserve">
-		<value>Número de canales</value>
-	</data>
+    <value>Número de canales</value>
+  </data>
 	<data name="Region" xml:space="preserve">
-		<value>Región</value>
-	</data>
+    <value>Región</value>
+  </data>
 	<data name="DefaultChannel" xml:space="preserve">
-		<value>Canal por defecto</value>
-	</data>
+    <value>Canal por defecto</value>
+  </data>
 	<data name="LanguageNotFound" xml:space="preserve">
-		<value>Idioma no encontrado.</value>
-	</data>
+    <value>Idioma no encontrado.</value>
+  </data>
 	<data name="CategoryCount" xml:space="preserve">
-		<value>Número de categorías</value>
-	</data>
+    <value>Número de categorías</value>
+  </data>
 	<data name="Changelog1.2.9" xml:space="preserve">
-		<value>- Agregado un traductor de reserva que será usado automáticamente cuando el principal falle.
+    <value>- Agregado un traductor de reserva que será usado automáticamente cuando el principal falle.
 - Aumentado el intervalo de limpieza del caché de comandos.
 
 - Arreglado un bug en `new` que prevenía que se muestre el texto inicial.
@@ -1871,15 +1837,15 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Ahora `ping` muestra la latencia de la base de datos.
 
 - Reducido el uso de memoria.</value>
-	</data>
+  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
-		<value>Volcando la aventura...</value>
-	</data>
+    <value>Volcando la aventura...</value>
+  </data>
 	<data name="EditCanceled" xml:space="preserve">
-		<value>Edición cancelada.</value>
-	</data>
+    <value>Edición cancelada.</value>
+  </data>
 	<data name="Changelog1.3" xml:space="preserve">
-		<value>- Nuevo comando: `dump`.
+    <value>- Nuevo comando: `dump`.
 
 - Actualizado la API de AI Dungeon para usar WebSocketss. Ahora los tiempos de respuestas son mucho más rápidos.
 - Actualizado el comando `new` para usar reacciones en vez de tener que enviar números o nombres.
@@ -1905,5 +1871,100 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Ahora `badtranslator` no tendrá idiomas duplicados.
 
 - Reducido *mas* el uso de memoria.</value>
-	</data>
+  </data>
+	<data name="NothingToDelete" xml:space="preserve">
+    <value>Nada que eliminar.</value>
+  </data>
+	<data name="aidinfoSummary" xml:space="preserve">
+    <value>Muestra la info de AI Dungeon.</value>
+  </data>
+	<data name="aidnewSummary" xml:space="preserve">
+    <value>Crea una nueva aventura.</value>
+  </data>
+	<data name="continueSummary" xml:space="preserve">
+    <value>Continúa la aventura con el texto ingresado. Si no se da un texto, la IA generará una historia.</value>
+  </data>
+	<data name="continueParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="continueParam2" xml:space="preserve">
+    <value>El texto a usar.</value>
+  </data>
+	<data name="undoSummary" xml:space="preserve">
+    <value>Deshace la última acción.</value>
+  </data>
+	<data name="undoParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="redoSummary" xml:space="preserve">
+    <value>Rehace la última acción deshecha.</value>
+  </data>
+	<data name="redoParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="rememberSummary" xml:space="preserve">
+    <value>Agrega texto en el contexto de la memoria.</value>
+  </data>
+	<data name="rememberParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="rememberParam2" xml:space="preserve">
+    <value>El texto a agregar.</value>
+  </data>
+	<data name="alterSummary" xml:space="preserve">
+    <value>Edita la última respuesta.</value>
+  </data>
+	<data name="retrySummary" xml:space="preserve">
+    <value>Reintenta la última acción y genera una nueva respuesta.</value>
+  </data>
+	<data name="retryParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="makepublicSummary" xml:space="preserve">
+    <value>Hace público una ID.</value>
+  </data>
+	<data name="makepublicParam1" xml:space="preserve">
+    <value>La ID de aventura. Tienes que ser el dueño de esta ID.</value>
+  </data>
+	<data name="makeprivateSummary" xml:space="preserve">
+    <value>Hace privado una ID.</value>
+  </data>
+	<data name="makeprivateParam1" xml:space="preserve">
+    <value>La ID de aventura. Tienes que ser el dueño de esta ID.</value>
+  </data>
+	<data name="idlistSummary" xml:space="preserve">
+    <value>Muestra la lista de IDs de un usuario.</value>
+  </data>
+	<data name="idlistParam1" xml:space="preserve">
+    <value>El usuario a obtener sus IDs.</value>
+  </data>
+	<data name="idinfoSummary" xml:space="preserve">
+    <value>Muestra información acerca de una ID.</value>
+  </data>
+	<data name="idinfoParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="deleteSummary" xml:space="preserve">
+    <value>Elimina una ID.</value>
+  </data>
+	<data name="deleteParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="dumpSummary" xml:space="preserve">
+    <value>Extrae todo el texto de una ID.</value>
+  </data>
+	<data name="dumpParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
+	<data name="Changelog1.3.3" xml:space="preserve">
+    <value>- Eliminado `someone`.
+
+- Ahora Fergun mostrará la ayuda de un comando cuando éste se use de manera incorrecta
+- Agregado un ejemplo para cada comando con parámetros en la ayuda de comando.
+- Agregado la info del sistema operativo en `stats`.
+
+- Arreglado un bug en `ban`, `kick`, `nick` y `clear` que evitaba que funcionase correctamente, diciendo el usuario especificado no ha sido encontrado. Esto pasaba porque la caché de usuarios fue deshabilitada hace un tiempo.
+- Arreglado un bug en `clear` que hacia de diciese que habia mensajes anteriores a 2 semanas cuando no había mensajes a eliminar.
+- Arreglado un bug en `resize` y `invert` que causaba el comando fallase porque Discord mostraba en la prevista de algunas urls una imágen inválida.</value>
+  </data>
 </root>

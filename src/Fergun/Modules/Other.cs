@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
@@ -68,6 +69,7 @@ namespace Fergun.Modules
         [Command("changelog")]
         [Summary("changelogSummary")]
         [Alias("update")]
+        [Example("1.2")]
         public async Task<RuntimeResult> Changelog([Summary("changelogParam1")] string version = null)
         {
             version ??= FergunClient.Version;
@@ -97,6 +99,7 @@ namespace Fergun.Modules
         [Command("code", RunMode = RunMode.Async), Ratelimit(1, FergunClient.GlobalCooldown, Measure.Minutes)]
         [Summary("codeSummary")]
         [Alias("source")]
+        [Example("img")]
         public async Task<RuntimeResult> Code([Summary("codeParam1")] string commandName = null)
         {
             // maybe some day
@@ -229,6 +232,7 @@ namespace Fergun.Modules
         [Command("prefix")]
         [Summary("prefixSummary")]
         [Alias("setprefix")]
+        [Example("!")]
         public async Task<RuntimeResult> Prefix([Summary("prefixParam1")] string newPrefix)
         {
             if (FergunClient.IsDebugMode)
@@ -256,13 +260,14 @@ namespace Fergun.Modules
             }
 
             FergunClient.Database.UpdateRecord("Guilds", currentGuild);
-            await SendEmbedAsync($"{Locate("NewPrefix")} \"{newPrefix}\"");
+            await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
         }
 
         [Command("reaction")]
         [Summary("reactionSummary")]
         [Alias("react")]
+        [Example(":thonk: 635356699263887700")]
         public async Task<RuntimeResult> Reaction([Summary("reactionParam1")] string reaction,
             [Summary("reactionParam2")] ulong? messageId = null)
         {
@@ -309,6 +314,7 @@ namespace Fergun.Modules
 
         [Command("say", RunMode = RunMode.Async)]
         [Summary("saySummary")]
+        [Example("hey")]
         public async Task Say([Remainder, Summary("sayParam1")] string text)
         {
             await ReplyAsync(text, allowedMentions: AllowedMentions.None);
@@ -331,32 +337,63 @@ namespace Fergun.Modules
         {
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
             var cpuUsage = (int)await GetCpuUsageForProcessAsync();
-            string cpu;
-            string totalRam;
-            string totalRamUsage;
-            string processRamUsage;
+            string cpu = "?";
+            long? totalRamUsage;
+            long? processRamUsage;
+            long? totalRam;
+            string os = RuntimeInformation.OSDescription;
             if (FergunClient.IsLinux)
             {
-                cpu = "Intel Xeon Gold 6140 @ 4x 2.295GHz";
+                // CPU Name
+                if (File.Exists("/proc/cpuinfo"))
+                {
+                    var cpuinfo = File.ReadAllLines("/proc/cpuinfo");
+                    if (cpuinfo.Length > 4)
+                    {
+                        cpu = cpuinfo[4].Split(':')[1];
+                    }
+                }
 
-                string output = "free -m".Bash();
-                var lines = output.Split("\n");
-                var memory = lines[1].Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                totalRam = memory[1];
-                totalRamUsage = memory[2];
+                // OS Name
+                if (File.Exists("/etc/lsb-release"))
+                {
+                    var distroInfo = File.ReadAllLines("/etc/lsb-release");
+                    if (distroInfo.Length > 3)
+                    {
+                        os = distroInfo[3].Split('=')[1].Trim('\"');
+                    }
+                }
 
-                int ProcessId = Process.GetCurrentProcess().Id;
-                processRamUsage = $"ps -o rss= {ProcessId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".Bash().TrimEnd();
+                // Total RAM & total RAM usage
+                var output = "free -m".RunCommand().Split(Environment.NewLine);
+                var memory = output[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                totalRam = long.Parse(memory[1]);
+                totalRamUsage = long.Parse(memory[2]);
+
+                // Process RAM usage
+                int processId = Process.GetCurrentProcess().Id;
+                processRamUsage = long.Parse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand().TrimEnd());
             }
             else
             {
-                totalRam = "?";
-                cpu = "Intel Core i5-7400 CPU @ 3.00GHz";
-                totalRamUsage = "?";
-                processRamUsage = (Process.GetCurrentProcess().NonpagedSystemMemorySize64 / 1024).ToString();
-            }
+                // CPU Name
+                cpu = "wmic cpu get name"
+                    .RunCommand()
+                    .Trim()
+                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)[1];
 
-            //var ramUsage = Process.GetCurrentProcess().PeakWorkingSet64 / 1024 / 1024;
+                // Total RAM & total RAM usage
+                var output = "wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value"
+                    .RunCommand()
+                    .Trim()
+                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+                long freeRam = long.Parse(output[0].Split('=', StringSplitOptions.RemoveEmptyEntries)[1]) / 1024;
+                totalRam = long.Parse(output[1].Split('=', StringSplitOptions.RemoveEmptyEntries)[1]) / 1024;
+                totalRamUsage = totalRam - freeRam;
+
+                // Process RAM usage
+                processRamUsage = Process.GetCurrentProcess().NonpagedSystemMemorySize64 / 1024;
+            }
 
             int totalUsers = 0;
             foreach (var guild in Context.Client.Guilds)
@@ -373,13 +410,13 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Stats")
 
-                .AddField("Uptime", elapsed.ToShortForm2(), true)
+                .AddField(Locate("OperatingSystem"), os, true)
                 .AddField("\u200b", "\u200b", true)
                 .AddField("CPU", cpu, true)
 
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
-                .AddField(Locate("RAMUsage"), $"{processRamUsage}MB / {totalRamUsage}MB / {totalRam}MB", true) // TODO: Find a way to get the total RAM on windows
+                .AddField(Locate("RAMUsage"), $"{processRamUsage.ToString() ?? "?"}MB / {totalRamUsage.ToString() ?? "?"}MB / {totalRam.ToString() ?? "?"}MB", true)
 
                 .AddField(Locate("Library"), $"Discord.Net\nv{DiscordConfig.Version}", true)
                 .AddField("\u200b", "\u200b", true)
@@ -389,7 +426,8 @@ namespace Fergun.Modules
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("TotalUsers"), totalUsers, true)
 
-                .AddField(Locate("WebsocketPing"), $"{Context.Client.Latency}ms", true)
+                .AddField("Uptime", elapsed.ToShortForm2(), true)
+
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("BotOwner"), owner.Mention, true);
 
@@ -449,6 +487,7 @@ namespace Fergun.Modules
         [LongRunning]
         [Command("trivia", RunMode = RunMode.Async)]
         [Summary("triviaSummary")]
+        [Example("computers")]
         public async Task<RuntimeResult> Trivia([Summary("triviaParam1")] string category = null)
         {
             if (!string.IsNullOrEmpty(category))

@@ -62,6 +62,7 @@ namespace Fergun.Modules
         public static Emote TextEmote { get; set; } = Emote.Parse("<:text:728358376278458368>");
         public static Emote VoiceEmote { get; set; } = Emote.Parse("<:voice:728358400316145755>");
         public static Emote MongoDbEmote { get; set; } = Emote.Parse("<:mongodb:728358607195996271>");
+        public static Emote WebSocketEmote { get; set; } = Emote.Parse("<:websocket:736733297232838736>");
         private static Random RngInstance => _rngInstance ??= new Random();
 
         public Utility(CommandService commands)
@@ -71,6 +72,7 @@ namespace Fergun.Modules
 
         [Command("avatar")]
         [Summary("avatarSummary")]
+        [Example("Fergun#6839")]
         public async Task Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
         {
             user ??= Context.User;
@@ -104,6 +106,7 @@ namespace Fergun.Modules
         [Command("badtranslator", RunMode = RunMode.Async), Ratelimit(1, FergunClient.GlobalCooldown, Measure.Minutes)]
         [Summary("badtranslatorSummary")]
         [Alias("bt")]
+        [Example("i don't know what to say lol")]
         public async Task<RuntimeResult> Badtranslator([Remainder, Summary("badtranslatorParam1")] string text = null)
         {
             var builder = new EmbedBuilder
@@ -187,6 +190,7 @@ namespace Fergun.Modules
         [Command("base64decode")]
         [Summary("base64decodeSummary")]
         [Alias("b64decode", "b64d")]
+        [Example("aGVsbG8gd29ybGQ=")]
         public async Task<RuntimeResult> Base64decode([Remainder, Summary("base64decodeParam1")] string text)
         {
             if (!text.IsBase64())
@@ -201,6 +205,7 @@ namespace Fergun.Modules
         [Command("base64encode")]
         [Summary("base64encodeSummary")]
         [Alias("b64encode", "b64e")]
+        [Example("hello")]
         public async Task Base64encode([Remainder, Summary("base64encodeParam1")] string text)
         {
             string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
@@ -218,6 +223,7 @@ namespace Fergun.Modules
         [Command("calc", RunMode = RunMode.Async)]
         [Summary("calcSummary")]
         [Alias("calculate")]
+        [Example("2 * 2 - 1")]
         public async Task<RuntimeResult> Calc([Remainder, Summary("calcParam1")] string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -255,6 +261,7 @@ namespace Fergun.Modules
         [Command("channelinfo")]
         [Summary("channelinfoSummary")]
         [Alias("channel")]
+        [Example("#general")]
         public async Task<RuntimeResult> Channelinfo([Remainder, Summary("channelinfoParam1")] ITextChannel channel = null)
         {
             channel ??= Context.Channel as ITextChannel;
@@ -284,6 +291,7 @@ namespace Fergun.Modules
         [Command("choice")]
         [Summary("choiceSummary")]
         [Alias("choose")]
+        [Example("c c++ c#")]
         public async Task<RuntimeResult> Choice([Summary("choiceParam1")] params string[] choices)
         {
             if (choices.Length == 0)
@@ -296,6 +304,7 @@ namespace Fergun.Modules
 
         [Command("color")]
         [Summary("colorSummary")]
+        [Example("#ff983e")]
         public async Task<RuntimeResult> Color([Summary("colorParam1")] string color = null)
         {
             System.Drawing.Color _color;
@@ -417,6 +426,7 @@ namespace Fergun.Modules
         [Command("editsnipe", RunMode = RunMode.Async)]
         [Summary("editsnipeSummary")]
         [Alias("esnipe")]
+        [Example("#bots")]
         public async Task Editsnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
@@ -442,6 +452,7 @@ namespace Fergun.Modules
         [Command("help")]
         [Summary("helpSummary")]
         [Alias("ayuda", "yardım")]
+        [Example("help")]
         public async Task<RuntimeResult> Help([Summary("helpParam1")] string commandName = null)
         {
             var builder = new EmbedBuilder();
@@ -494,7 +505,7 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
                 }
-                var embed = BuildCommandHelp(command);
+                var embed = command.ToHelpEmbed(GetLanguage(), GetPrefix());
                 await ReplyAsync(embed: embed);
             }
             return FergunResult.FromSuccess();
@@ -505,6 +516,7 @@ namespace Fergun.Modules
         [Summary("identifySummary")]
         [Alias("captionbot")]
         [Remarks("NoUrlPassed")]
+        [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
         {
             string errorReason;
@@ -547,10 +559,11 @@ namespace Fergun.Modules
         [Command("img", RunMode = RunMode.Async), Ratelimit(1, FergunClient.GlobalCooldown, Measure.Minutes)]
         [Summary("imgSummary")]
         [Alias("im", "image", "ddgi")]
+        [Example("discord")]
         public async Task<RuntimeResult> Img([Remainder, Summary("imgParam1")] string query)
         {
+            //Console.WriteLine($"Executing \"img\" in {(Context.IsPrivate ? $"@{Context.User}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User} with query: \"{query}\"");
             query = query.Trim();
-            Console.WriteLine($"Executing \"img\" in {(Context.IsPrivate ? $"@{Context.User}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User} with query: \"{query}\"");
 
             // Considering a DM channel a SFW channel.
             bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
@@ -626,6 +639,7 @@ namespace Fergun.Modules
         [Command("invert", RunMode = RunMode.Async), Ratelimit(2, FergunClient.GlobalCooldown, Measure.Minutes)]
         [Summary("invertSummary")]
         [Alias("negate", "negative")]
+        [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Invert([Remainder, Summary("invertParam1")] string url = null)
         {
             string errorReason;
@@ -661,6 +675,7 @@ namespace Fergun.Modules
         [Command("ocr", RunMode = RunMode.Async), Ratelimit(2, 1, Measure.Minutes)]
         [Summary("ocrSummary")]
         [Remarks("NoUrlPassed")]
+        [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
             string errorReason;
@@ -772,6 +787,7 @@ namespace Fergun.Modules
         [Summary("ocrtranslateSummary")]
         [Alias("ocrtr")]
         [Remarks("NoUrlPassed")]
+        [Example("en https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocrtr([Summary("ocrtranslateParam1")] string target,
             [Summary("ocrtranslateParam2")] string url = null)
         {
@@ -838,7 +854,11 @@ namespace Fergun.Modules
             FergunClient.Database.Find<Guild>("Guilds", _ => true);
             sw2.Stop();
 
-            await SendEmbedAsync($"⏱**Message**: {sw.ElapsedMilliseconds}ms\n\n{MongoDbEmote}**Database**: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms");
+            await SendEmbedAsync($@"⏱**Message**: {sw.ElapsedMilliseconds}ms
+
+{WebSocketEmote}**WebSocket**: {Context.Client.Latency}ms
+
+{MongoDbEmote}**Database**: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms");
             //await msg.ModifyAsync(x => x.Content = $"**Pong!** {sw.ElapsedMilliseconds}ms\nWebsocket: {Context.Client.Latency}ms");
         }
 
@@ -847,6 +867,7 @@ namespace Fergun.Modules
         [Summary("resizeSummary")]
         [Alias("waifu2x", "w2x")]
         [Remarks("NoUrlPassed")]
+        [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Resize([Summary("resizeParam1")] string url = null)
         {
             string errorReason;
@@ -892,6 +913,7 @@ namespace Fergun.Modules
         [Command("roleinfo")]
         [Summary("roleinfoSummary")]
         [Alias("role")]
+        [Example("Devs")]
         public async Task<RuntimeResult> Roleinfo([Remainder, Summary("roleinfoParam1")] SocketRole role)
         {
             var builder = new EmbedBuilder()
@@ -925,6 +947,7 @@ namespace Fergun.Modules
         [Command("screenshot", RunMode = RunMode.Async), Ratelimit(2, 1, Measure.Minutes)]
         [Summary("screenshotSummary")]
         [Alias("ss")]
+        [Example("https://www.fergun.com")]
         public async Task<RuntimeResult> Screenshot([Summary("screenshotParam1")] string url)
         {
             Uri uri;
@@ -989,12 +1012,12 @@ namespace Fergun.Modules
         [Command("serverinfo", RunMode = RunMode.Async)]
         [Summary("serverinfoSummary")]
         [Alias("server", "guild", "guildinfo")]
-        public async Task<RuntimeResult> Serverinfo(ulong? serverId = null)
+        public async Task<RuntimeResult> Serverinfo(string serverId = null)
         {
             SocketGuild server;
             if (Context.User.Id == (await Context.Client.GetApplicationInfoAsync()).Owner.Id)
             {
-                server = serverId == null ? Context.Guild : Context.Client.GetGuild(serverId.Value);
+                server = serverId == null ? Context.Guild : Context.Client.GetGuild(ulong.Parse(serverId));
                 if (server == null)
                 {
                     return FergunResult.FromError(Locate("GuildNotFound"));
@@ -1019,7 +1042,7 @@ namespace Fergun.Modules
             //    }
             //    users = server.Users;
             //}
-            var users = Context.Guild.Users;
+            //var users = Context.Guild.Users;
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("ServerInfo"))
@@ -1040,12 +1063,13 @@ namespace Fergun.Modules
                 .AddField(Locate("BoostCount"), server.PremiumSubscriptionCount, true)
                 .AddField(Locate("ServerFeatures"), server.Features.Count == 0 ? Locate("None") : string.Join(", ", server.Features), true)
 
-                .AddField(Locate("Members"), $"{server.MemberCount} (Bots: {users.Count(x => x.IsBot)}) **|** " +
-                $"{OnlineEmote} {users.Count(x => x.Status == UserStatus.Online)} **|** " +
-                $"{IdleEmote} {users.Count(x => x.Status == UserStatus.Idle)} **|** " +
-                $"{DndEmote} {users.Count(x => x.Status == UserStatus.DoNotDisturb)} **|** " +
-                $"{StreamingEmote} {users.Count(x => x.Activity != null && x.Activity.Type == ActivityType.Streaming)} **|** " +
-                $"{OfflineEmote} {users.Count(x => x.Status == UserStatus.Offline)}");
+                .AddField(Locate("Members"), server.MemberCount, true);
+                //.AddField(Locate("Members"), $"{server.MemberCount} (Bots: {users.Count(x => x.IsBot)}) **|** " +
+                //$"{OnlineEmote} {users.Count(x => x.Status == UserStatus.Online)} **|** " +
+                //$"{IdleEmote} {users.Count(x => x.Status == UserStatus.Idle)} **|** " +
+                //$"{DndEmote} {users.Count(x => x.Status == UserStatus.DoNotDisturb)} **|** " +
+                //$"{StreamingEmote} {users.Count(x => x.Activity != null && x.Activity.Type == ActivityType.Streaming)} **|** " +
+                //$"{OfflineEmote} {users.Count(x => x.Status == UserStatus.Offline)}");
 
             /*
             .AddField(Locate("Members"), $"{server.MemberCount} (Bots: {server.Users.Count(x => x.IsBot)}) **|** " +
@@ -1083,6 +1107,7 @@ namespace Fergun.Modules
 
         [Command("snipe", RunMode = RunMode.Async)]
         [Summary("snipeSummary")]
+        [Example("#help")]
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
@@ -1109,6 +1134,7 @@ namespace Fergun.Modules
         [Command("translate", RunMode = RunMode.Async)]
         [Summary("translateSummary")]
         [Alias("tr")]
+        [Example("es hello world")]
         public async Task<RuntimeResult> Translate([Summary("translateParam1")] string target,
             [Remainder, Summary("translateParam2")] string text)
         {
@@ -1151,13 +1177,14 @@ namespace Fergun.Modules
         [Command("tts", RunMode = RunMode.Async), Ratelimit(2, FergunClient.GlobalCooldown, Measure.Minutes)]
         [Summary("Text to speech.")]
         [Alias("texttospeech", "t2s")]
+        [Example("en hello world")]
         public async Task<RuntimeResult> Tts([Summary("ttsParam1")] string target,
             [Remainder, Summary("ttsParam2")] string text)
         {
             target = target.ToLowerInvariant();
             text = text.ToLowerInvariant();
 
-            if (!GoogleTTS.IsLanguageSupported(new Language("", target)))
+            if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
             {
                 //return CustomResult.FromError(GetValue("InvalidLanguage"));
                 text = $"{target} {text}";
@@ -1185,24 +1212,24 @@ namespace Fergun.Modules
         [Command("urban", RunMode = RunMode.Async)]
         [Summary("urbanSummary")]
         [Alias("ud")]
+        [Example("pog")]
         public async Task<RuntimeResult> Urban([Remainder, Summary("urbanParam1")] string query = null)
         {
-            Console.WriteLine($"Executing \"urban\" in {(Context.IsPrivate ? $"@{Context.User}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User} with query: \"{query}\"");
-            UrbanApi urban = new UrbanApi();
+            //Console.WriteLine($"Executing \"urban\" in {(Context.IsPrivate ? $"@{Context.User}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User} with query: \"{query}\"");
             UrbanResponse search = null;
             CachedPages cached = null;
 
             query = query?.Trim();
             if (string.IsNullOrWhiteSpace(query))
             {
-                search = urban.GetRandomWords();
+                search = UrbanApi.GetRandomWords();
             }
             else
             {
                 cached = UrbanCache.FirstOrDefault(x => x.Query == query);
                 if (cached == null)
                 {
-                    search = urban.SearchWord(query);
+                    search = UrbanApi.SearchWord(query);
                     if (search.Definitions.Count == 0)
                     {
                         return FergunResult.FromError(Locate("NoResults"));
@@ -1297,6 +1324,7 @@ namespace Fergun.Modules
         [Command("userinfo")]
         [Summary("userinfoSummary")]
         [Alias("ui", "user", "whois")]
+        [Example("Fergun#6839")]
         public async Task<RuntimeResult> Userinfo([Remainder, Summary("userinfoParam1")] IUser user = null)
         {
             user ??= Context.User;
@@ -1363,6 +1391,7 @@ namespace Fergun.Modules
         [Command("wikipedia", RunMode = RunMode.Async)]
         [Summary("wikipediaSummary")]
         [Alias("wiki")]
+        [Example("Discord")]
         public async Task<RuntimeResult> Wikipedia([Remainder, Summary("wikipediaParam1")] string query)
         {
             string response;
@@ -1463,6 +1492,7 @@ namespace Fergun.Modules
 
         [Command("xkcd")]
         [Summary("xkcdSummary")]
+        [Example("1000")]
         public async Task<RuntimeResult> Xkcd([Summary("xkcdParam1")] int? number = null)
         {
             UpdateLastComic();
@@ -1510,7 +1540,7 @@ namespace Fergun.Modules
 
                 await ReplyAsync(Locate("EmptyCache"));
                 await Context.Channel.TriggerTypingAsync();
-                Console.WriteLine($"Creating video cache in {(Context.IsPrivate ? $"{Context.Channel}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User}");
+                //Console.WriteLine($"Creating video cache in {(Context.IsPrivate ? $"{Context.Channel}" : $"{Context.Guild.Name}/{Context.Channel.Name}")} for {Context.User}");
 
                 var tasks = CreateVideoTasks();
                 try
@@ -1526,7 +1556,10 @@ namespace Fergun.Modules
                     _isCreatingCache = false;
                 }
             }
-            VideoCache.TryTake(out string id);
+            if (VideoCache.TryTake(out string id))
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
             await ReplyAsync($"https://www.youtube.com/watch?v={id}");
             return FergunResult.FromSuccess();
         }
@@ -1719,65 +1752,6 @@ namespace Fergun.Modules
             _timeToCheckComic = DateTime.UtcNow.AddDays(1);
         }
 
-        private Embed BuildCommandHelp(CommandInfo command)
-        {
-            //Maybe there's a better way to make a dynamic help?
-            var builder = new EmbedBuilder
-            {
-                Title = command.Name,
-                Description = Locate(command.Summary ?? "HelpNoDescription"),
-                Color = new Discord.Color(FergunConfig.EmbedColor)
-            };
-
-            if (command.Parameters.Count > 0)
-            {
-                // Add parameters: param1 (type) (Optional): description
-                string field = "";
-                foreach (var parameter in command.Parameters)
-                {
-                    field += $"{parameter.Name} ({parameter.Type.CSharpName()}) ";
-                    if (parameter.IsOptional)
-                        field += $" {Locate("HelpOptional")}";
-                    field += $": {Locate(parameter.Summary ?? "HelpNoDescription")}\n";
-                }
-                builder.AddField(Locate("HelpParameters"), field);
-            }
-
-            // Add usage field (`prefix command <param1> [param2...]`)
-            string usage = $"`{GetPrefix()}{command.Name}";
-            foreach (var parameter in command.Parameters)
-            {
-                usage += " ";
-                usage += parameter.IsOptional ? "[" : "<";
-                usage += parameter.Name;
-                if (parameter.IsRemainder || parameter.IsMultiple)
-                    usage += "...";
-                usage += parameter.IsOptional ? "]" : ">";
-            }
-            usage += "`";
-            builder.AddField(Locate("HelpUsage"), usage);
-
-            // Add notes if present
-            if (!string.IsNullOrEmpty(command.Remarks))
-            {
-                builder.AddField(Locate("Notes"), Locate(command.Remarks));
-            }
-
-            // Add aliases if present
-            if (command.Aliases.Count > 1)
-            {
-                builder.AddField(Locate("HelpAlias"), string.Join(", ", command.Aliases.Skip(1)));
-            }
-
-            // Add footer with info about obligatory and optional parameters
-            if (command.Parameters.Count > 0)
-            {
-                builder.WithFooter(Locate("HelpFooter2"));
-            }
-
-            return builder.Build();
-        }
-
         /// <summary>
         /// Gets the url from the last x messages / embeds /attachments.
         /// </summary>
@@ -1796,7 +1770,7 @@ namespace Fergun.Modules
                     var attachment = Context.Message.Attachments.First();
                     if (onlyImage && attachment.Width == null && attachment.Height == null)
                     {
-                        return (null, "AttachNotImage");
+                        return (null, "AttachmentNotImage");
                     }
                     url = attachment.Url;
                 }
@@ -1858,15 +1832,12 @@ namespace Fergun.Modules
                     {
                         return (null, "ImageNotFound");
                     }
-                    //string ImageUrl = embed.Image.HasValue ? embed.Image.Value.Url : embed.Thumbnail.Value.Url;
-                    //if (!IsImageUrl(ImageUrl))
-                    //{
-                    //    return (null, "ImageNotFound");
-                    //}
-                    //else
-                    //{
-                    //    url = ImageUrl;
-                    //}
+
+                    // the image can still be invalid
+                    if (!await IsImageUrlAsync(url))
+                    {
+                        return (null, "ImageNotFound");
+                    }
                 }
                 else
                 {

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 
@@ -21,12 +22,12 @@ namespace Fergun.Modules
         [Command("normalize")]
         [Summary("normalizeSummary")]
         [Alias("decancer")]
+        [Example("ａｅｓｔｈｅｔｉｃ")]
         public async Task Normalize([Remainder, Summary("normalizeParam1")] string text)
         {
-            var normalizedString = text.Normalize(NormalizationForm.FormKD);
             string normalized = "";
 
-            foreach (var c in normalizedString)
+            foreach (var c in text.Normalize(NormalizationForm.FormKD))
             {
                 var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
                 if (unicodeCategory != UnicodeCategory.NonSpacingMark)
@@ -39,6 +40,7 @@ namespace Fergun.Modules
 
         [Command("randomize")]
         [Summary("randomizeSummary")]
+        [Example("hello")]
         public async Task Randomize([Remainder, Summary("randomizeParam1")] string text)
         {
             await ReplyAsync(new string(text.ToCharArray().OrderBy(s => RngInstance.Next(2) == 0).ToArray()).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
@@ -46,6 +48,7 @@ namespace Fergun.Modules
 
         [Command("repeat")]
         [Summary("repeatSummary")]
+        [Example("10 oof")]
         public async Task Repeat([Summary("repeatParam1")] uint count,
             [Remainder, Summary("repeatParam2")] string text)
         {
@@ -54,6 +57,7 @@ namespace Fergun.Modules
 
         [Command("reverse")]
         [Summary("reverseSummary")]
+        [Example("hello")]
         public async Task Reverse([Remainder, Summary("reverseParam1")] string text)
         {
             await ReplyAsync(StringExtension.Reverse(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
@@ -62,6 +66,7 @@ namespace Fergun.Modules
         [Command("reverselines")]
         [Summary("reverselinesSummary")]
         [Alias("rlines", "rline", "rel")]
+        [Example("line 1\nline 2\nline 3")]
         public async Task Reverselines([Remainder, Summary("reverselinesParam1")] string text)
         {
             await ReplyAsync(StringExtension.ReverseEachLine(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
@@ -70,6 +75,7 @@ namespace Fergun.Modules
         [Command("reversewords")]
         [Summary("reversewordsSummary")]
         [Alias("rwords")]
+        [Example("one two three")]
         public async Task Reversewords([Remainder, Summary("reversewordsParam1")] string text)
         {
             await ReplyAsync(string.Join(" ", text.Split(' ').Reverse()).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
@@ -77,15 +83,17 @@ namespace Fergun.Modules
 
         [Command("sarcasm")]
         [Summary("sarcasmSummary")]
-        [Alias("randomcase", "sarcastic2")]
+        [Alias("randomcase", "sarcastic")]
+        [Example("you can't do that!")]
         public async Task Sarcasm([Remainder, Summary("sarcasmParam1")] string text)
         {
             await ReplyAsync(string.Concat(text.ToLowerInvariant().Select(x => RngInstance.Next(2) == 0 ? char.ToUpperInvariant(x) : x)).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
         }
 
-        [Command("vapor")]
+        [Command("vaporwave")]
         [Summary("vaporwaveSummary")]
-        [Alias("vaporwave", "aesthetic", "fullwidth")]
+        [Alias("vapor", "aesthetic", "fullwidth")]
+        [Example("aesthetic")]
         public async Task Vapor([Remainder, Summary("vaporwaveParam1")] string text)
         {
             await ReplyAsync(text.Fullwidth().Truncate(DiscordConfig.MaxMessageSize));

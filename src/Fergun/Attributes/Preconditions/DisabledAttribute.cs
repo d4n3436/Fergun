@@ -5,28 +5,31 @@ using Discord.Commands;
 namespace Fergun.Attributes.Preconditions
 {
     /// <summary>
-    /// Disables the command or module on a specific guild.
+    /// Disables the command or module globally or on a specific guild.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class DisabledAttribute : PreconditionAttribute
     {
-        public DisabledAttribute(ulong guildId)
+        public DisabledAttribute()
         {
-             _guildId = guildId;
+        }
+
+        public DisabledAttribute(params ulong[] guildIds)
+        {
+             _guildIds = guildIds;
         }
 
         /// <inheritdoc />
         public override string ErrorMessage { get; set; }
 
-        private readonly ulong _guildId;
+        private readonly ulong[] _guildIds = Array.Empty<ulong>();
 
         /// <inheritdoc />
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo _, IServiceProvider _1)
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo _, IServiceProvider _1)
         {
-            await Task.CompletedTask;
-            return context.Guild.Id != _guildId
-                ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError(ErrorMessage ?? "This module is disabled in this guild.");
+            return _guildIds.Length == 0 || Array.Exists(_guildIds, x => x == context.Guild.Id)
+                ? Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? "Disabled command / module."))
+                : Task.FromResult(PreconditionResult.FromSuccess());
         }
     }
 }

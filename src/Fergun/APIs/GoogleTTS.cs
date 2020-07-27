@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GoogleTranslateFreeApi;
 
 namespace Fergun.APIs
 {
@@ -97,9 +96,6 @@ namespace Fergun.APIs
             return builder.Uri;
         }
 
-        // :)
-        public static bool IsLanguageSupported(Language language) => GoogleTranslator.IsLanguageSupported(language);
-
         /// <summary>
         /// Where the magic happens.
         /// </summary>
@@ -122,7 +118,7 @@ namespace Fergun.APIs
             {
                 a = (a & int.MaxValue) + int.MaxValue + 1;
             }
-                
+
             a %= 1000000; //0x1E6
             //stamp %= (long)Math.Pow(10.00, 6.00);
             //stamp %= long.Parse(Math.Pow(10.00, 6.00).ToString());

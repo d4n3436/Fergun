@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Fergun.APIs
 {
-    static class OCRSpace
+    public static class OCRSpace
     {
         // https://api.ocr.space/parse/image
         public const string ApiEndpoint = "https://api.ocr.space/parse/imageurl";
@@ -193,10 +193,12 @@ namespace Fergun.APIs
             /// This contains the words with the specific details of a word like its text and position
             /// </summary>
             public List<Word> Words { get; set; }
+
             /// <summary>
             /// Contains the height (in px) of the line
             /// </summary>
             public int MaxHeight { get; set; }
+
             /// <summary>
             /// Contains the distance (in px) of the line from the top edge in the original size of image
             /// </summary>
@@ -212,18 +214,22 @@ namespace Fergun.APIs
             /// This contains the text of that specific word
             /// </summary>
             public string WordText { get; set; }
+
             /// <summary>
             /// Contains the distance (in px) of the word from the left edge of the image
             /// </summary>
             public int Left { get; set; }
+
             /// <summary>
             /// Contains the distance (in px) of the word from the top edge of the image
             /// </summary>
             public int Top { get; set; }
+
             /// <summary>
             /// Contains the height (in px) of the word
             /// </summary>
             public int Height { get; set; }
+
             /// <summary>
             /// Contains the width (in px) of the word
             /// </summary>

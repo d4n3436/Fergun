@@ -22,6 +22,14 @@ namespace Fergun.Attributes.Preconditions
         {
         }
 
+        public UserMustBeInVoiceAttribute(params string[] exceptions)
+            : this()
+        {
+            _exceptions = exceptions;
+        }
+
+        private readonly string[] _exceptions;
+
         /// <inheritdoc />
         public override async Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context, CommandInfo command, IServiceProvider services)
@@ -30,7 +38,7 @@ namespace Fergun.Attributes.Preconditions
             if (!baseResult.IsSuccess)
                 return baseResult;
 
-            if (command.Name == "lyrics")
+            if (Array.Exists(_exceptions, x => x == command.Name))
                 return PreconditionResult.FromSuccess();
 
             var current = (context.User as IVoiceState)?.VoiceChannel?.Id;

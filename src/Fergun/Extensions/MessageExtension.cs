@@ -6,10 +6,10 @@ using Discord.WebSocket;
 
 namespace Fergun.Extensions
 {
-    public static class IMessageExtension
+    public static class MessageExtension
     {
         /// <summary>
-        /// Try to delete a message.
+        /// Tries to delete a message.
         /// </summary>
         /// <param name="messageId">The message Id.</param>
         public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, ulong messageId)
@@ -19,7 +19,7 @@ namespace Fergun.Extensions
         }
 
         /// <summary>
-        /// Try to delete a message.
+        /// Tries to delete a message.
         /// </summary>
         /// <param name="message">The message.</param>
         public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, IMessage message)
@@ -29,7 +29,7 @@ namespace Fergun.Extensions
         }
 
         /// <summary>
-        /// Try to delete this message.
+        /// Tries to delete this message.
         /// </summary>
         public static async Task<bool> TryDeleteAsync(this IMessage message)
         {
@@ -71,20 +71,31 @@ namespace Fergun.Extensions
             }
         }
 
-        public static async Task TryRemoveAllReactionsAsync(this IMessage message)
+        /// <summary>
+        /// Tries to remove all reactions from this message.
+        /// </summary>
+        public static async Task<bool> TryRemoveAllReactionsAsync(this IMessage message)
         {
-            if (message == null) return;
+            if (message == null) return false;
 
             // get the updated message with the reactions
             message = await message.Channel.GetMessageAsync(message.Id);
-            if (message.Reactions.Count == 0) return;
+            if (message.Reactions.Count == 0) return false;
 
             bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
 
             if (manageMessages)
+            {
                 await message.RemoveAllReactionsAsync();
+            }
             else
-                await (message as IUserMessage).RemoveReactionsAsync(message.Author, message.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+            {
+                var botReactions = message.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray();
+                if (botReactions.Length == 0) return false;
+
+                await (message as IUserMessage).RemoveReactionsAsync(message.Author, botReactions);
+            }
+            return true;
         }
     }
 }

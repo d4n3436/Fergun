@@ -48,10 +48,10 @@ namespace Fergun
 
         public static IReadOnlyList<string> WordList => _wordlist;
 
-        public const string Version = "1.3";
+        public const string Version = "1.3.3";
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>()
-        { 
+        {
             "0.8",
             "0.9",
             "1.0",
@@ -61,7 +61,8 @@ namespace Fergun
             "1.2.3",
             "1.2.4",
             "1.2.7",
-            "1.2.9"
+            "1.2.9",
+            "1.3"
         };
 
         public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
@@ -111,10 +112,10 @@ namespace Fergun
             {
                 MessageCacheSize = 50,
                 AlwaysDownloadUsers = false,
-                ConnectionTimeout = 30000, 
+                ConnectionTimeout = 30000,
                 LogLevel = LogSeverity.Verbose,
                 ExclusiveBulkDelete = true,
-                GatewayIntents = 
+                GatewayIntents =
                 GatewayIntents.Guilds |
 
                 // Moderation commands
@@ -133,10 +134,8 @@ namespace Fergun
                 GatewayIntents.DirectMessages |
                 GatewayIntents.DirectMessageReactions
 
-                //GatewayIntents.GuildPresences
+                //GatewayIntents.GuildPresences // I need it for the user status (userinfo and spotify)
                 //GatewayIntents.GuildEmojis
-                //GatewayIntents.GuildMembers
-                //GuildSubscriptions = true // I need it for the user status (userinfo and spotify)
             });
 
             _cmdService = new CommandService(new CommandServiceConfig
@@ -268,7 +267,6 @@ namespace Fergun
             {
                 ProcessStartInfo process = new ProcessStartInfo
                 {
-
                     FileName = "java",
                     Arguments = $"-jar \"{Path.Combine(AppContext.BaseDirectory, "Lavalink")}/Lavalink.jar\"",
                     WorkingDirectory = Path.Combine(AppContext.BaseDirectory, "Lavalink"),

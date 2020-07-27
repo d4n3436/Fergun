@@ -38,11 +38,7 @@ namespace Fergun
         {
             get
             {
-                try
-                {
-                    client.ListDatabaseNames();
-                }
-                catch (Exception) { }
+                client.ListDatabaseNames();
                 return client.Cluster.Description.State == ClusterState.Connected;
             }
         }

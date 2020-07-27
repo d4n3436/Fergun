@@ -27,10 +27,11 @@ namespace Fergun.Modules
         [LongRunning]
         [Command("bash", RunMode = RunMode.Async)]
         [Summary("bashSummary")]
-        [Alias("sh")]
+        [Alias("sh", "cmd")]
+        [Example("ping discord.com -c 4")]
         public async Task Bash([Remainder] string command)
         {
-            string result = command.Bash();
+            string result = command.RunCommand();
             if (string.IsNullOrWhiteSpace(result))
             {
                 await SendEmbedAsync("No output.");
@@ -43,6 +44,7 @@ namespace Fergun.Modules
 
         [Command("blacklist")]
         [Summary("blacklistSummary")]
+        [Example("666963870385923507 bot abuse")]
         public async Task Blacklist([Summary("blacklistParam1")] ulong id,
             [Remainder, Summary("blacklistParam2")] string reason = null)
         {
@@ -68,6 +70,7 @@ namespace Fergun.Modules
 
         [Command("botgame")]
         [Summary("botgameSummary")]
+        [Example("f!help | fergun.com")]
         public async Task Botgame([Remainder, Summary("botgameParam1")] string text)
         {
             await Context.Client.SetGameAsync(text);
@@ -79,6 +82,7 @@ namespace Fergun.Modules
 
         [Command("botstatus")]
         [Summary("botstatusSummary")]
+        [Example("1")]
         public async Task Botstatus([Summary("botstatusParam1")] uint status)
         {
             if (status <= 5)
@@ -93,6 +97,7 @@ namespace Fergun.Modules
 
         [Command("botcolor")]
         [Summary("botcolorSummary")]
+        [Example("1")]
         public async Task<RuntimeResult> Botcolor([Remainder, Summary("botcolorParam1")] string color)
         {
             if (!uint.TryParse(color, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint newcolor))
@@ -112,6 +117,7 @@ namespace Fergun.Modules
 
         [Command("eval", RunMode = RunMode.Async)]
         [Summary("evalSummary")]
+        [Example("return Context.Client.Guilds.Count();")]
         public async Task Eval([Remainder, Summary("evalParam1")] string code)
         {
             Stopwatch sw = new Stopwatch();
@@ -229,6 +235,7 @@ namespace Fergun.Modules
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [Command("forceprefix")]
         [Summary("forceprefixSummary")]
+        [Example("!")]
         public async Task<RuntimeResult> Forceprefix([Summary("prefixParam1")] string newPrefix)
         {
             var currentGuild = GetGuild();
@@ -261,6 +268,7 @@ namespace Fergun.Modules
 
         [Command("globalprefix")]
         [Summary("globalprefixSummary")]
+        [Example("f!")]
         public async Task<RuntimeResult> Globalprefix([Summary("globalprefixParam1")] string newPrefix)
         {
             if (newPrefix == FergunConfig.GlobalPrefix)

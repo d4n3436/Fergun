@@ -17,7 +17,7 @@ namespace Fergun.Modules
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     [Disabled(264445053596991498)]
-    [UserMustBeInVoice(ErrorMessage = "UserNotInVC")]
+    [UserMustBeInVoice("lyrics", ErrorMessage = "UserNotInVC")]
     public class Music : FergunBase
     {
         private readonly MusicService _musicService;
@@ -49,6 +49,7 @@ namespace Fergun.Modules
 
         [Command("loop")]
         [Summary("loopSummary")]
+        [Example("10")]
         public async Task Loop([Summary("loopParam1")] uint? count = null)
         {
             await SendEmbedAsync(_musicService.Loop(count, Context.Guild, Context.Channel as ITextChannel));
@@ -58,6 +59,7 @@ namespace Fergun.Modules
         [Command("lyrics", RunMode = RunMode.Async)]
         [Summary("lyricsSummary")]
         [Alias("l")]
+        [Example("never gonna give you up")]
         public async Task Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
             bool keepHeaders = false;
@@ -135,6 +137,7 @@ namespace Fergun.Modules
         [Command("play", RunMode = RunMode.Async)]
         [Summary("playSummary")]
         [Alias("p")]
+        [Example("darude sandstorm")]
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = Context.User as SocketGuildUser;
@@ -205,6 +208,7 @@ namespace Fergun.Modules
         [Command("remove")]
         [Summary("removeSummary")]
         [Alias("delete")]
+        [Example("2")]
         public async Task Remove([Summary("removeParam1")] int index)
         {
             await SendEmbedAsync(_musicService.RemoveAt(Context.Guild, Context.Channel as ITextChannel, index));
@@ -227,6 +231,7 @@ namespace Fergun.Modules
         [Command("seek")]
         [Summary("seekSummary")]
         [Alias("skipto", "goto")]
+        [Example("3:14")]
         public async Task Seek([Summary("seekParam1")] string time)
         {
             await SendEmbedAsync(await _musicService.SeekAsync(Context.Guild, Context.Channel as ITextChannel, time));
@@ -256,6 +261,7 @@ namespace Fergun.Modules
 
         [Command("volume")]
         [Summary("volumeSummary")]
+        [Example("70")]
         public async Task Volume([Summary("volumeParam1")] int volume)
         {
             await SendEmbedAsync(await _musicService.SetVolumeAsync(volume, Context.Guild, Context.Channel as ITextChannel));

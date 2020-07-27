@@ -133,7 +133,7 @@
     <value>Музыкальные команды</value>
   </data>
 	<data name="Notes" xml:space="preserve">
-    <value>Ноты:</value>
+    <value>Ноты</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
     <value>Используйте `{0} help [command]`, чтобы получить больше информации о команде.</value>
@@ -153,20 +153,20 @@
 	<data name="CommandNotFound" xml:space="preserve">
     <value>Команда не найдена. Используйте `{0}help` для просмотра списка команд.</value>
   </data>
-	<data name="HelpNoDescription" xml:space="preserve">
+	<data name="NoDescription" xml:space="preserve">
     <value>(Нет доступного описания)</value>
   </data>
-	<data name="HelpOptional" xml:space="preserve">
+	<data name="Optional" xml:space="preserve">
     <value>(Необязательный)</value>
   </data>
-	<data name="HelpUsage" xml:space="preserve">
-    <value>Применение:</value>
+	<data name="Usage" xml:space="preserve">
+    <value>Применение</value>
   </data>
-	<data name="HelpAlias" xml:space="preserve">
-    <value>Псевдоним (ы):</value>
+	<data name="Alias" xml:space="preserve">
+    <value>Псевдоним(ы)</value>
   </data>
-	<data name="HelpParameters" xml:space="preserve">
-    <value>Параметры:</value>
+	<data name="Parameters" xml:space="preserve">
+    <value>Параметры</value>
   </data>
 	<data name="mojibakeSummary" xml:space="preserve">
     <value>Показывает случайные символы Юникода.</value>
@@ -273,7 +273,7 @@
 	<data name="identifyParam1" xml:space="preserve">
     <value>URL изображения для использования.</value>
   </data>
-	<data name="AttachNotImage" xml:space="preserve">
+	<data name="AttachmentNotImage" xml:space="preserve">
     <value>Вложение не является изображением.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
@@ -737,19 +737,19 @@
 	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
     <value>В очереди {0} треков ({1})
 
-Сейчас играет: {2} ({3})</value>
+Сейчас играет: {2}</value>
   </data>
 	<data name="PlayerTrackAdded" xml:space="preserve">
-    <value>{0} ({1}) был добавлен в очередь.</value>
+    <value>{0} был добавлен в очередь.</value>
   </data>
 	<data name="PlayerNowPlaying" xml:space="preserve">
-    <value>Сейчас играет: {0} ({1})</value>
+    <value>Сейчас играет: {0}</value>
   </data>
 	<data name="InvalidTrack" xml:space="preserve">
     <value>Неверный трек.</value>
   </data>
 	<data name="Replaying" xml:space="preserve">
-    <value>Воспроизведение</value>
+    <value>Воспроизведение {0}</value>
   </data>
 	<data name="EmptyQueue" xml:space="preserve">
     <value>Очередь пуста.</value>
@@ -763,13 +763,13 @@
 	<data name="PlayerTrackSkipped" xml:space="preserve">
     <value>Пропущено: {0}
 
-Сейчас играет: {1} ({2})</value>
+Сейчас играет: {1}</value>
   </data>
 	<data name="VolumeOutOfIndex" xml:space="preserve">
     <value>Используйте число от 2 до 150.</value>
   </data>
-	<data name="VolumeSetted" xml:space="preserve">
-    <value>Громкость установлена ​​на:</value>
+	<data name="VolumeSet" xml:space="preserve">
+    <value>Громкость установлена ​​на: {0}.</value>
   </data>
 	<data name="PlayerPaused" xml:space="preserve">
     <value>Игрок теперь приостановлен.</value>
@@ -796,7 +796,7 @@
     <value>Индекс вне диапазона.</value>
   </data>
 	<data name="TrackRemoved" xml:space="preserve">
-    <value>Трек: ** {0} ** в позиции {1} был удален.</value>
+    <value>Трек {0} в позиции {1} был удален.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
     <value>Не удалось найти текст песни для {0}</value>
@@ -1055,33 +1055,6 @@
 	<data name="Commands" xml:space="preserve">
     <value>команды</value>
   </data>
-	<data name="AIDCommandList" xml:space="preserve">
-    <value>`info`: показывает это меню.
-
-`new`: создает новое приключение.
-
-`continue &lt;ID&gt; [Do | Say | Story] [Text ...]`: Продолжение рассказа с предоставленным вами текстом. Если текст не передан, ИИ сгенерирует историю.
-
-`undo &lt;ID&gt;`: отменить последнее действие.
-
-`redo &lt;ID&gt;`: Вы отменили случайно? Используйте эту команду, чтобы вернуть его.
-
-`alter &lt;ID&gt; &lt;newOutput ...&gt;`: редактирует последний ответ от ИИ.
-
-`remember &lt;ID&gt; &lt;текст ...&gt;`: редактирует контекст памяти.
-
-`retry &lt;ID&gt;`: повторяет последнее действие и генерирует новый ответ.
-
-`idlist [user]`: Показывает идентификаторы пользователя.
-
-`idinfo &lt;ID&gt;`: Показывает информацию об идентификаторе.
-
-`makepublic | makeprivate &lt;ID&gt; `: делает идентификатор открытым или закрытым.
-
-`delete &lt;ID&gt;`: удаляет идентификатор.
-
-`dump &lt;ID&gt;`: Экстракты весь текст идентификатора.</value>
-  </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Попробуйте использовать новые слова часто, ИИ становится более креативным с разнообразием.
 Не забудьте начать ввод "do" с глагола, например: Атака орка.
@@ -1275,8 +1248,8 @@
 	<data name="BotVersion" xml:space="preserve">
     <value>Бот версия</value>
   </data>
-	<data name="WebsocketPing" xml:space="preserve">
-    <value>Пинг в сети</value>
+	<data name="OperatingSystem" xml:space="preserve">
+    <value>Операционная система</value>
   </data>
 	<data name="BotOwner" xml:space="preserve">
     <value>Владелец бота</value>
@@ -1359,9 +1332,6 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Поддержка каналов DM.
 - Теперь бот использует правильную базу данных.
 - Больше исправлений ошибок.</value>
-  </data>
-	<data name="BadArgumentCountAid" xml:space="preserve">
-    <value>В команде отсутствуют обязательные аргументы. Используйте `{0} help info`, чтобы получить больше информации о команде.</value>
   </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>Вам нужно разрешение `Ban Members`, чтобы использовать эту команду.</value>
@@ -1555,10 +1525,6 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Повтор последнего действия ...</value>
   </data>
-	<data name="CommandParseFailedAid" xml:space="preserve">
-    <value>Ошибка разбора аргументов команды. Аргумент неверен или порядок аргументов неверен.
-Используйте `{0} help info`, чтобы получить больше информации о команде.</value>
-  </data>
 	<data name="SelfNoIDs" xml:space="preserve">
     <value>У вас нет идентификаторов приключений.
 Вы можете использовать команду `new`, чтобы создать новое приключение.</value>
@@ -1742,7 +1708,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>URL изображения для использования.</value>
   </data>
 	<data name="Changelog1.2.3" xml:space="preserve">
-		<value>- Новая команда: `инвертировать`
+    <value>- Новая команда: `инвертировать`
 - Добавлены русский и турецкий языки (я использовал Google Translate, поэтому в переводах может быть много ошибок).
 - Добавлена информация об обязательных и необязательных аргументах в `help`.
 - Добавлена простая система кеширования для img, tts и urban.
@@ -1755,64 +1721,64 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ошибка в `badtranslator`, которая приводила к случайному сбою команды без причины.
 - Исправлена ошибка с paginator для вставки, которая мерцала при определенных обстоятельствах.
 - Исправлены некоторые ошибки с парсером `lyrics`.</value>
-	</data>
+  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
-		<value>Сообщения должны быть моложе двух недель.</value>
-	</data>
+    <value>Сообщения должны быть моложе двух недель.</value>
+  </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
-		<value>{0} Сообщения не могут быть удалены, потому что они старше, чем через две недели.</value>
-	</data>
+    <value>{0} Сообщения не могут быть удалены, потому что они старше, чем через две недели.</value>
+  </data>
 	<data name="Changelog1.2.4" xml:space="preserve">
-		<value>- Добавлена служба надежности для предотвращения взаимоблокировок и скрипт автозапуска, который запускается в случае сбоя бота.
+    <value>- Добавлена служба надежности для предотвращения взаимоблокировок и скрипт автозапуска, который запускается в случае сбоя бота.
 
 - ограниченный макс. длина текста в «лирике».
 
 - Исправлена ошибка в `инвертировать`, которая не работала на некоторых изображениях.
 - Исправлена ошибка в `clear`, из-за которой предупреждение о сообщениях не могло быть удалено, даже если все удаленные сообщения были моложе двух недель.
 - Исправлена ошибка в `пустяках`, которая приводила к таймауту независимо от ввода.</value>
-	</data>
+  </data>
 	<data name="GuildNotFound" xml:space="preserve">
-		<value>Сервер не найден.</value>
-	</data>
+    <value>Сервер не найден.</value>
+  </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
-		<value>при разборе текст для {0} произошла ошибка.
+    <value>при разборе текст для {0} произошла ошибка.
 Может быть, это инструментальное?</value>
-	</data>
+  </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
-		<value>Параметр {0} должен быть ниже, чем {1}.</value>
-	</data>
+    <value>Параметр {0} должен быть ниже, чем {1}.</value>
+  </data>
 	<data name="InvalidID" xml:space="preserve">
-		<value>Неверный ID.</value>
-	</data>
+    <value>Неверный ID.</value>
+  </data>
 	<data name="HastebinLink" xml:space="preserve">
-		<value>Hastebin ссылка</value>
-	</data>
+    <value>Hastebin ссылка</value>
+  </data>
 	<data name="NotAvailable" xml:space="preserve">
-		<value>Недоступно.</value>
-	</data>
+    <value>Недоступно.</value>
+  </data>
 	<data name="WaitingQueue" xml:space="preserve">
-		<value>Ожидание, пока очередь опустеет ...</value>
-	</data>
+    <value>Ожидание, пока очередь опустеет ...</value>
+  </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>Старый выход:
+    <value>Старый выход:
 {0}
 Пожалуйста, введите новый выход (**не** командной).</value>
-	</data>
+  </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
-		<value>Генерация нового ответа ...</value>
-	</data>
+    <value>Генерация нового ответа ...</value>
+  </data>
 	<data name="InputTypes" xml:space="preserve">
-		<value>Варианты ввода</value>
-	</data>
+    <value>Варианты ввода</value>
+  </data>
 	<data name="InputTypesList" xml:space="preserve">
-		<value>Do: действие, которое вы хотите предпринять в истории. Всегда начинай с действия, напр. «Поиск спрятанных сокровищ». Это опция по умолчанию, если никто не обнаружен.
+    <value>Do: действие, которое вы хотите предпринять в истории. Всегда начинай с действия, напр. «Поиск спрятанных сокровищ». Это опция по умолчанию, если никто не обнаружен.
 
 Скажите: Вы можете использовать это, чтобы говорить, напр. "Оставь их в покое!"
 
 История: Этот вход не дает ИИ поставить «Вы» перед вашим входом.</value>
-	</data>
+  </data>
 	<data name="Changelog1.2.7" xml:space="preserve">
-		<value>- Новые команды: `color` и` retry`.
+    <value>- Новые команды: `color` и` retry`.
 
 - Добавлен сервис кэширования команд, теперь вы можете отредактировать сообщение для новой команды, и Fergun обновит ее ответ или отправит новую.
 
@@ -1826,24 +1792,24 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Теперь некоторые команды будут загружать свои результаты в Hastebin, когда содержимое слишком длинное.
 
 - Исправлены некоторые ошибки в `tpdne`,` tcdne`, `repeat`, службе команд и системе разбивки на страницы.</value>
-	</data>
+  </data>
 	<data name="ChannelCount" xml:space="preserve">
-		<value>Количество каналов</value>
-	</data>
+    <value>Количество каналов</value>
+  </data>
 	<data name="Region" xml:space="preserve">
-		<value>Область</value>
-	</data>
+    <value>Область</value>
+  </data>
 	<data name="DefaultChannel" xml:space="preserve">
-		<value>Канал по умолчанию</value>
-	</data>
+    <value>Канал по умолчанию</value>
+  </data>
 	<data name="LanguageNotFound" xml:space="preserve">
-		<value>Язык не найден.</value>
-	</data>
+    <value>Язык не найден.</value>
+  </data>
 	<data name="CategoryCount" xml:space="preserve">
-		<value>Количество категорий</value>
-	</data>
+    <value>Количество категорий</value>
+  </data>
 	<data name="Changelog1.2.9" xml:space="preserve">
-		<value>- Добавлен резервный переводчик, который будет автоматически использоваться при сбое первого.
+    <value>- Добавлен резервный переводчик, который будет автоматически использоваться при сбое первого.
 - Увеличен интервал очистки кеша команд.
 
 - Исправлена ошибка в `new`, из-за которой не отображалось начальное приглашение.
@@ -1854,15 +1820,15 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Теперь `ping` показывает задержку базы данных.
 
 - Уменьшено использование памяти.</value>
-	</data>
+  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
-		<value>Демпинг приключения...</value>
-	</data>
+    <value>Демпинг приключения...</value>
+  </data>
 	<data name="EditCanceled" xml:space="preserve">
-		<value>Редактировать отменен.</value>
-	</data>
+    <value>Редактировать отменен.</value>
+  </data>
 	<data name="Changelog1.3" xml:space="preserve">
-		<value>- Новая команда: `dump`.
+    <value>- Новая команда: `dump`.
 
 - Обновлен API AI Dungeon для использования WebSockets. Теперь время отклика намного быстрее.
 - Обновлена ​​команда `new` для использования реакций вместо отправки чисел или имен.
@@ -1888,5 +1854,115 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Теперь у `badtranslator` не будет дублированных языков.
 
 - Уменьшено * больше * использование памяти.</value>
-	</data>
+  </data>
+	<data name="NothingToDelete" xml:space="preserve">
+    <value>Нечего удалять.</value>
+  </data>
+	<data name="Members" xml:space="preserve">
+    <value>члены$$</value>
+  </data>
+	<data name="Online" xml:space="preserve">
+    <value>В сети$$</value>
+  </data>
+	<data name="Idle" xml:space="preserve">
+    <value>вхолостую$$</value>
+  </data>
+	<data name="DnD" xml:space="preserve">
+    <value>DnD$$</value>
+  </data>
+	<data name="Offline" xml:space="preserve">
+    <value>Не в сети$$</value>
+  </data>
+	<data name="aidinfoSummary" xml:space="preserve">
+    <value>Показывает информацию AI Dungeon.</value>
+  </data>
+	<data name="aidnewSummary" xml:space="preserve">
+    <value>Создает новое приключение.</value>
+  </data>
+	<data name="continueSummary" xml:space="preserve">
+    <value>Продолжает приключение с предоставленному текста. Если текст не будет принят, ИИ будет генерировать историю.</value>
+  </data>
+	<data name="continueParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
+	<data name="continueParam2" xml:space="preserve">
+    <value>Текст для использования.</value>
+  </data>
+	<data name="undoSummary" xml:space="preserve">
+    <value>Отменяет последнее действие.</value>
+  </data>
+	<data name="undoParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
+	<data name="redoSummary" xml:space="preserve">
+    <value>Повторяет последнее действие отмененного.</value>
+  </data>
+	<data name="redoParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
+	<data name="rememberSummary" xml:space="preserve">
+    <value>Добавляет текст в контекст памяти.</value>
+  </data>
+	<data name="rememberParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
+	<data name="rememberParam2" xml:space="preserve">
+    <value>Текст для добавления.$$</value>
+  </data>
+	<data name="alterSummary" xml:space="preserve">
+    <value>Редактирует последний ответ.$$</value>
+  </data>
+	<data name="retrySummary" xml:space="preserve">
+    <value>Повторит последнее действие и порождает новый ответ.$$</value>
+  </data>
+	<data name="retryParam1" xml:space="preserve">
+    <value>Приключение ID.$$</value>
+  </data>
+	<data name="makepublicSummary" xml:space="preserve">
+    <value>Делает ID общественности.</value>
+  </data>
+	<data name="makepublicParam1" xml:space="preserve">
+    <value>Приключение IF. Вы должны иметь этот идентификатор.</value>
+  </data>
+	<data name="makeprivateSummary" xml:space="preserve">
+    <value>Делает ID приватным.</value>
+  </data>
+	<data name="makeprivateParam1" xml:space="preserve">
+    <value>Приключение IF. Вы должны иметь этот идентификатор.</value>
+  </data>
+	<data name="idlistSummary" xml:space="preserve">
+    <value>Получает список идентификаторов, принадлежащий пользователя.</value>
+  </data>
+	<data name="idlistParam1" xml:space="preserve">
+    <value>Пользователю получить свои идентификаторы.</value>
+  </data>
+	<data name="idinfoSummary" xml:space="preserve">
+    <value>Показывает информацию о идентификатора.</value>
+  </data>
+	<data name="idinfoParam1" xml:space="preserve">
+    <value>Приключение ID.$$</value>
+  </data>
+	<data name="deleteSummary" xml:space="preserve">
+    <value>Удаляет идентификатор.$$</value>
+  </data>
+	<data name="deleteParam1" xml:space="preserve">
+    <value>Приключение ID.$$</value>
+  </data>
+	<data name="dumpSummary" xml:space="preserve">
+    <value>Сплин весь текст из идентификатора.</value>
+  </data>
+	<data name="dumpParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
+	<data name="Changelog1.3.3" xml:space="preserve">
+    <value>- Удалены `someone`.
+
+- Теперь Fergun покажет команду помощи при использовании команды неправильно.
+- Добавлен пример для каждой команды с параметрами в командной помощи.
+- Добавлена ​​операционная система информации в `stats`.
+
+- Исправлена ​​ошибка в `ban`,` kick`, `` nick` и clear`, что мешало работать должным образом, говоря о том, что указанный пользователь не был найден. Это произошло потому, что кэш-пользователь был отключен некоторое время назад.
+- Исправлена ​​ошибка в `clear`, что бы неправильно сказать, что есть сообщения старше, что через 2 недели, когда нет сообщений для удаления.
+- Исправлена ​​ошибка в `` resize` и invert`, вызвавшие команды, чтобы потерпеть неудачу, потому что Раздор показывает неверный предварительный просмотр изображения в некоторых URLs.</value>
+  </data>
 </root>

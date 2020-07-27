@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
@@ -47,7 +46,9 @@ namespace Fergun
             // See Dependency Injection guide for more information.
 
             _cmdService.AddTypeReader(typeof(IUser), new Readers.UserTypeReader<IUser>());
-            _cmdService.AddTypeReader(typeof(IGuildUser), new Readers.UserTypeReader<IGuildUser>());
+
+            // IGuildUser type reader won't work since user cache is disabled.
+            //_cmdService.AddTypeReader(typeof(IGuildUser), new Readers.UserTypeReader<IGuildUser>());
 
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
@@ -138,23 +139,15 @@ namespace Fergun
             switch (result.Error)
             {
                 //case CommandError.UnknownCommand:
-                //    await SendCachedEmbedAsync(context.Message, string.Format(LocalizationService.Locate("CommandNotFound", context.Message), GetPrefix(context.Channel)));
+                //    await SendEmbedAsync(context.Message, string.Format(LocalizationService.Locate("CommandNotFound", context.Message), GetPrefix(context.Channel)));
                 //    break;
                 case CommandError.BadArgCount:
-                    await SendEmbedAsync(context.Message, "\u26a0 " +
-                        (command.Value.Module.Group == "aid"
-                        ? string.Format(Localizer.Locate("BadArgumentCountAid", context.Channel), Localizer.GetPrefix(context.Channel))
-                        : string.Format(Localizer.Locate("BadArgumentCount", context.Channel), Localizer.GetPrefix(context.Channel), command.Value.Name))
-                        , _services);
-                    break;
-
                 case CommandError.ParseFailed:
-                    await SendEmbedAsync(context.Message, "\u26a0 " +
-                        (command.Value.Module.Group == "aid"
-                        ? string.Format(Localizer.Locate("CommandParseFailedAid", context.Channel), Localizer.GetPrefix(context.Channel))
-                        : string.Format(Localizer.Locate("CommandParseFailed", context.Channel), Localizer.GetPrefix(context.Channel), command.Value.Name))
-                        , _services);
-                    //await SendCachedEmbedAsync(context.Message, "\u26a0 " + string.Format(LocalizationService.Locate("CommandParseFailed", context.Channel), GetPrefix(context.Channel), command.Value.Name));
+                    // CommandParseFailed
+                    // BadArgumentCount
+                    string language = Localizer.GetLanguage(context.Channel);
+                    string prefix = Localizer.GetPrefix(context.Channel);
+                    await SendEmbedAsync(context.Message, command.Value.ToHelpEmbed(language, prefix), _services);
                     break;
 
                 case CommandError.UnmetPrecondition when command.Value.Module.Name != "Dev":
@@ -200,7 +193,7 @@ namespace Fergun
 
                         var builder = new EmbedBuilder()
                             .WithTitle($"\u274c {Localizer.Locate("FailedExecution", context.Channel)} `{command.Value.Name}`")
-                            .AddField(Localizer.Locate("ErrorType", context.Channel), $"```cs\n{exception.GetType().Name}```")
+                            .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
                             .AddField(Localizer.Locate("ErrorMessage", context.Channel), $"```cs\n{exception.Message}```")
                             .WithColor(FergunConfig.EmbedColor);
 
@@ -222,8 +215,8 @@ namespace Fergun
                             string title = $"\u274c Failed to execute `{command.Value.Name}` in {(context.Channel is SocketDMChannel ? $"`{context.Channel.Name}`" : $"`{context.Guild.Name}`/`{context.Channel.Name}`")}";
                             var embed2 = new EmbedBuilder()
                                 .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
-                                .AddField(Localizer.Locate("ErrorType", context.Channel), $"```cs\n{exception.GetType().Name}```")
-                                .AddField(Localizer.Locate("ErrorMessage", context.Channel), $"```cs\n{exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
+                                .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
+                                .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
                                 .AddField("Jump url", context.Message.GetJumpUrl())
                                 .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
                                 .WithColor(FergunConfig.EmbedColor);

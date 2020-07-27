@@ -55,17 +55,19 @@ namespace Fergun.Services
             return Task.CompletedTask;
         }
 
-        public Task DisconnectedAsync(Exception _1)
+        public Task DisconnectedAsync(Exception exception)
         {
-            // Check the state after <timeout> to see if we reconnected
-            _ = InfoAsync("Client disconnected, starting timeout task...");
-            _ = Task.Delay(_timeout, _cts.Token).ContinueWith(async _ =>
+            if (!(exception is GatewayReconnectException))
             {
-                await DebugAsync("Timeout expired, continuing to check client state...");
-                await CheckStateAsync();
-                await DebugAsync("State came back.");
-            });
-
+                // Check the state after <timeout> to see if we reconnected
+                _ = InfoAsync("Client disconnected, starting timeout task...");
+                _ = Task.Delay(_timeout, _cts.Token).ContinueWith(async _ =>
+                {
+                    await DebugAsync("Timeout expired, continuing to check client state...");
+                    await CheckStateAsync();
+                    await DebugAsync("State came back.");
+                });
+            }
             return Task.CompletedTask;
         }
 

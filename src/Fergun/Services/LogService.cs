@@ -33,7 +33,7 @@ namespace Fergun.Services
 
             // Create the log directory if it doesn't exist
             // What would happen if the folder is deleted while logging..?
-            if (!Directory.Exists(LogDirectory)) 
+            if (!Directory.Exists(LogDirectory))
                 Directory.CreateDirectory(LogDirectory);
 
             if (IsNewDay)

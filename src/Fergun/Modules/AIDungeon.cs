@@ -13,6 +13,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.AIDungeon;
+using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using GoogleTranslateFreeApi;
@@ -29,29 +30,59 @@ namespace Fergun.Modules
         private static readonly ConcurrentDictionary<uint, SemaphoreSlim> _queue = new ConcurrentDictionary<uint, SemaphoreSlim>();
         private static readonly Random _rng = new Random();
         private static SortedList<string, uint> _modes;
+        private static CommandService _cmdService;
 
-        public AIDungeon()
+        public AIDungeon(CommandService commands)
         {
             API ??= new APIs.AIDungeon.AIDungeon(FergunConfig.AiDungeonToken);
+            _cmdService ??= commands;
         }
 
         [Command("info")]
-        public async Task Info()
+        [Summary("aidinfoSummary")]
+        public async Task<RuntimeResult> Info()
         {
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("AIDHelp"))
                 .AddField(Locate("AboutAIDTitle"), Locate("AboutAIDText"))
                 .AddField(Locate("AIDHowToPlayTitle"), Locate("AIDHowToPlayText"))
-                .AddField(Locate("InputTypes"), Locate("InputTypesList"))
-                .AddField(Locate("Commands"), Locate("AIDCommandList"))
+                .AddField(Locate("InputTypes"), Locate("InputTypesList"));
+
+            var aidCommands = _cmdService.Modules.FirstOrDefault(x => x.Group == "aid");
+            if (aidCommands == null)
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+
+            string list = "";
+            foreach (var command in aidCommands.Commands)
+            {
+
+                list += $"`{command.Name}";
+                foreach (var parameter in command.Parameters)
+                {
+                    list += ' ';
+                    list += parameter.IsOptional ? '[' : '<';
+                    list += parameter.Name;
+                    if (parameter.IsRemainder || parameter.IsMultiple)
+                        list += "...";
+                    list += parameter.IsOptional ? ']' : '>';
+                }
+                list += $"`: {Locate(command.Summary)}\n\n";
+            }
+            
+            builder.AddField(Locate("Commands"), list)
                 .WithFooter(Locate("HelpFooter2"), IconUrl)
                 //.AddField("Tips", "- " + string.Join("\n- ", GetValue("AIDTips").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)))
                 .WithColor(FergunConfig.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
+
+            return FergunResult.FromSuccess();
         }
 
         [Command("new", RunMode = RunMode.Async)]
+        [Summary("aidnewSummary")]
         public async Task<RuntimeResult> New()
         {
             string list = $"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n";
@@ -791,7 +822,11 @@ namespace Fergun.Modules
         }
 
         [Command("continue", RunMode = RunMode.Async)]
-        public async Task<RuntimeResult> Continue(uint adventureId, [Remainder] string text = "")
+        [Summary("continueSummary")]
+        [Alias("next")]
+        [Example("2582734 save the princess")]
+        public async Task<RuntimeResult> Continue([Summary("continueParam1")] uint adventureId,
+            [Remainder, Summary("continueParam2")] string text = "")
         {
             string result = await RunAIDCommandAsync(adventureId, "GeneratingStory", text: text);
             if (result != null)
@@ -803,8 +838,10 @@ namespace Fergun.Modules
         }
 
         [Command("undo", RunMode = RunMode.Async)]
+        [Summary("undoSummary")]
         [Alias("revert")]
-        public async Task<RuntimeResult> Undo(uint adventureId)
+        [Example("2582734")]
+        public async Task<RuntimeResult> Undo([Summary("undoParam1")] uint adventureId)
         {
             string result = await RunAIDCommandAsync(adventureId, "RevertingLastAction", ActionType.Undo);
             if (result != null)
@@ -816,7 +853,9 @@ namespace Fergun.Modules
         }
 
         [Command("redo", RunMode = RunMode.Async)]
-        public async Task<RuntimeResult> Redo(uint adventureId)
+        [Summary("redoSummary")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Redo([Summary("redoParam1")] uint adventureId)
         {
             string result = await RunAIDCommandAsync(adventureId, "RedoingLastAction", ActionType.Redo);
             if (result != null)
@@ -828,7 +867,10 @@ namespace Fergun.Modules
         }
 
         [Command("remember", RunMode = RunMode.Async)]
-        public async Task<RuntimeResult> Remember(uint adventureId, [Remainder] string text)
+        [Summary("rememberSummary")]
+        [Example("2582734 there's a dragon waiting for me")]
+        public async Task<RuntimeResult> Remember([Summary("rememberParam1")] uint adventureId,
+            [Remainder, Summary("rememberParam2")] string text)
         {
             string result = await RunAIDCommandAsync(adventureId, "EditingStoryContext", ActionType.Remember, text);
             if (result != null)
@@ -840,6 +882,8 @@ namespace Fergun.Modules
         }
 
         [Command("alter", RunMode = RunMode.Async)]
+        [Summary("alterSummary")]
+        [Example("2582734")]
         public async Task<RuntimeResult> Alter(uint adventureId)
         {
             string checkResult = await CheckIdAsync(adventureId);
@@ -917,7 +961,9 @@ namespace Fergun.Modules
         }
 
         [Command("retry", RunMode = RunMode.Async)]
-        public async Task<RuntimeResult> Retry(uint adventureId)
+        [Summary("retrySummary")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Retry([Summary("retryParam1")] uint adventureId)
         {
             string result = await RunAIDCommandAsync(adventureId, "GeneratingNewResponse", ActionType.Retry);
             if (result != null)
@@ -929,7 +975,9 @@ namespace Fergun.Modules
         }
 
         [Command("makepublic")]
-        public async Task<RuntimeResult> Makepublic(uint adventureId)
+        [Summary("makepublicSummary")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Makepublic([Summary("makepublicParam1")] uint adventureId)
         {
             AidAdventure currentAdventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
 
@@ -953,7 +1001,9 @@ namespace Fergun.Modules
         }
 
         [Command("makeprivate")]
-        public async Task<RuntimeResult> Makeprivate(uint adventureId)
+        [Summary("makeprivateSummary")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Makeprivate([Summary("makeprivateParam1")] uint adventureId)
         {
             AidAdventure currentAdventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
 
@@ -978,7 +1028,9 @@ namespace Fergun.Modules
 
         [Command("idlist", RunMode = RunMode.Async)]
         [Alias("ids", "list")]
-        public async Task<RuntimeResult> Idlist(IUser user = null)
+        [Summary("idlistSummary")]
+        [Example("Discord#1234")]
+        public async Task<RuntimeResult> Idlist([Summary("idlistParam1")] IUser user = null)
         {
             user ??= Context.User;
             List<AidAdventure> adventures = FergunClient.Database.FindMany<AidAdventure>("AIDAdventures", x => x.OwnerID == user.Id);
@@ -1000,7 +1052,9 @@ namespace Fergun.Modules
         }
 
         [Command("idinfo", RunMode = RunMode.Async)]
-        public async Task<RuntimeResult> Idinfo(uint adventureId)
+        [Summary("idinfoSummary")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Idinfo([Summary("idinfoParam1")] uint adventureId)
         {
             AidAdventure currentAdventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
             if (currentAdventure == null)
@@ -1053,8 +1107,10 @@ namespace Fergun.Modules
         }
 
         [Command("delete", RunMode = RunMode.Async)]
+        [Summary("deleteSummary")]
         [Alias("remove")]
-        public async Task<RuntimeResult> Delete(uint adventureId)
+        [Example("2582734")]
+        public async Task<RuntimeResult> Delete([Summary("deleteParam1")] uint adventureId)
         {
             AidAdventure currentAdventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
 
@@ -1110,7 +1166,10 @@ namespace Fergun.Modules
         }
 
         [Command("dump", RunMode = RunMode.Async), Ratelimit(1, 20, Measure.Minutes)]
-        public async Task<RuntimeResult> Dump(uint adventureId)
+        [Summary("dumpSummary")]
+        [Alias("export")]
+        [Example("2582734")]
+        public async Task<RuntimeResult> Dump([Summary("dumpParam1")] uint adventureId)
         {
             string checkResult = await CheckIdAsync(adventureId);
             if (checkResult != null)

@@ -129,7 +129,7 @@ namespace Fergun.Services
                 {
                     _loopDict.TryRemove(guildId, out _);
                     var builder2 = new EmbedBuilder()
-                        .WithDescription(string.Format(Localizer.Locate("LoopEnded", args.Player.TextChannel), $"[{args.Track.Title}]({args.Track.Url})"))
+                        .WithDescription(string.Format(Localizer.Locate("LoopEnded", args.Player.TextChannel), args.Track.ToTrackLink(false)))
                         .WithColor(FergunConfig.EmbedColor);
                     await args.Player.TextChannel.SendMessageAsync(null, false, builder2.Build());
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Loop for track {args.Track.Title} ({args.Track.Url}) ended in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
@@ -153,7 +153,7 @@ namespace Fergun.Services
 
             await args.Player.PlayAsync(nextTrack);
             builder.WithTitle(Localizer.Locate("NowPlaying", args.Player.TextChannel))
-                .WithDescription($"[{nextTrack.Title}]({nextTrack.Url}) ({nextTrack.Duration.ToShortForm()})")
+                .WithDescription(nextTrack.ToTrackLink())
                 .WithColor(FergunConfig.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Now playing: {nextTrack.Title} ({nextTrack.Url}) in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
@@ -255,7 +255,7 @@ namespace Fergun.Services
                     }
                     // if player wasnt playing anything
                     await player.PlayAsync(search.Tracks[0]);
-                    return (string.Format(Localizer.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), $"[{search.Tracks[0].Title}]({search.Tracks[0].Url})", search.Tracks[0].Duration.ToShortForm()), null);
+                    return (string.Format(Localizer.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks[0].ToTrackLink()), null);
                 }
             }
             else
@@ -278,12 +278,12 @@ namespace Fergun.Services
                 if (player.PlayerState == PlayerState.Playing)
                 {
                     player.Queue.Enqueue(track);
-                    return (string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), $"[{track.Title}]({track.Url})", track.Duration.ToShortForm()), null);
+                    return (string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink()), null);
                 }
                 else
                 {
                     await player.PlayAsync(track);
-                    return (string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), $"[{track.Title}]({track.Url})", track.Duration.ToShortForm()), null);
+                    return (string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink()), null);
                 }
             }
         }
@@ -301,13 +301,13 @@ namespace Fergun.Services
             {
                 player.Queue.Enqueue(track);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Added {track.Title} ({track.Url}) to the queue in {textChannel.Guild.Name}/{textChannel.Name}"));
-                return string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), $"[{track.Title}]({track.Url})", track.Duration.ToShortForm());
+                return string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink());
             }
             else
             {
                 await player.PlayAsync(track);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", $"Now playing: {track.Title} ({track.Url}) in {textChannel.Guild.Name}/{textChannel.Name}"));
-                return string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), $"[{track.Title}]({track.Url})", track.Duration.ToShortForm());
+                return string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink());
             }
         }
 
@@ -319,7 +319,7 @@ namespace Fergun.Services
             else if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
             await player.SeekAsync(TimeSpan.Zero);
-            return $"{Localizer.Locate("Replaying", textChannel)} {player.Track.ToTrackLink()}";
+            return string.Format(Localizer.Locate("Replaying", textChannel), player.Track.ToTrackLink());
         }
 
         public async Task<string> SeekAsync(IGuild guild, ITextChannel textChannel, string time)
@@ -386,22 +386,23 @@ namespace Fergun.Services
 
             var oldTrack = player.Track;
             await player.SkipAsync();
-            return string.Format(Localizer.Locate("PlayerTrackSkipped", textChannel), $"[{oldTrack.Title}]({oldTrack.Url})", $"[{player.Track.Title}]({player.Track.Url})", player.Track.Duration.ToShortForm());
+            return string.Format(Localizer.Locate("PlayerTrackSkipped", textChannel), oldTrack.ToTrackLink(false), player.Track.ToTrackLink());
         }
 
-        public async Task<string> SetVolumeAsync(int vol, IGuild guild, ITextChannel textChannel)
+        public async Task<string> SetVolumeAsync(int volume, IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
 
-            if (vol > 150 || vol <= 2)
+            volume = Math.Min(volume, 150);
+            if (volume <= 2)
             {
                 return Localizer.Locate("VolumeOutOfIndex", textChannel);
             }
 
-            await player.UpdateVolumeAsync((ushort)vol);
-            return $"{Localizer.Locate("VolumeSetted", textChannel)} {vol}";
+            await player.UpdateVolumeAsync((ushort)volume);
+            return string.Format(Localizer.Locate("VolumeSet", textChannel), volume);
         }
 
         public async Task<string> PauseOrResumeAsync(IGuild guild, ITextChannel textChannel)
@@ -443,7 +444,7 @@ namespace Fergun.Services
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
 
-            return string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), $"[{player.Track.Title}]({player.Track.Url})", player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm());
+            return string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm());
         }
 
         public string GetQueue(IGuild guild, ITextChannel textChannel)
@@ -452,10 +453,10 @@ namespace Fergun.Services
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
 
-            string queue = string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), $"[{player.Track.Title}]({player.Track.Url})", player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm()) + "\n\n";
+            string queue = string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm()) + "\n\n";
             if (player.Queue.Count == 0)
             {
-                return $"{queue}{Localizer.Locate("EmptyQueue", textChannel)}";
+                return queue + Localizer.Locate("EmptyQueue", textChannel);
             }
 
             queue += $"{Localizer.Locate("MusicInQueue", textChannel)}\n";
@@ -466,7 +467,7 @@ namespace Fergun.Services
             for (int i = 0; i < tracksToShow; i++)
             {
                 var current = player.Queue.ElementAt(i) as LavaTrack;
-                queue += $"{i + 1}. {Format.Url(current.Title, current.Url)} ({current.Duration.ToShortForm()})\n";
+                queue += $"{i + 1}. {current.ToTrackLink()}\n";
             }
             if (excess > 0)
             {
@@ -496,7 +497,6 @@ namespace Fergun.Services
 
         public string RemoveAt(IGuild guild, ITextChannel textChannel, int index)
         {
-            //await Task.CompletedTask;
             bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return Localizer.Locate("PlayerNotPlaying", textChannel);
@@ -508,10 +508,10 @@ namespace Fergun.Services
             {
                 return Localizer.Locate("IndexOutOfRange", textChannel);
             }
-            var titleToRemove = (player.Queue.ElementAt(index - 1) as LavaTrack).Title;
+            var track = player.Queue.ElementAt(index - 1) as LavaTrack;
 
             player.Queue.RemoveAt(index - 1);
-            return string.Format(Localizer.Locate("TrackRemoved", textChannel), titleToRemove, index);
+            return string.Format(Localizer.Locate("TrackRemoved", textChannel), track.ToTrackLink(false), index);
         }
 
         public async Task<(string, IEnumerable<string>)> GetLyricsAsync(string query, bool keepHeaders, IGuild guild, ITextChannel textChannel, SpotifyGame spotify)
@@ -708,14 +708,14 @@ namespace Fergun.Services
             //lyrics = string.Join("\n", lyrics);
             //lyrics = lyrics.Replace("<br/>", "\n");
             lyrics = Regex.Replace(lyrics, @"(\<.*?\>)", string.Empty);
-            if (!keepHeaders)
+            if (keepHeaders)
             {
-                lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty, RegexOptions.Multiline);
-                //lyrics = Regex.Replace(lyrics, @"\n{2}", "\n");
+                lyrics = lyrics.Replace(" [", "\n[", StringComparison.OrdinalIgnoreCase).Replace("[", "\n[", StringComparison.OrdinalIgnoreCase);
             }
             else
             {
-                lyrics = lyrics.Replace(" [", "\n[", StringComparison.OrdinalIgnoreCase).Replace("[", "\n[", StringComparison.OrdinalIgnoreCase);
+                lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty, RegexOptions.Multiline);
+                //lyrics = Regex.Replace(lyrics, @"\n{2}", "\n");
             }
             lyrics = Regex.Replace(lyrics, @"\n{3,}", "\n\n");
 

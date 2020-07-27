@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Discord;
+using Discord.Commands;
+using Fergun.Attributes;
+using Fergun.Services;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -85,7 +88,87 @@ namespace Fergun.Extensions
             return Format.Url(track.Title, track.Url) + (withTime ? $" ({track.Duration.ToShortForm()})" : "");
         }
 
-        public static string Dump(this object obj, int maxDepth = 2)
+        public static Embed ToHelpEmbed(this CommandInfo command, string language, string prefix)
+        {
+            //Maybe there's a better way to make a dynamic help?
+            var builder = new EmbedBuilder
+            {
+                Title = command.Name,
+                Description = Localizer.Locate(command.Summary ?? "NoDescription", language),
+                Color = new Color(FergunConfig.EmbedColor)
+            };
+
+            if (command.Parameters.Count > 0)
+            {
+                // Add parameters: param1 (type) (Optional): description
+                string field = "";
+                foreach (var parameter in command.Parameters)
+                {
+                    field += $"{parameter.Name} ({parameter.Type.CSharpName()})";
+                    if (parameter.IsOptional)
+                        field += ' ' + Localizer.Locate("Optional", language);
+                    field += $": {Localizer.Locate(parameter.Summary ?? "NoDescription", language)}\n";
+                }
+                builder.AddField(Localizer.Locate("Parameters", language), field);
+            }
+
+            // Add usage field (`prefix group command <param1> [param2...]`)
+            string usage = '`' + prefix;
+            if (!string.IsNullOrEmpty(command.Module.Group))
+            {
+                usage += command.Module.Group + ' ';
+            }
+            usage += command.Name;
+            foreach (var parameter in command.Parameters)
+            {
+                usage += ' ';
+                usage += parameter.IsOptional ? '[' : '<';
+                usage += parameter.Name;
+                if (parameter.IsRemainder || parameter.IsMultiple)
+                    usage += "...";
+                usage += parameter.IsOptional ? ']' : '>';
+            }
+            usage += '`';
+            builder.AddField(Localizer.Locate("Usage", language), usage);
+
+            // Add example if the command has parameters
+            if (command.Parameters.Count > 0)
+            {
+                var attribute = command.Attributes.FirstOrDefault(x => x.GetType() == typeof(ExampleAttribute));
+                if (attribute != null)
+                {
+                    string example = prefix;
+                    if (!string.IsNullOrEmpty(command.Module.Group))
+                    {
+                        example += command.Module.Group + ' ';
+                    }
+                    example += $"{command.Name} {(attribute as ExampleAttribute).Example}";
+                    builder.AddField(Localizer.Locate("Example", language), example);
+                }
+            }
+
+            // Add notes if present
+            if (!string.IsNullOrEmpty(command.Remarks))
+            {
+                builder.AddField(Localizer.Locate("Notes", language), Localizer.Locate(command.Remarks, language));
+            }
+
+            // Add aliases if present
+            if (command.Aliases.Count > 1)
+            {
+                builder.AddField(Localizer.Locate("Alias", language), string.Join(", ", command.Aliases.Skip(1)));
+            }
+
+            // Add footer with info about obligatory and optional parameters
+            if (command.Parameters.Count > 0)
+            {
+                builder.WithFooter(Localizer.Locate("HelpFooter2", language));
+            }
+
+            return builder.Build();
+        }
+
+        public static string Dump<T>(this T obj, int maxDepth = 2)
         {
             try
             {

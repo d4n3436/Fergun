@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 
@@ -17,7 +18,8 @@ namespace Fergun.Modules
         [Command("ban")]
         [Summary("banSummary")]
         [Alias("hardban")]
-        public async Task<RuntimeResult> Ban([Summary("banParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IGuildUser user,
+        [Example("Fergun#6839")]
+        public async Task<RuntimeResult> Ban([Summary("banParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("banParam2")] string reason = null)
         {
             if (user.Id == Context.User.Id)
@@ -37,7 +39,8 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
 
-            await user.BanAsync(0, reason);
+            // user.BanAsync(0, reason);
+            await Context.Guild.AddBanAsync(user, 0, reason);
             await SendEmbedAsync(string.Format(Locate("Banned"), user.Mention));
             return FergunResult.FromSuccess();
         }
@@ -48,16 +51,26 @@ namespace Fergun.Modules
         [Summary("clearSummary")]
         [Alias("purge", "prune")]
         [Remarks("clearRemarks")]
+        [Example("10")]
         public async Task<RuntimeResult> Clear([Summary("clearParam1")] int count,
-            [Remainder, Summary("clearParam2")] IGuildUser user = null)
+            [Remainder, Summary("clearParam2")] IUser user = null)
         {
             count = Math.Min(count, DiscordConfig.MaxMessagesPerBatch);
             if (count < 1)
             {
-                return FergunResult.FromError(string.Format(Locate("ClearOutOfIndex"), 1, DiscordConfig.MaxMessagesPerBatch));
+                return FergunResult.FromError(string.Format(Locate("NumberOutOfIndex"), 1, DiscordConfig.MaxMessagesPerBatch));
             }
 
-            var messages = await Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
+            var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).FlattenAsync();
+
+            // Use Messages.Count() instead of count because there's a chance there are less messages in the channel that the number of messages to delete.
+            int totalMsgs = messages.Count();
+
+            if (totalMsgs == 0)
+            {
+                return FergunResult.FromError(Locate("NothingToDelete"));
+            }
+
             if (user != null)
             {
                 messages = messages.Where(x => x.Author.Id == user.Id);
@@ -66,22 +79,23 @@ namespace Fergun.Modules
                     return FergunResult.FromError(string.Format(Locate("ClearNotFound"), user.Mention, count));
                 }
             }
-            int totalMsgs = messages.Count();
+
             messages = messages.Where(x => x.CreatedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
-            if (messages.Count() == 1)
+            if (!messages.Any())
             {
                 return FergunResult.FromError(Locate("MessagesOlderThan2Weeks"));
             }
-            await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
+
+            await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages.Append(Context.Message));
+
             string message;
             if (user != null)
             {
-                message = string.Format(Locate("DeletedMessagesByUser"), messages.Count() - 1, user.Mention);
+                message = string.Format(Locate("DeletedMessagesByUser"), messages.Count(), user.Mention);
             }
             else
             {
-                // Here I use Messages.Count() instead of count because there's a chance there are less messages in the channel that the number to delete.
-                message = string.Format(Locate("DeletedMessages"), messages.Count() - 1);
+                message = string.Format(Locate("DeletedMessages"), messages.Count());
             }
             if (totalMsgs != messages.Count())
             {
@@ -103,6 +117,7 @@ namespace Fergun.Modules
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]
         [Command("hackban")]
         [Summary("hackbanSummary")]
+        [Example("666963870385923507 spam")]
         public async Task<RuntimeResult> Hackban([Summary("hackbanParam1")] ulong userId,
             [Remainder, Summary("hackbanParam2")] string reason = null)
         {
@@ -134,12 +149,19 @@ namespace Fergun.Modules
         [RequireBotPermission(GuildPermission.KickMembers, ErrorMessage = "BotRequireKickMembers")]
         [Command("kick")]
         [Summary("kickSummary")]
-        public async Task Kick(
-            [Summary("kickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IGuildUser user,
+        [Example("Fergun#6839 test")]
+        public async Task<RuntimeResult> Kick(
+            [Summary("kickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("kickParam2")] string reason = null)
         {
-            await user.KickAsync(reason);
+            if (!(user is IGuildUser guildUser))
+            {
+                return FergunResult.FromError(Locate("UserNotFound"));
+            }
+            await guildUser.KickAsync(reason);
             await SendEmbedAsync(string.Format(Locate("Kicked"), user.Mention));
+
+            return FergunResult.FromSuccess();
         }
 
         [RequireUserPermission(GuildPermission.ManageNicknames, ErrorMessage = "UserRequireManageNicknames")]
@@ -147,11 +169,16 @@ namespace Fergun.Modules
         [Command("nick")]
         [Summary("nickSummary")]
         [Alias("nickname")]
+        [Example("Fergun#6839 fer")]
         public async Task<RuntimeResult> Nick(
-            [Summary("nickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IGuildUser user,
+            [Summary("nickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("nickParam2")] string newNick = null)
         {
-            if (user.Nickname == newNick)
+            if (!(user is IGuildUser guildUser))
+            {
+                return FergunResult.FromError(Locate("UserNotFound"));
+            }
+            if (guildUser.Nickname == newNick)
             {
                 if (newNick == null)
                 {
@@ -160,7 +187,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("CurrentNewNickEqual"));
             }
 
-            await user.ModifyAsync(x => x.Nickname = newNick);
+            await guildUser.ModifyAsync(x => x.Nickname = newNick);
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
             {
                 await Context.Message.AddReactionAsync(new Emoji("\u2705"));
@@ -181,6 +208,7 @@ namespace Fergun.Modules
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]
         [Command("softban")]
         [Summary("softbanSummary")]
+        [Example("Fergun#6839 10 test")]
         public async Task<RuntimeResult> Softban(
             [Summary("softbanParam1"), RequireLowerHierarchy("UserNotLowerHierarchy", true)] IUser user,
             [Summary("softbanParam2")] uint days = 7,
@@ -226,6 +254,7 @@ namespace Fergun.Modules
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]
         [Command("unban")]
         [Summary("unbanSummary")]
+        [Example("666963870385923507")]
         public async Task<RuntimeResult> Unban([Summary("unbanParam1")] ulong userId)
         {
             var banList = await Context.Guild.GetBansAsync();

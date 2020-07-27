@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Newtonsoft.Json;
 
 namespace Fergun.Extensions
 {
@@ -73,12 +72,13 @@ namespace Fergun.Extensions
 
         public static IEnumerable<string> SplitToLines(this string stringToSplit, int maximumLineLength)
         {
-            //int charCount = 0;
+            /*
+            int charCount = 0;
 
-            //var lines = input.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                //.GroupBy(w => (charCount += w.Length + 1) / maximumLineLength)
-                //.Select(g => string.Join(" ", g));
-
+            var lines = input.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .GroupBy(w => (charCount += w.Length + 1) / maximumLineLength)
+                .Select(g => string.Join(" ", g));
+            */
             var words = stringToSplit.Split(' ').Concat(new[] { "" });
             return words
                 .Skip(1)
@@ -119,25 +119,21 @@ namespace Fergun.Extensions
             //return "00000".Substring(0, 6 - c.Length) + c;
         }
 
-        public static string Bash(this string command)
+        public static string RunCommand(this string command)
         {
-            if (!FergunClient.IsLinux)
-            {
-                return "Linux only.";
-            }
             var escapedArgs = command.Replace("\"", "\\\"", StringComparison.OrdinalIgnoreCase);
-            string result;
             var startInfo = new ProcessStartInfo
             {
-                FileName = "/bin/bash",
-                Arguments = $"-c \"{escapedArgs}\"",
+                FileName = FergunClient.IsLinux ? "/bin/bash" : "cmd.exe",
+                Arguments = FergunClient.IsLinux ? $"-c \"{escapedArgs}\"" : $"/c {escapedArgs}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = "/home"
+                WorkingDirectory = FergunClient.IsLinux ? "/home" : ""
             };
 
+            string result;
             using (var process = new Process())
             {
                 process.StartInfo = startInfo;

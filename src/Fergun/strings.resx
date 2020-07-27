@@ -133,7 +133,7 @@
     <value>Music commands</value>
   </data>
 	<data name="Notes" xml:space="preserve">
-    <value>Notes:</value>
+    <value>Notes</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
     <value>Use `{0}help [command]` to get more info about a command.</value>
@@ -153,20 +153,20 @@
 	<data name="CommandNotFound" xml:space="preserve">
     <value>Command not found. Use `{0}help` to view the command list.</value>
   </data>
-	<data name="HelpNoDescription" xml:space="preserve">
+	<data name="NoDescription" xml:space="preserve">
     <value>(No description available)</value>
   </data>
-	<data name="HelpOptional" xml:space="preserve">
+	<data name="Optional" xml:space="preserve">
     <value>(Optional)</value>
   </data>
-	<data name="HelpUsage" xml:space="preserve">
-    <value>Usage:</value>
+	<data name="Usage" xml:space="preserve">
+    <value>Usage</value>
   </data>
-	<data name="HelpAlias" xml:space="preserve">
-    <value>Alias(es):</value>
+	<data name="Alias" xml:space="preserve">
+    <value>Alias(es)</value>
   </data>
-	<data name="HelpParameters" xml:space="preserve">
-    <value>Parameters:</value>
+	<data name="Parameters" xml:space="preserve">
+    <value>Parameters</value>
   </data>
 	<data name="mojibakeSummary" xml:space="preserve">
     <value>Shows random unicode characters.</value>
@@ -280,7 +280,7 @@
 	<data name="NoUrlPassed" xml:space="preserve">
     <value>Not specifying an url will make the command to search for the last 100 messages for a link or an attachment.</value>
   </data>
-	<data name="AttachNotImage" xml:space="preserve">
+	<data name="AttachmentNotImage" xml:space="preserve">
     <value>The attachment is not an image.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
@@ -735,19 +735,19 @@ Error code:</value>
 	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
     <value>Queued {0} tracks ({1})
 
-Now playing: {2} ({3})</value>
+Now playing: {2}</value>
   </data>
 	<data name="PlayerTrackAdded" xml:space="preserve">
-    <value>{0} ({1}) has been added to the queue.</value>
+    <value>{0} has been added to the queue.</value>
   </data>
 	<data name="PlayerNowPlaying" xml:space="preserve">
-    <value>Now playing: {0} ({1})</value>
+    <value>Now playing: {0}</value>
   </data>
 	<data name="InvalidTrack" xml:space="preserve">
     <value>Invalid track.</value>
   </data>
 	<data name="Replaying" xml:space="preserve">
-    <value>Replaying</value>
+    <value>Replaying {0}</value>
   </data>
 	<data name="EmptyQueue" xml:space="preserve">
     <value>The queue is empty.</value>
@@ -761,13 +761,13 @@ Now playing: {2} ({3})</value>
 	<data name="PlayerTrackSkipped" xml:space="preserve">
     <value>Skipped: {0}
 
-Now playing: {1} ({2})</value>
+Now playing: {1}</value>
   </data>
 	<data name="VolumeOutOfIndex" xml:space="preserve">
     <value>Use a number between 2 and 150.</value>
   </data>
-	<data name="VolumeSetted" xml:space="preserve">
-    <value>Volume set to:</value>
+	<data name="VolumeSet" xml:space="preserve">
+    <value>Volume set to: {0}.</value>
   </data>
 	<data name="PlayerPaused" xml:space="preserve">
     <value>Player is now paused.</value>
@@ -794,7 +794,7 @@ Now playing: {1} ({2})</value>
     <value>Index out of range.</value>
   </data>
 	<data name="TrackRemoved" xml:space="preserve">
-    <value>Track: **{0}** at position {1} was removed.</value>
+    <value>The track {0} at position {1} was removed.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
     <value>Could not find lyrics for {0}</value>
@@ -1052,33 +1052,6 @@ The prompt will timeout in 5 minutes and the max. number of characters is 140.</
 	<data name="Commands" xml:space="preserve">
     <value>Commands</value>
   </data>
-	<data name="AIDCommandList" xml:space="preserve">
-    <value>`info`: Shows this menu.
-
-`new`: Creates a new adventure.
-
-`continue &lt;ID&gt; [Do|Say|Story] [Text...]`: Continues the adventure with the text you provide. If no text is passed, the AI will generate the story.
-
-`undo &lt;ID&gt;`: Undo the last action.
-
-`redo &lt;ID&gt;`: Did you undo on accident? Use this command to get it back.
-
-`alter &lt;ID&gt; &lt;newOutput...&gt;`: Edits the last response from the AI.
-
-`remember &lt;ID&gt; &lt;text...&gt;`: Edits the memory context.
-
-`retry &lt;ID&gt;`:  Retries the last action and generates a new response.
-
-`idlist [user]`: Shows the IDs of an user.
-
-`idinfo &lt;ID&gt;`: Shows info about a ID.
-
-`makepublic | makeprivate &lt;ID&gt;`: Makes an ID public or private.
-
-`delete &lt;ID&gt;`: Removes an ID.
-
-`dump &lt;ID&gt;`: Dumps all the text from an ID.</value>
-  </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Try using new words often, the AI gets more creative with variety.
 Remember to start a "do" input with a verb, ex: Attack the orc.
@@ -1272,8 +1245,8 @@ Use `{0}help {1}` to get more info about the command.</value>
 	<data name="BotVersion" xml:space="preserve">
     <value>Bot version</value>
   </data>
-	<data name="WebsocketPing" xml:space="preserve">
-    <value>Websocket ping</value>
+	<data name="OperatingSystem" xml:space="preserve">
+    <value>Operating System</value>
   </data>
 	<data name="BotOwner" xml:space="preserve">
     <value>Bot owner</value>
@@ -1356,9 +1329,6 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 - Support to DM channels.
 - Now the bot uses a proper database.
 - More bug fixes.</value>
-  </data>
-	<data name="BadArgumentCountAid" xml:space="preserve">
-    <value>The command is missing required arguments. Use `{0}aid info` to get more info about the command.</value>
   </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>You need the `Ban Members` permission to use this command.</value>
@@ -1552,10 +1522,6 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Redoing last action...</value>
   </data>
-	<data name="CommandParseFailedAid" xml:space="preserve">
-    <value>Error parsing the command arguments. An argument is invalid or the order of the arguments is incorrect.
-Use `{0}aid info` to get more info about the command.</value>
-  </data>
 	<data name="SelfNoIDs" xml:space="preserve">
     <value>You don't have any adventure IDs.
 You can use the `new` command to create a new adventure.</value>
@@ -1743,7 +1709,7 @@ This prevents duplicating the localization methods for each module, and the resp
     <value>The url of an image to use.</value>
   </data>
 	<data name="Changelog1.2.3" xml:space="preserve">
-		<value>This update contains fixes for bugs that left 1.2 and some changes / new things that were delayed from 1.2 to improve them.
+    <value>This update contains fixes for bugs that left 1.2 and some changes / new things that were delayed from 1.2 to improve them.
 
 - New command: `invert`
 - Added Russian and Turkish languages (I've used Google Translate so the translations may have lots of errors).
@@ -1758,64 +1724,64 @@ This prevents duplicating the localization methods for each module, and the resp
 - Fixed a bug in `badtranslator` that made the command fail randomly for no reason.
 - Fixed a bug with the paginator that flickered in certain circumstances.
 - Fixed some bugs with the `lyrics` parser.</value>
-	</data>
+  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
-		<value>Messages must be younger than two weeks.</value>
-	</data>
+    <value>Messages must be younger than two weeks.</value>
+  </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
-		<value>{0} messages could not be deleted because they are older than two weeks.</value>
-	</data>
+    <value>{0} messages could not be deleted because they are older than two weeks.</value>
+  </data>
 	<data name="Changelog1.2.4" xml:space="preserve">
-		<value>- Added a reliability service to prevent deadlocks and an auto-restart script that executes if the bot crashes.
+    <value>- Added a reliability service to prevent deadlocks and an auto-restart script that executes if the bot crashes.
 
 - Limited the max. text length in `lyrics`.
 
 - Fixed a bug in `invert` that failed in some images.
 - Fixed a bug in `clear` that showed a warning about messages could not be deleted even if the all the deleted messages are younger than two weeks.
 - Fixed a bug in `trivia` that would timeout regardless of the input.</value>
-	</data>
+  </data>
 	<data name="GuildNotFound" xml:space="preserve">
-		<value>Server not found.</value>
-	</data>
+    <value>Server not found.</value>
+  </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
-		<value>An error occurred while parsing the lyrics for {0}.
+    <value>An error occurred while parsing the lyrics for {0}.
 Maybe its's an instrumental?</value>
-	</data>
+  </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
-		<value>Parameter `{0}` must be lower than {1}.</value>
-	</data>
+    <value>Parameter `{0}` must be lower than {1}.</value>
+  </data>
 	<data name="InvalidID" xml:space="preserve">
-		<value>Invalid ID.</value>
-	</data>
+    <value>Invalid ID.</value>
+  </data>
 	<data name="HastebinLink" xml:space="preserve">
-		<value>Hastebin link</value>
-	</data>
+    <value>Hastebin link</value>
+  </data>
 	<data name="NotAvailable" xml:space="preserve">
-		<value>Not available.</value>
-	</data>
+    <value>Not available.</value>
+  </data>
 	<data name="WaitingQueue" xml:space="preserve">
-		<value>Waiting for the queue to empty...</value>
-	</data>
+    <value>Waiting for the queue to empty...</value>
+  </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>The old output is:
+    <value>The old output is:
 {0}
 Please enter the new output (**not** the command).</value>
-	</data>
+  </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
-		<value>Generating a new response...</value>
-	</data>
+    <value>Generating a new response...</value>
+  </data>
 	<data name="InputTypes" xml:space="preserve">
-		<value>Input options</value>
-	</data>
+    <value>Input options</value>
+  </data>
 	<data name="InputTypesList" xml:space="preserve">
-		<value>Do: An action you want to take in the story. Always start with an action, ex. "Search for the hidden treasure". This is the default option if no one is detected.
+    <value>Do: An action you want to take in the story. Always start with an action, ex. "Search for the hidden treasure". This is the default option if no one is detected.
 
 Say: You can use this to speak, ex. "Leave them alone!"
 
 Story: This input stops the AI from putting "You" in front of your input.</value>
-	</data>
+  </data>
 	<data name="Changelog1.2.7" xml:space="preserve">
-		<value>- New commands: `color` and `retry`.
+    <value>- New commands: `color` and `retry`.
 
 - Added a command cache service, now you can edit a message to a new command and Fergun will update it's response or send a new one.
 
@@ -1829,39 +1795,39 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Now some commands will upload its results to Hastebin when the content is too long.
 
 - Fixed some bugs in `tpdne`, `tcdne`, `repeat`, the command service and the paginator system.</value>
-	</data>
+  </data>
 	<data name="Members" xml:space="preserve">
-		<value>Members</value>
-	</data>
+    <value>Members</value>
+  </data>
 	<data name="Online" xml:space="preserve">
-		<value>Online</value>
-	</data>
+    <value>Online</value>
+  </data>
 	<data name="Idle" xml:space="preserve">
-		<value>Idle</value>
-	</data>
+    <value>Idle</value>
+  </data>
 	<data name="DnD" xml:space="preserve">
-		<value>DnD</value>
-	</data>
+    <value>DnD</value>
+  </data>
 	<data name="Offline" xml:space="preserve">
-		<value>Offline</value>
-	</data>
+    <value>Offline</value>
+  </data>
 	<data name="ChannelCount" xml:space="preserve">
-		<value>Channel count</value>
-	</data>
+    <value>Channel count</value>
+  </data>
 	<data name="Region" xml:space="preserve">
-		<value>Region</value>
-	</data>
+    <value>Region</value>
+  </data>
 	<data name="DefaultChannel" xml:space="preserve">
-		<value>Default channel</value>
-	</data>
+    <value>Default channel</value>
+  </data>
 	<data name="LanguageNotFound" xml:space="preserve">
-		<value>Language not found.</value>
-	</data>
+    <value>Language not found.</value>
+  </data>
 	<data name="CategoryCount" xml:space="preserve">
-		<value>Category count</value>
-	</data>
+    <value>Category count</value>
+  </data>
 	<data name="Changelog1.2.9" xml:space="preserve">
-		<value>- Added a backup translator that will be automatically used when the first one fails.
+    <value>- Added a backup translator that will be automatically used when the first one fails.
 - Increased the command cache cleaning interval.
 
 - Fixed a bug in `new` that prevented showing the initial prompt.
@@ -1872,15 +1838,15 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Now `ping` shows the database latency.
 
 - Reduced the memory usage.</value>
-	</data>
+  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
-		<value>Dumping the adventure...</value>
-	</data>
+    <value>Dumping the adventure...</value>
+  </data>
 	<data name="EditCanceled" xml:space="preserve">
-		<value>Edit canceled.</value>
-	</data>
+    <value>Edit canceled.</value>
+  </data>
 	<data name="Changelog1.3" xml:space="preserve">
-		<value>- New command: `dump`.
+    <value>- New command: `dump`.
 
 - Updated the AI Dungeon API to use WebSockets. Now the response times are a lot faster.
 - Updated the `new` command to use reactions instead of having to send numbers or names.
@@ -1906,5 +1872,100 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Now `badtranslator` won't have duplicated languages.
 
 - Reduced *more* the memory usage.</value>
-	</data>
+  </data>
+	<data name="NothingToDelete" xml:space="preserve">
+    <value>Nothing to delete.</value>
+  </data>
+	<data name="aidinfoSummary" xml:space="preserve">
+    <value>Shows the AI Dungeon info.</value>
+  </data>
+	<data name="aidnewSummary" xml:space="preserve">
+    <value>Creates a new adventure.</value>
+  </data>
+	<data name="continueSummary" xml:space="preserve">
+    <value>Continues the adventure with the provided text. If no text is passed, the AI will generate the story.</value>
+  </data>
+	<data name="continueParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="continueParam2" xml:space="preserve">
+    <value>The text to use.</value>
+  </data>
+	<data name="undoSummary" xml:space="preserve">
+    <value>Undoes the last action.</value>
+  </data>
+	<data name="undoParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="redoSummary" xml:space="preserve">
+    <value>Redoes the last undone action.</value>
+  </data>
+	<data name="redoParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="rememberSummary" xml:space="preserve">
+    <value>Adds text to the memory context.</value>
+  </data>
+	<data name="rememberParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="rememberParam2" xml:space="preserve">
+    <value>The text to add.</value>
+  </data>
+	<data name="alterSummary" xml:space="preserve">
+    <value>Edits the last response.</value>
+  </data>
+	<data name="retrySummary" xml:space="preserve">
+    <value>Retries the last action and generates a new response.</value>
+  </data>
+	<data name="retryParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="makepublicSummary" xml:space="preserve">
+    <value>Makes an ID public.</value>
+  </data>
+	<data name="makepublicParam1" xml:space="preserve">
+    <value>The adventure ID. You have to own this ID.</value>
+  </data>
+	<data name="makeprivateSummary" xml:space="preserve">
+    <value>Makes an ID private.</value>
+  </data>
+	<data name="makeprivateParam1" xml:space="preserve">
+    <value>The adventure ID. You have to own this ID.</value>
+  </data>
+	<data name="idlistSummary" xml:space="preserve">
+    <value>Gets the ID list of an user.</value>
+  </data>
+	<data name="idlistParam1" xml:space="preserve">
+    <value>The user to get its IDs.</value>
+  </data>
+	<data name="idinfoSummary" xml:space="preserve">
+    <value>Shows info about a ID.</value>
+  </data>
+	<data name="idinfoParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="deleteSummary" xml:space="preserve">
+    <value>Removes an ID.</value>
+  </data>
+	<data name="deleteParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="dumpSummary" xml:space="preserve">
+    <value>Dumps all the text from an ID.</value>
+  </data>
+	<data name="dumpParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
+  </data>
+	<data name="Changelog1.3.3" xml:space="preserve">
+    <value>- Removed `someone`.
+
+- Now Fergun will show the command help when using a command incorrectly.
+- Added a example to every command with parameters in the command help.
+- Added operating system info in `stats`.
+
+- Fixed a bug in `ban`, `kick`, `nick` and `clear` that prevented working properly, saying that the specified user was not found. This happened because the user cache was disabled some time ago.
+- Fixed a bug in `clear` that would incorrectly say that there are messages older that 2 weeks when there are no messages to delete.
+- Fixed a bug in `resize` and `invert` that caused the commands to fail because Discord shows an invalid image preview to some urls.</value>
+  </data>
 </root>

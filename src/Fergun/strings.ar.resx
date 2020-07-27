@@ -133,7 +133,7 @@
     <value>أوامر الموسيقى</value>
   </data>
 	<data name="Notes" xml:space="preserve">
-    <value>ملاحظات:</value>
+    <value>ملاحظات</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
     <value>استخدم `help [command]{0}` لمعرفة المزيد من المعلومات حول الأمر.</value>
@@ -153,20 +153,20 @@
 	<data name="CommandNotFound" xml:space="preserve">
     <value>القيادة لم يتم العثور. استخدم `{0} help` لعرض قائمة الأوامر.</value>
   </data>
-	<data name="HelpNoDescription" xml:space="preserve">
+	<data name="NoDescription" xml:space="preserve">
     <value>(لا يوجد وصف متاح)</value>
   </data>
-	<data name="HelpOptional" xml:space="preserve">
+	<data name="Optional" xml:space="preserve">
     <value>(اختياري)</value>
   </data>
-	<data name="HelpUsage" xml:space="preserve">
-    <value>إستعمال:</value>
+	<data name="Usage" xml:space="preserve">
+    <value>إستعمال</value>
   </data>
-	<data name="HelpAlias" xml:space="preserve">
-    <value>اسماء مستعارة):</value>
+	<data name="Alias" xml:space="preserve">
+    <value>اسماء مستعارة)</value>
   </data>
-	<data name="HelpParameters" xml:space="preserve">
-    <value>المعلمات:</value>
+	<data name="Parameters" xml:space="preserve">
+    <value>المعلمات</value>
   </data>
 	<data name="mojibakeSummary" xml:space="preserve">
     <value>يظهر أحرف يونيكود عشوائية.</value>
@@ -279,7 +279,7 @@
 	<data name="NoUrlPassed" xml:space="preserve">
     <value>يؤدي عدم تحديد عنوان URL إلى جعل الأمر يبحث عن آخر 100 رسالة لارتباط أو مرفق.</value>
   </data>
-	<data name="AttachNotImage" xml:space="preserve">
+	<data name="AttachmentNotImage" xml:space="preserve">
     <value>المرفق ليس صورة.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
@@ -734,19 +734,19 @@
 	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
     <value>مسارات قائمة الانتظار {0} ({1})
 
-يلعب الآن: {2} ({3})</value>
+يلعب الآن: {2}</value>
   </data>
 	<data name="PlayerTrackAdded" xml:space="preserve">
-    <value>تمت إضافة {0} ({1}) إلى قائمة الانتظار.</value>
+    <value>تمت إضافة {0} إلى قائمة الانتظار.</value>
   </data>
 	<data name="PlayerNowPlaying" xml:space="preserve">
-    <value>قيد التشغيل الآن: {0} ({1})</value>
+    <value>قيد التشغيل الآن: {0}</value>
   </data>
 	<data name="InvalidTrack" xml:space="preserve">
     <value>مسار غير صالح.</value>
   </data>
 	<data name="Replaying" xml:space="preserve">
-    <value>إعادة التشغيل</value>
+    <value>إعادة التشغيل {0}</value>
   </data>
 	<data name="EmptyQueue" xml:space="preserve">
     <value>قائمة الانتظار فارغة.</value>
@@ -760,13 +760,13 @@
 	<data name="PlayerTrackSkipped" xml:space="preserve">
     <value>تم التخطي: {0}
 
-يلعب الآن: {1} ({2})</value>
+يلعب الآن: {1}</value>
   </data>
 	<data name="VolumeOutOfIndex" xml:space="preserve">
     <value>استخدم رقمًا بين 2 و 150.</value>
   </data>
-	<data name="VolumeSetted" xml:space="preserve">
-    <value>تم تعيين مستوى الصوت على:</value>
+	<data name="VolumeSet" xml:space="preserve">
+    <value>تم تعيين مستوى الصوت على: {0}.</value>
   </data>
 	<data name="PlayerPaused" xml:space="preserve">
     <value>تم إيقاف المشغل مؤقتًا الآن.</value>
@@ -793,7 +793,7 @@
     <value>الفهرس خارج النطاق.</value>
   </data>
 	<data name="TrackRemoved" xml:space="preserve">
-    <value>المسار: تمت إزالة ** {0} ** في الموضع {1}.</value>
+    <value>تمت إزالة المسار {0} في الموضع {1}.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
     <value>لا يمكن العثور على كلمات ل{0}</value>
@@ -1052,33 +1052,6 @@
 	<data name="Commands" xml:space="preserve">
     <value>أوامر</value>
   </data>
-	<data name="AIDCommandList" xml:space="preserve">
-    <value>`info`: يعرض هذه القائمة.
-
-`new`: يخلق مغامرة جديدة.
-
-`continue &lt;ID&gt; [Do | Say | Story] [Text ...]`: متابعة القصة بالنص الذي تقدمه. إذا لم يتم تمرير أي نص ، فإن الذكاء الاصطناعي سينشئ القصة.
-
-`&lt;undo&lt;ID`: التراجع عن الإجراء الأخير.
-
-`&lt;redo &lt;ID`: هل قمت بالتراجع عن الحادث؟ استخدم هذا الأمر لاستعادته.
-
-`&lt;...alter &lt;ID&gt; &lt;newOutput`: يقوم بتحرير الرد الأخير من AI.
-
-`&lt;...remember &lt;ID&gt; &lt;text&gt;`: يقوم بتحرير سياق الذاكرة.
-
-`&lt;retry &lt;ID`: لإعادة الإجراء الأخير وإنشاء استجابة جديدة.
-
-`idlist [user]`: يعرض معرفات المستخدم.
-
-`&lt;idinfo &lt;ID`: يعرض معلومات حول المعرف.
-
-`&lt;makepublic | makeprivate &lt;ID `: يجعل المعرّف عامًا أو خاصًا.
-
-`&lt;delete &lt;ID`: إزالة معرف.
-
-`&lt;dump &lt;ID`: مقتطفات من كل نص ID.</value>
-  </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>حاول استخدام كلمات جديدة كثيرًا ، فالذكاء الاصطناعي يصبح أكثر إبداعًا مع التنوع.
 هل تريد المزيد من القصة لتوليدها؟ استخدم الأمر متابعة بدون أي نص.
@@ -1279,8 +1252,8 @@
 	<data name="BotVersion" xml:space="preserve">
     <value>نسخة بوت</value>
   </data>
-	<data name="WebsocketPing" xml:space="preserve">
-    <value>الكمون Websocket</value>
+	<data name="OperatingSystem" xml:space="preserve">
+    <value>نظام التشغيل</value>
   </data>
 	<data name="BotOwner" xml:space="preserve">
     <value>مالك بوت</value>
@@ -1363,9 +1336,6 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - دعم قنوات DM.
 - يستخدم البوت الآن قاعدة بيانات مناسبة.
 - المزيد من الاصلاحات.</value>
-  </data>
-	<data name="BadArgumentCountAid" xml:space="preserve">
-    <value>عدد الوسيطة غير صالح. استخدم `{0}info aid` للحصول على مزيد من المعلومات حول الأمر.</value>
   </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>تحتاج إلى إذن `حظر الأعضاء` لاستخدام هذا الأمر.</value>
@@ -1559,10 +1529,6 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>الإعادة الإجراء الأخير ...</value>
   </data>
-	<data name="CommandParseFailedAid" xml:space="preserve">
-    <value>خطأ تحليل الحجج الأوامر. حجة غير صالحة أو ترتيب الحجج غير صحيح.
-استخدام info {0} المساعدات للحصول على مزيد من المعلومات حول الأمر.</value>
-  </data>
 	<data name="SelfNoIDs" xml:space="preserve">
     <value>لم يكن لديك أي معرفات المغامرة.
 يمكنك استخدام قيادة new لخلق مغامرة جديدة.</value>
@@ -1752,7 +1718,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>عنوان URL للصورة المراد استخدامها.</value>
   </data>
 	<data name="Changelog1.2.3" xml:space="preserve">
-		<value>ويتضمن هذا التحديث إصلاحات الأخطاء التي تركت 1.2 و بعض التغييرات / الأشياء الجديدة التي تأجلت من 1.2 إلى تحسينها.
+    <value>ويتضمن هذا التحديث إصلاحات الأخطاء التي تركت 1.2 و بعض التغييرات / الأشياء الجديدة التي تأجلت من 1.2 إلى تحسينها.
 
 - الأمر جديد: `invert`
 - أضيفت الروسية والتركية (لقد استعملت جوجل ترجمة ذلك الترجمات قد يكون الكثير من الأخطاء).
@@ -1767,64 +1733,64 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - إصلاح الخلل في` badtranslator` التي جعلت الأمر تفشل عشوائيا من دون سبب.
 - إصلاح الخلل مع` paginator` تضمين هذا مومض عند الرد على الزر الأول / الماضي عندما كانت الصفحة بالفعل أول / آخر واحد.
 - إصلاح بعض الخلل مع محلل` lyrics`.</value>
-	</data>
+  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
-		<value>يجب أن تكون رسائل الأصغر من أسبوعين.</value>
-	</data>
+    <value>يجب أن تكون رسائل الأصغر من أسبوعين.</value>
+  </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
-		<value>لا يمكن حذف {0} رسائل لأنهم هم من كبار السن من أسبوعين.</value>
-	</data>
+    <value>لا يمكن حذف {0} رسائل لأنهم هم من كبار السن من أسبوعين.</value>
+  </data>
 	<data name="Changelog1.2.4" xml:space="preserve">
-		<value>- تمت إضافة خدمة موثوقية لمنع الجمود والبرنامج النصي لإعادة التشغيل التلقائي الذي يتم تنفيذه إذا تعطل البوت.
+    <value>- تمت إضافة خدمة موثوقية لمنع الجمود والبرنامج النصي لإعادة التشغيل التلقائي الذي يتم تنفيذه إذا تعطل البوت.
 
 - حد أقصى. طول النص في "كلمات".
 
 - إصلاح الخلل في "عكس" الذي فشل في بعض الصور.
 - تم إصلاح خطأ "واضح" أظهر تحذيرًا بشأن الرسائل لا يمكن حذفه حتى لو كانت جميع الرسائل المحذوفة أقل من أسبوعين.
 - تم إصلاح الخلل في "معلومات تافهة" بحيث تنتهي مهلتها بغض النظر عن الإدخال.</value>
-	</data>
+  </data>
 	<data name="GuildNotFound" xml:space="preserve">
-		<value>لم يتم العثور على الخادم.</value>
-	</data>
+    <value>لم يتم العثور على الخادم.</value>
+  </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
-		<value>حدث خطأ أثناء تحليل كلمات ل{0}.
+    <value>حدث خطأ أثناء تحليل كلمات ل{0}.
 ربما انها مفيدة؟</value>
-	</data>
+  </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
-		<value>المعلمة  `{0}` يجب أن يكون أقل من {1}.</value>
-	</data>
+    <value>المعلمة  `{0}` يجب أن يكون أقل من {1}.</value>
+  </data>
 	<data name="InvalidID" xml:space="preserve">
-		<value>بطاقة التعريف غير صالحة.</value>
-	</data>
+    <value>بطاقة التعريف غير صالحة.</value>
+  </data>
 	<data name="HastebinLink" xml:space="preserve">
-		<value>رابط Hastebin</value>
-	</data>
+    <value>رابط Hastebin</value>
+  </data>
 	<data name="NotAvailable" xml:space="preserve">
-		<value>غير متوفر.</value>
-	</data>
+    <value>غير متوفر.</value>
+  </data>
 	<data name="WaitingQueue" xml:space="preserve">
-		<value>في انتظار تفريغ قائمة الانتظار ...</value>
-	</data>
+    <value>في انتظار تفريغ قائمة الانتظار ...</value>
+  </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>إخراج القديم هو:
+    <value>إخراج القديم هو:
 {0}
 الرجاء إدخال الانتاج الجديد (**لا** الأمر).</value>
-	</data>
+  </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
-		<value>جارٍ إنشاء رد جديد ...</value>
-	</data>
+    <value>جارٍ إنشاء رد جديد ...</value>
+  </data>
 	<data name="InputTypes" xml:space="preserve">
-		<value>خيارات الإدخال</value>
-	</data>
+    <value>خيارات الإدخال</value>
+  </data>
 	<data name="InputTypesList" xml:space="preserve">
-		<value>افعل: الإجراء الذي تريد القيام به في القصة. ابدأ دائمًا بإجراء ، على سبيل المثال. "البحث عن الكنز المخفي". هذا هو الخيار الافتراضي إذا لم يتم الكشف عن أي شخص.
+    <value>افعل: الإجراء الذي تريد القيام به في القصة. ابدأ دائمًا بإجراء ، على سبيل المثال. "البحث عن الكنز المخفي". هذا هو الخيار الافتراضي إذا لم يتم الكشف عن أي شخص.
 
 قل: يمكنك استخدام هذا للتحدث ، على سبيل المثال. "دعهم و شأنهم!"
 
 القصة: يمنع هذا الإدخال AI من وضع "أنت" أمام إدخالك.</value>
-	</data>
+  </data>
 	<data name="Changelog1.2.7" xml:space="preserve">
-		<value>- الأوامر الجديدة: `color` و` retry`.
+    <value>- الأوامر الجديدة: `color` و` retry`.
 
 - تمت إضافة خدمة ذاكرة التخزين المؤقت للأوامر ، يمكنك الآن تحرير رسالة إلى أمر جديد وسيقوم Fergun بتحديث رده أو إرسال أمر جديد.
 
@@ -1838,24 +1804,24 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - الآن ستقوم بعض الأوامر بتحميل نتائجها إلى Hastebin عندما يكون المحتوى طويلًا جدًا.
 
 - تم إصلاح بعض الأخطاء في `tpdne` و` tcdne` و `تكرار` وخدمة الأوامر ونظام الترقيم.</value>
-	</data>
+  </data>
 	<data name="ChannelCount" xml:space="preserve">
-		<value>عدد قناة</value>
-	</data>
+    <value>عدد قناة</value>
+  </data>
 	<data name="Region" xml:space="preserve">
-		<value>منطقة</value>
-	</data>
+    <value>منطقة</value>
+  </data>
 	<data name="DefaultChannel" xml:space="preserve">
-		<value>القناة الإفتراضية</value>
-	</data>
+    <value>القناة الإفتراضية</value>
+  </data>
 	<data name="LanguageNotFound" xml:space="preserve">
-		<value>لم يتم العثور على اللغة.</value>
-	</data>
+    <value>لم يتم العثور على اللغة.</value>
+  </data>
 	<data name="CategoryCount" xml:space="preserve">
-		<value>الفئة العد</value>
-	</data>
+    <value>الفئة العد</value>
+  </data>
 	<data name="Changelog1.2.9" xml:space="preserve">
-		<value>- تمت إضافة مترجم احتياطي سيتم استخدامه تلقائيًا عند فشل المترجم الأول.
+    <value>- تمت إضافة مترجم احتياطي سيتم استخدامه تلقائيًا عند فشل المترجم الأول.
 - زيادة الفاصل الزمني لتنظيف ذاكرة التخزين المؤقت الأوامر.
 
 - تم إصلاح الخلل في "جديد" الذي حال دون عرض المطالبة الأولية.
@@ -1866,15 +1832,15 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - يُظهر الآن "ping" وقت استجابة قاعدة البيانات.
 
 - خفض استخدام الذاكرة.</value>
-	</data>
+  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
-		<value>إلقاء المغامرة...</value>
-	</data>
+    <value>إلقاء المغامرة...</value>
+  </data>
 	<data name="EditCanceled" xml:space="preserve">
-		<value>تحرير إلغاؤها.</value>
-	</data>
+    <value>تحرير إلغاؤها.</value>
+  </data>
 	<data name="Changelog1.3" xml:space="preserve">
-		<value>- الأمر الجديد: `تفريغ`.
+    <value>- الأمر الجديد: `تفريغ`.
 
 - تم تحديث واجهة برمجة تطبيقات AI Dungeon API لاستخدام WebSockets. الآن أوقات الاستجابة أسرع بكثير.
 - تحديث الأمر `new` لاستخدام ردود الفعل بدلاً من إرسال أرقام أو أسماء.
@@ -1900,5 +1866,115 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - الآن لن يكون لـ "badtranslator" لغات مكررة.
 
 - خفض * استخدام * الذاكرة بشكل أكبر.</value>
-	</data>
+  </data>
+	<data name="NothingToDelete" xml:space="preserve">
+    <value>ليس هناك شيء لحذفه.</value>
+  </data>
+	<data name="Members" xml:space="preserve">
+    <value>أفراد$$</value>
+  </data>
+	<data name="Online" xml:space="preserve">
+    <value>عبر الانترنت$$</value>
+  </data>
+	<data name="Idle" xml:space="preserve">
+    <value>خامل$$</value>
+  </data>
+	<data name="DnD" xml:space="preserve">
+    <value>السحب والإفلات$$</value>
+  </data>
+	<data name="Offline" xml:space="preserve">
+    <value>غير متصل على الانترنت$$</value>
+  </data>
+	<data name="aidinfoSummary" xml:space="preserve">
+    <value>يظهر من المعلومات AI الأبراج.</value>
+  </data>
+	<data name="aidnewSummary" xml:space="preserve">
+    <value>يخلق مغامرة جديدة.</value>
+  </data>
+	<data name="continueSummary" xml:space="preserve">
+    <value>يواصل المغامرة مع نص المقدمة. إذا كان يتم تمرير أي نص، فإن منظمة العفو الدولية توليد القصة.</value>
+  </data>
+	<data name="continueParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
+	<data name="continueParam2" xml:space="preserve">
+    <value>النص للاستخدام.</value>
+  </data>
+	<data name="undoSummary" xml:space="preserve">
+    <value>التراجع عن الإجراء الأخير.</value>
+  </data>
+	<data name="undoParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
+	<data name="redoSummary" xml:space="preserve">
+    <value>Redoes العمل التراجع الماضي.</value>
+  </data>
+	<data name="redoParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
+	<data name="rememberSummary" xml:space="preserve">
+    <value>ويضيف النص إلى إطار الذاكرة.</value>
+  </data>
+	<data name="rememberParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
+	<data name="rememberParam2" xml:space="preserve">
+    <value>النص لإضافة.$$</value>
+  </data>
+	<data name="alterSummary" xml:space="preserve">
+    <value>التعديلات استجابة الماضية.$$</value>
+  </data>
+	<data name="retrySummary" xml:space="preserve">
+    <value>عمليات إعادة الإجراء الأخير ويولد استجابة جديدة.$$</value>
+  </data>
+	<data name="retryParam1" xml:space="preserve">
+    <value>معرف المغامرة.$$</value>
+  </data>
+	<data name="makepublicSummary" xml:space="preserve">
+    <value>يجعل الجمهور ID.</value>
+  </data>
+	<data name="makepublicParam1" xml:space="preserve">
+    <value>مغامرة IF. عليك أن تملك هذا الرقم.</value>
+  </data>
+	<data name="makeprivateSummary" xml:space="preserve">
+    <value>يجعل الخاص ID.</value>
+  </data>
+	<data name="makeprivateParam1" xml:space="preserve">
+    <value>مغامرة IF. عليك أن تملك هذا الرقم.</value>
+  </data>
+	<data name="idlistSummary" xml:space="preserve">
+    <value>يحصل على قائمة معرف مستخدم.</value>
+  </data>
+	<data name="idlistParam1" xml:space="preserve">
+    <value>للمستخدم الحصول على معرفات لها.</value>
+  </data>
+	<data name="idinfoSummary" xml:space="preserve">
+    <value>يظهر من المعلومات حول هوية.</value>
+  </data>
+	<data name="idinfoParam1" xml:space="preserve">
+    <value>معرف المغامرة.$$</value>
+  </data>
+	<data name="deleteSummary" xml:space="preserve">
+    <value>يزيل معرف.$$</value>
+  </data>
+	<data name="deleteParam1" xml:space="preserve">
+    <value>معرف المغامرة.$$</value>
+  </data>
+	<data name="dumpSummary" xml:space="preserve">
+    <value>مقالب عن النص من معرف.</value>
+  </data>
+	<data name="dumpParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
+	<data name="Changelog1.3.3" xml:space="preserve">
+    <value>- إزالة `someone`.
+
+- والآن Fergun عرض مساعدة القيادة عند استخدام أمر غير صحيح.
+- يضاف مثال لكل أمر مع المعلمات في مساعدة الأوامر.
+- أضيفت تشغيل نظام المعلومات في `stats`.
+
+- إصلاح الخلل في `ban`،` kick`، `` nick` وclear` التي حالت دون العمل بشكل صحيح، قائلا ان لم يتم العثور على المستخدم المحدد. حدث هذا لأن ذاكرة التخزين المؤقت المستخدم تم تعطيل منذ بعض الوقت.
+- إصلاح الخلل في `clear` أن أقول بشكل غير صحيح أن هناك رسائل القديمة التي 2 أسابيع عندما لا يكون هناك رسائل إلى حذف.
+- إصلاح الخلل في `` resize` وinvert` التي تسببت الأوامر إلى فشل بسبب الخلاف يظهر معاينة الصور غير صالحة لبعض عناوين المواقع.</value>
+  </data>
 </root>

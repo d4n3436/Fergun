@@ -40,7 +40,7 @@ namespace Fergun.Readers
 
             //if (context.Guild != null)
             //    guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
-            
+
             guildUsers = await context.Guild.SearchUsersAsync(input, 10).ConfigureAwait(false);
             if (guildUsers.Count == 1)
                 return TypeReaderResult.FromSuccess(guildUsers.First() as T);
@@ -98,7 +98,7 @@ namespace Fergun.Readers
             }
             else
             {
-                user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false); 
+                user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
             }
             if (user == null)
             {

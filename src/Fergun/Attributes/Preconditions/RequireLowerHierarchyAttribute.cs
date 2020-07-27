@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Fergun.Extensions;
 
 namespace Fergun.Attributes.Preconditions
 {
     /// <summary>
-    ///     Indicates this parameter must be a <see cref="SocketGuildUser"/>
-    ///     whose <see cref="SocketGuildUser.Hierarchy"/> value must be
+    ///     Indicates this parameter must be a <see cref="IGuildUser"/>
+    ///     whose Hierarchy value must be
     ///     lower than that of the Bot.
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
@@ -32,19 +34,20 @@ namespace Fergun.Attributes.Preconditions
         }
 
         /// <inheritdoc />
-        public override Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext _, ParameterInfo __, object value, IServiceProvider ___)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context, ParameterInfo __, object value, IServiceProvider ___)
         {
-            if (value is SocketGuildUser user)
+            if (value is IGuildUser user)
             {
-                return (user.Guild.CurrentUser.Hierarchy > user.Hierarchy)
-                    ? Task.FromResult(PreconditionResult.FromSuccess())
-                    : Task.FromResult(PreconditionResult.FromError(_errorMessage ?? "Specified user must be lower in hierarchy."));
+                int botHierarchy = (await user.Guild.GetCurrentUserAsync()).GetHierarchy();
+                int userHierarchy = user.GetHierarchy();
+                return botHierarchy > userHierarchy
+                    ? PreconditionResult.FromSuccess()
+                    : PreconditionResult.FromError(_errorMessage ?? "Specified user must be lower in hierarchy.");
             }
-            if (_ignoreNotGuildContext)
-                return Task.FromResult(PreconditionResult.FromSuccess());
-
-            return Task.FromResult(PreconditionResult.FromError("Command requires Guild context."));
+            return _ignoreNotGuildContext
+                ? PreconditionResult.FromSuccess()
+                : PreconditionResult.FromError("Command requires Guild context.");
         }
     }
 }

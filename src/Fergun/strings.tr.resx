@@ -133,7 +133,7 @@
     <value>Müzik komutları</value>
   </data>
 	<data name="Notes" xml:space="preserve">
-    <value>Notlar:</value>
+    <value>Notlar</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
     <value>Bir komut hakkında daha fazla bilgi almak için `{0}help  [komut] 'kullanın.</value>
@@ -153,20 +153,20 @@
 	<data name="CommandNotFound" xml:space="preserve">
     <value>Komut bulunamadı. Kullanım `{0}help` komut listesini görmek için.</value>
   </data>
-	<data name="HelpNoDescription" xml:space="preserve">
+	<data name="NoDescription" xml:space="preserve">
     <value>(Açıklama yok)</value>
   </data>
-	<data name="HelpOptional" xml:space="preserve">
+	<data name="Optional" xml:space="preserve">
     <value>(İsteğe bağlı)</value>
   </data>
-	<data name="HelpUsage" xml:space="preserve">
-    <value>Kullanımı:</value>
+	<data name="Usage" xml:space="preserve">
+    <value>Kullanımı</value>
   </data>
-	<data name="HelpAlias" xml:space="preserve">
-    <value>Alias ​​(es):</value>
+	<data name="Alias" xml:space="preserve">
+    <value>Alias ​(es)</value>
   </data>
-	<data name="HelpParameters" xml:space="preserve">
-    <value>Parametreler:</value>
+	<data name="Parameters" xml:space="preserve">
+    <value>Parametreler</value>
   </data>
 	<data name="mojibakeSummary" xml:space="preserve">
     <value>Rasgele unicode karakterleri gösterir.</value>
@@ -279,7 +279,7 @@
 	<data name="NoUrlPassed" xml:space="preserve">
     <value>Bir url belirtilmemesi, son 100 iletiyi bir bağlantı veya ek için arama komutu yapar.</value>
   </data>
-	<data name="AttachNotImage" xml:space="preserve">
+	<data name="AttachmentNotImage" xml:space="preserve">
     <value>Ek bir resim değil.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
@@ -734,19 +734,19 @@ Hata kodu:</value>
 	<data name="PlayerEmptyPlaylistAdded" xml:space="preserve">
     <value>Sıraya alınmış {0} parça ({1})
 
-Şimdi çalıyor: {2} ({3})$$</value>
+Şimdi çalıyor: {2}</value>
   </data>
 	<data name="PlayerTrackAdded" xml:space="preserve">
-    <value>{0} ({1}) kuyruğa eklendi.</value>
+    <value>{0} kuyruğa eklendi.</value>
   </data>
 	<data name="PlayerNowPlaying" xml:space="preserve">
-    <value>Şimdi çalıyor: {0} ({1})</value>
+    <value>Şimdi çalıyor: {0}</value>
   </data>
 	<data name="InvalidTrack" xml:space="preserve">
     <value>Geçersiz parça.</value>
   </data>
 	<data name="Replaying" xml:space="preserve">
-    <value>Tekrar oynatılıyor</value>
+    <value>Tekrar oynatılıyor {0}</value>
   </data>
 	<data name="EmptyQueue" xml:space="preserve">
     <value>Sıra boş.</value>
@@ -760,13 +760,13 @@ Hata kodu:</value>
 	<data name="PlayerTrackSkipped" xml:space="preserve">
     <value>Atlandı: {0}
 
-Şimdi çalıyor: {1} ({2})</value>
+Şimdi çalıyor: {1}</value>
   </data>
 	<data name="VolumeOutOfIndex" xml:space="preserve">
     <value>2 ile 150 arasında bir sayı kullanın.</value>
   </data>
-	<data name="VolumeSetted" xml:space="preserve">
-    <value>Ses şiddeti:</value>
+	<data name="VolumeSet" xml:space="preserve">
+    <value>Ses şiddeti: {0}.</value>
   </data>
 	<data name="PlayerPaused" xml:space="preserve">
     <value>Oyuncu şimdi duraklatıldı.</value>
@@ -793,7 +793,7 @@ Hata kodu:</value>
     <value>Dizin aralık dışında.</value>
   </data>
 	<data name="TrackRemoved" xml:space="preserve">
-    <value>Parça: {1} konumundaki ** {0} ** kaldırıldı.</value>
+    <value>{1} konumundaki {0} parçası kaldırıldı.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
     <value>İçin şarkı sözleri bulunamadı {0}</value>
@@ -1052,33 +1052,6 @@ Bilgi istemi 5 dakika içinde zaman aşımına uğrar ve maks. karakter sayısı
 	<data name="Commands" xml:space="preserve">
     <value>Komutları</value>
   </data>
-	<data name="AIDCommandList" xml:space="preserve">
-    <value>`info`: Bu menüyü gösterir.
-
-`new`: Yeni bir macera yaratır.
-
-`continue &lt;ID&gt; [Do|Say|Story] [Text...]`: Hikayeye sağladığınız metinle devam eder. Hiçbir metin geçilmezse, AI hikayeyi oluşturur.
-
-`undo &lt;ID&gt;`: Son eylemi geri al.
-
-`redid &lt;ID&gt;`: Kazayı geri aldın mı? Geri almak için bu komutu kullanın.
-
-`alter &lt;ID&gt; &lt;newOutput ...&gt;`: AI'dan son yanıtı düzenler.
-
-`remember &lt;ID&gt; &lt;text...&gt;`: Bellek içeriğini düzenler.
-
-`retry &lt;ID&gt;`: Son eylemi yeniden dener ve yeni bir yanıt oluşturur.
-
-`idlist [user]`: Bir kullanıcının kimliklerini gösterir.
-
-`idinfo &lt;ID&gt;`: Bir kimlik hakkında bilgi gösterir.
-
-`makepublic | makeprivate &lt;ID&gt; `: Bir kimliği genel veya özel yapar.
-
-`delete &lt;ID&gt;`: Bir kimliği kaldırır.
-
-`dump &lt;ID&gt;`: bir kimlik özütleri tüm metin.</value>
-  </data>
 	<data name="AIDTips" xml:space="preserve">
     <value>Sık sık yeni kelimeler kullanmayı deneyin, AI çeşitlilik ile daha yaratıcı hale gelir.
 Bir fiil ile bir "do" girdisi başlatmayı unutmayın, örn: Ork'a saldırın.
@@ -1238,8 +1211,8 @@ Bot'un mesajları arayabileceği gün sınırı 14'tür.</value>
 	<data name="BotVersion" xml:space="preserve">
     <value>Bot versiyonu</value>
   </data>
-	<data name="WebsocketPing" xml:space="preserve">
-    <value>Websocket ping</value>
+	<data name="OperatingSystem" xml:space="preserve">
+    <value>İşletim sistemi</value>
   </data>
 	<data name="BotOwner" xml:space="preserve">
     <value>Bot sahibi</value>
@@ -1468,9 +1441,6 @@ Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," se
 - Şimdi bot uygun bir veritabanı kullanıyor.
 - Daha fazla hata düzeltmesi.</value>
   </data>
-	<data name="BadArgumentCountAid" xml:space="preserve">
-    <value>Komutta gerekli bağımsız değişkenler eksik. Komut hakkında daha fazla bilgi almak için `{0} yardım bilgilerini 'kullanın.</value>
-  </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>Bu komutu kullanmak için `Üyeleri Yasakla 'iznine ihtiyacınız var.</value>
   </data>
@@ -1551,10 +1521,6 @@ Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," se
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Son işlem yeniden yapılıyor ...</value>
-  </data>
-	<data name="CommandParseFailedAid" xml:space="preserve">
-    <value>Komut bağımsız değişkenleri ayrıştırılırken hata oluştu. Bağımsız değişken geçersiz veya bağımsız değişkenlerin sırası yanlış.
-Komut hakkında daha fazla bilgi almak için `{0} yardım bilgilerini 'kullanın.</value>
   </data>
 	<data name="SelfNoIDs" xml:space="preserve">
     <value>Hiç macera kimliğiniz yok.
@@ -1742,7 +1708,7 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
     <value>Dil seçimi</value>
   </data>
 	<data name="Changelog1.2.3" xml:space="preserve">
-		<value>- Yeni komut: `invert`
+    <value>- Yeni komut: `invert`
 - Rusça ve Türkçe diller eklendi (Google Çeviri'yi kullandım, böylece çevirilerde çok fazla hata olabilir).
 - `help` da zorunlu ve isteğe bağlı argümanlar hakkında bilgi eklendi.
 - `img`, `tts` ve `urban` e basit bir önbellek sistemi eklendi.
@@ -1755,64 +1721,64 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
 - `Badtranslator` da komutun hiçbir nedenle rastgele başarısız olmasını sağlayan bir hata düzeltildi.
 - Sayfa zaten ilk / sonuncuyken ilk / son düğmeye tepki verirken yanıp sönen gömme sayfalayıcıdaki bir hata düzeltildi.
 - Bazı sözler ayrıştırıcı ile bazı hatalar düzeltildi.</value>
-	</data>
+  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
-		<value>Mesajlar iki hafta yaşından küçük olması gerekmektedir.</value>
-	</data>
+    <value>Mesajlar iki hafta yaşından küçük olması gerekmektedir.</value>
+  </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
-		<value>iki hafta daha eski olduğu için {0} mesajlar silinemedi.</value>
-	</data>
+    <value>iki hafta daha eski olduğu için {0} mesajlar silinemedi.</value>
+  </data>
 	<data name="Changelog1.2.4" xml:space="preserve">
-		<value>- Kilitlenmeleri önlemek için bir güvenilirlik hizmeti ve bot çöktüğünde çalışan otomatik yeniden başlatma komut dosyası eklendi.
+    <value>- Kilitlenmeleri önlemek için bir güvenilirlik hizmeti ve bot çöktüğünde çalışan otomatik yeniden başlatma komut dosyası eklendi.
 
 - Maks. `lyrics` içindeki metin uzunluğu.
 
 - `invert` içindeki bazı resimlerde başarısız olan bir hata düzeltildi.
 - `clear` içindeki, silinen iletilerin tümü iki haftadan küçük olsa bile iletilerin silinemediğini gösteren bir hata düzeltildi.
 - `trivia`  içindeki girişten bağımsız olarak zaman aşımına uğrayan bir hata düzeltildi.</value>
-	</data>
+  </data>
 	<data name="GuildNotFound" xml:space="preserve">
-		<value>Sunucu bulunamadı.</value>
-	</data>
+    <value>Sunucu bulunamadı.</value>
+  </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
-		<value>{0} sözlerini ayrıştırılırken bir hata meydana geldi.
+    <value>{0} sözlerini ayrıştırılırken bir hata meydana geldi.
 Belki bu bir vesile değil mi?</value>
-	</data>
+  </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
-		<value>Parametre {0} '{1} daha düşük olması gerekir.</value>
-	</data>
+    <value>Parametre {0} '{1} daha düşük olması gerekir.</value>
+  </data>
 	<data name="InvalidID" xml:space="preserve">
-		<value>Geçersiz kimlik.</value>
-	</data>
+    <value>Geçersiz kimlik.</value>
+  </data>
 	<data name="HastebinLink" xml:space="preserve">
-		<value>Hastebin bağlantı</value>
-	</data>
+    <value>Hastebin bağlantı</value>
+  </data>
 	<data name="NotAvailable" xml:space="preserve">
-		<value>Müsait değil.</value>
-	</data>
+    <value>Müsait değil.</value>
+  </data>
 	<data name="WaitingQueue" xml:space="preserve">
-		<value>Sıranın boşalması bekleniyor ...</value>
-	</data>
+    <value>Sıranın boşalması bekleniyor ...</value>
+  </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-		<value>Eski çıktı şöyledir:
+    <value>Eski çıktı şöyledir:
 {0}
 yeni çıktının (**değil** komutu) girin.</value>
-	</data>
+  </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
-		<value>Yeni bir yanıt oluşturuluyor ...</value>
-	</data>
+    <value>Yeni bir yanıt oluşturuluyor ...</value>
+  </data>
 	<data name="InputTypes" xml:space="preserve">
-		<value>Giriş seçenekleri</value>
-	</data>
+    <value>Giriş seçenekleri</value>
+  </data>
 	<data name="InputTypesList" xml:space="preserve">
-		<value>Yapın: Hikayede yapmak istediğiniz bir eylem. Her zaman bir eylemle başlayın, örn. Msgstr "Gizli hazineyi ara". Hiç kimse algılanmazsa bu varsayılan seçenektir.
+    <value>Yapın: Hikayede yapmak istediğiniz bir eylem. Her zaman bir eylemle başlayın, örn. Msgstr "Gizli hazineyi ara". Hiç kimse algılanmazsa bu varsayılan seçenektir.
 
 De ki: Bunu konuşmak için kullanabilirsiniz, ör. "Onları yalnız bırak!"
 
 Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller.</value>
-	</data>
+  </data>
 	<data name="Changelog1.2.7" xml:space="preserve">
-		<value>- Yeni komutlar: "renk" ve "yeniden dene".
+    <value>- Yeni komutlar: "renk" ve "yeniden dene".
 
 - Bir komut önbellek servisi eklendi, şimdi yeni bir komuta mesaj düzenleyebilirsiniz ve Fergun yanıtını güncelleyecek veya yeni bir komut gönderecektir.
 
@@ -1826,24 +1792,24 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Artık bazı komutlar, içerik çok uzun olduğunda sonuçlarını Hastebin'e yükleyecek.
 
 - "tpdne", "tcdne", "tekrar", komut hizmeti ve sayfa sistemindeki bazı hatalar düzeltildi.</value>
-	</data>
+  </data>
 	<data name="ChannelCount" xml:space="preserve">
-		<value>Kanal sayısı</value>
-	</data>
+    <value>Kanal sayısı</value>
+  </data>
 	<data name="Region" xml:space="preserve">
-		<value>bölge</value>
-	</data>
+    <value>bölge</value>
+  </data>
 	<data name="DefaultChannel" xml:space="preserve">
-		<value>Standart kanal</value>
-	</data>
+    <value>Standart kanal</value>
+  </data>
 	<data name="LanguageNotFound" xml:space="preserve">
-		<value>Dil bulunamadı.</value>
-	</data>
+    <value>Dil bulunamadı.</value>
+  </data>
 	<data name="CategoryCount" xml:space="preserve">
-		<value>Kategori sayımı</value>
-	</data>
+    <value>Kategori sayımı</value>
+  </data>
 	<data name="Changelog1.2.9" xml:space="preserve">
-		<value>- Birincisi başarısız olduğunda otomatik olarak kullanılacak bir yedek çevirmen eklendi.
+    <value>- Birincisi başarısız olduğunda otomatik olarak kullanılacak bir yedek çevirmen eklendi.
 - Komut önbellek temizleme aralığını arttırdı.
 
 - İlk istemin gösterilmesini engelleyen "yeni" bir hata düzeltildi.
@@ -1854,15 +1820,15 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Şimdi "ping" veritabanı gecikmesini gösteriyor.
 
 - Bellek kullanımını azalttı.</value>
-	</data>
+  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
-		<value>macera Damping...</value>
-	</data>
+    <value>macera Damping...</value>
+  </data>
 	<data name="EditCanceled" xml:space="preserve">
-		<value>Düzenleme iptal edildi.</value>
-	</data>
+    <value>Düzenleme iptal edildi.</value>
+  </data>
 	<data name="Changelog1.3" xml:space="preserve">
-		<value>- Yeni komut: `dump`.
+    <value>- Yeni komut: `dump`.
 
 - AI Dungeon API'sini WebSockets'i kullanacak şekilde güncellendi. Şimdi tepki süreleri çok daha hızlı.
 - Sayı veya ad göndermek yerine reaksiyonları kullanmak için `yeni` komutu güncellendi.
@@ -1888,5 +1854,115 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Şimdi "badtranslator" ın yinelenen dilleri olmayacak.
 
 - Bellek kullanımını azaltır *.</value>
-	</data>
+  </data>
+	<data name="NothingToDelete" xml:space="preserve">
+    <value>Silinecek bir şey yok.</value>
+  </data>
+	<data name="Members" xml:space="preserve">
+    <value>Üyeler$$</value>
+  </data>
+	<data name="Online" xml:space="preserve">
+    <value>İnternet üzerinden$$</value>
+  </data>
+	<data name="Idle" xml:space="preserve">
+    <value>Boşta$$</value>
+  </data>
+	<data name="DnD" xml:space="preserve">
+    <value>DnD$$</value>
+  </data>
+	<data name="Offline" xml:space="preserve">
+    <value>Çevrim$$</value>
+  </data>
+	<data name="aidinfoSummary" xml:space="preserve">
+    <value>AI Zindan bilgi gösterir.</value>
+  </data>
+	<data name="aidnewSummary" xml:space="preserve">
+    <value>Yeni bir macera oluşturur.</value>
+  </data>
+	<data name="continueSummary" xml:space="preserve">
+    <value>sağlanan metin ile macera devam ediyor. Hiçbir metin iletilirse, AI hikaye üretecektir.</value>
+  </data>
+	<data name="continueParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
+	<data name="continueParam2" xml:space="preserve">
+    <value>Metin kullanmak.</value>
+  </data>
+	<data name="undoSummary" xml:space="preserve">
+    <value>Son işlemi geri alır.</value>
+  </data>
+	<data name="undoParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
+	<data name="redoSummary" xml:space="preserve">
+    <value>Son eylemi yineler.</value>
+  </data>
+	<data name="redoParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
+	<data name="rememberSummary" xml:space="preserve">
+    <value>Hafıza bağlamında metin ekler.</value>
+  </data>
+	<data name="rememberParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
+	<data name="rememberParam2" xml:space="preserve">
+    <value>Metin eklemek için.$$</value>
+  </data>
+	<data name="alterSummary" xml:space="preserve">
+    <value>Geçen tepkisini düzenler.$$</value>
+  </data>
+	<data name="retrySummary" xml:space="preserve">
+    <value>Son eylemi yeniden dener ve yeni bir yanıt oluşturur.$$</value>
+  </data>
+	<data name="retryParam1" xml:space="preserve">
+    <value>macera kimliği.$$</value>
+  </data>
+	<data name="makepublicSummary" xml:space="preserve">
+    <value>bir kimlik halka yapar.</value>
+  </data>
+	<data name="makepublicParam1" xml:space="preserve">
+    <value>macera IF. Bu Kimliği sahibi olmak gerekir.</value>
+  </data>
+	<data name="makeprivateSummary" xml:space="preserve">
+    <value>bir kimlik olarak gizli yapar.</value>
+  </data>
+	<data name="makeprivateParam1" xml:space="preserve">
+    <value>macera IF. Bu Kimliği sahibi olmak gerekir.</value>
+  </data>
+	<data name="idlistSummary" xml:space="preserve">
+    <value>bir kullanıcının kimliği liste alır.</value>
+  </data>
+	<data name="idlistParam1" xml:space="preserve">
+    <value>Kullanıcı, Kimliğini almak için.</value>
+  </data>
+	<data name="idinfoSummary" xml:space="preserve">
+    <value>Bir Kimliği hakkında Gösterileri bilgi.</value>
+  </data>
+	<data name="idinfoParam1" xml:space="preserve">
+    <value>macera kimliği.$$</value>
+  </data>
+	<data name="deleteSummary" xml:space="preserve">
+    <value>Bir kimlik kaldırır.$$</value>
+  </data>
+	<data name="deleteParam1" xml:space="preserve">
+    <value>macera kimliği.$$</value>
+  </data>
+	<data name="dumpSummary" xml:space="preserve">
+    <value>Bir kimliğinden tüm metin döker.</value>
+  </data>
+	<data name="dumpParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
+	<data name="Changelog1.3.3" xml:space="preserve">
+    <value>- kaldırıldı `someone`.
+
+- Yanlış bir komut kullanırken Şimdi Fergun komut yardımı gösterecektir.
+- Komut yardım parametrelerle her komuta bir örnek eklendi.
+- stats` `in işletim sistemi bilgisi eklendi.
+
+- `ban`,` kick`, `nick` ve belirtilen kullanıcı bulunamadı söyleyerek düzgün çalıştığından engellediğini` clear` bir hata düzeltildi. kullanıcı önbellek bir süre önce devre dışı olduğu için oldu.
+- yanlış Silinecek mesaj varken 2 hafta o eski iletiler olduğunu söyleyebilirim clear` `de bir hata düzeltildi.
+- Bir resize` `hatasından ve ikilik var bazı URL'ler geçersiz bir görüntü önizlemesini gösterir çünkü neden komutlar başarısız olduğunu` invert` düzeltildi.</value>
+  </data>
 </root>
