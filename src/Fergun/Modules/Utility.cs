@@ -1556,7 +1556,7 @@ namespace Fergun.Modules
                     _isCreatingCache = false;
                 }
             }
-            if (VideoCache.TryTake(out string id))
+            if (!VideoCache.TryTake(out string id))
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }

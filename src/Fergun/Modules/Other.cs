@@ -320,14 +320,14 @@ namespace Fergun.Modules
             await ReplyAsync(text, allowedMentions: AllowedMentions.None);
         }
 
-        [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
-        [Command("someone")]
-        [Summary("someoneSummary")]
-        public async Task Someone()
-        {
-            var user = Context.Guild.Users.ElementAt(RngInstance.Next(Context.Guild.Users.Count)); // Context.Guild.MemberCount may give the incorrect count
-            await ReplyAsync(user.ToString());
-        }
+        //[RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
+        //[Command("someone")]
+        //[Summary("someoneSummary")]
+        //public async Task Someone()
+        //{
+        //    var user = Context.Guild.Users.ElementAt(RngInstance.Next(Context.Guild.Users.Count)); // Context.Guild.MemberCount may give the incorrect count
+        //    await ReplyAsync(user.ToString());
+        //}
 
         [LongRunning]
         [Command("stats", RunMode = RunMode.Async)]
