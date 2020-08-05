@@ -8,6 +8,7 @@ using System.Reflection;
 using Discord;
 using Discord.Commands;
 using Fergun.Attributes;
+using Fergun.Attributes.Preconditions;
 using Fergun.Services;
 using Microsoft.CSharp;
 using Newtonsoft.Json;
@@ -134,7 +135,7 @@ namespace Fergun.Extensions
             // Add example if the command has parameters
             if (command.Parameters.Count > 0)
             {
-                var attribute = command.Attributes.FirstOrDefault(x => x.GetType() == typeof(ExampleAttribute));
+                var attribute = command.Attributes.FirstOrDefault(x => x is ExampleAttribute);
                 if (attribute != null)
                 {
                     string example = prefix;
@@ -153,13 +154,52 @@ namespace Fergun.Extensions
                 builder.AddField(Localizer.Locate("Notes", language), Localizer.Locate(command.Remarks, language));
             }
 
+            var modulePreconds = command.Module.Preconditions;
+            var commandPreconds = command.Preconditions;
+
+            // Add ratelimit info if present
+            var ratelimit = commandPreconds.Concat(modulePreconds).OfType<RatelimitAttribute>().FirstOrDefault();
+
+            if (ratelimit != null)
+            {
+                builder.AddField("Ratelimit", string.Format(Localizer.Locate("RatelimitUses", language), ratelimit.InvokeLimit, ratelimit.InvokeLimitPeriod.ToShortForm2()));
+            }
+
+            // Add required permissions if there's any
+            var preconditions = modulePreconds
+                .Concat(commandPreconds).Where(x => !(x is RatelimitAttribute) && !(x is LongRunningAttribute) && !(x is DisabledAttribute));
+
+            if (preconditions.Any())
+            {
+                string list = "";
+                foreach (var precondition in preconditions)
+                {
+                    string name = precondition.GetType().Name;
+                    list += Format.Code(name.Substring(0, name.Length - 9));
+                    if (precondition is RequireContextAttribute requireContext)
+                    {
+                        list += ": " + requireContext.Contexts.ToString();
+                    }
+                    else if (precondition is RequireUserPermissionAttribute requireUser)
+                    {
+                        list += $": {requireUser.GuildPermission?.ToString() ?? requireUser.ChannelPermission?.ToString()}";
+                    }
+                    else if (precondition is RequireBotPermissionAttribute requireBot)
+                    {
+                        list += $": {requireBot.GuildPermission?.ToString() ?? requireBot.ChannelPermission?.ToString()}";
+                    }
+                    list += "\n";
+                }
+                builder.AddField(Localizer.Locate("Requirements", language), list);
+            }
+
             // Add aliases if present
             if (command.Aliases.Count > 1)
             {
                 builder.AddField(Localizer.Locate("Alias", language), string.Join(", ", command.Aliases.Skip(1)));
             }
 
-            // Add footer with info about obligatory and optional parameters
+            // Add footer with info about required and optional parameters
             if (command.Parameters.Count > 0)
             {
                 builder.WithFooter(Localizer.Locate("HelpFooter2", language));

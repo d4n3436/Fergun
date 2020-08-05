@@ -503,10 +503,6 @@ Creating cache...</value>
 	<data name="Banned" xml:space="preserve">
     <value>User {0} was banned.</value>
   </data>
-	<data name="BanError" xml:space="preserve">
-    <value>Could not ban the user.
-Error code:</value>
-  </data>
 	<data name="clearSummary" xml:space="preserve">
     <value>Clears the last x messages in the current channel.</value>
   </data>
@@ -797,7 +793,7 @@ Now playing: {1}</value>
     <value>The track {0} at position {1} was removed.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
-    <value>Could not find lyrics for {0}</value>
+    <value>No lyrics found for {0}.</value>
   </data>
 	<data name="botgameSummary" xml:space="preserve">
     <value>Sets the game status of the bot.</value>
@@ -1101,15 +1097,8 @@ You can use Say before the text to talk.</value>
 	<data name="SoftbanMyself" xml:space="preserve">
     <value>I won't softban myself lol</value>
   </data>
-	<data name="SoftbanHigherRole" xml:space="preserve">
-    <value>I can't softban that person..</value>
-  </data>
 	<data name="Softbanned" xml:space="preserve">
     <value>User {0} was softbanned.</value>
-  </data>
-	<data name="SoftbanError" xml:space="preserve">
-    <value>Could not softban the user.
-Error code:</value>
   </data>
 	<data name="AIDCommands" xml:space="preserve">
     <value>AI Dungeon (use {0}aid &lt;command&gt;)</value>
@@ -1147,9 +1136,6 @@ The limit of days that the bot can search messages is 14.</value>
   </data>
 	<data name="NotSupportedInDM" xml:space="preserve">
     <value>I don't think you can use that here.</value>
-  </data>
-	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
-    <value>I cant get info from a DM channel. Pass a server ID.</value>
   </data>
 	<data name="tcdneSummary" xml:space="preserve">
     <value>This cat does not exist</value>
@@ -1968,4 +1954,28 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in `clear` that would incorrectly say that there are messages older that 2 weeks when there are no messages to delete.
 - Fixed a bug in `resize` and `invert` that caused the commands to fail because Discord shows an invalid image preview to some urls.</value>
   </data>
+	<data name="RatelimitUses" xml:space="preserve">
+		<value>{0} use(s) every {1}</value>
+	</data>
+	<data name="Requirements" xml:space="preserve">
+		<value>Requirements</value>
+	</data>
+	<data name="cmdstatsSummary" xml:space="preserve">
+		<value>Shows the command stats.</value>
+	</data>
+	<data name="Changelog1.3.6" xml:space="preserve">
+		<value>- New command: `cmdstats`.
+
+- Now the `first` and `last` paginator buttons in `img` and `urban` will only appear when there are 3 or more pages, and the `jump` button when there are 4 or more pages.
+- Now Fergun will send a direct message to warn an user when the bot doesn't have the minimun required permissions in the current channel (`SendMessages` and `EmbedLinks`).
+- Now Fergun supports multiple user activities, this is useful in `userinfo` and `lyrics` (when the Spotify activity is hidden by the custom status).
+- Added ratelimit and required permissions info in the command help.
+
+- Fixed a bug in `wikipedia` that caused the command to fail because the query was not encoded in some cases.
+- Fixed a bug in `screenshot` that caused the command to fail because the url was encoded by error.
+- Fixed a bug in the AI Dungeon module that caused the commands to fail when different IDs were used at the same time.</value>
+	</data>
+	<data name="CommandStatsInfo" xml:space="preserve">
+		<value>Command stats (since 02/21/2020)</value>
+	</data>
 </root>

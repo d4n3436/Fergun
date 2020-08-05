@@ -124,7 +124,7 @@
     <value>Развлекательные команды</value>
   </data>
 	<data name="HelpFooter" xml:space="preserve">
-    <value>Fergun {0} - Общее количество команд: {1}</value>
+    <value>Fergun {0} - Общее количество командование: {1}</value>
   </data>
 	<data name="ModerationCommands" xml:space="preserve">
     <value>Команды модерации</value>
@@ -136,7 +136,7 @@
     <value>Ноты</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
-    <value>Используйте `{0} help [command]`, чтобы получить больше информации о команде.</value>
+    <value>Используйте `{0}help [command]`, чтобы получить больше информации о команде.</value>
   </data>
 	<data name="OtherCommands" xml:space="preserve">
     <value>Другие команды</value>
@@ -484,10 +484,6 @@
 	<data name="Banned" xml:space="preserve">
     <value>Пользователь {0} был запрещен.</value>
   </data>
-	<data name="BanError" xml:space="preserve">
-    <value>Не удалось забанить пользователя.
-Код ошибки:</value>
-  </data>
 	<data name="clearSummary" xml:space="preserve">
     <value>Удаляет последние x сообщений в текущем канале.</value>
   </data>
@@ -799,7 +795,7 @@
     <value>Трек {0} в позиции {1} был удален.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
-    <value>Не удалось найти текст песни для {0}</value>
+    <value>Нет текст не найдено для {0}.</value>
   </data>
 	<data name="botgameSummary" xml:space="preserve">
     <value>Устанавливает игровой статус бота.</value>
@@ -935,7 +931,7 @@
     <value>Добро пожаловать в AI Dungeon</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>Обязательно прочитайте информацию и команды с `{0}help info`, прежде чем продолжить.
+    <value>Обязательно прочитайте информацию и команды с `{0}aid info`, прежде чем продолжить.
 
 Выберите режим:</value>
   </data>
@@ -1075,7 +1071,7 @@
     <value>Вы должны быть администратором, чтобы использовать эту команду.</value>
   </data>
 	<data name="Loading" xml:space="preserve">
-    <value>Loading ...</value>
+    <value>загрузка...</value>
   </data>
 	<data name="FergunConfiguration" xml:space="preserve">
     <value>Конфигурация Fergun</value>
@@ -1104,18 +1100,11 @@
 	<data name="SoftbanMyself" xml:space="preserve">
     <value>Я не буду софтбан сам LOL</value>
   </data>
-	<data name="SoftbanHigherRole" xml:space="preserve">
-    <value>Я не могу мягко запретить этого человека ..</value>
-  </data>
 	<data name="Softbanned" xml:space="preserve">
     <value>Пользователь {0} был заблокирован.</value>
   </data>
-	<data name="SoftbanError" xml:space="preserve">
-    <value>Не удалось софтбанить пользователю.
-Код ошибки:</value>
-  </data>
 	<data name="AIDCommands" xml:space="preserve">
-    <value>AI Dungeon (используйте {0} aid &lt;command&gt;)</value>
+    <value>AI Dungeon (используйте {0}aid &lt;command&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">
     <value>Возврат последнего действия ...</value>
@@ -1146,13 +1135,10 @@
     <value>Пользователь не забанен.</value>
   </data>
 	<data name="BotMention" xml:space="preserve">
-    <value>Мой префикс здесь `{0}`. Используйте `{0} help`, чтобы увидеть мой список команд, и` {0} prefix`, чтобы изменить префикс.</value>
+    <value>Мой префикс здесь `{0}`. Используйте `{0}help`, чтобы увидеть мой список команд, и` {0}prefix`, чтобы изменить префикс.</value>
   </data>
 	<data name="NotSupportedInDM" xml:space="preserve">
     <value>Я не думаю, что вы можете использовать это здесь.</value>
-  </data>
-	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
-    <value>Я не могу получить информацию от канала DM. Передайте идентификатор сервера.</value>
   </data>
 	<data name="tcdneSummary" xml:space="preserve">
     <value>Этот кот не существует</value>
@@ -1517,7 +1503,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Всего пользователей</value>
   </data>
 	<data name="Links" xml:space="preserve">
-    <value>[Пригласить] ({0})| [DBL Bot Page]({1}) | [Ссылка для голосования]({2}) | [Сервер поддержки]({3})</value>
+    <value>[приглашение]({0}) | [DBL Страница бота]({1}) | [Ссылка для голосования]({2}) | [Сервер поддержки]({3})</value>
   </data>
 	<data name="ContactInfo" xml:space="preserve">
     <value>Если у вас есть сообщение об ошибке, вопрос или предложение, вы можете присоединиться к [серверу поддержки]({0}) или связаться со мной через прямое сообщение ({1}).</value>
@@ -1638,7 +1624,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
   </data>
 	<data name="LoopNoValuePassed" xml:space="preserve">
     <value>Передайте количество раз, которое вы хотите повторить трек, например:
-`{0} loop 5`</value>
+`{0}loop 5`</value>
   </data>
 	<data name="NowLooping" xml:space="preserve">
     <value>Текущий трек теперь будет повторяться {0} раз.
@@ -1859,19 +1845,19 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Нечего удалять.</value>
   </data>
 	<data name="Members" xml:space="preserve">
-    <value>члены$$</value>
+    <value>члены</value>
   </data>
 	<data name="Online" xml:space="preserve">
-    <value>В сети$$</value>
+    <value>В сети</value>
   </data>
 	<data name="Idle" xml:space="preserve">
-    <value>вхолостую$$</value>
+    <value>вхолостую</value>
   </data>
 	<data name="DnD" xml:space="preserve">
-    <value>DnD$$</value>
+    <value>DnD</value>
   </data>
 	<data name="Offline" xml:space="preserve">
-    <value>Не в сети$$</value>
+    <value>Не в сети</value>
   </data>
 	<data name="aidinfoSummary" xml:space="preserve">
     <value>Показывает информацию AI Dungeon.</value>
@@ -1907,16 +1893,16 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Приключение ID.</value>
   </data>
 	<data name="rememberParam2" xml:space="preserve">
-    <value>Текст для добавления.$$</value>
+    <value>Текст для добавления.</value>
   </data>
 	<data name="alterSummary" xml:space="preserve">
-    <value>Редактирует последний ответ.$$</value>
+    <value>Редактирует последний ответ.</value>
   </data>
 	<data name="retrySummary" xml:space="preserve">
-    <value>Повторит последнее действие и порождает новый ответ.$$</value>
+    <value>Повторит последнее действие и порождает новый ответ.</value>
   </data>
 	<data name="retryParam1" xml:space="preserve">
-    <value>Приключение ID.$$</value>
+    <value>Приключение ID.</value>
   </data>
 	<data name="makepublicSummary" xml:space="preserve">
     <value>Делает ID общественности.</value>
@@ -1940,13 +1926,13 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Показывает информацию о идентификатора.</value>
   </data>
 	<data name="idinfoParam1" xml:space="preserve">
-    <value>Приключение ID.$$</value>
+    <value>Приключение ID.</value>
   </data>
 	<data name="deleteSummary" xml:space="preserve">
-    <value>Удаляет идентификатор.$$</value>
+    <value>Удаляет идентификатор.</value>
   </data>
 	<data name="deleteParam1" xml:space="preserve">
-    <value>Приключение ID.$$</value>
+    <value>Приключение ID.</value>
   </data>
 	<data name="dumpSummary" xml:space="preserve">
     <value>Сплин весь текст из идентификатора.</value>
@@ -1965,4 +1951,28 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ​​ошибка в `clear`, что бы неправильно сказать, что есть сообщения старше, что через 2 недели, когда нет сообщений для удаления.
 - Исправлена ​​ошибка в `` resize` и invert`, вызвавшие команды, чтобы потерпеть неудачу, потому что Раздор показывает неверный предварительный просмотр изображения в некоторых URLs.</value>
   </data>
+	<data name="RatelimitUses" xml:space="preserve">
+		<value>{0} использует каждый {1}</value>
+	</data>
+	<data name="Requirements" xml:space="preserve">
+		<value>Требования</value>
+	</data>
+	<data name="cmdstatsSummary" xml:space="preserve">
+		<value>Показывает статистику команд.</value>
+	</data>
+	<data name="Changelog1.3.6" xml:space="preserve">
+		<value>- Новая команда: `cmdstats`.
+
+- Теперь кнопки нумерации `first` и `last` в `img` и `urban` будут появляться только при наличии 3 или более страниц, а кнопка `jump` - при наличии 4 или более страниц.
+- Теперь Fergun будет отправлять прямое сообщение, чтобы предупредить пользователя, когда у бота нет минимально необходимых разрешений в текущем канале (`SendMessages` и `EmbedLinks`).
+- Теперь Fergun поддерживает несколько пользовательских действий, это полезно в `userinfo` и` lyrics` (когда активность Spotify скрыта под пользовательским статусом).
+- Добавлена скорость и информация о необходимых разрешениях в справке команды.
+
+- Исправлена ошибка в `wikipedia`, из-за которой команда не выполнялась, поскольку в некоторых случаях запрос не был закодирован.
+- Исправлена ошибка в `screenshot`, которая приводила к сбою команды, поскольку URL был закодирован по ошибке.
+- Исправлена ошибка в модуле AI Dungeon, которая приводила к сбою команд при одновременном использовании разных идентификаторов.</value>
+	</data>
+	<data name="CommandStatsInfo" xml:space="preserve">
+		<value>Команда Статистика (с 02/21/2020)</value>
+	</data>
 </root>

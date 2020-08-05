@@ -72,13 +72,6 @@ namespace Fergun.Extensions
 
         public static IEnumerable<string> SplitToLines(this string stringToSplit, int maximumLineLength)
         {
-            /*
-            int charCount = 0;
-
-            var lines = input.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .GroupBy(w => (charCount += w.Length + 1) / maximumLineLength)
-                .Select(g => string.Join(" ", g));
-            */
             var words = stringToSplit.Split(' ').Concat(new[] { "" });
             return words
                 .Skip(1)
@@ -105,7 +98,7 @@ namespace Fergun.Extensions
                             return a;
                         });
         }
-
+        
         public static int ToColor(this string str)
         {
             int hash = 0;

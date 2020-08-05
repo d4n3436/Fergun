@@ -163,7 +163,7 @@
     <value>Kullanımı</value>
   </data>
 	<data name="Alias" xml:space="preserve">
-    <value>Alias ​(es)</value>
+    <value>Takma ad(lar)</value>
   </data>
 	<data name="Parameters" xml:space="preserve">
     <value>Parametreler</value>
@@ -487,10 +487,6 @@
 	<data name="Banned" xml:space="preserve">
     <value>Kullanıcı {0} yasaklandı.</value>
   </data>
-	<data name="BanError" xml:space="preserve">
-    <value>Kullanıcı yasaklanamadı.
-Hata kodu:</value>
-  </data>
 	<data name="clearSummary" xml:space="preserve">
     <value>Geçerli kanaldaki son x iletiyi siler.</value>
   </data>
@@ -796,7 +792,7 @@ Hata kodu:</value>
     <value>{1} konumundaki {0} parçası kaldırıldı.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
-    <value>İçin şarkı sözleri bulunamadı {0}</value>
+    <value>Hiçbir şarkı {0} bulundu.</value>
   </data>
 	<data name="botgameSummary" xml:space="preserve">
     <value>Botun oyun durumunu ayarlar.</value>
@@ -1101,15 +1097,8 @@ Konuşmak için metinden önce Say'ı kullanabilirsiniz.</value>
 	<data name="SoftbanMyself" xml:space="preserve">
     <value>Kendimi softban yapmayacağım lol</value>
   </data>
-	<data name="SoftbanHigherRole" xml:space="preserve">
-    <value>O kişiyi yasaklayamam ...</value>
-  </data>
 	<data name="Softbanned" xml:space="preserve">
     <value>{0} kullanıcısı yazılımla yasaklandı.</value>
-  </data>
-	<data name="SoftbanError" xml:space="preserve">
-    <value>Kullanıcı yasaklanamadı.
-Hata kodu:</value>
   </data>
 	<data name="AIDCommands" xml:space="preserve">
     <value>AI Dungeon (kullanım {0}aid &lt;komut&gt;)</value>
@@ -1132,9 +1121,6 @@ Hata kodu:</value>
 	<data name="clearRemarks" xml:space="preserve">
     <value>Bir kullanıcı iletilirse, komut son "sayım" iletisindeki kullanıcıdan tüm iletileri silmeye çalışır.
 Bot'un mesajları arayabileceği gün sınırı 14'tür.</value>
-  </data>
-	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
-    <value>DM kanalından bilgi alamıyorum. Bir sunucu kimliği iletin.</value>
   </data>
 	<data name="tcdneSummary" xml:space="preserve">
     <value>Bu kedi mevcut değil</value>
@@ -1397,7 +1383,7 @@ AI Dungeon giriş ve çıkışını otomatik çevir
     <value>Kullanıcı yasaklanmadı.</value>
   </data>
 	<data name="BotMention" xml:space="preserve">
-    <value>Buradaki önekim {{}}. Komut listemi görmek için {{0} yardımını ve öneki değiştirmek için `{0} önekini 'kullan.</value>
+    <value>Buradaki önekim `{0}`. Komut listemi görmek için `{0}help` ve öneki değiştirmek için `{0}prefix ` kullanın.</value>
   </data>
 	<data name="NotSupportedInDM" xml:space="preserve">
     <value>Bunu burada kullanabileceğini sanmıyorum.</value>
@@ -1463,10 +1449,10 @@ Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," se
     <value>ISO kodunda hedef dil (en, es, br, vb.)</value>
   </data>
 	<data name="ocrtranslateParam2" xml:space="preserve">
-    <value>Kullanılacak bir resmin URL'si.$$</value>
+    <value>Kullanılacak bir resmin URL'si.</value>
   </data>
 	<data name="Input" xml:space="preserve">
-    <value>Giriş$$</value>
+    <value>Giriş</value>
   </data>
 	<data name="MemberCount" xml:space="preserve">
     <value>Üye Sayısı</value>
@@ -1632,7 +1618,7 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
   </data>
 	<data name="LoopNoValuePassed" xml:space="preserve">
     <value>Parçayı tekrarlamak istediğiniz sayıyı girin, örn:
-"{0} döngü 5`</value>
+"{0}loop 5`</value>
   </data>
 	<data name="NowLooping" xml:space="preserve">
     <value>Geçerli parça şimdi {0} kez tekrarlanacaktır.
@@ -1859,19 +1845,19 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
     <value>Silinecek bir şey yok.</value>
   </data>
 	<data name="Members" xml:space="preserve">
-    <value>Üyeler$$</value>
+    <value>Üyeler</value>
   </data>
 	<data name="Online" xml:space="preserve">
-    <value>İnternet üzerinden$$</value>
+    <value>İnternet üzerinden</value>
   </data>
 	<data name="Idle" xml:space="preserve">
-    <value>Boşta$$</value>
+    <value>Boşta</value>
   </data>
 	<data name="DnD" xml:space="preserve">
-    <value>DnD$$</value>
+    <value>DnD</value>
   </data>
 	<data name="Offline" xml:space="preserve">
-    <value>Çevrim$$</value>
+    <value>Çevrim</value>
   </data>
 	<data name="aidinfoSummary" xml:space="preserve">
     <value>AI Zindan bilgi gösterir.</value>
@@ -1907,16 +1893,16 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
     <value>macera kimliği.</value>
   </data>
 	<data name="rememberParam2" xml:space="preserve">
-    <value>Metin eklemek için.$$</value>
+    <value>Metin eklemek için.</value>
   </data>
 	<data name="alterSummary" xml:space="preserve">
-    <value>Geçen tepkisini düzenler.$$</value>
+    <value>Geçen tepkisini düzenler.</value>
   </data>
 	<data name="retrySummary" xml:space="preserve">
-    <value>Son eylemi yeniden dener ve yeni bir yanıt oluşturur.$$</value>
+    <value>Son eylemi yeniden dener ve yeni bir yanıt oluşturur.</value>
   </data>
 	<data name="retryParam1" xml:space="preserve">
-    <value>macera kimliği.$$</value>
+    <value>macera kimliği.</value>
   </data>
 	<data name="makepublicSummary" xml:space="preserve">
     <value>bir kimlik halka yapar.</value>
@@ -1940,13 +1926,13 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
     <value>Bir Kimliği hakkında Gösterileri bilgi.</value>
   </data>
 	<data name="idinfoParam1" xml:space="preserve">
-    <value>macera kimliği.$$</value>
+    <value>macera kimliği.</value>
   </data>
 	<data name="deleteSummary" xml:space="preserve">
-    <value>Bir kimlik kaldırır.$$</value>
+    <value>Bir kimlik kaldırır.</value>
   </data>
 	<data name="deleteParam1" xml:space="preserve">
-    <value>macera kimliği.$$</value>
+    <value>macera kimliği.</value>
   </data>
 	<data name="dumpSummary" xml:space="preserve">
     <value>Bir kimliğinden tüm metin döker.</value>
@@ -1965,4 +1951,28 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - yanlış Silinecek mesaj varken 2 hafta o eski iletiler olduğunu söyleyebilirim clear` `de bir hata düzeltildi.
 - Bir resize` `hatasından ve ikilik var bazı URL'ler geçersiz bir görüntü önizlemesini gösterir çünkü neden komutlar başarısız olduğunu` invert` düzeltildi.</value>
   </data>
+	<data name="RatelimitUses" xml:space="preserve">
+		<value>Her {1} için {0} kullanım</value>
+	</data>
+	<data name="Requirements" xml:space="preserve">
+		<value>Gereksinimler</value>
+	</data>
+	<data name="cmdstatsSummary" xml:space="preserve">
+		<value>Komut istatistikleri gösterir.</value>
+	</data>
+	<data name="Changelog1.3.6" xml:space="preserve">
+		<value>- Yeni komut: `cmdstats`.
+
+- Şimdi {0} ve {0} içindeki {0} ve {0} sayfalayıcı düğmeleri yalnızca 3 veya daha fazla sayfa olduğunda ve {0} düğmesi 4 veya daha fazla sayfa olduğunda görünecektir.
+- Artık Fergun, bot geçerli kanalda (`SendMessages` ve` EmbedLinks`) gerekli minimum izinlere sahip olmadığında kullanıcıyı uyarmak için doğrudan bir mesaj gönderecek.
+- Artık Fergun birden fazla kullanıcı etkinliğini destekliyor, bu `userinfo` ve` şarkı sözleri`nde (Spotify etkinliği özel durum tarafından gizlendiğinde) kullanışlıdır.
+- Komut yardımına ratelimit ve gerekli izin bilgileri eklendi.
+
+- Bazı durumlarda sorgu kodlanmadığı için komutun başarısız olmasına neden olan wikipedia'daki bir hata düzeltildi.
+- Url yanlışlıkla kodlandığı için komutun başarısız olmasına neden olan ekran görüntüsünde bir hata düzeltildi.
+- AI Dungeon modülünde, aynı anda farklı kimlikler kullanıldığında komutların başarısız olmasına neden olan bir hata düzeltildi.</value>
+	</data>
+	<data name="CommandStatsInfo" xml:space="preserve">
+		<value>Komut İstatistikler (02/21/2020 beri)</value>
+	</data>
 </root>

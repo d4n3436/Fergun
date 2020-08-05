@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Fergun
@@ -33,6 +34,7 @@ namespace Fergun
         public bool CaptionbotAutoTranslateDefault { get; set; }
         public bool AidAutoTranslateDefault { get; set; }
         public bool TrackSelectionDefault { get; set; }
+        public Dictionary<string, int> CommandStats { get; set; }
     }
 
     public static class FergunConfig
@@ -144,6 +146,17 @@ namespace Fergun
             {
                 var cfg = GetConfig();
                 cfg.TrackSelectionDefault = value;
+                FergunClient.Database.UpdateRecord("Config", cfg);
+            }
+        }
+
+        public static Dictionary<string, int> CommandStats
+        {
+            get => GetConfig().CommandStats;
+            set
+            {
+                var cfg = GetConfig();
+                cfg.CommandStats = value;
                 FergunClient.Database.UpdateRecord("Config", cfg);
             }
         }

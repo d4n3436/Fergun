@@ -29,10 +29,9 @@ using Newtonsoft.Json.Linq;
 using org.mariuszgromada.math.mxparser;
 using YoutubeExplode;
 
-//using Tesseract;
-
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
     public class Utility : FergunBase
     {
@@ -453,7 +452,7 @@ namespace Fergun.Modules
         [Summary("helpSummary")]
         [Alias("ayuda", "yardım")]
         [Example("help")]
-        public async Task<RuntimeResult> Help([Summary("helpParam1")] string commandName = null)
+        public async Task<RuntimeResult> Help([Remainder, Summary("helpParam1")] string commandName = null)
         {
             var builder = new EmbedBuilder();
             if (commandName == null)
@@ -462,7 +461,7 @@ namespace Fergun.Modules
                 var utilityCommands = _cmdService.Commands.Where(x => x.Module.Name == "Utility").Select(x => x.Name);
                 var moderationCommands = _cmdService.Commands.Where(x => x.Module.Name == "Moderation").Select(x => x.Name);
                 var musicCommands = _cmdService.Commands.Where(x => x.Module.Name == "Music").Select(x => x.Name);
-                var aidCommands = _cmdService.Commands.Where(x => x.Module.Group == "aid").Select(x => x.Name);
+                var aidCommands = _cmdService.Commands.Where(x => x.Module.Name == "aid").Select(x => x.Name);
                 var otherCommands = _cmdService.Commands.Where(x => x.Module.Name == "Other").Select(x => x.Name);
                 var ownerCommands = _cmdService.Commands.Where(x => x.Module.Name == "Owner").Select(x => x.Name);
                 var devCommandCount = _cmdService.Commands.Count(x => x.Module.Name == "Dev");
@@ -594,7 +593,7 @@ namespace Fergun.Modules
                 foreach (var item in search.Results)
                 {
                     string imageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(item.Image));
-                    if (Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
+                    if (Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute) && Uri.IsWellFormedUriString(item.Url, UriKind.Absolute))
                     {
                         pages.Add(new PaginatedMessage.Page()
                         {
@@ -629,7 +628,18 @@ namespace Fergun.Modules
                 }
             };
 
-            await PagedReplyAsync(pager, new ReactionList(true, true, true, true, true, true, false));
+            var reactions = new ReactionList()
+            {
+                First = pages.Count >= 3,
+                Backward = true,
+                Forward = true,
+                Last = pages.Count >= 3,
+                Stop = true,
+                Jump = pages.Count >= 4,
+                Info = false
+            };
+
+            await PagedReplyAsync(pager, reactions);
 
             return FergunResult.FromSuccess();
         }
@@ -963,7 +973,7 @@ namespace Fergun.Modules
             ApiFlashResponse response;
             try
             {
-                response = await ApiFlash.UrlToImageAsync(FergunConfig.ApiFlashAccessKey, Uri.EscapeDataString(uri.AbsoluteUri), ApiFlash.FormatType.png, "400,403,404,500-511");
+                response = await ApiFlash.UrlToImageAsync(FergunConfig.ApiFlashAccessKey, uri.AbsoluteUri, ApiFlash.FormatType.png, "400,403,404,500-511");
             }
             catch (ArgumentException)
             {
@@ -1307,12 +1317,12 @@ namespace Fergun.Modules
 
             var reactions = new ReactionList()
             {
-                First = true,
+                First = pages.Count >= 3,
                 Backward = true,
                 Forward = true,
-                Last = true,
+                Last = pages.Count >= 3,
                 Stop = true,
-                Jump = true,
+                Jump = pages.Count >= 4,
                 Info = false
             };
 
@@ -1328,7 +1338,6 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Userinfo([Remainder, Summary("userinfoParam1")] IUser user = null)
         {
             user ??= Context.User;
-
             // Prevent getting error 404 while downloading the avatar getting the user from REST.
             var restUser = await Context.Client.Rest.GetUserAsync(user.Id);
 
@@ -1344,18 +1353,29 @@ namespace Fergun.Modules
                 }
             }
 
-            string activity;
-            if (user.Activity == null)
+            string activities = "";
+            //if (user.Activity == null)
+            //{
+            //    activity = Locate("None");
+            //}
+            foreach (var activity in user.Activities)
             {
-                activity = Locate("None");
+                if (activity != null)
+                {
+                    if (activity.Type == ActivityType.CustomStatus)
+                    {
+                        activities += $"**{(activity as CustomStatusGame).State}**";
+                    }
+                    else
+                    {
+                        activities += $"{activity.Type} **{activity.Name}**";
+                    }
+                    activities += "\n";
+                }
             }
-            else if (user.Activity.Type == ActivityType.CustomStatus)
+            if (string.IsNullOrWhiteSpace(activities))
             {
-                activity = $"**{(user.Activity as CustomStatusGame).State}**";
-            }
-            else
-            {
-                activity = $"{user.Activity.Type} **{user.Activity.Name}**";
+                activities = Locate("None");
             }
             var guildUser = user as IGuildUser;
 
@@ -1372,7 +1392,7 @@ namespace Fergun.Modules
                 .AddField(Locate("Name"), user.ToString(), false)
                 .AddField("Nickname", guildUser?.Nickname ?? Locate("None"), false)
                 .AddField("ID", user.Id, false)
-                .AddField(Locate("Activity"), activity, true)
+                .AddField(Locate("Activity"), activities, true)
                 .AddField(Locate("ActiveClients"), clients, true)
                 .AddField(Locate("IsBot"), Locate(user.IsBot), false)
                 .AddField(Locate("CreatedAt"), user.CreatedAt)
@@ -1414,7 +1434,7 @@ namespace Fergun.Modules
                     langToUse = "en";
                     using (WebClient wc = new WebClient())
                     {
-                        response = await wc.DownloadStringTaskAsync($"https://{langToUse}.wikipedia.org/w/api.php?action=opensearch&search={query}&format=json");
+                        response = await wc.DownloadStringTaskAsync($"https://{langToUse}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
                     }
                     search = JsonConvert.DeserializeObject<List<dynamic>>(response);
                     if (search[1].Count == 0)

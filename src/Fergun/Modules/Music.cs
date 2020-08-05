@@ -14,8 +14,8 @@ using Victoria;
 
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
-    [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     [Disabled(264445053596991498)]
     [UserMustBeInVoice("lyrics", ErrorMessage = "UserNotInVC")]
     public class Music : FergunBase
@@ -73,7 +73,7 @@ namespace Fergun.Modules
                 keepHeaders = true;
             }
             var result = await _musicService.GetLyricsAsync(query, keepHeaders, Context.Guild,
-                Context.Channel as ITextChannel, Context.User.Activity as SpotifyGame);
+                Context.Channel as ITextChannel, Context.User.Activities?.OfType<SpotifyGame>()?.FirstOrDefault());
 
             if (result.Item1 != null)
             {

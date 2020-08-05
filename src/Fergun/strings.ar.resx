@@ -502,10 +502,6 @@
 	<data name="Banned" xml:space="preserve">
     <value>تم حظر المستخدم {0}.</value>
   </data>
-	<data name="BanError" xml:space="preserve">
-    <value>لا يمكن حظر المستخدم.
-خطا بالكود:</value>
-  </data>
 	<data name="clearSummary" xml:space="preserve">
     <value>يمسح آخر x رسائل للقناة الحالية.</value>
   </data>
@@ -796,7 +792,7 @@
     <value>تمت إزالة المسار {0} في الموضع {1}.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
-    <value>لا يمكن العثور على كلمات ل{0}</value>
+    <value>لا توجد كلمات ل{0}.</value>
   </data>
 	<data name="botgameSummary" xml:space="preserve">
     <value>يحدد حالة لعبة البوت.</value>
@@ -932,7 +928,7 @@
     <value>مرحبًا بك في AI Dungeon</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>تأكد من قراءة المعلومات والأوامر باستخدام `{0} aid info` قبل المتابعة.
+    <value>تأكد من قراءة المعلومات والأوامر باستخدام `aid info{0}` قبل المتابعة.
 
 حدد الوضع:</value>
   </data>
@@ -1102,18 +1098,11 @@
 	<data name="SoftbanMyself" xml:space="preserve">
     <value>أنا لن softban نفسي ههههههههه</value>
   </data>
-	<data name="SoftbanHigherRole" xml:space="preserve">
-    <value>لا أستطيع أن أسلم هذا الشخص ..</value>
-  </data>
 	<data name="Softbanned" xml:space="preserve">
     <value>تم حظر المستخدم {0}.</value>
   </data>
-	<data name="SoftbanError" xml:space="preserve">
-    <value>تعذر softban للمستخدم.
-خطا بالكود:</value>
-  </data>
 	<data name="AIDCommands" xml:space="preserve">
-    <value>زنزانة AI (استخدم {0} aid &lt;command&gt;)</value>
+    <value>زنزانة AI (استخدم {0}aid &lt;command&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">
     <value>جارٍ الرجوع إلى الإجراء الأخير ...</value>
@@ -1148,9 +1137,6 @@
   </data>
 	<data name="NotSupportedInDM" xml:space="preserve">
     <value>لا أعتقد أنه يمكنك استخدام ذلك هنا.</value>
-  </data>
-	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
-    <value>لا يمكنني الحصول على معلومات من قناة DM. قم بتمرير معرف الخادم.</value>
   </data>
 	<data name="tcdneSummary" xml:space="preserve">
     <value>هذا القط غير موجود</value>
@@ -1871,19 +1857,19 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>ليس هناك شيء لحذفه.</value>
   </data>
 	<data name="Members" xml:space="preserve">
-    <value>أفراد$$</value>
+    <value>أفراد</value>
   </data>
 	<data name="Online" xml:space="preserve">
-    <value>عبر الانترنت$$</value>
+    <value>عبر الانترنت</value>
   </data>
 	<data name="Idle" xml:space="preserve">
-    <value>خامل$$</value>
+    <value>خامل</value>
   </data>
 	<data name="DnD" xml:space="preserve">
-    <value>السحب والإفلات$$</value>
+    <value>السحب والإفلات</value>
   </data>
 	<data name="Offline" xml:space="preserve">
-    <value>غير متصل على الانترنت$$</value>
+    <value>غير متصل على الانترنت</value>
   </data>
 	<data name="aidinfoSummary" xml:space="preserve">
     <value>يظهر من المعلومات AI الأبراج.</value>
@@ -1919,16 +1905,16 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>معرف المغامرة.</value>
   </data>
 	<data name="rememberParam2" xml:space="preserve">
-    <value>النص لإضافة.$$</value>
+    <value>النص لإضافة.</value>
   </data>
 	<data name="alterSummary" xml:space="preserve">
-    <value>التعديلات استجابة الماضية.$$</value>
+    <value>التعديلات استجابة الماضية.</value>
   </data>
 	<data name="retrySummary" xml:space="preserve">
-    <value>عمليات إعادة الإجراء الأخير ويولد استجابة جديدة.$$</value>
+    <value>عمليات إعادة الإجراء الأخير ويولد استجابة جديدة.</value>
   </data>
 	<data name="retryParam1" xml:space="preserve">
-    <value>معرف المغامرة.$$</value>
+    <value>معرف المغامرة.</value>
   </data>
 	<data name="makepublicSummary" xml:space="preserve">
     <value>يجعل الجمهور ID.</value>
@@ -1952,13 +1938,13 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>يظهر من المعلومات حول هوية.</value>
   </data>
 	<data name="idinfoParam1" xml:space="preserve">
-    <value>معرف المغامرة.$$</value>
+    <value>معرف المغامرة.</value>
   </data>
 	<data name="deleteSummary" xml:space="preserve">
-    <value>يزيل معرف.$$</value>
+    <value>يزيل معرف.</value>
   </data>
 	<data name="deleteParam1" xml:space="preserve">
-    <value>معرف المغامرة.$$</value>
+    <value>معرف المغامرة.</value>
   </data>
 	<data name="dumpSummary" xml:space="preserve">
     <value>مقالب عن النص من معرف.</value>
@@ -1977,4 +1963,28 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - إصلاح الخلل في `clear` أن أقول بشكل غير صحيح أن هناك رسائل القديمة التي 2 أسابيع عندما لا يكون هناك رسائل إلى حذف.
 - إصلاح الخلل في `` resize` وinvert` التي تسببت الأوامر إلى فشل بسبب الخلاف يظهر معاينة الصور غير صالحة لبعض عناوين المواقع.</value>
   </data>
+	<data name="RatelimitUses" xml:space="preserve">
+		<value>يستخدم {0} كل {1}</value>
+	</data>
+	<data name="Requirements" xml:space="preserve">
+		<value>المتطلبات</value>
+	</data>
+	<data name="cmdstatsSummary" xml:space="preserve">
+		<value>تبين الإحصاءات الأوامر.</value>
+	</data>
+	<data name="Changelog1.3.6" xml:space="preserve">
+		<value>- الأمر الجديد: `cmdstats`.
+
+- الآن سيظهر الزران {0} و {0} paginator في {0} و {0} فقط عندما يكون هناك 3 صفحات أو أكثر ، والزر {0} عندما يكون هناك 4 صفحات أو أكثر.
+- الآن سترسل Fergun رسالة مباشرة لتحذير المستخدم عندما لا يكون لدى البوت الحد الأدنى من الأذونات المطلوبة في القناة الحالية (`SendMessages` و` EmbedLinks`).
+- يدعم الآن Fergun أنشطة المستخدم المتعددة ، وهذا مفيد في `userinfo` و` Lyrics` (عندما يكون نشاط Spotify مخفيًا بالحالة المخصصة).
+- تمت إضافة معلومات ratelimit والأذونات المطلوبة في تعليمات الأمر.
+
+- تم إصلاح الخلل في "ويكيبيديا" الذي تسبب في فشل الأمر لأنه لم يتم ترميز الاستعلام في بعض الحالات.
+- تم إصلاح الخلل في "لقطة الشاشة" التي تسببت في فشل الأمر بسبب تشفير عنوان URL عن طريق الخطأ.
+- تم إصلاح الخلل في وحدة AI Dungeon التي تسببت في فشل الأوامر عند استخدام معرفات مختلفة في نفس الوقت.</value>
+	</data>
+	<data name="CommandStatsInfo" xml:space="preserve">
+		<value>إحصائيات الأوامر (منذ 2020/02/21)</value>
+	</data>
 </root>

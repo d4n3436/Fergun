@@ -9,6 +9,7 @@ using Fergun.Extensions;
 
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     public class Moderation : FergunBase

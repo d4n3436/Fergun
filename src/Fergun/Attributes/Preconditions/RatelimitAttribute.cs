@@ -22,12 +22,12 @@ namespace Fergun.Attributes.Preconditions
     {
         /// <inheritdoc />
         public override string ErrorMessage { get; set; }
+        public uint InvokeLimit { get; }
+        public TimeSpan InvokeLimitPeriod { get; }
 
-        private readonly uint _invokeLimit;
         private readonly bool _noLimitInDMs;
         private readonly bool _noLimitForAdmins;
         private readonly bool _applyPerGuild;
-        private readonly TimeSpan _invokeLimitPeriod;
         private readonly Dictionary<(ulong, ulong?), CommandTimeout> _invokeTracker = new Dictionary<(ulong, ulong?), CommandTimeout>();
         private ulong _ownerId = 0;
 
@@ -49,12 +49,12 @@ namespace Fergun.Attributes.Preconditions
             uint times, double period, Measure measure,
             RatelimitFlags flags = RatelimitFlags.None)
         {
-            _invokeLimit = times;
+            InvokeLimit = times;
             _noLimitInDMs = (flags & RatelimitFlags.NoLimitInDMs) == RatelimitFlags.NoLimitInDMs;
             _noLimitForAdmins = (flags & RatelimitFlags.NoLimitForAdmins) == RatelimitFlags.NoLimitForAdmins;
             _applyPerGuild = (flags & RatelimitFlags.ApplyPerGuild) == RatelimitFlags.ApplyPerGuild;
 
-            _invokeLimitPeriod = measure switch
+            InvokeLimitPeriod = measure switch
             {
                 Measure.Days => TimeSpan.FromDays(period),
                 Measure.Hours => TimeSpan.FromHours(period),
@@ -86,12 +86,12 @@ namespace Fergun.Attributes.Preconditions
             uint times, TimeSpan period,
             RatelimitFlags flags = RatelimitFlags.None)
         {
-            _invokeLimit = times;
+            InvokeLimit = times;
             _noLimitInDMs = (flags & RatelimitFlags.NoLimitInDMs) == RatelimitFlags.NoLimitInDMs;
             _noLimitForAdmins = (flags & RatelimitFlags.NoLimitForAdmins) == RatelimitFlags.NoLimitForAdmins;
             _applyPerGuild = (flags & RatelimitFlags.ApplyPerGuild) == RatelimitFlags.ApplyPerGuild;
 
-            _invokeLimitPeriod = period;
+            InvokeLimitPeriod = period;
         }
 
         /// <inheritdoc />
@@ -117,12 +117,12 @@ namespace Fergun.Attributes.Preconditions
             var key = _applyPerGuild ? (context.User.Id, context.Guild?.Id) : (context.User.Id, null);
 
             var timeout = (_invokeTracker.TryGetValue(key, out var t)
-                && ((now - t.FirstInvoke) < _invokeLimitPeriod))
+                && ((now - t.FirstInvoke) < InvokeLimitPeriod))
                     ? t : new CommandTimeout(now);
 
             timeout.TimesInvoked++;
 
-            if (timeout.TimesInvoked <= _invokeLimit)
+            if (timeout.TimesInvoked <= InvokeLimit)
             {
                 _invokeTracker[key] = timeout;
                 return PreconditionResult.FromSuccess();
@@ -130,7 +130,7 @@ namespace Fergun.Attributes.Preconditions
             else
             {
                 // i think this is the way..?
-                var result = (_invokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
+                var result = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
                 //Console.WriteLine($"_invokeLimitPeriod.Seconds: {_invokeLimitPeriod.TotalSeconds}\n" +
                 //    //$"_invokeLimit: {_invokeLimit}\n" +
                 //    $"now - t.FirstInvoke: {(now - t.FirstInvoke).TotalSeconds}\n" + 

@@ -17,6 +17,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [RequireOwner(ErrorMessage = "BotOwnerOnly")]
     public class Owner : FergunBase
     {

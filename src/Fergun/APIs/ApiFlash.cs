@@ -13,67 +13,68 @@ namespace Fergun.APIs
         /// <summary>
         /// Takes an screenshot from an Url.
         /// </summary>
-        /// <param name="AccessKey">A valid access key allowing you to make API calls.</param>
-        /// <param name="Url">The complete URL of the website for which you want to capture a screenshot. The URL must include the protocol (http:// or https://) to be processed correctly.</param>
-        /// <param name="Format">The image format of the captured screenshot. Either jpeg or png.</param>
-        /// <param name="FailOnStatus">A comma separated list of HTTP status codes that should make the API call fail instead of returning a screenshot. Hyphen separated HTTP status codes can be used to define ranges. For example 400,404,500-511 would make the API call fail if the URL returns 400, 404 or any status code between 500 and 511.</param>
+        /// <param name="accessKey">A valid access key allowing you to make API calls.</param>
+        /// <param name="url">The complete URL of the website for which you want to capture a screenshot. The URL must include the protocol (http:// or https://) to be processed correctly.</param>
+        /// <param name="format">The image format of the captured screenshot. Either jpeg or png.</param>
+        /// <param name="failOnStatus">A comma separated list of HTTP status codes that should make the API call fail instead of returning a screenshot. Hyphen separated HTTP status codes can be used to define ranges. For example 400,404,500-511 would make the API call fail if the URL returns 400, 404 or any status code between 500 and 511.</param>
         /// <param name="ttl">Number of seconds the screenshot is cached. API calls with the same parameters do return a cached screenshot and don't count in your monthly quota. From 0 seconds to 2592000 seconds (30 days).</param>
-        /// <param name="Fresh">Force the API to capture a fresh new screenshot instead of returning a screenshot from the cache.</param>
-        /// <param name="FullPage">Set this parameter to true to capture the entire page of the target website.</param>
-        /// <param name="ScrollPage">Set this parameter to true to scroll through the entire page before capturing a screenshot. This is useful to trigger animations or lazy loaded elements.</param>
-        /// <param name="Width">The width, in pixels, of the viewport to use.</param>
-        /// <param name="Height">The height, in pixels, of the viewport to use. This is ignored if FullPage is true.</param>
-        /// <param name="Delay">The delay, in seconds, to wait after the page is loaded (load event fired and no more network connections for at least 500ms) before capturing the screenshot. From 0 seconds to a maximum of 10 seconds.</param>
-        /// <param name="WaitFor">Wait until the provided CSS selector matches an element present in the page before capturing a screenshot. The process times out after 40 seconds.</param>
-        /// <param name="Quality">The quality of the image between 0 and 100. This only works with the jpeg format.</param>
-        /// <param name="Transparent">Hides the default background and allows capturing screenshots with transparency. This only works with the png format.</param>
-        /// <param name="ThumbnailWidth">The width, in pixels, of the thumbnail to generate. The aspect ratio will be preserved. This is ignored if FullPage is true.</param>
-        /// <param name="ScaleFactor">The device scale factor to use when capturing the screenshot. A scale factor of 2 will produce a high definition screenshot suited to be displayed on retina devices. The bigger the scale factor is, the heavier the produced screenshot will be.</param>
-        /// <param name="CSS">A CSS string to inject in the web page when capturing the screenshot. This CSS string needs to be URL encoded to be processed correctly.</param>
-        /// <param name="JS">Additional JavaScript code to be injected into the page before capturing. The JS string needs to be URL encoded to be processed correctly.</param>
-        /// <param name="ExtractHtml">Extract the HTML of the page at the same time the screenshot is made. When this parameter is set to true, an ExtractedHtml attribute is added to the returned json document.</param>
-        /// <param name="ExtractText">Extract the text of the page at the same time the screenshot is made. When this parameter is set to true, an ExtractedText attribute is added to the returned json document.</param>
-        /// <param name="AcceptLanguage">Sets the Accept-Language header on requests to the target URL allowing you to make screenshots of a website with a specific language.</param>
-        /// <param name="UserAgent">Sets the User-Agent header to emulate a particular device when making screenshots. It should be URL encoded to be processed correctly.</param>
-        /// <param name="Headers">A semicolon separated list of headers to be used when capturing the screenshot. Each header should be supplied as a key value pair and multiple pairs should be separated by a semicolon. The Headers parameter value should be URL encoded to be processed correctly. For example, Header1=value1;Header2=value2 would have to be URL encoded into Header1%3Dvalue1%3BHeader2%3Dvalue2.</param>
-        /// <param name="Cookies">A semicolon separated list of cookies to be used when capturing the screenshot. Each cookie should be supplied as a name value pair and multiple pairs should be separated by a semicolon. The Cookies parameter value should be URL encoded to be processed correctly. For example, cookie1=value1;cookie2=value2 would have to be URL encoded into cookie1%3Dvalue1%3Bcookie2%3Dvalue2.</param>
-        /// <param name="Latitude">The latitude to use when emulating geo-location between -90 and 90.</param>
-        /// <param name="Longitude">The longitude to use when emulating geo-location between -180 and 180.</param>
-        /// <param name="Accuracy">Accuracy value to use when emulating geo-location.</param>
-        /// <param name="Proxy">The address of a proxy server through which the screenshot should be captured. The proxy address should be formatted as address:port or user:password@address:port if authentication is needed.</param>
+        /// <param name="fresh">Force the API to capture a fresh new screenshot instead of returning a screenshot from the cache.</param>
+        /// <param name="fullPage">Set this parameter to true to capture the entire page of the target website.</param>
+        /// <param name="scrollPage">Set this parameter to true to scroll through the entire page before capturing a screenshot. This is useful to trigger animations or lazy loaded elements.</param>
+        /// <param name="width">The width, in pixels, of the viewport to use.</param>
+        /// <param name="height">The height, in pixels, of the viewport to use. This is ignored if FullPage is true.</param>
+        /// <param name="delay">The delay, in seconds, to wait after the page is loaded (load event fired and no more network connections for at least 500ms) before capturing the screenshot. From 0 seconds to a maximum of 10 seconds.</param>
+        /// <param name="waitFor">Wait until the provided CSS selector matches an element present in the page before capturing a screenshot. The process times out after 40 seconds.</param>
+        /// <param name="quality">The quality of the image between 0 and 100. This only works with the jpeg format.</param>
+        /// <param name="transparent">Hides the default background and allows capturing screenshots with transparency. This only works with the png format.</param>
+        /// <param name="thumbnailWidth">The width, in pixels, of the thumbnail to generate. The aspect ratio will be preserved. This is ignored if FullPage is true.</param>
+        /// <param name="scaleFactor">The device scale factor to use when capturing the screenshot. A scale factor of 2 will produce a high definition screenshot suited to be displayed on retina devices. The bigger the scale factor is, the heavier the produced screenshot will be.</param>
+        /// <param name="css">A CSS string to inject in the web page when capturing the screenshot. This CSS string needs to be URL encoded to be processed correctly.</param>
+        /// <param name="js">Additional JavaScript code to be injected into the page before capturing. The JS string needs to be URL encoded to be processed correctly.</param>
+        /// <param name="extractHtml">Extract the HTML of the page at the same time the screenshot is made. When this parameter is set to true, an ExtractedHtml attribute is added to the returned json document.</param>
+        /// <param name="extractText">Extract the text of the page at the same time the screenshot is made. When this parameter is set to true, an ExtractedText attribute is added to the returned json document.</param>
+        /// <param name="acceptLanguage">Sets the Accept-Language header on requests to the target URL allowing you to make screenshots of a website with a specific language.</param>
+        /// <param name="userAgent">Sets the User-Agent header to emulate a particular device when making screenshots. It should be URL encoded to be processed correctly.</param>
+        /// <param name="headers">A semicolon separated list of headers to be used when capturing the screenshot. Each header should be supplied as a key value pair and multiple pairs should be separated by a semicolon. The Headers parameter value should be URL encoded to be processed correctly. For example, Header1=value1;Header2=value2 would have to be URL encoded into Header1%3Dvalue1%3BHeader2%3Dvalue2.</param>
+        /// <param name="cookies">A semicolon separated list of cookies to be used when capturing the screenshot. Each cookie should be supplied as a name value pair and multiple pairs should be separated by a semicolon. The Cookies parameter value should be URL encoded to be processed correctly. For example, cookie1=value1;cookie2=value2 would have to be URL encoded into cookie1%3Dvalue1%3Bcookie2%3Dvalue2.</param>
+        /// <param name="latitude">The latitude to use when emulating geo-location between -90 and 90.</param>
+        /// <param name="longitude">The longitude to use when emulating geo-location between -180 and 180.</param>
+        /// <param name="accuracy">Accuracy value to use when emulating geo-location.</param>
+        /// <param name="proxy">The address of a proxy server through which the screenshot should be captured. The proxy address should be formatted as address:port or user:password@address:port if authentication is needed.</param>
         /// <returns>An ApiFlashResponse object containing the Url of the image or the error message.</returns>
-        public static async Task<ApiFlashResponse> UrlToImageAsync(string AccessKey, string Url, FormatType Format = FormatType.jpeg, string FailOnStatus = "", uint ttl = 86400, bool Fresh = false, bool FullPage = false, bool ScrollPage = false,
-            uint Width = 1920, uint Height = 1080, uint Delay = 0, string WaitFor = "", uint Quality = 80,
-            bool Transparent = false, uint ThumbnailWidth = 0, uint ScaleFactor = 1, string CSS = "", string JS = "", bool ExtractHtml = false,
-            bool ExtractText = false, string AcceptLanguage = "", string UserAgent = "", string Headers = "", string Cookies = "", int Latitude = 0,
-            int Longitude = 0, uint Accuracy = 0, string Proxy = "")
+        public static async Task<ApiFlashResponse> UrlToImageAsync(string accessKey, string url, FormatType format = FormatType.jpeg, string failOnStatus = "",
+            uint ttl = 86400, bool fresh = false, bool fullPage = false, bool scrollPage = false,
+            uint width = 1920, uint height = 1080, uint delay = 0, string waitFor = "", uint quality = 80,
+            bool transparent = false, uint thumbnailWidth = 0, uint scaleFactor = 1, string css = "", string js = "", bool extractHtml = false,
+            bool extractText = false, string acceptLanguage = "", string userAgent = "", string headers = "", string cookies = "", int latitude = 0,
+            int longitude = 0, uint accuracy = 0, string proxy = "")
         {
 
-            if (string.IsNullOrEmpty(AccessKey))
+            if (string.IsNullOrEmpty(accessKey))
             {
-                throw new ArgumentNullException(nameof(AccessKey));
+                throw new ArgumentNullException(nameof(accessKey));
             }
-            if (string.IsNullOrEmpty(Url))
+            if (string.IsNullOrEmpty(url))
             {
-                throw new ArgumentNullException(nameof(Url));
+                throw new ArgumentNullException(nameof(url));
             }
-            if (!Uri.IsWellFormedUriString(Url, UriKind.Absolute))
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
-                throw new ArgumentException("The Url is not well formed.", nameof(Url));
+                throw new ArgumentException("The Url is not well formed.", nameof(url));
             }
 
             var query = HttpUtility.ParseQueryString(string.Empty);
-            query["access_key"] = AccessKey;
-            query["url"] = Url;
+            query["access_key"] = accessKey;
+            query["url"] = url;
             query["response_type"] = ResponseType.json.ToString();
 
-            if (Format != FormatType.jpeg)
+            if (format != FormatType.jpeg)
             {
-                query["format_type"] = Format.ToString();
+                query["format"] = format.ToString();
             }
-            if (!string.IsNullOrEmpty(FailOnStatus)) // check valid
+            if (!string.IsNullOrEmpty(failOnStatus)) // check valid
             {
-                query["fail_on_status"] = FailOnStatus;
+                query["fail_on_status"] = failOnStatus;
             }
             if (ttl != 86400)
             {
@@ -83,113 +84,113 @@ namespace Fergun.APIs
                 }
                 query["ttl"] = ttl.ToString();
             }
-            if (Fresh != false)
+            if (fresh != false)
             {
                 query["fresh"] = "true";
             }
-            if (FullPage != false)
+            if (fullPage != false)
             {
                 query["full_page"] = "true";
             }
-            if (ScrollPage != false)
+            if (scrollPage != false)
             {
                 query["scroll_page"] = "true";
             }
-            if (Width != 1920)
+            if (width != 1920)
             {
-                query["width"] = Width.ToString();
+                query["width"] = width.ToString();
             }
-            if (Height != 1080 && FullPage != true)
+            if (height != 1080 && fullPage != true)
             {
-                query["height"] = Height.ToString();
+                query["height"] = height.ToString();
             }
-            if (Delay != 0)
+            if (delay != 0)
             {
-                if (Delay > 10)
+                if (delay > 10)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Delay), "Value must be between 0 and 10.");
+                    throw new ArgumentOutOfRangeException(nameof(delay), "Value must be between 0 and 10.");
                 }
-                query["delay"] = Delay.ToString();
+                query["delay"] = delay.ToString();
             }
-            if (!string.IsNullOrEmpty(WaitFor))
+            if (!string.IsNullOrEmpty(waitFor))
             {
-                query["wait_for"] = WaitFor;
+                query["wait_for"] = waitFor;
             }
-            if (Quality != 80)
+            if (quality != 80)
             {
-                if (Quality > 100)
+                if (quality > 100)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Quality), "Value must be between 0 and 100.");
+                    throw new ArgumentOutOfRangeException(nameof(quality), "Value must be between 0 and 100.");
                 }
-                query["quality"] = Quality.ToString();
+                query["quality"] = quality.ToString();
             }
-            if (Transparent != false && Format == FormatType.png)
+            if (transparent != false && format == FormatType.png)
             {
                 query["transparent"] = "true";
             }
-            if (ThumbnailWidth != 0 && FullPage != true)
+            if (thumbnailWidth != 0 && fullPage != true)
             {
-                query["thumbnail_width"] = ThumbnailWidth.ToString();
+                query["thumbnail_width"] = thumbnailWidth.ToString();
             }
-            if (ScaleFactor != 1)
+            if (scaleFactor != 1)
             {
-                query["scale_factor"] = ScaleFactor.ToString();
+                query["scale_factor"] = scaleFactor.ToString();
             }
-            if (!string.IsNullOrEmpty(CSS))
+            if (!string.IsNullOrEmpty(css))
             {
-                query["css"] = CSS;
+                query["css"] = css;
             }
-            if (!string.IsNullOrEmpty(JS))
+            if (!string.IsNullOrEmpty(js))
             {
-                query["js"] = JS;
+                query["js"] = js;
             }
-            if (ExtractHtml != false)
+            if (extractHtml != false)
             {
                 query["extract_html"] = "true";
             }
-            if (ExtractText != false)
+            if (extractText != false)
             {
                 query["extract_text"] = "true";
             }
-            if (!string.IsNullOrEmpty(AcceptLanguage))
+            if (!string.IsNullOrEmpty(acceptLanguage))
             {
-                query["accept_language"] = AcceptLanguage;
+                query["accept_language"] = acceptLanguage;
             }
-            if (!string.IsNullOrEmpty(UserAgent))
+            if (!string.IsNullOrEmpty(userAgent))
             {
-                query["user_agent"] = UserAgent;
+                query["user_agent"] = userAgent;
             }
-            if (!string.IsNullOrEmpty(Headers))
+            if (!string.IsNullOrEmpty(headers))
             {
-                query["headers"] = Headers;
+                query["headers"] = headers;
             }
-            if (!string.IsNullOrEmpty(Cookies))
+            if (!string.IsNullOrEmpty(cookies))
             {
-                query["cookies"] = Cookies;
+                query["cookies"] = cookies;
             }
-            if (Latitude != 0)
+            if (latitude != 0)
             {
-                if (Latitude < -90 || Latitude > 90)
+                if (latitude < -90 || latitude > 90)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Latitude), "Value must be between -90 and 90.");
+                    throw new ArgumentOutOfRangeException(nameof(latitude), "Value must be between -90 and 90.");
                 }
-                query["latitude"] = Latitude.ToString();
+                query["latitude"] = latitude.ToString();
             }
-            if (Longitude != 0)
+            if (longitude != 0)
             {
-                if (Longitude < -180 || Longitude > 180)
+                if (longitude < -180 || longitude > 180)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Longitude), "Value must be between -180 and 180.");
+                    throw new ArgumentOutOfRangeException(nameof(longitude), "Value must be between -180 and 180.");
                 }
-                query["longitude"] = Longitude.ToString();
+                query["longitude"] = longitude.ToString();
             }
-            if (Accuracy != 0)
+            if (accuracy != 0)
             {
-                query["accuracy"] = Accuracy.ToString();
+                query["accuracy"] = accuracy.ToString();
             }
-            if (!string.IsNullOrEmpty(Proxy)) // check valid
+            if (!string.IsNullOrEmpty(proxy)) // check valid
             {
-                query["proxy"] = Proxy;
+                query["proxy"] = proxy;
             }
 
             string json;

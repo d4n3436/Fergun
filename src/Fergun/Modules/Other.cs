@@ -20,6 +20,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
     public class Other : FergunBase
     {
@@ -138,6 +139,54 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
+        [Command("cmdstats", RunMode = RunMode.Async)]
+        [Summary("cmdstatsSummary")]
+        [Alias("commandstats")]
+        public async Task<RuntimeResult> CmdStats()
+        {
+            var stats = FergunConfig.CommandStats.OrderByDescending(x => x.Value);
+            int i = 1;
+            string current = "";
+            var pages = new List<PaginatedMessage.Page>();
+
+            foreach (var pair in stats)
+            {
+                string command = $"{i}. {Format.Code(pair.Key)}: {pair.Value}\n";
+                if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength)
+                {
+                    pages.Add(new PaginatedMessage.Page { Description = current });
+                    current = command;
+                }
+                else
+                {
+                    current += command;
+                }
+                i++;
+            }
+            if (!string.IsNullOrEmpty(current))
+            {
+                pages.Add(new PaginatedMessage.Page { Description = current });
+            }
+            if (pages.Count == 0)
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+
+            var pager = new PaginatedMessage()
+            {
+                Title = Locate("CommandStatsInfo"),
+                Pages = pages,
+                Color = new Color(FergunConfig.EmbedColor),
+                Options = new PaginatedAppearanceOptions()
+                {
+                    FooterFormat = Locate("PaginatorFooter")
+                }
+            };
+
+            await PagedReplyAsync(pager, ReactionList.Default);
+            return FergunResult.FromSuccess();
+        }
+
         [Command("cringe")]
         [Summary("cringeSummary")]
         public async Task Cringe()
@@ -152,7 +201,7 @@ namespace Fergun.Modules
             string img;
             using (WebClient wc = new WebClient())
             {
-                img = await wc.DownloadStringTaskAsync("https://inspirobot.me/api?generate=true"); //&oy=vey
+                img = await wc.DownloadStringTaskAsync("https://inspirobot.me/api?generate=true");
             }
             var builder = new EmbedBuilder()
                 .WithTitle("InspiroBot")

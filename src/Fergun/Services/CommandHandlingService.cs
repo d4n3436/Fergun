@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.CommandCache;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using Fergun.Extensions;
 using Fergun.Services;
@@ -22,6 +23,7 @@ namespace Fergun
 
         private static readonly List<ulong> _ignoredUsers = new List<ulong>();
         private static readonly object _userLock = new object();
+        private static readonly object _cmdStatsLock = new object();
 
         public CommandHandlingService(DiscordSocketClient client, CommandService commands, LogService logService, IServiceProvider services)
         {
@@ -65,11 +67,6 @@ namespace Fergun
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
-
-            if (message.Channel is SocketGuildChannel guildChannel && !guildChannel.Guild.CurrentUser.GuildPermissions.SendMessages)
-            {
-                return;
-            }
 
             string prefix = Localizer.GetPrefix(message.Channel);
             if (message.Content == prefix)
@@ -130,11 +127,25 @@ namespace Fergun
                 return;
             }
 
+            // Update the command stats
+            lock (_cmdStatsLock)
+            {
+                var stats = FergunConfig.CommandStats ?? new Dictionary<string, int>();
+                if (stats.ContainsKey(command.Value.Name))
+                {
+                    stats[command.Value.Name]++;
+                }
+                else
+                {
+                    stats.Add(command.Value.Name, 1);
+                }
+                FergunConfig.CommandStats = stats;
+            }
+
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
                 return;
 
-            //await context.Channel.TriggerTypingAsync();
             double ignoreTime = 0.6;
             switch (result.Error)
             {
@@ -151,18 +162,44 @@ namespace Fergun
                     break;
 
                 case CommandError.UnmetPrecondition when command.Value.Module.Name != "Dev":
-                    if (context.Channel is SocketGuildChannel && context.Guild.Id == 264445053596991498 && result.ErrorReason == "This module is disabled in this guild.")
+                    if (context.Channel is SocketGuildChannel && context.Guild.Id == 264445053596991498 && result.ErrorReason == "Disabled command / module.")
                     {
                         break;
                     }
                     // TODO: Cleanup
-                    string errorReason = result.ErrorReason;
-                    if (errorReason.StartsWith("RLMT", StringComparison.OrdinalIgnoreCase))
+                    IGuildUser guildUser = null;
+                    if (context.Guild != null)
+                        guildUser = await context.Guild.GetCurrentUserAsync().ConfigureAwait(false);
+
+                    ChannelPermissions perms = context.Channel is IGuildChannel guildChannel
+                        ? guildUser.GetPermissions(guildChannel)
+                        : ChannelPermissions.All(context.Channel);
+
+                    if (!perms.Has(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks))
                     {
-                        errorReason = errorReason.Substring(4);
-                        ignoreTime = 4;
+                        try
+                        {
+                            var builder = new EmbedBuilder()
+                                .WithDescription($"\u26a0 {result.ErrorReason}")
+                                .WithColor(FergunConfig.EmbedColor);
+
+                            await context.User.SendMessageAsync(embed: builder.Build());
+                        }
+                        catch (HttpException)
+                        {
+                            await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Unable to send a DM about the minimun required permissions to the user."));
+                        }
                     }
-                    await SendEmbedAsync(context.Message, $"\u26a0 {Localizer.Locate(errorReason, context.Channel)}", _services);
+                    else
+                    {
+                        string errorReason = result.ErrorReason;
+                        if (errorReason.StartsWith("RLMT", StringComparison.OrdinalIgnoreCase))
+                        {
+                            errorReason = errorReason.Substring(4);
+                            ignoreTime = 4;
+                        }
+                        await SendEmbedAsync(context.Message, $"\u26a0 {Localizer.Locate(errorReason, context.Channel)}", _services);
+                    }
                     break;
 
                 case CommandError.ObjectNotFound:
@@ -221,7 +258,7 @@ namespace Fergun
                                 .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
                                 .WithColor(FergunConfig.EmbedColor);
 
-                            await channel.SendMessageAsync(null, false, embed2.Build());
+                            await channel.SendMessageAsync(embed: embed2.Build());
                         }
                     }
                     break;

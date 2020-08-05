@@ -503,10 +503,6 @@ Creando caché...</value>
 	<data name="Banned" xml:space="preserve">
     <value>El usuario {0} fue baneado.</value>
   </data>
-	<data name="BanError" xml:space="preserve">
-    <value>No se pudo banear al usuario.
-Código de error:</value>
-  </data>
 	<data name="clearSummary" xml:space="preserve">
     <value>Elimina los últimos x mensajes en el canal actual.</value>
   </data>
@@ -794,7 +790,7 @@ Reproduciendo ahora: {1}</value>
     <value>La pista {0} en la posición {1} fue eliminada.</value>
   </data>
 	<data name="LyricsNotFound" xml:space="preserve">
-    <value>No se pudo encontrar la letra para {0}</value>
+    <value>No se encontró la letra para {0}</value>
   </data>
 	<data name="Incorrect" xml:space="preserve">
     <value>Incorrecto!</value>
@@ -1101,15 +1097,8 @@ Puedes usar Say luego de el texto para hablar.</value>
 	<data name="SoftbanMyself" xml:space="preserve">
     <value>No me voy a softbanear lol</value>
   </data>
-	<data name="SoftbanHigherRole" xml:space="preserve">
-    <value>No puedo softbanear a esa persona..</value>
-  </data>
 	<data name="Softbanned" xml:space="preserve">
     <value>El usuario {0} fue softbaneado.</value>
-  </data>
-	<data name="SoftbanError" xml:space="preserve">
-    <value>No se pudo softbanear al usuario.
-Código de error:</value>
   </data>
 	<data name="AIDCommands" xml:space="preserve">
     <value>AI Dungeon (usa {0}aid &lt;comando&gt;)</value>
@@ -1146,9 +1135,6 @@ Código de error:</value>
   </data>
 	<data name="NotSupportedInDM" xml:space="preserve">
     <value>No creo que puedas usar eso aquí.</value>
-  </data>
-	<data name="ServerinfoIDNotPassedInDM" xml:space="preserve">
-    <value>No puedo obtener información de un canal de MD. Pasa una ID de un servidor.</value>
   </data>
 	<data name="tcdneSummary" xml:space="preserve">
     <value>Este gato no existe</value>
@@ -1967,4 +1953,28 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Arreglado un bug en `clear` que hacia de diciese que habia mensajes anteriores a 2 semanas cuando no había mensajes a eliminar.
 - Arreglado un bug en `resize` y `invert` que causaba el comando fallase porque Discord mostraba en la prevista de algunas urls una imágen inválida.</value>
   </data>
+	<data name="RatelimitUses" xml:space="preserve">
+		<value>{0} uso(s) cada {1}</value>
+	</data>
+	<data name="Requirements" xml:space="preserve">
+		<value>Requisitos</value>
+	</data>
+	<data name="cmdstatsSummary" xml:space="preserve">
+		<value>Muestra las estadísticas de los comandos.</value>
+	</data>
+	<data name="Changelog1.3.6" xml:space="preserve">
+		<value>- Nuevo comando: `cmdstats`.
+
+- Ahora los botones del paginador `primero` y `último` en `img` y` urban` solo aparecerán cuando haya 3 o más páginas, y el botón `saltar` cuando haya 4 o más páginas.
+- Ahora Fergun enviará un mensaje directo para advertir a un usuario cuando el bot no tiene los permisos mínimos requeridos en el canal actual (`SendMessages` y `EmbedLinks`).
+- Ahora Fergun soporta múltiples actividades de usuario, esto es útil en `userinfo` y `lyrics` (cuando la actividad de Spotify está oculta por el estado personalizado).
+- Agregado información de los permisos requeridos y de ratelimit en la ayuda de los comandos.
+
+- Arreglado un error en `wikipedia` que causaba que el comando fallase porque el texto a buscar no estaba codificado en algunos casos.
+- Arreglad un error en `screenshot` que causaba que el comando fallase porque la url estaba codificada por error.
+- Arreglado  un error en el módulo AI Dungeon que causaba que los comandos fallasen cuando se usaban diferentes IDs al mismo tiempo.</value>
+	</data>
+	<data name="CommandStatsInfo" xml:space="preserve">
+		<value>Command stats (desde 21/02/2020)</value>
+	</data>
 </root>

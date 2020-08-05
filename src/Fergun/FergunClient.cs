@@ -48,7 +48,7 @@ namespace Fergun
 
         public static IReadOnlyList<string> WordList => _wordlist;
 
-        public const string Version = "1.3.3";
+        public const string Version = "1.3.6";
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>()
         {
@@ -62,15 +62,16 @@ namespace Fergun
             "1.2.4",
             "1.2.7",
             "1.2.9",
-            "1.3"
+            "1.3",
+            "1.3.3"
         };
 
         public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
 
-        public const ulong InvitePermissions =
+        public const GuildPermission InvitePermissions =
 
             // General
-            (ulong)(GuildPermission.KickMembers |
+            GuildPermission.KickMembers |
             GuildPermission.ManageNicknames |
             GuildPermission.BanMembers |
             GuildPermission.ChangeNickname |
@@ -87,7 +88,7 @@ namespace Fergun
 
             // Voice
             GuildPermission.Connect |
-            GuildPermission.Speak);
+            GuildPermission.Speak;
 
         public const string LoadingEmote = "<a:loading:721975158826598522>";
 
@@ -132,10 +133,10 @@ namespace Fergun
 
                 // DM support
                 GatewayIntents.DirectMessages |
-                GatewayIntents.DirectMessageReactions
+                GatewayIntents.DirectMessageReactions |
 
-                //GatewayIntents.GuildPresences // I need it for the user status (userinfo and spotify)
-                //GatewayIntents.GuildEmojis
+                // Presence intent required
+                GatewayIntents.GuildPresences // I need it for the user status (userinfo and spotify)
             });
 
             _cmdService = new CommandService(new CommandServiceConfig
@@ -218,6 +219,8 @@ namespace Fergun
             else
             {
                 Console.WriteLine("Could not connect to the database.");
+                Console.Read();
+                Environment.Exit(1);
             }
             //Guilds = DB.LoadRecords<Guild>("Guilds");
             //if (IsLinux)
@@ -424,7 +427,7 @@ namespace Fergun
             {
                 if (!IsDebugMode)
                 {
-                    InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={InvitePermissions}";
+                    InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)InvitePermissions}";
 
                     DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
 

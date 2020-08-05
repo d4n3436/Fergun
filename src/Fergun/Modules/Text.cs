@@ -11,6 +11,7 @@ using Fergun.Extensions;
 
 namespace Fergun.Modules
 {
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
     public class Text : FergunBase
     {

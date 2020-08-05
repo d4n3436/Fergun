@@ -17,7 +17,6 @@ namespace Fergun.APIs.AIDungeon
         public const string WebSocketEndpoint = "wss://api.aidungeon.io/subscriptions";
         public const uint AllScenarios = 458612; //362833
         private static readonly HttpClient _aidClient = new HttpClient { BaseAddress = new Uri(ApiEndpoint) };
-        private static ClientWebSocket _webSocket;
 
         public string Token { get; set; }
 
@@ -30,18 +29,6 @@ namespace Fergun.APIs.AIDungeon
             Token = token;
         }
 
-        public async Task StartWebSocketAsync()
-        {
-            _webSocket = new ClientWebSocket();
-            _webSocket.Options.AddSubProtocol("graphql-ws");
-
-            await _webSocket.ConnectAsync(new Uri(WebSocketEndpoint), CancellationToken.None);
-
-            string initData = "{\"type\":\"connection_init\",\"payload\":{\"token\":\"" + Token + "\"}}";
-            var encodedInit = Encoding.UTF8.GetBytes(initData);
-            await _webSocket.SendAsync(new ArraySegment<byte>(encodedInit), WebSocketMessageType.Text, true, CancellationToken.None);
-        }
-
         private async Task<WebSocketActionResponse> SendWebSocketActionAsync(uint adventureId, ActionType action, string text = "", uint actionId = 0)
         {
             if (string.IsNullOrEmpty(Token))
@@ -50,13 +37,23 @@ namespace Fergun.APIs.AIDungeon
             }
 
             // I've tried to reuse the websocket but for some reason, half of the times the response containing the history list don't have the generated text, idk why
-            await StartWebSocketAsync();
+            //await StartWebSocketAsync();
 
             string subscription = "{\"id\":\"1\",\"type\":\"start\",\"payload\":{\"variables\":{\"id\":\"adventure:" + adventureId.ToString() + "\"},\"extensions\":{},\"operationName\":\"subscribeContent\",\"query\":\"subscription subscribeContent($id: String) {  subscribeContent(id: $id) {    id    historyList    quests    error    memory    mode    actionLoading    characters {      id      userId      name      __typename    }    gameState    thirdPerson    __typename  }}\",\"auth\":{\"token\":\"hello\"}}}";
 #if DEBUG
             Console.WriteLine($"send: {subscription}");
 #endif
             var encodedSub = Encoding.UTF8.GetBytes(subscription);
+
+            ClientWebSocket _webSocket = new ClientWebSocket();
+            _webSocket.Options.AddSubProtocol("graphql-ws");
+
+            await _webSocket.ConnectAsync(new Uri(WebSocketEndpoint), CancellationToken.None);
+
+            string initData = "{\"type\":\"connection_init\",\"payload\":{\"token\":\"" + Token + "\"}}";
+            var encodedInit = Encoding.UTF8.GetBytes(initData);
+            await _webSocket.SendAsync(new ArraySegment<byte>(encodedInit), WebSocketMessageType.Text, true, CancellationToken.None);
+
             await _webSocket.SendAsync(new ArraySegment<byte>(encodedSub), WebSocketMessageType.Text, true, CancellationToken.None);
 
             var request = new WebSocketActionRequest(adventureId, action, text, actionId);
@@ -89,6 +86,7 @@ namespace Fergun.APIs.AIDungeon
                         if (response.Contains("subscribeContent", StringComparison.OrdinalIgnoreCase))
                         {
                             await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                            _webSocket.Dispose();
                             return JsonConvert.DeserializeObject<WebSocketActionResponse>(response);
                         }
 #if DEBUG
@@ -220,7 +218,7 @@ namespace Fergun.APIs.AIDungeon
                 }
                 else
                 {
-                    _webSocket.Abort();
+                    //_webSocket.Abort();
                     throw new TimeoutException("Timeout");
                 }
             }

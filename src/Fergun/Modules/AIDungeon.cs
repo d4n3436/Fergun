@@ -22,6 +22,7 @@ namespace Fergun.Modules
 {
     using ActionType = APIs.AIDungeon.ActionType;
 
+    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
     [Group("aid"), Ratelimit(2, FergunClient.GlobalCooldown, Measure.Minutes)]
     public class AIDungeon : FergunBase
     {
@@ -81,7 +82,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("new", RunMode = RunMode.Async)]
+        [Command("new", RunMode = RunMode.Async), Ratelimit(1, 1, Measure.Minutes)]
         [Summary("aidnewSummary")]
         public async Task<RuntimeResult> New()
         {

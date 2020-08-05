@@ -25,6 +25,7 @@ namespace Fergun.Services
         private readonly DiscordSocketClient _client;
         private readonly Func<LogMessage, Task> _logger;
         private CancellationTokenSource _cts;
+        private bool isReconnecting = false;
 
         // How long should we wait on the client to reconnect before resetting?
         private readonly TimeSpan _timeout;
@@ -46,19 +47,27 @@ namespace Fergun.Services
 
         public Task ConnectedAsync()
         {
-            // Cancel all previous state checks and reset the CancelToken - client is back online
-            _ = DebugAsync("Client reconnected, resetting cancel tokens...");
-            _cts.Cancel();
-            _cts = new CancellationTokenSource();
-            _ = DebugAsync("Client reconnected, cancel tokens reset.");
+            if (!isReconnecting)
+            {
+                // Cancel all previous state checks and reset the CancelToken - client is back online
+                _ = DebugAsync("Client reconnected, resetting cancel tokens...");
+                _cts.Cancel();
+                _cts = new CancellationTokenSource();
+                _ = DebugAsync("Client reconnected, cancel tokens reset.");
+            }
 
             return Task.CompletedTask;
         }
 
         public Task DisconnectedAsync(Exception exception)
         {
-            if (!(exception is GatewayReconnectException))
+            if (exception is GatewayReconnectException)
             {
+                isReconnecting = true;
+            }
+            else
+            {
+                isReconnecting = false;
                 // Check the state after <timeout> to see if we reconnected
                 _ = InfoAsync("Client disconnected, starting timeout task...");
                 _ = Task.Delay(_timeout, _cts.Token).ContinueWith(async _ =>
