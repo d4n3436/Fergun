@@ -14,9 +14,8 @@ using Victoria;
 
 namespace Fergun.Modules
 {
-    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
-    [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
-    [Disabled(264445053596991498)]
+    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [UserMustBeInVoice("lyrics", ErrorMessage = "UserNotInVC")]
     public class Music : FergunBase
     {
@@ -96,7 +95,7 @@ namespace Fergun.Modules
             var pager = new PaginatedMessage
             {
                 Color = new Color(FergunConfig.EmbedColor),
-                Title = result.Item2.First(),
+                Title = result.Item2.First().Truncate(EmbedBuilder.MaxTitleLength),
                 Pages = pages,
                 Options = new PaginatedAppearanceOptions
                 {
@@ -150,7 +149,7 @@ namespace Fergun.Modules
             else
             {
                 LavaTrack selectedTrack;
-                bool trackSelection = GetGuild()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
+                bool trackSelection = GetGuildConfig()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
                 if (trackSelection)
                 {
                     string list = "";

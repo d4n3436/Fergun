@@ -391,31 +391,34 @@ namespace Fergun.APIs.AIDungeon
         public List<string> Tags { get; set; }
 
         [JsonProperty("nsfw")]
-        public bool Nsfw { get; set; }
+        public bool? Nsfw { get; set; }
 
         [JsonProperty("published")]
-        public bool Published { get; set; }
+        public bool? Published { get; set; }
 
         [JsonProperty("createdAt")]
-        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
 
         [JsonProperty("updatedAt")]
-        public DateTimeOffset UpdatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
 
         [JsonProperty("deletedAt")]
         public DateTimeOffset? DeletedAt { get; set; }
 
         [JsonProperty("options")]
-        public List<Option> Options { get; set; }
+        public List<ScenarioOption> Options { get; set; }
 
         [JsonProperty("__typename")]
         public string Typename { get; set; }
     }
 
-    public class Option
+    public class ScenarioOption
     {
         [JsonProperty("id")]
         public string Id { get; set; }
+
+        [JsonProperty("publicId")]
+        public Guid? PublicId { get; set; }
 
         [JsonProperty("title")]
         public string Title { get; set; }
@@ -487,7 +490,7 @@ namespace Fergun.APIs.AIDungeon
         public string Typename { get; set; }
     }
 
-    public partial class ActionResponse : IResponse
+    public class ActionResponse : IResponse
     {
         [JsonProperty("data")]
         public ActionData Data { get; set; }
@@ -496,7 +499,7 @@ namespace Fergun.APIs.AIDungeon
         public List<ErrorInfo> Errors { get; set; }
     }
 
-    public partial class ActionData
+    public class ActionData
     {
         [JsonProperty("doContentAction", NullValueHandling = NullValueHandling.Ignore)]
         public bool? DoContentAction { get; set; }
@@ -506,7 +509,7 @@ namespace Fergun.APIs.AIDungeon
         public object DoAlterAction { get; set; }
     }
 
-    public partial class WebSocketActionResponse
+    public class WebSocketResponse
     {
         [JsonProperty("type")]
         public string Type { get; set; }
@@ -515,61 +518,196 @@ namespace Fergun.APIs.AIDungeon
         public string Id { get; set; }
 
         [JsonProperty("payload")]
-        public WebSocketPayload Payload { get; set; }
+        public WebSocketResponsePayload Payload { get; set; }
     }
 
-    public partial class WebSocketPayload
+    public class WebSocketResponsePayload
     {
-        [JsonProperty("data")]
+        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         public WebSocketData Data { get; set; }
+
+        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)] // error
+        public string Message { get; set; }
     }
 
-    public partial class WebSocketData
+    public class WebSocketData
     {
-        [JsonProperty("subscribeContent")]
-        public SubscribeContent SubscribeContent { get; set; }
+        //[JsonProperty("user", NullValueHandling = NullValueHandling.Ignore)]
+        //public User User { get; set; }
+
+        [JsonProperty("subscribeAdventure", NullValueHandling = NullValueHandling.Ignore)] // subscribe adventure response
+        public WebSocketAdventure SubscribeAdventure { get; set; }
+
+        [JsonProperty("scenario", NullValueHandling = NullValueHandling.Ignore)] // get scenario(s) response
+        public ScenarioContent Scenario { get; set; }
+
+        [JsonProperty("createAdventure", NullValueHandling = NullValueHandling.Ignore)] // create adventure response
+        public WebSocketAdventure CreateAdventure { get; set; }
+
+        [JsonProperty("adventure", NullValueHandling = NullValueHandling.Ignore)]
+        public WebSocketAdventure Adventure { get; set; } // get adventure response
+
+        [JsonProperty("playerAction", NullValueHandling = NullValueHandling.Ignore)] // action response
+        public WebSocketAdventure PlayerAction { get; set; }
+
+        [JsonProperty("updateAdventureMemory", NullValueHandling = NullValueHandling.Ignore)]
+        public UpdateAdventureMemory UpdateAdventureMemory { get; set; } // remember response
+
+        [JsonProperty("alterAction", NullValueHandling = NullValueHandling.Ignore)]
+        public AlterAction AlterAction { get; set; } // alter response
+
+        [JsonProperty("deleteAdventure", NullValueHandling = NullValueHandling.Ignore)] // create adventure response
+        public DeleteAdventure DeleteAdventure { get; set; }
+
+        [JsonProperty("errors", NullValueHandling = NullValueHandling.Ignore)]
+        public List<ErrorInfo> Errors { get; set; } // ??
     }
 
-    public partial class SubscribeContent
+    public class WebSocketAdventure
     {
         [JsonProperty("id")]
         public string Id { get; set; }
 
-        [JsonProperty("historyList")]
-        public List<History> HistoryList { get; set; }
+        [JsonProperty("playPublicId", NullValueHandling = NullValueHandling.Ignore)]
+        public Guid? PlayPublicId { get; set; }
 
-        [JsonProperty("quests")]
+        [JsonProperty("publicId", NullValueHandling = NullValueHandling.Ignore)]
+        public Guid? PublicId { get; set; }
+
+        [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
+        public string Title { get; set; }
+
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
+        public string Description { get; set; }
+
+        [JsonProperty("musicTheme", NullValueHandling = NullValueHandling.Ignore)]
+        public string MusicTheme { get; set; }
+
+        [JsonProperty("music", NullValueHandling = NullValueHandling.Ignore)]
+        public object Music { get; set; }
+
+        [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Tags { get; set; }
+
+        [JsonProperty("nsfw", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Nsfw { get; set; }
+
+        [JsonProperty("published", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Published { get; set; }
+
+        [JsonProperty("actions", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Action> Actions { get; set; }
+
+        [JsonProperty("quests", NullValueHandling = NullValueHandling.Ignore)]
         public List<QuestData> Quests { get; set; }
 
-        [JsonProperty("error")]
+        [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
         public WebSocketError Error { get; set; }
 
-        [JsonProperty("memory")]
+        [JsonProperty("memory", NullValueHandling = NullValueHandling.Ignore)]
         public string Memory { get; set; }
+
+        [JsonProperty("hasBannedWord", NullValueHandling = NullValueHandling.Ignore)]
+        public object HasBannedWord { get; set; }
+
+        [JsonProperty("hasUserBannedWord", NullValueHandling = NullValueHandling.Ignore)]
+        public object HasUserBannedWord { get; set; }
+
+        [JsonProperty("mode", NullValueHandling = NullValueHandling.Ignore)]
+        public string Mode { get; set; }
+
+        [JsonProperty("actionLoading", NullValueHandling = NullValueHandling.Ignore)]
+        public bool ActionLoading { get; set; }
+
+        [JsonProperty("characters", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> Characters { get; set; }
+
+        [JsonProperty("actionCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? ActionCount { get; set; }
+
+        [JsonProperty("choices", NullValueHandling = NullValueHandling.Ignore)]
+        public object Choices { get; set; }
+
+        [JsonProperty("gameState", NullValueHandling = NullValueHandling.Ignore)]
+        public string GameState { get; set; }
+
+        [JsonProperty("userId", NullValueHandling = NullValueHandling.Ignore)]
+        public string UserId { get; set; }
+
+        [JsonProperty("thirdPerson", NullValueHandling = NullValueHandling.Ignore)]
+        public bool ThirdPerson { get; set; }
+
+        [JsonProperty("died", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? Died { get; set; }
+
+        [JsonProperty("createdAt", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        [JsonProperty("updatedAt", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTimeOffset? UpdatedAt { get; set; }
+
+        [JsonProperty("deletedAt", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTimeOffset? DeletedAt { get; set; }
+
+        [JsonProperty("__typename")]
+        public string Typename { get; set; }
+    }
+
+    public class Action
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("text")]
+        public string Text { get; set; }
+
+        [JsonProperty("__typename")]
+        public string Typename { get; set; }
+    }
+
+    public partial class AlterAction
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("publicId")]
+        public Guid PublicId { get; set; }
 
         [JsonProperty("mode")]
         public string Mode { get; set; }
 
-        [JsonProperty("actionLoading")]
-        public bool ActionLoading { get; set; }
-
-        [JsonProperty("characters")]
-        public List<string> Characters { get; set; }
-
-        [JsonProperty("gameState")]
-        public string GameState { get; set; }
-
-        [JsonProperty("thirdPerson")]
-        public bool ThirdPerson { get; set; }
+        [JsonProperty("actions")]
+        public List<Action> Actions { get; set; }
 
         [JsonProperty("__typename")]
         public string Typename { get; set; }
-
-        [JsonProperty("died", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? Died { get; set; }
     }
 
-    public partial class WebSocketError
+    public class UpdateAdventureMemory
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("memory")]
+        public string Memory { get; set; }
+
+        [JsonProperty("__typename")]
+        public string Typename { get; set; }
+    }
+
+    public partial class DeleteAdventure
+    {
+        [JsonProperty("deletedAt", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTimeOffset? DeletedAt { get; set; }
+
+        [JsonProperty("publicId", NullValueHandling = NullValueHandling.Ignore)]
+        public Guid? PublicId { get; set; }
+
+        [JsonProperty("__typename")]
+        public string Typename { get; set; }
+    }
+
+    public class WebSocketError
     {
         [JsonProperty("message")]
         public string Message { get; set; }
@@ -629,7 +767,7 @@ namespace Fergun.APIs.AIDungeon
         public DateTimeOffset? UndoneAt { get; set; }
     }
 
-    public partial class QuestData
+    public class QuestData
     {
         [JsonProperty("quest")]
         public string Quest { get; set; }
@@ -677,10 +815,10 @@ namespace Fergun.APIs.AIDungeon
         public List<string> Path { get; set; }
 
         [JsonProperty("extensions")]
-        public Extensions Extensions { get; set; }
+        public Extension Extension { get; set; }
     }
 
-    public class Extensions
+    public class Extension
     {
         [JsonProperty("code")]
         public string Code { get; set; }

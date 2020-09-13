@@ -29,7 +29,6 @@ namespace Fergun.Attributes.Preconditions
         private readonly bool _noLimitForAdmins;
         private readonly bool _applyPerGuild;
         private readonly Dictionary<(ulong, ulong?), CommandTimeout> _invokeTracker = new Dictionary<(ulong, ulong?), CommandTimeout>();
-        private ulong _ownerId = 0;
 
         /// <summary>
         ///     Sets how often a user is allowed to use this command. </summary>
@@ -98,14 +97,8 @@ namespace Fergun.Attributes.Preconditions
         public override async Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context, CommandInfo _, IServiceProvider __)
         {
-            if (_ownerId == 0)
-            {
-                _ownerId = (await context.Client.GetApplicationInfoAsync()).Owner.Id;
-            }
-            if (_ownerId == context.User.Id)
+            if ((await context.Client.GetApplicationInfoAsync()).Owner.Id == context.User.Id)
                 return PreconditionResult.FromSuccess();
-            //if ((await context.Client.GetApplicationInfoAsync()).Owner.Id == context.User.Id)
-            //    return PreconditionResult.FromSuccess();
 
             if (_noLimitInDMs && context.Channel is IPrivateChannel)
                 return PreconditionResult.FromSuccess();

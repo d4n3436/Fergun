@@ -27,17 +27,17 @@ namespace Fergun.Extensions
                 return int.MaxValue;
             }
 
-            int num = 0;
-            for (int i = 0; i < user.Guild.Roles.Count; i++)
+            int maxPos = 0;
+            for (int i = 0; i < user.RoleIds.Count; i++)
             {
-                IRole role = user.Guild.Roles.ElementAt(i);
-                if (role != null && role.Position > num)
+                IRole role = user.Guild.GetRole(user.RoleIds.ElementAt(i));
+                if (role != null && role.Position > maxPos)
                 {
-                    num = role.Position;
+                    maxPos = role.Position;
                 }
             }
 
-            return num;
+            return maxPos;
         }
 
         public static void Shuffle<T>(this IList<T> list)
@@ -78,7 +78,7 @@ namespace Fergun.Extensions
         {
             return ImageCodecInfo.GetImageEncoders()
                                  .FirstOrDefault(x => x.FormatID == format.Guid)?
-                                 .FilenameExtension?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)?
+                                 .FilenameExtension?.Split(';', StringSplitOptions.RemoveEmptyEntries)?
                                  .FirstOrDefault()?
                                  .Trim('*')?
                                  .ToLowerInvariant() ?? ".jpg";
@@ -91,7 +91,6 @@ namespace Fergun.Extensions
 
         public static Embed ToHelpEmbed(this CommandInfo command, string language, string prefix)
         {
-            //Maybe there's a better way to make a dynamic help?
             var builder = new EmbedBuilder
             {
                 Title = command.Name,
@@ -206,6 +205,21 @@ namespace Fergun.Extensions
             }
 
             return builder.Build();
+        }
+
+        public static string Display(this ICommandContext context, bool displayUser = false)
+        {
+            return context.Channel.Display() + (displayUser ? $"/{context.User}" : "");
+        }
+
+        public static string Display(this IChannel channel)
+        {
+            return (channel is IGuildChannel guildChannel ? $"{guildChannel.Guild.Name}/" : "") + channel.Name;
+        }
+
+        public static string Display(this IMessage message)
+        {
+            return message.Channel.Display() + $"/{message.Author}";
         }
 
         public static string Dump<T>(this T obj, int maxDepth = 2)

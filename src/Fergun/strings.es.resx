@@ -278,13 +278,13 @@
     <value>La url de una imagen a usar.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>El no especifiar una url hará que el comando busque en los últimos 100 mensajes por un link o un archivo adjunto.</value>
+    <value>El no especifiar una url hará que el comando busque en los últimos x mensajes en la caché por un link o un archivo adjunto.</value>
   </data>
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>El archivo adjunto no es una imagen.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
-    <value>No se pudo encontrar alguna url o archivo adjunto en los últimos 50 mensajes.</value>
+    <value>No se pudo encontrar alguna url o archivo adjunto en los últimos {0} mensajes.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>La url no es una imagen válida.</value>
@@ -449,7 +449,7 @@
     <value>El usuario no fue encontrado.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
-    <value>Busca un artículo en Wikipedia</value>
+    <value>Busca un artículo en Wikipedia.</value>
   </data>
 	<data name="wikipediaParam1" xml:space="preserve">
     <value>Las palabras clave a buscar.</value>
@@ -1954,16 +1954,16 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Arreglado un bug en `resize` y `invert` que causaba el comando fallase porque Discord mostraba en la prevista de algunas urls una imágen inválida.</value>
   </data>
 	<data name="RatelimitUses" xml:space="preserve">
-		<value>{0} uso(s) cada {1}</value>
-	</data>
+    <value>{0} uso(s) cada {1}</value>
+  </data>
 	<data name="Requirements" xml:space="preserve">
-		<value>Requisitos</value>
-	</data>
+    <value>Requisitos</value>
+  </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
-		<value>Muestra las estadísticas de los comandos.</value>
-	</data>
+    <value>Muestra las estadísticas de los comandos.</value>
+  </data>
 	<data name="Changelog1.3.6" xml:space="preserve">
-		<value>- Nuevo comando: `cmdstats`.
+    <value>- Nuevo comando: `cmdstats`.
 
 - Ahora los botones del paginador `primero` y `último` en `img` y` urban` solo aparecerán cuando haya 3 o más páginas, y el botón `saltar` cuando haya 4 o más páginas.
 - Ahora Fergun enviará un mensaje directo para advertir a un usuario cuando el bot no tiene los permisos mínimos requeridos en el canal actual (`SendMessages` y `EmbedLinks`).
@@ -1973,8 +1973,149 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Arreglado un error en `wikipedia` que causaba que el comando fallase porque el texto a buscar no estaba codificado en algunos casos.
 - Arreglad un error en `screenshot` que causaba que el comando fallase porque la url estaba codificada por error.
 - Arreglado  un error en el módulo AI Dungeon que causaba que los comandos fallasen cuando se usaban diferentes IDs al mismo tiempo.</value>
-	</data>
+  </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-		<value>Command stats (desde 21/02/2020)</value>
+    <value>Command stats (desde 21/02/2020)</value>
+  </data>
+	<data name="lmgtfySummary" xml:space="preserve">
+    <value>Permíteme que use Google por ti.</value>
+  </data>
+	<data name="lmgtfyParam1" xml:space="preserve">
+    <value>Las palabras clave a buscar.</value>
+  </data>
+	<data name="pasteSummary" xml:space="preserve">
+    <value>Sube texto a Hastebin.</value>
+  </data>
+	<data name="pasteParam1" xml:space="preserve">
+    <value>El texto a subir.</value>
+  </data>
+	<data name="Uploading" xml:space="preserve">
+    <value>Subiendo...</value>
+  </data>
+	<data name="bigsnipeSummary" xml:space="preserve">
+    <value>Muestra los últimos mensajes eliminados en el canal actual.</value>
+  </data>
+	<data name="bigsnipeParam1" xml:space="preserve">
+    <value>Un canal en específico a buscar.</value>
+  </data>
+	<data name="MinutesAgo" xml:space="preserve">
+    <value>Hace {0} minutos</value>
+  </data>
+	<data name="Attachment" xml:space="preserve">
+    <value>Archivo adjunto</value>
+  </data>
+	<data name="bigeditsnipeSummary" xml:space="preserve">
+    <value>Muestra los últimos mensajes editados en el canal actual.</value>
+  </data>
+	<data name="bigeditsnipeParam1" xml:space="preserve">
+    <value>Un canal en específico a buscar.</value>
+  </data>
+	<data name="TextChannel" xml:space="preserve">
+    <value>Canal de Texto</value>
+  </data>
+	<data name="AnnouncementChannel" xml:space="preserve">
+    <value>Canal de Anuncios</value>
+  </data>
+	<data name="VoiceChannel" xml:space="preserve">
+    <value>Canal de Voz</value>
+  </data>
+	<data name="DMChannel" xml:space="preserve">
+    <value>Canal de MD</value>
+  </data>
+	<data name="Bitrate" xml:space="preserve">
+    <value>Tasa de bits</value>
+  </data>
+	<data name="UserLimit" xml:space="preserve">
+    <value>Límite de usuarios</value>
+  </data>
+	<data name="NoLimit" xml:space="preserve">
+    <value>Sin límite</value>
+  </data>
+	<data name="disableSummary" xml:space="preserve">
+    <value>Deshabilita un comando localmente (para este servidor).</value>
+  </data>
+	<data name="disableParam1" xml:space="preserve">
+    <value>El nombre del comando a deshabilitar.</value>
+  </data>
+	<data name="NonDisableable" xml:space="preserve">
+    <value>{0} no puede ser deshabilitado!</value>
+  </data>
+	<data name="AlreadyDisabled" xml:space="preserve">
+    <value>{0} ya está deshabilitado!</value>
+  </data>
+	<data name="CommandDisabled" xml:space="preserve">
+    <value>El comando {0} ha sido deshabilitado en este servidor.</value>
+  </data>
+	<data name="enableSummary" xml:space="preserve">
+    <value>Habilita un comando localmente (para este servidor).</value>
+  </data>
+	<data name="enableParam1" xml:space="preserve">
+    <value>El nombre del comando a habilitar.</value>
+  </data>
+	<data name="AlreadyEnabled" xml:space="preserve">
+    <value>{0} ya está habilitado!</value>
+  </data>
+	<data name="CommandEnabled" xml:space="preserve">
+    <value>El comando {0} ha sido habilitado en este servidor.</value>
+  </data>
+	<data name="globaldisableSummary" xml:space="preserve">
+    <value>Deshabilita un comando globalmente (en todos los servidores).</value>
+  </data>
+	<data name="globaldisableParam1" xml:space="preserve">
+    <value>El nombre del comando a deshabilitar globalmente.</value>
+  </data>
+	<data name="globaldisableParam2" xml:space="preserve">
+    <value>The razón a usar.</value>
+  </data>
+	<data name="AlreadyDisabledGlobally" xml:space="preserve">
+    <value>{0} ya está deshabilitado globalmente!</value>
+  </data>
+	<data name="CommandDisabledGlobally" xml:space="preserve">
+    <value>El comando {0} ha sido deshabilitado en todos los servidores.</value>
+  </data>
+	<data name="globalenableSummary" xml:space="preserve">
+    <value>Habilita un comando globalmente (en todos los servidores).</value>
+  </data>
+	<data name="AlreadyEnabledGlobally" xml:space="preserve">
+    <value>{0} ya está habilitado globalmente!</value>
+  </data>
+	<data name="CommandEnabledGlobally" xml:space="preserve">
+    <value>El comando {0} ha sido habilitado en todos los servidores.</value>
+  </data>
+	<data name="globalenableParam1" xml:space="preserve">
+    <value>El nombre del comando a habilitar globalmente.</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>Razón</value>
+  </data>
+	<data name="LeftVCInactivity" xml:space="preserve">
+		<value>He salido del canal de voz por inactividad.</value>
+	</data>
+	<data name="MusicPlayerShutdownWarning" xml:space="preserve">
+		<value>Fergun será reiniciado/apagado en unos segundos y tu reproductor de música sera cerrado. Lo siento por los inconvenientes ocasionados.</value>
+	</data>
+	<data name="Warning" xml:space="preserve">
+		<value>Advertencia</value>
+	</data>
+	<data name="PublicIdNull" xml:space="preserve">
+		<value>La ID pública de esta aventura es nula. Por favor crea una nueva aventura.</value>
+	</data>
+	<data name="Changelog1.4" xml:space="preserve">
+		<value>- Nuevos comandos: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` y `globaldisable`.
+
+- Ahora cuando Fergun ingresa a un servidor y éste servidor tiene un lenguaje preferido, éste lenguaje será guardado en la configuración de Fergun en ese servidor.
+- Ahora cuando Fergun deja un servidor, la configuración de ese servidor será eliminada de la base de datos.
+- Ahora Fergun saldrá de un canal de voz si todos los usuarios dejan ese canal.
+- Ahora Fergun enviará una advertencia a todos los servidores que tengan un reproductor de música antes de reiniciarse/apagarse.
+- Ahora los comandos que usen Hastebin y la subida de texto falle, su contenido se mostrará en el mensaje, pero cortado.
+
+- Añadido soporte a deshabilitación de comandos a nivel de servidor. 
+- Añadido soporte a canales de voz, canales de categorías y canales de MD en `channelinfo`.
+- Añadido soporte a archivos eliminados en `snipe` (`bigsnipe` ya viene con esta caracerística).
+
+- Actualizado el scraper de `lyrics` y arreglado el bug del texto cortado.
+- Actualizado el módulo de AI Dungeon y el wrapper de API.
+
+- Arreglado un bug que causaba que algunos comandos de moderación fallaran porque la jerarquía de calculaba incorrectamente.</value>
 	</data>
 </root>

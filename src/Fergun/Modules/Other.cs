@@ -13,15 +13,13 @@ using Fergun.APIs.OpenTriviaDB;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
+using Fergun.Services;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Fergun.Modules
 {
-    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
-    [Ratelimit(3, FergunClient.GlobalCooldown, Measure.Minutes)]
+    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Other : FergunBase
     {
         private static readonly string[] categories = {
@@ -55,17 +53,19 @@ namespace Fergun.Modules
 
         private static readonly string[] responseCodes = { "Success", "No Results", "Invalid Parameter", "Token Not Found", "Token Empty", "Unknown Error" };
 
-        [ThreadStatic]
-        private static Random _rngInstance;
+        //[ThreadStatic]
+        //private static Random _rngInstance;
 
         private static CommandService _cmdService;
+        private static LogService _logService;
 
-        public Other(CommandService commands)
+        public Other(CommandService commands, LogService logService)
         {
             _cmdService ??= commands;
+            _logService ??= logService;
         }
 
-        private static Random RngInstance => _rngInstance ??= new Random();
+        //private static Random RngInstance => _rngInstance ??= new Random();
 
         [Command("changelog")]
         [Summary("changelogSummary")]
@@ -73,19 +73,19 @@ namespace Fergun.Modules
         [Example("1.2")]
         public async Task<RuntimeResult> Changelog([Summary("changelogParam1")] string version = null)
         {
-            version ??= FergunClient.Version;
-            if (version != FergunClient.Version && FergunClient.PreviousVersions.FirstOrDefault(x => x == version) == null)
+            version ??= Constants.Version;
+            if (version != Constants.Version && Constants.PreviousVersions.FirstOrDefault(x => x == version) == null)
             {
-                return FergunResult.FromError(string.Format(Locate("VersionNotFound"), string.Join(", ", FergunClient.PreviousVersions.Append(FergunClient.Version))));
+                return FergunResult.FromError(string.Format(Locate("VersionNotFound"), string.Join(", ", Constants.PreviousVersions.Append(Constants.Version))));
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Changelog")
                 //.AddField($"v{version}", Locate($"Changelog{version}"))
-                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", FergunClient.PreviousVersions.Append(FergunClient.Version).Where(x => x != version))))
+                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", Constants.PreviousVersions.Append(Constants.Version).Where(x => x != version))))
                 .WithColor(FergunConfig.EmbedColor);
 
-            var split = Locate($"Changelog{version}").SplitToLines(EmbedFieldBuilder.MaxFieldValueLength).ToList();
+            var split = Locate($"Changelog{version}").SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToList();
             for (int i = 0; i < split.Count; i++)
             {
                 builder.AddField(i == 0 ? $"v{version}" : "\u200b", split[i]);
@@ -97,46 +97,20 @@ namespace Fergun.Modules
         }
 
         //[LongRunning]
-        [Command("code", RunMode = RunMode.Async), Ratelimit(1, FergunClient.GlobalCooldown, Measure.Minutes)]
+        [Command("code", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("codeSummary")]
         [Alias("source")]
         [Example("img")]
         public async Task<RuntimeResult> Code([Summary("codeParam1")] string commandName = null)
         {
-            // maybe some day
-            bool isDisabled = true;
-            if (isDisabled)
-            {
-                return FergunResult.FromError("In maintenance.");
-            }
-            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != "Dev");
+            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
             if (command == null)
             {
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
-            string methodName = char.ToUpperInvariant(command.Name[0]) + string.Join("", command.Name.Skip(1));
 
-            DirectoryInfo workingDir = new DirectoryInfo(Environment.CurrentDirectory);
-            DirectoryInfo sourceDir = workingDir.Parent.Parent.Parent;
-
-            string path = $"{sourceDir.FullName}\\Modules\\{(command.Module.Name == "aid" ? "AIDungeon" : command.Module.Name)}.cs";
-
-            string methodBody;
-
-            using (var stream = File.OpenRead(path))
-            {
-                var syntaxTree = CSharpSyntaxTree.ParseText(SourceText.From(stream), path: path);
-                var root = syntaxTree.GetRoot();
-                var method = root.DescendantNodes()
-                                 .OfType<MethodDeclarationSyntax>()
-                                 .Where(md => md.Identifier.ValueText == methodName)
-                                 .FirstOrDefault().NormalizeWhitespace();
-                methodBody = method.ToString().Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase);
-            }
-
-            await PagedReplyAsync(methodBody.SplitToLines(EmbedBuilder.MaxDescriptionLength - 9).Select(x => $"```cs\n{x}```"));
-
-            return FergunResult.FromSuccess();
+            // TODO: Get links pointing command methods from the GitHub repo.
+            return FergunResult.FromError("WIP");
         }
 
         [Command("cmdstats", RunMode = RunMode.Async)]
@@ -194,6 +168,82 @@ namespace Fergun.Modules
             await ReplyAsync("https://fergun.is-inside.me/MyAxVm6x.mp4");
         }
 
+        [AlwaysEnabled]
+        [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
+        [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
+        [Command("disable", RunMode = RunMode.Async)]
+        [Summary("disableSummary")]
+        [Example("img")]
+        public async Task<RuntimeResult> Disable([Remainder, Summary("disableParam1")] string commandName)
+        {
+            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
+            if (command != null)
+            {
+                if (command.Attributes.Concat(command.Module.Attributes).Any(x => x is AlwaysEnabledAttribute))
+                {
+                    return FergunResult.FromError(string.Format(Locate("NonDisableable"), Format.Code(command.Name)));
+                }
+            }
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
+            }
+
+            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
+            guild.DisabledCommands ??= new List<string>();
+            if (guild.DisabledCommands.Contains(command.Name))
+            {
+                return FergunResult.FromError(string.Format(Locate("AlreadyDisabled"), Format.Code(command.Name)));
+            }
+
+            guild.DisabledCommands.Add(command.Name);
+            FergunClient.Database.UpdateRecord("Guilds", guild);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Disable: Disabled command \"{command.Name}\" in server {Context.Guild.Id}."));
+
+            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabled"), Format.Code(command.Name)));
+
+            return FergunResult.FromSuccess();
+        }
+
+        [AlwaysEnabled]
+        [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
+        [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
+        [Command("enable", RunMode = RunMode.Async)]
+        [Summary("enableSummary")]
+        [Example("img")]
+        public async Task<RuntimeResult> Enable([Remainder, Summary("enableParam1")] string commandName)
+        {
+            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
+            if (command != null)
+            {
+                if (command.Attributes.Concat(command.Module.Attributes).Any(x => x is AlwaysEnabledAttribute))
+                {
+                    return FergunResult.FromError(string.Format(Locate("AlreadyEnabled"), Format.Code(command.Name)));
+                }
+            }
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
+            }
+
+            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
+            guild.DisabledCommands ??= new List<string>();
+            if (guild.DisabledCommands.Contains(command.Name))
+            {
+                guild.DisabledCommands.Remove(command.Name);
+                FergunClient.Database.UpdateRecord("Guilds", guild);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Enable: Enabled command \"{command.Name}\" in server {Context.Guild.Id}."));
+
+                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabled"), Format.Code(command.Name)));
+            }
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("AlreadyEnabled"), Format.Code(command.Name)));
+            }
+
+            return FergunResult.FromSuccess();
+        }
+
         [Command("inspirobot")]
         [Summary("inspirobotSummary")]
         public async Task Inspirobot()
@@ -203,6 +253,8 @@ namespace Fergun.Modules
             {
                 img = await wc.DownloadStringTaskAsync("https://inspirobot.me/api?generate=true");
             }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Inspirobot: Generated url: {img}"));
+
             var builder = new EmbedBuilder()
                 .WithTitle("InspiroBot")
                 .WithImageUrl(img)
@@ -226,8 +278,7 @@ namespace Fergun.Modules
         [Alias("lang")]
         public async Task<RuntimeResult> Language()
         {
-            var currentGuild = GetGuild() ?? new Guild(Context.Guild.Id);
-            string currentLanguage = currentGuild?.Language ?? FergunConfig.DefaultLanguage;
+            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
             bool hasReacted = false;
             IUserMessage message = null;
@@ -239,13 +290,15 @@ namespace Fergun.Modules
 
             async Task HandleLanguageUpdateAsync(string newLanguage)
             {
-                if (hasReacted || currentLanguage == newLanguage)
+                if (hasReacted || guild.Language == newLanguage)
                 {
                     return;
                 }
                 hasReacted = true;
-                currentGuild.Language = newLanguage;
-                FergunClient.Database.UpdateRecord("Guilds", currentGuild);
+                guild.Language = newLanguage;
+                FergunClient.Database.UpdateRecord("Guilds", guild);
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
                 await message.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
             }
 
@@ -258,7 +311,7 @@ namespace Fergun.Modules
                     }
                 });
 
-            foreach (var lang in FergunClient.Languages)
+            foreach (var lang in Constants.Languages)
             {
                 data.AddCallBack(new Emoji(lang.Value), async (_, _1) => await HandleLanguageUpdateAsync(lang.Key));
             }
@@ -276,6 +329,7 @@ namespace Fergun.Modules
             ;
         }
 
+        [AlwaysEnabled]
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
         [Command("prefix")]
@@ -297,18 +351,21 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("PrefixTooLong"));
             }
+
             // null prefix = use the global prefix
-            var currentGuild = GetGuild() ?? new Guild(Context.Guild.Id);
+            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
             if (newPrefix == FergunConfig.GlobalPrefix)
             {
-                currentGuild.Prefix = null; //Default prefix
+                guild.Prefix = null;
             }
             else
             {
-                currentGuild.Prefix = newPrefix;
+                guild.Prefix = newPrefix;
             }
 
-            FergunClient.Database.UpdateRecord("Guilds", currentGuild);
+            FergunClient.Database.UpdateRecord("Guilds", guild);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated prefix to: \"{newPrefix}\" in {Context.Guild.Name}"));
+
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
         }
@@ -449,7 +506,7 @@ namespace Fergun.Modules
             {
                 totalUsers += guild.MemberCount;
             }
-            string version = $"v{FergunClient.Version}";
+            string version = $"v{Constants.Version}";
             if (FergunClient.IsDebugMode)
             {
                 version += "-dev";
@@ -465,7 +522,10 @@ namespace Fergun.Modules
 
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
-                .AddField(Locate("RAMUsage"), $"{processRamUsage.ToString() ?? "?"}MB / {totalRamUsage.ToString() ?? "?"}MB / {totalRam.ToString() ?? "?"}MB", true)
+                .AddField(Locate("RAMUsage"),
+                $"{(processRamUsage.ToString() == null ? "?MB" : $"{processRamUsage}MB ({Math.Round((double)processRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
+                $"/ {(totalRamUsage.ToString() == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
+                $"/ {totalRam.ToString() ?? "?"}MB", true)
 
                 .AddField(Locate("Library"), $"Discord.Net\nv{DiscordConfig.Version}", true)
                 .AddField("\u200b", "\u200b", true)
@@ -487,7 +547,7 @@ namespace Fergun.Modules
                     FergunClient.InviteLink,
                     FergunClient.DblBotPage,
                     $"{FergunClient.DblBotPage}/vote",
-                    FergunClient.SupportServer));
+                    FergunConfig.SupportServer));
             }
             builder.WithColor(FergunConfig.EmbedColor);
 
@@ -500,7 +560,7 @@ namespace Fergun.Modules
         public async Task Support()
         {
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-            await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunClient.SupportServer, owner.ToString()));
+            await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunConfig.SupportServer, owner.ToString()));
         }
 
         [Command("tcdne")]
@@ -569,12 +629,8 @@ namespace Fergun.Modules
                 return FergunResult.FromSuccess();
             }
 
-            TriviaPlayer currentPlayer = FergunClient.Database.Find<TriviaPlayer>("TriviaStats", x => x.ID == Context.User.Id);
-            if (currentPlayer == null)
-            {
-                currentPlayer = new TriviaPlayer(Context.User.Id);
-                FergunClient.Database.InsertRecord("TriviaStats", currentPlayer);
-            }
+            TriviaPlayer currentPlayer = FergunClient.Database.Find<TriviaPlayer>("TriviaStats", x => x.ID == Context.User.Id)
+                ?? new TriviaPlayer(Context.User.Id);
 
             if (category == "leaderboard" || category == "ranks")
             {

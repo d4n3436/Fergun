@@ -71,7 +71,25 @@ namespace Fergun.Services
 
             lock (_writerLock)
             {
+                switch (message.Severity)
+                {
+                    case LogSeverity.Critical:
+                    case LogSeverity.Error:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        break;
+                    case LogSeverity.Warning:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case LogSeverity.Info:
+                        Console.ForegroundColor = ConsoleColor.White;
+                        break;
+                    case LogSeverity.Verbose:
+                    case LogSeverity.Debug:
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        break;
+                }
                 Console.WriteLine(logText);
+                Console.ResetColor();
                 Writer.WriteLine(logText);
                 Writer.Flush();
                 //await File.AppendAllTextAsync(LogFile, logText + "\n");
@@ -79,18 +97,18 @@ namespace Fergun.Services
             await Task.CompletedTask;
         }
 
-        static private async Task CompressAsync(string FilePath)
+        static private async Task CompressAsync(string filePath)
         {
-            using (var msi = new MemoryStream(await File.ReadAllBytesAsync(FilePath)))
+            using (var msi = new MemoryStream(await File.ReadAllBytesAsync(filePath)))
             using (var mso = new MemoryStream())
             {
                 using (var gs = new GZipStream(mso, CompressionMode.Compress))
                 {
                     await msi.CopyToAsync(gs);
                 }
-                await File.WriteAllBytesAsync(Path.ChangeExtension(FilePath, "gz"), mso.ToArray());
+                await File.WriteAllBytesAsync(Path.ChangeExtension(filePath, "gz"), mso.ToArray());
             }
-            File.Delete(FilePath);
+            File.Delete(filePath);
         }
     }
 }

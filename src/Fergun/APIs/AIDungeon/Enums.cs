@@ -47,4 +47,12 @@
         /// </summary>
         Retry
     }
+
+    public enum RequestType
+    {
+        GetScenario,
+        GetAdventure,
+        CreateAdventure,
+        DeleteAdventure
+    }
 }

@@ -28,7 +28,10 @@ namespace Fergun
 
         public FergunDB(string database, string user, string password, string host = null)
         {
-            host ??= "localhost";
+            if (string.IsNullOrEmpty(host))
+            {
+                host = "localhost";
+            }
             var connectionString = $"mongodb://{user}:{password}@{host}/admin";
             client = new MongoClient(connectionString);
             db = client.GetDatabase(database);
@@ -38,8 +41,12 @@ namespace Fergun
         {
             get
             {
-                client.ListDatabaseNames();
-                return client.Cluster.Description.State == ClusterState.Connected;
+                try
+                {
+                    client.ListDatabaseNames();
+                    return client.Cluster.Description.State == ClusterState.Connected;
+                }
+                catch { return false; }
             }
         }
 
@@ -143,7 +150,7 @@ namespace Fergun
             var collection = db.GetCollection<T>(table);
             var result = collection.Find(filter).Limit(1).ToList();
             if (result.Count == 0)
-                return null;
+                return default;
             return result[0];
         }
 
@@ -152,7 +159,7 @@ namespace Fergun
             var collection = db.GetCollection<T>(table);
             var result = await (await collection.FindAsync(filter)).ToListAsync();
             if (result.Count == 0)
-                return null;
+                return default;
             return result[0];
         }
 

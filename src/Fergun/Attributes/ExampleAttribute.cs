@@ -3,7 +3,7 @@
 namespace Fergun.Attributes
 {
     /// <summary>
-    /// Attribute for example commands.
+    /// Attaches an example to your command.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     class ExampleAttribute : Attribute

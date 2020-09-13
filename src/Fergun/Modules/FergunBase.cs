@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
@@ -23,12 +22,6 @@ namespace Fergun.Modules
         /// Gets or sets the interactive service.
         /// </summary>
         public InteractiveService Interactive { get; set; }
-
-        //protected override async void BeforeExecute(CommandInfo command)
-        //{
-        //    await Context.Channel.TriggerTypingAsync();
-        //    base.BeforeExecute(command);
-        //}
 
         public Task<SocketMessage> NextMessageAsync(ICriterion<SocketMessage> criterion, TimeSpan? timeout = null)
             => Interactive.NextMessageAsync(Context, criterion, timeout);
@@ -96,7 +89,7 @@ namespace Fergun.Modules
 
         public string GetPrefix() => Localizer.GetPrefix(Context.Channel);
 
-        public Guild GetGuild() => Localizer.GetGuild(Context.Channel);
+        public GuildConfig GetGuildConfig() => Localizer.GetGuildConfig(Context.Channel);
 
         public string GetLanguage() => Localizer.GetLanguage(Context.Channel);
 

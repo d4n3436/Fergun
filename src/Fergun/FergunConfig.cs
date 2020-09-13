@@ -35,11 +35,14 @@ namespace Fergun
         public bool AidAutoTranslateDefault { get; set; }
         public bool TrackSelectionDefault { get; set; }
         public Dictionary<string, int> CommandStats { get; set; }
+        public Dictionary<string, string> GloballyDisabledCommands { get; internal set; }
+        public string SupportServer { get; set; }
+        public string LogChannel { get; set; }
     }
 
     public static class FergunConfig
     {
-        private static bool _tokenUsed = false;
+        private static bool _tokenUsed;
         public static string Token
         {
             get
@@ -161,6 +164,21 @@ namespace Fergun
             }
         }
 
+        public static Dictionary<string, string> GloballyDisabledCommands
+        {
+            get => GetConfig().GloballyDisabledCommands ?? new Dictionary<string, string>();
+            set
+            {
+                var cfg = GetConfig();
+                cfg.GloballyDisabledCommands = value;
+                FergunClient.Database.UpdateRecord("Config", cfg);
+            }
+        }
+
+        public static string SupportServer => GetConfig().SupportServer ?? "https://discord.com";
+
+        public static string LogChannel => GetConfig().LogChannel;
+
         private static BaseConfig GetConfig()
         {
             return FergunClient.Database.LoadRecord<BaseConfig>("Config");
@@ -187,24 +205,24 @@ namespace Fergun
     }
 
     [BsonIgnoreExtraElements]
-    public class Guild : IIdentity
+    public class GuildConfig : IIdentity
     {
-        public Guild(ulong id)
+        public GuildConfig(ulong id)
         {
             ID = id;
         }
 
-        public Guild(ulong id, string prefix) : this(id)
+        public GuildConfig(ulong id, string prefix) : this(id)
         {
             Prefix = prefix;
         }
 
-        public Guild(ulong id, string prefix, string language) : this(id, prefix)
+        public GuildConfig(ulong id, string prefix, string language) : this(id, prefix)
         {
             Language = language;
         }
 
-        public Guild(ulong id,
+        public GuildConfig(ulong id,
                      string prefix,
                      string language,
                      bool captionbotAutoTranslate,
@@ -219,8 +237,9 @@ namespace Fergun
         [BsonId]
         public ObjectId ObjectId { get; set; }
         public ulong ID { get; set; }
-        public string Prefix { get; set; } = null;
+        public string Prefix { get; set; }
         public string Language { get; set; } = FergunConfig.DefaultLanguage;
+        public List<string> DisabledCommands { get; set; } = new List<string>();
         public bool CaptionbotAutoTranslate { get; set; } = FergunConfig.CaptionbotAutoTranslateDefault;
         public bool AidAutoTranslate { get; set; } = FergunConfig.AidAutoTranslateDefault;
         public bool TrackSelection { get; set; } = FergunConfig.TrackSelectionDefault;
@@ -229,21 +248,21 @@ namespace Fergun
     [BsonIgnoreExtraElements]
     public class AidAdventure : IIdentity
     {
-        public AidAdventure(uint id, ulong ownerid, bool isPublic)
+        public AidAdventure(uint id, string publicId, ulong ownerId, bool isPublic)
         {
             ID = id;
-            OwnerID = ownerid;
+            PublicId = publicId;
+            OwnerID = ownerId;
             IsPublic = isPublic;
         }
 
         [BsonId]
         public ObjectId ObjectId { get; set; }
         public uint ID { get; set; }
+        public string PublicId { get; set; }
         public ulong OwnerID { get; set; }
         public bool IsPublic { get; set; }
     }
-
-    // TODO: Merge TriviaPlayer and BlacklistEntity to User
 
     [BsonIgnoreExtraElements]
     public class TriviaPlayer : IIdentity
@@ -261,7 +280,7 @@ namespace Fergun
         [BsonId]
         public ObjectId ObjectId { get; set; }
         public ulong ID { get; set; }
-        public int Points { get; set; } = 0;
+        public int Points { get; set; }
     }
 
     [BsonIgnoreExtraElements]
@@ -280,6 +299,6 @@ namespace Fergun
         [BsonId]
         public ObjectId ObjectId { get; set; }
         public ulong ID { get; set; }
-        public string Reason { get; set; } = null;
+        public string Reason { get; set; }
     }
 }

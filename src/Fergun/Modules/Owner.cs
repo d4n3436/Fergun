@@ -11,19 +11,31 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Fergun.Attributes;
 using Fergun.Extensions;
+using Fergun.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
 namespace Fergun.Modules
 {
-    [RequireBotPermission(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks)]
+    [AlwaysEnabled]
+    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [RequireOwner(ErrorMessage = "BotOwnerOnly")]
     public class Owner : FergunBase
     {
         private static IEnumerable<Assembly> _scriptAssemblies;
         private static IEnumerable<string> _scriptNamespaces;
         private static ScriptOptions _scriptOptions;
+        private static CommandService _cmdService;
+        private static LogService _logService;
+        private readonly MusicService _musicService;
+
+        public Owner(CommandService commands, LogService logService, MusicService musicService)
+        {
+            _cmdService ??= commands;
+            _logService ??= logService;
+            _musicService ??= musicService;
+        }
 
         [LongRunning]
         [Command("bash", RunMode = RunMode.Async)]
@@ -39,7 +51,7 @@ namespace Fergun.Modules
             }
             else
             {
-                await ReplyAsync($"```{result.Truncate(DiscordConfig.MaxMessageSize - 6)}```");
+                await ReplyAsync(Format.Code(result.Truncate(DiscordConfig.MaxMessageSize - 10), "md"));
             }
         }
 
@@ -181,15 +193,15 @@ namespace Fergun.Modules
             }
 
             string value = returnValue.ToString();
-            if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 6)
+            if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
                 var pages = new List<PaginatedMessage.Page>();
 
-                foreach (var item in value.SplitToLines(EmbedBuilder.MaxDescriptionLength - 6))
+                foreach (var item in value.SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10))
                 {
                     pages.Add(new PaginatedMessage.Page()
                     {
-                        Description = $"```{item.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase)}```"
+                        Description = Format.Code(item.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md")
                     });
                 }
 
@@ -206,7 +218,7 @@ namespace Fergun.Modules
                     {
                         new EmbedFieldBuilder()
                         .WithName(Locate("Type"))
-                        .WithValue($"```{returnType}```")
+                        .WithValue(Format.Code(returnType, "md"))
                     },
                     Color = new Color(FergunConfig.EmbedColor),
                     Options = new PaginatedAppearanceOptions()
@@ -223,9 +235,9 @@ namespace Fergun.Modules
             {
                 var builder = new EmbedBuilder()
                     .WithTitle(Locate("EvalResults"))
-                    .AddField(Locate("Input"), $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
-                    .AddField(Locate("Output"), $"```{returnValue.ToString().Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase)}```")
-                    .AddField(Locate("Type"), $"```{returnType}```")
+                    .AddField(Locate("Input"), Format.Code(code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                    .AddField(Locate("Output"), Format.Code(value.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md"))
+                    .AddField(Locate("Type"), Format.Code(returnType, "md"))
                     .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
                     .WithColor(FergunConfig.EmbedColor);
 
@@ -239,31 +251,91 @@ namespace Fergun.Modules
         [Example("!")]
         public async Task<RuntimeResult> Forceprefix([Summary("prefixParam1")] string newPrefix)
         {
-            var currentGuild = GetGuild();
-            string prefix = currentGuild?.Prefix ?? FergunConfig.GlobalPrefix;
-
-            if (newPrefix == prefix)
+            if (newPrefix == GetPrefix())
             {
                 return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
             }
-            currentGuild ??= new Guild(Context.Guild.Id, newPrefix);
-            if (currentGuild == null)
+
+            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
+            if (newPrefix == FergunConfig.GlobalPrefix)
             {
-                currentGuild = new Guild(Context.Guild.Id, newPrefix);
+                guild.Prefix = null; //Default prefix
             }
             else
             {
-                if (newPrefix == FergunConfig.GlobalPrefix)
+                guild.Prefix = newPrefix;
+            }
+
+            FergunClient.Database.UpdateRecord("Guilds", guild);
+            await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("globaldisable", RunMode = RunMode.Async)]
+        [Summary("globaldisableSummary")]
+        [Example("img")]
+        public async Task<RuntimeResult> Globaldisable([Summary("globaldisableParam1")] string commandName,
+            [Remainder, Summary("globaldisableParam2")] string reason = null)
+        {
+            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
+            if (command != null)
+            {
+                if (command.Attributes.Concat(command.Module.Attributes).Any(x => x is AlwaysEnabledAttribute))
                 {
-                    currentGuild.Prefix = null; //Default prefix
-                }
-                else
-                {
-                    currentGuild.Prefix = newPrefix;
+                    return FergunResult.FromError(string.Format(Locate("NonDisableable"), Format.Code(command.Name)));
                 }
             }
-            FergunClient.Database.UpdateRecord("Guilds", currentGuild);
-            await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
+            }
+
+            var disabledCommands = FergunConfig.GloballyDisabledCommands;
+            if (disabledCommands.ContainsKey(command.Name))
+            {
+                return FergunResult.FromError(string.Format(Locate("AlreadyDisabledGlobally"), Format.Code(command.Name)));
+            }
+
+            disabledCommands.Add(command.Name, reason);
+            FergunConfig.GloballyDisabledCommands = disabledCommands;
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globaldisable: Disabled command {command.Name} in all servers."));
+
+            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabledGlobally"), Format.Code(command.Name)));
+
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("globalenable", RunMode = RunMode.Async)]
+        [Summary("globalenableSummary")]
+        [Example("img")]
+        public async Task<RuntimeResult> Globalenable([Summary("globalenableParam1")] string commandName)
+        {
+            var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
+            if (command != null)
+            {
+                if (command.Attributes.Concat(command.Module.Attributes).Any(x => x is AlwaysEnabledAttribute))
+                {
+                    return FergunResult.FromError(string.Format(Locate("AlreadyEnabledGlobally"), Format.Code(command.Name)));
+                }
+            }
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
+            }
+
+            var disabledCommands = FergunConfig.GloballyDisabledCommands;
+            if (disabledCommands.ContainsKey(command.Name))
+            {
+                disabledCommands.Remove(command.Name);
+                FergunConfig.GloballyDisabledCommands = disabledCommands;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globalenable: Enabled command {command.Name} in all servers."));
+
+                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabledGlobally"), Format.Code(command.Name)));
+            }
+            else
+            {
+                return FergunResult.FromError(string.Format(Locate("AlreadyEnabledGlobally"), Format.Code(command.Name)));
+            }
             return FergunResult.FromSuccess();
         }
 
@@ -283,13 +355,28 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        // TODO: Close the music player if there's any, and other pending commands during the bot disconnection
-
         [Command("logout")]
         [Summary("logoutSummary")]
         [Alias("die")]
         public async Task<RuntimeResult> Logout()
         {
+            if (_musicService.LavaNode.Players.Any())
+            {
+                var embed = new EmbedBuilder()
+                        .WithTitle($"\u26a0 {Locate("Warning")} \u26a0")
+                        .WithDescription(Locate("MusicPlayerShutdownWarning"))
+                        .WithColor(FergunConfig.EmbedColor);
+
+                foreach (var player in _musicService.LavaNode.Players)
+                {
+                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
+                }
+                await Task.Delay(5000);
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {_musicService.LavaNode.Players.Count()} music players..."));
+                await _musicService.LavaNode.DisconnectAsync();
+            }
+
             await ReplyAsync("Bye bye");
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
             //await Context.Client.LogoutAsync();
@@ -305,12 +392,31 @@ namespace Fergun.Modules
         [Summary("restartSummary")]
         public async Task<RuntimeResult> Restart()
         {
+            if (_musicService.LavaNode.Players.Any())
+            {
+                var embed = new EmbedBuilder()
+                        .WithTitle($"\u26a0 {Locate("Warning")} \u26a0")
+                        .WithDescription(Locate("MusicPlayerShutdownWarning"))
+                        .WithColor(FergunConfig.EmbedColor);
+
+                foreach (var player in _musicService.LavaNode.Players)
+                {
+                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
+                }
+                await Task.Delay(5000);
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Restart", $"Shutting down {_musicService.LavaNode.Players.Count()} music players..."));
+                await _musicService.LavaNode.DisconnectAsync();
+            }
+
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
             {
                 await Context.Message.AddReactionAsync(new Emoji("\u2705"));
             }
-            //Utility.TessEngine.Dispose();
+
             Process.Start(AppDomain.CurrentDomain.FriendlyName);
+            await Context.Client.SetStatusAsync(UserStatus.Idle);
+            //Utility.TessEngine.Dispose();
             Cache.Dispose();
             Environment.Exit(0);
 

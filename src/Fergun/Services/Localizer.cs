@@ -4,20 +4,23 @@ namespace Fergun.Services
 {
     public static class Localizer
     {
-        public static Guild GetGuild(IMessageChannel channel)
+        public static GuildConfig GetGuildConfig(IMessageChannel channel)
         {
             if (IsPrivate(channel))
             {
                 return null;
             }
-            return FergunClient.Database.Find<Guild>("Guilds", x => x.ID == (channel as IGuildChannel).Guild.Id);
+            return GetGuildConfig((channel as IGuildChannel).Guild);
         }
 
+        public static GuildConfig GetGuildConfig(IGuild guild)
+            => FergunClient.Database.Find<GuildConfig>("Guilds", x => x.ID == guild.Id);
+
         public static string GetPrefix(IMessageChannel channel)
-            => GetGuild(channel)?.Prefix ?? FergunConfig.GlobalPrefix;
+            => GetGuildConfig(channel)?.Prefix ?? FergunConfig.GlobalPrefix;
 
         public static string GetLanguage(IMessageChannel channel)
-            => GetGuild(channel)?.Language ?? FergunConfig.DefaultLanguage;
+            => GetGuildConfig(channel)?.Language ?? FergunConfig.DefaultLanguage;
 
         public static string Locate(string key, IMessageChannel channel)
             => strings.ResourceManager.GetString(key, FergunClient.Locales[GetLanguage(channel)]) ?? key;

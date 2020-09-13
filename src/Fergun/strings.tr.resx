@@ -277,13 +277,13 @@
     <value>Kullanılacak bir resmin URL'si.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>Bir url belirtilmemesi, son 100 iletiyi bir bağlantı veya ek için arama komutu yapar.</value>
+    <value>komutu bir bağlantı veya bir eki için önbellekte Son x ileti aramak için yapacak bir url belirterek Değil.</value>
   </data>
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>Ek bir resim değil.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
-    <value>Son 50 mesajda resim URL'si veya eki bulunamadı.</value>
+    <value>Son {0} mesajda resim URL'si veya eki bulunamadı.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>URL geçerli bir resim değil.</value>
@@ -448,7 +448,7 @@
     <value>Kullanıcı bulunamadı.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
-    <value>Wikipedia'da bir makale arar</value>
+    <value>Wikipedia'da bir makale arar.</value>
   </data>
 	<data name="wikipediaParam1" xml:space="preserve">
     <value>Aranacak anahtar kelimeler.</value>
@@ -957,7 +957,7 @@ Bir mod seçin:</value>
     <value>Bu komutu kullanmadan önce birkaç saniye bekleyin!</value>
   </data>
 	<data name="snipeParam1" xml:space="preserve">
-    <value>Su çulluğu yapmak için belirli bir kanal</value>
+    <value>Su çulluğu yapmak için belirli bir kana.l</value>
   </data>
 	<data name="IDNotFound" xml:space="preserve">
     <value>Kimlik bulunamadı.</value>
@@ -1952,16 +1952,16 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Bir resize` `hatasından ve ikilik var bazı URL'ler geçersiz bir görüntü önizlemesini gösterir çünkü neden komutlar başarısız olduğunu` invert` düzeltildi.</value>
   </data>
 	<data name="RatelimitUses" xml:space="preserve">
-		<value>Her {1} için {0} kullanım</value>
-	</data>
+    <value>Her {1} için {0} kullanım</value>
+  </data>
 	<data name="Requirements" xml:space="preserve">
-		<value>Gereksinimler</value>
-	</data>
+    <value>Gereksinimler</value>
+  </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
-		<value>Komut istatistikleri gösterir.</value>
-	</data>
+    <value>Komut istatistikleri gösterir.</value>
+  </data>
 	<data name="Changelog1.3.6" xml:space="preserve">
-		<value>- Yeni komut: `cmdstats`.
+    <value>- Yeni komut: `cmdstats`.
 
 - Şimdi {0} ve {0} içindeki {0} ve {0} sayfalayıcı düğmeleri yalnızca 3 veya daha fazla sayfa olduğunda ve {0} düğmesi 4 veya daha fazla sayfa olduğunda görünecektir.
 - Artık Fergun, bot geçerli kanalda (`SendMessages` ve` EmbedLinks`) gerekli minimum izinlere sahip olmadığında kullanıcıyı uyarmak için doğrudan bir mesaj gönderecek.
@@ -1971,8 +1971,149 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - Bazı durumlarda sorgu kodlanmadığı için komutun başarısız olmasına neden olan wikipedia'daki bir hata düzeltildi.
 - Url yanlışlıkla kodlandığı için komutun başarısız olmasına neden olan ekran görüntüsünde bir hata düzeltildi.
 - AI Dungeon modülünde, aynı anda farklı kimlikler kullanıldığında komutların başarısız olmasına neden olan bir hata düzeltildi.</value>
-	</data>
+  </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-		<value>Komut İstatistikler (02/21/2020 beri)</value>
+    <value>Komut İstatistikler (02/21/2020 beri)</value>
+  </data>
+	<data name="lmgtfySummary" xml:space="preserve">
+    <value>Bunu senin için Google'da arayalım.</value>
+  </data>
+	<data name="lmgtfyParam1" xml:space="preserve">
+    <value>Aranacak anahtar kelimeler.</value>
+  </data>
+	<data name="pasteSummary" xml:space="preserve">
+    <value>Hastebin yükledikleriniz metni.</value>
+  </data>
+	<data name="pasteParam1" xml:space="preserve">
+    <value>Metin yüklemek için.</value>
+  </data>
+	<data name="Uploading" xml:space="preserve">
+    <value>Yükleme...</value>
+  </data>
+	<data name="bigsnipeSummary" xml:space="preserve">
+    <value>Gösteriler son mevcut kanal veya belirtilen mesajlar silindi.</value>
+  </data>
+	<data name="bigsnipeParam1" xml:space="preserve">
+    <value>Belirli bir kanal snipe.</value>
+  </data>
+	<data name="MinutesAgo" xml:space="preserve">
+    <value>{0} dakika önce</value>
+  </data>
+	<data name="Attachment" xml:space="preserve">
+    <value>Ek dosya</value>
+  </data>
+	<data name="bigeditsnipeSummary" xml:space="preserve">
+    <value>Gösterim mevcut kanal veya belirtilen son düzenlenmiş mesajlar.</value>
+  </data>
+	<data name="bigeditsnipeParam1" xml:space="preserve">
+    <value>Belirli bir kanal snipe.</value>
+  </data>
+	<data name="TextChannel" xml:space="preserve">
+    <value>Metin Kanal</value>
+  </data>
+	<data name="AnnouncementChannel" xml:space="preserve">
+    <value>duyuru Kanal</value>
+  </data>
+	<data name="VoiceChannel" xml:space="preserve">
+    <value>Ses Kanalı</value>
+  </data>
+	<data name="DMChannel" xml:space="preserve">
+    <value>DM Kanal</value>
+  </data>
+	<data name="Bitrate" xml:space="preserve">
+    <value>Bit Hızı</value>
+  </data>
+	<data name="UserLimit" xml:space="preserve">
+    <value>Kullanıcı Sınırı</value>
+  </data>
+	<data name="NoLimit" xml:space="preserve">
+    <value>Limit yok</value>
+  </data>
+	<data name="disableSummary" xml:space="preserve">
+    <value>(Bu sunucu için) yerel olarak bir komut devre dışı bırakır.</value>
+  </data>
+	<data name="disableParam1" xml:space="preserve">
+    <value>komutunun adı devre dışı bırakmak için.</value>
+  </data>
+	<data name="NonDisableable" xml:space="preserve">
+    <value>{0} devre dışı bırakılamaz!</value>
+  </data>
+	<data name="AlreadyDisabled" xml:space="preserve">
+    <value>{0} zaten devre dışı bırakılmış!</value>
+  </data>
+	<data name="CommandDisabled" xml:space="preserve">
+    <value>Komut {0} bu sunucuda devre dışı bırakıldı.</value>
+  </data>
+	<data name="enableSummary" xml:space="preserve">
+    <value>(Bu sunucu için) yerel olarak bir komut sağlar.</value>
+  </data>
+	<data name="enableParam1" xml:space="preserve">
+    <value>komutunun adı etkinleştirmek için.</value>
+  </data>
+	<data name="AlreadyEnabled" xml:space="preserve">
+    <value>{0} zaten etkindir!</value>
+  </data>
+	<data name="CommandEnabled" xml:space="preserve">
+    <value>Komut {0} bu sunucuda etkinleştirilmiştir.$$</value>
+  </data>
+	<data name="globaldisableSummary" xml:space="preserve">
+    <value>Devre dışı bırakır (bütün sunucularda) bir komut global.$$</value>
+  </data>
+	<data name="globaldisableParam1" xml:space="preserve">
+    <value>komutunun adı global olarak devre dışı bırakmak için.</value>
+  </data>
+	<data name="globaldisableParam2" xml:space="preserve">
+    <value>sebebi kullanmak.</value>
+  </data>
+	<data name="AlreadyDisabledGlobally" xml:space="preserve">
+    <value>{0} zaten küresel devre dışı bırakılmış!</value>
+  </data>
+	<data name="CommandDisabledGlobally" xml:space="preserve">
+    <value>Komut {0} Tüm sunucularda devre dışı bırakılmıştır.</value>
+  </data>
+	<data name="globalenableSummary" xml:space="preserve">
+    <value>(Bütün sunucularda) bir komut tüm dünyada sağlar.</value>
+  </data>
+	<data name="globalenableParam1" xml:space="preserve">
+    <value>komutunun adı global olarak etkinleştirmek için.</value>
+  </data>
+	<data name="AlreadyEnabledGlobally" xml:space="preserve">
+    <value>{0} zaten küresel etkindir!</value>
+  </data>
+	<data name="CommandEnabledGlobally" xml:space="preserve">
+    <value>Komut {0} Tüm sunucularda etkinleştirildi.</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>neden</value>
+  </data>
+	<data name="LeftVCInactivity" xml:space="preserve">
+		<value>Ben etkin olmaması nedeniyle ses kanalını bıraktık.</value>
+	</data>
+	<data name="MusicPlayerShutdownWarning" xml:space="preserve">
+		<value>Fergun bazı saniyede kapalı / yeniden başlatılacak ve müzik çalar kapatılacak. Rahatsızlıktan dolayı özür dileriz.</value>
+	</data>
+	<data name="Warning" xml:space="preserve">
+		<value>Uyarı</value>
+	</data>
+	<data name="PublicIdNull" xml:space="preserve">
+		<value>Bu maceranın kamu kimliği boş. Yeni bir macera oluşturun.</value>
+	</data>
+	<data name="Changelog1.4" xml:space="preserve">
+		<value>- Yeni komutlar: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` ve `globaldisable`.
+
+- Şimdi, Fergun bir sunucuya katıldığında ve bu sunucunun tercih edilen bir yerel ayarı olduğunda, bu yerel ayar, o sunucu için Fergun yapılandırmasına kaydedilecektir.
+- Artık Fergun bir sunucudan ayrıldığında, bu sunucu yapılandırması veritabanından silinecek.
+- Şimdi Fergun, tüm kullanıcılar o kanaldan ayrıldığında bir ses kanalından ayrılacak.
+- Şimdi Fergun, yeniden başlatmadan / kapatmadan önce müzik çalar bulunan tüm sunuculara bir uyarı gönderecek.
+- Artık Hastebin'i kullanan ve yükleme başarısız olan komutlar mesajda gösterilecek, ancak kesilecektir.
+
+- Klan seviyesinde komutları devre dışı bırakmak için destek eklendi.
+- `channelinfo` için ses kanalları, kategori kanalları ve DM kanallarına destek eklendi.
+- `snipe` 'de silinen ekler için destek eklendi (`bigsnipe`, yayınlandığında bu özellikle birlikte gelir).
+
+- `lyrics` kazıyıcı güncellendi ve metin kesme hatası düzeltildi.
+- AI Dungeon modülü ve API sarmalayıcı güncellendi.
+
+- Kullanıcı hiyerarşisi yanlış hesaplandığı için bazı moderasyon komutlarının başarısız olmasına neden olan bir hata düzeltildi.</value>
 	</data>
 </root>

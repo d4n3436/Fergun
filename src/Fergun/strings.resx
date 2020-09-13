@@ -278,13 +278,13 @@
     <value>The url of an image to use.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>Not specifying an url will make the command to search for the last 100 messages for a link or an attachment.</value>
+    <value>Not specifying an url will make the command to search for the last x messages in cache for a link or an attachment.</value>
   </data>
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>The attachment is not an image.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
-    <value>Could not find any image url or attachment in the last 50 messages.</value>
+    <value>Could not find any image url or attachment in the last {0} messages.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>The url is not a valid image.</value>
@@ -449,7 +449,7 @@
     <value>User not found.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
-    <value>Searches for an article on Wikipedia</value>
+    <value>Searches for an article on Wikipedia.</value>
   </data>
 	<data name="wikipediaParam1" xml:space="preserve">
     <value>The keyword(s) to search.</value>
@@ -957,7 +957,7 @@ Select a mode:</value>
     <value>Wait some seconds before using this command!</value>
   </data>
 	<data name="snipeParam1" xml:space="preserve">
-    <value>A specific channel to snipe</value>
+    <value>A specific channel to snipe.</value>
   </data>
 	<data name="IDNotFound" xml:space="preserve">
     <value>ID not found.</value>
@@ -1955,16 +1955,16 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in `resize` and `invert` that caused the commands to fail because Discord shows an invalid image preview to some urls.</value>
   </data>
 	<data name="RatelimitUses" xml:space="preserve">
-		<value>{0} use(s) every {1}</value>
-	</data>
+    <value>{0} use(s) every {1}</value>
+  </data>
 	<data name="Requirements" xml:space="preserve">
-		<value>Requirements</value>
-	</data>
+    <value>Requirements</value>
+  </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
-		<value>Shows the command stats.</value>
-	</data>
+    <value>Shows the command stats.</value>
+  </data>
 	<data name="Changelog1.3.6" xml:space="preserve">
-		<value>- New command: `cmdstats`.
+    <value>- New command: `cmdstats`.
 
 - Now the `first` and `last` paginator buttons in `img` and `urban` will only appear when there are 3 or more pages, and the `jump` button when there are 4 or more pages.
 - Now Fergun will send a direct message to warn an user when the bot doesn't have the minimun required permissions in the current channel (`SendMessages` and `EmbedLinks`).
@@ -1974,8 +1974,149 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in `wikipedia` that caused the command to fail because the query was not encoded in some cases.
 - Fixed a bug in `screenshot` that caused the command to fail because the url was encoded by error.
 - Fixed a bug in the AI Dungeon module that caused the commands to fail when different IDs were used at the same time.</value>
-	</data>
+  </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-		<value>Command stats (since 02/21/2020)</value>
+    <value>Command stats (since 02/21/2020)</value>
+  </data>
+	<data name="lmgtfySummary" xml:space="preserve">
+    <value>Let me Google that for you.</value>
+  </data>
+	<data name="lmgtfyParam1" xml:space="preserve">
+    <value>The keyword(s) to search.</value>
+  </data>
+	<data name="pasteSummary" xml:space="preserve">
+    <value>Uploads text to Hastebin.</value>
+  </data>
+	<data name="pasteParam1" xml:space="preserve">
+    <value>The text to upload.</value>
+  </data>
+	<data name="Uploading" xml:space="preserve">
+    <value>Uploading...</value>
+  </data>
+	<data name="bigsnipeSummary" xml:space="preserve">
+    <value>Shows the last deleted messages in the current channel or the specified.</value>
+  </data>
+	<data name="bigsnipeParam1" xml:space="preserve">
+    <value>A specific channel to snipe.</value>
+  </data>
+	<data name="MinutesAgo" xml:space="preserve">
+    <value>{0} minutes ago</value>
+  </data>
+	<data name="Attachment" xml:space="preserve">
+    <value>Attachment</value>
+  </data>
+	<data name="bigeditsnipeSummary" xml:space="preserve">
+    <value>Shows the last edited messages in the current channel or the specified.</value>
+  </data>
+	<data name="bigeditsnipeParam1" xml:space="preserve">
+    <value>A specific channel to snipe.</value>
+  </data>
+	<data name="TextChannel" xml:space="preserve">
+    <value>Text Channel</value>
+  </data>
+	<data name="AnnouncementChannel" xml:space="preserve">
+    <value>Announcement Channel</value>
+  </data>
+	<data name="VoiceChannel" xml:space="preserve">
+    <value>Voice Channel</value>
+  </data>
+	<data name="DMChannel" xml:space="preserve">
+    <value>DM Channel</value>
+  </data>
+	<data name="Bitrate" xml:space="preserve">
+    <value>Bitrate</value>
+  </data>
+	<data name="UserLimit" xml:space="preserve">
+    <value>User Limit</value>
+  </data>
+	<data name="NoLimit" xml:space="preserve">
+    <value>No Limit</value>
+  </data>
+	<data name="disableSummary" xml:space="preserve">
+    <value>Disables a command locally (for this server).</value>
+  </data>
+	<data name="disableParam1" xml:space="preserve">
+    <value>The name of the command to disable.</value>
+  </data>
+	<data name="NonDisableable" xml:space="preserve">
+    <value>{0} can't be disabled!</value>
+  </data>
+	<data name="AlreadyDisabled" xml:space="preserve">
+    <value>{0} is already disabled!</value>
+  </data>
+	<data name="CommandDisabled" xml:space="preserve">
+    <value>The command {0} has been disabled in this server.</value>
+  </data>
+	<data name="enableSummary" xml:space="preserve">
+    <value>Enables a command locally (for this server).</value>
+  </data>
+	<data name="enableParam1" xml:space="preserve">
+    <value>The name of the command to enable.</value>
+  </data>
+	<data name="AlreadyEnabled" xml:space="preserve">
+    <value>{0} is already enabled!</value>
+  </data>
+	<data name="CommandEnabled" xml:space="preserve">
+    <value>The command {0} has been enabled in this server.</value>
+  </data>
+	<data name="globaldisableSummary" xml:space="preserve">
+    <value>Disables a command globally (in all servers).</value>
+  </data>
+	<data name="globaldisableParam1" xml:space="preserve">
+    <value>The name of the command to disable globally.</value>
+  </data>
+	<data name="globaldisableParam2" xml:space="preserve">
+    <value>The reason to use.</value>
+  </data>
+	<data name="AlreadyDisabledGlobally" xml:space="preserve">
+    <value>{0} is already disabled globally!</value>
+  </data>
+	<data name="CommandDisabledGlobally" xml:space="preserve">
+    <value>The command {0} has been disabled in all servers.</value>
+  </data>
+	<data name="globalenableSummary" xml:space="preserve">
+    <value>Enables a command globally (in all servers).</value>
+  </data>
+	<data name="globalenableParam1" xml:space="preserve">
+    <value>The name of the command to enable globally.</value>
+  </data>
+	<data name="AlreadyEnabledGlobally" xml:space="preserve">
+    <value>{0} is already enabled globally!</value>
+  </data>
+	<data name="CommandEnabledGlobally" xml:space="preserve">
+    <value>The command {0} has been enabled in all servers.</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+	<data name="LeftVCInactivity" xml:space="preserve">
+		<value>I have left the voice channel due to inactivity.</value>
+	</data>
+	<data name="MusicPlayerShutdownWarning" xml:space="preserve">
+		<value>Fergun will be restarted/turned off in some seconds and your music player will be shut down. Sorry for the inconvenience.</value>
+	</data>
+	<data name="Warning" xml:space="preserve">
+		<value>Warning</value>
+	</data>
+	<data name="PublicIdNull" xml:space="preserve">
+		<value>The public ID of this adventure is null. Please create a new adventure.</value>
+	</data>
+	<data name="Changelog1.4" xml:space="preserve">
+		<value>- New commands: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` and `globaldisable`.
+
+- Now when Fergun joins a server and that server has a preferred locale, that locale will be saved to the Fergun configuration for that server.
+- Now when Fergun leaves a server, that server config will be deleted from the database.
+- Now Fergun will leave a voice channel when all the users leave that channel.
+- Now Fergun will send a warning to all servers that has a music player before restarting/shutting down.
+- Now the commands that uses Hastebin and the upload fails its content will be showed in the message, but cut down.
+
+- Added support to disable commands at guild level.
+- Added support to voice channels, category channels and DM channels in `channelinfo`.
+- Added support to deleted attachments in `snipe` (`bigsnipe` comes with this feature on release).
+
+- Updated the `lyrics` scraper and fixed the cut text bug.
+- Updated the AI Dungeon module and API wrapper.
+
+- Fixed a bug that caused some moderation commands to fail because the user hierarchy was calculated incorrectly.</value>
 	</data>
 </root>

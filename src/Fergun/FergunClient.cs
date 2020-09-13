@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -6,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.CommandCache;
@@ -15,6 +17,7 @@ using Discord.WebSocket;
 using DiscordBotsList.Api;
 using DiscordBotsList.Api.Objects;
 using Fergun.APIs.DiscordBots;
+using Fergun.Extensions;
 using Fergun.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Victoria;
@@ -24,74 +27,17 @@ namespace Fergun
     public class FergunClient
     {
         public static FergunDB Database { get; private set; }
-        public static List<IMessage> DeletedMessages { get; } = new List<IMessage>();
-        public static List<IMessage> EditedMessages { get; } = new List<IMessage>();
+        public static ConcurrentDictionary<IMessage, bool> MessageCache { get; } = new ConcurrentDictionary<IMessage, bool>(); // true = is a deleted message
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static AuthDiscordBotListApi DblApi { get; private set; }
-        public static IDblSelfBot DblBot { get; private set; } = null;
+        public static IDblSelfBot DblBot { get; private set; }
         public static string DblBotPage { get; private set; }
-        public static string SupportServer { get; set; } = "https://discord.gg/5w5GEKE";
         public static string InviteLink { get; set; }
-
-        public static Dictionary<string, string> Languages { get; } = new Dictionary<string, string>
-        {
-            { "es", "🇪🇸" },
-            { "en", "🇺🇸" },
-            { "ar", "🇸🇦" },
-            { "ru", "🇷🇺" },
-            { "tr", "🇹🇷" }
-        };
-
         public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
 
         public static IReadOnlyList<string> WordList => _wordlist;
-
-        public const string Version = "1.3.6";
-
-        public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>()
-        {
-            "0.8",
-            "0.9",
-            "1.0",
-            "1.1",
-            "1.1.5",
-            "1.2",
-            "1.2.3",
-            "1.2.4",
-            "1.2.7",
-            "1.2.9",
-            "1.3",
-            "1.3.3"
-        };
-
-        public const double GlobalCooldown = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
-
-        public const GuildPermission InvitePermissions =
-
-            // General
-            GuildPermission.KickMembers |
-            GuildPermission.ManageNicknames |
-            GuildPermission.BanMembers |
-            GuildPermission.ChangeNickname |
-            GuildPermission.ViewChannel |
-
-            // Text
-            GuildPermission.EmbedLinks |
-            GuildPermission.ReadMessageHistory |
-            GuildPermission.UseExternalEmojis |
-            GuildPermission.SendMessages |
-            GuildPermission.ManageMessages |
-            GuildPermission.AttachFiles |
-            GuildPermission.AddReactions |
-
-            // Voice
-            GuildPermission.Connect |
-            GuildPermission.Speak;
-
-        public const string LoadingEmote = "<a:loading:721975158826598522>";
-
         private readonly DiscordSocketClient _client;
         private readonly CommandService _cmdService;
         private static IServiceProvider _services;
@@ -103,41 +49,13 @@ namespace Fergun
 
         private static string[] _dbCredentials;
         private static bool _hasCredentials;
-        private static readonly object _messageLock = new object();
         private static bool _firstConnect = true;
         private static DiscordBotsApi _discordBots;
+        private static Timer _autoClear;
 
         public FergunClient()
         {
-            _client = new DiscordSocketClient(new DiscordSocketConfig
-            {
-                MessageCacheSize = 50,
-                AlwaysDownloadUsers = false,
-                ConnectionTimeout = 30000,
-                LogLevel = LogSeverity.Verbose,
-                ExclusiveBulkDelete = true,
-                GatewayIntents =
-                GatewayIntents.Guilds |
-
-                // Moderation commands
-                GatewayIntents.GuildBans |
-
-                // General + Moderation commands
-                GatewayIntents.GuildMessages |
-
-                // Commands that uses paginators
-                GatewayIntents.GuildMessageReactions |
-
-                // Music commands
-                GatewayIntents.GuildVoiceStates |
-
-                // DM support
-                GatewayIntents.DirectMessages |
-                GatewayIntents.DirectMessageReactions |
-
-                // Presence intent required
-                GatewayIntents.GuildPresences // I need it for the user status (userinfo and spotify)
-            });
+            _client = new DiscordSocketClient(Constants.ClientConfig);
 
             _cmdService = new CommandService(new CommandServiceConfig
             {
@@ -153,80 +71,78 @@ namespace Fergun
 #else
             IsDebugMode = false;
 #endif
-            string wordlistFile = $"{AppContext.BaseDirectory}/Resources/wordlist.txt";
+            string wordlistFile = Path.Combine(AppContext.BaseDirectory, "Resources", "wordlist.txt");
             if (File.Exists(wordlistFile))
             {
                 try
                 {
-                    _wordlist = File.ReadAllText(wordlistFile).Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                    _wordlist = File.ReadAllText(wordlistFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                 }
-                catch (IOException)
-                {
-                }
+                catch (IOException) { }
             }
-            string credentialsFile = $"{AppContext.BaseDirectory}/Resources/dbcred.txt";
+
+            string credentialsFile = Path.Combine(AppContext.BaseDirectory, "Resources", "dbcred.txt");
             if (File.Exists(credentialsFile))
             {
                 try
                 {
-                    _dbCredentials = File.ReadAllText(credentialsFile).Split('\n', StringSplitOptions.RemoveEmptyEntries);
-                    _hasCredentials = true;
+                    _dbCredentials = File.ReadAllText(credentialsFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    if (_dbCredentials.Length > 1)
+                    {
+                        _hasCredentials = true;
+                    }
                 }
-                catch (IOException)
-                {
-                    _hasCredentials = false;
-                }
-            }
-            else
-            {
-                _hasCredentials = false;
+                catch (IOException) { }
             }
 
-            foreach (string key in Languages.Keys)
+            foreach (string key in Constants.Languages.Keys)
             {
                 Locales[key] = new CultureInfo(key);
             }
         }
 
+        ~FergunClient()
+        {
+            _autoClear.Dispose();
+        }
+
         public async Task InitializeAsync()
         {
-            if (IsLinux)
+            if (_hasCredentials)
             {
-                if (_hasCredentials)
-                {
-                    Database = new FergunDB("FergunDB", _dbCredentials[0], _dbCredentials[1]);
-                }
-                else
-                {
-                    Console.Write("Enter DB User: ");
-                    string user = Console.ReadLine();
-                    Console.Write("Enter DB Password: ");
-                    string password = ReadPassword();
-                    Console.Write("Enter DB host (leave empty for local): ");
-                    string host = Console.ReadLine();
-                    Database = new FergunDB("FergunDB", user, password, host);
-                }
+                Database = new FergunDB("FergunDB", _dbCredentials[0], _dbCredentials[1], _dbCredentials.Length > 2 ? _dbCredentials[2] : null);
             }
             else
             {
-                Database = new FergunDB("FergunDB");
+                Console.Write("Enter DB User (leave emtpy if there's no auth): ");
+                string user = Console.ReadLine();
+                Console.Write("Enter DB Password (leave emtpy if there's no auth): ");
+                string password = ReadPassword();
+                Console.Write("Enter DB host (leave empty for local): ");
+                string host = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(user) && string.IsNullOrEmpty(password) && string.IsNullOrEmpty(host))
+                {
+                    Database = new FergunDB("FergunDB");
+                }
+                else
+                {
+                    Database = new FergunDB("FergunDB", user, password, host);
+                }
             }
 
             if (Database.IsConnected)
             {
-                Console.WriteLine("Connected to database.");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connected to the database successfully."));
             }
             else
             {
-                Console.WriteLine("Could not connect to the database.");
-                Console.Read();
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Database", "Could not connect to the database. Press any key to exit."));
+                Console.ReadKey(true);
                 Environment.Exit(1);
             }
-            //Guilds = DB.LoadRecords<Guild>("Guilds");
-            //if (IsLinux)
-            //{
-            //    await UpdateLavalink();
-            //}
+
+            await UpdateLavalinkAsync();
             await StartLavalinkAsync();
 
             await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
@@ -241,14 +157,13 @@ namespace Fergun
             _client.UserLeft += UserLeft;
             _client.UserBanned += UserBanned;
             _client.UserUnbanned += UserUnbanned;
-            //_client.ReactionAdded += HandleReactionAdded;
-            //_client.ReactionRemoved += HandleReactionRemoved;
 
             _services = SetupServices();
 
             // Initialize the music service
             await _services.GetRequiredService<MusicService>().InitializeAsync();
 
+            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
             _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
             await _cmdHandlingService.InitializeAsync();
 
@@ -263,11 +178,17 @@ namespace Fergun
             await Task.Delay(-1);
         }
 
-        private static async Task StartLavalinkAsync()
+        private async Task StartLavalinkAsync()
         {
             Process[] processList = Process.GetProcessesByName("java");
             if (processList.Length == 0)
             {
+                string lavalinkFile = Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar");
+                if (!File.Exists(lavalinkFile))
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Lavalink", "Lavalink.jar not found."));
+                    return;
+                }
                 ProcessStartInfo process = new ProcessStartInfo
                 {
                     FileName = "java",
@@ -294,19 +215,13 @@ namespace Fergun
             }
         }
 
-        private static async Task UpdateLavalinkAsync()
+        private async Task UpdateLavalinkAsync()
         {
-            string projectDir;
-            if (IsLinux)
-            {
-                projectDir = Environment.CurrentDirectory;
-            }
-            else
-            {
-                projectDir = new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.FullName;
-            }
-            string projectLavalinkDir = Path.Combine(projectDir, "Lavalink");
-            string buildLavalinkDir = Path.Combine(AppContext.BaseDirectory, "Lavalink");
+            string lavalinkDir = Path.Combine(AppContext.BaseDirectory, "Lavalink");
+            string lavalinkFile = Path.Combine(lavalinkDir, "Lavalink.jar");
+            string versionFile = Path.Combine(lavalinkDir, "VERSION.txt");
+
+            if (!File.Exists(lavalinkFile)) return;
             string remoteVersion;
             try
             {
@@ -317,76 +232,88 @@ namespace Fergun
             }
             catch (WebException e)
             {
-                Console.WriteLine($"An error occurred while downloading VERSION.txt: {e.Message}\nSkipping the update...");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading VERSION.txt: {e.Message}\nSkipping the update..."));
                 return;
             }
-            if (File.Exists($"{buildLavalinkDir}/VERSION.txt"))
+
+            string localVersion;
+            if (File.Exists(versionFile))
             {
-                string localVersion;
                 try
                 {
-                    localVersion = File.ReadAllText($"{buildLavalinkDir}/VERSION.txt");
+                    localVersion = File.ReadAllText(versionFile);
                 }
                 catch (IOException e)
                 {
-                    Console.WriteLine($"An error occurred while reading VERSION.txt: {e.Message}\nSkipping the update...");
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while reading local VERSION.txt: {e.Message}\nSkipping the update..."));
                     return;
                 }
                 if (localVersion != remoteVersion)
                 {
-                    Console.WriteLine("A new dev build of Lavalink was found.");
-                    Process[] processList = Process.GetProcessesByName("java");
-                    if (processList.Length != 0)
-                    {
-                        Console.WriteLine($"There's an instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\nSkipping the update...");
-                        return;
-                    }
-                    //foreach (var process in processList)
-                    //{
-                    //    process.Kill();
-                    //}
-                    try
-                    {
-                        File.Delete($"{buildLavalinkDir}/Lavalink.jar");
-                        File.Delete($"{projectLavalinkDir}/Lavalink.jar");
-                    }
-                    catch (IOException e)
-                    {
-                        Console.WriteLine($"An error occurred while deleting the old builds: {e.Message}\nSkipping the update...");
-                        return;
-                    }
-                    Console.WriteLine("Downloading the new dev build of Lavalink...");
-                    try
-                    {
-                        using (WebClient wc = new WebClient())
-                        {
-                            await wc.DownloadFileTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1", $"{buildLavalinkDir}/Lavalink.jar");
-                        }
-                    }
-                    catch (WebException e)
-                    {
-                        Console.WriteLine($"An error occurred while downloading the new dev build: {e.Message}\nSkipping the update...");
-                        return;
-                    }
-                    File.Copy($"{buildLavalinkDir}/Lavalink.jar", $"{projectLavalinkDir}/Lavalink.jar");
-                    Console.WriteLine("Finished updating Lavalink.");
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "A new dev build has been found."));
                 }
                 else
                 {
-                    Console.WriteLine("Lavalink is up to date.");
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Lavalink is up to date."));
+                    return;
                 }
             }
             else
             {
-                Console.WriteLine("VERSION.txt not found. Not possible to compare the local build with the remote one.\nSkipping the update...");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "Local VERSION.txt not found or can't be read. Asuming the remote version is newer than the local..."));
             }
-            File.WriteAllText($"{projectLavalinkDir}/VERSION.txt", remoteVersion);
-            File.WriteAllText($"{buildLavalinkDir}/VERSION.txt", remoteVersion);
+
+            Process[] processList = Process.GetProcessesByName("java");
+            if (processList.Length != 0)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\nSkipping the update..."));
+                return;
+            }
+
+            try
+            {
+                File.Move(lavalinkFile, Path.ChangeExtension(lavalinkFile, ".jar.bak"), true);
+            }
+            catch (IOException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while renaming local Lavalink.jar: {e.Message}\nSkipping the update..."));
+                return;
+            }
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Downloading the new dev build of Lavalink..."));
+            try
+            {
+                using (WebClient wc = new WebClient())
+                {
+                    await wc.DownloadFileTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1", lavalinkFile);
+                }
+            }
+            catch (WebException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading the new dev build: {e.Message}"));
+                try
+                {
+                    if (File.Exists(lavalinkFile))
+                    {
+                        File.Delete(lavalinkFile);
+                    }
+                    File.Move(lavalinkFile, Path.ChangeExtension(lavalinkFile, ".jar"));
+                }
+                catch (IOException) { }
+                return;
+            }
+            try
+            {
+                File.WriteAllText(versionFile, remoteVersion);
+            }
+            catch (IOException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while updating local VERSION.txt: {e.Message}"));
+            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Finished updating Lavalink."));
         }
 
-        private IServiceProvider SetupServices()
-        {
-            return new ServiceCollection()
+        private IServiceProvider SetupServices() => new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_cmdService)
                 .AddSingleton(_logService)
@@ -403,9 +330,8 @@ namespace Fergun
                 .AddSingleton<MusicService>()
                 .AddSingleton(new ReliabilityService(_client, x => _ = _logService.LogAsync(x)))
                 .AddSingleton(new CommandCacheService(_client, CommandCacheService.UNLIMITED,
-                message => _ = _cmdHandlingService.HandleCommandAsync(message), log => _ = _logService.LogAsync(log), 14400000, 4))
+                message => _ = _cmdHandlingService.HandleCommandAsync(message), log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval, Constants.MaxCommandCacheLongevity))
                 .BuildServiceProvider();
-        }
 
         private static string ReadPassword()
         {
@@ -415,6 +341,7 @@ namespace Fergun
                 var keyInfo = Console.ReadKey(true);
                 if (keyInfo.Key == ConsoleKey.Enter)
                 {
+                    Console.WriteLine();
                     return password;
                 }
                 password += keyInfo.KeyChar;
@@ -427,14 +354,14 @@ namespace Fergun
             {
                 if (!IsDebugMode)
                 {
-                    InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)InvitePermissions}";
+                    InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)Constants.InvitePermissions}";
 
                     DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
 
                     DblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
                     _discordBots = new DiscordBotsApi(FergunConfig.DiscordBotsApiToken);
 
-                    await TryUpdateBotListStatsAsync();
+                    await UpdateBotListStatsAsync();
                 }
                 Uptime = DateTime.UtcNow;
                 _firstConnect = false;
@@ -442,83 +369,71 @@ namespace Fergun
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
         }
 
+        private void OnTimerFired(object state)
+        {
+            var purge = MessageCache.Where(p =>
+            {
+                TimeSpan difference = DateTimeOffset.UtcNow - p.Key.CreatedAt;
+                return difference.TotalHours >= Constants.MaxMessageCacheLongevity;
+            }).ToList();
+
+            var removed = purge.Where(p => MessageCache.TryRemove(p.Key, out _));
+
+            _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed.Count()} deleted / edited messages from the cache."));
+        }
+
         private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
         {
-            if (after == null || after.Author.IsBot || after.Content == null)
+            if (after == null || after.Source != MessageSource.User || string.IsNullOrEmpty(after.Content))
             {
                 return;
             }
 
             var before = await cachedbefore.GetOrDownloadAsync();
-            if (before == null || before.Content == null || before.Content == after.Content)
+            if (before == null || string.IsNullOrEmpty(before.Content) || before.Content == after.Content)
             {
                 return;
             }
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"Message edited in " + (channel is IGuildChannel ? $"{(channel as IGuildChannel).Guild.Name}/" : "") + $"{channel.Name}/{before.Author}: {before} -> {after}"));
-            _ = MessageUpdatedHandler(before);
+            MessageCache.TryAdd(before, false);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgUpdated", $"Message edited in {before.Display()}: {before} -> {after}"));
         }
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
             var message = await cache.GetOrDownloadAsync();
-            if (message == null || message.Author.IsBot || string.IsNullOrEmpty(message.Content))
+            if (message == null || message.Source != MessageSource.User)
             {
                 return;
             }
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"Message deleted in " + (channel is IGuildChannel ? $"{(channel as IGuildChannel).Guild.Name}/" : "") + $"{channel.Name}/{message.Author}: {message.Content}"));
-            _ = MessageDeletedHandler(message);
+
+            MessageCache.TryAdd(message, true);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"Message deleted in {message.Display()}: {(string.IsNullOrEmpty(message.Content) ? message.Attachments.FirstOrDefault()?.Url : message.Content)}"));
         }
 
         //private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
         //{
-        //    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"{msgs.Count} messages deleted in " + (channel is IGuildChannel ? $"{(channel as IGuildChannel).Guild.Name}/" : "") + $"{channel.Name}"));
+        //    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
         //}
 
         private async Task UserJoined(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserLeft(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserBanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
         }
 
         private async Task UserUnbanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
-        }
-
-        private static async Task MessageUpdatedHandler(IMessage message)
-        {
-            lock (_messageLock)
-            {
-                EditedMessages.Add(message);
-            }
-            await Task.Delay(TimeSpan.FromMinutes(10));
-            lock (_messageLock)
-            {
-                EditedMessages.Remove(message);
-            }
-        }
-
-        private static async Task MessageDeletedHandler(IMessage message)
-        {
-            lock (_messageLock)
-            {
-                DeletedMessages.Add(message);
-            }
-            await Task.Delay(TimeSpan.FromMinutes(10));
-            lock (_messageLock)
-            {
-                DeletedMessages.Remove(message);
-            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
         }
 
         private async Task JoinedGuild(SocketGuild guild)
@@ -526,15 +441,32 @@ namespace Fergun
             var blacklistedGuild = Database.Find<BlacklistEntity>("Blacklist", x => x.ID == guild.Id);
             if (blacklistedGuild != null)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"Someone tried to add me to the blacklisted guild \"{guild.Name}\" ({guild.Id})"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "JoinGuild", $"Someone tried to add me to the blacklisted guild \"{guild.Name}\" ({guild.Id})"));
                 await guild.LeaveAsync();
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"Bot has joined the guild \"{guild.Name}\" ({guild.Id})"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "JoinGuild", $"Bot has joined the guild \"{guild.Name}\" ({guild.Id})"));
+                if (guild.PreferredLocale != null)
+                {
+                    string preferredLanguage = Locales.FirstOrDefault(x => x.Value.TwoLetterISOLanguageName == guild.PreferredCulture.TwoLetterISOLanguageName).Key;
+                    if (preferredLanguage != null)
+                    {
+                        if (preferredLanguage != FergunConfig.DefaultLanguage)
+                        {
+                            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "JoinGuild", $"A preferred language ({preferredLanguage}) was found in the guild {guild.Id}. Saving the preferred language in the database..."));
+
+                            var config = new GuildConfig(guild.Id)
+                            {
+                                Language = preferredLanguage
+                            };
+                            Database.UpdateRecord("Guilds", config);
+                        }
+                    }
+                }
                 if (!IsDebugMode)
                 {
-                    await TryUpdateBotListStatsAsync();
+                    await UpdateBotListStatsAsync();
                 }
             }
         }
@@ -544,15 +476,21 @@ namespace Fergun
             var blacklistedGuild = Database.Find<BlacklistEntity>("Blacklist", x => x.ID == guild.Id);
             if (blacklistedGuild == null)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"Bot has left the guild \"{guild.Name}\" ({guild.Id})"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Bot has left the guild \"{guild.Name}\" ({guild.Id})"));
+                var config = Database.Find<GuildConfig>("Guilds", x => x.ID == guild.Id);
+                if (config != null)
+                {
+                    Database.DeleteRecord("Guilds", config);
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Deleted config of guild {guild.Id}"));
+                }
                 if (!IsDebugMode)
                 {
-                    await TryUpdateBotListStatsAsync();
+                    await UpdateBotListStatsAsync();
                 }
             }
         }
 
-        private async Task TryUpdateBotListStatsAsync()
+        private async Task UpdateBotListStatsAsync()
         {
             try
             {
@@ -562,30 +500,8 @@ namespace Fergun
             }
             catch (Exception e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not update the DBL/DiscordBots bot stats.", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not update the DBL/DiscordBots bot stats", e));
             }
         }
-
-        //private async Task HandleReactionAdded(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction)
-        //{
-        //    var msg = await cache.GetOrDownloadAsync();
-        //    if (msg == null || !reaction.User.IsSpecified || reaction.User.Value.IsBot)
-        //    {
-        //        return;
-        //    }
-        //    IUser user = reaction.User.Value;
-        //    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{user.Username}#{user.Discriminator}\" added a reaction \"{reaction.Emote.Name}\"" +
-        //        $" to {msg.Author}'s message."));
-        //}
-
-        //private async Task HandleReactionRemoved(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction)
-        //{
-        //    var msg = await cache.GetOrDownloadAsync();
-        //    if (msg != null && reaction.User.IsSpecified && !reaction.User.Value.IsBot)
-        //    {
-        //        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Rest", $"User \"{reaction.User.Value.Username}#{reaction.User.Value.Discriminator}\" reaction \"{reaction.Emote.Name}\"" +
-        //            $" was removed from {msg.Author}'s message."));
-        //    }
-        //}
     }
 }

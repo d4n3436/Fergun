@@ -56,7 +56,7 @@ namespace Fergun.Extensions
 
         public static bool ContainsAny(this string input, IEnumerable<string> containsKeywords, StringComparison comparisonType)
         {
-            return containsKeywords.Any(keyword => input.IndexOf(keyword, comparisonType) >= 0);
+            return containsKeywords.Any(keyword => input.Contains(keyword, comparisonType));
         }
 
         public static bool IsBase64(this string s)
@@ -70,35 +70,31 @@ namespace Fergun.Extensions
             return string.IsNullOrEmpty(s) ? s : char.ToUpperInvariant(s[0]) + (s.Length > 1 ? s.Substring(1).ToLowerInvariant() : "");
         }
 
-        public static IEnumerable<string> SplitToLines(this string stringToSplit, int maximumLineLength)
+        public static IEnumerable<string> SplitBySeparatorWithLimit(this string text, char separator, int maxLength)
         {
-            var words = stringToSplit.Split(' ').Concat(new[] { "" });
-            return words
-                .Skip(1)
-                .Aggregate(
-                words.Take(1).ToList(),
-                        (a, w) =>
-                        {
-                            var last = a.Last();
-                            while (last.Length > maximumLineLength)
-                            {
-                                a[a.Count - 1] = last.Substring(0, maximumLineLength);
-                                last = last.Substring(maximumLineLength);
-                                a.Add(last);
-                            }
-                            var test = last + " " + w;
-                            if (test.Length > maximumLineLength)
-                            {
-                                a.Add(w);
-                            }
-                            else
-                            {
-                                a[a.Count - 1] = test;
-                            }
-                            return a;
-                        });
+            string current = "";
+            List<string> list = new List<string>();
+
+            foreach (var part in text.Split(separator))
+            {
+                if (part.Length + current.Length >= maxLength)
+                {
+                    list.Add(current);
+                    current = part;
+                }
+                else
+                {
+                    current += part + separator;
+                }
+            }
+            if (!string.IsNullOrEmpty(current))
+            {
+                list.Add(current);
+            }
+
+            return list;
         }
-        
+
         public static int ToColor(this string str)
         {
             int hash = 0;

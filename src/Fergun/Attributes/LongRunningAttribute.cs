@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.CommandCache;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Fergun.Attributes
 {
     /// <summary>
-    /// An attributes that sends the typing state to the current channel (useful for long-running commands).
+    /// An attribute that sends the typing state to the current channel (useful for long-running commands).
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class LongRunningAttribute : PreconditionAttribute
@@ -25,7 +24,7 @@ namespace Fergun.Attributes
                 {
                     x.Content = null;
                     x.Embed = new EmbedBuilder()
-                    .WithDescription($"{FergunClient.LoadingEmote} {Localizer.Locate("Loading", context.Channel)}")
+                    .WithDescription($"{Constants.LoadingEmote} {Localizer.Locate("Loading", context.Channel)}")
                     .WithColor(FergunConfig.EmbedColor)
                     .Build();
                 });

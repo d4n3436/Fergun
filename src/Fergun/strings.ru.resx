@@ -277,7 +277,7 @@
     <value>Вложение не является изображением.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
-    <value>Не удалось найти ни одного URL изображения или вложения в последних 50 сообщениях.</value>
+    <value>Не удалось найти ни одного URL изображения или вложения в последних {0} сообщениях.</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>Ключевое слово (а) для поиска.</value>
@@ -310,7 +310,7 @@
     <value>Определяет изображение с помощью Microsoft CaptionBot.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>Если не указать URL-адрес, будет выполнена команда для поиска последних 100 сообщений для ссылки или вложения.</value>
+    <value>Не указав URL заставит команду для поиска последних х сообщений в кэше ссылки или вложения.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>URL не является допустимым изображением.</value>
@@ -433,7 +433,7 @@
     <value>Пользователь, чтобы получить информацию от.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
-    <value>Ищет статью в Википедии</value>
+    <value>Ищет статью в Википедии.</value>
   </data>
 	<data name="wikipediaParam1" xml:space="preserve">
     <value>Ключевое слово (а) для поиска.</value>
@@ -960,7 +960,7 @@
     <value>Подождите несколько секунд, прежде чем использовать эту команду!</value>
   </data>
 	<data name="snipeParam1" xml:space="preserve">
-    <value>Конкретный канал, чтобы стрелять</value>
+    <value>Конкретный канал, чтобы стрелять.</value>
   </data>
 	<data name="IDNotFound" xml:space="preserve">
     <value>Идентификатор не найден.</value>
@@ -1952,16 +1952,16 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ​​ошибка в `` resize` и invert`, вызвавшие команды, чтобы потерпеть неудачу, потому что Раздор показывает неверный предварительный просмотр изображения в некоторых URLs.</value>
   </data>
 	<data name="RatelimitUses" xml:space="preserve">
-		<value>{0} использует каждый {1}</value>
-	</data>
+    <value>{0} использует каждый {1}</value>
+  </data>
 	<data name="Requirements" xml:space="preserve">
-		<value>Требования</value>
-	</data>
+    <value>Требования</value>
+  </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
-		<value>Показывает статистику команд.</value>
-	</data>
+    <value>Показывает статистику команд.</value>
+  </data>
 	<data name="Changelog1.3.6" xml:space="preserve">
-		<value>- Новая команда: `cmdstats`.
+    <value>- Новая команда: `cmdstats`.
 
 - Теперь кнопки нумерации `first` и `last` в `img` и `urban` будут появляться только при наличии 3 или более страниц, а кнопка `jump` - при наличии 4 или более страниц.
 - Теперь Fergun будет отправлять прямое сообщение, чтобы предупредить пользователя, когда у бота нет минимально необходимых разрешений в текущем канале (`SendMessages` и `EmbedLinks`).
@@ -1971,8 +1971,149 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ошибка в `wikipedia`, из-за которой команда не выполнялась, поскольку в некоторых случаях запрос не был закодирован.
 - Исправлена ошибка в `screenshot`, которая приводила к сбою команды, поскольку URL был закодирован по ошибке.
 - Исправлена ошибка в модуле AI Dungeon, которая приводила к сбою команд при одновременном использовании разных идентификаторов.</value>
-	</data>
+  </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-		<value>Команда Статистика (с 02/21/2020)</value>
+    <value>Команда Статистика (с 02/21/2020)</value>
+  </data>
+	<data name="lmgtfySummary" xml:space="preserve">
+    <value>Позвольте мне Google, что для Вас.</value>
+  </data>
+	<data name="lmgtfyParam1" xml:space="preserve">
+    <value>Ключевое слово (а) для поиска.</value>
+  </data>
+	<data name="pasteSummary" xml:space="preserve">
+    <value>Закачивает текст Hastebin.</value>
+  </data>
+	<data name="pasteParam1" xml:space="preserve">
+    <value>Текст для загрузки.</value>
+  </data>
+	<data name="Uploading" xml:space="preserve">
+    <value>Загрузка...</value>
+  </data>
+	<data name="bigsnipeSummary" xml:space="preserve">
+    <value>Показывает последние удаленные сообщения в текущем канале или указанный.</value>
+  </data>
+	<data name="bigsnipeParam1" xml:space="preserve">
+    <value>Конкретный канал бекас.</value>
+  </data>
+	<data name="MinutesAgo" xml:space="preserve">
+    <value>{0} минут назад</value>
+  </data>
+	<data name="Attachment" xml:space="preserve">
+    <value>прикрепление</value>
+  </data>
+	<data name="bigeditsnipeSummary" xml:space="preserve">
+    <value>Показывает последние отредактированные сообщения в текущем канале или указанный.</value>
+  </data>
+	<data name="bigeditsnipeParam1" xml:space="preserve">
+    <value>Конкретный канал бекас.</value>
+  </data>
+	<data name="TextChannel" xml:space="preserve">
+    <value>Текст канал</value>
+  </data>
+	<data name="AnnouncementChannel" xml:space="preserve">
+    <value>Объявление канала</value>
+  </data>
+	<data name="VoiceChannel" xml:space="preserve">
+    <value>речевой канал</value>
+  </data>
+	<data name="DMChannel" xml:space="preserve">
+    <value>DM Channel</value>
+  </data>
+	<data name="Bitrate" xml:space="preserve">
+    <value>Bitrate</value>
+  </data>
+	<data name="UserLimit" xml:space="preserve">
+    <value>Лимит пользователя</value>
+  </data>
+	<data name="NoLimit" xml:space="preserve">
+    <value>Нет ограничений</value>
+  </data>
+	<data name="disableSummary" xml:space="preserve">
+    <value>Отключает команду локально (для этого сервера).</value>
+  </data>
+	<data name="disableParam1" xml:space="preserve">
+    <value>Имя команды, чтобы отключить.</value>
+  </data>
+	<data name="NonDisableable" xml:space="preserve">
+    <value>{0} не может быть отключена!</value>
+  </data>
+	<data name="AlreadyDisabled" xml:space="preserve">
+    <value>{0} уже отключена!</value>
+  </data>
+	<data name="CommandDisabled" xml:space="preserve">
+    <value>Команда {0} была отключена в этом сервере.</value>
+  </data>
+	<data name="enableSummary" xml:space="preserve">
+    <value>Включает команду локально (для этого сервера).</value>
+  </data>
+	<data name="enableParam1" xml:space="preserve">
+    <value>Имя команды, чтобы включить.</value>
+  </data>
+	<data name="AlreadyEnabled" xml:space="preserve">
+    <value>{0} уже включен!</value>
+  </data>
+	<data name="CommandEnabled" xml:space="preserve">
+    <value>Команда {0} была включена в этом сервере.$$</value>
+  </data>
+	<data name="globaldisableSummary" xml:space="preserve">
+    <value>Отключение команды глобально (на всех серверах).$$</value>
+  </data>
+	<data name="globaldisableParam1" xml:space="preserve">
+    <value>Имя команды, чтобы отключить глобально.</value>
+  </data>
+	<data name="globaldisableParam2" xml:space="preserve">
+    <value>Причина использования.</value>
+  </data>
+	<data name="AlreadyDisabledGlobally" xml:space="preserve">
+    <value>{0} уже отключена во всем мире!</value>
+  </data>
+	<data name="CommandDisabledGlobally" xml:space="preserve">
+    <value>Команда {0} была отключена на всех серверах.</value>
+  </data>
+	<data name="globalenableSummary" xml:space="preserve">
+    <value>Включает команду глобально (на всех серверах).</value>
+  </data>
+	<data name="globalenableParam1" xml:space="preserve">
+    <value>Имя команды, чтобы включить в глобальном масштабе.</value>
+  </data>
+	<data name="AlreadyEnabledGlobally" xml:space="preserve">
+    <value>{0} уже включена в глобальном масштабе!</value>
+  </data>
+	<data name="CommandEnabledGlobally" xml:space="preserve">
+    <value>Команда {0} была включена во всех серверах.</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>причина</value>
+  </data>
+	<data name="LeftVCInactivity" xml:space="preserve">
+		<value>Я оставил голосовой канал из-за неактивности.</value>
+	</data>
+	<data name="MusicPlayerShutdownWarning" xml:space="preserve">
+		<value>Fergun будет перезапущена / выключена через несколько секунд, и ваш музыкальный проигрыватель будет закрыт. Приносим извинения за неудобства.</value>
+	</data>
+	<data name="Warning" xml:space="preserve">
+		<value>Предупреждение</value>
+	</data>
+	<data name="PublicIdNull" xml:space="preserve">
+		<value>Общественность ID этой авантюры является недействительным. Пожалуйста, создайте новое приключение.</value>
+	</data>
+	<data name="Changelog1.4" xml:space="preserve">
+		<value>- Новые команды: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable`} и `globaldisable`.
+
+- Теперь, когда Fergun присоединяется к серверу и у этого сервера есть предпочтительный языковой стандарт, этот языковой стандарт будет сохранен в конфигурации Fergun для этого сервера.
+- Теперь, когда Фергун покидает сервер, эта конфигурация сервера будет удалена из базы данных.
+- Теперь Фергун выйдет из голосового канала, когда все пользователи покинут этот канал.
+- Теперь Fergun будет отправлять предупреждение всем серверам, на которых есть музыкальный проигрыватель, перед перезапуском / выключением.
+- Теперь команды, использующие Hastebin и не загружающие его содержимое, будут отображаться в сообщении, но урезаны.
+
+- Добавлена ​​поддержка отключения команд на уровне гильдии.
+- Добавлена ​​поддержка голосовых каналов, каналов категорий и каналов DM в `channelinfo`.
+- Добавлена ​​поддержка удаленных вложений в `snipe` (bigsnipe` поставляется с этой функцией в выпуске).
+
+- Обновлен скребок `lyrics` и исправлена ​​ошибка вырезания текста.
+- Обновлены модуль AI Dungeon и оболочка API.
+
+- Исправлена ​​ошибка, из-за которой некоторые команды модерации не выполнялись из-за неправильного расчета иерархии пользователей.</value>
 	</data>
 </root>

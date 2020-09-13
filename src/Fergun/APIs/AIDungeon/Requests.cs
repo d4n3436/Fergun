@@ -138,9 +138,9 @@ namespace Fergun.APIs.AIDungeon
     {
         public CreationRequest(uint scenarioId, string prompt = null)
         {
-            var Vars = new CreationVariables
+            var Vars = new PayloadVariables
             {
-                Id = $"scenario:{scenarioId}"
+                ScenarioId = $"scenario:{scenarioId}"
             };
             if (prompt != null)
             {
@@ -154,19 +154,10 @@ namespace Fergun.APIs.AIDungeon
         public string OperationName { get; set; } = null;
 
         [JsonProperty("variables")]
-        public CreationVariables Variables { get; set; }
+        public PayloadVariables Variables { get; set; }
 
         [JsonProperty("query")]
         public string Query { get; set; } = "mutation ($id: String!, $prompt: String) {\n  createAdventureFromScenarioId(id: $id, prompt: $prompt) {\n    id\n    contentType\n    contentId\n    title\n    description\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    historyList\n    __typename\n  }\n}\n";
-    }
-
-    public class CreationVariables
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
-        [JsonProperty("prompt", NullValueHandling = NullValueHandling.Ignore)]
-        public string Prompt { get; set; }
     }
 
     public class AdventureListRequest
@@ -261,7 +252,7 @@ namespace Fergun.APIs.AIDungeon
         {
             var inputData = new InputData
             {
-                Id = $"adventure:{adventureId}",
+                PublicId = $"adventure:{adventureId}",
                 Type = action.ToString().ToLowerInvariant()
             };
 
@@ -281,7 +272,7 @@ namespace Fergun.APIs.AIDungeon
                 // Alter command is special :)
                 Query = "mutation ($input: ContentActionInput) {\n  doAlterAction(input: $input) {\n    id\n    historyList\n    __typename\n  }\n}\n";
             }
-            Variables = new ActionVariables
+            Variables = new PayloadVariables
             {
                 Input = inputData
             };
@@ -291,42 +282,95 @@ namespace Fergun.APIs.AIDungeon
         public string OperationName { get; set; } = null;
 
         [JsonProperty("variables")]
-        public ActionVariables Variables { get; set; }
+        public PayloadVariables Variables { get; set; }
 
         [JsonProperty("query")]
         public string Query { get; set; } = "mutation ($input: ContentActionInput) {\n  doContentAction(input: $input)\n}\n";
     }
 
-    public class ActionVariables
+    public class PayloadVariables
     {
-        [JsonProperty("input")]
+        [JsonProperty("publicId", NullValueHandling = NullValueHandling.Ignore)]
+        public string PublicId { get; set; }
+
+        [JsonProperty("scenarioId", NullValueHandling = NullValueHandling.Ignore)]
+        public string ScenarioId { get; set; }
+
+        [JsonProperty("input", NullValueHandling = NullValueHandling.Ignore)]
         public InputData Input { get; set; }
+
+        [JsonProperty("prompt", NullValueHandling = NullValueHandling.Ignore)]
+        public string Prompt { get; set; }
     }
 
     public class InputData
     {
-        [JsonProperty("actionId", NullValueHandling = NullValueHandling.Ignore)]
-        public string ActionId { get; set; }
+        [JsonProperty("publicId")]
+        public string PublicId { get; set; }
+
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
+        public string Type { get; set; }
 
         [JsonProperty("text", NullValueHandling = NullValueHandling.Ignore)]
         public string Text { get; set; }
 
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        [JsonProperty("choicesMode", NullValueHandling = NullValueHandling.Ignore)]
+        public bool? ChoicesMode { get; set; }
 
+        [JsonProperty("memory", NullValueHandling = NullValueHandling.Ignore)]
+        public string Memory { get; set; }
 
-        [JsonProperty("id")]
-        public string Id { get; set; }
+        [JsonProperty("actionId", NullValueHandling = NullValueHandling.Ignore)]
+        public string ActionId { get; set; }
     }
 
-    public class WebSocketActionRequest
+    public class WebSocketRequest
     {
-        public WebSocketActionRequest(uint adventureId, ActionType action, string text = "", uint actionId = 0)
+        public WebSocketRequest(string id, RequestType requestType, string prompt = null)
+        {
+            Payload = new WebSocketPayload();
+            if (requestType == RequestType.CreateAdventure)
+            {
+                Payload.Variables = new PayloadVariables
+                {
+                    ScenarioId = id,
+                    Prompt = prompt
+                };
+                Payload.Query = "mutation ($scenarioId: String, $prompt: String) {\n  createAdventure(scenarioId: $scenarioId, prompt: $prompt) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n";
+            }
+            else if (requestType == RequestType.GetScenario)
+            {
+                Payload.Variables = new PayloadVariables
+                {
+                    PublicId = id
+                };
+                Payload.Query = "query ($publicId: String) {\n  user {\n    ...DisplayFragment\n    __typename\n  }\n  scenario(publicId: $publicId) {\n    ...PlayScenarioFragment\n    __typename\n  }\n}\n\nfragment PlayScenarioFragment on Scenario {\n  id\n  prompt\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n\nfragment DisplayFragment on User {\n  id\n  gameSettings {\n    id\n    accessibilityMode\n    ...StoryTextFragment\n    __typename\n  }\n  __typename\n}\n\nfragment StoryTextFragment on GameSettings {\n  id\n  textSpeed\n  textSize\n  textFont\n  __typename\n}\n";
+            }
+            else if (requestType == RequestType.GetAdventure)
+            {
+                Payload.Variables = new PayloadVariables
+                {
+                    PublicId = id
+                };
+                Payload.Query = "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    playPublicId\n    publicId\n    thirdPerson\n    actions {\n      id\n      text\n      __typename\n    }\n    ...AdventureControllerFragment\n    ...AudioPlayerFragment\n    ...PromptReviewFragment\n    __typename\n  }\n}\n\nfragment AdventureControllerFragment on Adventure {\n  id\n  actionLoading\n  error\n  gameState\n  thirdPerson\n  userId\n  characters {\n    id\n    userId\n    name\n    __typename\n  }\n  ...ActionControllerFragment\n  ...AlterControllerFragment\n  ...QuestControllerFragment\n  ...RememberControllerFragment\n  ...SafetyControllerFragment\n  ...ShareControllerFragment\n  __typename\n}\n\nfragment ActionControllerFragment on Adventure {\n  id\n  publicId\n  actionCount\n  choices\n  error\n  mode\n  thirdPerson\n  userId\n  characters {\n    id\n    userId\n    name\n    __typename\n  }\n  ...DeathControllerFragment\n  __typename\n}\n\nfragment DeathControllerFragment on Adventure {\n  id\n  publicId\n  mode\n  died\n  __typename\n}\n\nfragment AlterControllerFragment on Adventure {\n  id\n  publicId\n  mode\n  actions {\n    id\n    text\n    __typename\n  }\n  __typename\n}\n\nfragment QuestControllerFragment on Adventure {\n  id\n  actions {\n    id\n    text\n    __typename\n  }\n  quests {\n    id\n    text\n    completed\n    active\n    actionGainedId\n    actionCompletedId\n    __typename\n  }\n  __typename\n}\n\nfragment RememberControllerFragment on Adventure {\n  id\n  memory\n  __typename\n}\n\nfragment SafetyControllerFragment on Adventure {\n  id\n  hasBannedWord\n  hasUserBannedWord\n  __typename\n}\n\nfragment ShareControllerFragment on Adventure {\n  id\n  userId\n  thirdPerson\n  playPublicId\n  characters {\n    id\n    userId\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment AudioPlayerFragment on Adventure {\n  id\n  music\n  actions {\n    id\n    text\n    __typename\n  }\n  __typename\n}\n\nfragment PromptReviewFragment on Adventure {\n  id\n  actionCount\n  __typename\n}\n";
+            }
+            else if (requestType == RequestType.DeleteAdventure)
+            {
+                Payload.Variables = new PayloadVariables
+                {
+                    PublicId = id
+                };
+                Payload.Query = "mutation ($publicId: String) {\n  deleteAdventure(publicId: $publicId) {\n    publicId\n    deletedAt\n    __typename\n  }\n}\n";
+            }
+        }
+
+        public WebSocketRequest(string publicId, ActionType action, string text = "", uint actionId = 0)
         {
             var inputData = new InputData
             {
-                Id = $"adventure:{adventureId}",
-                Type = action.ToString().ToLowerInvariant()
+                PublicId = publicId,
+                Type = action.ToString().ToLowerInvariant(),
+                ChoicesMode = false
             };
 
             if (!string.IsNullOrEmpty(text) &&
@@ -343,12 +387,13 @@ namespace Fergun.APIs.AIDungeon
                 inputData.ActionId = actionId.ToString();
             }
 
-            Payload = new WebSocketActionPayload
+            Payload = new WebSocketPayload
             {
-                Variables = new ActionVariables
+                Variables = new PayloadVariables
                 {
                     Input = inputData
-                }
+                },
+                Query = "mutation ($input: ActionInput) {\n  playerAction(input: $input) {\n    actions {\n      id\n      text\n      __typename\n    }\n    ...ActionControllerFragment\n    __typename\n  }\n}\n\nfragment ActionControllerFragment on Adventure {\n  id\n  publicId\n  actionCount\n  choices\n  error\n  mode\n  thirdPerson\n  userId\n  characters {\n    id\n    userId\n    name\n    __typename\n  }\n  ...DeathControllerFragment\n  __typename\n}\n\nfragment DeathControllerFragment on Adventure {\n  id\n  publicId\n  mode\n  died\n  __typename\n}\n"
             };
         }
 
@@ -359,13 +404,13 @@ namespace Fergun.APIs.AIDungeon
         public string Type { get; set; } = "start";
 
         [JsonProperty("payload")]
-        public WebSocketActionPayload Payload { get; set; }
+        public WebSocketPayload Payload { get; set; }
     }
 
-    public class WebSocketActionPayload
+    public class WebSocketPayload
     {
         [JsonProperty("variables")]
-        public ActionVariables Variables { get; set; }
+        public PayloadVariables Variables { get; set; }
 
         [JsonProperty("extensions")]
         public ActionExtensions Extensions { get; set; } = new ActionExtensions();
@@ -374,7 +419,7 @@ namespace Fergun.APIs.AIDungeon
         public string OperationName { get; set; } = null;
 
         [JsonProperty("query")]
-        public string Query { get; set; } = "mutation ($input: ContentActionInput) {  sendAction(input: $input) {    id    actionLoading    memory    died    gameState    __typename  }}";
+        public string Query { get; set; }
 
         [JsonProperty("auth")]
         public ActionAuth Auth { get; set; } = new ActionAuth();

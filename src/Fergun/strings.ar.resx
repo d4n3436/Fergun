@@ -277,13 +277,13 @@
     <value>عنوان URL للصورة المراد استخدامها.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>يؤدي عدم تحديد عنوان URL إلى جعل الأمر يبحث عن آخر 100 رسالة لارتباط أو مرفق.</value>
+    <value>لا تحديد عنوان URL سيجعل الأمر للبحث عن رسائل س مشاركة في ذاكرة التخزين المؤقت لرابط أو مرفق.</value>
   </data>
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>المرفق ليس صورة.</value>
   </data>
 	<data name="ImageNotFound" xml:space="preserve">
-    <value>تعذر العثور على أي عنوان url للصورة أو مرفق في آخر 50 رسالة.</value>
+    <value>تعذر العثور على أي عنوان url للصورة أو مرفق في آخر {0} رسالة.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>عنوان url ليس صورة صالحة.</value>
@@ -448,7 +448,7 @@
     <value>المستخدم ليس موجود.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
-    <value>يبحث عن مقال في ويكيبيديا</value>
+    <value>يبحث عن مقال في ويكيبيديا.</value>
   </data>
 	<data name="wikipediaParam1" xml:space="preserve">
     <value>الكلمة (الكلمات) الرئيسية للبحث.</value>
@@ -957,7 +957,7 @@
     <value>انتظر بضع ثوان قبل استخدام هذا الأمر!</value>
   </data>
 	<data name="snipeParam1" xml:space="preserve">
-    <value>قناة محددة للقنص</value>
+    <value>قناة محددة للقنص.</value>
   </data>
 	<data name="IDNotFound" xml:space="preserve">
     <value>المعرف غير موجود.</value>
@@ -1964,16 +1964,16 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - إصلاح الخلل في `` resize` وinvert` التي تسببت الأوامر إلى فشل بسبب الخلاف يظهر معاينة الصور غير صالحة لبعض عناوين المواقع.</value>
   </data>
 	<data name="RatelimitUses" xml:space="preserve">
-		<value>يستخدم {0} كل {1}</value>
-	</data>
+    <value>يستخدم {0} كل {1}</value>
+  </data>
 	<data name="Requirements" xml:space="preserve">
-		<value>المتطلبات</value>
-	</data>
+    <value>المتطلبات</value>
+  </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
-		<value>تبين الإحصاءات الأوامر.</value>
-	</data>
+    <value>تبين الإحصاءات الأوامر.</value>
+  </data>
 	<data name="Changelog1.3.6" xml:space="preserve">
-		<value>- الأمر الجديد: `cmdstats`.
+    <value>- الأمر الجديد: `cmdstats`.
 
 - الآن سيظهر الزران {0} و {0} paginator في {0} و {0} فقط عندما يكون هناك 3 صفحات أو أكثر ، والزر {0} عندما يكون هناك 4 صفحات أو أكثر.
 - الآن سترسل Fergun رسالة مباشرة لتحذير المستخدم عندما لا يكون لدى البوت الحد الأدنى من الأذونات المطلوبة في القناة الحالية (`SendMessages` و` EmbedLinks`).
@@ -1983,8 +1983,149 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - تم إصلاح الخلل في "ويكيبيديا" الذي تسبب في فشل الأمر لأنه لم يتم ترميز الاستعلام في بعض الحالات.
 - تم إصلاح الخلل في "لقطة الشاشة" التي تسببت في فشل الأمر بسبب تشفير عنوان URL عن طريق الخطأ.
 - تم إصلاح الخلل في وحدة AI Dungeon التي تسببت في فشل الأوامر عند استخدام معرفات مختلفة في نفس الوقت.</value>
-	</data>
+  </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-		<value>إحصائيات الأوامر (منذ 2020/02/21)</value>
+    <value>إحصائيات الأوامر (منذ 2020/02/21)</value>
+  </data>
+	<data name="lmgtfySummary" xml:space="preserve">
+    <value>اسمحوا لي أن جوجل ذلك لك.</value>
+  </data>
+	<data name="lmgtfyParam1" xml:space="preserve">
+    <value>الكلمة (الكلمات) الرئيسية للبحث.</value>
+  </data>
+	<data name="pasteSummary" xml:space="preserve">
+    <value>تحميل النص إلى Hastebin.</value>
+  </data>
+	<data name="pasteParam1" xml:space="preserve">
+    <value>النص للتحميل.</value>
+  </data>
+	<data name="Uploading" xml:space="preserve">
+    <value>تحميل...</value>
+  </data>
+	<data name="bigsnipeSummary" xml:space="preserve">
+    <value>يظهر آخر حذف الرسائل في القناة الحالية أو المحدد.</value>
+  </data>
+	<data name="bigsnipeParam1" xml:space="preserve">
+    <value>قناة خاصة لقنص.</value>
+  </data>
+	<data name="MinutesAgo" xml:space="preserve">
+    <value>{0} دقيقة</value>
+  </data>
+	<data name="Attachment" xml:space="preserve">
+    <value>المرفق</value>
+  </data>
+	<data name="bigeditsnipeSummary" xml:space="preserve">
+    <value>يظهر الرسائل التي تم تحريرها مشاركة في القناة الحالية أو المحدد.</value>
+  </data>
+	<data name="bigeditsnipeParam1" xml:space="preserve">
+    <value>قناة خاصة لقنص.</value>
+  </data>
+	<data name="TextChannel" xml:space="preserve">
+    <value>قناة النص</value>
+  </data>
+	<data name="AnnouncementChannel" xml:space="preserve">
+    <value>قناة إعلان</value>
+  </data>
+	<data name="VoiceChannel" xml:space="preserve">
+    <value>قناة صوت</value>
+  </data>
+	<data name="DMChannel" xml:space="preserve">
+    <value>قناة DM</value>
+  </data>
+	<data name="Bitrate" xml:space="preserve">
+    <value>معدل البت</value>
+  </data>
+	<data name="UserLimit" xml:space="preserve">
+    <value>حد المستخدم</value>
+  </data>
+	<data name="NoLimit" xml:space="preserve">
+    <value>لا حدود</value>
+  </data>
+	<data name="disableSummary" xml:space="preserve">
+    <value>تعطيل أمر محليا (لهذا الملقم).</value>
+  </data>
+	<data name="disableParam1" xml:space="preserve">
+    <value>اسم الأمر إلى تعطيل.</value>
+  </data>
+	<data name="NonDisableable" xml:space="preserve">
+    <value>{0} لا يمكن تعطيل!</value>
+  </data>
+	<data name="AlreadyDisabled" xml:space="preserve">
+    <value>{0} تم تعطيل بالفعل!</value>
+  </data>
+	<data name="CommandDisabled" xml:space="preserve">
+    <value>تم تعطيل الأمر {0} في هذا الخادم.</value>
+  </data>
+	<data name="enableSummary" xml:space="preserve">
+    <value>تمكن أمر محليا (لهذا الملقم).</value>
+  </data>
+	<data name="enableParam1" xml:space="preserve">
+    <value>اسم الأمر إلى تمكين.</value>
+  </data>
+	<data name="AlreadyEnabled" xml:space="preserve">
+    <value>{0} تمكين بالفعل!</value>
+  </data>
+	<data name="CommandEnabled" xml:space="preserve">
+    <value>تم تمكين الأمر {0} في هذا الخادم.$$</value>
+  </data>
+	<data name="globaldisableSummary" xml:space="preserve">
+    <value>تعطيل على مستوى العالم الأمر (في كافة ملقمات).$$</value>
+  </data>
+	<data name="globaldisableParam1" xml:space="preserve">
+    <value>اسم الأمر لتعطيل عالميا.</value>
+  </data>
+	<data name="globaldisableParam2" xml:space="preserve">
+    <value>السبب للاستخدام.</value>
+  </data>
+	<data name="AlreadyDisabledGlobally" xml:space="preserve">
+    <value>{0} تم تعطيل بالفعل على مستوى العالم!</value>
+  </data>
+	<data name="CommandDisabledGlobally" xml:space="preserve">
+    <value>تم تعطيل الأمر {0} في كافة الملقمات.</value>
+  </data>
+	<data name="globalenableSummary" xml:space="preserve">
+    <value>تمكن عالميا الأمر (في كافة ملقمات).</value>
+  </data>
+	<data name="globalenableParam1" xml:space="preserve">
+    <value>اسم الأمر لتمكين عالميا.</value>
+  </data>
+	<data name="AlreadyEnabledGlobally" xml:space="preserve">
+    <value>{0} تمكين بالفعل على مستوى العالم!</value>
+  </data>
+	<data name="CommandEnabledGlobally" xml:space="preserve">
+    <value>تم تمكين الأمر {0} في كافة الملقمات.</value>
+  </data>
+	<data name="Reason" xml:space="preserve">
+    <value>السبب</value>
+  </data>
+	<data name="LeftVCInactivity" xml:space="preserve">
+		<value>لقد تركت قناة صوت بسبب عدم النشاط.</value>
+	</data>
+	<data name="MusicPlayerShutdownWarning" xml:space="preserve">
+		<value>سيتم إعادة تشغيل Fergun / إيقاف في بعض ثوان، ومشغل الموسيقى الخاص بك سيتم إيقاف. آسف للإزعاج.</value>
+	</data>
+	<data name="Warning" xml:space="preserve">
+		<value>تحذير</value>
+	</data>
+	<data name="PublicIdNull" xml:space="preserve">
+		<value>معرف العام من هذه المغامرة هو باطل. يرجى إنشاء مغامرة جديدة.</value>
+	</data>
+	<data name="Changelog1.4" xml:space="preserve">
+		<value>- أوامر جديدة: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable`, `globaldisable`.
+
+- الآن عندما ينضم Fergun إلى خادم ويكون لهذا الخادم لغة مفضلة ، سيتم حفظ هذه الإعدادات المحلية في تكوين Fergun لذلك الخادم.
+- الآن عندما يغادر Fergun الخادم ، سيتم حذف تكوين الخادم هذا من قاعدة البيانات.
+- الآن سيترك Fergun قناة صوتية عندما يغادر جميع المستخدمين هذه القناة.
+- الآن سيرسل Fergun تحذيرًا إلى جميع الخوادم التي تحتوي على مشغل موسيقى قبل إعادة التشغيل / الإغلاق.
+- الآن الأوامر التي تستخدم Hastebin وفشل التحميل ، سيتم عرض محتواها في الرسالة ، ولكن سيتم تقليصها.
+
+- تمت إضافة دعم لتعطيل الأوامر على مستوى الجماعة.
+- تمت إضافة دعم للقنوات الصوتية وقنوات الفئات وقنوات DM في `channelinfo`.
+- دعم إضافي للمرفقات المحذوفة في `snipe` (`bigsnipe` تأتي مع هذه الميزة عند الإصدار).
+
+- تم تحديث `lyrics` الكاشطة وإصلاح خطأ النص المقطوع.
+- تم تحديث وحدة AI Dungeon ومضمّن API.
+
+- إصلاح الخلل الذي تسبب في فشل بعض أوامر الإشراف بسبب حساب التسلسل الهرمي للمستخدم بشكل غير صحيح.</value>
 	</data>
 </root>

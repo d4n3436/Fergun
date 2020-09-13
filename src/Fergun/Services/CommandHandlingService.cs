@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -76,7 +77,7 @@ namespace Fergun
 
             if (message.Content == _client.CurrentUser.Mention)
             {
-                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(1));
+                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
                 await SendEmbedAsync(message, string.Format(Localizer.Locate("BotMention", message.Channel), prefix), _services);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} mentioned me."));
                 return;
@@ -87,10 +88,16 @@ namespace Fergun
                 message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
 
+            // Create a WebSocket-based command context based on the message
+            var context = new SocketCommandContext(_client, message);
+
+            var result = _cmdService.Search(context, argPos);
+            if (!result.IsSuccess) return;
+
             var blacklistedUser = FergunClient.Database.Find<BlacklistEntity>("Blacklist", x => x.ID == message.Author.Id);
             if (blacklistedUser != null)
             {
-                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(5));
+                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
                 if (blacklistedUser.Reason == null)
                 {
                     await SendEmbedAsync(message, "\u274c " + Localizer.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
@@ -99,16 +106,33 @@ namespace Fergun
                 {
                     await SendEmbedAsync(message, "\u274c " + string.Format(Localizer.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.Reason), _services, message.Author.Mention);
                 }
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use a command but they are blacklisted."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
                 return;
             }
 
-            // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(_client, message);
-
-            // Execute the command with the command context we just
-            // created, along with the service provider for precondition checks.
-            await _cmdService.ExecuteAsync(context, argPos, _services);
+            var disabledCommands = Localizer.GetGuildConfig(context.Channel)?.DisabledCommands ?? new List<string>();
+            var disabled = disabledCommands.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
+            if (disabled != null)
+            {
+                await SendEmbedAsync(message, "\u26a0 " + string.Format(Localizer.Locate("CommandDisabled", message.Channel), Format.Code(disabled)), _services);
+                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
+            }
+            else
+            {
+                var globalDisabled = FergunConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
+                if (globalDisabled.Key != null)
+                {
+                    await SendEmbedAsync(message, $"\u26a0 {string.Format(Localizer.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
+                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{Localizer.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}", _services);
+                    _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
+                }
+                else
+                {
+                    // Execute the command with the command context we just
+                    // created, along with the service provider for precondition checks.
+                    await _cmdService.ExecuteAsync(context, argPos, _services);
+                }
+            }
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
@@ -122,31 +146,34 @@ namespace Fergun
             {
                 if (!context.Message.Content.StartsWith(FergunConfig.GlobalPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Unknown command: \"{context.Message.Content}\", sent by {context.User} in {(context.Channel is SocketDMChannel ? $"@{context.User.Username}#{context.User.Discriminator}" : $"{context.Guild.Name}/{context.Channel.Name}")}"));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Unknown command: \"{context.Message.Content}\", sent by {context.User} in {context.Display()}"));
                 }
                 return;
             }
 
-            // Update the command stats
-            lock (_cmdStatsLock)
+            if (command.Value.Module.Name != Constants.DevelopmentModuleName)
             {
-                var stats = FergunConfig.CommandStats ?? new Dictionary<string, int>();
-                if (stats.ContainsKey(command.Value.Name))
+                // Update the command stats
+                lock (_cmdStatsLock)
                 {
-                    stats[command.Value.Name]++;
+                    var stats = FergunConfig.CommandStats ?? new Dictionary<string, int>();
+                    if (stats.ContainsKey(command.Value.Name))
+                    {
+                        stats[command.Value.Name]++;
+                    }
+                    else
+                    {
+                        stats.Add(command.Value.Name, 1);
+                    }
+                    FergunConfig.CommandStats = stats;
                 }
-                else
-                {
-                    stats.Add(command.Value.Name, 1);
-                }
-                FergunConfig.CommandStats = stats;
             }
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
                 return;
 
-            double ignoreTime = 0.6;
+            double ignoreTime = Constants.DefaultIgnoreTime;
             switch (result.Error)
             {
                 //case CommandError.UnknownCommand:
@@ -161,11 +188,7 @@ namespace Fergun
                     await SendEmbedAsync(context.Message, command.Value.ToHelpEmbed(language, prefix), _services);
                     break;
 
-                case CommandError.UnmetPrecondition when command.Value.Module.Name != "Dev":
-                    if (context.Channel is SocketGuildChannel && context.Guild.Id == 264445053596991498 && result.ErrorReason == "Disabled command / module.")
-                    {
-                        break;
-                    }
+                case CommandError.UnmetPrecondition when command.Value.Module.Name != Constants.DevelopmentModuleName:
                     // TODO: Cleanup
                     IGuildUser guildUser = null;
                     if (context.Guild != null)
@@ -175,7 +198,7 @@ namespace Fergun
                         ? guildUser.GetPermissions(guildChannel)
                         : ChannelPermissions.All(context.Channel);
 
-                    if (!perms.Has(ChannelPermission.SendMessages | ChannelPermission.EmbedLinks))
+                    if (!perms.Has(Constants.MinimunRequiredPermissions))
                     {
                         try
                         {
@@ -196,7 +219,7 @@ namespace Fergun
                         if (errorReason.StartsWith("RLMT", StringComparison.OrdinalIgnoreCase))
                         {
                             errorReason = errorReason.Substring(4);
-                            ignoreTime = 4;
+                            ignoreTime = Constants.CooldownIgnoreTime;
                         }
                         await SendEmbedAsync(context.Message, $"\u26a0 {Localizer.Locate(errorReason, context.Channel)}", _services);
                     }
@@ -229,9 +252,9 @@ namespace Fergun
                         var exception = execResult.Exception;
 
                         var builder = new EmbedBuilder()
-                            .WithTitle($"\u274c {Localizer.Locate("FailedExecution", context.Channel)} `{command.Value.Name}`")
+                            .WithTitle($"\u274c {Localizer.Locate("FailedExecution", context.Channel)} {Format.Code(command.Value.Name)}")
                             .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                            .AddField(Localizer.Locate("ErrorMessage", context.Channel), $"```cs\n{exception.Message}```")
+                            .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
                             .WithColor(FergunConfig.EmbedColor);
 
                         var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
@@ -246,19 +269,37 @@ namespace Fergun
                         // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
                         if (context.User.Id != owner.Id)
                         {
-                            var guild = await context.Client.GetGuildAsync(460627183501574144);
-                            var channel = await guild.GetTextChannelAsync(696506593830895686);
-
-                            string title = $"\u274c Failed to execute `{command.Value.Name}` in {(context.Channel is SocketDMChannel ? $"`{context.Channel.Name}`" : $"`{context.Guild.Name}`/`{context.Channel.Name}`")}";
-                            var embed2 = new EmbedBuilder()
-                                .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
-                                .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                                .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
-                                .AddField("Jump url", context.Message.GetJumpUrl())
-                                .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
-                                .WithColor(FergunConfig.EmbedColor);
-
-                            await channel.SendMessageAsync(embed: embed2.Build());
+                            if (ulong.TryParse(FergunConfig.LogChannel, out ulong channelId))
+                            {
+                                var channel = await context.Client.GetChannelAsync(channelId);
+                                if (channel != null && channel is IMessageChannel messageChannel)
+                                {
+                                    string title = $"\u274c Failed to execute {Format.Code(command.Value.Name)} in {context.Display()}";
+                                    var embed2 = new EmbedBuilder()
+                                        .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
+                                        .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
+                                        .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
+                                        .AddField("Jump url", context.Message.GetJumpUrl())
+                                        .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
+                                        .WithColor(FergunConfig.EmbedColor);
+                                    try
+                                    {
+                                        await messageChannel.SendMessageAsync(embed: embed2.Build());
+                                    }
+                                    catch (HttpException e)
+                                    {
+                                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error while sending the embed in the log channel", e));
+                                    }
+                                }
+                                else
+                                {
+                                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel. Not possible to send the embed with the error info."));
+                                }
+                            }
+                            else
+                            {
+                                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel ID. Not possible to send the embed with the error info."));
+                            }
                         }
                     }
                     break;
@@ -268,7 +309,7 @@ namespace Fergun
             }
 
             _ = IgnoreUserAsync(context.User.Id, TimeSpan.FromSeconds(ignoreTime));
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Value.Name}\" for {context.User} in {(context.Channel is SocketDMChannel ? $"@{context.User.Username}#{context.User.Discriminator}" : $"{context.Guild.Name}/{context.Channel.Name}")}, with error type: {result.Error} and reason: {result.ErrorReason}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Value.Name}\" for {context.User} in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
         }
 
         public static async Task IgnoreUserAsync(ulong id, TimeSpan time)
