@@ -27,7 +27,7 @@ namespace Fergun
     public class FergunClient
     {
         public static FergunDB Database { get; private set; }
-        public static ConcurrentDictionary<IMessage, bool> MessageCache { get; } = new ConcurrentDictionary<IMessage, bool>(); // true = is a deleted message
+        public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -373,11 +373,11 @@ namespace Fergun
         {
             var purge = MessageCache.Where(p =>
             {
-                TimeSpan difference = DateTimeOffset.UtcNow - p.Key.CreatedAt;
+                TimeSpan difference = DateTimeOffset.UtcNow - p.CreatedAt;
                 return difference.TotalHours >= Constants.MaxMessageCacheLongevity;
             }).ToList();
 
-            var removed = purge.Where(p => MessageCache.TryRemove(p.Key, out _));
+            var removed = purge.Where(p => MessageCache.TryTake(out _));
 
             _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed.Count()} deleted / edited messages from the cache."));
         }
@@ -395,7 +395,7 @@ namespace Fergun
                 return;
             }
 
-            MessageCache.TryAdd(before, false);
+            MessageCache.Add(new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated));
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgUpdated", $"Message edited in {before.Display()}: {before} -> {after}"));
         }
 
@@ -407,7 +407,7 @@ namespace Fergun
                 return;
             }
 
-            MessageCache.TryAdd(message, true);
+            MessageCache.Add(new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted));
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"Message deleted in {message.Display()}: {(string.IsNullOrEmpty(message.Content) ? message.Attachments.FirstOrDefault()?.Url : message.Content)}"));
         }
 

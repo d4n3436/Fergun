@@ -237,10 +237,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Bigeditsnipe([Summary("bigeditsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var msgs = FergunClient.MessageCache.Where(x => !x.Value && x.Key.Channel.Id == channel.Id)
-                .Reverse()//.OrderByDescending(x => x.Key.EditedTimestamp?.UtcTicks)
-                .Take(20)
-                .Select(x => x.Key);
+            var msgs = FergunClient.MessageCache
+                .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+                .OrderByDescending(x => x.CachedAt)
+                .Take(20);
 
             var builder = new EmbedBuilder();
             if (!msgs.Any())
@@ -270,10 +270,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Bigsnipe([Summary("bigsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var msgs = FergunClient.MessageCache.Where(x => x.Value && x.Key.Channel.Id == channel.Id)
-                .Reverse()//.OrderByDescending(x => x.Value?.UtcTicks)
-                .Take(20)
-                .Select(x => x.Key);
+            var msgs = FergunClient.MessageCache
+                .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+                .OrderByDescending(x => x.CachedAt)
+                .Take(20);
 
             var builder = new EmbedBuilder();
             if (!msgs.Any())
@@ -286,21 +286,7 @@ namespace Fergun.Modules
                 foreach (var msg in msgs)
                 {
                     text += $"{Format.Bold(msg.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - msg.CreatedAt).Minutes)})\n";
-                    if (string.IsNullOrEmpty(msg.Content))
-                    {
-                        if (msg.Attachments.Count > 0)
-                        {
-                            text += string.Join("\n", msg.Attachments.Select(x => $"{x.Url} ({Locate("Attachment")})"));
-                        }
-                        else
-                        {
-                            text += "?";
-                        }
-                    }
-                    else
-                    {
-                        text += msg.Content.Truncate(200);
-                    }
+                    text += !string.IsNullOrEmpty(msg.Content) ? msg.Content.Truncate(200) : msg.Attachments.Count > 0 ? $"({Locate("Attachment")})" : "?";
                     text += "\n\n";
                 }
                 builder.WithTitle("Big snipe")
@@ -544,7 +530,10 @@ namespace Fergun.Modules
         public async Task Editsnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            IMessage message = FergunClient.MessageCache.LastOrDefault(x => !x.Value && x.Key.Channel.Id == channel.Id).Key;
+            var message = FergunClient.MessageCache
+                .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+                .OrderByDescending(x => x.CachedAt)
+                .FirstOrDefault();
 
             var builder = new EmbedBuilder();
             if (message == null)
@@ -1215,7 +1204,10 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            IMessage message = FergunClient.MessageCache.LastOrDefault(x => x.Value && x.Key.Channel.Id == channel.Id).Key;
+            var message = FergunClient.MessageCache
+                .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+                .OrderByDescending(x => x.CachedAt)
+                .FirstOrDefault();
 
             var builder = new EmbedBuilder();
             if (message == null)
@@ -1224,18 +1216,7 @@ namespace Fergun.Modules
             }
             else
             {
-                string text = message.Content;
-                if (string.IsNullOrEmpty(text))
-                {
-                    if (message.Attachments.Count > 0)
-                    {
-                        text = string.Join("\n", message.Attachments.Select(x => $"{x.Url} (Attachment)"));
-                    }
-                    else
-                    {
-                        text = "?";
-                    }
-                }
+                string text = !string.IsNullOrEmpty(message.Content) ? message.Content : message.Attachments.Count > 0 ? $"({Locate("Attachment")})" : "?";
 
                 builder.WithAuthor(message.Author)
                     .WithDescription(text.Truncate(EmbedBuilder.MaxDescriptionLength))

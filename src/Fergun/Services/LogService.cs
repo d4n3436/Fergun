@@ -85,7 +85,7 @@ namespace Fergun.Services
                         break;
                     case LogSeverity.Verbose:
                     case LogSeverity.Debug:
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         break;
                 }
                 Console.WriteLine(logText);
