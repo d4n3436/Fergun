@@ -13,6 +13,7 @@ using Discord;
 using Discord.Addons.CommandCache;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using DiscordBotsList.Api;
 using DiscordBotsList.Api.Objects;
@@ -388,8 +389,15 @@ namespace Fergun
             {
                 return;
             }
-
-            var before = await cachedbefore.GetOrDownloadAsync();
+            IMessage before = null;
+            try
+            {
+                before = await cachedbefore.GetOrDownloadAsync();
+            }
+            catch (HttpException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "MsgUpdated", $"Could not get original message content ({cachedbefore.Id}) in channel \"{channel.Name}\" ({channel.Id}), reason: {e.Message}"));
+            }
             if (before == null || string.IsNullOrEmpty(before.Content) || before.Content == after.Content)
             {
                 return;
@@ -401,7 +409,15 @@ namespace Fergun
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            var message = await cache.GetOrDownloadAsync();
+            IMessage message = null;
+            try
+            {
+                message = await cache.GetOrDownloadAsync();
+            }
+            catch (HttpException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "MsgDeleted", $"Could not get deleted message ({cache.Id}) in channel \"{channel.Name}\" ({channel.Id}), reason: {e.Message}"));
+            }
             if (message == null || message.Source != MessageSource.User)
             {
                 return;
