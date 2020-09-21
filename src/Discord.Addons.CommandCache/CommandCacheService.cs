@@ -214,63 +214,73 @@ namespace Discord.Addons.CommandCache
             _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Cleaned {removed.Count()} item(s) from the cache."));
         }
 
-        private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)
+        private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)
         {
-            if (TryGetValue(cacheable.Id, out ulong messageId))
+            _ = Task.Run(async () =>
             {
-                var message = await channel.GetMessageAsync(messageId);
-                if (message != null)
+                if (TryGetValue(cacheable.Id, out ulong messageId))
                 {
-                    await message.DeleteAsync();
-                }
-                else
-                {
-                    await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"{cacheable.Id} deleted but {messageId} does not exist."));
-                }
-                Remove(cacheable.Id);
-            }
-        }
-
-        private async Task OnMessageModified(Cacheable<IMessage, ulong> cacheable, SocketMessage after, ISocketMessageChannel channel)
-        {
-            // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
-            if (after?.Content == null || after.Author.IsBot) return;
-            var before = await cacheable.GetOrDownloadAsync();
-            if (before?.Content == null || before.Content == after.Content) return;
-
-            if (TryGetValue(cacheable.Id, out ulong responseId))
-            {
-                var response = await channel.GetMessageAsync(responseId);
-                if (response == null)
-                {
-                    await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"A message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
+                    var message = await channel.GetMessageAsync(messageId);
+                    if (message != null)
+                    {
+                        await message.DeleteAsync();
+                    }
+                    else
+                    {
+                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"{cacheable.Id} deleted but {messageId} does not exist."));
+                    }
                     Remove(cacheable.Id);
                 }
-                else
+            });
+
+            return Task.CompletedTask;
+        }
+
+        private Task OnMessageModified(Cacheable<IMessage, ulong> cacheable, SocketMessage after, ISocketMessageChannel channel)
+        {
+            _ = Task.Run(async () =>
+            {
+                // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
+                if (after?.Content == null || after.Author.IsBot) return;
+                var before = await cacheable.GetOrDownloadAsync();
+                if (before?.Content == null || before.Content == after.Content) return;
+
+                if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
-                    if (response.Attachments.Count > 0)
+                    var response = await channel.GetMessageAsync(responseId);
+                    if (response == null)
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Attachment found on response ({responseId}). Deleting the message..."));
-                        _ = response.DeleteAsync();
+                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"A message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
                         Remove(cacheable.Id);
                     }
                     else
                     {
-                        await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to message {cacheable.Id} in cache."));
-                        if (response.Reactions.Count > 0)
+                        if (response.Attachments.Count > 0)
                         {
-                            bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
+                            await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Attachment found on response ({responseId}). Deleting the message..."));
+                            _ = response.DeleteAsync();
+                            Remove(cacheable.Id);
+                        }
+                        else
+                        {
+                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to message {cacheable.Id} in cache."));
+                            if (response.Reactions.Count > 0)
+                            {
+                                bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
 
-                            // RemoveReactionsAsync() is slow...
-                            if (manageMessages)
-                                await response.RemoveAllReactionsAsync();
-                            else
-                                await (response as IUserMessage).RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                                // RemoveReactionsAsync() is slow...
+                                if (manageMessages)
+                                    await response.RemoveAllReactionsAsync();
+                                else
+                                    await (response as IUserMessage).RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                            }
                         }
                     }
                 }
-            }
-            _ = _cmdHandler(after);
+                _ = _cmdHandler(after);
+            });
+
+            return Task.CompletedTask;
         }
 
         private void UpdateCount() => Interlocked.Exchange(ref _count, _cache.Count);
