@@ -441,12 +441,13 @@ namespace Fergun.Modules
         [Alias("info", "botinfo")]
         public async Task Stats()
         {
+            long temp;
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
             var cpuUsage = (int)await GetCpuUsageForProcessAsync();
-            string cpu = "?";
-            long? totalRamUsage;
-            long? processRamUsage;
-            long? totalRam;
+            string cpu = null;
+            long? totalRamUsage = null;
+            long? processRamUsage = null;
+            long? totalRam = null;
             string os = RuntimeInformation.OSDescription;
             if (FergunClient.IsLinux)
             {
@@ -454,48 +455,62 @@ namespace Fergun.Modules
                 if (File.Exists("/proc/cpuinfo"))
                 {
                     var cpuinfo = File.ReadAllLines("/proc/cpuinfo");
-                    if (cpuinfo.Length > 4)
-                    {
-                        cpu = cpuinfo[4].Split(':')[1];
-                    }
+                    cpu = cpuinfo.ElementAtOrDefault(4)?.Split(':')?.ElementAtOrDefault(1);
                 }
 
                 // OS Name
                 if (File.Exists("/etc/lsb-release"))
                 {
                     var distroInfo = File.ReadAllLines("/etc/lsb-release");
-                    if (distroInfo.Length > 3)
-                    {
-                        os = distroInfo[3].Split('=')[1].Trim('\"');
-                    }
+                    os = distroInfo.ElementAtOrDefault(3)?.Split('=')?.ElementAtOrDefault(1)?.Trim('\"');
                 }
 
                 // Total RAM & total RAM usage
-                var output = "free -m".RunCommand().Split(Environment.NewLine);
-                var memory = output[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                totalRam = long.Parse(memory[1]);
-                totalRamUsage = long.Parse(memory[2]);
+                var output = "free -m".RunCommand()?.Split(Environment.NewLine);
+                var memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (long.TryParse(memory?.ElementAtOrDefault(1), out temp)) totalRam = temp;
+                if (long.TryParse(memory?.ElementAtOrDefault(2), out temp)) totalRamUsage = temp;
 
                 // Process RAM usage
                 int processId = Process.GetCurrentProcess().Id;
-                processRamUsage = long.Parse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand().TrimEnd());
+                if (long.TryParse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand()?.TrimEnd(), out temp)) processRamUsage = temp;
+                //processRamUsage = long.Parse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand().TrimEnd());
             }
             else
             {
                 // CPU Name
                 cpu = "wmic cpu get name"
                     .RunCommand()
-                    .Trim()
-                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)[1];
+                    ?.Trim()
+                    ?.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)?.ElementAtOrDefault(1);
 
                 // Total RAM & total RAM usage
                 var output = "wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value"
                     .RunCommand()
-                    .Trim()
-                    .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-                long freeRam = long.Parse(output[0].Split('=', StringSplitOptions.RemoveEmptyEntries)[1]) / 1024;
-                totalRam = long.Parse(output[1].Split('=', StringSplitOptions.RemoveEmptyEntries)[1]) / 1024;
-                totalRamUsage = totalRam - freeRam;
+                    ?.Trim()
+                    ?.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+
+                if (output != null && output.Length > 0)
+                {
+                    long freeRam = 0;
+                    var split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
+                    if (split.Length > 1 && long.TryParse(split[1], out temp))
+                    {
+                        freeRam = temp / 1024;
+                    }
+
+                    split = output[1].Split('=', StringSplitOptions.RemoveEmptyEntries);
+                    if (split.Length > 1 && long.TryParse(split[1], out temp))
+                    {
+                        totalRam = temp / 1024;
+                    }
+
+                    if (totalRam != null && freeRam != 0)
+                    {
+                        totalRamUsage = totalRam - freeRam;
+                    }
+                }
 
                 // Process RAM usage
                 processRamUsage = Process.GetCurrentProcess().NonpagedSystemMemorySize64 / 1024;
@@ -518,14 +533,14 @@ namespace Fergun.Modules
 
                 .AddField(Locate("OperatingSystem"), os, true)
                 .AddField("\u200b", "\u200b", true)
-                .AddField("CPU", cpu, true)
+                .AddField("CPU", cpu ?? "?", true)
 
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("RAMUsage"),
-                $"{(processRamUsage.ToString() == null ? "?MB" : $"{processRamUsage}MB ({Math.Round((double)processRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
-                $"/ {(totalRamUsage.ToString() == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
-                $"/ {totalRam.ToString() ?? "?"}MB", true)
+                $"{(processRamUsage == null || totalRam == null ? "?MB" : $"{processRamUsage}MB ({Math.Round((double)processRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
+                $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
+                $"/ {totalRam?.ToString() ?? "?"}MB", true)
 
                 .AddField(Locate("Library"), $"Discord.Net\nv{DiscordConfig.Version}", true)
                 .AddField("\u200b", "\u200b", true)

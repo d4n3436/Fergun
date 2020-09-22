@@ -104,7 +104,10 @@ namespace Fergun
 
         ~FergunClient()
         {
-            _autoClear.Dispose();
+            if (_autoClear != null)
+            {
+                _autoClear.Dispose();
+            }
         }
 
         public async Task InitializeAsync()

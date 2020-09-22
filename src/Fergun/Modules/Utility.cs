@@ -1990,8 +1990,10 @@ namespace Fergun.Modules
                 }
                 url = match;
             }
-            // Not null if the url was from an attachment.
-            size ??= await GetUrlContentLengthAsync(url);
+            if (filtered.Attachments.Count == 0)
+            {
+                size = await GetUrlContentLengthAsync(url);
+            }
 
             if (size != null && size > maxSize)
             {

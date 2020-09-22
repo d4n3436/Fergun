@@ -259,19 +259,15 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Unban([Summary("unbanParam1")] ulong userId)
         {
             var banList = await Context.Guild.GetBansAsync();
-            var user = banList.FirstOrDefault(x => x.User.Id == userId);
-            if (user != null)
+            var ban = banList.FirstOrDefault(x => x.User.Id == userId);
+            if (ban == null)
             {
                 return FergunResult.FromError(Locate("UserNotBanned"));
             }
-            //if (!banList.Any(x => x.User.Id == userId))
-            //{
-            //    return FergunResult.FromError(Locate("UserNotBanned"));
-            //}
 
             await Context.Guild.RemoveBanAsync(userId);
             //var user = await Context.Client.Rest.GetUserAsync(userId);
-            await SendEmbedAsync(string.Format(Locate("Unbanned"), user.ToString()));
+            await SendEmbedAsync(string.Format(Locate("Unbanned"), ban.User.ToString()));
 
             return FergunResult.FromSuccess();
         }

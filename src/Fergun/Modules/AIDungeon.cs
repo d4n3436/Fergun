@@ -27,7 +27,6 @@ namespace Fergun.Modules
     [Group("aid"), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class AIDungeon : FergunBase
     {
-        // TODO: Replace History list with actions
         public const string IconUrl = "https://fergun.is-inside.me/CypOix5S.png";
 
         private static APIs.AIDungeon.AIDungeon _api;
@@ -930,7 +929,7 @@ namespace Fergun.Modules
             }
 
             string initialPrompt;
-            var actionList = response.Payload.Data.Adventure.Actions;
+            var actionList = response?.Payload?.Data?.SubscribeAdventure?.Actions ?? response?.Payload?.Data?.PlayerAction?.Actions;
             if (actionList == null || actionList.Count == 0)
             {
                 initialPrompt = "???";
