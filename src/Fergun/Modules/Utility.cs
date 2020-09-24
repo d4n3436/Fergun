@@ -1716,35 +1716,39 @@ namespace Fergun.Modules
             return tasks;
         }
 
-        private static Task<HttpResponseMessage> GetUrlResponseHeadersAsync(string url)
+        private static async Task<HttpResponseMessage> GetUrlResponseHeadersAsync(string url)
         {
-            return _httpClient.GetAsync(new UriBuilder(url).Uri, HttpCompletionOption.ResponseHeadersRead);
+            try
+            {
+                return await _httpClient.GetAsync(new UriBuilder(url).Uri, HttpCompletionOption.ResponseHeadersRead);
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
+            catch (UriFormatException)
+            {
+                return null;
+            }
         }
 
         private static async Task<long?> GetUrlContentLengthAsync(string url)
         {
+
             var response = await GetUrlResponseHeadersAsync(url);
-            return response.Content.Headers.ContentLength;
+            return response?.Content?.Headers?.ContentLength;
         }
 
         private static async Task<string> GetUrlMediaTypeAsync(string url)
         {
             var response = await GetUrlResponseHeadersAsync(url);
-            return response.Content.Headers.ContentType.MediaType;
+            return response?.Content?.Headers?.ContentType?.MediaType;
         }
 
         private static async Task<bool> IsImageUrlAsync(string url)
         {
-            string mediaType;
-            try
-            {
-                mediaType = await GetUrlMediaTypeAsync(url);
-            }
-            catch (HttpRequestException)
-            {
-                return false;
-            }
-            return mediaType.ToLowerInvariant().StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+            string mediaType = await GetUrlMediaTypeAsync(url);
+            return mediaType != null && mediaType.ToLowerInvariant().StartsWith("image/", StringComparison.OrdinalIgnoreCase);
         }
 
         private static async Task<(string, string)> OcrSimpleAsync(string url)
