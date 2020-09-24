@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,26 +29,24 @@ namespace Fergun
     public class FergunClient
     {
         public static FergunDB Database { get; private set; }
-        public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
-        public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static AuthDiscordBotListApi DblApi { get; private set; }
         public static IDblSelfBot DblBot { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; set; }
+        public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+        public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
+        public static IReadOnlyList<string> WordList { get; private set; } = new List<string>();
 
-        public static IReadOnlyList<string> WordList => _wordlist;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _cmdService;
         private static IServiceProvider _services;
         private readonly LogService _logService;
         private static CommandHandlingService _cmdHandlingService;
-
-        //private static ReliabilityService _reliabilityService;
-        private static string[] _wordlist = Array.Empty<string>();
-
+        private static ReliabilityService _reliabilityService;
+        private static CommandCacheService _commandCacheService;
         private static string[] _dbCredentials;
         private static bool _hasCredentials;
         private static bool _firstConnect = true;
@@ -67,6 +66,8 @@ namespace Fergun
 
             _logService = new LogService(_client, _cmdService);
 
+            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
+
 #if DEBUG
             IsDebugMode = true;
 #else
@@ -77,7 +78,7 @@ namespace Fergun
             {
                 try
                 {
-                    _wordlist = File.ReadAllText(wordlistFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    WordList = File.ReadAllText(wordlistFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList().AsReadOnly();
                 }
                 catch (IOException) { }
             }
@@ -156,22 +157,26 @@ namespace Fergun
             _client.LeftGuild += LeftGuild;
             _client.MessageUpdated += MessageUpdated;
             _client.MessageDeleted += MessageDeleted;
-            //_client.MessagesBulkDeleted += MessagesBulkDeleted;
+            _client.MessagesBulkDeleted += MessagesBulkDeleted;
             _client.UserJoined += UserJoined;
             _client.UserLeft += UserLeft;
             _client.UserBanned += UserBanned;
             _client.UserUnbanned += UserUnbanned;
+
+            _reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
+            _commandCacheService = new CommandCacheService(_client, CommandCacheService.UNLIMITED,
+                message => _ = _cmdHandlingService.HandleCommandAsync(message),
+                log => _ = _logService.LogAsync(log),
+                Constants.CommandCacheClearInterval, Constants.MaxCommandCacheLongevity);
 
             _services = SetupServices();
 
             // Initialize the music service
             await _services.GetRequiredService<MusicService>().InitializeAsync();
 
-            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
             _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
             await _cmdHandlingService.InitializeAsync();
 
-            //_reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
             if (!IsDebugMode)
             {
                 await _client.SetGameAsync($"{FergunConfig.GlobalPrefix}help", null, ActivityType.Playing);
@@ -322,19 +327,11 @@ namespace Fergun
                 .AddSingleton(_cmdService)
                 .AddSingleton(_logService)
                 .AddSingleton<InteractiveService>()
-                /*
-                .AddSingleton<IDiscordClientWrapper, DiscordClientWrapper>()
-                .AddSingleton<IAudioService, LavalinkNode>()
-                .AddSingleton<LavalinkNode>()
-                */
-                //.AddSingleton<LavaRestClient>()
-                //.AddSingleton<LavaSocketClient>()
                 .AddSingleton<LavaConfig>()
                 .AddSingleton<LavaNode>()
                 .AddSingleton<MusicService>()
-                .AddSingleton(new ReliabilityService(_client, x => _ = _logService.LogAsync(x)))
-                .AddSingleton(new CommandCacheService(_client, CommandCacheService.UNLIMITED,
-                message => _ = _cmdHandlingService.HandleCommandAsync(message), log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval, Constants.MaxCommandCacheLongevity))
+                .AddSingleton(_reliabilityService)
+                .AddSingleton(_commandCacheService)
                 .BuildServiceProvider();
 
         private static string ReadPassword()
@@ -440,10 +437,10 @@ namespace Fergun
             return Task.CompletedTask;
         }
 
-        //private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
-        //{
-        //    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
-        //}
+        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
+        {
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
+        }
 
         private async Task UserJoined(SocketGuildUser user)
         {
@@ -527,7 +524,7 @@ namespace Fergun
                 await DblBot.UpdateStatsAsync(_client.Guilds.Count);
                 await _discordBots.UpdateStatsAsync(_client.CurrentUser.Id, _client.Guilds.Count);
             }
-            catch (Exception e)
+            catch (HttpRequestException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not update the DBL/DiscordBots bot stats", e));
             }

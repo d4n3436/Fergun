@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord.Net;
+using Discord.WebSocket;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -242,7 +243,14 @@ namespace Discord.Addons.CommandCache
             {
                 // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
                 if (after?.Content == null || after.Author.IsBot) return;
-                var before = await cacheable.GetOrDownloadAsync();
+                IMessage before = null;
+                try
+                {
+                    before = await cacheable.GetOrDownloadAsync();
+                }
+                catch (HttpException e)
+                {
+                }
                 if (before?.Content == null || before.Content == after.Content) return;
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))

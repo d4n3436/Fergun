@@ -271,8 +271,7 @@ namespace Fergun.Modules
         }
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
-        [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer", Group = "Permission")]
-        [RequireOwner(Group = "Permission")]
+        [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
         [Command("language")]
         [Summary("languageSummary")]
         [Alias("lang")]

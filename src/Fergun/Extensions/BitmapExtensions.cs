@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Fergun.Extensions
 {
-    public static class BitmapExtension
+    public static class BitmapExtensions
     {
         /// <summary>
         /// Resize the image to the specified width and height.

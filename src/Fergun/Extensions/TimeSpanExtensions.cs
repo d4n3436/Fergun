@@ -2,7 +2,7 @@
 
 namespace Fergun.Extensions
 {
-    public static class TimeSpanExtension
+    public static class TimeSpanExtensions
     {
         /// <summary>
         /// Formats a TimeSpan to mm:ss or hh:mm:ss.

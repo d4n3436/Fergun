@@ -2,7 +2,7 @@
 
 namespace Fergun.Responses
 {
-    public class XkcdResponse
+    public class XkcdComic
     {
         [JsonProperty("month")]
         public string Month { get; set; }

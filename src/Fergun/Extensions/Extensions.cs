@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
@@ -10,14 +9,13 @@ using Discord.Commands;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Services;
-using Microsoft.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Victoria;
 
 namespace Fergun.Extensions
 {
-    public static class Extension
+    public static class Extensions
     {
         // Copy pasted from SocketGuildUser Hiearchy property to be used with RestGuildUser
         public static int GetHierarchy(this IGuildUser user)
@@ -55,23 +53,48 @@ namespace Fergun.Extensions
             }
         }
 
-        public static string CSharpName(this Type type)
+        public static string GetFriendlyName(this Type type)
         {
-            if (!type.FullName.StartsWith("System", StringComparison.OrdinalIgnoreCase))
-                return type.Name;
-            string output;
-            using (var compiler = new CSharpCodeProvider())
+            if (type == typeof(bool))
+                return "bool";
+            if (type == typeof(byte))
+                return "byte";
+            if (type == typeof(sbyte))
+                return "sbyte";
+            if (type == typeof(short))
+                return "short";
+            if (type == typeof(ushort))
+                return "ushort";
+            if (type == typeof(char))
+                return "char";
+            if (type == typeof(int))
+                return "int";
+            if (type == typeof(uint))
+                return "uint";
+            if (type == typeof(long))
+                return "long";
+            if (type == typeof(ulong))
+                return "ulong";
+            if (type == typeof(float))
+                return "float";
+            if (type == typeof(double))
+                return "double";
+            if (type == typeof(decimal))
+                return "decimal";
+            if (type == typeof(string))
+                return "string";
+            if (type == typeof(object))
+                return "object";
+            if (type.IsGenericType)
             {
-                var t = new CodeTypeReference(type);
-                output = compiler.GetTypeOutput(t);
+                string arguments = string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyName(x)).ToArray());
+                if (type.Name.Contains("Nullable", StringComparison.OrdinalIgnoreCase))
+                {
+                    return arguments + "?";
+                }
+                return $"{type.Name.Split('`')[0]}<{arguments}>";
             }
-            output = output.Replace("System.", "", StringComparison.OrdinalIgnoreCase);
-            if (output.Contains("Nullable<", StringComparison.OrdinalIgnoreCase))
-                output = output
-                    .Replace("Nullable", "", StringComparison.OrdinalIgnoreCase)
-                    .Replace(">", "", StringComparison.OrdinalIgnoreCase)
-                    .Replace("<", "", StringComparison.OrdinalIgnoreCase) + "?";
-            return output;
+            return type.Name;
         }
 
         public static string FileExtensionFromEncoder(this System.Drawing.Imaging.ImageFormat format)
@@ -104,7 +127,7 @@ namespace Fergun.Extensions
                 string field = "";
                 foreach (var parameter in command.Parameters)
                 {
-                    field += $"{parameter.Name} ({parameter.Type.CSharpName()})";
+                    field += $"{parameter.Name} ({parameter.Type.GetFriendlyName()})";
                     if (parameter.IsOptional)
                         field += ' ' + Localizer.Locate("Optional", language);
                     field += $": {Localizer.Locate(parameter.Summary ?? "NoDescription", language)}\n";
@@ -249,7 +272,7 @@ namespace Fergun.Extensions
                 //        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
                 //    });
             }
-            catch
+            catch (JsonSerializationException)
             {
                 return "Error";
             }

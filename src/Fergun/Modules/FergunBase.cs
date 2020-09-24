@@ -109,18 +109,14 @@ namespace Fergun.Modules
         /// <summary>
         /// Sends or edits an embed to the channel the command was invoked in, and adds the response to the cache if the message is new.
         /// </summary>
-        /// <param name="embed">The message's rich embed.</param>
-        /// <returns>The response message that was sent.</returns>
-        public async Task<IUserMessage> SendEmbedAsync(string text, bool noCache = false)
+        /// <param name="text">The message's rich embed.</param>
+        /// <returns>A task that represents the send or edit operation. The task contains the sent or edited message.</returns>
+        public async Task<IUserMessage> SendEmbedAsync(string text)
         {
             var builder = new EmbedBuilder()
                 .WithDescription(text)
                 .WithColor(FergunConfig.EmbedColor);
 
-            if (noCache)
-            {
-                return await Context.Channel.SendMessageAsync(embed: builder.Build());
-            }
             return await ReplyAsync(embed: builder.Build());
         }
 

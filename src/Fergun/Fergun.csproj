@@ -27,8 +27,8 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.3.0-dev-20200904.2" />
     <PackageReference Include="DiscordBotsList.Api" Version="1.4.0" />
-    <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.49.0.2077" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.47.0.2008" />
+    <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.49.0.2084" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.49.0.2084" />
     <PackageReference Include="GoogleTranslateFreeApi" Version="1.1.1" />
     <PackageReference Include="MathParser.org-mXparser" Version="4.4.2" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="3.7.0" />
@@ -39,7 +39,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.8" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.2" />
-    <PackageReference Include="System.CodeDom" Version="4.7.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="Victoria" Version="5.1.9" />
     <PackageReference Include="YoutubeExplode" Version="5.1.5" />

@@ -59,7 +59,7 @@ namespace Fergun.Modules
         [Summary("lyricsSummary")]
         [Alias("l")]
         [Example("never gonna give you up")]
-        public async Task Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
+        public async Task<RuntimeResult> Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
             bool keepHeaders = false;
             if (string.IsNullOrWhiteSpace(query) || query.ToLowerInvariant().Trim() == "-headers")
@@ -71,23 +71,22 @@ namespace Fergun.Modules
                 query = query.Substring(0, query.Length - 8);
                 keepHeaders = true;
             }
-            var result = await _musicService.GetLyricsAsync(query, keepHeaders, Context.Guild,
+            (var error, var lyrics) = await _musicService.GetLyricsAsync(query, keepHeaders, Context.Guild,
                 Context.Channel as ITextChannel, Context.User.Activities?.OfType<SpotifyGame>()?.FirstOrDefault());
 
-            if (result.Item1 != null)
+            if (error != null)
             {
-                await SendEmbedAsync($"\u26a0 {result.Item1}");
-                return;
+                return FergunResult.FromError(error);
             }
             var pages = new List<PaginatedMessage.Page>();
-            foreach (var item in result.Item2.Skip(2))
+            foreach (var item in lyrics.Skip(2))
             {
                 pages.Add(new PaginatedMessage.Page
                 {
                     Description = item,
                     Fields = new List<EmbedFieldBuilder>()
                     {
-                        new EmbedFieldBuilder { Name = "Links", Value = result.Item2.ElementAt(1) }
+                        new EmbedFieldBuilder { Name = "Links", Value = lyrics.ElementAt(1) }
                     },
                 });
             }
@@ -95,7 +94,7 @@ namespace Fergun.Modules
             var pager = new PaginatedMessage
             {
                 Color = new Color(FergunConfig.EmbedColor),
-                Title = result.Item2.First().Truncate(EmbedBuilder.MaxTitleLength),
+                Title = lyrics.First().Truncate(EmbedBuilder.MaxTitleLength),
                 Pages = pages,
                 Options = new PaginatedAppearanceOptions
                 {
@@ -106,6 +105,8 @@ namespace Fergun.Modules
             };
 
             await PagedReplyAsync(pager, ReactionList.Default);
+
+            return FergunResult.FromSuccess();
         }
 
         [Command("move")]

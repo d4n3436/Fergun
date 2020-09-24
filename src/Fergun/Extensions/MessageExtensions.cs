@@ -6,7 +6,7 @@ using Discord.WebSocket;
 
 namespace Fergun.Extensions
 {
-    public static class MessageExtension
+    public static class MessageExtensions
     {
         /// <summary>
         /// Tries to delete a message.

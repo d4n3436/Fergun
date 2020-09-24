@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Fergun.Extensions
 {
-    public static class StringExtension
+    public static class StringExtensions
     {
         public static string Repeat(this string input, int count)
         {
@@ -23,10 +23,10 @@ namespace Fergun.Extensions
         }
 
         /// <summary>
-        /// Converts a string to it's full width form.
+        /// Converts a string to its full width form.
         /// </summary>
         /// <param name="input">The string to convert.</param>
-        public static string Fullwidth(this string input)
+        public static string ToFullWidth(this string input)
         {
             string output = "";
             foreach (char currentchar in input.ToCharArray())
@@ -49,9 +49,7 @@ namespace Fergun.Extensions
         /// <returns>The truncated string.</returns>
         public static string Truncate(this string value, int maxLength)
         {
-            if (string.IsNullOrEmpty(value))
-                return value;
-            return value.Substring(0, Math.Min(value.Length, maxLength));
+            return value?.Substring(0, Math.Min(value.Length, maxLength));
         }
 
         public static bool ContainsAny(this string input, IEnumerable<string> containsKeywords, StringComparison comparisonType)

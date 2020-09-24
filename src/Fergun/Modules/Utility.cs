@@ -15,6 +15,7 @@ using Discord;
 using Discord.Addons.CommandCache;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.DuckDuckGo;
@@ -39,14 +40,12 @@ namespace Fergun.Modules
         [ThreadStatic]
         private static Random _rngInstance;
 
-        // A regex i copied and pasted from somewhere (yep)
-        private static readonly Regex _linkParser = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex _bracketReplacer = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
-        private static readonly HttpClient _deepAiClient = new HttpClient();
+        private static readonly Regex _linkRegex = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
         private static bool _isCreatingCache;
-        private static XkcdResponse _lastComic;
+        private static XkcdComic _lastComic;
         private static DateTimeOffset _timeToCheckComic;
         private static CommandService _cmdService;
         private static LogService _logService;
@@ -69,12 +68,14 @@ namespace Fergun.Modules
         public async Task Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
         {
             user ??= Context.User;
+            if (!(user is RestUser))
+            {
+                // Prevent getting error 404 while downloading the avatar getting the user from REST.
+                user = await Context.Client.Rest.GetUserAsync(user.Id);
+            }
 
-            // Prevent getting error 404 while downloading the avatar getting the user from REST.
-            var restUser = await Context.Client.Rest.GetUserAsync(user.Id);
-
-            string avatarUrl = restUser.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? restUser.GetDefaultAvatarUrl();
-            string thumbnail = restUser.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? restUser.GetDefaultAvatarUrl();
+            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
@@ -211,24 +212,21 @@ namespace Fergun.Modules
         [Example("hello")]
         public async Task Base64encode([Remainder, Summary("base64encodeParam1")] string text)
         {
-            string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
-            if (encoded.Length > DiscordConfig.MaxMessageSize)
+            text = Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
+            if (text.Length > DiscordConfig.MaxMessageSize)
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(encoded);
-                    await ReplyAsync(response.GetLink());
+                    var response = await Hastebin.UploadAsync(text);
+                    text = response.GetLink();
                 }
                 catch (HttpRequestException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
-                    await ReplyAsync(encoded.Truncate(DiscordConfig.MaxMessageSize));
+                    text = text.Truncate(DiscordConfig.MaxMessageSize);
                 }
             }
-            else
-            {
-                await ReplyAsync(encoded);
-            }
+            await ReplyAsync(text);
         }
 
         [Command("bigeditsnipe", RunMode = RunMode.Async)]
@@ -429,7 +427,7 @@ namespace Fergun.Modules
                     }
                 }
                 _color = System.Drawing.Color.FromArgb(rawColor);
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Color: {rawColor} -> {_color}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Color: {color.Truncate(30)} -> {rawColor} -> {_color}"));
             }
 
             using (Bitmap bmp = new Bitmap(500, 500))
@@ -828,12 +826,12 @@ namespace Fergun.Modules
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Ocr: url to use: {url}"));
 
-            var result = await OcrSimpleAsync(url);
-            if (!int.TryParse(result.Item1, out int processTime))
+            string text;
+            (error, text) = await OcrSimpleAsync(url);
+            if (!int.TryParse(error, out int processTime))
             {
-                return FergunResult.FromError(Locate(result.Item1));
+                return FergunResult.FromError(Locate(error));
             }
-            string text = result.Item2;
 
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
@@ -886,12 +884,12 @@ namespace Fergun.Modules
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Orctranslate: url to use: {url}"));
 
-            var ocrResult = await OcrSimpleAsync(url);
-            if (!int.TryParse(ocrResult.Item1, out int processTime))
+            string text;
+            (error, text) = await OcrSimpleAsync(url);
+            if (!int.TryParse(error, out int processTime))
             {
-                return FergunResult.FromError(Locate(ocrResult.Item1));
+                return FergunResult.FromError(Locate(error));
             }
-            string text = ocrResult.Item2;
 
             var sw = Stopwatch.StartNew();
             var result = await TranslateSimpleAsync(text, target);
@@ -997,7 +995,7 @@ namespace Fergun.Modules
             {
                 request.Headers.Add("Api-Key", FergunConfig.DeepAiApiKey);
                 request.Content = content;
-                var response = await _deepAiClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request);
                 responseString = await response.Content.ReadAsStringAsync();
             }
 
@@ -1368,11 +1366,11 @@ namespace Fergun.Modules
                 foreach (var item in search.Definitions)
                 {
                     // Nice way to replace all ocurrences to a custom string.
-                    item.Definition = _bracketReplacer.Replace(item.Definition,
+                    item.Definition = _bracketRegex.Replace(item.Definition,
                                                               m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"));
                     if (!string.IsNullOrEmpty(item.Example))
                     {
-                        item.Example = _bracketReplacer.Replace(item.Example,
+                        item.Example = _bracketRegex.Replace(item.Example,
                                                               m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"));
                     }
                     List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>
@@ -1454,11 +1452,14 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Userinfo([Remainder, Summary("userinfoParam1")] IUser user = null)
         {
             user ??= Context.User;
-            // Prevent getting error 404 while downloading the avatar getting the user from REST.
-            var restUser = await Context.Client.Rest.GetUserAsync(user.Id);
+            if (!(user is RestUser))
+            {
+                // Prevent getting error 404 while downloading the avatar getting the user from REST.
+                user = await Context.Client.Rest.GetUserAsync(user.Id);
+            }
 
-            string avatarUrl = restUser.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? restUser.GetDefaultAvatarUrl();
-            string thumbnail = restUser.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? restUser.GetDefaultAvatarUrl();
+            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
@@ -1630,14 +1631,14 @@ namespace Fergun.Modules
                 response = await wc.DownloadStringTaskAsync($"https://xkcd.com/{number ?? RngInstance.Next(1, _lastComic.Num)}/info.0.json");
             }
 
-            XkcdResponse xkcd = JsonConvert.DeserializeObject<XkcdResponse>(response);
+            XkcdComic comic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
             var builder = new EmbedBuilder()
-                .WithTitle(xkcd.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithUrl($"https://xkcd.com/{xkcd.Num}/")
-                .WithImageUrl(xkcd.Img)
-                .WithFooter(xkcd.Alt.Truncate(EmbedFooterBuilder.MaxFooterTextLength))
-                .WithTimestamp(new DateTime(int.Parse(xkcd.Year), int.Parse(xkcd.Month), int.Parse(xkcd.Day)));
+                .WithTitle(comic.Title.Truncate(EmbedBuilder.MaxTitleLength))
+                .WithUrl($"https://xkcd.com/{comic.Num}/")
+                .WithImageUrl(comic.Img)
+                .WithFooter(comic.Alt.Truncate(EmbedFooterBuilder.MaxFooterTextLength))
+                .WithTimestamp(new DateTime(int.Parse(comic.Year), int.Parse(comic.Month), int.Parse(comic.Day)));
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -1729,28 +1730,15 @@ namespace Fergun.Modules
         private static async Task<string> GetUrlMediaTypeAsync(string url)
         {
             var response = await GetUrlResponseHeadersAsync(url);
-            return response.Content.Headers.ContentType.MediaType.ToLowerInvariant();
+            return response.Content.Headers.ContentType.MediaType;
         }
 
         private static async Task<bool> IsImageUrlAsync(string url)
         {
-            //Uri uri;
-            //try
-            //{
-            //    uri = new UriBuilder(url).Uri;
-            //}
-            //catch
-            //{
-            //    return false;
-            //}
             string mediaType;
             try
             {
                 mediaType = await GetUrlMediaTypeAsync(url);
-            }
-            catch (UriFormatException)
-            {
-                return false;
             }
             catch (HttpRequestException)
             {
@@ -1885,7 +1873,7 @@ namespace Fergun.Modules
             {
                 response = wc.DownloadString("https://xkcd.com/info.0.json");
             }
-            _lastComic = JsonConvert.DeserializeObject<XkcdResponse>(response);
+            _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
         }
 
@@ -1930,7 +1918,7 @@ namespace Fergun.Modules
             var filtered = messages.FirstOrDefault(x =>
             x.Attachments.Any(y => !onlyImage || y.Width != null && y.Height != null)
             || x.Embeds.Any(y => !onlyImage || y.Image != null || y.Thumbnail != null)
-            || _linkParser.IsMatch(x.Content));
+            || _linkRegex.IsMatch(x.Content));
 
             //If there's no results, return nothing
             if (filtered == null)
@@ -1983,7 +1971,7 @@ namespace Fergun.Modules
             }
             else
             {
-                string match = _linkParser.Match(filtered.Content).Value;
+                string match = _linkRegex.Match(filtered.Content).Value;
                 if (onlyImage && !await IsImageUrlAsync(match))
                 {
                     return (null, string.Format(Locate("ImageNotFound"), messageCount));

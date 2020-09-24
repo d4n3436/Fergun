@@ -61,7 +61,7 @@ namespace Fergun.Modules
         [Example("hello")]
         public async Task Reverse([Remainder, Summary("reverseParam1")] string text)
         {
-            await ReplyAsync(StringExtension.Reverse(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(StringExtensions.Reverse(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
         }
 
         [Command("reverselines")]
@@ -70,7 +70,7 @@ namespace Fergun.Modules
         [Example("line 1\nline 2\nline 3")]
         public async Task Reverselines([Remainder, Summary("reverselinesParam1")] string text)
         {
-            await ReplyAsync(StringExtension.ReverseEachLine(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(StringExtensions.ReverseEachLine(text).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
         }
 
         [Command("reversewords")]
@@ -97,7 +97,7 @@ namespace Fergun.Modules
         [Example("aesthetic")]
         public async Task Vapor([Remainder, Summary("vaporwaveParam1")] string text)
         {
-            await ReplyAsync(text.Fullwidth().Truncate(DiscordConfig.MaxMessageSize));
+            await ReplyAsync(text.ToFullWidth().Truncate(DiscordConfig.MaxMessageSize));
             //await ReplyAsync(new Regex(@"[\uFF61-\uFF9F]+", RegexOptions.Compiled).Replace(text, m => m.Value.Normalize(NormalizationForm.FormKC)));
         }
     }

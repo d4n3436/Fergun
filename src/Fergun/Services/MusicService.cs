@@ -54,7 +54,6 @@ namespace Fergun.Services
             await Task.CompletedTask;
         }
 
-
         private async Task ClientReadyAsync()
         {
             if (!LavaNode.IsConnected)
@@ -62,30 +61,42 @@ namespace Fergun.Services
                 await LavaNode.ConnectAsync();
             }
         }
+
         private async Task UserVoiceStateUpdatedAsync(SocketUser user, SocketVoiceState beforeState, SocketVoiceState afterState)
         {
             if (user is SocketGuildUser guildUser && LavaNode.TryGetPlayer(guildUser.Guild, out var player))
             {
-                if (player.VoiceChannel != null && (player.VoiceChannel as SocketVoiceChannel).Users.Count == 1 && afterState.VoiceChannel == null)
+                // Someone has left a voice channel
+                if (player.VoiceChannel != null && afterState.VoiceChannel == null)
                 {
-                    if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
-                    {
-                        _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
-                    }
+                    // Fergun has left a voice channel that has a player
                     if (user.Id == _client.CurrentUser.Id)
                     {
+                        if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
+                        {
+                            _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
+                        }
                         await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because I got kicked out."));
+
+                        await LavaNode.LeaveAsync(player.VoiceChannel);
                     }
-                    else
+                    // There are no users (only bots) in the voice channel
+                    else if ((player.VoiceChannel as SocketVoiceChannel).Users.All(x => x.IsBot))
                     {
+                        if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
+                        {
+                            _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
+                        }
+
                         var builder = new EmbedBuilder()
                             .WithDescription("\u26A0 " + Localizer.Locate("LeftVCInactivity", player.TextChannel))
                             .WithColor(FergunConfig.EmbedColor);
 
                         await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
                         await player.TextChannel.SendMessageAsync(embed: builder.Build());
+
+                        await LavaNode.LeaveAsync(player.VoiceChannel);
                     }
-                    await LavaNode.LeaveAsync(player.VoiceChannel);
                 }
             }
         }
@@ -249,7 +260,11 @@ namespace Fergun.Services
             else
             {
                 LavaTrack track;
-                if (search.Tracks.Count == 1 || Uri.IsWellFormedUriString(query, UriKind.Absolute))
+                if (search.Tracks.Count == 0)
+                {
+                    return (Localizer.Locate("PlayerNoMatches", textChannel), null);
+                }
+                if (search.Tracks.Count == 1)
                 {
                     track = search.Tracks[0];
                 }
