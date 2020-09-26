@@ -672,7 +672,11 @@ namespace Fergun.Modules
         [Example("discord")]
         public async Task<RuntimeResult> Img([Remainder, Summary("imgParam1")] string query)
         {
-            query = query.Trim();
+            query = query.Replace("!", "", StringComparison.OrdinalIgnoreCase).Trim();
+            if (string.IsNullOrEmpty(query))
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
 
             // Considering a DM channel a SFW channel.
             bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
@@ -696,7 +700,7 @@ namespace Fergun.Modules
                 catch (TokenNotFoundException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
-                    return FergunResult.FromError(e.Message);
+                    return FergunResult.FromError(Locate("NoResultsFound"));
                 }
                 if (search.Results.Count == 0)
                 {
@@ -1734,7 +1738,6 @@ namespace Fergun.Modules
 
         private static async Task<long?> GetUrlContentLengthAsync(string url)
         {
-
             var response = await GetUrlResponseHeadersAsync(url);
             return response?.Content?.Headers?.ContentLength;
         }
