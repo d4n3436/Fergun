@@ -10,9 +10,10 @@ namespace Fergun.APIs.DuckDuckGo
     public static class DdgApi
     {
         public const string ApiEndpoint = "https://duckduckgo.com";
+        public const int MaxLength = 500;
+
         private static readonly HttpClient _client = new HttpClient();
-        //private static readonly HttpRequestMessage _defaultRequestMessage = new HttpRequestMessage();
-        private static readonly Regex _tokenExtractor = new Regex(@"vqd=([\d-]+)\&", RegexOptions.IgnoreCase);
+        private static readonly Regex _tokenRegex = new Regex(@"vqd=([\d-]+)\&", RegexOptions.IgnoreCase);
 
         static DdgApi()
         {
@@ -21,6 +22,11 @@ namespace Fergun.APIs.DuckDuckGo
 
         public static async Task<DdgResponse> SearchImagesAsync(string keywords, SafeSearch filter = SafeSearch.Moderate)
         {
+            if (keywords.Length > MaxLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(keywords), $"The query cannot be larger than {MaxLength}.");
+            }
+
             string token = await GetTokenAsync(keywords);
 
             string query = "?";
@@ -58,7 +64,7 @@ namespace Fergun.APIs.DuckDuckGo
         {
             var content = await _client.GetStringAsync(new Uri($"?q={Uri.EscapeDataString(keywords)}", UriKind.Relative));
 
-            Match match = _tokenExtractor.Match(content);
+            Match match = _tokenRegex.Match(content);
             if (match.Success)
             {
                 return match.Groups[1].Value;

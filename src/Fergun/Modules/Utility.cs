@@ -677,6 +677,10 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
+            if (query.Length > DdgApi.MaxLength)
+            {
+                return FergunResult.FromError(string.Format(Locate("MustBeLowerThan"), nameof(query), DdgApi.MaxLength));
+            }
 
             // Considering a DM channel a SFW channel.
             bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
@@ -1564,7 +1568,7 @@ namespace Fergun.Modules
             using (WebClient wc = new WebClient())
             {
                 string articleUrl = search[search.Count - 1][0];
-                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{articleUrl.Substring(30)}";
+                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(articleUrl.Substring(30))}";
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
 
                 response = await wc.DownloadStringTaskAsync(apiUrl);
@@ -1576,7 +1580,7 @@ namespace Fergun.Modules
                 .WithTitle(article.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .WithFooter(Locate("WikipediaSearch"))
-                .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Wikipedia-logo-v2.svg/500px-Wikipedia-logo-v2.svg.png")
+                .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png")
                 .WithColor(FergunConfig.EmbedColor);
 
             string url = Context.User.ActiveClients.Any(x => x == ClientType.Mobile) ? article.ContentUrls.Mobile.Page : article.ContentUrls.Desktop.Page;
