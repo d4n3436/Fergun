@@ -78,7 +78,7 @@ namespace Fergun.Extensions
                 if (part.Length + current.Length >= maxLength)
                 {
                     list.Add(current);
-                    current = part;
+                    current = part + separator;
                 }
                 else
                 {

@@ -62,7 +62,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
             bool keepHeaders = false;
-            if (string.IsNullOrWhiteSpace(query) || query.ToLowerInvariant().Trim() == "-headers")
+            if (string.IsNullOrWhiteSpace(query))
             {
                 query = null;
             }

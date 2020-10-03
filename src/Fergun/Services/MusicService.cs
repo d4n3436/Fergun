@@ -520,7 +520,7 @@ namespace Fergun.Services
         public async Task<(string, IEnumerable<string>)> GetLyricsAsync(string query, bool keepHeaders, IGuild guild, ITextChannel textChannel, SpotifyGame spotify)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
-            if (query == null)
+            if (string.IsNullOrWhiteSpace(query))
             {
                 if (hasPlayer && player.PlayerState == PlayerState.Playing)
                 {
