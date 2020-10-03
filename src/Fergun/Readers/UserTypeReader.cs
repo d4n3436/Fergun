@@ -94,7 +94,11 @@ namespace Fergun.Readers
             IUser user;
             if (context.Guild != null)
             {
-                user = await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
+                user = await context.Guild.GetUserAsync(id);
+                if (user == null)
+                {
+                    user = await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
+                }
             }
             else
             {

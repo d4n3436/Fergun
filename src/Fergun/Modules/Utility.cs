@@ -1460,6 +1460,27 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Userinfo([Remainder, Summary("userinfoParam1")] IUser user = null)
         {
             user ??= Context.User;
+
+            string activities = Locate("None");
+            if (user.Activities.Count > 0)
+            {
+                activities = string.Join('\n', user.Activities.Select(x =>
+                x.Type == ActivityType.CustomStatus ?
+                Format.Bold((x as CustomStatusGame).State) :
+                $"{x.Type} {Format.Bold(x.Name)}"));
+            }
+
+            string clients = "?";
+            if (user.ActiveClients.Count > 0)
+            {
+                clients = string.Join(' ', user.ActiveClients.Select(x =>
+                x == ClientType.Desktop ? "🖥" :
+                x == ClientType.Mobile ? "📱" :
+                x == ClientType.Web ? "🌐" : ""));
+            }
+
+            var guildUser = user as IGuildUser;
+
             if (!(user is RestUser))
             {
                 // Prevent getting error 404 while downloading the avatar getting the user from REST.
@@ -1476,36 +1497,6 @@ namespace Fergun.Modules
                 avatarColor = img.GetAverageColor();
             }
 
-            string activities = "";
-            foreach (var activity in user.Activities)
-            {
-                if (activity != null)
-                {
-                    if (activity.Type == ActivityType.CustomStatus)
-                    {
-                        activities += Format.Bold((activity as CustomStatusGame).State);
-                    }
-                    else
-                    {
-                        activities += $"{activity.Type} {Format.Bold(activity.Name)}";
-                    }
-                    activities += "\n";
-                }
-            }
-            if (string.IsNullOrWhiteSpace(activities))
-            {
-                activities = Locate("None");
-            }
-            var guildUser = user as IGuildUser;
-
-            string clients = "?";
-            if (user.ActiveClients.Count > 0)
-            {
-                clients = string.Join(" ", user.ActiveClients.Select(x =>
-                x == ClientType.Desktop ? "🖥" :
-                x == ClientType.Mobile ? "📱" :
-                x == ClientType.Web ? "🌐" : ""));
-            }
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("UserInfo"))
                 .AddField(Locate("Name"), user.ToString(), false)
