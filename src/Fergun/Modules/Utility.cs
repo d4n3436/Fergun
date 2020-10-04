@@ -1559,7 +1559,7 @@ namespace Fergun.Modules
             using (WebClient wc = new WebClient())
             {
                 string articleUrl = search[search.Count - 1][0];
-                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(articleUrl.Substring(30))}";
+                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
 
                 response = await wc.DownloadStringTaskAsync(apiUrl);
