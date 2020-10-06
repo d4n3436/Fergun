@@ -360,7 +360,7 @@ namespace Fergun.Modules
         [Alias("die")]
         public async Task<RuntimeResult> Logout()
         {
-            await _musicService.ShutdownAllPlayers();
+            await _musicService.ShutdownAllPlayersAsync();
 
             await ReplyAsync("Bye bye");
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
@@ -377,7 +377,7 @@ namespace Fergun.Modules
         [Summary("restartSummary")]
         public async Task<RuntimeResult> Restart()
         {
-            await _musicService.ShutdownAllPlayers();
+            await _musicService.ShutdownAllPlayersAsync();
 
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
             {

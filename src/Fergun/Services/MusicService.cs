@@ -657,7 +657,7 @@ namespace Fergun.Services
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
 
-        public async Task ShutdownAllPlayers()
+        public async Task ShutdownAllPlayersAsync()
         {
             var players = LavaNode.Players.Where(x => x != null);
 
