@@ -656,5 +656,42 @@ namespace Fergun.Services
             }
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
+
+        public async Task ShutdownAllPlayers()
+        {
+            var players = LavaNode.Players.Where(x => x != null);
+
+            if (players.Any())
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Count()} music players..."));
+
+                foreach (var player in players)
+                {
+                    var embed = new EmbedBuilder()
+                        .WithTitle($"\u26a0 {Localizer.Locate("Warning", player.TextChannel)} \u26a0")
+                        .WithDescription(Localizer.Locate("MusicPlayerShutdownWarning", player.TextChannel))
+                        .WithColor(FergunConfig.EmbedColor);
+
+                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
+                }
+
+                await Task.Delay(5000);
+
+                foreach (var player in players)
+                {
+                    try
+                    {
+                        await LavaNode.LeaveAsync(player.VoiceChannel);
+                    }
+                    catch (NullReferenceException) { };
+                }
+            }
+
+            try
+            {
+                await LavaNode.DisposeAsync();
+            }
+            catch (NullReferenceException) { };
+        }
     }
 }

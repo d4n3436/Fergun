@@ -360,39 +360,7 @@ namespace Fergun.Modules
         [Alias("die")]
         public async Task<RuntimeResult> Logout()
         {
-            var players = _musicService.LavaNode.Players.Where(x => x != null);
-
-            if (players.Any())
-            {
-                var embed = new EmbedBuilder()
-                        .WithTitle($"\u26a0 {Locate("Warning")} \u26a0")
-                        .WithDescription(Locate("MusicPlayerShutdownWarning"))
-                        .WithColor(FergunConfig.EmbedColor);
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Count()} music players..."));
-
-                foreach (var player in players)
-                {
-                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
-                }
-
-                await Task.Delay(5000);
-
-                foreach (var player in players)
-                {
-                    try
-                    {
-                        await _musicService.LavaNode.LeaveAsync(player.VoiceChannel);
-                    }
-                    catch (NullReferenceException) { };
-                }
-            }
-
-            try
-            {
-                await _musicService.LavaNode.DisposeAsync();
-            }
-            catch (NullReferenceException) { };
+            await _musicService.ShutdownAllPlayers();
 
             await ReplyAsync("Bye bye");
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
@@ -409,33 +377,7 @@ namespace Fergun.Modules
         [Summary("restartSummary")]
         public async Task<RuntimeResult> Restart()
         {
-            var players = _musicService.LavaNode.Players.Where(x => x != null);
-
-            if (players.Any())
-            {
-                var embed = new EmbedBuilder()
-                        .WithTitle($"\u26a0 {Locate("Warning")} \u26a0")
-                        .WithDescription(Locate("MusicPlayerShutdownWarning"))
-                        .WithColor(FergunConfig.EmbedColor);
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Count()} music players..."));
-
-                foreach (var player in players)
-                {
-                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
-                }
-
-                await Task.Delay(5000);
-
-                foreach (var player in players)
-                {
-                    try
-                    {
-                        await _musicService.LavaNode.LeaveAsync(player.VoiceChannel);
-                    }
-                    catch (NullReferenceException) { };
-                }
-            }
+            await _musicService.ShutdownAllPlayers();
 
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
             {
