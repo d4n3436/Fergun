@@ -154,7 +154,7 @@ namespace Fergun.APIs
             /// Error message returned by the parsing engine
             /// </summary>
             [JsonProperty("ErrorMessage", NullValueHandling = NullValueHandling.Ignore)]
-            public List<string> ErrorMessage { get; set; }
+            public string ErrorMessage { get; set; }
 
             /// <summary>
             /// Detailed error message returned from the parsing engine for debugging purposes

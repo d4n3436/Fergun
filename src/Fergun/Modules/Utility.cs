@@ -1759,7 +1759,7 @@ namespace Fergun.Modules
             OCRSpace.OCRSpaceResponse ocr;
             try
             {
-                ocr = await OCRSpace.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: OCRSpace.OCREngine.Engine1);
+                ocr = await OCRSpace.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: OCRSpace.OCREngine.Engine2);
             }
             catch (WebException e)
             {
@@ -1769,7 +1769,7 @@ namespace Fergun.Modules
 
             if (ocr.IsErroredOnProcessing || ocr.OcrExitCode != 1)
             {
-                return (ocr.ErrorMessage[0], null);
+                return (ocr.ParsedResults?.FirstOrDefault()?.ErrorMessage ?? ocr.ErrorMessage[0], null);
             }
             else if (string.IsNullOrWhiteSpace(ocr.ParsedResults[0].ParsedText))
             {
