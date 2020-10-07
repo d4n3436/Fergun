@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 
 namespace Fergun
@@ -38,7 +39,7 @@ namespace Fergun
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
-            MessageCacheSize = 50,
+            MessageCacheSize = 100,
             AlwaysDownloadUsers = false,
             ConnectionTimeout = 30000,
             LogLevel = LogSeverity.Verbose,
@@ -61,9 +62,13 @@ namespace Fergun
             // DM support
             GatewayIntents.DirectMessages |
             GatewayIntents.DirectMessageReactions
+        };
 
-            // Activities, for userinfo and lyrics commands (Presence intent required)
-            //GatewayIntents.GuildPresences
+        public static CommandServiceConfig CommandServiceConfig { get; } = new CommandServiceConfig
+        {
+            LogLevel = LogSeverity.Verbose,
+            CaseSensitiveCommands = false,
+            IgnoreExtraArgs = true
         };
 
         public const GuildPermission InvitePermissions =
@@ -121,6 +126,8 @@ namespace Fergun
         public const int MessageCacheClearInterval = 3600000;
 
         public const int MaxMessageCacheLongevity = 6;
+
+        public const int MaxPrefixLength = 10;
 
         public static string LoadingEmote { get; set; } = "<a:loading:721975158826598522>";
         public static string OnlineEmote { get; set; } = "<:online:726601254016647241>";

@@ -346,7 +346,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
             }
-            if (newPrefix.Length > 10)
+            if (newPrefix.Length > Constants.MaxPrefixLength)
             {
                 return FergunResult.FromError(Locate("PrefixTooLong"));
             }

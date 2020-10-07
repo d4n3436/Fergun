@@ -35,9 +35,13 @@ namespace Fergun
         public bool AidAutoTranslateDefault { get; set; }
         public bool TrackSelectionDefault { get; set; }
         public Dictionary<string, int> CommandStats { get; set; }
-        public Dictionary<string, string> GloballyDisabledCommands { get; internal set; }
+        public Dictionary<string, string> GloballyDisabledCommands { get; set; }
         public string SupportServer { get; set; }
         public string LogChannel { get; set; }
+        public bool? PresenceIntent { get; set; }
+        public bool? ServerMembersIntent { get; set; }
+        public int? MessageCacheSize { get; set; }
+        public bool? AlwaysDownloadUsers { get; set; }
     }
 
     public static class FergunConfig
@@ -178,6 +182,14 @@ namespace Fergun
         public static string SupportServer => GetConfig().SupportServer ?? "https://discord.com";
 
         public static string LogChannel => GetConfig().LogChannel;
+
+        public static bool? PresenceIntent => GetConfig().PresenceIntent;
+
+        public static bool? ServerMembersIntent => GetConfig().ServerMembersIntent;
+
+        public static int? MessageCacheSize => GetConfig().MessageCacheSize;
+
+        public static bool? AlwaysDownloadUsers => GetConfig().AlwaysDownloadUsers;
 
         private static BaseConfig GetConfig()
         {

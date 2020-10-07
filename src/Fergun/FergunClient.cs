@@ -40,10 +40,10 @@ namespace Fergun
         public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
         public static IReadOnlyList<string> WordList { get; private set; } = new List<string>();
 
-        private readonly DiscordSocketClient _client;
+        private DiscordSocketClient _client;
+        private LogService _logService;
         private readonly CommandService _cmdService;
         private static IServiceProvider _services;
-        private readonly LogService _logService;
         private static CommandHandlingService _cmdHandlingService;
         private static ReliabilityService _reliabilityService;
         private static CommandCacheService _commandCacheService;
@@ -55,16 +55,7 @@ namespace Fergun
 
         public FergunClient()
         {
-            _client = new DiscordSocketClient(Constants.ClientConfig);
-
-            _cmdService = new CommandService(new CommandServiceConfig
-            {
-                LogLevel = LogSeverity.Verbose,
-                CaseSensitiveCommands = false,
-                IgnoreExtraArgs = true
-            });
-
-            _logService = new LogService(_client, _cmdService);
+            _cmdService = new CommandService(Constants.CommandServiceConfig);
 
             _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
 
@@ -138,20 +129,35 @@ namespace Fergun
 
             if (Database.IsConnected)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connected to the database successfully."));
+                Console.WriteLine("Connected to the database successfully.");
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Database", "Could not connect to the database. Press any key to exit."));
+                Console.WriteLine("Could not connect to the database. Press any key to exit.");
                 Console.ReadKey(true);
                 Environment.Exit(1);
             }
 
-            await UpdateLavalinkAsync();
-            await StartLavalinkAsync();
+            if (FergunConfig.PresenceIntent ?? false)
+            {
+                Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildPresences;
+            }
+            if (FergunConfig.ServerMembersIntent ?? false)
+            {
+                Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildMembers;
+            }
 
-            await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
-            await _client.StartAsync();
+            // Only override the default value if the corresponding value in the database has been set.
+            if (FergunConfig.AlwaysDownloadUsers != null)
+            {
+                Constants.ClientConfig.AlwaysDownloadUsers = FergunConfig.AlwaysDownloadUsers.Value;
+            }
+            if (FergunConfig.MessageCacheSize != null)
+            {
+                Constants.ClientConfig.MessageCacheSize = FergunConfig.MessageCacheSize.Value;
+            }
+
+            _client = new DiscordSocketClient(Constants.ClientConfig);
             _client.Ready += ClientReady;
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
@@ -162,6 +168,14 @@ namespace Fergun
             _client.UserLeft += UserLeft;
             _client.UserBanned += UserBanned;
             _client.UserUnbanned += UserUnbanned;
+
+            _logService = new LogService(_client, _cmdService);
+
+            await UpdateLavalinkAsync();
+            await StartLavalinkAsync();
+
+            await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
+            await _client.StartAsync();
 
             _reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
             _commandCacheService = new CommandCacheService(_client, CommandCacheService.UNLIMITED,
