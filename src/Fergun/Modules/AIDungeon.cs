@@ -132,7 +132,8 @@ namespace Fergun.Modules
                     }
                     return FergunResult.FromError(Locate("ErrorOnAPI"));
                 }
-                _modes = content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString());
+                // TODO: Unhide custom and archive modes after fixing the errors when selecting the custom mode and after finishing the custom mode prompt.
+                _modes = content.Options.Where(x => x.Title != "custom" && x.Title != "archive").ToDictionary(x => x.Title, x => x.PublicId?.ToString());
             }
             else
             {
