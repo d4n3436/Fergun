@@ -263,7 +263,7 @@ namespace Discord.Addons.Interactive
 
                     page = requestedPage;
 
-                    _ = Message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+                    _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId);
 
                     await RenderAsync().ConfigureAwait(false);
                 });
@@ -291,7 +291,7 @@ namespace Discord.Addons.Interactive
                 return false;
             }
 
-            _ = Message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+            _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId);
 
             await RenderAsync().ConfigureAwait(false);
             return false;
