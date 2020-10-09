@@ -533,7 +533,7 @@
     <value>Дата вступления в гильдию</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>Пользователь не найден.</value>
+    <value>Пользователь не найден. Попробуйте использовать упоминание или идентификатор.</value>
   </data>
 	<data name="BanSameUser" xml:space="preserve">
     <value>Какая? Вы хотите забанить себя?</value>

@@ -446,7 +446,7 @@
     <value>Dia de ingreso al servidor</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>El usuario no fue encontrado.</value>
+    <value>El usuario no fue encontrado. Intenta usar una mención o una ID.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Busca un artículo en Wikipedia.</value>

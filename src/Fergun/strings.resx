@@ -446,7 +446,7 @@
     <value>Guild join date</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>User not found.</value>
+    <value>User not found Try using a mention or an ID.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Searches for an article on Wikipedia.</value>

@@ -445,7 +445,7 @@
     <value>Lonca katılma tarihi</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>Kullanıcı bulunamadı.</value>
+    <value>Kullanıcı bulunamadı Bir söz veya kimlik kullanmayı deneyin.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Wikipedia'da bir makale arar.</value>

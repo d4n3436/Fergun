@@ -445,7 +445,7 @@
     <value>تاريخ انضمام النقابة</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>المستخدم ليس موجود.</value>
+    <value>المستخدم غير موجود حاول استخدام إشارة أو معرّف.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>يبحث عن مقال في ويكيبيديا.</value>
