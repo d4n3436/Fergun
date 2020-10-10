@@ -222,7 +222,7 @@ namespace Fergun.Modules
                 }
                 catch (HttpRequestException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Badtranslator: Error while uploading text to Hastebin", e));
                     text = text.Truncate(DiscordConfig.MaxMessageSize);
                 }
             }
@@ -850,7 +850,7 @@ namespace Fergun.Modules
                 }
                 catch (HttpRequestException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocr: Error while uploading text to Hastebin", e));
                     text = Format.Code(text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
@@ -916,7 +916,7 @@ namespace Fergun.Modules
                 }
                 catch (HttpRequestException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocrtranslate: Error while uploading text to Hastebin", e));
                     result.Text = Format.Code(result.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
@@ -1083,12 +1083,12 @@ namespace Fergun.Modules
             }
             catch (ArgumentException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Screenshot: Error in UrlToImageAsync", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Screenshot: Error in API", e));
                 return FergunResult.FromError(Locate("InvalidUrl"));
             }
             catch (WebException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Screenshot: Error in UrlToImageAsync", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Screenshot: Error in API", e));
                 return FergunResult.FromError(e.Message);
             }
 
@@ -1262,7 +1262,7 @@ namespace Fergun.Modules
                 }
                 catch (HttpRequestException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Translate: Error while uploading text to Hastebin", e));
                     result.Text = Format.Code(result.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
@@ -1335,14 +1335,14 @@ namespace Fergun.Modules
             query = query?.Trim();
             if (string.IsNullOrWhiteSpace(query))
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Urban: Getting random words..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Getting random words..."));
                 try
                 {
                     search = UrbanApi.GetRandomWords();
                 }
                 catch (WebException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Urban: Error in API", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
                     return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
                 }
             }
@@ -1358,7 +1358,7 @@ namespace Fergun.Modules
                     }
                     catch (WebException e)
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Urban: Error in API", e));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
                         return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
                     }
                     if (search.Definitions.Count == 0)

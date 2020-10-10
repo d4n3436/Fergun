@@ -277,8 +277,8 @@ namespace Fergun
                                     string title = $"\u274c Failed to execute {Format.Code(command.Value.Name)} in {context.Display()}";
                                     var embed2 = new EmbedBuilder()
                                         .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
-                                        .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                                        .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
+                                        .AddField(Localizer.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
+                                        .AddField(Localizer.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
                                         .AddField("Jump url", context.Message.GetJumpUrl())
                                         .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
                                         .WithColor(FergunConfig.EmbedColor);
