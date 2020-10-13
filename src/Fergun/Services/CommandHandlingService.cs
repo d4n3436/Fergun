@@ -11,6 +11,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Fergun.Extensions;
 using Fergun.Services;
+using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun
@@ -69,7 +70,7 @@ namespace Fergun
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
 
-            string prefix = Localizer.GetPrefix(message.Channel);
+            string prefix = GuildUtils.GetPrefix(message.Channel);
             if (message.Content == prefix)
             {
                 return;
@@ -78,7 +79,7 @@ namespace Fergun
             if (message.Content == _client.CurrentUser.Mention)
             {
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
-                await SendEmbedAsync(message, string.Format(Localizer.Locate("BotMention", message.Channel), prefix), _services);
+                await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix), _services);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} mentioned me."));
                 return;
             }
@@ -100,21 +101,21 @@ namespace Fergun
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
                 if (blacklistedUser.Reason == null)
                 {
-                    await SendEmbedAsync(message, "\u274c " + Localizer.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
                 }
                 else
                 {
-                    await SendEmbedAsync(message, "\u274c " + string.Format(Localizer.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.Reason), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.Reason), _services, message.Author.Mention);
                 }
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
                 return;
             }
 
-            var disabledCommands = Localizer.GetGuildConfig(context.Channel)?.DisabledCommands ?? new List<string>();
+            var disabledCommands = GuildUtils.GetGuildConfig(context.Channel)?.DisabledCommands ?? new List<string>();
             var disabled = disabledCommands.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
             if (disabled != null)
             {
-                await SendEmbedAsync(message, "\u26a0 " + string.Format(Localizer.Locate("CommandDisabled", message.Channel), Format.Code(disabled)), _services);
+                await SendEmbedAsync(message, "\u26a0 " + string.Format(GuildUtils.Locate("CommandDisabled", message.Channel), Format.Code(disabled)), _services);
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
             }
             else
@@ -122,8 +123,8 @@ namespace Fergun
                 var globalDisabled = FergunConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
                 if (globalDisabled.Key != null)
                 {
-                    await SendEmbedAsync(message, $"\u26a0 {string.Format(Localizer.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
-                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{Localizer.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}", _services);
+                    await SendEmbedAsync(message, $"\u26a0 {string.Format(GuildUtils.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
+                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{GuildUtils.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}", _services);
                     _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
                 }
                 else
@@ -183,8 +184,8 @@ namespace Fergun
                 case CommandError.ParseFailed:
                     // CommandParseFailed
                     // BadArgumentCount
-                    string language = Localizer.GetLanguage(context.Channel);
-                    string prefix = Localizer.GetPrefix(context.Channel);
+                    string language = GuildUtils.GetLanguage(context.Channel);
+                    string prefix = GuildUtils.GetPrefix(context.Channel);
                     await SendEmbedAsync(context.Message, command.Value.ToHelpEmbed(language, prefix), _services);
                     break;
 
@@ -221,7 +222,7 @@ namespace Fergun
                             errorReason = errorReason.Substring(4);
                             ignoreTime = Constants.CooldownIgnoreTime;
                         }
-                        await SendEmbedAsync(context.Message, $"\u26a0 {Localizer.Locate(errorReason, context.Channel)}", _services);
+                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(errorReason, context.Channel)}", _services);
                     }
                     break;
 
@@ -235,12 +236,12 @@ namespace Fergun
                     // Remove spaces (UserNotFound)
                     reason = reason.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase);
                     // Locate the string to the current language of the guild
-                    reason = Localizer.Locate(reason, context.Channel);
+                    reason = GuildUtils.Locate(reason, context.Channel);
                     await SendEmbedAsync(context.Message, $"\u26a0 {reason}", _services);
                     break;
 
                 case CommandError.MultipleMatches:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {Localizer.Locate("MultipleMatches", context.Channel)}", _services);
+                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}", _services);
                     break;
 
                 case CommandError.Unsuccessful:
@@ -252,16 +253,16 @@ namespace Fergun
                         var exception = execResult.Exception;
 
                         var builder = new EmbedBuilder()
-                            .WithTitle($"\u274c {Localizer.Locate("FailedExecution", context.Channel)} {Format.Code(command.Value.Name)}")
-                            .AddField(Localizer.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                            .AddField(Localizer.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
+                            .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Value.Name)}")
+                            .AddField(GuildUtils.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
+                            .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
                             .WithColor(FergunConfig.EmbedColor);
 
                         var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
 
                         if (context.User.Id != owner.Id)
                         {
-                            builder.WithFooter(Localizer.Locate("ErrorSentToOwner", context.Channel));
+                            builder.WithFooter(GuildUtils.Locate("ErrorSentToOwner", context.Channel));
                         }
 
                         await SendEmbedAsync(context.Message, builder.Build(), _services);
@@ -277,8 +278,8 @@ namespace Fergun
                                     string title = $"\u274c Failed to execute {Format.Code(command.Value.Name)} in {context.Display()}";
                                     var embed2 = new EmbedBuilder()
                                         .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
-                                        .AddField(Localizer.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
-                                        .AddField(Localizer.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
+                                        .AddField(GuildUtils.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
+                                        .AddField(GuildUtils.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
                                         .AddField("Jump url", context.Message.GetJumpUrl())
                                         .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
                                         .WithColor(FergunConfig.EmbedColor);

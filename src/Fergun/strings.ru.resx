@@ -276,8 +276,8 @@
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>Вложение не является изображением.</value>
   </data>
-	<data name="ImageNotFound" xml:space="preserve">
-    <value>Не удалось найти ни одного URL изображения или вложения в последних {0} сообщениях.</value>
+	<data name="UrlNotFound" xml:space="preserve">
+    <value>Не удалось найти ни url-адреса, ни вложения в последних сообщениях ({0}).</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>Ключевое слово (а) для поиска.</value>
@@ -324,8 +324,8 @@
 	<data name="ocrParam1" xml:space="preserve">
     <value>URL изображения для использования.</value>
   </data>
-	<data name="ImageTooLarge" xml:space="preserve">
-    <value>Изображение слишком большое.</value>
+	<data name="UrlFileTooLarge" xml:space="preserve">
+    <value>Файл слишком большой.</value>
   </data>
 	<data name="ocr2Param1" xml:space="preserve">
     <value>URL изображения для использования.</value>

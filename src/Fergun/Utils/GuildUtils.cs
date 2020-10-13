@@ -1,12 +1,13 @@
 ﻿using Discord;
+using Fergun.Extensions;
 
-namespace Fergun.Services
+namespace Fergun.Utils
 {
-    public static class Localizer
+    public static class GuildUtils
     {
         public static GuildConfig GetGuildConfig(IMessageChannel channel)
         {
-            if (IsPrivate(channel))
+            if (channel.IsPrivate())
             {
                 return null;
             }
@@ -27,7 +28,5 @@ namespace Fergun.Services
 
         public static string Locate(string key, string language)
             => strings.ResourceManager.GetString(key, FergunClient.Locales[language]) ?? key;
-
-        public static bool IsPrivate(IMessageChannel channel) => channel is IPrivateChannel;
     }
 }

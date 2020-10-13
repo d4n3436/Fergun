@@ -14,7 +14,7 @@ using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Services;
-using Microsoft.CodeAnalysis;
+using Fergun.Utils;
 
 namespace Fergun.Modules
 {
@@ -442,7 +442,7 @@ namespace Fergun.Modules
         {
             long temp;
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-            var cpuUsage = (int)await GetCpuUsageForProcessAsync();
+            var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
             string cpu = null;
             long? totalRamUsage = null;
             long? processRamUsage = null;
@@ -802,20 +802,6 @@ namespace Fergun.Modules
                 Color = new Color(FergunConfig.EmbedColor)
             };
             await ReplyAsync(embed: builder.Build());
-        }
-
-        private static async Task<double> GetCpuUsageForProcessAsync()
-        {
-            var startTime = DateTime.UtcNow;
-            var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-            await Task.Delay(500);
-
-            var endTime = DateTime.UtcNow;
-            var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-            var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-            var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-            return cpuUsageTotal * 100;
         }
     }
 }

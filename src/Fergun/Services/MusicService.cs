@@ -3,15 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AngleSharp;
 using Discord;
 using Discord.WebSocket;
 using Fergun.APIs.Genius;
 using Fergun.Extensions;
+using Fergun.Utils;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
@@ -89,7 +87,7 @@ namespace Fergun.Services
                         }
 
                         var builder = new EmbedBuilder()
-                            .WithDescription("\u26A0 " + Localizer.Locate("LeftVCInactivity", player.TextChannel))
+                            .WithDescription("\u26A0 " + GuildUtils.Locate("LeftVCInactivity", player.TextChannel))
                             .WithColor(FergunConfig.EmbedColor);
 
                         await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
@@ -128,7 +126,7 @@ namespace Fergun.Services
                 {
                     _loopDict.TryRemove(guildId, out _);
                     var builder2 = new EmbedBuilder()
-                        .WithDescription(string.Format(Localizer.Locate("LoopEnded", args.Player.TextChannel), args.Track.ToTrackLink(false)))
+                        .WithDescription(string.Format(GuildUtils.Locate("LoopEnded", args.Player.TextChannel), args.Track.ToTrackLink(false)))
                         .WithColor(FergunConfig.EmbedColor);
                     await args.Player.TextChannel.SendMessageAsync(null, false, builder2.Build());
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Loop for track {args.Track.Title} ({args.Track.Url}) ended in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
@@ -142,7 +140,7 @@ namespace Fergun.Services
             }
             if (!args.Player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
-                builder.WithDescription(Localizer.Locate("NoTracks", args.Player.TextChannel))
+                builder.WithDescription(GuildUtils.Locate("NoTracks", args.Player.TextChannel))
                     .WithColor(FergunConfig.EmbedColor);
 
                 await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
@@ -151,7 +149,7 @@ namespace Fergun.Services
             }
 
             await args.Player.PlayAsync(nextTrack);
-            builder.WithTitle(Localizer.Locate("NowPlaying", args.Player.TextChannel))
+            builder.WithTitle(GuildUtils.Locate("NowPlaying", args.Player.TextChannel))
                 .WithDescription(nextTrack.ToTrackLink())
                 .WithColor(FergunConfig.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
@@ -161,7 +159,7 @@ namespace Fergun.Services
         private async Task OnTrackExceptionAsync(TrackExceptionEventArgs args)
         {
             var builder = new EmbedBuilder()
-                .WithDescription($"\u26a0 {Localizer.Locate("PlayerError", args.Player.TextChannel)}:```{args.ErrorMessage}```")
+                .WithDescription($"\u26a0 {GuildUtils.Locate("PlayerError", args.Player.TextChannel)}:```{args.ErrorMessage}```")
                 .WithColor(FergunConfig.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
@@ -170,7 +168,7 @@ namespace Fergun.Services
         private async Task OnTrackStuckAsync(TrackStuckEventArgs args)
         {
             var builder = new EmbedBuilder()
-                .WithDescription($"\u26a0 {string.Format(Localizer.Locate("PlayerStuck", args.Player.TextChannel), args.Player.Track.Title, args.Threshold.TotalSeconds)}")
+                .WithDescription($"\u26a0 {string.Format(GuildUtils.Locate("PlayerStuck", args.Player.TextChannel), args.Player.Track.Title, args.Threshold.TotalSeconds)}")
                 .WithColor(FergunConfig.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
@@ -179,9 +177,9 @@ namespace Fergun.Services
         public async Task<string> JoinAsync(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
         {
             if (LavaNode.HasPlayer(guild))
-                return Localizer.Locate("AlreadyConnected", textChannel);
+                return GuildUtils.Locate("AlreadyConnected", textChannel);
             await LavaNode.JoinAsync(voiceChannel, textChannel);
-            return string.Format(Localizer.Locate("NowConnected", textChannel), Format.Bold(voiceChannel.Name));
+            return string.Format(GuildUtils.Locate("NowConnected", textChannel), Format.Bold(voiceChannel.Name));
         }
 
         public async Task<bool> LeaveAsync(IGuild guild, SocketVoiceChannel voiceChannel)
@@ -202,12 +200,12 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             var oldChannel = player.VoiceChannel;
             if (voiceChannel.Id == oldChannel.Id)
-                return Localizer.Locate("MoveSameChannel", textChannel);
+                return GuildUtils.Locate("MoveSameChannel", textChannel);
             await LavaNode.MoveChannelAsync(voiceChannel);
-            return string.Format(Localizer.Locate("PlayerMoved", textChannel), oldChannel, voiceChannel);
+            return string.Format(GuildUtils.Locate("PlayerMoved", textChannel), oldChannel, voiceChannel);
         }
 
         public async Task<(string, IReadOnlyList<LavaTrack>)> PlayAsync(string query, IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
@@ -219,7 +217,7 @@ namespace Fergun.Services
                 search = await LavaNode.SearchAsync(query);
                 if (search.LoadStatus == LoadStatus.NoMatches || search.LoadStatus == LoadStatus.LoadFailed)
                 {
-                    return (Localizer.Locate("PlayerNoMatches", textChannel), null);
+                    return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
                 }
             }
 
@@ -242,7 +240,7 @@ namespace Fergun.Services
                         player.Queue.Enqueue(track);
                         time += track.Duration;
                     }
-                    return (string.Format(Localizer.Locate("PlayerPlaylistAdded", textChannel), search.Playlist.Name, trackCount, time.ToShortForm()), null);
+                    return (string.Format(GuildUtils.Locate("PlayerPlaylistAdded", textChannel), search.Playlist.Name, trackCount, time.ToShortForm()), null);
                 }
                 else
                 {
@@ -254,7 +252,7 @@ namespace Fergun.Services
                     }
                     // if player wasnt playing anything
                     await player.PlayAsync(search.Tracks[0]);
-                    return (string.Format(Localizer.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks[0].ToTrackLink()), null);
+                    return (string.Format(GuildUtils.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks[0].ToTrackLink()), null);
                 }
             }
             else
@@ -262,7 +260,7 @@ namespace Fergun.Services
                 LavaTrack track;
                 if (search.Tracks.Count == 0)
                 {
-                    return (Localizer.Locate("PlayerNoMatches", textChannel), null);
+                    return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
                 }
                 if (search.Tracks.Count == 1)
                 {
@@ -281,12 +279,12 @@ namespace Fergun.Services
                 if (player.PlayerState == PlayerState.Playing)
                 {
                     player.Queue.Enqueue(track);
-                    return (string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink()), null);
+                    return (string.Format(GuildUtils.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink()), null);
                 }
                 else
                 {
                     await player.PlayAsync(track);
-                    return (string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink()), null);
+                    return (string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink()), null);
                 }
             }
         }
@@ -299,18 +297,18 @@ namespace Fergun.Services
                 player = LavaNode.GetPlayer(guild);
             }
             if (track == null)
-                return Localizer.Locate("InvalidTrack", textChannel);
+                return GuildUtils.Locate("InvalidTrack", textChannel);
             if (player.PlayerState == PlayerState.Playing)
             {
                 player.Queue.Enqueue(track);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Added {track.Title} ({track.Url}) to the queue in {textChannel.Guild.Name}/{textChannel.Name}"));
-                return string.Format(Localizer.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink());
+                return string.Format(GuildUtils.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink());
             }
             else
             {
                 await player.PlayAsync(track);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Now playing: {track.Title} ({track.Url}) in {textChannel.Guild.Name}/{textChannel.Name}"));
-                return string.Format(Localizer.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink());
+                return string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink());
             }
         }
 
@@ -318,36 +316,36 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (player == null)
-                return Localizer.Locate("EmptyQueue", textChannel);
+                return GuildUtils.Locate("EmptyQueue", textChannel);
             else if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             await player.SeekAsync(TimeSpan.Zero);
-            return string.Format(Localizer.Locate("Replaying", textChannel), player.Track.ToTrackLink());
+            return string.Format(GuildUtils.Locate("Replaying", textChannel), player.Track.ToTrackLink());
         }
 
         public async Task<string> SeekAsync(IGuild guild, ITextChannel textChannel, string time)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player?.Track?.Duration == null || !player.Track.CanSeek)
-                return Localizer.Locate("CannotSeek", textChannel);
+                return GuildUtils.Locate("CannotSeek", textChannel);
 
             if (uint.TryParse(time, out uint second))
             {
                 if (second >= player.Track.Duration.TotalSeconds)
                 {
-                    return string.Format(Localizer.Locate("SeekHigherOrEqual", textChannel), second, player.Track.Duration.TotalSeconds);
+                    return string.Format(GuildUtils.Locate("SeekHigherOrEqual", textChannel), second, player.Track.Duration.TotalSeconds);
                 }
                 await player.SeekAsync(TimeSpan.FromSeconds(second));
 
-                return string.Format(Localizer.Locate("SeekComplete", textChannel), second, TimeSpan.FromSeconds(second).ToShortForm(), player.Track.Duration.ToShortForm());
+                return string.Format(GuildUtils.Locate("SeekComplete", textChannel), second, TimeSpan.FromSeconds(second).ToShortForm(), player.Track.Duration.ToShortForm());
             }
             // Assume its a string with the formats below
             string[] timeformats = { @"m\:ss", @"mm\:ss", @"h\:mm\:ss", @"hh\:mm\:ss" };
             if (!TimeSpan.TryParseExact(time, timeformats, CultureInfo.InvariantCulture, out TimeSpan span))
             {
-                return Localizer.Locate("SeekInvalidFormat", textChannel);
+                return GuildUtils.Locate("SeekInvalidFormat", textChannel);
             }
             if (span < TimeSpan.Zero)
             {
@@ -355,74 +353,74 @@ namespace Fergun.Services
             }
             if (span >= player.Track.Duration)
             {
-                return string.Format(Localizer.Locate("SeekTimeHigherOrEqual", textChannel), span.ToShortForm(), player.Track.Duration.ToShortForm());
+                return string.Format(GuildUtils.Locate("SeekTimeHigherOrEqual", textChannel), span.ToShortForm(), player.Track.Duration.ToShortForm());
             }
             await player.SeekAsync(span);
 
-            return string.Format(Localizer.Locate("SeekTimeComplete", textChannel), span.ToShortForm(), player.Track.Duration.ToShortForm());
+            return string.Format(GuildUtils.Locate("SeekTimeComplete", textChannel), span.ToShortForm(), player.Track.Duration.ToShortForm());
         }
 
         public async Task<string> StopAsync(IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player == null)
-                return Localizer.Locate("PlayerError", textChannel);
+                return GuildUtils.Locate("PlayerError", textChannel);
             await player.StopAsync();
             if (_loopDict.ContainsKey(guild.Id))
             {
                 _loopDict.TryRemove(guild.Id, out _);
             }
-            return Localizer.Locate("PlayerStopped", textChannel);
+            return GuildUtils.Locate("PlayerStopped", textChannel);
         }
 
         public async Task<string> SkipAsync(IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player == null)
-                return Localizer.Locate("PlayerError", textChannel);
+                return GuildUtils.Locate("PlayerError", textChannel);
             if (player.Queue.Count == 0)
-                return Localizer.Locate("EmptyQueue", textChannel);
+                return GuildUtils.Locate("EmptyQueue", textChannel);
 
             var oldTrack = player.Track;
             await player.SkipAsync();
-            return string.Format(Localizer.Locate("PlayerTrackSkipped", textChannel), oldTrack.ToTrackLink(false), player.Track.ToTrackLink());
+            return string.Format(GuildUtils.Locate("PlayerTrackSkipped", textChannel), oldTrack.ToTrackLink(false), player.Track.ToTrackLink());
         }
 
         public async Task<string> SetVolumeAsync(int volume, IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
             volume = Math.Min(volume, 150);
             if (volume <= 2)
             {
-                return Localizer.Locate("VolumeOutOfIndex", textChannel);
+                return GuildUtils.Locate("VolumeOutOfIndex", textChannel);
             }
 
             await player.UpdateVolumeAsync((ushort)volume);
-            return string.Format(Localizer.Locate("VolumeSet", textChannel), volume);
+            return string.Format(GuildUtils.Locate("VolumeSet", textChannel), volume);
         }
 
         public async Task<string> PauseOrResumeAsync(IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
             if (player.PlayerState == PlayerState.Playing)
             {
                 await player.PauseAsync();
-                return Localizer.Locate("PlayerPaused", textChannel);
+                return GuildUtils.Locate("PlayerPaused", textChannel);
             }
             else
             {
                 await player.ResumeAsync();
-                return Localizer.Locate("PlaybackResumed", textChannel);
+                return GuildUtils.Locate("PlaybackResumed", textChannel);
             }
         }
 
@@ -430,39 +428,39 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
             if (player.PlayerState == PlayerState.Paused)
             {
                 await player.ResumeAsync();
-                return Localizer.Locate("PlaybackResumed", textChannel);
+                return GuildUtils.Locate("PlaybackResumed", textChannel);
             }
 
-            return Localizer.Locate("PlayerNotPaused", textChannel);
+            return GuildUtils.Locate("PlayerNotPaused", textChannel);
         }
 
         public string GetCurrentTrack(IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
-            return string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm());
+            return string.Format(GuildUtils.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm());
         }
 
         public string GetQueue(IGuild guild, ITextChannel textChannel)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
-            string queue = string.Format(Localizer.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm()) + "\n\n";
+            string queue = string.Format(GuildUtils.Locate("CurrentlyPlaying", textChannel), player.Track.ToTrackLink(false), player.Track.Position.ToShortForm(), player.Track.Duration.ToShortForm()) + "\n\n";
             if (player.Queue.Count == 0)
             {
-                return queue + Localizer.Locate("EmptyQueue", textChannel);
+                return queue + GuildUtils.Locate("EmptyQueue", textChannel);
             }
 
-            queue += $"{Localizer.Locate("MusicInQueue", textChannel)}\n";
+            queue += $"{GuildUtils.Locate("MusicInQueue", textChannel)}\n";
             //return "Music in queue:\n" + string.Join("\n", player.Queue.Select(x => (x as LavaTrack).Title));
             int tracksToShow = Math.Min(10, player.Queue.Count);
             int excess = player.Queue.Count - 10;
@@ -474,7 +472,7 @@ namespace Fergun.Services
             }
             if (excess > 0)
             {
-                queue += "\n" + string.Format(Localizer.Locate("QueueExcess", textChannel), excess);
+                queue += "\n" + string.Format(GuildUtils.Locate("QueueExcess", textChannel), excess);
             }
             return queue;
         }
@@ -483,38 +481,38 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player.Queue.Count == 0)
             {
-                return Localizer.Locate("EmptyQueue", textChannel);
+                return GuildUtils.Locate("EmptyQueue", textChannel);
             }
             else if (player.Queue.Count == 1)
             {
-                return Localizer.Locate("Queue1Item", textChannel);
+                return GuildUtils.Locate("Queue1Item", textChannel);
             }
 
             player.Queue.Shuffle();
 
-            return Localizer.Locate("QueueShuffled", textChannel);
+            return GuildUtils.Locate("QueueShuffled", textChannel);
         }
 
         public string RemoveAt(IGuild guild, ITextChannel textChannel, int index)
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player.Queue.Count == 0)
             {
-                return Localizer.Locate("EmptyQueue", textChannel);
+                return GuildUtils.Locate("EmptyQueue", textChannel);
             }
             if (index < 1 || index > player.Queue.Count)
             {
-                return Localizer.Locate("IndexOutOfRange", textChannel);
+                return GuildUtils.Locate("IndexOutOfRange", textChannel);
             }
             var track = player.Queue.ElementAt(index - 1);
 
             player.Queue.RemoveAt(index - 1);
-            return string.Format(Localizer.Locate("TrackRemoved", textChannel), track.ToTrackLink(false), index);
+            return string.Format(GuildUtils.Locate("TrackRemoved", textChannel), track.ToTrackLink(false), index);
         }
 
         public async Task<(string, IEnumerable<string>)> GetLyricsAsync(string query, bool keepHeaders, IGuild guild, ITextChannel textChannel, SpotifyGame spotify)
@@ -537,7 +535,7 @@ namespace Fergun.Services
                 {
                     if (spotify == null)
                     {
-                        return (Localizer.Locate("LyricsQueryNotPassed", textChannel), null);
+                        return (GuildUtils.Locate("LyricsQueryNotPassed", textChannel), null);
                     }
                     query = $"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}";
                 }
@@ -550,28 +548,28 @@ namespace Fergun.Services
             }
             catch (HttpRequestException)
             {
-                return (Localizer.Locate("AnErrorOccurred", textChannel), null);
+                return (GuildUtils.Locate("AnErrorOccurred", textChannel), null);
             }
             if (genius.Meta.Status != 200)
             {
-                return (Localizer.Locate("AnErrorOccurred", textChannel), null);
+                return (GuildUtils.Locate("AnErrorOccurred", textChannel), null);
             }
             if (genius.Response.Hits.Count == 0)
             {
-                return (string.Format(Localizer.Locate("LyricsNotFound", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
+                return (string.Format(GuildUtils.Locate("LyricsNotFound", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
             }
             string title = genius.Response.Hits[0].Result.FullTitle;
             Uri uri = genius.Response.Hits[0].Result.Url;
 
-            string lyrics = await ParseGeniusLyricsAsync(uri, keepHeaders);
+            string lyrics = await CommandUtils.ParseGeniusLyricsAsync(uri, keepHeaders);
             if (string.IsNullOrWhiteSpace(lyrics))
             {
-                return (string.Format(Localizer.Locate("ErrorParsingLyrics", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
+                return (string.Format(GuildUtils.Locate("ErrorParsingLyrics", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
             }
             var split = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
 
             string links = Format.Url("Genius", uri.AbsoluteUri);
-            links += $" - {Format.Url(Localizer.Locate("ArtistPage", textChannel), genius.Response.Hits[0].Result.PrimaryArtist.Url.AbsoluteUri)}";
+            links += $" - {Format.Url(GuildUtils.Locate("ArtistPage", textChannel), genius.Response.Hits[0].Result.PrimaryArtist.Url.AbsoluteUri)}";
             split = split.Prepend(links);
             split = split.Prepend(title);
             return (null, split);
@@ -581,12 +579,12 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return (false, Localizer.Locate("PlayerNotPlaying", textChannel));
+                return (false, GuildUtils.Locate("PlayerNotPlaying", textChannel));
 
             var artworkLink = await player.Track.FetchArtworkAsync();
             if (string.IsNullOrEmpty(artworkLink))
             {
-                return (false, Localizer.Locate("AnErrorOccurred", textChannel));
+                return (false, GuildUtils.Locate("AnErrorOccurred", textChannel));
             }
             else
                 return (true, artworkLink);
@@ -596,65 +594,32 @@ namespace Fergun.Services
         {
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
-                return Localizer.Locate("PlayerNotPlaying", textChannel);
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
             if (!count.HasValue)
             {
                 if (_loopDict.ContainsKey(guild.Id))
                 {
                     _loopDict.TryRemove(guild.Id, out _);
-                    return Localizer.Locate("LoopDisabled", textChannel);
+                    return GuildUtils.Locate("LoopDisabled", textChannel);
                 }
-                return string.Format(Localizer.Locate("LoopNoValuePassed", textChannel), Localizer.GetPrefix(textChannel));
+                return string.Format(GuildUtils.Locate("LoopNoValuePassed", textChannel), GuildUtils.GetPrefix(textChannel));
             }
 
             uint countValue = count.Value;
             if (countValue < 1)
             {
-                return string.Format(Localizer.Locate("NumberOutOfIndex", textChannel), 1, Constants.MaxTrackLoops);
+                return string.Format(GuildUtils.Locate("NumberOutOfIndex", textChannel), 1, Constants.MaxTrackLoops);
             }
             countValue = Math.Min(Constants.MaxTrackLoops, countValue);
 
             if (_loopDict.ContainsKey(guild.Id))
             {
                 _loopDict[guild.Id] = countValue;
-                return string.Format(Localizer.Locate("LoopUpdated", textChannel), countValue);
+                return string.Format(GuildUtils.Locate("LoopUpdated", textChannel), countValue);
             }
             _loopDict.TryAdd(guild.Id, countValue);
-            return string.Format(Localizer.Locate("NowLooping", textChannel), countValue);
-        }
-
-        private static async Task<string> ParseGeniusLyricsAsync(Uri uri, bool keepHeaders)
-        {
-            var context = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
-            var document = await context.OpenAsync(uri.AbsoluteUri);
-            var element = document?.GetElementsByClassName("lyrics")?.FirstOrDefault()
-                       ?? document?.GetElementsByClassName("SongPageGrid-sc-1vi6xda-0 DGVcp Lyrics__Root-sc-1ynbvzw-0 kkHBOZ")?.FirstOrDefault();
-
-            if (element == null)
-            {
-                return null;
-            }
-
-            // Remove newlines and tabs.
-            string lyrics = Regex.Replace(element.InnerHtml, @"\t|\n|\r", string.Empty);
-
-            lyrics = WebUtility.HtmlDecode(lyrics)
-                .Replace("<b>", "**", StringComparison.OrdinalIgnoreCase)
-                .Replace("</b>", "**", StringComparison.OrdinalIgnoreCase)
-                .Replace("<i>", "*", StringComparison.OrdinalIgnoreCase)
-                .Replace("</i>", "*", StringComparison.OrdinalIgnoreCase)
-                .Replace("<br>", "\n", StringComparison.OrdinalIgnoreCase)
-                .Replace("</div>", "\n", StringComparison.OrdinalIgnoreCase);
-
-            // Remove remaining HTML tags.
-            lyrics = Regex.Replace(lyrics, @"(\<.*?\>)", string.Empty);
-
-            if (!keepHeaders)
-            {
-                lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty, RegexOptions.Multiline);
-            }
-            return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
+            return string.Format(GuildUtils.Locate("NowLooping", textChannel), countValue);
         }
 
         public async Task ShutdownAllPlayersAsync()
@@ -668,8 +633,8 @@ namespace Fergun.Services
                 foreach (var player in players)
                 {
                     var embed = new EmbedBuilder()
-                        .WithTitle($"\u26a0 {Localizer.Locate("Warning", player.TextChannel)} \u26a0")
-                        .WithDescription(Localizer.Locate("MusicPlayerShutdownWarning", player.TextChannel))
+                        .WithTitle($"\u26a0 {GuildUtils.Locate("Warning", player.TextChannel)} \u26a0")
+                        .WithDescription(GuildUtils.Locate("MusicPlayerShutdownWarning", player.TextChannel))
                         .WithColor(FergunConfig.EmbedColor);
 
                     await player.TextChannel.SendMessageAsync(embed: embed.Build());

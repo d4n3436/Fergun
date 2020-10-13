@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Fergun.Services;
+using Fergun.Utils;
 
 namespace Fergun.Attributes.Preconditions
 {
@@ -130,7 +130,7 @@ namespace Fergun.Attributes.Preconditions
                 //    $"result: {result}\n\nrounded: {Math.Round(result, 2)}");
 
                 return PreconditionResult.FromError(
-                    ErrorMessage ?? "RLMT" + string.Format(Localizer.Locate("Ratelimited", context.Channel), Math.Round(result, 2).ToString()));
+                    ErrorMessage ?? "RLMT" + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(result, 2).ToString()));
             }
         }
 

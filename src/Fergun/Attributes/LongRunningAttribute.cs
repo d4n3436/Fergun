@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.CommandCache;
 using Discord.Commands;
-using Fergun.Services;
+using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Attributes
@@ -24,7 +24,7 @@ namespace Fergun.Attributes
                 {
                     x.Content = null;
                     x.Embed = new EmbedBuilder()
-                    .WithDescription($"{Constants.LoadingEmote} {Localizer.Locate("Loading", context.Channel)}")
+                    .WithDescription($"{Constants.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
                     .WithColor(FergunConfig.EmbedColor)
                     .Build();
                 });

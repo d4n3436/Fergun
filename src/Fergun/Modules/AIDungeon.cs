@@ -109,11 +109,6 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(Locate("ErrorOnAPI"));
                 }
-                catch (Exception e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Unknown error", e));
-                    return FergunResult.FromError(e.Message);
-                }
                 string error = CheckResponse(response);
                 if (error != null)
                 {
@@ -281,11 +276,6 @@ namespace Fergun.Modules
             {
                 return (Locate("ErrorOnAPI"), null);
             }
-            catch (Exception e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Unknown exception", e));
-                return (e.Message, null);
-            }
             string error = CheckResponse(response);
             if (error != null)
             {
@@ -374,11 +364,6 @@ namespace Fergun.Modules
             {
                 return (Locate("ErrorOnAPI"), null);
             }
-            catch (Exception e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Unknown exception", e));
-                return (e.Message, null);
-            }
             error = CheckResponse(response);
             if (error != null)
             {
@@ -406,11 +391,6 @@ namespace Fergun.Modules
             {
                 return (Locate("ErrorOnAPI"), null);
             }
-            catch (Exception e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Unknown exception", e));
-                return (e.Message, null);
-            }
             error = CheckResponse(response);
             if (error != null)
             {
@@ -437,11 +417,6 @@ namespace Fergun.Modules
             catch (TimeoutException)
             {
                 return (Locate("ErrorOnAPI"), null);
-            }
-            catch (Exception e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Unknown exception", e));
-                return (e.Message, null);
             }
             error = CheckResponse(response);
             if (error != null)

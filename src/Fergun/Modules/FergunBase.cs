@@ -6,7 +6,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Discord.Addons.CommandCache;
 using Discord.Addons.Interactive;
-using Fergun.Services;
+using Fergun.Utils;
 
 namespace Fergun.Modules
 {
@@ -87,17 +87,17 @@ namespace Fergun.Modules
             //return response;
         }
 
-        public string GetPrefix() => Localizer.GetPrefix(Context.Channel);
+        public string GetPrefix() => GuildUtils.GetPrefix(Context.Channel);
 
-        public GuildConfig GetGuildConfig() => Localizer.GetGuildConfig(Context.Channel);
+        public GuildConfig GetGuildConfig() => GuildUtils.GetGuildConfig(Context.Channel);
 
-        public string GetLanguage() => Localizer.GetLanguage(Context.Channel);
+        public string GetLanguage() => GuildUtils.GetLanguage(Context.Channel);
 
-        public string Locate(string key) => Localizer.Locate(key, Context.Channel);
+        public string Locate(string key) => GuildUtils.Locate(key, Context.Channel);
 
-        public string Locate(bool boolean) => Localizer.Locate(boolean ? "Yes" : "No", Context.Channel);
+        public string Locate(bool boolean) => GuildUtils.Locate(boolean ? "Yes" : "No", Context.Channel);
 
-        public string Locate(string key, string language) => Localizer.Locate(key, language);
+        public string Locate(string key, string language) => GuildUtils.Locate(key, language);
 
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null)
         {

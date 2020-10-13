@@ -282,8 +282,8 @@
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>Ek bir resim değil.</value>
   </data>
-	<data name="ImageNotFound" xml:space="preserve">
-    <value>Son {0} mesajda resim URL'si veya eki bulunamadı.</value>
+	<data name="UrlNotFound" xml:space="preserve">
+    <value>Son {0} iletide herhangi bir url veya ek bulunamadı.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>URL geçerli bir resim değil.</value>
@@ -315,8 +315,8 @@
 	<data name="ocrParam1" xml:space="preserve">
     <value>Kullanılacak bir resmin URL'si.</value>
   </data>
-	<data name="ImageTooLarge" xml:space="preserve">
-    <value>Görüntü çok büyük.</value>
+	<data name="UrlFileTooLarge" xml:space="preserve">
+    <value>Dosya çok büyük.</value>
   </data>
 	<data name="OcrEmpty" xml:space="preserve">
     <value>OCR sonuç vermedi.</value>

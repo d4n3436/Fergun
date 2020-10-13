@@ -4,11 +4,12 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
-using Fergun.Services;
+using Fergun.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Victoria;
@@ -117,7 +118,7 @@ namespace Fergun.Extensions
             var builder = new EmbedBuilder
             {
                 Title = command.Name,
-                Description = Localizer.Locate(command.Summary ?? "NoDescription", language),
+                Description = GuildUtils.Locate(command.Summary ?? "NoDescription", language),
                 Color = new Color(FergunConfig.EmbedColor)
             };
 
@@ -129,10 +130,10 @@ namespace Fergun.Extensions
                 {
                     field += $"{parameter.Name} ({parameter.Type.GetFriendlyName()})";
                     if (parameter.IsOptional)
-                        field += ' ' + Localizer.Locate("Optional", language);
-                    field += $": {Localizer.Locate(parameter.Summary ?? "NoDescription", language)}\n";
+                        field += ' ' + GuildUtils.Locate("Optional", language);
+                    field += $": {GuildUtils.Locate(parameter.Summary ?? "NoDescription", language)}\n";
                 }
-                builder.AddField(Localizer.Locate("Parameters", language), field);
+                builder.AddField(GuildUtils.Locate("Parameters", language), field);
             }
 
             // Add usage field (`prefix group command <param1> [param2...]`)
@@ -152,7 +153,7 @@ namespace Fergun.Extensions
                 usage += parameter.IsOptional ? ']' : '>';
             }
             usage += '`';
-            builder.AddField(Localizer.Locate("Usage", language), usage);
+            builder.AddField(GuildUtils.Locate("Usage", language), usage);
 
             // Add example if the command has parameters
             if (command.Parameters.Count > 0)
@@ -166,14 +167,14 @@ namespace Fergun.Extensions
                         example += command.Module.Group + ' ';
                     }
                     example += $"{command.Name} {(attribute as ExampleAttribute).Example}";
-                    builder.AddField(Localizer.Locate("Example", language), example);
+                    builder.AddField(GuildUtils.Locate("Example", language), example);
                 }
             }
 
             // Add notes if present
             if (!string.IsNullOrEmpty(command.Remarks))
             {
-                builder.AddField(Localizer.Locate("Notes", language), Localizer.Locate(command.Remarks, language));
+                builder.AddField(GuildUtils.Locate("Notes", language), GuildUtils.Locate(command.Remarks, language));
             }
 
             var modulePreconds = command.Module.Preconditions;
@@ -184,7 +185,7 @@ namespace Fergun.Extensions
 
             if (ratelimit != null)
             {
-                builder.AddField("Ratelimit", string.Format(Localizer.Locate("RatelimitUses", language), ratelimit.InvokeLimit, ratelimit.InvokeLimitPeriod.ToShortForm2()));
+                builder.AddField("Ratelimit", string.Format(GuildUtils.Locate("RatelimitUses", language), ratelimit.InvokeLimit, ratelimit.InvokeLimitPeriod.ToShortForm2()));
             }
 
             // Add required permissions if there's any
@@ -212,22 +213,37 @@ namespace Fergun.Extensions
                     }
                     list += "\n";
                 }
-                builder.AddField(Localizer.Locate("Requirements", language), list);
+                builder.AddField(GuildUtils.Locate("Requirements", language), list);
             }
 
             // Add aliases if present
             if (command.Aliases.Count > 1)
             {
-                builder.AddField(Localizer.Locate("Alias", language), string.Join(", ", command.Aliases.Skip(1)));
+                builder.AddField(GuildUtils.Locate("Alias", language), string.Join(", ", command.Aliases.Skip(1)));
             }
 
             // Add footer with info about required and optional parameters
             if (command.Parameters.Count > 0)
             {
-                builder.WithFooter(Localizer.Locate("HelpFooter2", language));
+                builder.WithFooter(GuildUtils.Locate("HelpFooter2", language));
             }
 
             return builder.Build();
+        }
+
+        /// <summary>
+        /// Gets the last url in the last <paramref name="messageCount"/> messages.
+        /// </summary>
+        /// <param name="context">The channel to search.</param>
+        /// <param name="messageCount">The number of messages to search.</param>
+        /// <param name="onlyImage">Get only urls of images.</param>
+        /// <param name="url">An optional url to use before searching in the channel.</param>
+        /// <param name="maxSize">The maximum file size in bytes, <see cref="Constants.AttachmentSizeLimit"/> by default.</param>
+        /// <returns>A task that represents an asynchronous search operation.</returns>
+        public static Task<(string, UrlFindResult)> GetLastUrlAsync(this ICommandContext context, int messageCount, bool onlyImage = false,
+            string url = null, long maxSize = Constants.AttachmentSizeLimit)
+        {
+            return context.Channel.GetLastUrlAsync(messageCount, onlyImage, context.Message, url, maxSize);
         }
 
         public static string Display(this ICommandContext context, bool displayUser = false)

@@ -282,8 +282,8 @@
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>المرفق ليس صورة.</value>
   </data>
-	<data name="ImageNotFound" xml:space="preserve">
-    <value>تعذر العثور على أي عنوان url للصورة أو مرفق في آخر {0} رسالة.</value>
+	<data name="UrlNotFound" xml:space="preserve">
+    <value>تعذر العثور على أي عنوان url أو مرفق في آخر {0} رسائل.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
     <value>عنوان url ليس صورة صالحة.</value>
@@ -315,8 +315,8 @@
 	<data name="ocrParam1" xml:space="preserve">
     <value>عنوان URL للصورة المراد استخدامها.</value>
   </data>
-	<data name="ImageTooLarge" xml:space="preserve">
-    <value>الصورة كبيرة جدًا.</value>
+	<data name="UrlFileTooLarge" xml:space="preserve">
+    <value>الملف كبير جدًا.</value>
   </data>
 	<data name="OcrEmpty" xml:space="preserve">
     <value>لم يعط OCR نتائج.</value>

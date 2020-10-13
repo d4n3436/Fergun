@@ -248,7 +248,7 @@ namespace Discord.Addons.CommandCache
                 {
                     before = await cacheable.GetOrDownloadAsync();
                 }
-                catch (HttpException e)
+                catch (HttpException)
                 {
                 }
                 if (before?.Content == null || before.Content == after.Content) return;

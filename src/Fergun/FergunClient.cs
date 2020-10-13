@@ -21,6 +21,7 @@ using DiscordBotsList.Api.Objects;
 using Fergun.APIs.DiscordBots;
 using Fergun.Extensions;
 using Fergun.Services;
+using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Victoria;
 
@@ -113,7 +114,7 @@ namespace Fergun
                 Console.Write("Enter DB User (leave emtpy if there's no auth): ");
                 string user = Console.ReadLine();
                 Console.Write("Enter DB Password (leave emtpy if there's no auth): ");
-                string password = ReadPassword();
+                string password = StringUtils.ReadPassword();
                 Console.Write("Enter DB host (leave empty for local): ");
                 string host = Console.ReadLine();
 
@@ -347,21 +348,6 @@ namespace Fergun
                 .AddSingleton(_reliabilityService)
                 .AddSingleton(_commandCacheService)
                 .BuildServiceProvider();
-
-        private static string ReadPassword()
-        {
-            string password = string.Empty;
-            while (true)
-            {
-                var keyInfo = Console.ReadKey(true);
-                if (keyInfo.Key == ConsoleKey.Enter)
-                {
-                    Console.WriteLine();
-                    return password;
-                }
-                password += keyInfo.KeyChar;
-            }
-        }
 
         private async Task ClientReady()
         {

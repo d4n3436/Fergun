@@ -9,42 +9,15 @@ namespace Fergun.Extensions
     public static class MessageExtensions
     {
         /// <summary>
-        /// Tries to delete a message.
-        /// </summary>
-        /// <param name="messageId">The message Id.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, ulong messageId)
-        {
-            var msg = await channel.GetMessageAsync(messageId);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
-
-        /// <summary>
-        /// Tries to delete a message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this ISocketMessageChannel channel, IMessage message)
-        {
-            var msg = await channel.GetMessageAsync(message.Id);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
-
-        /// <summary>
         /// Tries to delete this message.
         /// </summary>
         public static async Task<bool> TryDeleteAsync(this IMessage message)
         {
             if (message == null) return false;
-            var msg = await message.Channel.GetMessageAsync(message.Id);
-            return await TryDeleteMessageInternalAsync(msg);
-        }
 
-        internal static async Task<bool> TryDeleteMessageInternalAsync(IMessage message)
-        {
-            if (message == null)
-            {
-                // The message is already deleted.
-                return false;
-            }
+            message = await message.Channel.GetMessageAsync(message.Id);
+
+            if (message == null) return false;
 
             if (message.Channel is SocketGuildChannel guildChannel)
             {

@@ -283,7 +283,7 @@
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>El archivo adjunto no es una imagen.</value>
   </data>
-	<data name="ImageNotFound" xml:space="preserve">
+	<data name="UrlNotFound" xml:space="preserve">
     <value>No se pudo encontrar alguna url o archivo adjunto en los últimos {0} mensajes.</value>
   </data>
 	<data name="UrlNotImage" xml:space="preserve">
@@ -316,8 +316,8 @@
 	<data name="ocrParam1" xml:space="preserve">
     <value>La url de una imagen a usar.</value>
   </data>
-	<data name="ImageTooLarge" xml:space="preserve">
-    <value>La imagen es demasiado grande.</value>
+	<data name="UrlFileTooLarge" xml:space="preserve">
+    <value>El archivo es demasiado grande.</value>
   </data>
 	<data name="OcrEmpty" xml:space="preserve">
     <value>El OCR no dió resultados.</value>

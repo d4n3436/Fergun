@@ -25,6 +25,7 @@ using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Responses;
 using Fergun.Services;
+using Fergun.Utils;
 using GoogleTranslateFreeApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -40,7 +41,6 @@ namespace Fergun.Modules
         [ThreadStatic]
         private static Random _rngInstance;
 
-        private static readonly Regex _linkRegex = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient();
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
@@ -127,7 +127,7 @@ namespace Fergun.Modules
             List<string> languageChain = new List<string>();
             int chainCount = 7;
             string originalLang = null;
-            SimpleTranslationResult result;
+            SimpleTranslationResult translation;
 
             for (int i = 0; i < chainCount; i++)
             {
@@ -145,14 +145,14 @@ namespace Fergun.Modules
                     } while (languageChain.Contains(targetLang));
                 }
 
-                result = await TranslateSimpleAsync(text, targetLang, "");
-                if (result.Error != null)
+                translation = await TranslateSimpleAsync(text, targetLang, "");
+                if (translation.Error != null)
                 {
-                    return FergunResult.FromError(Locate(result.Error));
+                    return FergunResult.FromError(Locate(translation.Error));
                 }
                 if (i == 0)
                 {
-                    originalLang = result.Source.ISO639;
+                    originalLang = translation.Source.ISO639;
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Original language: {originalLang}"));
 
                     // Fallback to English if the detected language is not supported by Bing.
@@ -163,7 +163,7 @@ namespace Fergun.Modules
                     }
                     languageChain.Add(originalLang);
                 }
-                text = result.Text;
+                text = translation.Text;
                 languageChain.Add(targetLang);
             }
 
@@ -621,12 +621,13 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
         {
-            string error;
-            (url, error) = await GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
-            if (url == null)
+            UrlFindResult result;
+            (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
+            if (result != UrlFindResult.UrlFound)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(string.Format(Locate(result.ToString()), Constants.ClientConfig.MessageCacheSize));
             }
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Identify: url to use: {url}"));
 
             var data = new Dictionary<string, string>
@@ -654,10 +655,10 @@ namespace Fergun.Modules
             bool autoTranslate = GetGuildConfig()?.CaptionbotAutoTranslate ?? FergunConfig.CaptionbotAutoTranslateDefault;
             if (autoTranslate && GetLanguage() != "en")
             {
-                var result = await TranslateSimpleAsync(text, GetLanguage(), "en");
-                if (result.Error == null)
+                var translation = await TranslateSimpleAsync(text, GetLanguage(), "en");
+                if (translation.Error == null)
                 {
-                    text = result.Text;
+                    text = translation.Text;
                 }
             }
 
@@ -782,12 +783,13 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Invert([Remainder, Summary("invertParam1")] string url = null)
         {
-            string error;
-            (url, error) = await GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
-            if (url == null)
+            UrlFindResult result;
+            (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
+            if (result != UrlFindResult.UrlFound)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(string.Format(Locate(result.ToString()), Constants.ClientConfig.MessageCacheSize));
             }
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Invert: url to use: {url}"));
 
             using (Stream response = await _httpClient.GetStreamAsync(new Uri(url)))
@@ -826,16 +828,16 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
-            string error;
-            (url, error) = await GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
-            if (url == null)
+            UrlFindResult result;
+            (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
+            if (result != UrlFindResult.UrlFound)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(string.Format(Locate(result.ToString()), Constants.ClientConfig.MessageCacheSize));
             }
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Ocr: url to use: {url}"));
 
-            string text;
-            (error, text) = await OcrSimpleAsync(url);
+            (string error, string text) = await OcrSimpleAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
                 return FergunResult.FromError(Locate(error));
@@ -884,53 +886,53 @@ namespace Fergun.Modules
                 return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Translators.SupportedLanguages.Select(x => Format.Code(x)))}");
             }
 
-            string error;
-            (url, error) = await GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
-            if (url == null)
+            UrlFindResult result;
+            (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
+            if (result != UrlFindResult.UrlFound)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(string.Format(Locate(result.ToString()), Constants.ClientConfig.MessageCacheSize));
             }
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Orctranslate: url to use: {url}"));
 
-            string text;
-            (error, text) = await OcrSimpleAsync(url);
+            (string error, string text) = await OcrSimpleAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
                 return FergunResult.FromError(Locate(error));
             }
 
             var sw = Stopwatch.StartNew();
-            var result = await TranslateSimpleAsync(text, target);
+            var translation = await TranslateSimpleAsync(text, target);
             sw.Stop();
-            if (result.Error != null)
+            if (translation.Error != null)
             {
-                return FergunResult.FromError(Locate(result.Error));
+                return FergunResult.FromError(Locate(translation.Error));
             }
 
-            if (result.Text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
+            if (translation.Text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(result.Text);
-                    result.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
+                    var response = await Hastebin.UploadAsync(translation.Text);
+                    translation.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
                 }
                 catch (HttpRequestException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocrtranslate: Error while uploading text to Hastebin", e));
-                    result.Text = Format.Code(result.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                    translation.Text = Format.Code(translation.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
             else
             {
-                result.Text = Format.Code(result.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                translation.Text = Format.Code(translation.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("OcrtrResults"))
                 .AddField(Locate("Input"), Format.Code(text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                .AddField(Locate("SourceLanguage"), result.Source?.FullName ?? "???", false)
-                .AddField(Locate("TargetLanguage"), result.Target.FullName, false)
-                .AddField(Locate("Result"), result.Text, false)
+                .AddField(Locate("SourceLanguage"), translation.Source?.FullName ?? "???", false)
+                .AddField(Locate("TargetLanguage"), translation.Target.FullName, false)
+                .AddField(Locate("Result"), translation.Text, false)
                 .WithFooter(string.Format(Locate("ProcessingTime"), processTime + sw.ElapsedMilliseconds))
                 .WithColor(FergunConfig.EmbedColor);
 
@@ -983,12 +985,13 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Resize([Summary("resizeParam1")] string url = null)
         {
-            string error;
-            (url, error) = await GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
-            if (url == null)
+            UrlFindResult result;
+            (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
+            if (result != UrlFindResult.UrlFound)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(string.Format(Locate(result.ToString()), Constants.ClientConfig.MessageCacheSize));
             }
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Resize: url to use: {url}"));
 
             var data = new Dictionary<string, string>
@@ -1695,7 +1698,7 @@ namespace Fergun.Modules
                 {
                     for (int i = 0; i < 10; i++)
                     {
-                        string randStr = RandomString(RngInstance.Next(5, 7));
+                        string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
                         //var items = await YTClient.SearchVideosAsync(rand, 1);
                         var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
                         if (items.Count != 0)
@@ -1715,43 +1718,9 @@ namespace Fergun.Modules
             return tasks;
         }
 
-        private static async Task<HttpResponseMessage> GetUrlResponseHeadersAsync(string url)
-        {
-            try
-            {
-                return await _httpClient.GetAsync(new UriBuilder(url).Uri, HttpCompletionOption.ResponseHeadersRead);
-            }
-            catch (HttpRequestException)
-            {
-                return null;
-            }
-            catch (UriFormatException)
-            {
-                return null;
-            }
-        }
-
-        private static async Task<long?> GetUrlContentLengthAsync(string url)
-        {
-            var response = await GetUrlResponseHeadersAsync(url);
-            return response?.Content?.Headers?.ContentLength;
-        }
-
-        private static async Task<string> GetUrlMediaTypeAsync(string url)
-        {
-            var response = await GetUrlResponseHeadersAsync(url);
-            return response?.Content?.Headers?.ContentType?.MediaType;
-        }
-
-        private static async Task<bool> IsImageUrlAsync(string url)
-        {
-            string mediaType = await GetUrlMediaTypeAsync(url);
-            return mediaType != null && mediaType.ToLowerInvariant().StartsWith("image/", StringComparison.OrdinalIgnoreCase);
-        }
-
         private static async Task<(string, string)> OcrSimpleAsync(string url)
         {
-            if (!Enum.TryParse((await GetUrlMediaTypeAsync(url)).Substring(6), true, out OCRSpace.FileType fileType))
+            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url)).Substring(6), true, out OCRSpace.FileType fileType))
             {
                 return ("InvalidFileType", null);
             }
@@ -1807,22 +1776,7 @@ namespace Fergun.Modules
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
             }
-            catch (GoogleTranslateIPBannedException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
-                useBing = true;
-            }
-            catch (HttpRequestException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
-                useBing = true;
-            }
-            catch (NullReferenceException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
-                useBing = true;
-            }
-            catch (ArgumentNullException e)
+            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is SystemException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
                 useBing = true;
@@ -1838,20 +1792,10 @@ namespace Fergun.Modules
 
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
                 }
-                catch (JsonSerializationException e)
+                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
                     resultError = "ErrorInTranslation";
-                }
-                catch (HttpRequestException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
-                    resultError = "ErrorInTranslation";
-                }
-                catch (ArgumentException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
-                    resultError = "LanguageNotFound";
                 }
             }
 
@@ -1877,126 +1821,6 @@ namespace Fergun.Modules
             }
             _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
-        }
-
-        /// <summary>
-        /// Gets the url from the last x messages / embeds /attachments.
-        /// </summary>
-        /// <param name="messageCount">The number of messages to search.</param>
-        /// <param name="onlyImage">Get only urls of images.</param>
-        /// <param name="maxSize">The maximum file size in bytes, <see cref="Constants.AttachmentSizeLimit"/> by default.</param>
-        /// <returns>The url on success, or null and the error reason.</returns>
-        private async Task<(string, string)> GetLastUrlAsync(int messageCount, bool onlyImage, string url = null, long maxSize = Constants.AttachmentSizeLimit)
-        {
-            long? size = null;
-            //If the message that executed the command contains any suitable attachment or url
-            if (url != null || Context.Message.Attachments.Count > 0)
-            {
-                if (Context.Message.Attachments.Count > 0)
-                {
-                    var attachment = Context.Message.Attachments.First();
-                    if (onlyImage && attachment.Width == null && attachment.Height == null)
-                    {
-                        return (null, Locate("AttachmentNotImage"));
-                    }
-                    url = attachment.Url;
-                }
-                if (onlyImage && !await IsImageUrlAsync(url))
-                {
-                    return (null, Locate("UrlNotImage"));
-                }
-                size = await GetUrlContentLengthAsync(url);
-                if (size != null && size > maxSize)
-                {
-                    return (null, Locate("ImageTooLarge"));
-                }
-                return (url, null);
-            }
-
-            //Get the last x messages of the current channel
-            var messages = await Context.Channel.GetMessagesAsync(messageCount, messageCount > 0 ? CacheMode.CacheOnly : CacheMode.AllowDownload).FlattenAsync();
-
-            //Try to get the last message with any attachment, embed image url or that contains an url
-            var filtered = messages.FirstOrDefault(x =>
-            x.Attachments.Any(y => !onlyImage || y.Width != null && y.Height != null)
-            || x.Embeds.Any(y => !onlyImage || y.Image != null || y.Thumbnail != null)
-            || _linkRegex.IsMatch(x.Content));
-
-            //If there's no results, return nothing
-            if (filtered == null)
-            {
-                return (null, string.Format(Locate("ImageNotFound"), messageCount));
-            }
-
-            //Note: attachments and embeds can contain text but i'm prioritizing the previous ones
-            // Priority order: attachments > embeds > text
-            if (filtered.Attachments.Count > 0)
-            {
-                //var attachment = filtered.Attachments.First();
-                //if (OnlyImage && attachment.Width != null && attachment.Height != null)//!IsImageUrl(filtered.Attachments.First().Url))
-                //{
-                //    return (null, string.Format(Locate("ImageNotFound"), messageCount));
-                //}
-                url = filtered.Attachments.First().Url;
-                size = filtered.Attachments.First().Size;
-            }
-            else if (filtered.Embeds.Count > 0)
-            {
-                var embed = filtered.Embeds.First();
-                var image = embed.Image;
-                var thumbnail = embed.Thumbnail;
-                if (onlyImage)
-                {
-                    if (image?.Height != null && image?.Width != null)
-                    {
-                        url = image?.Url;
-                    }
-                    else if (thumbnail?.Height != null && thumbnail?.Width != null)
-                    {
-                        url = thumbnail?.Url;
-                    }
-                    else
-                    {
-                        return (null, string.Format(Locate("ImageNotFound"), messageCount));
-                    }
-
-                    // the image can still be invalid
-                    if (!await IsImageUrlAsync(url))
-                    {
-                        return (null, string.Format(Locate("ImageNotFound"), messageCount));
-                    }
-                }
-                else
-                {
-                    url = embed.Url ?? image?.Url ?? thumbnail?.Url;
-                }
-            }
-            else
-            {
-                string match = _linkRegex.Match(filtered.Content).Value;
-                if (onlyImage && !await IsImageUrlAsync(match))
-                {
-                    return (null, string.Format(Locate("ImageNotFound"), messageCount));
-                }
-                url = match;
-            }
-            if (filtered.Attachments.Count == 0)
-            {
-                size = await GetUrlContentLengthAsync(url);
-            }
-
-            if (size != null && size > maxSize)
-            {
-                return (null, Locate("ImageTooLarge"));
-            }
-            return (url, null);
-        }
-
-        public static string RandomString(int length)
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[RngInstance.Next(s.Length)]).ToArray());
         }
     }
 
