@@ -1033,6 +1033,8 @@ namespace Fergun.Modules
         [Example("Devs")]
         public async Task<RuntimeResult> Roleinfo([Remainder, Summary("roleinfoParam1")] SocketRole role)
         {
+            int memberCount = role.Members.Count();
+
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("RoleInfo"))
 
@@ -1046,7 +1048,7 @@ namespace Fergun.Modules
 
                 .AddField(Locate("Permissions"), role.Permissions.RawValue == 0 ? Locate("None") : Format.Code(string.Join("`, `", role.Permissions.ToList())), false)
 
-                .AddField(Locate("MemberCount"), role.Members.Count(), true)
+                .AddField(Locate("MemberCount"), Context.Guild.HasAllMembers ? memberCount.ToString() : memberCount == 0 ? "?" : "~" + memberCount, true)
                 .AddField(Locate("CreatedAt"), role.CreatedAt, true)
                 .AddField(Locate("Mention"), role.Mention, true)
 
