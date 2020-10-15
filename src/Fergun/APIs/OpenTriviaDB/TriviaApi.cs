@@ -12,8 +12,6 @@ namespace Fergun.APIs.OpenTriviaDB
         public const string ApiCategoryCountEndpoint = "https://opentdb.com/api_count.php";
         public const string ApiGlobalCountEndpoint = "https://opentdb.com/api_count_global.php";
 
-        private static readonly WebClient _client = new WebClient();
-
         /// <summary>
         /// Requests questions from the API.
         /// </summary>
@@ -32,9 +30,12 @@ namespace Fergun.APIs.OpenTriviaDB
                                                          ResponseEncoding encoding = ResponseEncoding.Default,
                                                          string sessionToken = "")
         {
-
-            string jsonString = _client.DownloadString(GenerateApiUrl(amount, category, difficulty, type, encoding, sessionToken));
-            return JsonConvert.DeserializeObject<QuestionsResponse>(jsonString);
+            string json;
+            using (var wc = new WebClient())
+            {
+                json = wc.DownloadString(GenerateApiUrl(amount, category, difficulty, type, encoding, sessionToken));
+            }
+            return JsonConvert.DeserializeObject<QuestionsResponse>(json);
         }
 
         public static string GenerateApiUrl(uint amount,
@@ -98,8 +99,12 @@ namespace Fergun.APIs.OpenTriviaDB
                 query += $"&token={sessionToken}";
             }
 
-            string JsonString = _client.DownloadString($"{ApiTokenEndpoint}?{query}");
-            return JsonConvert.DeserializeObject<SessionTokenResponse>(JsonString);
+            string json;
+            using (var wc = new WebClient())
+            {
+                json = wc.DownloadString($"{ApiTokenEndpoint}?{query}");
+            }
+            return JsonConvert.DeserializeObject<SessionTokenResponse>(json);
         }
 
         /// <summary>
@@ -108,8 +113,12 @@ namespace Fergun.APIs.OpenTriviaDB
         /// <returns>A <see cref="CategoryListResponse"/> object.</returns>
         public static CategoryListResponse RequestCategoryList()
         {
-            string JsonString = _client.DownloadString(ApiCategoryEndpoint);
-            return JsonConvert.DeserializeObject<CategoryListResponse>(JsonString);
+            string json;
+            using (var wc = new WebClient())
+            {
+                json = wc.DownloadString(ApiCategoryEndpoint);
+            }
+            return JsonConvert.DeserializeObject<CategoryListResponse>(json);
         }
 
         /// <summary>
@@ -125,8 +134,12 @@ namespace Fergun.APIs.OpenTriviaDB
                 throw new ArgumentException("You must specify a category.", nameof(category));
             }
 
-            string jsonString = _client.DownloadString($"{ApiCategoryCountEndpoint}?category={category.ToString("D")}");
-            return JsonConvert.DeserializeObject<NumberOfQuestionsInCategoryResponse>(jsonString);
+            string json;
+            using (var wc = new WebClient())
+            {
+                json = wc.DownloadString($"{ApiCategoryCountEndpoint}?category={category.ToString("D")}");
+            }
+            return JsonConvert.DeserializeObject<NumberOfQuestionsInCategoryResponse>(json);
         }
 
         /// <summary>
@@ -135,8 +148,12 @@ namespace Fergun.APIs.OpenTriviaDB
         /// <returns>A <see cref="GlobalQuestionCountResponse"/> object.</returns>
         public static GlobalQuestionCountResponse RequestGlobalQuestionCount()
         {
-            string jsonString = _client.DownloadString(ApiGlobalCountEndpoint);
-            return JsonConvert.DeserializeObject<GlobalQuestionCountResponse>(jsonString);
+            string json;
+            using (var wc = new WebClient())
+            {
+                json = wc.DownloadString(ApiGlobalCountEndpoint);
+            }
+            return JsonConvert.DeserializeObject<GlobalQuestionCountResponse>(json);
         }
     }
 }
