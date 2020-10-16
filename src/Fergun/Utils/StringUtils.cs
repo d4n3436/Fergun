@@ -15,11 +15,7 @@ namespace Fergun.Utils
             {
                 return await _httpClient.GetAsync(new UriBuilder(url).Uri, HttpCompletionOption.ResponseHeadersRead);
             }
-            catch (HttpRequestException)
-            {
-                return null;
-            }
-            catch (UriFormatException)
+            catch (Exception e) when (e is HttpRequestException || e is UriFormatException || e is ArgumentException)
             {
                 return null;
             }

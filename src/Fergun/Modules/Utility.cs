@@ -1720,6 +1720,7 @@ namespace Fergun.Modules
             return tasks;
         }
 
+        // TODO Use Engine 1 if the image is too small (30x30)
         private static async Task<(string, string)> OcrSimpleAsync(string url)
         {
             if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url)).Substring(6), true, out OCRSpace.FileType fileType))
@@ -1727,10 +1728,12 @@ namespace Fergun.Modules
                 return ("InvalidFileType", null);
             }
 
+            OCRSpace.OCREngine engine = fileType == OCRSpace.FileType.GIF ? OCRSpace.OCREngine.Engine1 : OCRSpace.OCREngine.Engine2;
+
             OCRSpace.OCRSpaceResponse ocr;
             try
             {
-                ocr = await OCRSpace.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: OCRSpace.OCREngine.Engine2);
+                ocr = await OCRSpace.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
             }
             catch (WebException e)
             {
