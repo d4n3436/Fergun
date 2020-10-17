@@ -1309,10 +1309,10 @@ namespace Fergun.Modules
                 target = "en";
             }
 
-            Stream stream;
+            byte[] bytes;
             try
             {
-                stream = await GoogleTTS.GetTtsStreamAsync(text, target);
+                bytes = await GoogleTTS.GetTtsAsync(text, target);
             }
             catch (HttpRequestException e)
             {
@@ -1320,7 +1320,10 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
+            using (var stream = new MemoryStream(bytes))
+            {
+                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
+            }
 
             return FergunResult.FromSuccess();
         }
