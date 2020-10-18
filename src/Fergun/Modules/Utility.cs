@@ -648,8 +648,15 @@ namespace Fergun.Modules
             }
             catch (HttpRequestException e)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling CaptionBot API", e));
                 return FergunResult.FromError(e.Message);
             }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling CaptionBot API", e));
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+
             text = text.Trim('\"');
 
             bool autoTranslate = GetGuildConfig()?.CaptionbotAutoTranslate ?? FergunConfig.CaptionbotAutoTranslateDefault;
@@ -700,7 +707,7 @@ namespace Fergun.Modules
                 catch (HttpRequestException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
-                    return FergunResult.FromError(Locate("AnErrorOccurred"));
+                    return FergunResult.FromError(e.Message);
                 }
                 catch (TokenNotFoundException e)
                 {
@@ -1000,17 +1007,30 @@ namespace Fergun.Modules
             };
 
             var content = new FormUrlEncodedContent(data);
-            string responseString;
+            string json;
 
-            using (var request = new HttpRequestMessage(HttpMethod.Post, "https://api.deepai.org/api/waifu2x"))
+            try
             {
-                request.Headers.Add("Api-Key", FergunConfig.DeepAiApiKey);
-                request.Content = content;
-                var response = await _httpClient.SendAsync(request);
-                responseString = await response.Content.ReadAsStringAsync();
+                using (var request = new HttpRequestMessage(HttpMethod.Post, "https://api.deepai.org/api/waifu2x"))
+                {
+                    request.Headers.Add("Api-Key", FergunConfig.DeepAiApiKey);
+                    request.Content = content;
+                    var response = await _httpClient.SendAsync(request);
+                    json = await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling waifu2x API", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling waifu2x API", e));
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            JToken token = JObject.Parse(responseString);
+            JToken token = JObject.Parse(json);
             string resultUrl = token.Value<string>("output_url");
             if (string.IsNullOrWhiteSpace(resultUrl))
             {
@@ -1564,14 +1584,22 @@ namespace Fergun.Modules
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Results count: {search[1].Count}"));
 
-            using (WebClient wc = new WebClient())
+            try
             {
-                string articleUrl = search[search.Count - 1][0];
-                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
+                using (WebClient wc = new WebClient())
+                {
+                    string articleUrl = search[search.Count - 1][0];
+                    string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
 
-                response = await wc.DownloadStringTaskAsync(apiUrl);
+                    response = await wc.DownloadStringTaskAsync(apiUrl);
+                }
             }
+            catch (WebException e)
+            {
+                return FergunResult.FromError(e.Message);
+            }
+
             var article = JsonConvert.DeserializeObject<WikiArticle>(response);
 
             var builder = new EmbedBuilder()
