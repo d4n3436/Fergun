@@ -7,7 +7,7 @@ namespace Fergun
 {
     public static class Constants
     {
-        public static string Version { get; } = "1.4";
+        public static string Version { get; } = "1.4.8";
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>
         {
@@ -23,7 +23,8 @@ namespace Fergun
             "1.2.9",
             "1.3",
             "1.3.3",
-            "1.3.6"
+            "1.3.6",
+            "1.4"
         };
 
         public static Dictionary<string, string> Languages { get; } = new Dictionary<string, string>

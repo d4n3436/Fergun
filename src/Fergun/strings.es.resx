@@ -2133,4 +2133,24 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="GaveId" xml:space="preserve">
 		<value>Se transfirió correctamente la ID a {0}.</value>
 	</data>
+	<data name="Changelog1.4.8" xml:space="preserve">
+		<value>- Nuevo comando: `give`.
+
+- Actualizado el módulo de AI Dungeon y el wrapper de API (otra vez), arreglado el bug de la aventura personalizada y arreglado `alter`.
+- Actualizado la librería de Google TTS, ahora usando preprocesadores y tokenizadores porteados de la librería de Python gTTS. Esto provee entonaciones y pronunciaciones correctas, y permite hacer TTS con textos más largos.
+- Mejorado el scraper de letras.
+
+- Ahora Fergun dejará un canal de voz cuando solo haya bots en ese canal.
+- Ahora `roleinfo` mostrará '?' y '~x' en los usuarios totales cuando la caché de servidor no está completa.
+
+- Arreglado Fixed activities and active clients not showing in `userinfo`.
+- Arreglado un bug `lyrics` que causaba que la opción "-headers" sea ignorado cuando sólo eso era pasado.
+- Arreglado un bug en `wikipedia` que ocurría con algunos artículos.
+- Arreglado un bug en `img` que ocurría cuando un !Bang era activado.
+- Arreglado un bug en `img` que ocurría cuando un texto largo era pasado.
+- Arreglado un bug raro en el paginador que ocurría cuando el usuario que añadía una reacción no estaba en la caché.
+- Arreglado un bug in `trivia` que ocurría cuando el comando era usado simultáneamente.
+- Arreglado un bug raro in `ocr` y `ocrtranslate` que ocurría cuando una imagen corrupta era usada.
+- Muchos bugs fixes menores.</value>
+	</data>
 </root>

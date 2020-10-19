@@ -2134,4 +2134,24 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="GaveId" xml:space="preserve">
 		<value>The ID was successfully transferred to {0}.</value>
 	</data>
+	<data name="Changelog1.4.8" xml:space="preserve">
+		<value>- New command: `give`.
+
+- Updated the AI Dungeon module and API wrapper (again), fixed the custom adventure bug, and fixed `alter`.
+- Updated the Google TTS library, now using preprocessors and tokenizers ported from gTTS Python library. This provides correct intonation and pronunciation, and also allows making TTS with larger texts.
+- Improved the lyrics scraper.
+
+- Now Fergun will leave a voice channel if there are only bots in that channel.
+- Now `roleinfo` will show '?' and '~x' total users when the guild cache isn't complete. 
+
+- Fixed activities and active clients not showing in `userinfo`.
+- Fixed a bug in `lyrics` that caused the "-headers" option from being ignored when only that was passed.
+- Fixed a bug in `wikipedia` that occurred with some articles.
+- Fixed a bug in `img` that occurred when a !Bang was triggered.
+- Fixed a bug in `img` that occurred when a large text was passed.
+- Fixed a rare bug in the paginator that occurred when the user that added a reaction wasn't cached.
+- Fixed a bug in `trivia` that occurred when the command was used simultaneously.
+- Fixed a rare bug in `ocr` and `ocrtranslate` that occurred when a corrupted image was used.
+- Lots of other bug fixes.</value>
+	</data>
 </root>

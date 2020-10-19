@@ -2131,4 +2131,24 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="GaveId" xml:space="preserve">
 		<value>Kimlik başarıyla {0} 'a aktarıldı.</value>
 	</data>
+	<data name="Changelog1.4.8" xml:space="preserve">
+		<value>- Yeni komut: `give`.
+
+- AI Dungeon modülü ve API sarmalayıcı (tekrar) güncellendi, özel macera hatası düzeltildi ve `alter` düzeltildi.
+- Google TTS kitaplığı, artık gTTS Python kitaplığından taşınan ön işlemciler ve belirteçler kullanılarak güncellendi. Bu, doğru tonlama ve telaffuz sağlar ve ayrıca TTS'nin daha büyük metinlerle yapılmasına izin verir.
+- Şarkı sözü sıyırıcı geliştirildi.
+
+- Şimdi Fergun, o kanalda yalnızca botlar varsa bir ses kanalından ayrılacak.
+- Artık "roleinfo", guild önbelleği tamamlanmadığında '?' ve '~x' toplam kullanıcıyı gösterecek.
+
+- Sabit etkinlikler ve aktif istemciler `userinfo` içinde gösterilmiyor.
+- Yalnızca bu geçildiğinde "-headers" seçeneğinin yok sayılmasına neden olan `lyrics` hata düzeltildi.
+- Bazı makalelerde meydana gelen `wikipedia` hata düzeltildi.
+- `img` tetiklendiğinde meydana gelen !Bang hatası düzeltildi.
+- Büyük bir metin iletildiğinde meydana gelen `img` hatası düzeltildi.
+- Bir reaksiyon ekleyen kullanıcı önbelleğe alınmadığında ortaya çıkan sayfalayıcıda nadir görülen bir hata düzeltildi.
+- `trivia` içinde komut aynı anda kullanıldığında oluşan bir hata düzeltildi.
+- Bozuk bir görüntü kullanıldığında meydana gelen nadir bir `ocr` ve `ocrtranslate` hata düzeltildi.
+- Diğer birçok hata düzeltmesi.</value>
+	</data>
 </root>
