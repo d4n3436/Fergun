@@ -2118,4 +2118,19 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 
 - Arreglado un bug que causaba que algunos comandos de moderación fallaran porque la jerarquía de calculaba incorrectamente.</value>
 	</data>
+	<data name="giveSummary" xml:space="preserve">
+		<value>Regala (transfiere) la ID especificada a un usuario.</value>
+	</data>
+	<data name="giveParam1" xml:space="preserve">
+		<value>La ID de aventura.</value>
+	</data>
+	<data name="giveParam2" xml:space="preserve">
+		<value>El usuario a regalar la ID.</value>
+	</data>
+	<data name="CannotGiveYourself" xml:space="preserve">
+		<value>No puedes regalar la ID a ti mismo!</value>
+	</data>
+	<data name="GaveId" xml:space="preserve">
+		<value>Se transfirió correctamente la ID a {0}.</value>
+	</data>
 </root>

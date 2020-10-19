@@ -2119,4 +2119,19 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 
 - Fixed a bug that caused some moderation commands to fail because the user hierarchy was calculated incorrectly.</value>
 	</data>
+	<data name="giveSummary" xml:space="preserve">
+		<value>Gives (transfers) the specified ID to an user.</value>
+	</data>
+	<data name="giveParam1" xml:space="preserve">
+		<value>The adventure ID.</value>
+	</data>
+	<data name="giveParam2" xml:space="preserve">
+		<value>The user to give the ID.</value>
+	</data>
+	<data name="CannotGiveYourself" xml:space="preserve">
+		<value>You cannot give the ID yourself!</value>
+	</data>
+	<data name="GaveId" xml:space="preserve">
+		<value>The ID was successfully transferred to {0}.</value>
+	</data>
 </root>

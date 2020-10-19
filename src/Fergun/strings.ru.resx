@@ -2116,4 +2116,19 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 
 - Исправлена ​​ошибка, из-за которой некоторые команды модерации не выполнялись из-за неправильного расчета иерархии пользователей.</value>
 	</data>
+	<data name="giveSummary" xml:space="preserve">
+		<value>Выдает (передает) указанный ID пользователю.</value>
+	</data>
+	<data name="giveParam1" xml:space="preserve">
+		<value>Идентификатор приключения.</value>
+	</data>
+	<data name="giveParam2" xml:space="preserve">
+		<value>Пользователь, которому необходимо присвоить идентификатор.</value>
+	</data>
+	<data name="CannotGiveYourself" xml:space="preserve">
+		<value>Вы не можете сами дать ID!</value>
+	</data>
+	<data name="GaveId" xml:space="preserve">
+		<value>Идентификатор был успешно перенесен на {0}.</value>
+	</data>
 </root>

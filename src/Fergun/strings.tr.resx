@@ -2116,4 +2116,19 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 
 - Kullanıcı hiyerarşisi yanlış hesaplandığı için bazı moderasyon komutlarının başarısız olmasına neden olan bir hata düzeltildi.</value>
 	</data>
+	<data name="giveSummary" xml:space="preserve">
+		<value>Belirtilen kimliği bir kullanıcıya verir (aktarır).</value>
+	</data>
+	<data name="giveParam1" xml:space="preserve">
+		<value>Macera kimliği.</value>
+	</data>
+	<data name="giveParam2" xml:space="preserve">
+		<value>Kullanıcı kimliği verecek.</value>
+	</data>
+	<data name="CannotGiveYourself" xml:space="preserve">
+		<value>Kimliği kendiniz veremezsiniz!</value>
+	</data>
+	<data name="GaveId" xml:space="preserve">
+		<value>Kimlik başarıyla {0} 'a aktarıldı.</value>
+	</data>
 </root>

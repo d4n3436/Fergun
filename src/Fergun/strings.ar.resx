@@ -2128,4 +2128,19 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 
 - إصلاح الخلل الذي تسبب في فشل بعض أوامر الإشراف بسبب حساب التسلسل الهرمي للمستخدم بشكل غير صحيح.</value>
 	</data>
+	<data name="giveSummary" xml:space="preserve">
+		<value>يعطي (ينقل) المعرف المحدد للمستخدم.</value>
+	</data>
+	<data name="giveParam1" xml:space="preserve">
+		<value>معرف المغامرة.</value>
+	</data>
+	<data name="giveParam2" xml:space="preserve">
+		<value>يعطي المستخدم المعرف.</value>
+	</data>
+	<data name="CannotGiveYourself" xml:space="preserve">
+		<value>لا يمكنك إعطاء الهوية بنفسك!</value>
+	</data>
+	<data name="GaveId" xml:space="preserve">
+		<value>تم نقل المعرف بنجاح إلى {0}.</value>
+	</data>
 </root>
