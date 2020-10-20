@@ -6,6 +6,12 @@ dotnet_diagnostic.CA2007.severity = none
 # CA1054: Uri parameters should not be strings
 dotnet_diagnostic.CA1054.severity = none
 
+# CA1055: URI-like return values should not be strings
+dotnet_diagnostic.CA1055.severity = none
+
+# CA1056: URI-like properties should not be strings
+dotnet_diagnostic.CA1056.severity = none
+
 # CA1305: Specify IFormatProvider
 dotnet_diagnostic.CA1305.severity = none
 
