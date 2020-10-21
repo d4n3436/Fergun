@@ -98,31 +98,8 @@ namespace Fergun.Modules
         [Summary("badtranslatorSummary")]
         [Alias("bt")]
         [Example("i don't know what to say lol")]
-        public async Task<RuntimeResult> Badtranslator([Remainder, Summary("badtranslatorParam1")] string text = null)
+        public async Task<RuntimeResult> Badtranslator([Remainder, Summary("badtranslatorParam1")] string text)
         {
-            var builder = new EmbedBuilder
-            {
-                Title = "Bad translator"
-            };
-
-            if (text == null)
-            {
-                if (FergunClient.WordList.Count == 0)
-                {
-                    return FergunResult.FromError("Could not get the word list.");
-                }
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Badtranslator: No text passed. Obtaining text from the word list."));
-                // Get random words
-                int maxLength = RngInstance.Next(6, 10);
-                for (int i = 0; i < maxLength; i++)
-                {
-                    text += FergunClient.WordList[RngInstance.Next(0, FergunClient.WordList.Count)] + ' ';
-                }
-                builder.AddField(Locate("Input"), text);
-            }
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Text to use: {text}"));
-
             List<string> languageChain = new List<string>();
             int chainCount = 7;
             string originalLang = null;
@@ -180,7 +157,9 @@ namespace Fergun.Modules
                 }
             }
 
-            builder.AddField(Locate("LanguageChain"), string.Join(" -> ", languageChain))
+            var builder = new EmbedBuilder()
+                .WithTitle("Bad translator")
+                .AddField(Locate("LanguageChain"), string.Join(" -> ", languageChain))
                 .AddField(Locate("Result"), text)
                 .WithThumbnailUrl("https://fergun.is-inside.me/gXEDLZVr.png")
                 .WithColor(FergunConfig.EmbedColor);

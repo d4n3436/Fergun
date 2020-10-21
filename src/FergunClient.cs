@@ -38,7 +38,6 @@ namespace Fergun
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
-        public static IReadOnlyList<string> WordList { get; private set; } = new List<string>();
 
         private DiscordSocketClient _client;
         private LogService _logService;
@@ -64,15 +63,6 @@ namespace Fergun
 #else
             IsDebugMode = false;
 #endif
-            string wordlistFile = Path.Combine(AppContext.BaseDirectory, "Resources", "wordlist.txt");
-            if (File.Exists(wordlistFile))
-            {
-                try
-                {
-                    WordList = File.ReadAllText(wordlistFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries).ToList().AsReadOnly();
-                }
-                catch (IOException) { }
-            }
 
             string credentialsFile = Path.Combine(AppContext.BaseDirectory, "Resources", "dbcred.txt");
             if (File.Exists(credentialsFile))
