@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -103,6 +104,11 @@ namespace Fergun.Modules
                 catch (IOException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                    return FergunResult.FromError(e.Message);
+                }
+                catch (WebSocketException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                     return FergunResult.FromError(e.Message);
                 }
                 catch (TimeoutException)
@@ -269,6 +275,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
                 return (e.Message, null);
             }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
+                return (e.Message, null);
+            }
             catch (TimeoutException)
             {
                 return (Locate("ErrorOnAPI"), null);
@@ -341,7 +352,7 @@ namespace Fergun.Modules
             //await message.DeleteAsync();
 
             builder.Title = "AI Dungeon";
-            builder.Description = string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
+            builder.Description = Constants.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
             _ = message.TryRemoveAllReactionsAsync();
             await ReplyAsync(embed: builder.Build());
@@ -354,6 +365,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                return (e.Message, null);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                 return (e.Message, null);
             }
             catch (TimeoutException)
@@ -383,6 +399,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
                 return (e.Message, null);
             }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
+                return (e.Message, null);
+            }
             catch (TimeoutException)
             {
                 return (Locate("ErrorOnAPI"), null);
@@ -408,6 +429,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                return (e.Message, null);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                 return (e.Message, null);
             }
             catch (TimeoutException)
@@ -456,7 +482,7 @@ namespace Fergun.Modules
             await userInput.TryDeleteAsync();
 
             builder.Title = "AI Dungeon";
-            builder.Description = Locate("GeneratingNewCustomAdventure");
+            builder.Description = $"{Constants.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";
 
             await ReplyAsync(embed: builder.Build());
 
@@ -470,6 +496,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                return (e.Message, null);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                 return (e.Message, null);
             }
             catch (TimeoutException)
@@ -499,6 +530,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                return (e.Message, null);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                 return (e.Message, null);
             }
             catch (TimeoutException)
@@ -531,6 +567,12 @@ namespace Fergun.Modules
             }
             catch (IOException e)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
+                return (e.Message, null);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
                 return (e.Message, null);
             }
             catch (TimeoutException)
@@ -628,6 +670,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "AID Action: IO exception", e));
                 return e.Message;
             }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "AID Action: Websocket exception", e));
+                return e.Message;
+            }
             catch (TimeoutException)
             {
                 return Locate("ErrorOnAPI");
@@ -669,7 +716,7 @@ namespace Fergun.Modules
                 textToShow = await TranslateSimplerAsync(textToShow, "en", GetLanguage());
             }
 
-            builder.WithDescription((actionType == ActionType.Remember ? $"{Locate("TheAIWillNowRemember")}\n{promptText}" : textToShow))
+            builder.WithDescription(actionType == ActionType.Remember ? $"{Locate("TheAIWillNowRemember")}\n{text}" : textToShow)
                 .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", IconUrl);
 
             await ReplyAsync(embed: builder.Build());
@@ -764,6 +811,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Alter: IO exception", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Alter: Websocket exception", e));
                 return FergunResult.FromError(e.Message);
             }
             catch (TimeoutException)
@@ -937,6 +989,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Idinfo: IO exception", e));
                 return FergunResult.FromError(e.Message);
             }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Idinfo: Websocket exception", e));
+                return FergunResult.FromError(e.Message);
+            }
             catch (TimeoutException)
             {
                 return FergunResult.FromError(Locate("ErrorOnAPI"));
@@ -1040,6 +1097,11 @@ namespace Fergun.Modules
                         await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
                         result = e.Message;
                     }
+                    catch (WebSocketException e)
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
+                        result = e.Message;
+                    }
                     catch (TimeoutException)
                     {
                         result = Locate("ErrorOnAPI");
@@ -1081,6 +1143,11 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Dump: IO exception", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Dump: Websocket exception", e));
                 return FergunResult.FromError(e.Message);
             }
             catch (TimeoutException)
