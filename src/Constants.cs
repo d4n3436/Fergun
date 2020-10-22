@@ -105,6 +105,10 @@ namespace Fergun
 
         public const string DevelopmentModuleName = "Dev";
 
+        public const string DatabaseCredentialsFile = "dbcred.json";
+
+        public const string FergunDatabase = "FergunDB";
+
         /// <summary>
         /// Default attachment size limit in bytes.
         /// </summary>

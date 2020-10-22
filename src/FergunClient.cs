@@ -20,8 +20,8 @@ using Fergun.APIs.DiscordBots;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
-using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Victoria;
 
 namespace Fergun
@@ -46,8 +46,6 @@ namespace Fergun
         private static CommandHandlingService _cmdHandlingService;
         private static ReliabilityService _reliabilityService;
         private static CommandCacheService _commandCacheService;
-        private static string[] _dbCredentials;
-        private static bool _hasCredentials;
         private static bool _firstConnect = true;
         private static DiscordBotsApi _discordBots;
         private static Timer _autoClear;
@@ -58,30 +56,16 @@ namespace Fergun
 
             _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
 
+            foreach (string key in Constants.Languages.Keys)
+            {
+                Locales[key] = new CultureInfo(key);
+            }
+
 #if DEBUG
             IsDebugMode = true;
 #else
             IsDebugMode = false;
 #endif
-
-            string credentialsFile = Path.Combine(AppContext.BaseDirectory, "Resources", "dbcred.txt");
-            if (File.Exists(credentialsFile))
-            {
-                try
-                {
-                    _dbCredentials = File.ReadAllText(credentialsFile).Split(new[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (_dbCredentials.Length > 1)
-                    {
-                        _hasCredentials = true;
-                    }
-                }
-                catch (IOException) { }
-            }
-
-            foreach (string key in Constants.Languages.Keys)
-            {
-                Locales[key] = new CultureInfo(key);
-            }
         }
 
         ~FergunClient()
@@ -94,28 +78,13 @@ namespace Fergun
 
         public async Task InitializeAsync()
         {
-            if (_hasCredentials)
-            {
-                Database = new FergunDB("FergunDB", _dbCredentials[0], _dbCredentials[1], _dbCredentials.Length > 2 ? _dbCredentials[2] : null);
-            }
-            else
-            {
-                Console.Write("Enter DB User (leave emtpy if there's no auth): ");
-                string user = Console.ReadLine();
-                Console.Write("Enter DB Password (leave emtpy if there's no auth): ");
-                string password = StringUtils.ReadPassword();
-                Console.Write("Enter DB host (leave empty for local): ");
-                string host = Console.ReadLine();
+            Console.WriteLine($"Fergun v{Constants.Version}");
+            await Task.Delay(3000);
 
-                if (string.IsNullOrEmpty(user) && string.IsNullOrEmpty(password) && string.IsNullOrEmpty(host))
-                {
-                    Database = new FergunDB("FergunDB");
-                }
-                else
-                {
-                    Database = new FergunDB("FergunDB", user, password, host);
-                }
-            }
+            var dbAuth = LoadDatabaseCredentials();
+            Console.WriteLine("Connecting to the database...");
+            Database = new FergunDB(Constants.FergunDatabase, dbAuth.ConnectionString);
+            dbAuth = null;
 
             if (Database.IsConnected)
             {
@@ -123,7 +92,9 @@ namespace Fergun
             }
             else
             {
-                Console.WriteLine("Could not connect to the database. Press any key to exit.");
+                Console.WriteLine("Could not connect to the database.");
+                Console.WriteLine($"Please check the content of the database login credentials file ({Constants.DatabaseCredentialsFile}) and try again.");
+                Console.WriteLine("Press any key to exit.");
                 Console.ReadKey(true);
                 Environment.Exit(1);
             }
@@ -189,6 +160,54 @@ namespace Fergun
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
+        }
+
+        private static MongoAuth LoadDatabaseCredentials()
+        {
+            string credentialsFile = Path.Combine(AppContext.BaseDirectory, Constants.DatabaseCredentialsFile);
+            MongoAuth dbCredentials = null;
+            bool hasCredentials = false;
+            if (File.Exists(credentialsFile))
+            {
+                try
+                {
+                    dbCredentials = JsonConvert.DeserializeObject<MongoAuth>(File.ReadAllText(credentialsFile));
+                    if (dbCredentials == null)
+                    {
+                        Console.WriteLine("Unknown error reading/deserializing the database login credentials file.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Loaded the database login credentials successfully.");
+                        hasCredentials = true;
+                    }
+                }
+                catch (IOException e)
+                {
+                    Console.WriteLine($"Error reading the database login credentials file. Using default credentials.\n{e}");
+                }
+                catch (JsonException e)
+                {
+                    Console.WriteLine($"Error deserializing the database login credentials file. Using default credentials.\n{e}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No database login credentials file found. Using default credentials.");
+            }
+
+            if (!hasCredentials)
+            {
+                dbCredentials = MongoAuth.Default;
+                // Create the database login credentials file.
+                try
+                {
+                    File.WriteAllText(credentialsFile, JsonConvert.SerializeObject(dbCredentials, Formatting.Indented));
+                }
+                catch (IOException) { }
+            }
+
+            return dbCredentials;
         }
 
         private async Task StartLavalinkAsync()
