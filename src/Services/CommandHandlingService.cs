@@ -114,6 +114,7 @@ namespace Fergun
             var disabled = disabledCommands.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
             if (disabled != null)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the locally disabled command \"{disabled}\"."));
                 await SendEmbedAsync(message, "\u26a0 " + string.Format(GuildUtils.Locate("CommandDisabled", message.Channel), Format.Code(disabled)), _services);
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
             }
@@ -122,6 +123,7 @@ namespace Fergun
                 var globalDisabled = FergunConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
                 if (globalDisabled.Key != null)
                 {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the globally disabled command \"{globalDisabled.Key}\"."));
                     await SendEmbedAsync(message, $"\u26a0 {string.Format(GuildUtils.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
                         $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{GuildUtils.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}", _services);
                     _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));

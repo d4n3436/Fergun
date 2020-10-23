@@ -67,16 +67,19 @@ namespace Fergun.Modules
                 FergunClient.Database.InsertRecord("Blacklist", new BlacklistEntity(id, reason));
                 if (reason == null)
                 {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added ID {id} to the blacklist."));
                     await SendEmbedAsync(string.Format(Locate("UserBlacklisted"), id));
                 }
                 else
                 {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added ID {id} to the blacklist with reason: {reason}"));
                     await SendEmbedAsync(string.Format(Locate("UserBlacklistedWithReason"), id, reason));
                 }
             }
             else
             {
                 FergunClient.Database.DeleteRecord("Blacklist", user);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed ID {id} from the blacklist."));
                 await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), id));
             }
         }
