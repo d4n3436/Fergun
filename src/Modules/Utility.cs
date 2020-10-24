@@ -1327,7 +1327,6 @@ namespace Fergun.Modules
         }
 
         // The attribute order matters
-        [RequireNsfw(ErrorMessage = "NSFWOnly")]
         [LongRunning]
         [Command("urban", RunMode = RunMode.Async)]
         [Summary("urbanSummary")]
