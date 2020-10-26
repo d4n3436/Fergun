@@ -5,6 +5,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
+using Discord;
 
 namespace Fergun.Utils
 {
@@ -55,6 +56,22 @@ namespace Fergun.Utils
                 lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty, RegexOptions.Multiline);
             }
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
+        }
+
+        public static string BuildLinks(IMessageChannel channel)
+        {
+            string links = $"{Format.Url(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink)}";
+            if (FergunClient.DblBotPage != null)
+            {
+                links += $" | {Format.Url(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage)}";
+                links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote")}";
+            }
+            if (!string.IsNullOrEmpty(FergunConfig.SupportServer))
+            {
+                links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunConfig.SupportServer)}";
+            }
+
+            return links;
         }
     }
 }

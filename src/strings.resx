@@ -1499,11 +1499,23 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="TotalUsers" xml:space="preserve">
     <value>Total users</value>
   </data>
-	<data name="Links" xml:space="preserve">
-    <value>[Invite]({0}) | [DBL Bot Page]({1}) | [Vote Link]({2}) | [Support Server]({3})</value>
+	<data name="Invite" xml:space="preserve">
+    <value>Invite</value>
+  </data>
+	<data name="DBLBotPage" xml:space="preserve">
+    <value>DBL Bot Page</value>
+  </data>
+	<data name="VoteLink" xml:space="preserve">
+    <value>Vote Link</value>
+  </data>
+	<data name="SupportServer" xml:space="preserve">
+    <value>Support Server</value>
   </data>
 	<data name="ContactInfo" xml:space="preserve">
     <value>If you have any bug report, question or suggestion, you can join the [support server]({0}) or contact me via direct message ({1}).</value>
+  </data>
+	<data name="ContactInfoNoServer" xml:space="preserve">
+    <value>If you have any bug report, question or suggestion, you can contact me via direct message ({0}).</value>
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Redoing last action...</value>
@@ -2153,5 +2165,8 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in `trivia` that occurred when the command was used simultaneously.
 - Fixed a rare bug in `ocr` and `ocrtranslate` that occurred when a corrupted image was used.
 - Lots of other bug fixes.</value>
+	</data>
+	<data name="ValueNotSetInDatabase" xml:space="preserve">
+		<value>The value of `{0}` has not been established in the database. If this problem persists, contact the developers.</value>
 	</data>
 </root>

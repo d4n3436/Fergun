@@ -265,9 +265,15 @@ namespace Fergun.Modules
 
         [Command("invite")]
         [Summary("inviteSummary")]
-        public async Task Invite()
+        public async Task<RuntimeResult> Invite()
         {
+            if (FergunClient.IsDebugMode)
+            {
+                return FergunResult.FromError("No");
+            }
+
             await SendEmbedAsync(Format.Url(Locate("InviteLink"), FergunClient.InviteLink));
+            return FergunResult.FromSuccess();
         }
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
@@ -363,6 +369,7 @@ namespace Fergun.Modules
             }
 
             FergunClient.Database.UpdateRecord("Guilds", guild);
+            GuildUtils.PrefixCache[Context.Guild.Id] = newPrefix;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated prefix to: \"{newPrefix}\" in {Context.Guild.Name}"));
 
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
@@ -556,12 +563,7 @@ namespace Fergun.Modules
 
             if (!FergunClient.IsDebugMode)
             {
-                builder.AddField("Links",
-                    string.Format(Locate("Links"),
-                    FergunClient.InviteLink,
-                    FergunClient.DblBotPage,
-                    $"{FergunClient.DblBotPage}/vote",
-                    FergunConfig.SupportServer));
+                builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
             }
             builder.WithColor(FergunConfig.EmbedColor);
 
@@ -574,7 +576,14 @@ namespace Fergun.Modules
         public async Task Support()
         {
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-            await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunConfig.SupportServer, owner.ToString()));
+            if (string.IsNullOrEmpty(FergunConfig.SupportServer))
+            {
+                await SendEmbedAsync(string.Format(Locate("ContactInfoNoServer"), owner.ToString()));
+            }
+            else
+            {
+                await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunConfig.SupportServer, owner.ToString()));
+            }
         }
 
         [Command("tcdne")]

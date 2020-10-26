@@ -1502,11 +1502,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="TotalUsers" xml:space="preserve">
     <value>Всего пользователей</value>
   </data>
-	<data name="Links" xml:space="preserve">
-    <value>[приглашение]({0}) | [DBL Страница бота]({1}) | [Ссылка для голосования]({2}) | [Сервер поддержки]({3})</value>
-  </data>
 	<data name="ContactInfo" xml:space="preserve">
-    <value>Если у вас есть сообщение об ошибке, вопрос или предложение, вы можете присоединиться к [серверу поддержки]({0}) или связаться со мной через прямое сообщение ({1}).</value>
+    <value>Если у вас есть отчет об ошибке, вопрос или предложение, вы можете присоединиться к [серверу поддержки] ({0}) или связаться со мной через прямое сообщение ({1}).</value>
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Повтор последнего действия ...</value>
@@ -2150,5 +2147,23 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ​​ошибка в `trivia`, возникавшая при одновременном использовании команды.
 - Исправлена ​​редкая ошибка в `ocr` и `ocrtranslate`, возникающая при использовании поврежденного изображения.
 - Множество других исправлений ошибок.</value>
+	</data>
+	<data name="Invite" xml:space="preserve">
+		<value>приглашение</value>
+	</data>
+	<data name="DBLBotPage" xml:space="preserve">
+		<value>DBL Страница бота</value>
+	</data>
+	<data name="VoteLink" xml:space="preserve">
+		<value>Ссылка для голосования</value>
+	</data>
+	<data name="SupportServer" xml:space="preserve">
+		<value>Сервер поддержки</value>
+	</data>
+	<data name="ContactInfoNoServer" xml:space="preserve">
+		<value>Если у вас есть отчет об ошибке, вопрос или предложение, вы можете связаться со мной через прямое сообщение ({0}).</value>
+	</data>
+	<data name="ValueNotSetInDatabase" xml:space="preserve">
+		<value>Значение `{0}` не было установлено в базе данных. Если проблема не исчезнет, обратитесь к разработчикам.</value>
 	</data>
 </root>

@@ -12,6 +12,7 @@ using Fergun.Attributes;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
+using Fergun.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -270,6 +271,8 @@ namespace Fergun.Modules
             }
 
             FergunClient.Database.UpdateRecord("Guilds", guild);
+            GuildUtils.PrefixCache[Context.Guild.Id] = newPrefix;
+
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
         }
@@ -353,6 +356,7 @@ namespace Fergun.Modules
             }
 
             FergunConfig.GlobalPrefix = newPrefix;
+            GuildUtils.CachedGlobalPrefix = newPrefix;
             await SendEmbedAsync(string.Format(Locate("NewGlobalPrefix"), newPrefix));
 
             return FergunResult.FromSuccess();
@@ -369,7 +373,6 @@ namespace Fergun.Modules
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
             //await Context.Client.LogoutAsync();
             await Context.Client.StopAsync();
-            //Utility.TessEngine.Dispose();
             Cache.Dispose();
             Environment.Exit(0);
 
@@ -389,7 +392,6 @@ namespace Fergun.Modules
 
             Process.Start(AppDomain.CurrentDomain.FriendlyName);
             await Context.Client.SetStatusAsync(UserStatus.Idle);
-            //Utility.TessEngine.Dispose();
             Cache.Dispose();
             Environment.Exit(0);
 

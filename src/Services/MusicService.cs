@@ -38,18 +38,14 @@ namespace Fergun.Services
             };
             LavaNode = new LavaNode(_client, _lavaConfig);
             _geniusApi = new GeniusApi(FergunConfig.GeniusApiToken);
-        }
 
-        public async Task InitializeAsync()
-        {
             _client.Ready += ClientReadyAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdatedAsync;
             LavaNode.OnLog += LogAsync;
             LavaNode.OnTrackEnded += OnTrackEndedAsync;
             LavaNode.OnTrackStuck += OnTrackStuckAsync;
             LavaNode.OnTrackException += OnTrackExceptionAsync;
-            LavaNode.OnWebSocketClosed += OnWebSocketClosed;
-            await Task.CompletedTask;
+            LavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
         }
 
         private async Task ClientReadyAsync()
@@ -99,7 +95,7 @@ namespace Fergun.Services
             }
         }
 
-        private async Task OnWebSocketClosed(WebSocketClosedEventArgs args)
+        private async Task OnWebSocketClosedAsync(WebSocketClosedEventArgs args)
         {
             if (_loopDict.ContainsKey(args.GuildId))
             {
@@ -651,12 +647,6 @@ namespace Fergun.Services
                     catch (NullReferenceException) { };
                 }
             }
-
-            try
-            {
-                await LavaNode.DisposeAsync();
-            }
-            catch (NullReferenceException) { };
         }
     }
 }

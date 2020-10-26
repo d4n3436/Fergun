@@ -1506,11 +1506,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="TotalUsers" xml:space="preserve">
     <value>عدد الأعضاء</value>
   </data>
-	<data name="Links" xml:space="preserve">
-    <value>[دعوة]({0}) | [صفحة DBL Bot]({1}) | [Vote Link]({2}) | [خادم الدعم]({3})</value>
-  </data>
 	<data name="ContactInfo" xml:space="preserve">
-    <value>إذا كان لديك أي تقرير خطأ أو سؤال أو اقتراح ، يمكنك الانضمام إلى [خادم الدعم]({0}) أو الاتصال بي عبر رسالة مباشرة ({1}).</value>
+    <value>إذا كان لديك أي تقرير خطأ أو سؤال أو اقتراح ، يمكنك الانضمام إلى [خادم الدعم] ({0}) أو الاتصال بي عبر رسالة مباشرة ({1}).</value>
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>الإعادة الإجراء الأخير ...</value>
@@ -2162,5 +2159,23 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - تم إصلاح الخلل في `trivia` الذي حدث عند استخدام الأمر في نفس الوقت.
 - تم إصلاح خطأ نادر في `ocr` و `ocrtranslate` الذي حدث عند استخدام صورة تالفة.
 - الكثير من إصلاحات الأخطاء الأخرى.</value>
+	</data>
+	<data name="Invite" xml:space="preserve">
+		<value>يدعو</value>
+	</data>
+	<data name="DBLBotPage" xml:space="preserve">
+		<value>صفحة DBL Bot</value>
+	</data>
+	<data name="VoteLink" xml:space="preserve">
+		<value>رابط التصويت</value>
+	</data>
+	<data name="SupportServer" xml:space="preserve">
+		<value>خادم الدعم</value>
+	</data>
+	<data name="ContactInfoNoServer" xml:space="preserve">
+		<value>إذا كان لديك أي تقرير خطأ أو سؤال أو اقتراح ، يمكنك الاتصال بي عبر رسالة مباشرة ({0}).</value>
+	</data>
+	<data name="ValueNotSetInDatabase" xml:space="preserve">
+		<value>لم يتم تعيين قيمة `{0}` في قاعدة البيانات. إذا استمرت هذه المشكلة ، فاتصل بالمطورين.</value>
 	</data>
 </root>

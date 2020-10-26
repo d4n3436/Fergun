@@ -61,6 +61,11 @@ namespace Fergun.Modules
         [Example("never gonna give you up")]
         public async Task<RuntimeResult> Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
+            if (string.IsNullOrEmpty(FergunConfig.GeniusApiToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.GeniusApiToken)));
+            }
+
             bool keepHeaders = false;
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -150,7 +155,7 @@ namespace Fergun.Modules
             else
             {
                 LavaTrack selectedTrack;
-                bool trackSelection = GetGuildConfig()?.TrackSelection ?? FergunConfig.TrackSelectionDefault;
+                bool trackSelection = GetGuildConfig()?.TrackSelection ?? Constants.TrackSelectionDefault;
                 if (trackSelection)
                 {
                     string list = "";

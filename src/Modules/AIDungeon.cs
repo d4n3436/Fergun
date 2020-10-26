@@ -92,6 +92,11 @@ namespace Fergun.Modules
         [Alias("create")]
         public async Task<RuntimeResult> New()
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+            }
+
             if (_modes == null)
             {
                 await Context.Channel.TriggerTypingAsync();
@@ -590,6 +595,11 @@ namespace Fergun.Modules
 
         private async Task<string> RunAIDCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", uint actionId = 0)
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken));
+            }
+
             AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
             // check the id
             string checkResult = await CheckIdAsync(adventure);
@@ -790,6 +800,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Alter(uint adventureId)
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+            }
+
             AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
             if (adventure == null)
             {
@@ -972,6 +987,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Idinfo([Summary("idinfoParam1")] uint adventureId)
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+            }
+
             AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
             if (adventure == null)
             {
@@ -1045,6 +1065,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Delete([Summary("deleteParam1")] uint adventureId)
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+            }
+
             AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
 
             if (adventure == null)
@@ -1121,6 +1146,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Dump([Summary("dumpParam1")] uint adventureId)
         {
+            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+            }
+
             AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
             string checkResult = await CheckIdAsync(adventure);
             if (checkResult != null)
@@ -1286,7 +1316,7 @@ namespace Fergun.Modules
             {
                 return true;
             }
-            return GetGuildConfig()?.AidAutoTranslate ?? FergunConfig.AidAutoTranslateDefault;
+            return GetGuildConfig()?.AidAutoTranslate ?? Constants.AidAutoTranslateDefault;
         }
 
         // Fallback to original text if fails

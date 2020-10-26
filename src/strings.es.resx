@@ -1498,11 +1498,8 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="TotalUsers" xml:space="preserve">
     <value>Usuarios totales</value>
   </data>
-	<data name="Links" xml:space="preserve">
-    <value>[Invitación]({0}) | [Página de DBL]({1}) | [Link de Votación]({2}) | [Servidor de Soporte]({3})</value>
-  </data>
 	<data name="ContactInfo" xml:space="preserve">
-    <value>Si tiene algún reporte de bug, pregunta o sugerencia, puedes entrar al [servidor de soporte]({0}) o contactarme vía mensaje directo ({1}).</value>
+    <value>Si tienes algún reporte de bug, pregunta o sugerencia, puedes entrar al [servidor de soporte]({0}) o contactarme vía mensaje directo ({1}).</value>
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Rehaciendo la última acción...</value>
@@ -2152,5 +2149,23 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Arreglado un bug in `trivia` que ocurría cuando el comando era usado simultáneamente.
 - Arreglado un bug raro in `ocr` y `ocrtranslate` que ocurría cuando una imagen corrupta era usada.
 - Muchos bugs fixes menores.</value>
+	</data>
+	<data name="Invite" xml:space="preserve">
+		<value>Invitación</value>
+	</data>
+	<data name="DBLBotPage" xml:space="preserve">
+		<value>Página de DBL</value>
+	</data>
+	<data name="VoteLink" xml:space="preserve">
+		<value>Link de Votación</value>
+	</data>
+	<data name="SupportServer" xml:space="preserve">
+		<value>Servidor de Soporte</value>
+	</data>
+	<data name="ContactInfoNoServer" xml:space="preserve">
+		<value>Si tienes algún reporte de bug, pregunta o sugerencia, puedes contactarme vía mensaje directo ({0}).</value>
+	</data>
+	<data name="ValueNotSetInDatabase" xml:space="preserve">
+		<value>El valor de `{0}` no ha sido establecido en la base de datos. Si este problema persiste, contacta a los desarrolladores.</value>
 	</data>
 </root>

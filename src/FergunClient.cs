@@ -20,6 +20,7 @@ using Fergun.APIs.DiscordBots;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
+using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Victoria;
@@ -31,8 +32,6 @@ namespace Fergun
         public static FergunDB Database { get; private set; }
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
-        public static AuthDiscordBotListApi DblApi { get; private set; }
-        public static IDblSelfBot DblBot { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -47,6 +46,8 @@ namespace Fergun
         private static ReliabilityService _reliabilityService;
         private static CommandCacheService _commandCacheService;
         private static bool _firstConnect = true;
+        private static AuthDiscordBotListApi DblApi;
+        private static IDblSelfBot DblBot;
         private static DiscordBotsApi _discordBots;
         private static Timer _autoClear;
 
@@ -99,6 +100,17 @@ namespace Fergun
                 Environment.Exit(1);
             }
 
+            if (string.IsNullOrEmpty(FergunConfig.GlobalPrefix))
+            {
+                Console.WriteLine("The bot prefix has not been set.");
+                Console.WriteLine($"Please set the value of the field \"{(IsDebugMode ? "Dev" : "")}GlobalPrefix\", in collection \"Config\", in the database.");
+                Console.WriteLine("Press any key to exit.");
+                Console.ReadKey(true);
+                Environment.Exit(1);
+            }
+
+            GuildUtils.Initialize();
+
             if (FergunConfig.PresenceIntent ?? false)
             {
                 Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildPresences;
@@ -146,17 +158,13 @@ namespace Fergun
 
             _services = SetupServices();
 
-            // Initialize the music service
-            await _services.GetRequiredService<MusicService>().InitializeAsync();
-
             _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
             await _cmdHandlingService.InitializeAsync();
 
             if (!IsDebugMode)
             {
-                await _client.SetGameAsync($"{FergunConfig.GlobalPrefix}help", null, ActivityType.Playing);
+                await _client.SetActivityAsync(new Game($"{FergunConfig.GlobalPrefix}help"));
             }
-            await _client.SetStatusAsync(UserStatus.Online);
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
@@ -298,7 +306,7 @@ namespace Fergun
             Process[] processList = Process.GetProcessesByName("java");
             if (processList.Length != 0)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\nSkipping the update..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\r\nSkipping the update..."));
                 return;
             }
 
@@ -365,10 +373,24 @@ namespace Fergun
                 {
                     InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)Constants.InvitePermissions}";
 
-                    DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
+                    if (string.IsNullOrEmpty(FergunConfig.DblApiToken))
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", $"Top.gg API token is empty or has not been established. Bot server count will not be sent to the API."));
+                    }
+                    else
+                    {
+                        DblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
+                        DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
+                    }
 
-                    DblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
-                    _discordBots = new DiscordBotsApi(FergunConfig.DiscordBotsApiToken);
+                    if (string.IsNullOrEmpty(FergunConfig.DblApiToken))
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", $"DiscordBots API token is empty or has not been established. Bot server count will not be sent to the API."));
+                    }
+                    else
+                    {
+                        _discordBots = new DiscordBotsApi(FergunConfig.DiscordBotsApiToken);
+                    }
 
                     await UpdateBotListStatsAsync();
                 }
@@ -414,7 +436,7 @@ namespace Fergun
                 }
 
                 MessageCache.Add(new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgUpdated", $"Message edited in {before.Display()}: {before} -> {after}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgUpdated", $"Message edited in {before.Display()}: {before} -> {after}"));
             });
 
             return Task.CompletedTask;
@@ -439,7 +461,7 @@ namespace Fergun
                 }
 
                 MessageCache.Add(new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"Message deleted in {message.Display()}: {(string.IsNullOrEmpty(message.Content) ? message.Attachments.FirstOrDefault()?.Url : message.Content)}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"Message deleted in {message.Display()}: {(string.IsNullOrEmpty(message.Content) ? message.Attachments.FirstOrDefault()?.Url : message.Content)}"));
             });
 
             return Task.CompletedTask;
@@ -447,27 +469,27 @@ namespace Fergun
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
         }
 
         private async Task UserJoined(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserLeft(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserBanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
         }
 
         private async Task UserUnbanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
         }
 
         private async Task JoinedGuild(SocketGuild guild)
@@ -486,7 +508,7 @@ namespace Fergun
                     string preferredLanguage = Locales.FirstOrDefault(x => x.Value.TwoLetterISOLanguageName == guild.PreferredCulture.TwoLetterISOLanguageName).Key;
                     if (preferredLanguage != null)
                     {
-                        if (preferredLanguage != FergunConfig.DefaultLanguage)
+                        if (preferredLanguage != FergunConfig.Language)
                         {
                             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "JoinGuild", $"A preferred language ({preferredLanguage}) was found in the guild {guild.Id}. Saving the preferred language in the database..."));
 
@@ -515,6 +537,7 @@ namespace Fergun
                 if (config != null)
                 {
                     Database.DeleteRecord("Guilds", config);
+                    GuildUtils.PrefixCache.TryRemove(guild.Id, out _);
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Deleted config of guild {guild.Id}"));
                 }
                 if (!IsDebugMode)
@@ -528,9 +551,15 @@ namespace Fergun
         {
             try
             {
-                DblBot ??= await DblApi.GetMeAsync();
-                await DblBot.UpdateStatsAsync(_client.Guilds.Count);
-                await _discordBots.UpdateStatsAsync(_client.CurrentUser.Id, _client.Guilds.Count);
+                if (DblApi != null)
+                {
+                    DblBot ??= await DblApi.GetMeAsync();
+                    await DblBot.UpdateStatsAsync(_client.Guilds.Count);
+                }
+                if (_discordBots != null)
+                {
+                    await _discordBots.UpdateStatsAsync(_client.CurrentUser.Id, _client.Guilds.Count);
+                }
             }
             catch (HttpRequestException e)
             {

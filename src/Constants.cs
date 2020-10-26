@@ -136,6 +136,17 @@ namespace Fergun
 
         public const int MaxPrefixLength = 10;
 
+        public const string DefaultLanguage = "en";
+
+        public const uint DefaultEmbedColor = 16750877;
+
+        // Command config defaults
+        public const bool CaptionbotAutoTranslateDefault = true;
+
+        public const bool AidAutoTranslateDefault = false;
+
+        public const bool TrackSelectionDefault = false;
+
         public static string LoadingEmote { get; set; } = "<a:loading:721975158826598522>";
         public static string OnlineEmote { get; set; } = "<:online:726601254016647241>";
         public static string IdleEmote { get; set; } = "<:idle:726601265563566111>";

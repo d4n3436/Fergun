@@ -1343,9 +1343,6 @@ AI Dungeon giriş ve çıkışını otomatik çevir
 	<data name="BoostingSince" xml:space="preserve">
     <value>O zamandan beri artıyor</value>
   </data>
-	<data name="Links" xml:space="preserve">
-    <value>[Davet et]({0}) | [DBL Bot Sayfası]({1}) | [Oylama Bağlantısı]({2}) | [Destek Sunucusu]({3})</value>
-  </data>
 	<data name="InvalidMessageID" xml:space="preserve">
     <value>Geçersiz mesaj kimliği. Emin olun mesajı bu kanaldan olduğunu.</value>
   </data>
@@ -1503,7 +1500,7 @@ Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," se
     <value>Toplam kullanıcı</value>
   </data>
 	<data name="ContactInfo" xml:space="preserve">
-    <value>Herhangi bir hata raporunuz, sorunuz veya öneriniz varsa, [destek sunucusu]({0}) katılabilir veya doğrudan mesajla ({1}) bana ulaşabilirsiniz.</value>
+    <value>Herhangi bir hata raporunuz, sorunuz veya öneriniz varsa, [destek sunucusuna] ({0}) katılabilir veya doğrudan mesaj ({1}) aracılığıyla benimle iletişime geçebilirsiniz.</value>
   </data>
 	<data name="RedoingLastAction" xml:space="preserve">
     <value>Son işlem yeniden yapılıyor ...</value>
@@ -2150,5 +2147,23 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - `trivia` içinde komut aynı anda kullanıldığında oluşan bir hata düzeltildi.
 - Bozuk bir görüntü kullanıldığında meydana gelen nadir bir `ocr` ve `ocrtranslate` hata düzeltildi.
 - Diğer birçok hata düzeltmesi.</value>
+	</data>
+	<data name="Invite" xml:space="preserve">
+		<value>Davet et</value>
+	</data>
+	<data name="DBLBotPage" xml:space="preserve">
+		<value>DBL Bot Sayfası</value>
+	</data>
+	<data name="VoteLink" xml:space="preserve">
+		<value>Oylama Bağlantısı</value>
+	</data>
+	<data name="SupportServer" xml:space="preserve">
+		<value>Destek Sunucusu</value>
+	</data>
+	<data name="ContactInfoNoServer" xml:space="preserve">
+		<value>Herhangi bir hata raporunuz, sorunuz veya öneriniz varsa, doğrudan mesaj ({0}) aracılığıyla benimle iletişime geçebilirsiniz.</value>
+	</data>
+	<data name="ValueNotSetInDatabase" xml:space="preserve">
+		<value>Veritabanında `{0}` değeri ayarlanmadı. Bu sorun devam ederse, geliştiricilerle iletişime geçin.</value>
 	</data>
 </root>

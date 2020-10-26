@@ -17,8 +17,9 @@ namespace Fergun.Attributes
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo _, IServiceProvider services)
         {
             IUserMessage response;
-            bool found = services.GetRequiredService<CommandCacheService>().TryGetValue(context.Message.Id, out ulong messageId);
-            if (found && (response = (IUserMessage)await context.Channel.GetMessageAsync(messageId)) != null)
+            ulong messageId = 0;
+            bool? found = services.GetService<CommandCacheService>()?.TryGetValue(context.Message.Id, out messageId);
+            if ((found ?? false) && (response = (IUserMessage)await context.Channel.GetMessageAsync(messageId)) != null)
             {
                 await response.ModifyAsync(x =>
                 {

@@ -49,7 +49,6 @@ namespace Fergun.Modules
         private static CommandService _cmdService;
         private static LogService _logService;
 
-        //public static TesseractEngine TessEngine { get; } = new TesseractEngine("./tessdata", "eng", EngineMode.LstmOnly);
         public static ConcurrentBag<CachedPages> ImgCache { get; } = new ConcurrentBag<CachedPages>();
         public static ConcurrentBag<CachedPages> UrbanCache { get; } = new ConcurrentBag<CachedPages>();
         public static ConcurrentBag<string> VideoCache { get; } = new ConcurrentBag<string>();
@@ -565,12 +564,7 @@ namespace Fergun.Modules
                 }
                 else
                 {
-                    builder.AddField("Links",
-                        string.Format(Locate("Links"),
-                        FergunClient.InviteLink,
-                        FergunClient.DblBotPage,
-                        $"{FergunClient.DblBotPage}/vote",
-                        FergunConfig.SupportServer));
+                    builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
                 }
                 builder.WithFooter(string.Format(Locate("HelpFooter"), version, visibleCommandCount))
                     .WithColor(FergunConfig.EmbedColor);
@@ -637,7 +631,7 @@ namespace Fergun.Modules
 
             text = text.Trim('\"');
 
-            bool autoTranslate = GetGuildConfig()?.CaptionbotAutoTranslate ?? FergunConfig.CaptionbotAutoTranslateDefault;
+            bool autoTranslate = GetGuildConfig()?.CaptionbotAutoTranslate ?? Constants.CaptionbotAutoTranslateDefault;
             if (autoTranslate && GetLanguage() != "en")
             {
                 var translation = await TranslateSimpleAsync(text, GetLanguage(), "en");
@@ -813,6 +807,11 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
+            if (string.IsNullOrEmpty(FergunConfig.OCRSpaceApiKey))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.OCRSpaceApiKey)));
+            }
+
             UrlFindResult result;
             (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
             if (result != UrlFindResult.UrlFound)
@@ -970,6 +969,11 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Resize([Summary("resizeParam1")] string url = null)
         {
+            if (string.IsNullOrEmpty(FergunConfig.DeepAiApiKey))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.DeepAiApiKey)));
+            }
+
             UrlFindResult result;
             (url, result) = await Context.GetLastUrlAsync(Constants.ClientConfig.MessageCacheSize, true, url);
             if (result != UrlFindResult.UrlFound)
@@ -1067,6 +1071,11 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com")]
         public async Task<RuntimeResult> Screenshot([Summary("screenshotParam1")] string url)
         {
+            if (string.IsNullOrEmpty(FergunConfig.ApiFlashAccessKey))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.ApiFlashAccessKey)));
+            }
+
             Uri uri;
             try
             {
@@ -1702,7 +1711,7 @@ namespace Fergun.Modules
         private static List<Task> CreateVideoTasks()
         {
             List<Task> tasks = new List<Task>();
-            for (int i = 0; i < FergunConfig.VideoCacheSize; i++)
+            for (int i = 0; i < (FergunConfig.VideoCacheSize ?? 1); i++)
             {
                 tasks.Add(Task.Run(async () =>
                 {

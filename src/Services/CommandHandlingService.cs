@@ -61,19 +61,20 @@ namespace Fergun
             // Don't process the command if it was a system message
             if (!(messageParam is SocketUserMessage message)) return;
 
+            // Ignore empty messages
+            if (string.IsNullOrEmpty(message.Content)) return;
+
             // Ignore messages from bots
             if (message.Author.IsBot) return;
 
+            // Ignore ...ignored users
             if (_ignoredUsers.Contains(message.Author.Id)) return;
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
 
-            string prefix = GuildUtils.GetPrefix(message.Channel);
-            if (message.Content == prefix)
-            {
-                return;
-            }
+            string prefix = GuildUtils.GetCachedPrefix(message.Channel);
+            if (message.Content == prefix) return;
 
             if (message.Content == _client.CurrentUser.Mention)
             {
@@ -172,8 +173,7 @@ namespace Fergun
             }
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
-            if (result.IsSuccess)
-                return;
+            if (result.IsSuccess) return;
 
             double ignoreTime = Constants.DefaultIgnoreTime;
             switch (result.Error)
@@ -340,20 +340,12 @@ namespace Fergun
         private static async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, IServiceProvider services, string text = null)
         {
             IUserMessage response;
-            bool found = services.GetRequiredService<CommandCacheService>().TryGetValue(userMessage.Id, out ulong messageId);
+            ulong messageId = 0;
+            var cache = services.GetService<CommandCacheService>();
+            bool found = cache != null && cache.TryGetValue(userMessage.Id, out messageId);
 
             if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId)) != null)
             {
-                //if (response.Reactions.Count > 0)
-                //{
-                //    bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
-
-                //    // This can be slow hmm
-                //    if (manageMessages)
-                //        await response.RemoveAllReactionsAsync();
-                //    else
-                //        await response.RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
-                //}
                 await response.ModifyAsync(x =>
                 {
                     x.Content = text;
@@ -364,7 +356,7 @@ namespace Fergun
             else
             {
                 response = await userMessage.Channel.SendMessageAsync(null, false, embed).ConfigureAwait(false);
-                services.GetRequiredService<CommandCacheService>().Add(userMessage, response);
+                cache?.Add(userMessage, response);
             }
 
             return response;

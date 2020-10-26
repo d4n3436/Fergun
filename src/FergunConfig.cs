@@ -18,7 +18,7 @@ namespace Fergun
         public string DevToken { get; set; }
         public string GlobalPrefix { get; set; }
         public string DevGlobalPrefix { get; set; }
-        public string DefaultLanguage { get; set; }
+        public string Language { get; set; }
         public string DblApiToken { get; set; }
         public string DiscordBotsApiToken { get; set; }
         public string GeniusApiToken { get; set; }
@@ -29,11 +29,8 @@ namespace Fergun
         public string DeepAiApiKey { get; set; }
         public string ApiFlashAccessKey { get; set; }
         public string OCRSpaceApiKey { get; set; }
-        public uint EmbedColor { get; set; }
-        public int VideoCacheSize { get; set; }
-        public bool CaptionbotAutoTranslateDefault { get; set; }
-        public bool AidAutoTranslateDefault { get; set; }
-        public bool TrackSelectionDefault { get; set; }
+        public uint? EmbedColor { get; set; }
+        public int? VideoCacheSize { get; set; }
         public Dictionary<string, int> CommandStats { get; set; }
         public Dictionary<string, string> GloballyDisabledCommands { get; set; }
         public string SupportServer { get; set; }
@@ -66,18 +63,25 @@ namespace Fergun
             set
             {
                 var cfg = GetConfig();
-                cfg.GlobalPrefix = value;
+                if (FergunClient.IsDebugMode)
+                {
+                    cfg.DevGlobalPrefix = value;
+                }
+                else
+                {
+                    cfg.GlobalPrefix = value;
+                }
                 FergunClient.Database.UpdateRecord("Config", cfg);
             }
         }
 
-        public static string DefaultLanguage
+        public static string Language
         {
-            get => GetConfig().DefaultLanguage;
+            get => GetConfig().Language;
             set
             {
                 var cfg = GetConfig();
-                cfg.DefaultLanguage = value;
+                cfg.Language = value;
                 FergunClient.Database.UpdateRecord("Config", cfg);
             }
         }
@@ -104,7 +108,7 @@ namespace Fergun
 
         public static uint EmbedColor
         {
-            get => GetConfig().EmbedColor;
+            get => GetConfig().EmbedColor ?? Constants.DefaultEmbedColor;
             set
             {
                 var cfg = GetConfig();
@@ -113,49 +117,7 @@ namespace Fergun
             }
         }
 
-        public static int VideoCacheSize
-        {
-            get => GetConfig().VideoCacheSize;
-            set
-            {
-                var cfg = GetConfig();
-                cfg.VideoCacheSize = value;
-                FergunClient.Database.UpdateRecord("Config", cfg);
-            }
-        }
-
-        public static bool CaptionbotAutoTranslateDefault
-        {
-            get => GetConfig().CaptionbotAutoTranslateDefault;
-            set
-            {
-                var cfg = GetConfig();
-                cfg.CaptionbotAutoTranslateDefault = value;
-                FergunClient.Database.UpdateRecord("Config", cfg);
-            }
-        }
-
-        public static bool AidAutoTranslateDefault
-        {
-            get => GetConfig().AidAutoTranslateDefault;
-            set
-            {
-                var cfg = GetConfig();
-                cfg.AidAutoTranslateDefault = value;
-                FergunClient.Database.UpdateRecord("Config", cfg);
-            }
-        }
-
-        public static bool TrackSelectionDefault
-        {
-            get => GetConfig().TrackSelectionDefault;
-            set
-            {
-                var cfg = GetConfig();
-                cfg.TrackSelectionDefault = value;
-                FergunClient.Database.UpdateRecord("Config", cfg);
-            }
-        }
+        public static int? VideoCacheSize => GetConfig().VideoCacheSize;
 
         public static Dictionary<string, int> CommandStats
         {
@@ -179,7 +141,7 @@ namespace Fergun
             }
         }
 
-        public static string SupportServer => GetConfig().SupportServer ?? "https://discord.com";
+        public static string SupportServer => GetConfig().SupportServer;
 
         public static string LogChannel => GetConfig().LogChannel;
 
@@ -195,25 +157,6 @@ namespace Fergun
         {
             return FergunClient.Database.LoadRecord<BaseConfig>("Config");
         }
-
-        /*
-        public string Token { get; internal set; }
-        public string DevToken { get; set; }
-        public string GlobalPrefix { get; set; }
-        public string DevGlobalPrefix { get; set; }
-        public string DefaultLanguage { get; set; }
-        public string GoogleSearchApiKey { get; set; }
-        public string SearchEngineId { get; set; }
-        public string YtSearchApiKey { get; set; }
-        public string DeepAiApiKey { get; set; }
-        public string ApiFlashAccessKey { get; set; }
-        public string OCRSpaceApiKey { get; set; }
-        public uint EmbedColor { get; set; }
-        public int VideoCacheSize { get; set; }
-        public bool CaptionbotAutoTranslateDefault { get; set; }
-        public bool AidAutoTranslateDefault { get; set; }
-        public bool TrackSelectionDefault { get; set; }
-        */
     }
 
     [BsonIgnoreExtraElements]
@@ -250,11 +193,11 @@ namespace Fergun
         public ObjectId ObjectId { get; set; }
         public ulong ID { get; set; }
         public string Prefix { get; set; }
-        public string Language { get; set; } = FergunConfig.DefaultLanguage;
+        public string Language { get; set; } = FergunConfig.Language;
         public List<string> DisabledCommands { get; set; } = new List<string>();
-        public bool CaptionbotAutoTranslate { get; set; } = FergunConfig.CaptionbotAutoTranslateDefault;
-        public bool AidAutoTranslate { get; set; } = FergunConfig.AidAutoTranslateDefault;
-        public bool TrackSelection { get; set; } = FergunConfig.TrackSelectionDefault;
+        public bool CaptionbotAutoTranslate { get; set; } = Constants.CaptionbotAutoTranslateDefault;
+        public bool AidAutoTranslate { get; set; } = Constants.AidAutoTranslateDefault;
+        public bool TrackSelection { get; set; } = Constants.TrackSelectionDefault;
     }
 
     [BsonIgnoreExtraElements]
