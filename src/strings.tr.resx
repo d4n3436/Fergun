@@ -1533,7 +1533,7 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
 	<data name="supportSummary" xml:space="preserve">
     <value>destek bilgisi gösterir.</value>
   </data>
-	<data name="ErrorOnAPI" xml:space="preserve">
+	<data name="ErrorInAPI" xml:space="preserve">
     <value>API çağrılırken bir hata oluştu.</value>
   </data>
 	<data name="Topic" xml:space="preserve">
@@ -2165,5 +2165,8 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	</data>
 	<data name="ValueNotSetInDatabase" xml:space="preserve">
 		<value>Veritabanında `{0}` değeri ayarlanmadı. Bu sorun devam ederse, geliştiricilerle iletişime geçin.</value>
+	</data>
+	<data name="CannotGiveToBot" xml:space="preserve">
+		<value>Kimliği bir bota veremezsiniz!</value>
 	</data>
 </root>

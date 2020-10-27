@@ -1548,7 +1548,7 @@ You can use the `new` command to create a new adventure.</value>
 	<data name="supportSummary" xml:space="preserve">
     <value>Shows the support info.</value>
   </data>
-	<data name="ErrorOnAPI" xml:space="preserve">
+	<data name="ErrorInAPI" xml:space="preserve">
     <value>An error occurred while calling the API.</value>
   </data>
 	<data name="Topic" xml:space="preserve">
@@ -1862,9 +1862,9 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in `badtranslator` that caused the command to enter in a infinite loop in rare cases.
 - Fixed a bug in `ytrandom` that caused the command to lock itself if an error occurs when creating the video cache.
 - Fixed a bug in `snipe` and `editsnipe` that occurred when the text was larger that 1024 characters.
-- Fixed a bug in `wikipedia` that occured when trying to use the article image.
+- Fixed a bug in `wikipedia` that occurred when trying to use the article image.
 - Fixed a bug in `changelog` that prevented viewing the changelog because of the way the version numbers were saved.
-- Fixed a bug in `skip` and `seek` that occured when the player state was invalid.
+- Fixed a bug in `skip` and `seek` that occurred when the player state was invalid.
 - Fixed a bug in `trivia` that caused the text to be encoded instead of decoded.
 
 - Now `badtranslator` won't have duplicated languages.
@@ -2142,6 +2142,9 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	</data>
 	<data name="CannotGiveYourself" xml:space="preserve">
 		<value>You cannot give the ID yourself!</value>
+	</data>
+	<data name="CannotGiveToBot" xml:space="preserve">
+		<value>You cannot give the ID to a bot!</value>
 	</data>
 	<data name="GaveId" xml:space="preserve">
 		<value>The ID was successfully transferred to {0}.</value>

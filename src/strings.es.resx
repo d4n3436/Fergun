@@ -1533,7 +1533,7 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
 	<data name="supportSummary" xml:space="preserve">
     <value>Muestra la información de soporte.</value>
   </data>
-	<data name="ErrorOnAPI" xml:space="preserve">
+	<data name="ErrorInAPI" xml:space="preserve">
     <value>Ocurrió un error mientras se llamaba a la API.</value>
   </data>
 	<data name="Topic" xml:space="preserve">
@@ -2167,5 +2167,8 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	</data>
 	<data name="ValueNotSetInDatabase" xml:space="preserve">
 		<value>El valor de `{0}` no ha sido establecido en la base de datos. Si este problema persiste, contacta a los desarrolladores.</value>
+	</data>
+	<data name="CannotGiveToBot" xml:space="preserve">
+		<value>No puedes dar la ID a un bot!</value>
 	</data>
 </root>

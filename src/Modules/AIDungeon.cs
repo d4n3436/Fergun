@@ -120,7 +120,7 @@ namespace Fergun.Modules
                 }
                 catch (TimeoutException)
                 {
-                    return FergunResult.FromError(Locate("ErrorOnAPI"));
+                    return FergunResult.FromError(Locate("ErrorInAPI"));
                 }
                 string error = CheckResponse(response);
                 if (error != null)
@@ -138,7 +138,7 @@ namespace Fergun.Modules
                     {
                         await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The mode list is empty."));
                     }
-                    return FergunResult.FromError(Locate("ErrorOnAPI"));
+                    return FergunResult.FromError(Locate("ErrorInAPI"));
                 }
                 _modes = content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString());
             }
@@ -225,19 +225,19 @@ namespace Fergun.Modules
             if (actionList == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The action list is null."));
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             int removed = actionList.RemoveAll(x => string.IsNullOrEmpty(x.Text));
             if (removed > 0)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"New: Removed {removed} empty entries in the action list."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Removed {removed} empty entries in the action list."));
             }
 
             if (actionList.Count == 0)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The action list is empty."));
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             string initialPrompt = actionList[actionList.Count - 1].Text;
@@ -254,6 +254,7 @@ namespace Fergun.Modules
 
             if (AutoTranslate() && !string.IsNullOrEmpty(initialPrompt))
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Translating text to \"{GetLanguage()}\"."));
                 initialPrompt = await TranslateSimplerAsync(initialPrompt, "en", GetLanguage());
             }
 
@@ -289,7 +290,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
             string error = CheckResponse(response);
             if (error != null)
@@ -299,7 +300,8 @@ namespace Fergun.Modules
             var content = response.Payload.Data.Scenario;
             if (content?.Options == null || content.Options.Count == 0)
             {
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The scenario list is null or empty."));
+                return (Locate("ErrorInAPI"), null);
             }
 
             int characterIndex = -1;
@@ -381,7 +383,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
             error = CheckResponse(response);
             if (error != null)
@@ -392,7 +394,8 @@ namespace Fergun.Modules
             content = response.Payload.Data.Scenario;
             if (content == null)
             {
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The scenario is null."));
+                return (Locate("ErrorInAPI"), null);
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Creating new adventure with character Id: {content.Id}"));
@@ -413,7 +416,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
             error = CheckResponse(response);
             if (error != null)
@@ -424,8 +427,8 @@ namespace Fergun.Modules
             string publicId = response.Payload.Data.AddAdventure?.PublicId?.ToString();
             if (publicId == null)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: publicId is null."));
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: publicId is null."));
+                return (Locate("ErrorInAPI"), null);
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting adventure with publicId: {publicId}"));
@@ -445,7 +448,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
             error = CheckResponse(response);
             if (error != null)
@@ -456,7 +459,8 @@ namespace Fergun.Modules
             var adventure = response.Payload.Data.Adventure;
             if (adventure == null)
             {
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The adventure is null."));
+                return (Locate("ErrorInAPI"), null);
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Created adventure ({_modes.Keys.ElementAt(modeIndex)}, {characters.Keys.ElementAt(characterIndex)})" +
                 $" (Id: {adventure.Id}, playPublicId: {adventure.PublicId})"));
@@ -507,7 +511,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
 
             string error = CheckResponse(adventure);
@@ -519,7 +523,8 @@ namespace Fergun.Modules
             string adventureId = adventure?.Payload?.Data?.Scenario?.Id;
             if (adventureId == null)
             {
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The adventure ID is null."));
+                return (Locate("ErrorInAPI"), null);
             }
 
             // Create new adventure with that ID
@@ -541,7 +546,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
 
             error = CheckResponse(creationResponse);
@@ -553,11 +558,13 @@ namespace Fergun.Modules
             string publicId = creationResponse.Payload.Data.AddAdventure.PublicId?.ToString();
             if (publicId == null)
             {
-                return (Locate("ErrorOnAPI"), null);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: publicId is null."));
+                return (Locate("ErrorInAPI"), null);
             }
 
             if (AutoTranslate())
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Translating text from \"{GetLanguage()}\" to English."));
                 customText = await TranslateSimplerAsync(customText, GetLanguage(), "en");
             }
 
@@ -579,7 +586,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return (Locate("ErrorOnAPI"), null);
+                return (Locate("ErrorInAPI"), null);
             }
             error = CheckResponse(response);
             if (error != null)
@@ -663,6 +670,7 @@ namespace Fergun.Modules
             // if a text is passed
             if (!string.IsNullOrEmpty(text) && AutoTranslate())
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text from \"{GetLanguage()}\" to English."));
                 text = await TranslateSimplerAsync(text, GetLanguage(), "en");
             }
 
@@ -684,7 +692,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return Locate("ErrorOnAPI");
+                return Locate("ErrorInAPI");
             }
             catch (Exception)
             {
@@ -707,7 +715,8 @@ namespace Fergun.Modules
             var actionList = data.SubscribeAdventure?.Actions ?? data.Adventure?.Actions;
             if (actionList == null || actionList.Count == 0)
             {
-                return Locate("ErrorOnAPI");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "AID Action: Action list is null or empty."));
+                return Locate("ErrorInAPI");
             }
 
             string textToShow = actionList[actionList.Count - 1].Text;
@@ -720,6 +729,7 @@ namespace Fergun.Modules
 
             if (!string.IsNullOrEmpty(textToShow) && AutoTranslate())
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text to \"{GetLanguage()}\"."));
                 textToShow = await TranslateSimplerAsync(textToShow, "en", GetLanguage());
             }
 
@@ -832,7 +842,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             string error = CheckResponse(response);
@@ -844,7 +854,8 @@ namespace Fergun.Modules
             var actionList = response?.Payload?.Data?.SubscribeAdventure?.Actions ?? response?.Payload?.Data?.Adventure?.Actions;
             if (actionList == null || actionList.Count == 0)
             {
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Alter: Action list is null or empty."));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             var lastAction = actionList[actionList.Count - 1];
@@ -854,12 +865,13 @@ namespace Fergun.Modules
 
             if (AutoTranslate())
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Alter: Translating text to \"{GetLanguage()}\"."));
                 oldOutput = await TranslateSimplerAsync(oldOutput, "en", GetLanguage());
             }
 
             builder.WithAuthor(Context.User)
                 .WithTitle("AI Dungeon")
-                .WithDescription(string.Format(Locate("NewOutputPrompt"), $"```{oldOutput}```"));
+                .WithDescription(string.Format(Locate("NewOutputPrompt"), $"```{oldOutput.Truncate(EmbedBuilder.MaxDescriptionLength - 50)}```"));
 
             await ReplyAsync(embed: builder.Build());
 
@@ -871,11 +883,6 @@ namespace Fergun.Modules
             }
 
             string newOutput = userInput.Content.Trim();
-
-            if (newOutput.Length > 140)
-            {
-                return FergunResult.FromError($"{Locate("140CharsMax")} {Locate("EditCanceled")}");
-            }
 
             await userInput.TryDeleteAsync();
 
@@ -1013,7 +1020,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             string error = CheckResponse(response);
@@ -1026,6 +1033,7 @@ namespace Fergun.Modules
             var actionList = response?.Payload?.Data?.SubscribeAdventure?.Actions ?? response?.Payload?.Data?.Adventure?.Actions;
             if (actionList == null || actionList.Count == 0)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Idinfo: Action list is null or empty."));
                 initialPrompt = "???";
             }
             else
@@ -1126,7 +1134,7 @@ namespace Fergun.Modules
                     }
                     catch (TimeoutException)
                     {
-                        result = Locate("ErrorOnAPI");
+                        result = Locate("ErrorInAPI");
                     }
 
                     await message.ModifyAsync(x => x.Embed = builder.WithDescription(result).Build());
@@ -1179,7 +1187,7 @@ namespace Fergun.Modules
             }
             catch (TimeoutException)
             {
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             string error = CheckResponse(response);
@@ -1191,7 +1199,8 @@ namespace Fergun.Modules
             var actionList = response.Payload.Data.Adventure.Actions;
             if (actionList == null || actionList.Count == 0)
             {
-                return FergunResult.FromError(Locate("ErrorOnAPI"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Dump: Action list is null or empty."));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
             try
@@ -1233,9 +1242,14 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("CannotGiveYourself"));
             }
+            if (user.IsBot)
+            {
+                return FergunResult.FromError(Locate("CannotGiveToBot"));
+            }
 
             adventure.OwnerID = user.Id;
             FergunClient.Database.UpdateRecord("AIDAdventures", adventure);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Give: Transferred adventure ID from {Context.User} ({Context.User.Id}) to {user} ({user.Id})."));
 
             await SendEmbedAsync("✅ " + string.Format(Locate("GaveId"), user.ToString()));
 
@@ -1272,7 +1286,7 @@ namespace Fergun.Modules
             var data = response.Payload.Data;
             if (data == null)
             {
-                return Locate("ErrorOnAPI");
+                return Locate("ErrorInAPI");
             }
             if (data.Errors != null && data.Errors.Count > 0)
             {

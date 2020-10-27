@@ -517,7 +517,7 @@
 	<data name="triviaSummary" xml:space="preserve">
     <value>Мелочи время!</value>
   </data>
-	<data name="ErrorOnAPI" xml:space="preserve">
+	<data name="ErrorInAPI" xml:space="preserve">
     <value>Произошла ошибка при вызове API.</value>
   </data>
 	<data name="UserInfo" xml:space="preserve">
@@ -2165,5 +2165,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	</data>
 	<data name="ValueNotSetInDatabase" xml:space="preserve">
 		<value>Значение `{0}` не было установлено в базе данных. Если проблема не исчезнет, обратитесь к разработчикам.</value>
+	</data>
+	<data name="CannotGiveToBot" xml:space="preserve">
+		<value>Вы не можете дать ID боту!</value>
 	</data>
 </root>

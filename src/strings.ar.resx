@@ -1540,7 +1540,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="supportSummary" xml:space="preserve">
     <value>يظهر معلومات الدعم.</value>
   </data>
-	<data name="ErrorOnAPI" xml:space="preserve">
+	<data name="ErrorInAPI" xml:space="preserve">
     <value>حدث خطأ أثناء استدعاء API.</value>
   </data>
 	<data name="Topic" xml:space="preserve">
@@ -2177,5 +2177,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="ValueNotSetInDatabase" xml:space="preserve">
 		<value>لم يتم تعيين قيمة `{0}` في قاعدة البيانات. إذا استمرت هذه المشكلة ، فاتصل بالمطورين.</value>
+	</data>
+	<data name="CannotGiveToBot" xml:space="preserve">
+		<value>لا يمكنك إعطاء المعرف لروبوت!</value>
 	</data>
 </root>
