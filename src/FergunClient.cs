@@ -27,7 +27,9 @@ using Victoria;
 
 namespace Fergun
 {
+#pragma warning disable CA1001
     public class FergunClient
+#pragma warning restore CA1001
     {
         public static FergunDB Database { get; private set; }
         public static DateTime Uptime { get; private set; }
@@ -306,7 +308,7 @@ namespace Fergun
             Process[] processList = Process.GetProcessesByName("java");
             if (processList.Length != 0)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\r\nSkipping the update..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\nSkipping the update..."));
                 return;
             }
 

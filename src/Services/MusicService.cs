@@ -23,9 +23,8 @@ namespace Fergun.Services
         private readonly DiscordSocketClient _client;
         private readonly LogService _logService;
         private readonly LavaConfig _lavaConfig;
-        private readonly GeniusApi _geniusApi;
-
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
+        private GeniusApi _geniusApi;
 
         public MusicService(DiscordSocketClient client, LogService logService)
         {
@@ -37,7 +36,6 @@ namespace Fergun.Services
                 LogSeverity = LogSeverity.Info
             };
             LavaNode = new LavaNode(_client, _lavaConfig);
-            _geniusApi = new GeniusApi(FergunConfig.GeniusApiToken);
 
             _client.Ready += ClientReadyAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdatedAsync;
@@ -538,6 +536,7 @@ namespace Fergun.Services
             }
             query = query.Trim();
             GeniusResponse genius;
+            _geniusApi ??= new GeniusApi(FergunConfig.GeniusApiToken);
             try
             {
                 genius = await _geniusApi.SearchAsync(query);

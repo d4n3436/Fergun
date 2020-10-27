@@ -4,24 +4,13 @@ using Discord.WebSocket;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// A criterion that ensures the user is the source user.
+    /// </summary>
     public class EnsureSourceUserCriterion : ICriterion<SocketMessage>
     {
-        /// <summary>
-        /// The judge async.
-        /// </summary>
-        /// <param name="sourceContext">
-        /// The source context.
-        /// </param>
-        /// <param name="parameter">
-        /// The parameter.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, SocketMessage parameter)
-        {
-            var ok = sourceContext.User.Id == parameter.Author.Id;
-            return Task.FromResult(ok);
-        }
+            => Task.FromResult(sourceContext.User.Id == parameter.Author.Id);
     }
 }

@@ -4,43 +4,36 @@ using Discord.Commands;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// Represents a collection of criterion.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Criteria<T> : ICriterion<T>
     {
         /// <summary>
         /// The criteria.
         /// </summary>
-        private readonly List<ICriterion<T>> criteria = new List<ICriterion<T>>();
+        private readonly List<ICriterion<T>> _criteria = new List<ICriterion<T>>();
 
         /// <summary>
-        /// adds a criterion
+        /// Adds a criterion.
         /// </summary>
         /// <param name="criterion">
         /// The criterion.
         /// </param>
         /// <returns>
-        /// The <see cref="criterion"/>.
+        /// The criteria with the criterion added.
         /// </returns>
         public Criteria<T> AddCriterion(ICriterion<T> criterion)
         {
-            criteria.Add(criterion);
+            _criteria.Add(criterion);
             return this;
         }
 
-        /// <summary>
-        /// The judge async.
-        /// </summary>
-        /// <param name="sourceContext">
-        /// The source context.
-        /// </param>
-        /// <param name="parameter">
-        /// The parameter.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public async Task<bool> JudgeAsync(SocketCommandContext sourceContext, T parameter)
         {
-            foreach (var criterion in criteria)
+            foreach (var criterion in _criteria)
             {
                 var result = await criterion.JudgeAsync(sourceContext, parameter).ConfigureAwait(false);
                 if (!result)

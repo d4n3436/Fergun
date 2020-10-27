@@ -12,15 +12,8 @@ namespace Fergun.Interactive
     /// </summary>
     public class InlineReactionCallback : IReactionCallback
     {
-        /// <summary>
-        /// The interactive.
-        /// </summary>
-        private readonly InteractiveService interactive;
-
-        /// <summary>
-        /// The data.
-        /// </summary>
-        private readonly ReactionCallbackData data;
+        private readonly InteractiveService _interactive;
+        private readonly ReactionCallbackData _data;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InlineReactionCallback"/> class.
@@ -43,9 +36,9 @@ namespace Fergun.Interactive
             ReactionCallbackData data,
             ICriterion<SocketReaction> criterion = null)
         {
-            this.interactive = interactive;
+            this._interactive = interactive;
             Context = context;
-            this.data = data;
+            this._data = data;
             Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
             Timeout = data.Timeout ?? TimeSpan.FromSeconds(30);
         }
@@ -83,27 +76,23 @@ namespace Fergun.Interactive
         /// </returns>
         public async Task DisplayAsync()
         {
-            var message = await Context.Channel.SendMessageAsync(data.Text, embed: data.Embed).ConfigureAwait(false);
+            var message = await Context.Channel.SendMessageAsync(_data.Text, embed: _data.Embed).ConfigureAwait(false);
             Message = message;
-            interactive.AddReactionCallback(message, this);
+            _interactive.AddReactionCallback(message, this);
 
             _ = Task.Run(async () =>
             {
-                foreach (var item in data.Callbacks)
+                foreach (var item in _data.Callbacks)
                 {
                     await message.AddReactionAsync(item.Reaction);
                 }
+                if (Timeout.HasValue)
+                {
+                    await Task.Delay(Timeout.Value);
+                    _interactive.RemoveReactionCallback(message);
+                    _data.TimeoutCallback?.Invoke(Context);
+                }
             });
-
-            if (Timeout.HasValue)
-            {
-                _ = Task.Delay(Timeout.Value)
-                    .ContinueWith(_ =>
-                        {
-                            interactive.RemoveReactionCallback(message);
-                            data.TimeoutCallback?.Invoke(Context);
-                        });
-            }
         }
 
         /// <summary>
@@ -118,19 +107,19 @@ namespace Fergun.Interactive
         public async Task<bool> HandleCallbackAsync(SocketReaction reaction)
         {
             // If reaction is not specified in our Callback List, ignore
-            var reactionCallbackItem = data.Callbacks.FirstOrDefault(t => t.Reaction.Equals(reaction.Emote));
+            var reactionCallbackItem = _data.Callbacks.FirstOrDefault(t => t.Reaction.Equals(reaction.Emote));
             if (reactionCallbackItem == null)
             {
                 return false;
             }
 
-            if (data.SingleUsePerUser)
+            if (_data.SingleUsePerUser)
             {
                 // Ensure that we only allow users to react a single time.
-                if (!data.ReactorIDs.Contains(reaction.UserId))
+                if (!_data.ReactorIDs.Contains(reaction.UserId))
                 {
                     await reactionCallbackItem.Callback(Context, reaction);
-                    data.ReactorIDs.Add(reaction.UserId);
+                    _data.ReactorIDs.Add(reaction.UserId);
                 }
             }
             else
@@ -138,7 +127,7 @@ namespace Fergun.Interactive
                 await reactionCallbackItem.Callback(Context, reaction);
             }
 
-            return data.ExpiresAfterUse;
+            return _data.ExpiresAfterUse;
         }
     }
 }

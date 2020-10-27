@@ -43,10 +43,10 @@ namespace Fergun.Modules
         public Task<IUserMessage> PagedReplyAsync(IEnumerable<object> list, bool fromSourceUser = true)
         {
             PaginatedMessage pager = new PaginatedMessage();
-            List<PaginatedMessage.Page> pages = new List<PaginatedMessage.Page>();
+            List<PaginatorPage> pages = new List<PaginatorPage>();
             foreach (var obj in list)
             {
-                pages.Add(new PaginatedMessage.Page { Description = obj.ToString() });
+                pages.Add(new PaginatorPage { Description = obj.ToString() });
             }
             pager.Pages = pages;
 

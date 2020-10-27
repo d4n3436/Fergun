@@ -54,7 +54,7 @@ namespace Fergun.APIs.OpenTriviaDB
 
             if (category != QuestionCategory.Any)
             {
-                query += $"&category={category.ToString("D")}";
+                query += $"&category={category:D}";
             }
 
             if (difficulty != QuestionDifficulty.Any)
@@ -137,7 +137,7 @@ namespace Fergun.APIs.OpenTriviaDB
             string json;
             using (var wc = new WebClient())
             {
-                json = wc.DownloadString($"{ApiCategoryCountEndpoint}?category={category.ToString("D")}");
+                json = wc.DownloadString($"{ApiCategoryCountEndpoint}?category={category:D}");
             }
             return JsonConvert.DeserializeObject<NumberOfQuestionsInCategoryResponse>(json);
         }

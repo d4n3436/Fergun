@@ -199,11 +199,11 @@ namespace Fergun.Modules
             string value = returnValue.ToString();
             if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
-                var pages = new List<PaginatedMessage.Page>();
+                var pages = new List<PaginatorPage>();
 
                 foreach (var item in value.SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10))
                 {
-                    pages.Add(new PaginatedMessage.Page()
+                    pages.Add(new PaginatorPage()
                     {
                         Description = Format.Code(item.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md")
                     });

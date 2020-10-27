@@ -32,3 +32,6 @@ csharp_style_prefer_index_operator = false:suggestion
 
 # CA1308: Normalize strings to uppercase
 dotnet_diagnostic.CA1308.severity = none
+
+# CA1724: Type names should not match namespaces
+dotnet_diagnostic.CA1724.severity = none

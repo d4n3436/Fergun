@@ -46,7 +46,7 @@ namespace Fergun
                     client.ListDatabaseNames();
                     return client.Cluster.Description.State == ClusterState.Connected;
                 }
-                catch { return false; }
+                catch (MongoException) { return false; }
             }
         }
 

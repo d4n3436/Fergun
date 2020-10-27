@@ -26,22 +26,22 @@ namespace Fergun.Interactive
         /// <summary>
         /// The options.
         /// </summary>
-        private PaginatedAppearanceOptions Options => pager.Options;
+        private PaginatedAppearanceOptions Options => _pager.Options;
 
         /// <summary>
         /// The page count.
         /// </summary>
-        private readonly int pages;
+        private readonly int _pages;
 
         /// <summary>
         /// The current page.
         /// </summary>
-        private int page = 1;
+        private int _page = 1;
         
         /// <summary>
-        /// The paginated message
+        /// The paginated message.
         /// </summary>
-        private readonly PaginatedMessage pager;
+        private readonly PaginatedMessage _pager;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessageCallback"/> class.
@@ -66,8 +66,8 @@ namespace Fergun.Interactive
             Interactive = interactive;
             Context = sourceContext;
             Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
-            this.pager = pager;
-            pages = this.pager.Pages.Count();
+            _pager = pager;
+            _pages = _pager.Pages.Count();
         }
 
         /// <summary>
@@ -93,20 +93,20 @@ namespace Fergun.Interactive
         public List<ulong> ShowingInfo { get; private set; } = new List<ulong>();
 
         /// <summary>
-        /// Sends the embed and the reactions.
+        /// Sends the paginated message with the provided reaction list.
         /// </summary>
         /// <param name="reactionList">
-        /// The reactions.
+        /// The reactions to add.
         /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <param name="oldMessage">
+        /// An old message to use.
+        /// </param>
         public async Task DisplayAsync(ReactionList reactionList, IUserMessage oldMessage)
         {
             var embed = BuildEmbed();
             if (oldMessage == null)
             {
-                Message = await Context.Channel.SendMessageAsync(pager.Content, embed: embed).ConfigureAwait(false);
+                Message = await Context.Channel.SendMessageAsync(_pager.Content, embed: embed).ConfigureAwait(false);
             }
             else
             {
@@ -122,7 +122,7 @@ namespace Fergun.Interactive
                 Message = (IUserMessage)await Context.Channel.GetMessageAsync(oldMessage.Id).ConfigureAwait(false);
             }
             //this.Message = Message;
-            if (pages == 1)
+            if (_pages == 1)
             {
                 return;
             }
@@ -131,10 +131,10 @@ namespace Fergun.Interactive
             // reactionList take a while to add, don't wait for them
             _ = Task.Run(async () =>
             {
-                if (reactionList.First) await Message.AddReactionAsync(Options.First);
-                if (reactionList.Backward) await Message.AddReactionAsync(Options.Back);
-                if (reactionList.Forward) await Message.AddReactionAsync(Options.Next);
-                if (reactionList.Last) await Message.AddReactionAsync(Options.Last);
+                if (reactionList.First) await Message.AddReactionAsync(Options.First).ConfigureAwait(false);
+                if (reactionList.Backward) await Message.AddReactionAsync(Options.Back).ConfigureAwait(false);
+                if (reactionList.Forward) await Message.AddReactionAsync(Options.Next).ConfigureAwait(false);
+                if (reactionList.Last) await Message.AddReactionAsync(Options.Last).ConfigureAwait(false);
 
                 bool manageMessages = Context.Channel is IGuildChannel guildChannel &&
                                      (Context.User as IGuildUser).GetPermissions(guildChannel).ManageMessages;
@@ -143,26 +143,26 @@ namespace Fergun.Interactive
                 {
                     if (Options.JumpDisplayOptions == JumpDisplayOption.Always || (Options.JumpDisplayOptions == JumpDisplayOption.WithManageMessages && manageMessages))
                     {
-                        await Message.AddReactionAsync(Options.Jump);
+                        await Message.AddReactionAsync(Options.Jump).ConfigureAwait(false);
                     }
                 }
 
                 if (reactionList.Stop)
                 {
-                    await Message.AddReactionAsync(Options.Stop);
+                    await Message.AddReactionAsync(Options.Stop).ConfigureAwait(false);
                 }
 
                 if (reactionList.Info)
                 {
-                    await Message.AddReactionAsync(Options.Info);
+                    await Message.AddReactionAsync(Options.Info).ConfigureAwait(false);
+                }
+
+                if (Timeout.HasValue)
+                {
+                    await Task.Delay(Timeout.Value).ConfigureAwait(false);
+                    await OnStopAsync(Message, Options.ActionOnTimeout).ConfigureAwait(false);
                 }
             });
-            if (Timeout.HasValue)
-            {
-                _ = Task.Delay(Timeout.Value)
-                    .ContinueWith(_ => OnStopAsync(Message, Options.ActionOnTimeout).ConfigureAwait(false))
-                    .ConfigureAwait(false);
-            }
         }
 
         /// <summary>
@@ -180,15 +180,15 @@ namespace Fergun.Interactive
             switch (actionOnStop)
             {
                 case ActionOnTimeout.DeleteMessage:
-                    await message.DeleteAsync();
+                    await message.DeleteAsync().ConfigureAwait(false);
                     break;
                 case ActionOnTimeout.DeleteReactions:
                     bool manageMessages = message.Channel is SocketGuildChannel guildChannel &&
                              guildChannel.GetUser(message.Author.Id).GetPermissions(guildChannel).ManageMessages;
                     if (manageMessages)
-                        await message.RemoveAllReactionsAsync();
+                        await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                     else
-                        await message.RemoveReactionsAsync(message.Author, message.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                        await message.RemoveReactionsAsync(message.Author, message.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray()).ConfigureAwait(false);
                     break;
                 case ActionOnTimeout.Nothing:
                 default:
@@ -211,31 +211,31 @@ namespace Fergun.Interactive
             var emote = reaction.Emote;
             if (emote.Equals(Options.First))
             {
-                if (page == 1)
+                if (_page == 1)
                     return false;
-                page = 1;
+                _page = 1;
             }
             else if (emote.Equals(Options.Next))
             {
-                if (page >= pages)
+                if (_page >= _pages)
                     return false;
-                ++page;
+                ++_page;
             }
             else if (emote.Equals(Options.Back))
             {
-                if (page <= 1)
+                if (_page <= 1)
                     return false;
-                --page;
+                --_page;
             }
             else if (emote.Equals(Options.Last))
             {
-                if (page == pages)
+                if (_page == _pages)
                     return false;
-                page = pages;
+                _page = _pages;
             }
             else if (emote.Equals(Options.Stop))
             {
-                _ = OnStopAsync(Message, Options.ActionOnStop);
+                _ = OnStopAsync(Message, Options.ActionOnStop).ConfigureAwait(false);
                 return false;
             }
             else if (emote.Equals(Options.Jump))
@@ -247,7 +247,7 @@ namespace Fergun.Interactive
                         .AddCriterion(new EnsureSourceChannelCriterion())
                         .AddCriterion(new EnsureFromUserCriterion(reaction.UserId))
                         .AddCriterion(new EnsureIsIntegerCriterion());
-                    var response = await Interactive.NextMessageAsync(Context, criteria, TimeSpan.FromSeconds(15));
+                    var response = await Interactive.NextMessageAsync(Context, criteria, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
 
                     if (response == null || !int.TryParse(response.Content, out int requestedPage))
                     {
@@ -255,16 +255,16 @@ namespace Fergun.Interactive
                     }
 
                     _ = response.DeleteAsync().ConfigureAwait(false);
-                    if (requestedPage < 1 || requestedPage == page || requestedPage > pages)
+                    if (requestedPage < 1 || requestedPage == _page || requestedPage > _pages)
                     {
                         //_ = response.DeleteAsync().ConfigureAwait(false);
                         //await Interactive.ReplyAndDeleteAsync(Context, Options.Stop.Name);
                         return;
                     }
 
-                    page = requestedPage;
+                    _page = requestedPage;
 
-                    _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId);
+                    _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId).ConfigureAwait(false);
 
                     await RenderAsync().ConfigureAwait(false);
                 });
@@ -276,14 +276,15 @@ namespace Fergun.Interactive
                 {
                     return false;
                 }
-                var msg = await Context.Channel.SendMessageAsync(Options.InformationText);
+                var msg = await Context.Channel.SendMessageAsync(Options.InformationText).ConfigureAwait(false);
                 ShowingInfo.Add(Message.Id);
-                _ = Task.Delay(Options.InfoTimeout)
-                    .ContinueWith(_ =>
-                    {
-                        _ = msg.DeleteAsync();
-                        ShowingInfo.Remove(Message.Id);
-                    }).ConfigureAwait(false);
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(Options.InfoTimeout).ConfigureAwait(false);
+                    await msg.DeleteAsync().ConfigureAwait(false);
+                    ShowingInfo.Remove(Message.Id);
+                });
+
                 //await Interactive.ReplyAndDeleteAsync(Context, Options.InformationText, timeout: Options.InfoTimeout);
                 return false;
             }
@@ -292,7 +293,7 @@ namespace Fergun.Interactive
                 return false;
             }
 
-            _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId);
+            _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId).ConfigureAwait(false);
 
             await RenderAsync().ConfigureAwait(false);
             return false;
@@ -306,23 +307,23 @@ namespace Fergun.Interactive
         /// </returns>
         protected Embed BuildEmbed()
         {
-            var current = pager.Pages.ElementAt(page - 1);
+            var current = _pager.Pages.ElementAt(_page - 1);
 
             var builder = new EmbedBuilder
             {
-                Author = current.Author ?? pager.Author,
-                Title = current.Title ?? pager.Title,
-                Url = current.Url ?? pager.Url,
-                Description = current.Description ?? pager.Description,
-                ImageUrl = current.ImageUrl ?? pager.ImageUrl,
-                Color = current.Color ?? pager.Color,
-                Fields = current.Fields ?? pager.Fields,
-                Footer = current.FooterOverride ?? pager.FooterOverride ?? new EmbedFooterBuilder
+                Author = current.Author ?? _pager.Author,
+                Title = current.Title ?? _pager.Title,
+                Url = current.Url ?? _pager.Url,
+                Description = current.Description ?? _pager.Description,
+                ImageUrl = current.ImageUrl ?? _pager.ImageUrl,
+                Color = current.Color ?? _pager.Color,
+                Fields = current.Fields ?? _pager.Fields,
+                Footer = current.FooterOverride ?? _pager.FooterOverride ?? new EmbedFooterBuilder
                 {
-                    Text = string.Format(Options.FooterFormat, page, pages)
+                    Text = string.Format(Options.FooterFormat, _page, _pages)
                 },
-                ThumbnailUrl = current.ThumbnailUrl ?? pager.ThumbnailUrl,
-                Timestamp = current.TimeStamp ?? pager.TimeStamp
+                ThumbnailUrl = current.ThumbnailUrl ?? _pager.ThumbnailUrl,
+                Timestamp = current.TimeStamp ?? _pager.TimeStamp
             };
 
             /*var builder = new EmbedBuilder()
@@ -340,15 +341,11 @@ namespace Fergun.Interactive
         }
 
         /// <summary>
-        /// Renders an embed page
+        /// Renders an embed page.
         /// </summary>
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        private Task RenderAsync()
-        {
-            //var embed = BuildEmbed();
-            return Message.ModifyAsync(m => m.Embed = BuildEmbed());
-        }
+        private Task RenderAsync() => Message.ModifyAsync(m => m.Embed = BuildEmbed());
     }
 }

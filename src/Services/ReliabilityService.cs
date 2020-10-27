@@ -15,23 +15,20 @@ namespace Fergun.Services
     // Links to daemons:
     // [Powershell (Windows+Unix)] https://gitlab.com/snippets/21444
     // [Bash (Unix)] https://stackoverflow.com/a/697064
-    public class ReliabilityService
+    public class ReliabilityService : IDisposable
     {
-        // Change log levels if desired:
-        private const LogSeverity _debug = LogSeverity.Debug;
-        private const LogSeverity _info = LogSeverity.Info;
-        private const LogSeverity _critical = LogSeverity.Critical;
-
         private readonly DiscordSocketClient _client;
         private readonly Func<LogMessage, Task> _logger;
         private CancellationTokenSource _cts;
-        private bool isReconnecting;
+        private bool _isReconnecting;
+        private bool _disposed;
 
         // How long should we wait on the client to reconnect before resetting?
         private readonly TimeSpan _timeout;
 
         // Should we attempt to reset the client? Set this to false if your client is still locking up.
-        private readonly bool _attemptReset = true;
+        private readonly bool _attemptReset;
+        private const string _logSource = "Reliability";
 
         public ReliabilityService(DiscordSocketClient client, Func<LogMessage, Task> logger = null, TimeSpan? timeout = null, bool attemptReset = true)
         {
@@ -45,15 +42,42 @@ namespace Fergun.Services
             _client.Disconnected += DisconnectedAsync;
         }
 
+        /// <summary>
+        /// Disposes the cancellation token
+        /// and unsubscribes from the <see cref="BaseSocketClient.Connected"/> and <see cref="BaseSocketClient.Disconnected"/> events.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ReliabilityService), "Service has been disposed.");
+            }
+            else if (disposing)
+            {
+                _cts.Dispose();
+                _cts = null;
+
+                _client.Connected -= ConnectedAsync;
+                _client.Disconnected -= DisconnectedAsync;
+                _disposed = true;
+            }
+        }
+
         public Task ConnectedAsync()
         {
-            if (!isReconnecting)
+            if (!_isReconnecting)
             {
                 // Cancel all previous state checks and reset the CancelToken - client is back online
-                _ = DebugAsync("Client reconnected, resetting cancel tokens...");
+                _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, resetting cancel tokens..."));
                 _cts.Cancel();
                 _cts = new CancellationTokenSource();
-                _ = DebugAsync("Client reconnected, cancel tokens reset.");
+                _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, cancel tokens reset."));
             }
 
             return Task.CompletedTask;
@@ -63,18 +87,19 @@ namespace Fergun.Services
         {
             if (exception is GatewayReconnectException)
             {
-                isReconnecting = true;
+                _isReconnecting = true;
             }
             else
             {
-                isReconnecting = false;
+                _isReconnecting = false;
                 // Check the state after <timeout> to see if we reconnected
-                _ = InfoAsync("Client disconnected, starting timeout task...");
-                _ = Task.Delay(_timeout, _cts.Token).ContinueWith(async _ =>
+                _ = Task.Run(async () =>
                 {
-                    await DebugAsync("Timeout expired, continuing to check client state...");
+                    await _logger(new LogMessage(LogSeverity.Info, _logSource, "Client disconnected, starting timeout task..."));
+                    await Task.Delay(_timeout, _cts.Token);
+                    await _logger(new LogMessage(LogSeverity.Debug, _logSource, "Timeout expired, continuing to check client state..."));
                     await CheckStateAsync();
-                    await DebugAsync("State came back.");
+                    await _logger(new LogMessage(LogSeverity.Debug, _logSource, "State came back."));
                 });
             }
             return Task.CompletedTask;
@@ -86,7 +111,7 @@ namespace Fergun.Services
             if (_client.ConnectionState == ConnectionState.Connected) return;
             if (_attemptReset)
             {
-                await InfoAsync("Attempting to reset the client...");
+                await _logger(new LogMessage(LogSeverity.Info, _logSource, "Attempting to reset the client..."));
 
                 var timeout = Task.Delay(_timeout);
                 var connect = _client.StartAsync();
@@ -94,35 +119,23 @@ namespace Fergun.Services
 
                 if (task == timeout)
                 {
-                    await CriticalAsync("Client reset timed out (task deadlocked?), killing process.");
+                    await _logger(new LogMessage(LogSeverity.Critical, _logSource, "Client reset timed out (task deadlocked?), killing process."));
                     FailFast();
                 }
                 else if (connect.IsFaulted)
                 {
-                    await CriticalAsync("Client reset faulted, killing process.", connect.Exception);
+                    await _logger(new LogMessage(LogSeverity.Critical, _logSource, "Client reset faulted, killing process.", connect.Exception));
                     FailFast();
                 }
                 else if (connect.IsCompletedSuccessfully)
-                    await InfoAsync("Client reset succesfully!");
+                    await _logger(new LogMessage(LogSeverity.Info, _logSource, "Client reset succesfully!"));
                 return;
             }
 
-            await CriticalAsync("Client did not reconnect in time, killing process.");
+            await _logger(new LogMessage(LogSeverity.Critical, _logSource, "Client did not reconnect in time, killing process."));
             FailFast();
         }
 
         private static void FailFast() => Environment.Exit(1);
-
-        // Logging Helpers
-        private const string LogSource = "Reliability";
-
-        private Task DebugAsync(string message)
-            => _logger.Invoke(new LogMessage(_debug, LogSource, message));
-
-        private Task InfoAsync(string message)
-            => _logger.Invoke(new LogMessage(_info, LogSource, message));
-
-        private Task CriticalAsync(string message, Exception error = null)
-            => _logger.Invoke(new LogMessage(_critical, LogSource, message, error));
     }
 }

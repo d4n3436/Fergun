@@ -8,18 +8,27 @@ namespace Fergun.APIs.Genius
 {
     public class GeniusApi
     {
-        public const string ApiEndpoint = "https://api.genius.com";
+        public static string ApiEndpoint => "https://api.genius.com";
 
-        private static readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri(ApiEndpoint) };
+        private readonly string _apiToken;
 
         public GeniusApi(string apiToken)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
+            _apiToken = apiToken;
         }
 
         public async Task<GeniusResponse> SearchAsync(string query)
         {
-            var response = await _httpClient.GetStringAsync(new Uri($"/search?q={Uri.EscapeDataString(query)}", UriKind.Relative));
+            if (string.IsNullOrEmpty(_apiToken))
+            {
+                throw new ArgumentNullException(nameof(_apiToken), "You must provide a valid token.");
+            }
+            string response;
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
+                response = await client.GetStringAsync(new Uri($"/search?q={Uri.EscapeDataString(query)}", UriKind.Relative));
+            }
             return JsonConvert.DeserializeObject<GeniusResponse>(response);
         }
     }

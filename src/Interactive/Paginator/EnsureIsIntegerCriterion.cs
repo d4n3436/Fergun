@@ -4,24 +4,13 @@ using Discord.WebSocket;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// A criterion that ensures the message content is an integer.
+    /// </summary>
     public class EnsureIsIntegerCriterion : ICriterion<SocketMessage>
     {
-        /// <summary>
-        /// Ensures the input number is an integer
-        /// </summary>
-        /// <param name="sourceContext">
-        /// The source context.
-        /// </param>
-        /// <param name="parameter">
-        /// The parameter.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, SocketMessage parameter)
-        {
-            bool ok = int.TryParse(parameter.Content, out _);
-            return Task.FromResult(ok);
-        }
+            => Task.FromResult(int.TryParse(parameter.Content, out _));
     }
 }

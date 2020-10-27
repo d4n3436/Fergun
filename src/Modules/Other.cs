@@ -110,7 +110,7 @@ namespace Fergun.Modules
             }
 
             // TODO: Get links pointing command methods from the GitHub repo.
-            return FergunResult.FromError("WIP");
+            return await Task.FromResult(FergunResult.FromError("WIP"));
         }
 
         [Command("cmdstats", RunMode = RunMode.Async)]
@@ -121,14 +121,14 @@ namespace Fergun.Modules
             var stats = FergunConfig.CommandStats.OrderByDescending(x => x.Value);
             int i = 1;
             string current = "";
-            var pages = new List<PaginatedMessage.Page>();
+            var pages = new List<PaginatorPage>();
 
             foreach (var pair in stats)
             {
                 string command = $"{i}. {Format.Code(pair.Key)}: {pair.Value}\n";
                 if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength)
                 {
-                    pages.Add(new PaginatedMessage.Page { Description = current });
+                    pages.Add(new PaginatorPage { Description = current });
                     current = command;
                 }
                 else
@@ -139,7 +139,7 @@ namespace Fergun.Modules
             }
             if (!string.IsNullOrEmpty(current))
             {
-                pages.Add(new PaginatedMessage.Page { Description = current });
+                pages.Add(new PaginatorPage { Description = current });
             }
             if (pages.Count == 0)
             {
@@ -326,14 +326,6 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("nothing")]
-        [Summary("nothingSummary")]
-        [Alias("noop")]
-        public async Task Nothing()
-        {
-            ;
-        }
-
         [AlwaysEnabled]
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
@@ -431,15 +423,6 @@ namespace Fergun.Modules
         {
             await ReplyAsync(text, allowedMentions: AllowedMentions.None);
         }
-
-        //[RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
-        //[Command("someone")]
-        //[Summary("someoneSummary")]
-        //public async Task Someone()
-        //{
-        //    var user = Context.Guild.Users.ElementAt(RngInstance.Next(Context.Guild.Users.Count)); // Context.Guild.MemberCount may give the incorrect count
-        //    await ReplyAsync(user.ToString());
-        //}
 
         [LongRunning]
         [Command("stats", RunMode = RunMode.Async)]

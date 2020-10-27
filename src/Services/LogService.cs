@@ -10,37 +10,27 @@ namespace Fergun.Services
 {
     public class LogService
     {
-        private static string AppDirectory { get; } = AppContext.BaseDirectory;
-        private string LogDirectory { get; }
-        private string LogDirectoryName { get; }
-        public string LogFile => Path.Combine(LogDirectory, $"{DateTime.Today:dd-MM-yyyy}.txt");
-        private bool IsNewDay => !File.Exists(LogFile);
-        private static TextWriter Writer { get; set; }
-
+        private static readonly string _appDirectory = AppContext.BaseDirectory;
+        private readonly string _logDirectoryPath;
+        private readonly string _logDirectoryName;
+        private static TextWriter _writer;
         private static readonly object _writerLock = new object();
 
         public LogService(DiscordSocketClient client, CommandService cmdService)
         {
-            if (FergunClient.IsDebugMode)
-            {
-                LogDirectoryName = "logs_debug";
-            }
-            else
-            {
-                LogDirectoryName = "logs";
-            }
-            LogDirectory = Path.Combine(AppDirectory, LogDirectoryName);
+            _logDirectoryName = FergunClient.IsDebugMode ? "logs_debug" : "logs";
+            _logDirectoryPath = Path.Combine(_appDirectory, _logDirectoryName);
 
             // Create the log directory if it doesn't exist
             // What would happen if the folder is deleted while logging..?
-            if (!Directory.Exists(LogDirectory))
-                Directory.CreateDirectory(LogDirectory);
+            if (!Directory.Exists(_logDirectoryPath))
+                Directory.CreateDirectory(_logDirectoryPath);
 
-            if (IsNewDay)
+            if (IsNewDay())
             {
                 CheckYesterday();
             }
-            Writer = TextWriter.Synchronized(File.AppendText(LogFile));
+            _writer = TextWriter.Synchronized(File.AppendText(GetlogFile()));
 
             client.Log += LogAsync;
             cmdService.Log += LogAsync;
@@ -48,7 +38,7 @@ namespace Fergun.Services
 
         private void CheckYesterday()
         {
-            string yesterday = Path.Combine(LogDirectory, $"{DateTime.Today.AddDays(-1):dd-MM-yyyy}.txt");
+            string yesterday = Path.Combine(_logDirectoryPath, $"{DateTime.Today.AddDays(-1):dd-MM-yyyy}.txt");
             // If the yesterday log file exists, compress it.
             if (File.Exists(yesterday))
             {
@@ -56,13 +46,17 @@ namespace Fergun.Services
             }
         }
 
+        private bool IsNewDay() => !File.Exists(GetlogFile());
+
+        private string GetlogFile() => Path.Combine(_logDirectoryPath, $"{DateTime.Today:dd-MM-yyyy}.txt");
+
         public async Task LogAsync(LogMessage message)
         {
-            if (IsNewDay)
+            if (IsNewDay())
             {
                 lock (_writerLock)
                 {
-                    Writer = TextWriter.Synchronized(File.AppendText(LogFile));
+                    _writer = TextWriter.Synchronized(File.AppendText(GetlogFile()));
                 }
                 CheckYesterday();
             }
@@ -90,8 +84,8 @@ namespace Fergun.Services
                 }
                 Console.WriteLine(logText);
                 Console.ResetColor();
-                Writer.WriteLine(logText);
-                Writer.Flush();
+                _writer.WriteLine(logText);
+                _writer.Flush();
                 //await File.AppendAllTextAsync(LogFile, logText + "\n");
             }
             await Task.CompletedTask;

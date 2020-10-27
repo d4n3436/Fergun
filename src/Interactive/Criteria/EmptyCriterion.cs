@@ -3,20 +3,13 @@ using Discord.Commands;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// A criterion that is always successful.
+    /// </summary>
+    /// <typeparam name="T">The type of the parameter to judge.</typeparam>
     public class EmptyCriterion<T> : ICriterion<T>
     {
-        /// <summary>
-        /// The judge async.
-        /// </summary>
-        /// <param name="sourceContext">
-        /// The source context.
-        /// </param>
-        /// <param name="parameter">
-        /// The parameter.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, T parameter)
             => Task.FromResult(true);
     }

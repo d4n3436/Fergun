@@ -83,10 +83,10 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(error);
             }
-            var pages = new List<PaginatedMessage.Page>();
+            var pages = new List<PaginatorPage>();
             foreach (var item in lyrics.Skip(2))
             {
-                pages.Add(new PaginatedMessage.Page
+                pages.Add(new PaginatorPage
                 {
                     Description = item,
                     Fields = new List<EmbedFieldBuilder>()

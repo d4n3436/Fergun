@@ -1,28 +1,16 @@
 ﻿using System.Threading.Tasks;
-
 using Discord.Commands;
 using Discord.WebSocket;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// A criterion that ensures the channel is the source channel.
+    /// </summary>
     public class EnsureSourceChannelCriterion : ICriterion<SocketMessage>
     {
-        /// <summary>
-        /// Returns true if the channel is the source channel
-        /// </summary>
-        /// <param name="sourceContext">
-        /// The source context.
-        /// </param>
-        /// <param name="parameter">
-        /// The parameter.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <inheritdoc/>
         public Task<bool> JudgeAsync(SocketCommandContext sourceContext, SocketMessage parameter)
-        {
-            var ok = sourceContext.Channel.Id == parameter.Channel.Id;
-            return Task.FromResult(ok);
-        }
+            => Task.FromResult(sourceContext.Channel.Id == parameter.Channel.Id);
     }
 }

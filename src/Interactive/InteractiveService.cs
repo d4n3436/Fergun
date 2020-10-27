@@ -12,50 +12,37 @@ namespace Fergun.Interactive
     /// </summary>
     public class InteractiveService : IDisposable
     {
+        private readonly IDiscordClient _client;
+    private readonly Dictionary<ulong, IReactionCallback> _callbacks;
+        private readonly TimeSpan _defaultTimeout;
         private bool _disposed;
-
-        /// <summary>
-        /// The callbacks.
-        /// </summary>
-        private readonly Dictionary<ulong, IReactionCallback> callbacks;
-
-        /// <summary>
-        /// The default timeout.
-        /// </summary>
-        private readonly TimeSpan defaultTimeout;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractiveService"/> class.
         /// </summary>
-        /// <param name="discord">
+        /// <param name="client">
         /// The discord.
         /// </param>
         /// <param name="defaultTimeout">
         /// The default timeout.
         /// </param>
-        public InteractiveService(DiscordSocketClient discord, TimeSpan? defaultTimeout = null)
+        public InteractiveService(DiscordSocketClient client, TimeSpan? defaultTimeout = null)
         {
-            Discord = discord;
-            discord.ReactionAdded += HandleReactionAsync;
+            _client = client;
+            client.ReactionAdded += HandleReactionAsync;
 
-            callbacks = new Dictionary<ulong, IReactionCallback>();
-            this.defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
+            _callbacks = new Dictionary<ulong, IReactionCallback>();
+            _defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
         }
 
         public InteractiveService(DiscordShardedClient discord, TimeSpan? defaultTimeout = null)
         {
-            Discord = discord;
+            _client = discord;
             discord.ReactionAdded += HandleReactionAsync;
 
-            callbacks = new Dictionary<ulong, IReactionCallback>();
-            this.defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
+            _callbacks = new Dictionary<ulong, IReactionCallback>();
+            _defaultTimeout = defaultTimeout ?? TimeSpan.FromSeconds(15);
         }
-
-        
-        /// <summary>
-        /// Gets the client
-        /// </summary>
-        public IDiscordClient Discord { get; }
 
         /// <summary>
         /// waits for the next message in the channel
@@ -73,7 +60,7 @@ namespace Fergun.Interactive
         /// The timeout.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        /// A task representing the wait operation. The result contains the message, or null if no message was sent before the timeout.
         /// </returns>
         public Task<SocketMessage> NextMessageAsync(SocketCommandContext context, bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null)
         {
@@ -92,7 +79,7 @@ namespace Fergun.Interactive
         }
         
         /// <summary>
-        /// waits for the next message in the channel
+        /// Waits for the next message in the channel.
         /// </summary>
         /// <param name="context">
         /// The context.
@@ -104,11 +91,11 @@ namespace Fergun.Interactive
         /// The timeout.
         /// </param>
         /// <returns>
-        /// The <see cref="Task"/>.
+        /// A task representing the wait operation. The result contains the message, or null if no message was sent before the timeout.
         /// </returns>
         public async Task<SocketMessage> NextMessageAsync(SocketCommandContext context, ICriterion<SocketMessage> criterion, TimeSpan? timeout = null)
         {
-            timeout ??= defaultTimeout;
+            timeout ??= _defaultTimeout;
 
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
 
@@ -184,11 +171,15 @@ namespace Fergun.Interactive
         /// </returns>
         public async Task<IUserMessage> ReplyAndDeleteAsync(SocketCommandContext context, string content, bool isTTS = false, Embed embed = null, TimeSpan? timeout = null, RequestOptions options = null)
         {
-            timeout ??= defaultTimeout;
+            timeout ??= _defaultTimeout;
             var message = await context.Channel.SendMessageAsync(content, isTTS, embed, options).ConfigureAwait(false);
-            _ = Task.Delay(timeout.Value)
-                .ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
-                .ConfigureAwait(false);
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(timeout.Value).ConfigureAwait(false);
+                await message.DeleteAsync().ConfigureAwait(false);
+            }); 
+
             return message;
         }
 
@@ -228,7 +219,7 @@ namespace Fergun.Interactive
         /// The callback.
         /// </param>
         public void AddReactionCallback(IMessage message, IReactionCallback callback)
-            => callbacks[message.Id] = callback;
+            => _callbacks[message.Id] = callback;
 
         /// <summary>
         /// Removes a reaction callback via message
@@ -244,17 +235,12 @@ namespace Fergun.Interactive
         /// <param name="id">
         /// The id.
         /// </param>
-        public void RemoveReactionCallback(ulong id) => callbacks.Remove(id);
+        public void RemoveReactionCallback(ulong id) => _callbacks.Remove(id);
 
         /// <summary>
         /// Clears all reaction callbacks
         /// </summary>
-        public void ClearReactionCallbacks() => callbacks.Clear();
-
-        /// <summary>
-        /// Unsubscribes from a reactionHandler event
-        /// </summary>
-        /// 
+        public void ClearReactionCallbacks() => _callbacks.Clear();
 
         public void Dispose()
         {
@@ -270,11 +256,11 @@ namespace Fergun.Interactive
             }
             else if (disposing)
             {
-                if (Discord is DiscordShardedClient shardedClient)
+                if (_client is DiscordShardedClient shardedClient)
                 {
                     shardedClient.ReactionAdded -= HandleReactionAsync;
                 }
-                else if (Discord is DiscordSocketClient socketClient)
+                else if (_client is DiscordSocketClient socketClient)
                 {
                     socketClient.ReactionAdded -= HandleReactionAsync;
                 }
@@ -327,12 +313,12 @@ namespace Fergun.Interactive
         /// </returns>
         private async Task HandleReactionAsync(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            if (reaction.UserId == Discord.CurrentUser.Id)
+            if (reaction.UserId == _client.CurrentUser.Id)
             {
                 return;
             }
 
-            if (!callbacks.TryGetValue(message.Id, out var callback))
+            if (!_callbacks.TryGetValue(message.Id, out var callback))
             {
                 return;
             }
@@ -345,7 +331,7 @@ namespace Fergun.Interactive
             switch (callback.RunMode)
             {
                 case RunMode.Async:
-                    _ = Task.Run(async () => await callback.HandleCallbackAsync(reaction).ConfigureAwait(false));
+                    _ = callback.HandleCallbackAsync(reaction).ConfigureAwait(false);
                     break;
                 default:
                     await callback.HandleCallbackAsync(reaction).ConfigureAwait(false);

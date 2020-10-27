@@ -16,7 +16,9 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.APIs;
+using Fergun.APIs.BingTranslator;
 using Fergun.APIs.DuckDuckGo;
+using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
@@ -116,7 +118,7 @@ namespace Fergun.Modules
                     // Get unique and random languages.
                     do
                     {
-                        targetLang = Translators.SupportedLanguages[RngInstance.Next(Translators.SupportedLanguages.Count)];
+                        targetLang = BingTranslatorApi.SupportedLanguages[RngInstance.Next(BingTranslatorApi.SupportedLanguages.Count)];
                     } while (languageChain.Contains(targetLang));
                 }
 
@@ -131,7 +133,7 @@ namespace Fergun.Modules
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Original language: {originalLang}"));
 
                     // Fallback to English if the detected language is not supported by Bing.
-                    if (Translators.SupportedLanguages.IndexOf(originalLang) == -1)
+                    if (BingTranslatorApi.SupportedLanguages.IndexOf(originalLang) == -1)
                     {
                         await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Badtranslator: Original language not supported by Bing. Fallback to English."));
                         originalLang = "en";
@@ -666,7 +668,7 @@ namespace Fergun.Modules
             bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
 
-            var pages = new List<PaginatedMessage.Page>();
+            var pages = new List<PaginatorPage>();
 
             var cached = ImgCache.FirstOrDefault(x => x.Query == query && x.IsNsfw == isNsfwChannel);
             if (cached == null)
@@ -705,7 +707,7 @@ namespace Fergun.Modules
                     }
                     else
                     {
-                        pages.Add(new PaginatedMessage.Page()
+                        pages.Add(new PaginatorPage()
                         {
                             Title = item.Title.Truncate(EmbedBuilder.MaxTitleLength),
                             ImageUrl = imageUrl,
@@ -867,7 +869,7 @@ namespace Fergun.Modules
         {
             if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Translators.SupportedLanguages.Select(x => Format.Code(x)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", BingTranslatorApi.SupportedLanguages.Select(x => Format.Code(x)))}");
             }
 
             UrlFindResult result;
@@ -1256,7 +1258,7 @@ namespace Fergun.Modules
         {
             if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Translators.SupportedLanguages.Select(x => Format.Code(x)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", BingTranslatorApi.SupportedLanguages.Select(x => Format.Code(x)))}");
             }
 
             var result = await TranslateSimpleAsync(text, target);
@@ -1382,7 +1384,7 @@ namespace Fergun.Modules
                 }
             }
 
-            var pages = new List<PaginatedMessage.Page>();
+            var pages = new List<PaginatorPage>();
             if (cached == null)
             {
                 foreach (var item in search.Definitions)
@@ -1420,7 +1422,7 @@ namespace Fergun.Modules
                     var author = new EmbedAuthorBuilder()
                         .WithName($"{Locate("By")} {item.Author}");
 
-                    pages.Add(new PaginatedMessage.Page()
+                    pages.Add(new PaginatorPage()
                     {
                         Author = author,
                         Title = item.Word.Truncate(EmbedBuilder.MaxTitleLength),
@@ -1740,17 +1742,17 @@ namespace Fergun.Modules
         // TODO Use Engine 1 if the image is too small (30x30)
         private static async Task<(string, string)> OcrSimpleAsync(string url)
         {
-            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url)).Substring(6), true, out OCRSpace.FileType fileType))
+            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url)).Substring(6), true, out FileType fileType))
             {
                 return ("InvalidFileType", null);
             }
 
-            OCRSpace.OCREngine engine = fileType == OCRSpace.FileType.GIF ? OCRSpace.OCREngine.Engine1 : OCRSpace.OCREngine.Engine2;
+            OCREngine engine = fileType == FileType.GIF ? OCREngine.Engine1 : OCREngine.Engine2;
 
-            OCRSpace.OCRSpaceResponse ocr;
+            OCRSpaceResponse ocr;
             try
             {
-                ocr = await OCRSpace.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
+                ocr = await OCRSpaceApi.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
             }
             catch (WebException e)
             {
@@ -1807,7 +1809,7 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var result = await Translators.TranslateBingAsync(text, target);
+                    var result = await BingTranslatorApi.TranslateAsync(text, target);
 
                     resultTranslation = result[0].Translations[0].Text;
                     resultSource = GoogleTranslator.GetLanguageByISO(result[0].DetectedLanguage.Language);
@@ -1848,7 +1850,7 @@ namespace Fergun.Modules
 
     public class CachedPages
     {
-        public CachedPages(string query, List<PaginatedMessage.Page> pages, bool isNsfw)
+        public CachedPages(string query, List<PaginatorPage> pages, bool isNsfw)
         {
             Query = query;
             Pages = pages;
@@ -1856,7 +1858,7 @@ namespace Fergun.Modules
         }
 
         public bool IsNsfw { get; set; }
-        public List<PaginatedMessage.Page> Pages { get; set; }
+        public List<PaginatorPage> Pages { get; set; }
         public string Query { get; set; }
     }
 

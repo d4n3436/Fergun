@@ -10,20 +10,24 @@ namespace Fergun.APIs.DiscordBots
 {
     public class DiscordBotsApi
     {
-        public const string ApiEndpoint = "https://discord.bots.gg/api/v1/";
+        public static string ApiEndpoint => "https://discord.bots.gg/api/v1/";
 
-        private static readonly HttpClient _client = new HttpClient() { BaseAddress = new Uri(ApiEndpoint) };
+        private readonly string _apiToken;
 
         public DiscordBotsApi()
         {
         }
 
-        public DiscordBotsApi(string apiToken)
+        public DiscordBotsApi(string apiToken) : this()
         {
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(apiToken);
+            if (string.IsNullOrEmpty(apiToken))
+            {
+                throw new ArgumentNullException(nameof(apiToken), "You must provide a valid token.");
+            }
+            _apiToken = apiToken;
         }
 
-        public async Task<BotsResponse> GetBotsAsync(string query = "", int page = 0, int limit = 50,
+        public static async Task<BotsResponse> GetBotsAsync(string query = "", int page = 0, int limit = 50,
             ulong? authorId = null, string authorName = "", bool unverified = false, string lib = "",
             SortKey sort = SortKey.None, SortOrder order = SortOrder.Asc)
         {
@@ -64,27 +68,32 @@ namespace Fergun.APIs.DiscordBots
             {
                 q += $"&order={order.ToString().ToUpperInvariant()}";
             }
-            string json = await _client.GetStringAsync(new Uri($"bots?{q}", UriKind.Relative));
+
+            string json;
+            using (var client = new HttpClient())
+            {
+                json = await client.GetStringAsync(new Uri($"{ApiEndpoint}bots?{q}"));
+            }
             return JsonConvert.DeserializeObject<BotsResponse>(json);
         }
 
-        public async Task<Bot> GetBotAsync(ulong id, bool sanitized = false)
+        public static async Task<Bot> GetBotAsync(ulong id, bool sanitized = false)
         {
             string q = "";
             if (sanitized)
             {
                 q += $"sanitized={sanitized}";
             }
-            string json = await _client.GetStringAsync(new Uri($"bots/{id}?{q}", UriKind.Relative));
+            string json;
+            using (var client = new HttpClient())
+            {
+                json = await client.GetStringAsync(new Uri($"{ApiEndpoint}bots/{id}?{q}"));
+            }
             return JsonConvert.DeserializeObject<Bot>(json);
         }
 
         public async Task<StatsResponse> UpdateStatsAsync(ulong id, int guildCount, int shardCount = 1, int shardId = 0)
         {
-            if (_client.DefaultRequestHeaders.Authorization == null)
-            {
-                throw new NullReferenceException("You must provide a token.");
-            }
             var dict = new Dictionary<string, string>
             {
                 { "guildCount", guildCount.ToString() }
@@ -97,12 +106,18 @@ namespace Fergun.APIs.DiscordBots
             {
                 dict.Add("shardId", shardId.ToString());
             }
+
+            string json;
             using (var content = new StringContent(JsonConvert.SerializeObject(dict), Encoding.UTF8, "application/json"))
             {
-                var response = await _client.PostAsync(new Uri($"bots/{id}/stats", UriKind.Relative), content);
-                string json = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<StatsResponse>(json);
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiToken);
+                    var response = await client.PostAsync(new Uri($"bots/{id}/stats", UriKind.Relative), content);
+                    json = await response.Content.ReadAsStringAsync();
+                }
             }
+            return JsonConvert.DeserializeObject<StatsResponse>(json);
         }
 
         public enum SortKey

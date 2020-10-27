@@ -13,12 +13,14 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.AIDungeon;
+using Fergun.APIs.BingTranslator;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
 using GoogleTranslateFreeApi;
+using Newtonsoft.Json;
 
 namespace Fergun.Modules
 {
@@ -1328,14 +1330,14 @@ namespace Fergun.Modules
                 var result = await translator.TranslateLiteAsync(text, new Language("", from), new Language("", to));
                 return result.MergedTranslation;
             }
-            catch
+            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is SystemException)
             {
                 try
                 {
-                    var result = await Translators.TranslateBingAsync(text, to, from);
+                    var result = await BingTranslatorApi.TranslateAsync(text, to, from);
                     return result[0].Translations[0].Text;
                 }
-                catch
+                catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is ArgumentException)
                 {
                     return text;
                 }
