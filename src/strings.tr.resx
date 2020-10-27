@@ -977,8 +977,8 @@ ve karakteri: ** {1} ** ...</value>
     <value>Özel karakter oluşturma</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
-    <value>Kim olduğunuzu ve başladığınız yerin ilk birkaç cümlesini tanımlayan bir metin girin.
-Bilgi istemi 5 dakika içinde zaman aşımına uğrar ve maks. karakter sayısı 140'tır.</value>
+    <value>Kim olduğunuzu ve başladığınız yerin ilk birkaç cümlesini açıklayan bir metin girin.
+Bu komut istemi 5 dakika içinde zaman aşımına uğrayacaktır.</value>
   </data>
 	<data name="GeneratingNewCustomAdventure" xml:space="preserve">
     <value>Özel istemi ile yeni bir macera oluşturuluyor...</value>

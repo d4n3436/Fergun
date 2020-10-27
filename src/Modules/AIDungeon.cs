@@ -481,11 +481,6 @@ namespace Fergun.Modules
 
             string customText = userInput.Content;
 
-            if (customText.Length > 140)
-            {
-                return ($"{Locate("140CharsMax")} {Locate("CreationCanceled")}", null);
-            }
-
             await userInput.TryDeleteAsync();
 
             builder.Title = "AI Dungeon";

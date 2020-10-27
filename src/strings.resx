@@ -978,7 +978,7 @@ and the character: **{1}**...</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
     <value>Enter a text that describes who you are and the first couple sentences of where you start out.
-The prompt will timeout in 5 minutes and the max. number of characters is 140.</value>
+This prompt will timeout in 5 minutes.</value>
   </data>
 	<data name="GeneratingNewCustomAdventure" xml:space="preserve">
     <value>Generating a new adventure with the custom prompt...</value>

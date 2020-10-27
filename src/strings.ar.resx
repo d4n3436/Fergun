@@ -977,8 +977,8 @@
     <value>إنشاء شخصية مخصصة</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
-    <value>أدخل موجه يصف من أنت والجملتين الأوليين حيث تبدأ.
-ستنتهي المهلة في 5 دقائق والحد الأقصى. عدد الحروف 140.</value>
+    <value>أدخل نصًا يصف هويتك وأول جملتين من حيث تبدأ.
+ستنتهي مهلة هذه المطالبة في غضون 5 دقائق.</value>
   </data>
 	<data name="GeneratingNewCustomAdventure" xml:space="preserve">
     <value>توليد مغامرة جديدة مع موجه مخصص ...</value>

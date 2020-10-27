@@ -978,7 +978,7 @@ y el personaje: **{1}**...</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
     <value>Ingresa un texto que describa quién eres y las primeras dos oraciones de dónde empiezas.
-Este aviso expirará en 5 minutos. y el número máximo de carácteres es 140.</value>
+Este aviso expirará en 5 minutos.</value>
   </data>
 	<data name="GeneratingNewCustomAdventure" xml:space="preserve">
     <value>Generando una nueva aventura con el texto personalizado...</value>
