@@ -62,7 +62,7 @@ namespace Fergun.Modules
             _logService ??= logService;
         }
 
-        [Command("avatar")]
+        [Command("avatar", RunMode = RunMode.Async)]
         [Summary("avatarSummary")]
         [Example("Fergun#6839")]
         public async Task Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
@@ -1469,7 +1469,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("userinfo")]
+        [Command("userinfo", RunMode = RunMode.Async)]
         [Summary("userinfoSummary")]
         [Alias("ui", "user", "whois")]
         [Example("Fergun#6839")]
@@ -1482,8 +1482,8 @@ namespace Fergun.Modules
             {
                 activities = string.Join('\n', user.Activities.Select(x =>
                 x.Type == ActivityType.CustomStatus ?
-                Format.Bold((x as CustomStatusGame).State) :
-                $"{x.Type} {Format.Bold(x.Name)}"));
+                (x as CustomStatusGame).ToString() :
+                $"{x.Type} {x.Name}"));
             }
 
             string clients = "?";
