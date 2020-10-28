@@ -27,7 +27,7 @@ namespace Fergun.APIs.Genius
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiToken);
-                response = await client.GetStringAsync(new Uri($"/search?q={Uri.EscapeDataString(query)}", UriKind.Relative));
+                response = await client.GetStringAsync(new Uri($"{ApiEndpoint}/search?q={Uri.EscapeDataString(query)}"));
             }
             return JsonConvert.DeserializeObject<GeniusResponse>(response);
         }

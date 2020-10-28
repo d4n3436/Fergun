@@ -37,8 +37,8 @@ namespace Fergun.Utils
                 return null;
             }
 
-            // Remove newlines and tabs.
-            string lyrics = Regex.Replace(element.InnerHtml, @"\t|\n|\r", string.Empty);
+            // Remove newlines, tabs and empty HTML tags.
+            string lyrics = Regex.Replace(element.InnerHtml, @"\t|\n|\r|<[^/>][^>]*>\s*<\/[^>]+>", string.Empty);
 
             lyrics = WebUtility.HtmlDecode(lyrics)
                 .Replace("<b>", "**", StringComparison.OrdinalIgnoreCase)
@@ -51,9 +51,13 @@ namespace Fergun.Utils
             // Remove remaining HTML tags.
             lyrics = Regex.Replace(lyrics, @"(\<.*?\>)", string.Empty);
 
+            // Prevent bold text overlapping.
+            lyrics = lyrics.Replace("****", "** **", StringComparison.OrdinalIgnoreCase)
+                .Replace("******", "*** ****", StringComparison.OrdinalIgnoreCase);
+
             if (!keepHeaders)
             {
-                lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty, RegexOptions.Multiline);
+                lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty);
             }
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
