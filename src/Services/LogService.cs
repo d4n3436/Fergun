@@ -16,7 +16,7 @@ namespace Fergun.Services
         private static TextWriter _writer;
         private static readonly object _writerLock = new object();
 
-        public LogService(DiscordSocketClient client, CommandService cmdService)
+        public LogService()
         {
             _logDirectoryName = FergunClient.IsDebugMode ? "logs_debug" : "logs";
             _logDirectoryPath = Path.Combine(_appDirectory, _logDirectoryName);
@@ -31,7 +31,10 @@ namespace Fergun.Services
                 CheckYesterday();
             }
             _writer = TextWriter.Synchronized(File.AppendText(GetlogFile()));
+        }
 
+        public LogService(DiscordSocketClient client, CommandService cmdService) : this()
+        {
             client.Log += LogAsync;
             cmdService.Log += LogAsync;
         }
@@ -71,12 +74,15 @@ namespace Fergun.Services
                     case LogSeverity.Error:
                         Console.ForegroundColor = ConsoleColor.Red;
                         break;
+
                     case LogSeverity.Warning:
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         break;
+
                     case LogSeverity.Info:
                         Console.ForegroundColor = ConsoleColor.White;
                         break;
+
                     case LogSeverity.Verbose:
                     case LogSeverity.Debug:
                         Console.ForegroundColor = ConsoleColor.Gray;

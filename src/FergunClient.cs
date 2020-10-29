@@ -56,7 +56,7 @@ namespace Fergun
         public FergunClient()
         {
             _cmdService = new CommandService(Constants.CommandServiceConfig);
-
+            _logService = new LogService();
             _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
 
             foreach (string key in Constants.Languages.Keys)
@@ -81,44 +81,47 @@ namespace Fergun
 
         public async Task InitializeAsync()
         {
-            Console.WriteLine($"Fergun v{Constants.Version}");
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"Fergun v{Constants.Version}"));
             await Task.Delay(3000);
 
-            var dbAuth = LoadDatabaseCredentials();
-            Console.WriteLine("Connecting to the database...");
+            var dbAuth = await LoadDatabaseCredentialsAsync();
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connecting to the database..."));
             Database = new FergunDB(Constants.FergunDatabase, dbAuth.ConnectionString);
             dbAuth = null;
 
             if (Database.IsConnected)
             {
-                Console.WriteLine("Connected to the database successfully.");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connected to the database successfully."));
             }
             else
             {
-                Console.WriteLine("Could not connect to the database.");
-                Console.WriteLine($"Please check the content of the database login credentials file ({Constants.DatabaseCredentialsFile}) and try again.");
-                Console.WriteLine("Press any key to exit.");
-                Console.ReadKey(true);
-                Environment.Exit(1);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "Could not connect to the database."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", "Ensure the MongoDB server you're trying to log in is running"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", $"and make sure the content of the credentials file ({Constants.DatabaseCredentialsFile}) is correct."));
+
+                Console.Write("Closing in 30 seconds... Press any key to exit now.");
+                await ExitWithInputTimeoutAsync(30, 1);
             }
 
             if (string.IsNullOrEmpty(FergunConfig.GlobalPrefix))
             {
-                Console.WriteLine("The bot prefix has not been set.");
-                Console.WriteLine($"Please set the value of the field \"{(IsDebugMode ? "Dev" : "")}GlobalPrefix\", in collection \"Config\", in the database.");
-                Console.WriteLine("Press any key to exit.");
-                Console.ReadKey(true);
-                Environment.Exit(1);
+                await _logService.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "The bot prefix has not been set."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", $"Please set a value in the field \"{(IsDebugMode ? "Dev" : "")}GlobalPrefix\", in collection \"Config\", in the database."));
+
+                Console.Write("Closing in 30 seconds... Press any key to exit now.");
+                await ExitWithInputTimeoutAsync(30, 1);
             }
 
             GuildUtils.Initialize();
 
             if (FergunConfig.PresenceIntent ?? false)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "Using presence intent."));
                 Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildPresences;
             }
             if (FergunConfig.ServerMembersIntent ?? false)
             {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "Using server members intent."));
                 Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildMembers;
             }
 
@@ -126,10 +129,12 @@ namespace Fergun
             if (FergunConfig.AlwaysDownloadUsers != null)
             {
                 Constants.ClientConfig.AlwaysDownloadUsers = FergunConfig.AlwaysDownloadUsers.Value;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Always download users set to: {Constants.ClientConfig.AlwaysDownloadUsers}"));
             }
             if (FergunConfig.MessageCacheSize != null)
             {
                 Constants.ClientConfig.MessageCacheSize = FergunConfig.MessageCacheSize.Value;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Message cache size set to: {Constants.ClientConfig.MessageCacheSize}"));
             }
 
             _client = new DiscordSocketClient(Constants.ClientConfig);
@@ -172,7 +177,7 @@ namespace Fergun
             await Task.Delay(-1);
         }
 
-        private static MongoAuth LoadDatabaseCredentials()
+        private async Task<MongoAuth> LoadDatabaseCredentialsAsync()
         {
             string credentialsFile = Path.Combine(AppContext.BaseDirectory, Constants.DatabaseCredentialsFile);
             MongoAuth dbCredentials = null;
@@ -184,26 +189,26 @@ namespace Fergun
                     dbCredentials = JsonConvert.DeserializeObject<MongoAuth>(File.ReadAllText(credentialsFile));
                     if (dbCredentials == null)
                     {
-                        Console.WriteLine("Unknown error reading/deserializing the database login credentials file.");
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Config", "Unknown error reading/deserializing the database login credentials file."));
                     }
                     else
                     {
-                        Console.WriteLine("Loaded the database login credentials successfully.");
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "Loaded the database login credentials successfully."));
                         hasCredentials = true;
                     }
                 }
                 catch (IOException e)
                 {
-                    Console.WriteLine($"Error reading the database login credentials file. Using default credentials.\n{e}");
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error reading the database login credentials file. Using default credentials", e));
                 }
                 catch (JsonException e)
                 {
-                    Console.WriteLine($"Error deserializing the database login credentials file. Using default credentials.\n{e}");
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error deserializing the database login credentials file. Using default credentials", e));
                 }
             }
             else
             {
-                Console.WriteLine("No database login credentials file found. Using default credentials.");
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "No database login credentials file found. Using default credentials."));
             }
 
             if (!hasCredentials)
@@ -218,6 +223,12 @@ namespace Fergun
             }
 
             return dbCredentials;
+        }
+
+        private static async Task ExitWithInputTimeoutAsync(int timeout, int exitCode)
+        {
+            await Task.WhenAny(Task.Delay(TimeSpan.FromSeconds(timeout)), Task.Run(() => Console.ReadKey(true)));
+            Environment.Exit(exitCode);
         }
 
         private async Task StartLavalinkAsync()
@@ -274,7 +285,7 @@ namespace Fergun
             }
             catch (WebException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading VERSION.txt: {e.Message}\nSkipping the update..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading VERSION.txt", e));
                 return;
             }
 
@@ -287,7 +298,7 @@ namespace Fergun
                 }
                 catch (IOException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while reading local VERSION.txt: {e.Message}\nSkipping the update..."));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while reading local VERSION.txt", e));
                     return;
                 }
                 if (localVersion != remoteVersion)
@@ -308,7 +319,7 @@ namespace Fergun
             Process[] processList = Process.GetProcessesByName("java");
             if (processList.Length != 0)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use.\nSkipping the update..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use."));
                 return;
             }
 
@@ -318,7 +329,7 @@ namespace Fergun
             }
             catch (IOException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while renaming local Lavalink.jar: {e.Message}\nSkipping the update..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while renaming local Lavalink.jar", e));
                 return;
             }
 
@@ -332,7 +343,7 @@ namespace Fergun
             }
             catch (WebException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading the new dev build: {e.Message}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading the new dev build", e));
                 try
                 {
                     if (File.Exists(lavalinkFile))
@@ -350,7 +361,7 @@ namespace Fergun
             }
             catch (IOException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while updating local VERSION.txt: {e.Message}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while updating local VERSION.txt", e));
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Finished updating Lavalink."));
         }
