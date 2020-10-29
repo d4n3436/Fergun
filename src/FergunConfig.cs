@@ -39,6 +39,7 @@ namespace Fergun
         public bool? ServerMembersIntent { get; set; }
         public int? MessageCacheSize { get; set; }
         public bool? AlwaysDownloadUsers { get; set; }
+        public bool? UseReliabilityService { get; set; }
     }
 
     public static class FergunConfig
@@ -152,6 +153,8 @@ namespace Fergun
         public static int? MessageCacheSize => GetConfig().MessageCacheSize;
 
         public static bool? AlwaysDownloadUsers => GetConfig().AlwaysDownloadUsers;
+
+        public static bool? UseReliabilityService => GetConfig().UseReliabilityService;
 
         private static BaseConfig GetConfig()
         {

@@ -114,6 +114,7 @@ namespace Fergun
 
             GuildUtils.Initialize();
 
+            bool useReliabilityService = false;
             if (FergunConfig.PresenceIntent ?? false)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "Using presence intent."));
@@ -123,6 +124,11 @@ namespace Fergun
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "Using server members intent."));
                 Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildMembers;
+            }
+            if (FergunConfig.UseReliabilityService ?? false)
+            {
+                useReliabilityService = true;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "Using reliability service. The bot will be shut down in case of deadlock. Remember to use a daemon!"));
             }
 
             // Only override the default value if the corresponding value in the database has been set.
@@ -150,14 +156,11 @@ namespace Fergun
             _client.UserUnbanned += UserUnbanned;
 
             _logService = new LogService(_client, _cmdService);
+            if (useReliabilityService)
+            {
+                _reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
+            }
 
-            await UpdateLavalinkAsync();
-            await StartLavalinkAsync();
-
-            await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
-            await _client.StartAsync();
-
-            _reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
             _commandCacheService = new CommandCacheService(_client, Constants.MessageCacheCapacity,
                 message => _ = _cmdHandlingService.HandleCommandAsync(message),
                 log => _ = _logService.LogAsync(log),
@@ -167,6 +170,12 @@ namespace Fergun
 
             _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
             await _cmdHandlingService.InitializeAsync();
+
+            await UpdateLavalinkAsync();
+            await StartLavalinkAsync();
+
+            await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
+            await _client.StartAsync();
 
             if (!IsDebugMode)
             {
@@ -366,17 +375,24 @@ namespace Fergun
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Finished updating Lavalink."));
         }
 
-        private IServiceProvider SetupServices() => new ServiceCollection()
+        private IServiceProvider SetupServices()
+        {
+            var collection = new ServiceCollection()
                 .AddSingleton(_client)
                 .AddSingleton(_cmdService)
                 .AddSingleton(_logService)
+                .AddSingleton(_commandCacheService)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<LavaConfig>()
                 .AddSingleton<LavaNode>()
-                .AddSingleton<MusicService>()
-                .AddSingleton(_reliabilityService)
-                .AddSingleton(_commandCacheService)
-                .BuildServiceProvider();
+                .AddSingleton<MusicService>();
+
+            if (_reliabilityService != null)
+            {
+                collection.AddSingleton(_reliabilityService);
+            }
+            return collection.BuildServiceProvider();
+        }
 
         private async Task ClientReady()
         {
