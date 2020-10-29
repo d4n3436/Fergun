@@ -122,15 +122,10 @@ namespace Fergun.Attributes.Preconditions
             }
             else
             {
-                // i think this is the way..?
-                var result = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
-                //Console.WriteLine($"_invokeLimitPeriod.Seconds: {_invokeLimitPeriod.TotalSeconds}\n" +
-                //    //$"_invokeLimit: {_invokeLimit}\n" +
-                //    $"now - t.FirstInvoke: {(now - t.FirstInvoke).TotalSeconds}\n" + 
-                //    $"result: {result}\n\nrounded: {Math.Round(result, 2)}");
+                double cooldown = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
 
                 return PreconditionResult.FromError(
-                    ErrorMessage ?? "RLMT" + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(result, 2).ToString()));
+                    ErrorMessage ?? "(Cooldown) " + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(cooldown, 2).ToString()));
             }
         }
 

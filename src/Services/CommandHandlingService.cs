@@ -39,6 +39,8 @@ namespace Fergun
 
         public async Task InitializeAsync()
         {
+            _cmdService.AddTypeReader(typeof(IUser), new Readers.UserTypeReader<IUser>());
+
             // Here we discover all of the command modules in the entry
             // assembly and load them. Starting from Discord.NET 2.0, a
             // service provider is required to be passed into the
@@ -47,12 +49,6 @@ namespace Fergun
             //
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
-
-            _cmdService.AddTypeReader(typeof(IUser), new Readers.UserTypeReader<IUser>());
-
-            // IGuildUser type reader won't work since user cache is disabled.
-            //_cmdService.AddTypeReader(typeof(IGuildUser), new Readers.UserTypeReader<IGuildUser>());
-
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
@@ -89,10 +85,7 @@ namespace Fergun
                 message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
 
-            // Create a WebSocket-based command context based on the message
-            var context = new SocketCommandContext(_client, message);
-
-            var result = _cmdService.Search(context, argPos);
+            var result = _cmdService.Search(message.Content.Substring(argPos));
             if (!result.IsSuccess) return;
 
             var blacklistedUser = FergunClient.Database.Find<BlacklistEntity>("Blacklist", x => x.ID == message.Author.Id);
@@ -111,7 +104,7 @@ namespace Fergun
                 return;
             }
 
-            var disabledCommands = GuildUtils.GetGuildConfig(context.Channel)?.DisabledCommands ?? new List<string>();
+            var disabledCommands = GuildUtils.GetGuildConfig(message.Channel)?.DisabledCommands ?? new List<string>();
             var disabled = disabledCommands.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
             if (disabled != null)
             {
@@ -131,6 +124,9 @@ namespace Fergun
                 }
                 else
                 {
+                    // Create a WebSocket-based command context based on the message
+                    var context = new SocketCommandContext(_client, message);
+
                     // Execute the command with the command context we just
                     // created, along with the service provider for precondition checks.
                     await _cmdService.ExecuteAsync(context, argPos, _services);
@@ -138,14 +134,14 @@ namespace Fergun
             }
         }
 
-        private async Task OnCommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> optionalCommand, ICommandContext context, IResult result)
         {
             // We have access to the information of the command executed,
             // the context of the command, and the result returned from the
             // execution in this event.
 
             // command is unspecified when there was a search failure (command not found)
-            if (!command.IsSpecified)
+            if (!optionalCommand.IsSpecified)
             {
                 if (!context.Message.Content.StartsWith(FergunConfig.GlobalPrefix, StringComparison.OrdinalIgnoreCase))
                 {
@@ -153,20 +149,21 @@ namespace Fergun
                 }
                 return;
             }
+            var command = optionalCommand.Value;
 
-            if (command.Value.Module.Name != Constants.DevelopmentModuleName)
+            if (command.Module.Name != Constants.DevelopmentModuleName)
             {
                 // Update the command stats
                 lock (_cmdStatsLock)
                 {
                     var stats = FergunConfig.CommandStats ?? new Dictionary<string, int>();
-                    if (stats.ContainsKey(command.Value.Name))
+                    if (stats.ContainsKey(command.Name))
                     {
-                        stats[command.Value.Name]++;
+                        stats[command.Name]++;
                     }
                     else
                     {
-                        stats.Add(command.Value.Name, 1);
+                        stats.Add(command.Name, 1);
                     }
                     FergunConfig.CommandStats = stats;
                 }
@@ -183,47 +180,44 @@ namespace Fergun
                 //    break;
                 case CommandError.BadArgCount:
                 case CommandError.ParseFailed:
-                    // CommandParseFailed
-                    // BadArgumentCount
                     string language = GuildUtils.GetLanguage(context.Channel);
                     string prefix = GuildUtils.GetPrefix(context.Channel);
-                    await SendEmbedAsync(context.Message, command.Value.ToHelpEmbed(language, prefix), _services);
+                    await SendEmbedAsync(context.Message, command.ToHelpEmbed(language, prefix), _services);
                     break;
 
-                case CommandError.UnmetPrecondition when command.Value.Module.Name != Constants.DevelopmentModuleName:
-                    // TODO: Cleanup
-                    IGuildUser guildUser = null;
-                    if (context.Guild != null)
-                        guildUser = await context.Guild.GetCurrentUserAsync().ConfigureAwait(false);
-
-                    ChannelPermissions perms = context.Channel is IGuildChannel guildChannel
-                        ? guildUser.GetPermissions(guildChannel)
-                        : ChannelPermissions.All(context.Channel);
-
-                    if (!perms.Has(Constants.MinimunRequiredPermissions))
+                case CommandError.UnmetPrecondition when command.Module.Name != Constants.DevelopmentModuleName:
+                    ChannelPermissions permissions;
+                    if (context.Guild == null)
                     {
+                        permissions = ChannelPermissions.All(context.Channel);
+                    }
+                    else
+                    {
+                        var guildUser = await context.Guild.GetCurrentUserAsync().ConfigureAwait(false);
+                        permissions = guildUser.GetPermissions((IGuildChannel)context.Channel);
+                    }
+
+                    if (!permissions.Has(Constants.MinimunRequiredPermissions))
+                    {
+                        var builder = new EmbedBuilder()
+                            .WithDescription($"\u26a0 {result.ErrorReason}")
+                            .WithColor(FergunConfig.EmbedColor);
                         try
                         {
-                            var builder = new EmbedBuilder()
-                                .WithDescription($"\u26a0 {result.ErrorReason}")
-                                .WithColor(FergunConfig.EmbedColor);
-
                             await context.User.SendMessageAsync(embed: builder.Build());
                         }
-                        catch (HttpException)
+                        catch (HttpException e) when (e.DiscordCode == 50007)
                         {
                             await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Unable to send a DM about the minimun required permissions to the user."));
                         }
                     }
                     else
                     {
-                        string errorReason = result.ErrorReason;
-                        if (errorReason.StartsWith("RLMT", StringComparison.OrdinalIgnoreCase))
+                        if (result.ErrorReason.StartsWith("(Cooldown)", StringComparison.OrdinalIgnoreCase))
                         {
-                            errorReason = errorReason.Substring(4);
                             ignoreTime = Constants.CooldownIgnoreTime;
                         }
-                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(errorReason, context.Channel)}", _services);
+                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(result.ErrorReason, context.Channel)}", _services);
                     }
                     break;
 
@@ -250,59 +244,54 @@ namespace Fergun
                     break;
 
                 case CommandError.Exception when result is ExecuteResult execResult:
+                    var exception = execResult.Exception;
+
+                    var builder2 = new EmbedBuilder()
+                        .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Name)}")
+                        .AddField(GuildUtils.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
+                        .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
+                        .WithColor(FergunConfig.EmbedColor);
+
+                    var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
+
+                    if (context.User.Id != owner.Id)
                     {
-                        var exception = execResult.Exception;
+                        builder2.WithFooter(GuildUtils.Locate("ErrorSentToOwner", context.Channel));
+                    }
 
-                        var builder = new EmbedBuilder()
-                            .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Value.Name)}")
-                            .AddField(GuildUtils.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                            .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
-                            .WithColor(FergunConfig.EmbedColor);
+                    await SendEmbedAsync(context.Message, builder2.Build(), _services);
 
-                        var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
+                    if (context.User.Id == owner.Id) break;
+                    // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
 
-                        if (context.User.Id != owner.Id)
-                        {
-                            builder.WithFooter(GuildUtils.Locate("ErrorSentToOwner", context.Channel));
-                        }
+                    if (!ulong.TryParse(FergunConfig.LogChannel, out ulong channelId))
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel ID. Not possible to send the embed with the error info."));
+                        break;
+                    }
 
-                        await SendEmbedAsync(context.Message, builder.Build(), _services);
+                    var channel = await context.Client.GetChannelAsync(channelId);
+                    if (!(channel is IMessageChannel messageChannel))
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel. Not possible to send the embed with the error info."));
+                        break;
+                    }
 
-                        // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
-                        if (context.User.Id != owner.Id)
-                        {
-                            if (ulong.TryParse(FergunConfig.LogChannel, out ulong channelId))
-                            {
-                                var channel = await context.Client.GetChannelAsync(channelId);
-                                if (channel != null && channel is IMessageChannel messageChannel)
-                                {
-                                    string title = $"\u274c Failed to execute {Format.Code(command.Value.Name)} in {context.Display()}";
-                                    var embed2 = new EmbedBuilder()
-                                        .WithTitle(title.Truncate(EmbedBuilder.MaxTitleLength))
-                                        .AddField(GuildUtils.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
-                                        .AddField(GuildUtils.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
-                                        .AddField("Jump url", context.Message.GetJumpUrl())
-                                        .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
-                                        .WithColor(FergunConfig.EmbedColor);
-                                    try
-                                    {
-                                        await messageChannel.SendMessageAsync(embed: embed2.Build());
-                                    }
-                                    catch (HttpException e)
-                                    {
-                                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error while sending the embed in the log channel", e));
-                                    }
-                                }
-                                else
-                                {
-                                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel. Not possible to send the embed with the error info."));
-                                }
-                            }
-                            else
-                            {
-                                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel ID. Not possible to send the embed with the error info."));
-                            }
-                        }
+                    var builder3 = new EmbedBuilder()
+                        .WithTitle($"\u274c Failed to execute {Format.Code(command.Name)} in {context.Display()}".Truncate(EmbedBuilder.MaxTitleLength))
+                        .AddField(GuildUtils.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
+                        .AddField(GuildUtils.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
+                        .AddField("Jump url", context.Message.GetJumpUrl())
+                        .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
+                        .WithColor(FergunConfig.EmbedColor);
+
+                    try
+                    {
+                        await messageChannel.SendMessageAsync(embed: builder3.Build());
+                    }
+                    catch (HttpException e)
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error while sending the embed in the log channel", e));
                     }
                     break;
 
@@ -311,7 +300,7 @@ namespace Fergun
             }
 
             _ = IgnoreUserAsync(context.User.Id, TimeSpan.FromSeconds(ignoreTime));
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Value.Name}\" for {context.User} in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Name}\" for {context.User} in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
         }
 
         public static async Task IgnoreUserAsync(ulong id, TimeSpan time)
