@@ -415,58 +415,23 @@ namespace Fergun
             _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed.Count()} deleted / edited messages from the cache."));
         }
 
-        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
+        private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
         {
-            _ = Task.Run(async () =>
-            {
-                if (after == null || after.Source != MessageSource.User || string.IsNullOrEmpty(after.Content))
-                {
-                    return;
-                }
-                IMessage before = null;
-                try
-                {
-                    before = await cachedbefore.GetOrDownloadAsync();
-                }
-                catch (HttpException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "MsgUpdated", $"Could not get original message content ({cachedbefore.Id}) in channel \"{channel.Name}\" ({channel.Id}), reason: {e.Message}"));
-                }
-                if (before == null || string.IsNullOrEmpty(before.Content) || before.Content == after.Content)
-                {
-                    return;
-                }
+            if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
+            IMessage before = cachedbefore.Value;
+            if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
-                MessageCache.Add(new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgUpdated", $"Message edited in {before.Display()}: {before} -> {after}"));
-            });
-
-            return Task.CompletedTask;
+            MessageCache.Add(new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
         }
 
-        private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
+        private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            _ = Task.Run(async () =>
-            {
-                IMessage message = null;
-                try
-                {
-                    message = await cache.GetOrDownloadAsync();
-                }
-                catch (HttpException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "MsgDeleted", $"Could not get deleted message ({cache.Id}) in channel \"{channel.Name}\" ({channel.Id}), reason: {e.Message}"));
-                }
-                if (message == null || message.Source != MessageSource.User)
-                {
-                    return;
-                }
+            IMessage message = cache.Value;
+            if (message?.Source != MessageSource.User) return;
 
-                MessageCache.Add(new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"Message deleted in {message.Display()}: {(string.IsNullOrEmpty(message.Content) ? message.Attachments.FirstOrDefault()?.Url : message.Content)}"));
-            });
-
-            return Task.CompletedTask;
+            MessageCache.Add(new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)

@@ -229,11 +229,12 @@ namespace Fergun.Services
                     var message = await channel.GetMessageAsync(messageId);
                     if (message != null)
                     {
+                        await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Command message ({cacheable.Id}) deleted. Deleting the response..."));
                         await message.DeleteAsync();
                     }
                     else
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"{cacheable.Id} deleted but {messageId} does not exist."));
+                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Command message ({cacheable.Id}) deleted but the response ({messageId}) was already deleted."));
                     }
                     TryRemove(cacheable.Id);
                 }
@@ -247,36 +248,29 @@ namespace Fergun.Services
             _ = Task.Run(async () =>
             {
                 // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
-                if (after?.Content == null || after.Author.IsBot) return;
-                IMessage before = null;
-                try
-                {
-                    before = await cacheable.GetOrDownloadAsync();
-                }
-                catch (HttpException)
-                {
-                }
-                if (before?.Content == null || before.Content == after.Content) return;
+                if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
+                IMessage before = cacheable.Value;
+                if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
                     var response = await channel.GetMessageAsync(responseId);
                     if (response == null)
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"A message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
+                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"A command message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
                         TryRemove(cacheable.Id);
                     }
                     else
                     {
                         if (response.Attachments.Count > 0)
                         {
-                            await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Attachment found on response ({responseId}). Deleting the message..."));
+                            await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Attachment found on response ({responseId}). Deleting the response..."));
                             _ = response.DeleteAsync();
                             TryRemove(cacheable.Id);
                         }
                         else
                         {
-                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to message {cacheable.Id} in cache."));
+                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message {cacheable.Id} in cache."));
                             if (response.Reactions.Count > 0)
                             {
                                 bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
