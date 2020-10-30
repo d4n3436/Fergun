@@ -8,13 +8,14 @@ using Discord.WebSocket;
 
 namespace Fergun.Services
 {
-    public class LogService
+    public class LogService : IDisposable
     {
         private static readonly string _appDirectory = AppContext.BaseDirectory;
         private readonly string _logDirectoryPath;
         private readonly string _logDirectoryName;
         private static TextWriter _writer;
         private static readonly object _writerLock = new object();
+        private bool _disposed;
 
         public LogService()
         {
@@ -37,6 +38,26 @@ namespace Fergun.Services
         {
             client.Log += LogAsync;
             cmdService.Log += LogAsync;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(LogService), "Service has been disposed.");
+            }
+            else if (disposing)
+            {
+                _writer.Dispose();
+                _writer = null;
+                _disposed = true;
+            }
         }
 
         private void CheckYesterday()

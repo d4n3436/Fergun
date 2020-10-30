@@ -155,6 +155,7 @@ namespace Fergun
             _client.UserBanned += UserBanned;
             _client.UserUnbanned += UserUnbanned;
 
+            _logService.Dispose();
             _logService = new LogService(_client, _cmdService);
             if (useReliabilityService)
             {
