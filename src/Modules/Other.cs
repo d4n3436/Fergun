@@ -435,7 +435,7 @@ namespace Fergun.Modules
             var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
             string cpu = null;
             long? totalRamUsage = null;
-            long? processRamUsage = null;
+            long? processRamUsage;
             long? totalRam = null;
             string os = RuntimeInformation.OSDescription;
             if (FergunClient.IsLinux)
@@ -540,7 +540,7 @@ namespace Fergun.Modules
                 .AddField("Uptime", elapsed.ToShortForm2(), true)
 
                 .AddField("\u200b", "\u200b", true)
-                .AddField(Locate("BotOwner"), owner.Mention, true);
+                .AddField(Locate("BotOwner"), owner, true);
 
             if (!FergunClient.IsDebugMode)
             {
