@@ -462,9 +462,7 @@ namespace Fergun.Modules
                 if (long.TryParse(memory?.ElementAtOrDefault(2), out temp)) totalRamUsage = temp;
 
                 // Process RAM usage
-                int processId = Process.GetCurrentProcess().Id;
-                if (long.TryParse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand()?.TrimEnd(), out temp)) processRamUsage = temp;
-                //processRamUsage = long.Parse($"ps -o rss= {processId} | awk '{{printf \" % .0f\\n\", $1 / 1024}}'".RunCommand().TrimEnd());
+                processRamUsage = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024;
             }
             else
             {
@@ -480,7 +478,7 @@ namespace Fergun.Modules
                     ?.Trim()
                     ?.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
-                if (output != null && output.Length > 0)
+                if (output?.Length > 1)
                 {
                     long freeRam = 0;
                     var split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
@@ -502,7 +500,7 @@ namespace Fergun.Modules
                 }
 
                 // Process RAM usage
-                processRamUsage = Process.GetCurrentProcess().NonpagedSystemMemorySize64 / 1024;
+                processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
             }
 
             int totalUsers = 0;
