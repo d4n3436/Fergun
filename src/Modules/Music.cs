@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Fergun.APIs.Genius;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
+using Fergun.Utils;
 using Victoria;
+using Victoria.Enums;
 
 namespace Fergun.Modules
 {
@@ -20,10 +24,12 @@ namespace Fergun.Modules
     public class Music : FergunBase
     {
         private readonly MusicService _musicService;
+        private static GeniusApi _geniusApi;
 
         public Music(MusicService musicService)
         {
             _musicService = musicService;
+            _geniusApi ??= new GeniusApi(FergunConfig.GeniusApiToken);
         }
 
         [RequireBotPermission(GuildPermission.Connect, ErrorMessage = "BotRequireConnect")]
@@ -69,37 +75,82 @@ namespace Fergun.Modules
             bool keepHeaders = false;
             if (string.IsNullOrWhiteSpace(query))
             {
-                query = null;
+                bool hasPlayer = _musicService.LavaNode.TryGetPlayer(Context.Guild, out var player);
+                if (hasPlayer && player.PlayerState == PlayerState.Playing)
+                {
+                    if (player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = player.Track.Title;
+                    }
+                    else
+                    {
+                        query = $"{player.Track.Author} - {player.Track.Title}";
+                    }
+                }
+                else
+                {
+                    var spotify = Context.User.Activities?.OfType<SpotifyGame>()?.FirstOrDefault();
+                    if (spotify == null)
+                    {
+                        return FergunResult.FromError(Locate("LyricsQueryNotPassed"));
+                    }
+                    query = $"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}";
+                }
             }
             else if (query.EndsWith("-headers", StringComparison.OrdinalIgnoreCase))
             {
                 query = query.Substring(0, query.Length - 8);
                 keepHeaders = true;
             }
-            (var error, var lyrics) = await _musicService.GetLyricsAsync(query, keepHeaders, Context.Guild,
-                Context.Channel as ITextChannel, Context.User.Activities?.OfType<SpotifyGame>()?.FirstOrDefault());
 
-            if (error != null)
+            query = query.Trim();
+            GeniusResponse genius;
+            try
             {
-                return FergunResult.FromError(error);
+                genius = await _geniusApi.SearchAsync(query);
             }
+            catch (HttpRequestException)
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+            if (genius.Meta.Status != 200)
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+            if (genius.Response.Hits.Count == 0)
+            {
+                return FergunResult.FromError(string.Format(Locate("LyricsNotFound"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
+            }
+ 
+            string url = genius.Response.Hits[0].Result.Url;
+            string lyrics = await CommandUtils.ParseGeniusLyricsAsync(url, keepHeaders);
+
+            if (string.IsNullOrWhiteSpace(lyrics))
+            {
+                return FergunResult.FromError(string.Format(Locate("ErrorParsingLyrics"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
+            }
+
+            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
+            string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
+
             var pages = new List<PaginatorPage>();
-            foreach (var item in lyrics.Skip(2))
+            foreach (var item in splitLyrics)
             {
                 pages.Add(new PaginatorPage
                 {
                     Description = item,
                     Fields = new List<EmbedFieldBuilder>()
                     {
-                        new EmbedFieldBuilder { Name = "Links", Value = lyrics.ElementAt(1) }
+                        new EmbedFieldBuilder { Name = "Links", Value = links }
                     },
                 });
             }
 
+            string title = genius.Response.Hits[0].Result.FullTitle;
             var pager = new PaginatedMessage
             {
                 Color = new Color(FergunConfig.EmbedColor),
-                Title = lyrics.First().Truncate(EmbedBuilder.MaxTitleLength),
+                Title = title.Truncate(EmbedBuilder.MaxTitleLength),
                 Pages = pages,
                 Options = new PaginatedAppearanceOptions
                 {

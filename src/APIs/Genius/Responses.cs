@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Fergun.APIs.Genius
@@ -52,10 +51,10 @@ namespace Fergun.APIs.Genius
         public string FullTitle { get; set; }
 
         [JsonProperty("header_image_thumbnail_url")]
-        public Uri HeaderImageThumbnailUrl { get; set; }
+        public string HeaderImageThumbnailUrl { get; set; }
 
         [JsonProperty("header_image_url")]
-        public Uri HeaderImageUrl { get; set; }
+        public string HeaderImageUrl { get; set; }
 
         [JsonProperty("id")]
         public long Id { get; set; }
@@ -73,10 +72,10 @@ namespace Fergun.APIs.Genius
         public long? PyongsCount { get; set; }
 
         [JsonProperty("song_art_image_thumbnail_url")]
-        public Uri SongArtImageThumbnailUrl { get; set; }
+        public string SongArtImageThumbnailUrl { get; set; }
 
         [JsonProperty("song_art_image_url")]
-        public Uri SongArtImageUrl { get; set; }
+        public string SongArtImageUrl { get; set; }
 
         [JsonProperty("stats")]
         public Stats Stats { get; set; }
@@ -88,7 +87,7 @@ namespace Fergun.APIs.Genius
         public string TitleWithFeatured { get; set; }
 
         [JsonProperty("url")]
-        public Uri Url { get; set; }
+        public string Url { get; set; }
 
         [JsonProperty("primary_artist")]
         public PrimaryArtist PrimaryArtist { get; set; }
@@ -100,13 +99,13 @@ namespace Fergun.APIs.Genius
         public string ApiPath { get; set; }
 
         [JsonProperty("header_image_url")]
-        public Uri HeaderImageUrl { get; set; }
+        public string HeaderImageUrl { get; set; }
 
         [JsonProperty("id")]
         public long Id { get; set; }
 
         [JsonProperty("image_url")]
-        public Uri ImageUrl { get; set; }
+        public string ImageUrl { get; set; }
 
         [JsonProperty("is_meme_verified")]
         public bool IsMemeVerified { get; set; }
@@ -118,7 +117,7 @@ namespace Fergun.APIs.Genius
         public string Name { get; set; }
 
         [JsonProperty("url")]
-        public Uri Url { get; set; }
+        public string Url { get; set; }
 
         [JsonProperty("iq", NullValueHandling = NullValueHandling.Ignore)]
         public long? Iq { get; set; }

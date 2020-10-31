@@ -25,10 +25,10 @@ namespace Fergun.Utils
             return cpuUsageTotal * 100;
         }
 
-        public static async Task<string> ParseGeniusLyricsAsync(Uri uri, bool keepHeaders)
+        public static async Task<string> ParseGeniusLyricsAsync(string url, bool keepHeaders)
         {
             var context = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
-            var document = await context.OpenAsync(uri.AbsoluteUri);
+            var document = await context.OpenAsync(url);
             var element = document?.GetElementsByClassName("lyrics")?.FirstOrDefault()
                        ?? document?.GetElementsByClassName("SongPageGrid-sc-1vi6xda-0 DGVcp Lyrics__Root-sc-1ynbvzw-0 kkHBOZ")?.FirstOrDefault();
 

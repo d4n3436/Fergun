@@ -24,7 +24,6 @@ namespace Fergun.Services
         private readonly LogService _logService;
         private readonly LavaConfig _lavaConfig;
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
-        private GeniusApi _geniusApi;
 
         public MusicService(DiscordSocketClient client, LogService logService)
         {
@@ -507,67 +506,6 @@ namespace Fergun.Services
 
             player.Queue.RemoveAt(index - 1);
             return string.Format(GuildUtils.Locate("TrackRemoved", textChannel), track.ToTrackLink(false), index);
-        }
-
-        public async Task<(string, IEnumerable<string>)> GetLyricsAsync(string query, bool keepHeaders, IGuild guild, ITextChannel textChannel, SpotifyGame spotify)
-        {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                if (hasPlayer && player.PlayerState == PlayerState.Playing)
-                {
-                    if (player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase))
-                    {
-                        query = player.Track.Title;
-                    }
-                    else
-                    {
-                        query = $"{player.Track.Author} - {player.Track.Title}";
-                    }
-                }
-                else
-                {
-                    if (spotify == null)
-                    {
-                        return (GuildUtils.Locate("LyricsQueryNotPassed", textChannel), null);
-                    }
-                    query = $"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}";
-                }
-            }
-            query = query.Trim();
-            GeniusResponse genius;
-            _geniusApi ??= new GeniusApi(FergunConfig.GeniusApiToken);
-            try
-            {
-                genius = await _geniusApi.SearchAsync(query);
-            }
-            catch (HttpRequestException)
-            {
-                return (GuildUtils.Locate("AnErrorOccurred", textChannel), null);
-            }
-            if (genius.Meta.Status != 200)
-            {
-                return (GuildUtils.Locate("AnErrorOccurred", textChannel), null);
-            }
-            if (genius.Response.Hits.Count == 0)
-            {
-                return (string.Format(GuildUtils.Locate("LyricsNotFound", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
-            }
-            string title = genius.Response.Hits[0].Result.FullTitle;
-            Uri uri = genius.Response.Hits[0].Result.Url;
-
-            string lyrics = await CommandUtils.ParseGeniusLyricsAsync(uri, keepHeaders);
-            if (string.IsNullOrWhiteSpace(lyrics))
-            {
-                return (string.Format(GuildUtils.Locate("ErrorParsingLyrics", textChannel), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))), null);
-            }
-            var split = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
-
-            string links = Format.Url("Genius", uri.AbsoluteUri);
-            links += $" - {Format.Url(GuildUtils.Locate("ArtistPage", textChannel), genius.Response.Hits[0].Result.PrimaryArtist.Url.AbsoluteUri)}";
-            split = split.Prepend(links);
-            split = split.Prepend(title);
-            return (null, split);
         }
 
         public async Task<(bool, string)> GetArtworkAsync(IGuild guild, ITextChannel textChannel)
