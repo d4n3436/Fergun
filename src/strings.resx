@@ -2172,4 +2172,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="ValueNotSetInDatabase" xml:space="preserve">
 		<value>The value of `{0}` has not been established in the database. If this problem persists, contact the developers.</value>
 	</data>
+	<data name="NoAvailableLanguages" xml:space="preserve">
+		<value>It seems there are no available languages.</value>
+	</data>
 </root>

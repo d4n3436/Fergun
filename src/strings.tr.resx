@@ -2169,4 +2169,7 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>Kimliği bir bota veremezsiniz!</value>
 	</data>
+	<data name="NoAvailableLanguages" xml:space="preserve">
+		<value>Görünüşe göre mevcut dil yok.</value>
+	</data>
 </root>

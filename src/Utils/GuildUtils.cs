@@ -50,9 +50,9 @@ namespace Fergun.Utils
             => GetGuildConfig(channel)?.Language ?? FergunConfig.Language ?? Constants.DefaultLanguage;
 
         public static string Locate(string key, IMessageChannel channel)
-            => strings.ResourceManager.GetString(key, FergunClient.Locales[GetLanguage(channel)]) ?? key;
+            => Locate(key, GetLanguage(channel));
 
         public static string Locate(string key, string language)
-            => strings.ResourceManager.GetString(key, FergunClient.Locales[language]) ?? key;
+            => strings.ResourceManager.GetString(key, FergunClient.Languages.GetValueOrDefault(language, FergunClient.Languages[Constants.DefaultLanguage])) ?? key;
     }
 }

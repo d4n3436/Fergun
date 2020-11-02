@@ -283,14 +283,25 @@ namespace Fergun.Modules
         [Alias("lang")]
         public async Task<RuntimeResult> Language()
         {
+            if (FergunClient.Languages.Count <= 1)
+            {
+                return FergunResult.FromError(Locate("NoAvailableLanguages"));
+            }
+
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
             bool hasReacted = false;
             IUserMessage message = null;
+            string languages = "";
+            for (int i = 0; i < FergunClient.Languages.Count; i++)
+            {
+                var culture = FergunClient.Languages.Values.ElementAt(i);
+                languages += $"{i + 1}. {Format.Bold(culture.EnglishName)} ({culture.NativeName})\n";
+            }
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
-                .WithDescription(Locate("LanguagePrompt"))
+                .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
                 .WithColor(FergunConfig.EmbedColor);
 
             async Task HandleLanguageUpdateAsync(string newLanguage)
@@ -316,9 +327,11 @@ namespace Fergun.Modules
                     }
                 });
 
-            foreach (var lang in Constants.Languages)
+            for (int i = 0; i < FergunClient.Languages.Count; i++)
             {
-                data.AddCallBack(new Emoji(lang.Value), async (_, _1) => await HandleLanguageUpdateAsync(lang.Key));
+                // "i" doesn't work
+                int index = i;
+                data.AddCallBack(new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) => await HandleLanguageUpdateAsync(FergunClient.Languages.Keys.ElementAt(index)));
             }
 
             message = await InlineReactionReplyAsync(data);

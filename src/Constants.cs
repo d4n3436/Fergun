@@ -27,15 +27,6 @@ namespace Fergun
             "1.4"
         };
 
-        public static Dictionary<string, string> Languages { get; } = new Dictionary<string, string>
-        {
-            { "es", "🇪🇸" },
-            { "en", "🇺🇸" },
-            { "ar", "🇸🇦" },
-            { "ru", "🇷🇺" },
-            { "tr", "🇹🇷" }
-        };
-
         public const double GlobalRatelimitPeriod = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig

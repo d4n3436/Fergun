@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.Net;
 using Discord.WebSocket;
 using DiscordBotsList.Api;
 using DiscordBotsList.Api.Objects;
@@ -38,7 +39,7 @@ namespace Fergun
         public static string InviteLink { get; set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
-        public static Dictionary<string, CultureInfo> Locales { get; private set; } = new Dictionary<string, CultureInfo>();
+        public static ReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordSocketClient _client;
         private LogService _logService;
@@ -59,11 +60,6 @@ namespace Fergun
             _logService = new LogService();
             _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
 
-            foreach (string key in Constants.Languages.Keys)
-            {
-                Locales[key] = new CultureInfo(key);
-            }
-
 #if DEBUG
             IsDebugMode = true;
 #else
@@ -83,6 +79,9 @@ namespace Fergun
         {
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"Fergun v{Constants.Version}"));
             await Task.Delay(3000);
+
+            Languages = new ReadOnlyDictionary<string, CultureInfo>(GetAvailableCultures().ToDictionary(x => x.TwoLetterISOLanguageName, x => x));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"{Languages.Count} available language(s) ({string.Join(", ", Languages.Keys)})."));
 
             var dbAuth = await LoadDatabaseCredentialsAsync();
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connecting to the database..."));
@@ -395,6 +394,31 @@ namespace Fergun
             return collection.BuildServiceProvider();
         }
 
+        private static IEnumerable<CultureInfo> GetAvailableCultures()
+        {
+            List<CultureInfo> result = new List<CultureInfo>();
+
+            CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            foreach (CultureInfo culture in cultures)
+            {
+                try
+                {
+                    if (!culture.Equals(CultureInfo.InvariantCulture))
+                    {
+                        ResourceSet rs = strings.ResourceManager.GetResourceSet(culture, true, false);
+                        if (rs != null)
+                        {
+                            result.Add(culture);
+                        }
+                    }
+                }
+                catch (CultureNotFoundException)
+                {
+                }
+            }
+            return result;
+        }
+
         private async Task ClientReady()
         {
             if (_firstConnect)
@@ -500,19 +524,16 @@ namespace Fergun
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "JoinGuild", $"Bot has joined the guild \"{guild.Name}\" ({guild.Id})"));
                 if (guild.PreferredLocale != null)
                 {
-                    string preferredLanguage = Locales.FirstOrDefault(x => x.Value.TwoLetterISOLanguageName == guild.PreferredCulture.TwoLetterISOLanguageName).Key;
-                    if (preferredLanguage != null)
+                    string languageCode = guild.PreferredCulture.TwoLetterISOLanguageName;
+                    if (Languages.ContainsKey(languageCode) && languageCode != (FergunConfig.Language ?? Constants.DefaultLanguage))
                     {
-                        if (preferredLanguage != FergunConfig.Language)
-                        {
-                            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "JoinGuild", $"A preferred language ({preferredLanguage}) was found in the guild {guild.Id}. Saving the preferred language in the database..."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "JoinGuild", $"A preferred language ({languageCode}) was found in the guild {guild.Id}. Saving the preferred language in the database..."));
 
-                            var config = new GuildConfig(guild.Id)
-                            {
-                                Language = preferredLanguage
-                            };
-                            Database.UpdateRecord("Guilds", config);
-                        }
+                        var config = new GuildConfig(guild.Id)
+                        {
+                            Language = languageCode
+                        };
+                        Database.UpdateRecord("Guilds", config);
                     }
                 }
                 if (!IsDebugMode)

@@ -2171,4 +2171,7 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>No puedes dar la ID a un bot!</value>
 	</data>
+	<data name="NoAvailableLanguages" xml:space="preserve">
+		<value>Parece que no hay idiomas disponibles.</value>
+	</data>
 </root>

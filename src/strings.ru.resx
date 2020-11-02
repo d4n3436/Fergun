@@ -2169,4 +2169,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>Вы не можете дать ID боту!</value>
 	</data>
+	<data name="NoAvailableLanguages" xml:space="preserve">
+		<value>Вроде нет доступных языков.</value>
+	</data>
 </root>

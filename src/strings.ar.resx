@@ -2181,4 +2181,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>لا يمكنك إعطاء المعرف لروبوت!</value>
 	</data>
+	<data name="NoAvailableLanguages" xml:space="preserve">
+		<value>يبدو أنه لا توجد لغات متاحة.</value>
+	</data>
 </root>
