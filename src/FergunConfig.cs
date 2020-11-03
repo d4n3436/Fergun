@@ -23,14 +23,10 @@ namespace Fergun
         public string DiscordBotsApiToken { get; set; }
         public string GeniusApiToken { get; set; }
         public string AiDungeonToken { get; set; }
-        public string GoogleSearchApiKey { get; set; }
-        public string SearchEngineId { get; set; }
-        public string YtSearchApiKey { get; set; }
         public string DeepAiApiKey { get; set; }
         public string ApiFlashAccessKey { get; set; }
         public string OCRSpaceApiKey { get; set; }
         public uint? EmbedColor { get; set; }
-        public int? VideoCacheSize { get; set; }
         public Dictionary<string, int> CommandStats { get; set; }
         public Dictionary<string, string> GloballyDisabledCommands { get; set; }
         public string SupportServer { get; set; }
@@ -95,12 +91,6 @@ namespace Fergun
 
         public static string AiDungeonToken => GetConfig().AiDungeonToken;
 
-        public static string GoogleSearchApiKey => GetConfig().GoogleSearchApiKey;
-
-        public static string SearchEngineId => GetConfig().SearchEngineId;
-
-        public static string YtSearchApiKey => GetConfig().YtSearchApiKey;
-
         public static string DeepAiApiKey => GetConfig().DeepAiApiKey;
 
         public static string ApiFlashAccessKey => GetConfig().ApiFlashAccessKey;
@@ -117,8 +107,6 @@ namespace Fergun
                 FergunClient.Database.UpdateRecord("Config", cfg);
             }
         }
-
-        public static int? VideoCacheSize => GetConfig().VideoCacheSize;
 
         public static Dictionary<string, int> CommandStats
         {

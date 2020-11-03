@@ -13,7 +13,6 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
 using Fergun.Utils;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
