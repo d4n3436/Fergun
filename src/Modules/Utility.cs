@@ -27,8 +27,8 @@ using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
 using GoogleTranslateFreeApi;
+using NCalc;
 using Newtonsoft.Json;
-using org.mariuszgromada.math.mxparser;
 using YoutubeExplode;
 
 namespace Fergun.Modules
@@ -290,19 +290,23 @@ namespace Fergun.Modules
         [Example("2 * 2 - 1")]
         public async Task<RuntimeResult> Calc([Remainder, Summary("calcParam1")] string expression)
         {
-            if (string.IsNullOrWhiteSpace(expression))
-            {
-                return FergunResult.FromError(Locate("InvalidExpression"));
-            }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Calc: expression: {expression}"));
 
             Stopwatch sw = Stopwatch.StartNew();
-            Expression ex = new Expression(expression);
-            //if (!ex.checkSyntax())
-            //{
-            //    return FergunResult.FromError(ex.getErrorMessage());
-            //}
-            string result = ex.calculate().ToString();
+            var ex = new Expression(expression);
+            if (ex.HasErrors())
+            {
+                return FergunResult.FromError(Locate("InvalidExpression"));
+            }
+            string result;
+            try
+            {
+                result = ex.Evaluate().ToString();
+            }
+            catch (ArgumentException)
+            {
+                return FergunResult.FromError(Locate("InvalidExpression"));
+            }
             sw.Stop();
 
             if (result.Length > EmbedFieldBuilder.MaxFieldValueLength)
@@ -311,14 +315,14 @@ namespace Fergun.Modules
             }
 
             var builder = new EmbedBuilder()
-                    .WithTitle(Locate("CalcResults"))
-                    .AddField(Locate("Input"), Format.Code(expression.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                    .AddField(Locate("Output"), Format.Code(result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                    .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
-                    .WithColor(FergunConfig.EmbedColor);
+                .WithTitle(Locate("CalcResults"))
+                .AddField(Locate("Input"), Format.Code(expression.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                .AddField(Locate("Output"), Format.Code(result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
+                .WithColor(FergunConfig.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
-
+            
             return FergunResult.FromSuccess();
         }
 
