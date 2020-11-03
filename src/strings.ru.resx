@@ -2172,4 +2172,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="NoAvailableLanguages" xml:space="preserve">
 		<value>Вроде нет доступных языков.</value>
 	</data>
+	<data name="RequestTimedOut" xml:space="preserve">
+		<value>Истекло время запроса.</value>
+	</data>
 </root>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -29,7 +28,6 @@ using Fergun.Services;
 using Fergun.Utils;
 using GoogleTranslateFreeApi;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using org.mariuszgromada.math.mxparser;
 using YoutubeExplode;
 
@@ -40,21 +38,16 @@ namespace Fergun.Modules
     public class Utility : FergunBase
     {
         [ThreadStatic]
-        private static Random _rngInstance;
-
+        private static Random _rng;
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
-        private static bool _isCreatingCache;
         private static XkcdComic _lastComic;
         private static DateTimeOffset _timeToCheckComic;
         private static CommandService _cmdService;
         private static LogService _logService;
 
-        public static ConcurrentBag<CachedPages> ImgCache { get; } = new ConcurrentBag<CachedPages>();
-        public static ConcurrentBag<CachedPages> UrbanCache { get; } = new ConcurrentBag<CachedPages>();
-        public static ConcurrentBag<string> VideoCache { get; } = new ConcurrentBag<string>();
-        private static Random RngInstance => _rngInstance ??= new Random();
+        private static Random RngInstance => _rng ??= new Random();
 
         public Utility(CommandService commands, LogService logService)
         {
@@ -65,7 +58,7 @@ namespace Fergun.Modules
         [Command("avatar", RunMode = RunMode.Async)]
         [Summary("avatarSummary")]
         [Example("Fergun#6839")]
-        public async Task Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
+        public async Task<RuntimeResult> Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
         {
             user ??= Context.User;
             if (!(user is RestUser))
@@ -78,10 +71,23 @@ namespace Fergun.Modules
             string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
-            using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
-            using (Bitmap img = new Bitmap(response))
+            try
             {
-                avatarColor = img.GetAverageColor();
+                using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
+                using (Bitmap img = new Bitmap(response))
+                {
+                    avatarColor = img.GetAverageColor();
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
             var builder = new EmbedBuilder
@@ -92,6 +98,8 @@ namespace Fergun.Modules
             };
 
             await ReplyAsync(embed: builder.Build());
+
+            return FergunResult.FromSuccess();
         }
 
         [LongRunning]
@@ -151,7 +159,7 @@ namespace Fergun.Modules
                     var response = await Hastebin.UploadAsync(text);
                     text = Format.Url(Locate("HastebinLink"), response.GetLink());
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
                     text = text.Truncate(EmbedFieldBuilder.MaxFieldValueLength);
@@ -199,7 +207,7 @@ namespace Fergun.Modules
                     var response = await Hastebin.UploadAsync(text);
                     text = response.GetLink();
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Badtranslator: Error while uploading text to Hastebin", e));
                     text = text.Truncate(DiscordConfig.MaxMessageSize);
@@ -628,7 +636,7 @@ namespace Fergun.Modules
             catch (TaskCanceledException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling CaptionBot API", e));
-                return FergunResult.FromError(Locate("AnErrorOccurred"));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
             text = text.Trim('\"');
@@ -667,60 +675,43 @@ namespace Fergun.Modules
             // Considering a DM channel a SFW channel.
             bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
-
-            var pages = new List<PaginatorPage>();
-
-            var cached = ImgCache.FirstOrDefault(x => x.Query == query && x.IsNsfw == isNsfwChannel);
-            if (cached == null)
+            DdgResponse search;
+            try
             {
-                DdgResponse search;
-                try
-                {
-                    search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
-                }
-                catch (HttpRequestException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
-                    return FergunResult.FromError(e.Message);
-                }
-                catch (TokenNotFoundException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
-                    return FergunResult.FromError(Locate("NoResultsFound"));
-                }
-                if (search.Results.Count == 0)
-                {
-                    return FergunResult.FromError(Locate("NoResultsFound"));
-                }
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Results count: {search.Results.Count}"));
-
-                foreach (var item in search.Results)
-                {
-                    string imageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(item.Image));
-                    if (!Uri.IsWellFormedUriString(imageUrl, UriKind.Absolute))
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Image: Invalid image url: {imageUrl}"));
-                    }
-                    else if (!Uri.IsWellFormedUriString(item.Url, UriKind.Absolute))
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Image: Invalid url: {item.Url}"));
-                    }
-                    else
-                    {
-                        pages.Add(new PaginatorPage()
-                        {
-                            Title = item.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                            ImageUrl = imageUrl,
-                            Url = item.Url
-                        });
-                    }
-                }
-                ImgCache.Add(new CachedPages(query, pages, isNsfwChannel));
+                search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
             }
-            else
+            catch (HttpRequestException e)
             {
-                pages = cached.Pages;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
+                return FergunResult.FromError(e.Message);
             }
+            catch (TokenNotFoundException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+            if (search.Results.Count == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Results count: {search.Results.Count}"));
+
+            var pages = search.Results
+                .Where(x =>
+                {
+                    return Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) && Uri.IsWellFormedUriString(x.Url, UriKind.Absolute);
+                })
+                .Select(x =>
+                {
+                    return new PaginatorPage()
+                    {
+                        Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
+                        ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
+                        Url = x.Url
+                    };
+                })
+                .ToList();
+
             var pager = new PaginatedMessage()
             {
                 Author = new EmbedAuthorBuilder()
@@ -773,7 +764,22 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Invert: url to use: {url}"));
 
-            using (Stream response = await _httpClient.GetStreamAsync(new Uri(url)))
+            Stream response;
+            try
+            {
+                response = await _httpClient.GetStreamAsync(new Uri(url));
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
             using (Bitmap img = new Bitmap(response))
             using (Bitmap inverted = img.InvertColor())
             using (Stream invertedFile = new MemoryStream())
@@ -836,7 +842,7 @@ namespace Fergun.Modules
                     var response = await Hastebin.UploadAsync(text);
                     text = Format.Url(Locate("HastebinLink"), response.GetLink());
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocr: Error while uploading text to Hastebin", e));
                     text = Format.Code(text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
@@ -902,7 +908,7 @@ namespace Fergun.Modules
                     var response = await Hastebin.UploadAsync(translation.Text);
                     translation.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocrtranslate: Error while uploading text to Hastebin", e));
                     translation.Text = Format.Code(translation.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
@@ -938,7 +944,7 @@ namespace Fergun.Modules
             {
                 await SendEmbedAsync(Format.Url(Locate("HastebinLink"), (await Hastebin.UploadAsync(text)).GetLink()));
             }
-            catch (HttpRequestException e)
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
                 return FergunResult.FromError(e.Message);
@@ -985,21 +991,15 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Resize: url to use: {url}"));
 
-            var data = new Dictionary<string, string>
-            {
-                { "image", url }
-            };
-
-            var content = new FormUrlEncodedContent(data);
             string json;
-
             try
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Post, "https://api.deepai.org/api/waifu2x"))
                 {
                     request.Headers.Add("Api-Key", FergunConfig.DeepAiApiKey);
-                    request.Content = content;
+                    request.Content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("image", url) });
                     var response = await _httpClient.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
                     json = await response.Content.ReadAsStringAsync();
                 }
             }
@@ -1011,11 +1011,11 @@ namespace Fergun.Modules
             catch (TaskCanceledException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling waifu2x API", e));
-                return FergunResult.FromError(Locate("AnErrorOccurred"));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
-            JToken token = JObject.Parse(json);
-            string resultUrl = token.Value<string>("output_url");
+            dynamic obj = JsonConvert.DeserializeObject(json);
+            string resultUrl = (string)obj.output_url;
             if (string.IsNullOrWhiteSpace(resultUrl))
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
@@ -1111,33 +1111,24 @@ namespace Fergun.Modules
                 return FergunResult.FromError(response.ErrorMessage);
             }
 
-            //var data = new Dictionary<string, string>
-            //{
-            //    { "image", Response.Url }
-            //};
-
-            //string responseString;
-
-            //using (var request = new HttpRequestMessage(HttpMethod.Post, "https://api.deepai.org/api/nsfw-detector"))
-            //{
-            //    request.Headers.Add("Api-Key", Config.DeepAiApiKey);
-            //    request.Content = new FormUrlEncodedContent(data);
-            //    var response = await DeepAIClient.SendAsync(request);
-            //    responseString = await response.Content.ReadAsStringAsync();
-            //}
-
-            //JToken token2 = JObject.Parse(responseString);
-            //double score = (double)token2["output"]["nsfw_score"];
-            //if (score > 0.3 && !(Context.Channel as SocketTextChannel).IsNsfw)
-            //{
-            //    await ReplyAsync(GetValue("ScreenshotNSFW"));
-            //    return;
-            //}
-
-            using (Stream image = await _httpClient.GetStreamAsync(new Uri(response.Url)))
+            try
             {
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png");
+                using (Stream image = await _httpClient.GetStreamAsync(new Uri(response.Url)))
+                {
+                    await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png");
+                }
             }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
             return FergunResult.FromSuccess();
         }
 
@@ -1274,7 +1265,7 @@ namespace Fergun.Modules
                     var response = await Hastebin.UploadAsync(result.Text);
                     result.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Translate: Error while uploading text to Hastebin", e));
                     result.Text = Format.Code(result.Text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
@@ -1328,6 +1319,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "TTS: Error while getting TTS", e));
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "TTS: Error while getting TTS", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
 
             using (var stream = new MemoryStream(bytes))
             {
@@ -1346,7 +1342,6 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Urban([Remainder, Summary("urbanParam1")] string query = null)
         {
             UrbanResponse search = null;
-            CachedPages cached = null;
 
             query = query?.Trim();
             if (string.IsNullOrWhiteSpace(query))
@@ -1365,80 +1360,72 @@ namespace Fergun.Modules
             else
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Urban: Query \"{query}\""));
-                cached = UrbanCache.FirstOrDefault(x => x.Query == query);
-                if (cached == null)
+                try
                 {
-                    try
-                    {
-                        search = UrbanApi.SearchWord(query);
-                    }
-                    catch (WebException e)
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
-                        return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
-                    }
-                    if (search.Definitions.Count == 0)
-                    {
-                        return FergunResult.FromError(Locate("NoResults"));
-                    }
+                    search = UrbanApi.SearchWord(query);
+                }
+                catch (WebException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
+                    return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
+                }
+                if (search.Definitions.Count == 0)
+                {
+                    return FergunResult.FromError(Locate("NoResults"));
                 }
             }
 
-            var pages = new List<PaginatorPage>();
-            if (cached == null)
+            var pages = search.Definitions.Select(x =>
             {
-                foreach (var item in search.Definitions)
+                // Replace all occurrences of a term in brackets with a hyperlink directing to the definition of that term.
+                string definition = _bracketRegex.Replace(x.Definition,
+                    m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"))
+                .Truncate(EmbedBuilder.MaxDescriptionLength);
+
+                string example;
+                if (string.IsNullOrEmpty(x.Example))
                 {
-                    // Nice way to replace all ocurrences to a custom string.
-                    item.Definition = _bracketRegex.Replace(item.Definition,
-                                                              m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"));
-                    if (!string.IsNullOrEmpty(item.Example))
-                    {
-                        item.Example = _bracketRegex.Replace(item.Example,
-                                                              m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"));
-                    }
-                    List<EmbedFieldBuilder> fields = new List<EmbedFieldBuilder>
-                    {
-                        new EmbedFieldBuilder()
-                        {
-                            Name = Locate("Example"),
-                            Value = string.IsNullOrEmpty(item.Example) ? Locate("NoExample") : item.Example.Truncate(EmbedFieldBuilder.MaxFieldValueLength),
-                            IsInline = false
-                        },
-                        new EmbedFieldBuilder()
-                        {
-                            Name = "👍",
-                            Value = item.ThumbsUp,
-                            IsInline = true
-                        },
-                        new EmbedFieldBuilder()
-                        {
-                            Name = "👎",
-                            Value = item.ThumbsDown,
-                            IsInline = true
-                        }
-                    };
-
-                    var author = new EmbedAuthorBuilder()
-                        .WithName($"{Locate("By")} {item.Author}");
-
-                    pages.Add(new PaginatorPage()
-                    {
-                        Author = author,
-                        Title = item.Word.Truncate(EmbedBuilder.MaxTitleLength),
-                        Description = item.Definition.Truncate(EmbedBuilder.MaxDescriptionLength),
-                        Url = item.Permalink,
-                        Fields = fields,
-                        TimeStamp = item.WrittenOn
-                    });
+                    example = Locate("NoExample");
                 }
-                UrbanCache.Add(new CachedPages(query, pages, true));
-            }
-            else
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Found a cached result."));
-                pages = cached.Pages;
-            }
+                else
+                {
+                    example = _bracketRegex.Replace(x.Example,
+                        m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"))
+                    .Truncate(EmbedFieldBuilder.MaxFieldValueLength);
+                }
+
+                var fields = new List<EmbedFieldBuilder>()
+                {
+                    new EmbedFieldBuilder()
+                    {
+                        Name = Locate("Example"),
+                        Value = example,
+                        IsInline = false
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "👍",
+                        Value = x.ThumbsUp,
+                        IsInline = true
+                    },
+                    new EmbedFieldBuilder()
+                    {
+                        Name = "👎",
+                        Value = x.ThumbsDown,
+                        IsInline = true
+                    }
+                };
+
+                return new PaginatorPage()
+                {
+                    Author = new EmbedAuthorBuilder { Name = $"{Locate("By")} {x.Author}" },
+                    Title = x.Word.Truncate(EmbedBuilder.MaxTitleLength),
+                    Description = definition,
+                    Url = x.Permalink,
+                    Fields = fields,
+                    TimeStamp = x.WrittenOn
+                };
+            });
 
             var pager = new PaginatedMessage()
             {
@@ -1455,12 +1442,12 @@ namespace Fergun.Modules
 
             var reactions = new ReactionList()
             {
-                First = pages.Count >= 3,
+                First = search.Definitions.Count >= 3,
                 Backward = true,
                 Forward = true,
-                Last = pages.Count >= 3,
+                Last = search.Definitions.Count >= 3,
                 Stop = true,
-                Jump = pages.Count >= 4,
+                Jump = search.Definitions.Count >= 4,
                 Info = false
             };
 
@@ -1507,10 +1494,23 @@ namespace Fergun.Modules
             string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
-            using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
-            using (Bitmap img = new Bitmap(response))
+            try
             {
-                avatarColor = img.GetAverageColor();
+                using (Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail)))
+                using (Bitmap img = new Bitmap(response))
+                {
+                    avatarColor = img.GetAverageColor();
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
             var builder = new EmbedBuilder()
@@ -1667,76 +1667,31 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [RequireNsfw(ErrorMessage = "NSFWOnly")]
-        //[LongRunning]
+        [LongRunning]
         [Command("ytrandom", RunMode = RunMode.Async)]
         [Summary("ytrandomSummary")]
         [Alias("ytrand")]
         public async Task<RuntimeResult> Ytrandom()
         {
-            if (VideoCache.IsEmpty)
+            for (int i = 0; i < 10; i++)
             {
-                if (_isCreatingCache)
+                string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
+                var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
+                if (items.Count != 0)
                 {
-                    return FergunResult.FromError(Locate("CreatingVideoCache"));
-                }
-                _isCreatingCache = true;
+                    string id = items[RngInstance.Next(items.Count)].Id;
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Using id: {id} (random string: {randStr}, search count: {items.Count})"));
 
-                await ReplyAsync(Locate("EmptyCache"));
-                await Context.Channel.TriggerTypingAsync();
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Creating video cache for {Context.User} in {Context.Display()}"));
-
-                var tasks = CreateVideoTasks();
-                try
-                {
-                    await Task.WhenAll(tasks);
+                    await ReplyAsync($"https://www.youtube.com/watch?v={id}");
+                    return FergunResult.FromSuccess();
                 }
-                catch
+                else
                 {
-                    throw;
-                }
-                finally
-                {
-                    _isCreatingCache = false;
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"No videos found on random string ({randStr})"));
                 }
             }
-            if (!VideoCache.TryTake(out string id))
-            {
-                return FergunResult.FromError(Locate("AnErrorOccurred"));
-            }
-            await ReplyAsync($"https://www.youtube.com/watch?v={id}");
-            return FergunResult.FromSuccess();
-        }
 
-        // Helper methods
-
-        private static List<Task> CreateVideoTasks()
-        {
-            List<Task> tasks = new List<Task>();
-            for (int i = 0; i < (FergunConfig.VideoCacheSize ?? 1); i++)
-            {
-                tasks.Add(Task.Run(async () =>
-                {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
-                        //var items = await YTClient.SearchVideosAsync(rand, 1);
-                        var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
-                        if (items.Count != 0)
-                        {
-                            string randomId = items[RngInstance.Next(items.Count)].Id;
-                            VideoCache.Add(randomId);
-                            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Added 1 item to Video cache (random string: {randStr}, search count: {items.Count}, selected id: {randomId}), total count: {VideoCache.Count}"));
-                            break;
-                        }
-                        else
-                        {
-                            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"No videos found on {randStr}"));
-                        }
-                    }
-                }));
-            }
-            return tasks;
+            return FergunResult.FromError(Locate("AnErrorOccurred"));
         }
 
         // TODO Use Engine 1 if the image is too small (30x30)
@@ -1800,7 +1755,7 @@ namespace Fergun.Modules
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
             }
-            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is SystemException)
+            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is TaskCanceledException || e is SystemException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
                 useBing = true;
@@ -1816,7 +1771,7 @@ namespace Fergun.Modules
 
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
                 }
-                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
+                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
                     resultError = "ErrorInTranslation";
@@ -1846,20 +1801,6 @@ namespace Fergun.Modules
             _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
         }
-    }
-
-    public class CachedPages
-    {
-        public CachedPages(string query, List<PaginatorPage> pages, bool isNsfw)
-        {
-            Query = query;
-            Pages = pages;
-            IsNsfw = isNsfw;
-        }
-
-        public bool IsNsfw { get; set; }
-        public List<PaginatorPage> Pages { get; set; }
-        public string Query { get; set; }
     }
 
     public class SimpleTranslationResult

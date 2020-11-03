@@ -1208,7 +1208,7 @@ namespace Fergun.Modules
                 var hastebin = await Hastebin.UploadAsync(string.Join("", actionList.Select(x => x.Text)));
                 builder.Description = Format.Url(Locate("HastebinLink"), hastebin.GetLink());
             }
-            catch (HttpRequestException)
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }

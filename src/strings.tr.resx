@@ -2172,4 +2172,7 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="NoAvailableLanguages" xml:space="preserve">
 		<value>Görünüşe göre mevcut dil yok.</value>
 	</data>
+	<data name="RequestTimedOut" xml:space="preserve">
+		<value>İstek zaman aşımına uğradı.</value>
+	</data>
 </root>

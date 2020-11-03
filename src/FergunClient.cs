@@ -577,7 +577,7 @@ namespace Fergun
                     await _discordBots.UpdateStatsAsync(_client.CurrentUser.Id, _client.Guilds.Count);
                 }
             }
-            catch (HttpRequestException e)
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not update the DBL/DiscordBots bot stats", e));
             }

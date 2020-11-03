@@ -7,7 +7,7 @@ namespace Fergun.Utils
 {
     public static class StringUtils
     {
-        private static readonly HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
 
         public static async Task<HttpResponseMessage> GetUrlResponseHeadersAsync(string url)
         {
@@ -15,7 +15,7 @@ namespace Fergun.Utils
             {
                 return await _httpClient.GetAsync(new UriBuilder(url).Uri, HttpCompletionOption.ResponseHeadersRead);
             }
-            catch (Exception e) when (e is HttpRequestException || e is UriFormatException || e is ArgumentException)
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is UriFormatException || e is ArgumentException)
             {
                 return null;
             }

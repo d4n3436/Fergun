@@ -2175,4 +2175,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="NoAvailableLanguages" xml:space="preserve">
 		<value>It seems there are no available languages.</value>
 	</data>
+	<data name="RequestTimedOut" xml:space="preserve">
+		<value>Request timed out.</value>
+	</data>
 </root>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -62,6 +63,8 @@ namespace Fergun
             CaseSensitiveCommands = false,
             IgnoreExtraArgs = true
         };
+
+        public static TimeSpan HttpClientTimeout { get; } = TimeSpan.FromSeconds(60);
 
         public const GuildPermission InvitePermissions =
 

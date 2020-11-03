@@ -109,9 +109,13 @@ namespace Fergun.Modules
             {
                 genius = await _geniusApi.SearchAsync(query);
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException e)
             {
-                return FergunResult.FromError(Locate("AnErrorOccurred"));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException)
+            {
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
             if (genius.Meta.Status != 200)
             {

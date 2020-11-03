@@ -2184,4 +2184,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="NoAvailableLanguages" xml:space="preserve">
 		<value>يبدو أنه لا توجد لغات متاحة.</value>
 	</data>
+	<data name="RequestTimedOut" xml:space="preserve">
+		<value>الطلب منتهي المدة.</value>
+	</data>
 </root>
