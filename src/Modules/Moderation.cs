@@ -28,19 +28,15 @@ namespace Fergun.Modules
                 await ReplyAsync(Locate("BanSameUser"));
                 return FergunResult.FromSuccess();
             }
-            if (user.Id == Context.Client.CurrentUser.Id)
-            {
-                await ReplyAsync(Locate("BanMyself"));
-                return FergunResult.FromSuccess();
-            }
-
-            var banList = await Context.Guild.GetBansAsync();
-            if (banList.Any(x => x.User.Id == user.Id))
+            if ((await Context.Guild.GetBanAsync(user)) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
+            if (!(user is IGuildUser))
+            {
+                return FergunResult.FromError(Locate("UserNotFound"));
+            }
 
-            // user.BanAsync(0, reason);
             await Context.Guild.AddBanAsync(user, 0, reason);
             await SendEmbedAsync(string.Format(Locate("Banned"), user.Mention));
             return FergunResult.FromSuccess();
@@ -64,7 +60,7 @@ namespace Fergun.Modules
 
             var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).FlattenAsync();
 
-            // Use Messages.Count() instead of count because there's a chance there are less messages in the channel that the number of messages to delete.
+            // Get the total message count before being filtered.
             int totalMsgs = messages.Count();
 
             if (totalMsgs == 0)
@@ -74,6 +70,7 @@ namespace Fergun.Modules
 
             if (user != null)
             {
+                // Get messages by user
                 messages = messages.Where(x => x.Author.Id == user.Id);
                 if (!messages.Any())
                 {
@@ -81,6 +78,7 @@ namespace Fergun.Modules
                 }
             }
 
+            // Get messages younger whan 2 weeks
             messages = messages.Where(x => x.CreatedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
             if (!messages.Any())
             {
@@ -122,8 +120,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Hackban([Summary("hackbanParam1")] ulong userId,
             [Remainder, Summary("hackbanParam2")] string reason = null)
         {
-            var banList = await Context.Guild.GetBansAsync();
-            if (banList.Any(x => x.User.Id == userId))
+            if ((await Context.Guild.GetBanAsync(userId)) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
@@ -142,7 +139,7 @@ namespace Fergun.Modules
             }
 
             await Context.Guild.AddBanAsync(userId, 0, reason);
-            await SendEmbedAsync(string.Format(Locate("Hackbanned"), user.ToString()));
+            await SendEmbedAsync(string.Format(Locate("Hackbanned"), user));
             return FergunResult.FromSuccess();
         }
 
@@ -155,6 +152,7 @@ namespace Fergun.Modules
             [Summary("kickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("kickParam2")] string reason = null)
         {
+            // IGuildUser parameter is bugged.
             if (!(user is IGuildUser guildUser))
             {
                 return FergunResult.FromError(Locate("UserNotFound"));
@@ -175,6 +173,7 @@ namespace Fergun.Modules
             [Summary("nickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("nickParam2")] string newNick = null)
         {
+            // IGuildUser parameter is bugged.
             if (!(user is IGuildUser guildUser))
             {
                 return FergunResult.FromError(Locate("UserNotFound"));
@@ -195,15 +194,7 @@ namespace Fergun.Modules
             }
             return FergunResult.FromSuccess();
         }
-
-        /*
-        public async Task Nick([Remainder] string newNick)
-        {
-        	//idk why Context.User doesn't have ModifyAsync()
-        	var user = Context.Guild.GetUser(Context.User.Id);
-        	await user.ModifyAsync(x => x.Nickname = newNick);
-        }
-        */
+        
 
         [RequireUserPermission(GuildPermission.BanMembers, ErrorMessage = "UserRequireBanMembers")]
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]
@@ -220,19 +211,12 @@ namespace Fergun.Modules
                 await ReplyAsync(Locate("SoftbanSameUser"));
                 return FergunResult.FromSuccess();
             }
-            if (user.Id == Context.Client.CurrentUser.Id)
-            {
-                await ReplyAsync(Locate("SoftbanMyself"));
-                return FergunResult.FromSuccess();
-            }
 
-            var banList = await Context.Guild.GetBansAsync();
-            if (banList.Any(x => x.User.Id == user.Id))
+            if ((await Context.Guild.GetBanAsync(user)) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
-            var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id);
-            if (guildUser != null)
+            if (user is IGuildUser guildUser)
             {
                 if (Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
                 {
@@ -246,7 +230,7 @@ namespace Fergun.Modules
 
             await Context.Guild.AddBanAsync(user.Id, (int)days, reason);
             await Context.Guild.RemoveBanAsync(user.Id);
-            await SendEmbedAsync(string.Format(Locate("Softbanned"), user.ToString()));
+            await SendEmbedAsync(string.Format(Locate("Softbanned"), user));
 
             return FergunResult.FromSuccess();
         }
@@ -258,16 +242,14 @@ namespace Fergun.Modules
         [Example("666963870385923507")]
         public async Task<RuntimeResult> Unban([Summary("unbanParam1")] ulong userId)
         {
-            var banList = await Context.Guild.GetBansAsync();
-            var ban = banList.FirstOrDefault(x => x.User.Id == userId);
+            var ban = await Context.Guild.GetBanAsync(userId);
             if (ban == null)
             {
                 return FergunResult.FromError(Locate("UserNotBanned"));
             }
 
             await Context.Guild.RemoveBanAsync(userId);
-            //var user = await Context.Client.Rest.GetUserAsync(userId);
-            await SendEmbedAsync(string.Format(Locate("Unbanned"), ban.User.ToString()));
+            await SendEmbedAsync(string.Format(Locate("Unbanned"), ban.User));
 
             return FergunResult.FromSuccess();
         }
