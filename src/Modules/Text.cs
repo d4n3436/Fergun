@@ -50,10 +50,16 @@ namespace Fergun.Modules
         [Command("repeat")]
         [Summary("repeatSummary")]
         [Example("10 oof")]
-        public async Task Repeat([Summary("repeatParam1")] uint count,
-            [Remainder, Summary("repeatParam2")] string text)
+        public async Task Repeat([Summary("repeatParam1")] int count, [Remainder, Summary("repeatParam2")] string text)
         {
-            await ReplyAsync(text.Repeat(Math.Min(DiscordConfig.MaxMessageSize, (int)count)).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            count = Math.Max(1, count);
+
+            // Repeat the text to the max message size if the resulting text is too large
+            text = text.Length * count > DiscordConfig.MaxMessageSize
+                ? text.RepeatToLength(DiscordConfig.MaxMessageSize)
+                : text.Repeat(count);
+
+            await ReplyAsync(text, allowedMentions: AllowedMentions.None);
         }
 
         [Command("reverse")]

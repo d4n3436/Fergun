@@ -12,6 +12,11 @@ namespace Fergun.Extensions
             return string.Join(string.Empty, Enumerable.Repeat(input, count));
         }
 
+        public static string RepeatToLength(this string input, int length)
+        {
+            return Repeat(input, length / input.Length + 1).Truncate(length);
+        }
+
         public static string Reverse(this string input)
         {
             return new string(Enumerable.Reverse(input).ToArray());
