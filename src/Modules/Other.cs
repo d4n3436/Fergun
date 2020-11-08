@@ -359,7 +359,7 @@ namespace Fergun.Modules
             }
             if (newPrefix.Length > Constants.MaxPrefixLength)
             {
-                return FergunResult.FromError(Locate("PrefixTooLong"));
+                return FergunResult.FromError(string.Format(Locate("PrefixTooLarge"), Constants.MaxPrefixLength));
             }
 
             // null prefix = use the global prefix

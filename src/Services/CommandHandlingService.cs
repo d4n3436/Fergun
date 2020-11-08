@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -245,6 +246,24 @@ namespace Fergun
 
                 case CommandError.Exception when result is ExecuteResult execResult:
                     var exception = execResult.Exception;
+
+                    if (exception is HttpException httpException && httpException.HttpCode >= HttpStatusCode.InternalServerError)
+                    {
+                        await Task.Delay(2000);
+                        var builder = new EmbedBuilder()
+                            .WithTitle(GuildUtils.Locate("DiscordServerError", context.Channel))
+                            .WithDescription($"\u26a0 {GuildUtils.Locate("DiscordServerErrorInfo", context.Channel)}")
+                            .AddField(GuildUtils.Locate("ErrorDetails", context.Channel), 
+                            Format.Code($"Code: {(int)httpException.HttpCode}, Reason: {httpException.Reason}", "md"))
+                            .WithColor(FergunConfig.EmbedColor);
+
+                        try
+                        {
+                            await SendEmbedAsync(context.Message, builder.Build(), _services);
+                        }
+                        catch (HttpException) { }
+                        break;
+                    }
 
                     var builder2 = new EmbedBuilder()
                         .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Name)}")

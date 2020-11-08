@@ -1288,7 +1288,7 @@ Track selection for `play`</value>
     <value>The ID of the user to blacklist.</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
-    <value>The reason of the blacklist.</value>
+    <value>The reason for being blacklisted.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
     <value>You are in the blacklist.</value>
@@ -1370,8 +1370,8 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="FirstTip" xml:space="preserve">
     <value>Use {0}aid continue &lt;ID&gt; [text] to continue your adventure.</value>
   </data>
-	<data name="PrefixTooLong" xml:space="preserve">
-    <value>The reason of the blacklist.</value>
+	<data name="PrefixTooLarge" xml:space="preserve">
+    <value>The prefix is too large. The max. prefix length is: {0}.</value>
   </data>
 	<data name="InvalidUrl" xml:space="preserve">
     <value>Invalid URL.</value>
@@ -2177,5 +2177,15 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	</data>
 	<data name="RequestTimedOut" xml:space="preserve">
 		<value>Request timed out.</value>
+	</data>
+	<data name="DiscordServerError" xml:space="preserve">
+		<value>Error in Discord Servers</value>
+	</data>
+	<data name="DiscordServerErrorInfo" xml:space="preserve">
+		<value>The command failed due to an issue on Discord's side.
+Please try again later.</value>
+	</data>
+	<data name="ErrorDetails" xml:space="preserve">
+		<value>Error Details</value>
 	</data>
 </root>

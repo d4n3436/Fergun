@@ -1292,7 +1292,7 @@
     <value>معرف المستخدم إلى القائمة السوداء.</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
-    <value>سبب القائمة السوداء.</value>
+    <value>سبب يجري على القائمة السوداء.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
     <value>انت في القائمة السوداء</value>
@@ -1377,8 +1377,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="FirstTip" xml:space="preserve">
     <value>استخدم {0} help Continue &lt;ID&gt; [text] لمتابعة قصتك.</value>
   </data>
-	<data name="PrefixTooLong" xml:space="preserve">
-    <value>سبب القائمة السوداء.</value>
+	<data name="PrefixTooLarge" xml:space="preserve">
+    <value>{البادئة كبيرة جدا. الحد الأقصى. طول البادئة هو: {0.</value>
   </data>
 	<data name="InvalidUrl" xml:space="preserve">
     <value>URL غير صالح.</value>
@@ -2186,5 +2186,15 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="RequestTimedOut" xml:space="preserve">
 		<value>الطلب منتهي المدة.</value>
+	</data>
+	<data name="DiscordServerError" xml:space="preserve">
+		<value>خطأ في خوادم الخلاف</value>
+	</data>
+	<data name="DiscordServerErrorInfo" xml:space="preserve">
+		<value>فشل الأمر نظرا لوجود مشكلة على جانب الخلاف في.
+الرجاء معاودة المحاولة في وقت لاحق.</value>
+	</data>
+	<data name="ErrorDetails" xml:space="preserve">
+		<value>تفاصيل الخطأ</value>
 	</data>
 </root>

@@ -1364,8 +1364,8 @@ AI Dungeon giriş ve çıkışını otomatik çevir
 	<data name="BotRequireManageMessages" xml:space="preserve">
     <value>Bu komutu yürütmek için `` Mesajları Yönet '' iznine ihtiyacım var.</value>
   </data>
-	<data name="PrefixTooLong" xml:space="preserve">
-    <value>Yeni önek çok uzun (en fazla 10 karakter).</value>
+	<data name="PrefixTooLarge" xml:space="preserve">
+    <value>Önek çok büyük. Maks. önek uzunluğu: {0}.</value>
   </data>
 	<data name="InvalidUrl" xml:space="preserve">
     <value>Geçersiz URL.</value>
@@ -1396,7 +1396,7 @@ Komut hakkında daha fazla bilgi almak için {{0} yardım {1} `kullanın.</value
     <value>Kaynak dil (Tespit edildi)</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
-    <value>Kara listenin nedeni.</value>
+    <value>Kara listeye alınma nedeni.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
     <value>Kara listede bulunuyorsunuz.</value>
@@ -2174,5 +2174,15 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	</data>
 	<data name="RequestTimedOut" xml:space="preserve">
 		<value>İstek zaman aşımına uğradı.</value>
+	</data>
+	<data name="DiscordServerError" xml:space="preserve">
+		<value>Discord Sunucularında Hata</value>
+	</data>
+	<data name="DiscordServerErrorInfo" xml:space="preserve">
+		<value>Discord tarafındaki bir sorun nedeniyle komut başarısız oldu.
+Lütfen daha sonra tekrar deneyiniz.</value>
+	</data>
+	<data name="ErrorDetails" xml:space="preserve">
+		<value>Hata detayları</value>
 	</data>
 </root>

@@ -1287,7 +1287,7 @@ Selección de pista para `play`</value>
     <value>La ID del usuario a agregar a la lista negra.</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
-    <value>La razón de ser incluido a la lista negra.</value>
+    <value>La razón de ser incluido en la lista negra.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
     <value>Estás en la lista negra.</value>
@@ -1369,8 +1369,8 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
 	<data name="FirstTip" xml:space="preserve">
     <value>Usa {0}aid continue &lt;ID&gt; [texto] para continuar tu aventura.</value>
   </data>
-	<data name="PrefixTooLong" xml:space="preserve">
-    <value>La razón de ser incluido a la lista negra.</value>
+	<data name="PrefixTooLarge" xml:space="preserve">
+    <value>El prefijo es demasiado largo. El tamaño máximo del prefijo es: {0}.</value>
   </data>
 	<data name="InvalidUrl" xml:space="preserve">
     <value>URL inválida.</value>
@@ -2176,5 +2176,15 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	</data>
 	<data name="RequestTimedOut" xml:space="preserve">
 		<value>Tiempo de espera agotado para la solicitud.</value>
+	</data>
+	<data name="DiscordServerError" xml:space="preserve">
+		<value>Error en los servidores de Discord</value>
+	</data>
+	<data name="DiscordServerErrorInfo" xml:space="preserve">
+		<value>El comando ha fallado debido a un problema en los servidores de Discord.
+Por favor inténtelo de nuevo más tarde.</value>
+	</data>
+	<data name="ErrorDetails" xml:space="preserve">
+		<value>Detalles del error</value>
 	</data>
 </root>

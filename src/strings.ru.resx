@@ -1291,7 +1291,7 @@
     <value>Идентификатор пользователя в черный список.</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
-    <value>Причина черного списка.</value>
+    <value>Причина попадания в черный список.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
     <value>Вы в черном списке.</value>
@@ -1373,8 +1373,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="FirstTip" xml:space="preserve">
     <value>Используйте {0} помощи, продолжайте &lt;ID&gt; [текст], чтобы продолжить ваше приключение.</value>
   </data>
-	<data name="PrefixTooLong" xml:space="preserve">
-    <value>Причина черного списка.</value>
+	<data name="PrefixTooLarge" xml:space="preserve">
+    <value>Префикс слишком большой. Макс. длина префикса: {0}.</value>
   </data>
 	<data name="InvalidUrl" xml:space="preserve">
     <value>Неправильный адрес.</value>
@@ -2174,5 +2174,15 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	</data>
 	<data name="RequestTimedOut" xml:space="preserve">
 		<value>Истекло время запроса.</value>
+	</data>
+	<data name="DiscordServerError" xml:space="preserve">
+		<value>Ошибка на серверах Discord</value>
+	</data>
+	<data name="DiscordServerErrorInfo" xml:space="preserve">
+		<value>Команда не удалась из-за проблемы на стороне Discord.
+Пожалуйста, повторите попытку позже.</value>
+	</data>
+	<data name="ErrorDetails" xml:space="preserve">
+		<value>Детали ошибки</value>
 	</data>
 </root>
