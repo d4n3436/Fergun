@@ -12,7 +12,7 @@ using Fergun.Extensions;
 namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Text : FergunBase
     {
         [ThreadStatic]

@@ -155,6 +155,8 @@ namespace Fergun.Modules
 
             async Task HandleAidReactionAsync(int index)
             {
+                if (hasReacted) return;
+                hasReacted = true;
                 modeIndex = index;
                 stopEvent.Set();
                 await Task.CompletedTask;
@@ -165,12 +167,7 @@ namespace Fergun.Modules
             for (int i = 0; i < _modes.Count; i++)
             {
                 int index = i;
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) =>
-                {
-                    hasReacted = true;
-                    await HandleAidReactionAsync(index);
-                }
-                ));
+                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReactionAsync(index)));
                 list += $"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n";
             }
 
@@ -180,15 +177,7 @@ namespace Fergun.Modules
                 .WithThumbnailUrl(IconUrl)
                 .WithColor(FergunConfig.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
-                async (_) =>
-                {
-                    if (!hasReacted)
-                    {
-                        stopEvent.Set();
-                        await Task.CompletedTask;
-                    }
-                });
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async (context) => await HandleAidReactionAsync(-1));
 
             data.AddCallbacks(callbacks);
             message = await InlineReactionReplyAsync(data);
@@ -309,11 +298,12 @@ namespace Fergun.Modules
             AutoResetEvent stopEvent = new AutoResetEvent(false);
 
             string list = "";
-            var characters =
-                new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
+            var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
 
             async Task HandleAidReaction2Async(int index)
             {
+                if (hasReacted) return;
+                hasReacted = true;
                 characterIndex = index;
                 stopEvent.Set();
                 await Task.CompletedTask;
@@ -323,30 +313,14 @@ namespace Fergun.Modules
             for (int i = 0; i < characters.Count; i++)
             {
                 int index = i;
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) =>
-                {
-                    hasReacted = true;
-                    await HandleAidReaction2Async(index);
-                }
-                ));
-
-                // Idk why adding this way can lead to unordered or repeated values
-                //characters.Add(options[i].Title, uint.Parse(options[i].Id.Substring(9))); // "scenario:xxxxxx"
                 list += $"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n";
+                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReaction2Async(index)));
             }
 
             builder.Title = Locate("CharacterSelect");
             builder.Description = list;
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
-                async (_) =>
-                {
-                    if (!hasReacted)
-                    {
-                        stopEvent.Set();
-                    }
-                    await Task.CompletedTask;
-                });
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async (context) => await HandleAidReaction2Async(-1));
 
             data.AddCallbacks(callbacks);
 
@@ -1086,63 +1060,64 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
 
-            bool hasReacted = false;
+            bool hasRacted = false;
             IUserMessage message = null;
 
             var builder = new EmbedBuilder()
                 .WithDescription(Locate("AdventureDeletionPrompt"))
                 .WithColor(FergunConfig.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30),
-                async (_) =>
-                {
-                    if (!hasReacted)
-                    {
-                        await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
-                    }
-                })
-                .AddCallBack(new Emoji("✅"), async (_, _1) =>
-                {
-                    hasReacted = true;
-                    string result;
-                    WebSocketResponse response;
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
-                    try
-                    {
-                        response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
-
-                        string error = CheckResponse(response);
-                        if (error != null)
-                        {
-                            result = error;
-                        }
-                        else
-                        {
-                            FergunClient.Database.DeleteRecord("AIDAdventures", adventure);
-                            result = Locate("AdventureDeleted");
-                        }
-                    }
-                    catch (IOException e)
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
-                        result = e.Message;
-                    }
-                    catch (WebSocketException e)
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
-                        result = e.Message;
-                    }
-                    catch (TimeoutException)
-                    {
-                        result = Locate("ErrorInAPI");
-                    }
-
-                    await message.ModifyAsync(x => x.Embed = builder.WithDescription(result).Build());
-                });
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async (context) => await HandleReactionAsync(true))
+                .AddCallBack(new Emoji("✅"), async (context, reaction) => await HandleReactionAsync(false));
 
             message = await InlineReactionReplyAsync(data);
 
             return FergunResult.FromSuccess();
+
+            async Task HandleReactionAsync(bool timeout)
+            {
+                if (hasRacted) return;
+                hasRacted = true;
+                if (timeout)
+                {
+                    await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
+                    return;
+                }
+                string result;
+                WebSocketResponse response;
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
+                try
+                {
+                    response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
+
+                    string error = CheckResponse(response);
+                    if (error != null)
+                    {
+                        result = error;
+                    }
+                    else
+                    {
+                        FergunClient.Database.DeleteRecord("AIDAdventures", adventure);
+                        result = Locate("AdventureDeleted");
+                    }
+                }
+                catch (IOException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
+                    result = e.Message;
+                }
+                catch (WebSocketException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
+                    result = e.Message;
+                }
+                catch (TimeoutException)
+                {
+                    result = Locate("ErrorInAPI");
+                }
+
+                await message.ModifyAsync(x => x.Embed = builder.WithDescription(result).Build());
+            }
         }
 
         [Command("dump", RunMode = RunMode.Async), Ratelimit(1, 20, Measure.Minutes)]

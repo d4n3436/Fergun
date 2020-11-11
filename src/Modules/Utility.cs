@@ -34,7 +34,7 @@ using YoutubeExplode;
 namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Utility : FergunBase
     {
         [ThreadStatic]
@@ -67,8 +67,8 @@ namespace Fergun.Modules
                 user = await Context.Client.Rest.GetUserAsync(user.Id);
             }
 
-            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
-            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
+            string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            string thumbnail = user.GetAvatarUrl(ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
             try
@@ -235,9 +235,7 @@ namespace Fergun.Modules
             else
             {
                 var text = msgs.Select(x =>
-                {
-                    return $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - x.CreatedAt).Minutes)})\n{x.Content.Truncate(200)}\n\n";
-                });
+                $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - x.CreatedAt).Minutes)})\n{x.Content.Truncate(200)}\n\n");
 
                 builder.WithTitle("Big edit snipe")
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
@@ -322,7 +320,7 @@ namespace Fergun.Modules
                 .WithColor(FergunConfig.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
-            
+
             return FergunResult.FromSuccess();
         }
 
@@ -455,7 +453,7 @@ namespace Fergun.Modules
             {
                 listToShow += $"**{i + 1}.** {configList[i]}\n";
             }
-            //bool hasReacted = false;
+
             IUserMessage message = null;
 
             string valueList =
@@ -471,6 +469,31 @@ namespace Fergun.Modules
                 .AddField(Locate("Value"), valueList, true)
                 .WithColor(FergunConfig.EmbedColor);
 
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
+                .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
+                {
+                    guild.CaptionbotAutoTranslate = !guild.CaptionbotAutoTranslate;
+                    await HandleReactionAsync(reaction);
+                })
+                .AddCallBack(new Emoji("2️⃣"), async (_, reaction) =>
+                {
+                    guild.AidAutoTranslate = !guild.AidAutoTranslate;
+                    await HandleReactionAsync(reaction);
+                })
+                .AddCallBack(new Emoji("3️⃣"), async (_, reaction) =>
+                {
+                    guild.TrackSelection = !guild.TrackSelection;
+                    await HandleReactionAsync(reaction);
+                })
+                .AddCallBack(new Emoji("❌"), async (_, reaction) =>
+                {
+                    await message.TryDeleteAsync();
+                });
+
+            message = await InlineReactionReplyAsync(data);
+
+            return FergunResult.FromSuccess();
+
             async Task HandleReactionAsync(SocketReaction reaction)
             {
                 FergunClient.Database.UpdateRecord("Guilds", guild);
@@ -483,33 +506,6 @@ namespace Fergun.Modules
                 _ = message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
             }
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
-                .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
-                {
-                    //hasReacted = true;
-                    guild.CaptionbotAutoTranslate = !guild.CaptionbotAutoTranslate;
-                    await HandleReactionAsync(reaction);
-                })
-                .AddCallBack(new Emoji("2️⃣"), async (_, reaction) =>
-                {
-                    guild.AidAutoTranslate = !guild.AidAutoTranslate;
-                    await HandleReactionAsync(reaction);
-                    //hasReacted = true;
-                })
-                .AddCallBack(new Emoji("3️⃣"), async (_, reaction) =>
-                {
-                    guild.TrackSelection = !guild.TrackSelection;
-                    await HandleReactionAsync(reaction);
-                    //hasReacted = true;
-                })
-                .AddCallBack(new Emoji("❌"), async (_, reaction) =>
-                {
-                    await message.TryDeleteAsync();
-                });
-
-            message = await InlineReactionReplyAsync(data);
-
-            return FergunResult.FromSuccess();
         }
 
         [Command("editsnipe", RunMode = RunMode.Async)]
@@ -702,17 +698,13 @@ namespace Fergun.Modules
 
             var pages = search.Results
                 .Where(x =>
+                Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
+                Uri.IsWellFormedUriString(x.Url, UriKind.Absolute))
+                .Select(x => new EmbedBuilder()
                 {
-                    return Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) && Uri.IsWellFormedUriString(x.Url, UriKind.Absolute);
-                })
-                .Select(x =>
-                {
-                    return new EmbedBuilder()
-                    {
-                        Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                        ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
-                        Url = x.Url
-                    };
+                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
+                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
+                    Url = x.Url
                 })
                 .ToList();
 
@@ -1357,7 +1349,7 @@ namespace Fergun.Modules
                 }
                 catch (WebException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Urban: Error in API", e));
                     return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
                 }
             }
@@ -1370,7 +1362,7 @@ namespace Fergun.Modules
                 }
                 catch (WebException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Error in API", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Urban: Error in API", e));
                     return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
                 }
                 if (search.Definitions.Count == 0)
@@ -1493,8 +1485,8 @@ namespace Fergun.Modules
                 user = await Context.Client.Rest.GetUserAsync(user.Id);
             }
 
-            string avatarUrl = user.GetAvatarUrl(Discord.ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
-            string thumbnail = user.GetAvatarUrl(Discord.ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
+            string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+            string thumbnail = user.GetAvatarUrl(ImageFormat.Png, 128) ?? user.GetDefaultAvatarUrl();
 
             System.Drawing.Color avatarColor;
             try

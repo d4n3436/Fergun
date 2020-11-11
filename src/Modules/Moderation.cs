@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
@@ -10,7 +12,7 @@ using Fergun.Extensions;
 namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     public class Moderation : FergunBase
     {
@@ -85,7 +87,11 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("MessagesOlderThan2Weeks"));
             }
 
-            await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages.Append(Context.Message));
+            try
+            {
+                await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages.Append(Context.Message));
+            }
+            catch (HttpException e) when (e.HttpCode == HttpStatusCode.NotFound) { }
 
             string message;
             if (user != null)
@@ -194,7 +200,6 @@ namespace Fergun.Modules
             }
             return FergunResult.FromSuccess();
         }
-        
 
         [RequireUserPermission(GuildPermission.BanMembers, ErrorMessage = "UserRequireBanMembers")]
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]

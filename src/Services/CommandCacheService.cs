@@ -302,7 +302,7 @@ namespace Fergun.Services
         /// <summary>
         /// Sends or edits a message to the source channel, and adds the response to the cache if the message is new.
         /// </summary>
-        /// <param name="message">The message to be sent or edited.</param>
+        /// <param name="text">The message to be sent or edited.</param>
         /// <param name="isTTS">Whether the message should be read aloud by Discord or not.</param>
         /// <param name="embed">The <see cref="EmbedType.Rich"/> <see cref="Embed"/> to be sent or edited.</param>
         /// <param name="options">The options to be used when sending the request.</param>
@@ -310,7 +310,7 @@ namespace Fergun.Services
         /// Specifies if notifications are sent for mentioned users and roles in the message <paramref name="text"/>. If <c>null</c>, all mentioned roles and users will be notified.
         /// </param>
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
-        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null)
+        protected override async Task<IUserMessage> ReplyAsync(string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null)
         {
             IUserMessage response;
             bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
@@ -318,7 +318,7 @@ namespace Fergun.Services
             {
                 await response.ModifyAsync(x =>
                 {
-                    x.Content = message;
+                    x.Content = text;
                     x.Embed = embed;
                 }).ConfigureAwait(false);
 
@@ -326,7 +326,7 @@ namespace Fergun.Services
             }
             else
             {
-                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions).ConfigureAwait(false);
+                response = await Context.Channel.SendMessageAsync(text, isTTS, embed, options, allowedMentions).ConfigureAwait(false);
                 Cache.Add(Context.Message, response);
             }
             return response;

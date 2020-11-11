@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Fergun.APIs.OpenTriviaDB;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
@@ -19,43 +21,11 @@ using Fergun.Utils;
 namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Other : FergunBase
     {
-        private static readonly string[] categories = {
-            "general_knowledge",
-            "books",
-            "film",
-            "music",
-            "musicals_theatres",
-            "television",
-            "video_games",
-            "board_games",
-            "science",
-            "computers",
-            "mathematics",
-            "mythology",
-            "sports",
-            "geography",
-            "history",
-            "politics",
-            "art",
-            "celebrities",
-            "animals",
-            "vehicles",
-            "comics",
-            "gadgets",
-            "anime",
-            "cartoons"
-        };
-
-        private static readonly string[] difficulties = { "Any", "easy", "medium", "hard" };
-
-        private static readonly string[] responseCodes = { "Success", "No Results", "Invalid Parameter", "Token Not Found", "Token Empty", "Unknown Error" };
-
-        //[ThreadStatic]
-        //private static Random _rngInstance;
-
+        private static readonly string[] triviaCategories = Enum.GetNames(typeof(QuestionCategory)).Select(x => x.ToLowerInvariant()).Skip(1).ToArray();
+        private static readonly string[] triviaDifficulties = Enum.GetNames(typeof(QuestionDifficulty)).Select(x => x.ToLowerInvariant()).ToArray();
         private static CommandService _cmdService;
         private static LogService _logService;
 
@@ -64,8 +34,6 @@ namespace Fergun.Modules
             _cmdService ??= commands;
             _logService ??= logService;
         }
-
-        //private static Random RngInstance => _rngInstance ??= new Random();
 
         [Command("changelog")]
         [Summary("changelogSummary")]
@@ -126,7 +94,7 @@ namespace Fergun.Modules
             foreach (var pair in stats)
             {
                 string command = $"{i}. {Format.Code(pair.Key)}: {pair.Value}\n";
-                if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength)
+                if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength / 2)
                 {
                     pages.Add(new EmbedBuilder { Description = current });
                     current = command;
@@ -145,10 +113,11 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
+            string creationDate = Context.Client.CurrentUser.CreatedAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture);
 
             var pager = new PaginatedMessage()
             {
-                Title = Locate("CommandStatsInfo"),
+                Title = string.Format(Locate("CommandStatsInfo"), creationDate),
                 Pages = pages,
                 Color = new Color(FergunConfig.EmbedColor),
                 Options = new PaginatorAppearanceOptions()
@@ -293,50 +262,43 @@ namespace Fergun.Modules
             bool hasReacted = false;
             IUserMessage message = null;
             string languages = "";
-            for (int i = 0; i < FergunClient.Languages.Count; i++)
+            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
+            EmbedBuilder builder = null;
+            int i = 0;
+            foreach (var language in FergunClient.Languages)
             {
-                var culture = FergunClient.Languages.Values.ElementAt(i);
-                languages += $"{i + 1}. {Format.Bold(culture.EnglishName)} ({culture.NativeName})\n";
+                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleLanguageUpdateAsync(language.Key)));
+                languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
+                i++;
             }
 
-            var builder = new EmbedBuilder()
+            builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
                 .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
                 .WithColor(FergunConfig.EmbedColor);
 
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
+                async (context) => await HandleLanguageUpdateAsync(null)).AddCallbacks(callbacks);
+
+            message = await InlineReactionReplyAsync(data);
+
+            return FergunResult.FromSuccess();
+
             async Task HandleLanguageUpdateAsync(string newLanguage)
             {
-                if (hasReacted || guild.Language == newLanguage)
+                if (hasReacted || guild.Language == newLanguage) return;
+                hasReacted = true;
+                if (newLanguage == null)
                 {
+                    await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
                     return;
                 }
-                hasReacted = true;
                 guild.Language = newLanguage;
                 FergunClient.Database.UpdateRecord("Guilds", guild);
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
                 await message.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
             }
-
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
-                async (_) =>
-                {
-                    if (!hasReacted)
-                    {
-                        await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
-                    }
-                });
-
-            for (int i = 0; i < FergunClient.Languages.Count; i++)
-            {
-                // "i" doesn't work
-                int index = i;
-                data.AddCallBack(new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) => await HandleLanguageUpdateAsync(FergunClient.Languages.Keys.ElementAt(index)));
-            }
-
-            message = await InlineReactionReplyAsync(data);
-
-            return FergunResult.FromSuccess();
         }
 
         [AlwaysEnabled]
@@ -526,7 +488,7 @@ namespace Fergun.Modules
             {
                 version += "-dev";
             }
-            var elapsed = DateTime.UtcNow - FergunClient.Uptime; //process.StartTime.ToUniversalTime();
+            var elapsed = DateTime.UtcNow - FergunClient.Uptime;
 
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Stats")
@@ -624,7 +586,7 @@ namespace Fergun.Modules
             if (category == "categories")
             {
                 builder.WithTitle(Locate("CategoryList"))
-                    .WithDescription(string.Join("\n", categories))
+                    .WithDescription(string.Join("\n", triviaCategories))
                     .WithColor(FergunConfig.EmbedColor);
 
                 await ReplyAsync(embed: builder.Build());
@@ -682,7 +644,7 @@ namespace Fergun.Modules
             int index = 0;
             if (category != null)
             {
-                index = Array.FindIndex(categories, x => x == category);
+                index = Array.FindIndex(triviaCategories, x => x == category);
                 if (index <= -1)
                 {
                     index = 0;
@@ -692,7 +654,7 @@ namespace Fergun.Modules
 
             if (trivia.ResponseCode != 0)
             {
-                return FergunResult.FromError(trivia.ResponseCode == 4 ? Locate("AllQuestionsAnswered") : $"{Locate("TriviaError")} {trivia.ResponseCode}: {responseCodes[trivia.ResponseCode]}");
+                return FergunResult.FromError(trivia.ResponseCode == 4 ? Locate("AllQuestionsAnswered") : $"{Locate("TriviaError")} {trivia.ResponseCode}: {(ResponseCode)trivia.ResponseCode}");
             }
             var question = trivia.Questions[0];
 
@@ -703,16 +665,44 @@ namespace Fergun.Modules
 
             options.Shuffle();
 
-            string optionsText = "";
-            for (int i = 0; i < options.Count; i++)
-                optionsText += $"{i + 1}. {Uri.UnescapeDataString(options[i])}\n";
-            bool hasReacted = false;
             IUserMessage message = null;
+            bool hasReacted = false;
+            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
+            string optionsText = "";
+            int i = 0;
+            foreach (string option in options)
+            {
+                optionsText += $"{i + 1}. {Uri.UnescapeDataString(options[i])}\n";
+                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleTriviaReactionAsync(option)));
+                i++;
+            }
+
+            int time = (Array.IndexOf(triviaDifficulties, question.Difficulty) * 5) + (question.Type == "multiple" ? 10 : 5);
+
+            builder.WithAuthor(Context.User)
+               .WithTitle("Trivia")
+               .AddField(Locate("Category"), Uri.UnescapeDataString(question.Category), true)
+               .AddField(Locate("Type"), Uri.UnescapeDataString(question.Type), true)
+               .AddField(Locate("Difficulty"), Uri.UnescapeDataString(question.Difficulty), true)
+               .AddField(Locate("Question"), Uri.UnescapeDataString(question.Question))
+               .AddField(Locate("Options"), optionsText)
+               .WithFooter(string.Format(Locate("TimeLeft"), time))
+               .WithColor(FergunConfig.EmbedColor);
+
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
+                async (context) => await HandleTriviaReactionAsync(null)).AddCallbacks(callbacks);
+
+            message = await InlineReactionReplyAsync(data);
+
+            return FergunResult.FromSuccess();
 
             async Task HandleTriviaReactionAsync(string option)
             {
+                if (hasReacted) return;
+                hasReacted = true;
+
                 builder = new EmbedBuilder();
-                if (option == "__none")
+                if (option == null)
                 {
                     currentPlayer.Points--;
                     builder.Title = $"❌ {Locate("TimesUp")}";
@@ -731,54 +721,19 @@ namespace Fergun.Modules
                     builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
                 }
 
-                builder.WithFooter($"{Locate("Points")}: {currentPlayer.Points}");
-                builder.WithColor(FergunConfig.EmbedColor);
+                builder.WithFooter($"{Locate("Points")}: {currentPlayer.Points}")
+                    .WithColor(FergunConfig.EmbedColor);
+
                 FergunClient.Database.UpdateRecord("TriviaStats", currentPlayer);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
             }
-
-            int time = (Array.IndexOf(difficulties, question.Difficulty) * 5) + (question.Type == "multiple" ? 10 : 5);
-
-            builder.WithAuthor(Context.User)
-               .WithTitle("Trivia")
-               .AddField(Locate("Category"), Uri.UnescapeDataString(question.Category), true)
-               .AddField(Locate("Type"), Uri.UnescapeDataString(question.Type), true)
-               .AddField(Locate("Difficulty"), Uri.UnescapeDataString(question.Difficulty), true)
-               .AddField(Locate("Question"), Uri.UnescapeDataString(question.Question))
-               .AddField(Locate("Options"), optionsText)
-               .WithFooter(string.Format(Locate("TimeLeft"), time))
-               .WithColor(FergunConfig.EmbedColor);
-
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
-                async (_) =>
-                {
-                    if (!hasReacted)
-                    {
-                        await HandleTriviaReactionAsync("__none");
-                    }
-                });
-
-            for (int i = 0; i < options.Count; i++)
-            {
-                // i have to pass the option to a temp var because passing the value directly throws ArgumentOutOfRangeException for some reason
-                string option = options[i];
-                data.AddCallBack(new Emoji($"{i + 1}\ufe0f\u20e3"), async (_, _1) =>
-                {
-                    hasReacted = true;
-                    await HandleTriviaReactionAsync(option);
-                });
-            }
-
-            message = await InlineReactionReplyAsync(data);
-
-            return FergunResult.FromSuccess();
         }
 
         [Command("uptime")]
         [Summary("uptimeSummary")]
         public async Task Uptime()
         {
-            var elapsed = DateTime.UtcNow - FergunClient.Uptime; //Process.GetCurrentProcess().StartTime.ToUniversalTime();
+            var elapsed = DateTime.UtcNow - FergunClient.Uptime;
 
             var builder = new EmbedBuilder
             {
@@ -792,19 +747,26 @@ namespace Fergun.Modules
 
         [Command("vote")]
         [Summary("voteSummary")]
-        public async Task Vote()
+        public async Task<RuntimeResult> Vote()
         {
             if (FergunClient.IsDebugMode)
             {
-                await ReplyAsync("No");
-                return;
+                //return FergunResult.FromError("No");
             }
+            if (FergunClient.DblBotPage == null)
+            {
+                return FergunResult.FromError(Locate("NowhereToVote"));
+            }
+
             var builder = new EmbedBuilder
             {
                 Description = string.Format(Locate("Vote"), $"{FergunClient.DblBotPage}/vote"),
                 Color = new Color(FergunConfig.EmbedColor)
             };
+
             await ReplyAsync(embed: builder.Build());
+
+            return FergunResult.FromSuccess();
         }
     }
 }

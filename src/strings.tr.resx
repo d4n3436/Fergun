@@ -1970,7 +1970,7 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 - AI Dungeon modülünde, aynı anda farklı kimlikler kullanıldığında komutların başarısız olmasına neden olan bir hata düzeltildi.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-    <value>Komut İstatistikler (02/21/2020 beri)</value>
+    <value>Komut İstatistikler ({0} beri)</value>
   </data>
 	<data name="lmgtfySummary" xml:space="preserve">
     <value>Bunu senin için Google'da arayalım.</value>
@@ -2184,5 +2184,8 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	</data>
 	<data name="ErrorDetails" xml:space="preserve">
 		<value>Hata detayları</value>
+	</data>
+	<data name="NowhereToVote" xml:space="preserve">
+		<value>Oy verecek yer yok.</value>
 	</data>
 </root>

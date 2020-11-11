@@ -1970,7 +1970,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ошибка в модуле AI Dungeon, которая приводила к сбою команд при одновременном использовании разных идентификаторов.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-    <value>Команда Статистика (с 02/21/2020)</value>
+    <value>Команда Статистика (с {0})</value>
   </data>
 	<data name="lmgtfySummary" xml:space="preserve">
     <value>Позвольте мне Google, что для Вас.</value>
@@ -2184,5 +2184,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	</data>
 	<data name="ErrorDetails" xml:space="preserve">
 		<value>Детали ошибки</value>
+	</data>
+	<data name="NowhereToVote" xml:space="preserve">
+		<value>Голосовать негде.</value>
 	</data>
 </root>

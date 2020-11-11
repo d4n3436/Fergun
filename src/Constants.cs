@@ -28,8 +28,6 @@ namespace Fergun
             "1.4"
         };
 
-        public const double GlobalRatelimitPeriod = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
-
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
             MessageCacheSize = 100,
@@ -108,6 +106,10 @@ namespace Fergun
         /// </summary>
         public const int AttachmentSizeLimit = 8 * 1024 * 1024;
 
+        public const double GlobalRatelimitPeriod = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
+
+        public const int GlobalCommandUsesPerPeriod = 3;
+
         public const double DefaultIgnoreTime = 0.6;
 
         public const double MentionIgnoreTime = 1;
@@ -133,6 +135,8 @@ namespace Fergun
         public const string DefaultLanguage = "en";
 
         public const uint DefaultEmbedColor = 16750877;
+
+        public const int MaxTracksToDisplay = 10;
 
         // Command config defaults
         public const bool CaptionbotAutoTranslateDefault = true;

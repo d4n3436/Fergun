@@ -19,7 +19,7 @@ using Victoria.Enums;
 namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Ratelimit(3, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [UserMustBeInVoice("lyrics", ErrorMessage = "UserNotInVC")]
     public class Music : FergunBase
     {
@@ -137,21 +137,6 @@ namespace Fergun.Modules
             var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
             string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
-            /*
-            var pages = new List<EmbedBuilder>();
-            foreach (var item in splitLyrics)
-            {
-                pages.Add(new EmbedBuilder
-                {
-                    Description = item,
-                    Fields = new List<EmbedFieldBuilder>()
-                    {
-                        new EmbedFieldBuilder { Name = "Links", Value = links }
-                    },
-                });
-            }
-            */
-
             string title = genius.Response.Hits[0].Result.FullTitle;
             var pager = new PaginatedMessage
             {
@@ -217,8 +202,7 @@ namespace Fergun.Modules
                 if (trackSelection)
                 {
                     string list = "";
-                    // Limit to 10, for now
-                    int count = Math.Min(10, tracks.Count);
+                    int count = Math.Min(Constants.MaxTracksToDisplay, tracks.Count);
 
                     for (int i = 0; i < count; i++)
                     {
@@ -329,26 +313,5 @@ namespace Fergun.Modules
         {
             await SendEmbedAsync(await _musicService.SetVolumeAsync(volume, Context.Guild, Context.Channel as ITextChannel));
         }
-
-        //[Command("artwork")]
-        //[Summary("artworkSummary")]
-        //public async Task Artwork()
-        //{
-        //
-        //    (bool success, string message) = await _musicService.GetArtworkAsync(Context.Guild);
-        //    if (!success)
-        //    {
-        //        await SendEmbedAsync(message);
-        //    }
-        //    else
-        //    {
-        //        EmbedBuilder builder = new EmbedBuilder()
-        //            .WithTitle("Artwork")
-        //            .WithImageUrl(message)
-        //            .WithColor(FergunConfig.EmbedColor);
-
-        //        await ReplyAsync(embed: builder.Build());
-        //    }
-        //}
     }
 }

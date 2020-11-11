@@ -58,4 +58,13 @@
         Request,
         Reset
     }
+
+    public enum ResponseCode
+    {
+        Success,
+        NoResults,
+        InvalidParameter,
+        TokenNotFound,
+        TokenEmpty
+    }
 }

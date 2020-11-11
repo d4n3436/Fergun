@@ -36,7 +36,7 @@ namespace Fergun
         public static DateTime Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
         public static string DblBotPage { get; private set; }
-        public static string InviteLink { get; set; }
+        public static string InviteLink { get; private set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static ReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }

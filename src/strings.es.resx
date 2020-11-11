@@ -1972,7 +1972,7 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 - Arreglado  un error en el módulo AI Dungeon que causaba que los comandos fallasen cuando se usaban diferentes IDs al mismo tiempo.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-    <value>Command stats (desde 21/02/2020)</value>
+    <value>Command stats (desde {0})</value>
   </data>
 	<data name="lmgtfySummary" xml:space="preserve">
     <value>Permíteme que use Google por ti.</value>
@@ -2186,5 +2186,8 @@ Por favor inténtelo de nuevo más tarde.</value>
 	</data>
 	<data name="ErrorDetails" xml:space="preserve">
 		<value>Detalles del error</value>
+	</data>
+	<data name="NowhereToVote" xml:space="preserve">
+		<value>No hay ningún lugar para votar.</value>
 	</data>
 </root>

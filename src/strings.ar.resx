@@ -1982,7 +1982,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - تم إصلاح الخلل في وحدة AI Dungeon التي تسببت في فشل الأوامر عند استخدام معرفات مختلفة في نفس الوقت.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-    <value>إحصائيات الأوامر (منذ 2020/02/21)</value>
+    <value>إحصائيات الأوامر (منذ {0})</value>
   </data>
 	<data name="lmgtfySummary" xml:space="preserve">
     <value>اسمحوا لي أن جوجل ذلك لك.</value>
@@ -2196,5 +2196,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="ErrorDetails" xml:space="preserve">
 		<value>تفاصيل الخطأ</value>
+	</data>
+	<data name="NowhereToVote" xml:space="preserve">
+		<value>لا يوجد مكان للتصويت.</value>
 	</data>
 </root>

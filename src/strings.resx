@@ -1988,7 +1988,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug in the AI Dungeon module that caused the commands to fail when different IDs were used at the same time.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
-    <value>Command stats (since 02/21/2020)</value>
+    <value>Command stats (since {0})</value>
   </data>
 	<data name="lmgtfySummary" xml:space="preserve">
     <value>Let me Google that for you.</value>
@@ -2187,5 +2187,8 @@ Please try again later.</value>
 	</data>
 	<data name="ErrorDetails" xml:space="preserve">
 		<value>Error Details</value>
+	</data>
+	<data name="NowhereToVote" xml:space="preserve">
+		<value>There's nowhere to vote.</value>
 	</data>
 </root>
