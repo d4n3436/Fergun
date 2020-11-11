@@ -9,15 +9,20 @@ namespace Fergun.Utils
     public static class GuildUtils
     {
         /// <summary>
-        /// This prefix may not be updated if its value has been changed externally.
+        /// Gets or sets the cached global prefix.
         /// </summary>
+        /// <remarks>This prefix may not be up-to-date if its value is modified externally.</remarks>
         public static string CachedGlobalPrefix { get; set; }
 
         /// <summary>
-        /// These prefixes may not be updated if their values has been changed externally.
+        /// Gets or sets the guild prefix cache.
         /// </summary>
+        /// <remarks>These prefixes may not be up-to-date if their values are modified externally.</remarks>
         public static ConcurrentDictionary<ulong, string> PrefixCache { get; private set; }
 
+        /// <summary>
+        /// Initializes the prefix cache.
+        /// </summary>
         public static void Initialize()
         {
             CachedGlobalPrefix = FergunConfig.GlobalPrefix;
@@ -25,9 +30,19 @@ namespace Fergun.Utils
             PrefixCache = new ConcurrentDictionary<ulong, string>(guilds?.ToDictionary(x => x.ID, x => x.Prefix) ?? new Dictionary<ulong, string>());
         }
 
+        /// <summary>
+        /// Returns a cached prefix corresponding to the specified channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The cached prefix of the channel.</returns>
         public static string GetCachedPrefix(IMessageChannel channel)
             => channel.IsPrivate() ? CachedGlobalPrefix : PrefixCache.GetValueOrDefault(((IGuildChannel)channel).GuildId, CachedGlobalPrefix) ?? CachedGlobalPrefix;
 
+        /// <summary>
+        /// Returns the configuration of a guild using the specified channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The configuration of the guild, or <c>null</c> if the guild cannot be found in the database.</returns>
         public static GuildConfig GetGuildConfig(IMessageChannel channel)
         {
             if (channel.IsPrivate())
@@ -37,21 +52,53 @@ namespace Fergun.Utils
             return GetGuildConfig(((IGuildChannel)channel).GuildId);
         }
 
+        /// <summary>
+        /// Returns the configuration of the specified guild Id.
+        /// </summary>
+        /// <param name="guildId">The Id of the guild.</param>
+        /// <returns>The configuration of the guild, or <c>null</c> if the guild cannot be found in the database.</returns>
         public static GuildConfig GetGuildConfig(ulong guildId)
             => FergunClient.Database.Find<GuildConfig>("Guilds", x => x.ID == guildId);
 
+        /// <summary>
+        /// Returns the configuration of the specified guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <returns>The configuration of the guild, or <c>null</c> if the guild cannot be found in the database.</returns>
         public static GuildConfig GetGuildConfig(IGuild guild)
             => GetGuildConfig(guild.Id);
 
+        /// <summary>
+        /// Returns the prefix of the specified channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The prefix of the channel.</returns>
         public static string GetPrefix(IMessageChannel channel)
             => GetGuildConfig(channel)?.Prefix ?? FergunConfig.GlobalPrefix;
 
+        /// <summary>
+        /// Returns the language of the specified channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The language of the channel.</returns>
         public static string GetLanguage(IMessageChannel channel)
             => GetGuildConfig(channel)?.Language ?? FergunConfig.Language ?? Constants.DefaultLanguage;
 
+        /// <summary>
+        /// Returns the localized value of a resource key in a channel.
+        /// </summary>
+        /// <param name="key">The resource key to localize.</param>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The localized text, or <paramref name="key"/> if the value cannot be found.</returns>
         public static string Locate(string key, IMessageChannel channel)
             => Locate(key, GetLanguage(channel));
 
+        /// <summary>
+        /// Returns the localized value of a resource key in the specified language.
+        /// </summary>
+        /// <param name="key">The resource key to localize.</param>
+        /// <param name="language">The language to localize the resource key.</param>
+        /// <returns>The localized text, or <paramref name="key"/> if the value cannot be found.</returns>
         public static string Locate(string key, string language)
             => strings.ResourceManager.GetString(key, FergunClient.Languages.GetValueOrDefault(language, FergunClient.Languages[Constants.DefaultLanguage])) ?? key;
     }

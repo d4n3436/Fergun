@@ -5,10 +5,16 @@
     /// </summary>
     public class ReactionList
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReactionList"/> class with the default values.
+        /// </summary>
         public ReactionList()
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReactionList"/> class with the provided values.
+        /// </summary>
         public ReactionList(bool first, bool last, bool forward, bool backward, bool jump, bool stop, bool info)
         {
             First = first;
@@ -29,12 +35,12 @@
         public bool Info { get; set; }
 
         /// <summary>
-        /// Returns a reaction list with the default settings.
+        /// Gets a reaction list with the default settings.
         /// </summary>
         public static ReactionList Default => new ReactionList();
 
         /// <summary>
-        /// Returns a reaction list with all reactions enabled.
+        /// Gets a reaction list with all reactions enabled.
         /// </summary>
         public static ReactionList All => new ReactionList(true, true, true, true, true, true, true);
     }

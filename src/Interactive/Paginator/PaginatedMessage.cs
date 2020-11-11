@@ -1,136 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Discord;
 
 namespace Fergun.Interactive
 {
     /// <summary>
-    /// The paginated message.
+    /// Represents a paginated message.
     /// </summary>
-    public class PaginatedMessage
+    public class PaginatedMessage : EmbedBuilder
     {
         /// <summary>
-        /// Gets or sets the pages.
+        /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
         /// </summary>
-        public IEnumerable<PaginatorPage> Pages { get; set; } = new List<PaginatorPage>();
+        public PaginatedMessage() : base()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the content.
+        /// Gets or sets the pages. The embeds in this collection will override the base embed.
         /// </summary>
-        public string Content { get; set; } = string.Empty;
+        public IEnumerable<EmbedBuilder> Pages { get; set; } = new List<EmbedBuilder>();
 
         /// <summary>
-        /// Gets or sets the author.
+        /// Gets or sets the paginator message.
         /// </summary>
-        public EmbedAuthorBuilder Author { get; set; }
+        public string Text { get; set; }
 
         /// <summary>
-        /// Gets or sets the title.
+        /// Gets or sets the paginator options.
         /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Gets or sets the url.
-        /// </summary>
-        public string Url { get; set; }
-
-        /// <summary>
-        /// Gets or sets the description.
-        /// </summary>
-        public string Description { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the image url.
-        /// </summary>
-        public string ImageUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the thumbnail url.
-        /// </summary>
-        public string ThumbnailUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the fields.
-        /// </summary>
-        public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
-
-        /// <summary>
-        /// Gets or sets the footer override.
-        /// </summary>
-        public EmbedFooterBuilder FooterOverride { get; set; }
-
-        /// <summary>
-        /// Gets or sets the time stamp.
-        /// </summary>
-        public DateTimeOffset? TimeStamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the color.
-        /// </summary>
-        public Color Color { get; set; } = Color.Default;
-
-        /// <summary>
-        /// Gets or sets the options.
-        /// </summary>
-        public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
+        public PaginatorAppearanceOptions Options { get; set; } = PaginatorAppearanceOptions.Default;
     }
-
-    /// <summary>
-    /// The page.
-    /// </summary>
-    public class PaginatorPage
-    {
-        // All content in here will override the 'Default' Paginated content
-
-        /// <summary>
-        /// Gets or sets the author.
-        /// </summary>
-        public EmbedAuthorBuilder Author { get; set; }
-
-        /// <summary>
-        /// Gets or sets the title.
-        /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Gets or sets the url.
-        /// </summary>
-        public string Url { get; set; }
-
-        /// <summary>
-        /// Gets or sets the description.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets the image url.
-        /// </summary>
-        public string ImageUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the thumbnail url.
-        /// </summary>
-        public string ThumbnailUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the fields.
-        /// </summary>
-        public List<EmbedFieldBuilder> Fields { get; set; } = new List<EmbedFieldBuilder>();
-
-        /// <summary>
-        /// Gets or sets the footer override.
-        /// </summary>
-        public EmbedFooterBuilder FooterOverride { get; set; }
-
-        /// <summary>
-        /// Gets or sets the time stamp.
-        /// </summary>
-        public DateTimeOffset? TimeStamp { get; set; }
-
-        /// <summary>
-        /// Gets or sets the color.
-        /// </summary>
-        public Color? Color { get; set; }
-    }
-
 }

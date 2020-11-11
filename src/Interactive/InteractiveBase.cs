@@ -6,9 +6,7 @@ using Discord.WebSocket;
 
 namespace Fergun.Interactive
 {
-    /// <summary>
-    /// The interactive base.
-    /// </summary>
+    /// <inheritdoc/>
     public class InteractiveBase : InteractiveBase<SocketCommandContext>
     {
     }
@@ -16,8 +14,6 @@ namespace Fergun.Interactive
     /// <summary>
     /// The interactive base.
     /// </summary>
-    /// <typeparam name="T">
-    /// </typeparam>
     public class InteractiveBase<T> : ModuleBase<T>
         where T : SocketCommandContext
     {
@@ -28,7 +24,8 @@ namespace Fergun.Interactive
 
         public Task<SocketMessage> NextMessageAsync(ICriterion<SocketMessage> criterion, TimeSpan? timeout = null)
             => Interactive.NextMessageAsync(Context, criterion, timeout);
-        public Task<SocketMessage> NextMessageAsync(bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null) 
+
+        public Task<SocketMessage> NextMessageAsync(bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null)
             => Interactive.NextMessageAsync(Context, fromSourceUser, inSourceChannel, timeout);
 
         public Task<IUserMessage> ReplyAndDeleteAsync(string content, bool isTTS = false, Embed embed = null, TimeSpan? timeout = null, RequestOptions options = null)
@@ -44,6 +41,7 @@ namespace Fergun.Interactive
                 criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
             return PagedReplyAsync(pager, criterion, Reactions);
         }
+
         public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketReaction> criterion, ReactionList Reactions)
             => Interactive.SendPaginatedMessageAsync(Context, pager, Reactions, criterion);
 

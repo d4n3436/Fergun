@@ -7,8 +7,6 @@ namespace Fergun.Interactive
 {
     public interface IReactionCallback
     {
-        RunMode RunMode { get; }
-
         ICriterion<SocketReaction> Criterion { get; }
 
         TimeSpan? Timeout { get; }

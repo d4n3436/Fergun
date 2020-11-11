@@ -1,14 +1,13 @@
-﻿using Discord;
-using Discord.Commands;
-using Discord.Net;
-using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 
 namespace Fergun.Services
 {
@@ -28,7 +27,7 @@ namespace Fergun.Services
         private readonly double _maxMessageTime;
 
         /// <summary>
-        /// Initialises the cache with a maximum capacity, tracking the client's message deleted event, and optionally the client's message modified event.
+        /// Initializes the cache with a maximum capacity, tracking the client's message deleted event, and optionally the client's message modified event.
         /// </summary>
         /// <param name="client">The client that the MessageDeleted handler should be hooked up to.</param>
         /// <param name="capacity">The maximum capacity of the cache.</param>
@@ -49,35 +48,33 @@ namespace Fergun.Services
             _cmdHandler = cmdHandler ?? (_ => Task.CompletedTask);
             _logger = logger ?? (_ => Task.CompletedTask);
 
-            // Make sure the max capacity is within an acceptable range, use it if it is.
+            // Make sure the max capacity is within an acceptable range.
             if (capacity < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(capacity), capacity, "Capacity can not be lower than 1.");
             }
-            else
-            {
-                _max = capacity;
-            }
+
+            _max = capacity;
             _maxMessageTime = maxMessageTime;
 
             // Create a timer that will clear out cached messages.
             _autoClear = new Timer(OnTimerFired, null, period, period);
 
-            _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"Service initialised, MessageDeleted and OnMessageModified event handlers registered."));
+            _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"Service initialized, MessageDeleted and OnMessageModified event handlers registered."));
         }
 
         /// <summary>
         /// Gets all the keys in the cache. Will claim all locks until the operation is complete.
         /// </summary>
-        public IEnumerable<ulong> Keys => _cache.Keys;
+        public ICollection<ulong> Keys => _cache.Keys;
 
         /// <summary>
         /// Gets all the values in the cache. Will claim all locks until the operation is complete.
         /// </summary>
-        public IEnumerable<ulong> Values => _cache.Values;
+        public ICollection<ulong> Values => _cache.Values;
 
         /// <summary>
-        /// Gets the number of command/response sets in the cache.
+        /// Gets the number of command/response pairs in the cache.
         /// </summary>
         public int Count => _count;
 
@@ -86,7 +83,6 @@ namespace Fergun.Services
         /// </summary>
         /// <param name="key">The id of the command message.</param>
         /// <param name="value">The ids of the response messages.</param>
-        /// <exception cref="ArgumentNullException">Thrown if values is null.</exception>
         public void Add(ulong key, ulong value)
         {
             if (_count >= _max)
@@ -117,16 +113,16 @@ namespace Fergun.Services
         }
 
         /// <summary>
-        /// Adds a new set to the cache, or extends the existing values if the key already exists.
+        /// Adds a new command/response pair to the cache, or updates the value if the key already exists.
         /// </summary>
-        /// <param name="pair">The key, and its values.</param>
+        /// <param name="pair">The command/response pair.</param>
         public void Add(KeyValuePair<ulong, ulong> pair) => Add(pair.Key, pair.Value);
 
         /// <summary>
-        /// Adds a command message and response to the cache using the message objects.
+        /// Adds a command message and response to the cache.
         /// </summary>
-        /// <param name="command">The message that invoked the command.</param>
-        /// <param name="response">The response to the command message.</param>
+        /// <param name="command">The command message.</param>
+        /// <param name="response">The response message.</param>
         public void Add(IUserMessage command, IUserMessage response) => Add(command.Id, response.Id);
 
         /// <summary>
@@ -204,7 +200,7 @@ namespace Fergun.Services
 
         private void OnTimerFired(object state)
         {
-            // Get all messages where the timestamp is older than 2 hours, then convert it to a list. The result of where merely contains references to the original
+            // Get all messages where the timestamp is older than the specified max message longevity, then convert it to a list. The result of where merely contains references to the original
             // collection, so iterating and removing will throw an exception. Converting it to a list first avoids this.
             var purge = _cache.Where(p =>
             {
@@ -224,9 +220,9 @@ namespace Fergun.Services
         {
             _ = Task.Run(async () =>
             {
-                if (TryGetValue(cacheable.Id, out ulong messageId))
+                if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
-                    var message = await channel.GetMessageAsync(messageId);
+                    var message = await channel.GetMessageAsync(responseId);
                     if (message != null)
                     {
                         await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Command message ({cacheable.Id}) deleted. Deleting the response..."));
@@ -234,7 +230,7 @@ namespace Fergun.Services
                     }
                     else
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Command message ({cacheable.Id}) deleted but the response ({messageId}) was already deleted."));
+                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Command message ({cacheable.Id}) deleted but the response ({responseId}) was already deleted."));
                     }
                     TryRemove(cacheable.Id);
                 }
@@ -264,22 +260,22 @@ namespace Fergun.Services
                     {
                         if (response.Attachments.Count > 0)
                         {
-                            await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Attachment found on response ({responseId}). Deleting the response..."));
+                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Attachment found on response ({responseId}). Deleting the response..."));
                             _ = response.DeleteAsync();
                             TryRemove(cacheable.Id);
                         }
                         else
                         {
-                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message {cacheable.Id} in cache."));
+                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message ({cacheable.Id}) in cache."));
                             if (response.Reactions.Count > 0)
                             {
                                 bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
 
-                                // RemoveReactionsAsync() is slow...
                                 if (manageMessages)
+                                {
+                                    await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Removing all reactions from response ({responseId})..."));
                                     await response.RemoveAllReactionsAsync();
-                                else
-                                    await (response as IUserMessage).RemoveReactionsAsync(response.Author, response.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray());
+                                }
                             }
                         }
                     }
@@ -291,10 +287,16 @@ namespace Fergun.Services
         }
     }
 
+    /// <summary>
+    /// The command cache module base.
+    /// </summary>
+    /// <typeparam name="TCommandContext">The <see cref="ICommandContext"/> implementation.</typeparam>
     public abstract class CommandCacheModuleBase<TCommandContext> : ModuleBase<TCommandContext>
         where TCommandContext : class, ICommandContext
     {
-
+        /// <summary>
+        /// Gets or sets the command cache service.
+        /// </summary>
         public CommandCacheService Cache { get; set; }
 
         /// <summary>
@@ -351,12 +353,15 @@ namespace Fergun.Services
         public static async Task<IUserMessage> SendCachedFileAsync(this IMessageChannel channel, CommandCacheService cache, ulong commandId, Stream stream, string filename,
             string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, bool isSpoiler = false, AllowedMentions allowedMentions = null)
         {
-            var response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions);
-
-            if (cache.ContainsKey(commandId))
+            IUserMessage response;
+            bool found = cache.TryGetValue(commandId, out ulong responseId);
+            if (found && (response = (IUserMessage)await channel.GetMessageAsync(responseId)) != null)
             {
-                cache.TryRemove(commandId);
+                await response.DeleteAsync();
             }
+
+            response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions);
+
             cache.Add(commandId, response.Id);
 
             return response;

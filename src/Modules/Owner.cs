@@ -198,15 +198,9 @@ namespace Fergun.Modules
             string value = returnValue.ToString();
             if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
-                var pages = new List<PaginatorPage>();
-
-                foreach (var item in value.SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10))
-                {
-                    pages.Add(new PaginatorPage()
-                    {
-                        Description = Format.Code(item.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md")
-                    });
-                }
+                var pages = value
+                    .SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10)
+                    .Select(x => new EmbedBuilder { Description = Format.Code(x.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md") });
 
                 var pager = new PaginatedMessage()
                 {
@@ -224,7 +218,7 @@ namespace Fergun.Modules
                         .WithValue(Format.Code(returnType, "md"))
                     },
                     Color = new Color(FergunConfig.EmbedColor),
-                    Options = new PaginatedAppearanceOptions()
+                    Options = new PaginatorAppearanceOptions()
                     {
                         FooterFormat = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}",
                         Timeout = TimeSpan.FromMinutes(10),

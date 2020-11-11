@@ -4,41 +4,9 @@ using Discord;
 namespace Fergun.Interactive
 {
     /// <summary>
-    /// Specifies the option to do when the jump reactions will be displayed.
+    /// Represents the paginator appearance options.
     /// </summary>
-    public enum JumpDisplayOption
-    {
-        Never,
-        WithManageMessages,
-        Always
-    }
-
-    /// <summary>
-    /// Specifies the action to do when the timeout is reached or the user reacts to the stop button (if present).
-    /// Regardless of the option, the hook/callback will be removed from the message.
-    /// </summary>
-    public enum ActionOnTimeout
-    {
-        /// <summary>
-        /// Remove the message.
-        /// </summary>
-        DeleteMessage,
-
-        /// <summary>
-        /// Remove the reactions.
-        /// </summary>
-        DeleteReactions,
-
-        /// <summary>
-        /// Remove the hook only.
-        /// </summary>
-        Nothing
-    }
-
-    /// <summary>
-    /// The paginated appearance options.
-    /// </summary>
-    public class PaginatedAppearanceOptions
+    public class PaginatorAppearanceOptions
     {
         /// <summary>
         /// Get or sets the emote that sends to the first page.
@@ -48,12 +16,12 @@ namespace Fergun.Interactive
         /// <summary>
         /// Get or sets the emote that sends to the previous page.
         /// </summary>
-        public IEmote Back { get; set; } = new Emoji("⬅"); //◀
+        public IEmote Back { get; set; } = new Emoji("⬅");
 
         /// <summary>
         /// Get or sets the emote that sends to the next page.
         /// </summary>
-        public IEmote Next { get; set; } = new Emoji("➡"); //▶
+        public IEmote Next { get; set; } = new Emoji("➡");
 
         /// <summary>
         /// Get or sets the emote that sends to the last page.
@@ -81,14 +49,9 @@ namespace Fergun.Interactive
         public string FooterFormat { get; set; } = "Page {0}/{1}";
 
         /// <summary>
-        /// Get or sets the information that will be shown when the <see cref="Info"/> emote is pressed.
+        /// Get or sets the information that will be displayed when the <see cref="Info"/> emote is pressed.
         /// </summary>
         public string InformationText { get; set; } = "This is a paginator. React with the respective icons to change page.";
-
-        /// <summary>
-        /// The display options for the <see cref="Jump"/> emote.
-        /// </summary>
-        public JumpDisplayOption JumpDisplayOptions { get; set; } = JumpDisplayOption.WithManageMessages;
 
         /// <summary>
         /// Get or sets the paginator timeout.
@@ -111,8 +74,30 @@ namespace Fergun.Interactive
         public ActionOnTimeout ActionOnStop { get; set; } = ActionOnTimeout.DeleteMessage;
 
         /// <summary>
-        /// Gets this class with the default settings.
+        /// Gets an instance of this class with the default settings.
         /// </summary>
-        public static PaginatedAppearanceOptions Default => new PaginatedAppearanceOptions();
+        public static PaginatorAppearanceOptions Default => new PaginatorAppearanceOptions();
+    }
+
+    /// <summary>
+    /// Specifies the action to do when the timeout is reached, or the user reacts to the stop button (if present).
+    /// </summary>
+    /// <remarks>Regardless of the option, the hook/callback will be removed from the message.</remarks>
+    public enum ActionOnTimeout
+    {
+        /// <summary>
+        /// Do nothing.
+        /// </summary>
+        Nothing,
+
+        /// <summary>
+        /// Delete the reactions.
+        /// </summary>
+        DeleteReactions,
+
+        /// <summary>
+        /// Delete the message.
+        /// </summary>
+        DeleteMessage,
     }
 }

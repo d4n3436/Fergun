@@ -19,13 +19,13 @@ namespace Fergun.Interactive
         /// Initializes a new instance of the <see cref="InlineReactionCallback"/> class.
         /// </summary>
         /// <param name="interactive">
-        /// The interactive.
+        /// The interactive service.
         /// </param>
         /// <param name="context">
         /// The context.
         /// </param>
         /// <param name="data">
-        /// The data.
+        /// The callback data.
         /// </param>
         /// <param name="criterion">
         /// The criterion.
@@ -36,17 +36,12 @@ namespace Fergun.Interactive
             ReactionCallbackData data,
             ICriterion<SocketReaction> criterion = null)
         {
-            this._interactive = interactive;
+            _interactive = interactive;
             Context = context;
-            this._data = data;
+            _data = data;
             Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
             Timeout = data.Timeout ?? TimeSpan.FromSeconds(30);
         }
-
-        /// <summary>
-        /// The run mode.
-        /// </summary>
-        public RunMode RunMode => RunMode.Sync;
 
         /// <summary>
         /// Gets the criterion.
@@ -69,7 +64,7 @@ namespace Fergun.Interactive
         public IUserMessage Message { get; private set; }
 
         /// <summary>
-        /// The display async.
+        /// Displays the message and the reactions.
         /// </summary>
         /// <returns>
         /// The <see cref="Task"/>.
@@ -96,7 +91,7 @@ namespace Fergun.Interactive
         }
 
         /// <summary>
-        /// handles callbacks (reactions from users)
+        /// Handles the callbacks (reactions from users).
         /// </summary>
         /// <param name="reaction">
         /// The reaction.

@@ -121,14 +121,14 @@ namespace Fergun.Modules
             var stats = FergunConfig.CommandStats.OrderByDescending(x => x.Value);
             int i = 1;
             string current = "";
-            var pages = new List<PaginatorPage>();
+            var pages = new List<EmbedBuilder>();
 
             foreach (var pair in stats)
             {
                 string command = $"{i}. {Format.Code(pair.Key)}: {pair.Value}\n";
                 if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength)
                 {
-                    pages.Add(new PaginatorPage { Description = current });
+                    pages.Add(new EmbedBuilder { Description = current });
                     current = command;
                 }
                 else
@@ -139,7 +139,7 @@ namespace Fergun.Modules
             }
             if (!string.IsNullOrEmpty(current))
             {
-                pages.Add(new PaginatorPage { Description = current });
+                pages.Add(new EmbedBuilder { Description = current });
             }
             if (pages.Count == 0)
             {
@@ -151,7 +151,7 @@ namespace Fergun.Modules
                 Title = Locate("CommandStatsInfo"),
                 Pages = pages,
                 Color = new Color(FergunConfig.EmbedColor),
-                Options = new PaginatedAppearanceOptions()
+                Options = new PaginatorAppearanceOptions()
                 {
                     FooterFormat = Locate("PaginatorFooter")
                 }

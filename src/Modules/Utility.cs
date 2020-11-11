@@ -707,7 +707,7 @@ namespace Fergun.Modules
                 })
                 .Select(x =>
                 {
-                    return new PaginatorPage()
+                    return new EmbedBuilder()
                     {
                         Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
                         ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
@@ -726,7 +726,7 @@ namespace Fergun.Modules
                 Description = Locate("ImageSearch"),
                 Pages = pages,
                 Color = new Discord.Color(FergunConfig.EmbedColor),
-                Options = new PaginatedAppearanceOptions()
+                Options = new PaginatorAppearanceOptions()
                 {
                     InformationText = Locate("PaginatorHelp"),
                     FooterFormat = Locate("PaginatorFooter"),
@@ -1420,23 +1420,22 @@ namespace Fergun.Modules
                     }
                 };
 
-                return new PaginatorPage()
+                return new EmbedBuilder()
                 {
                     Author = new EmbedAuthorBuilder { Name = $"{Locate("By")} {x.Author}" },
                     Title = x.Word.Truncate(EmbedBuilder.MaxTitleLength),
                     Description = definition,
                     Url = x.Permalink,
                     Fields = fields,
-                    TimeStamp = x.WrittenOn
+                    Timestamp = x.WrittenOn
                 };
             });
 
             var pager = new PaginatedMessage()
             {
-                //Title = result.Item2.First(),
                 Pages = pages,
                 Color = new Discord.Color(FergunConfig.EmbedColor),
-                Options = new PaginatedAppearanceOptions()
+                Options = new PaginatorAppearanceOptions()
                 {
                     FooterFormat = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")} - {Locate("PaginatorFooter")}",
                     Timeout = TimeSpan.FromMinutes(10),

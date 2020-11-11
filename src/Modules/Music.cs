@@ -125,7 +125,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(string.Format(Locate("LyricsNotFound"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
             }
- 
+
             string url = genius.Response.Hits[0].Result.Url;
             string lyrics = await CommandUtils.ParseGeniusLyricsAsync(url, keepHeaders);
 
@@ -137,10 +137,11 @@ namespace Fergun.Modules
             var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
             string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
-            var pages = new List<PaginatorPage>();
+            /*
+            var pages = new List<EmbedBuilder>();
             foreach (var item in splitLyrics)
             {
-                pages.Add(new PaginatorPage
+                pages.Add(new EmbedBuilder
                 {
                     Description = item,
                     Fields = new List<EmbedFieldBuilder>()
@@ -149,14 +150,16 @@ namespace Fergun.Modules
                     },
                 });
             }
+            */
 
             string title = genius.Response.Hits[0].Result.FullTitle;
             var pager = new PaginatedMessage
             {
                 Color = new Color(FergunConfig.EmbedColor),
                 Title = title.Truncate(EmbedBuilder.MaxTitleLength),
-                Pages = pages,
-                Options = new PaginatedAppearanceOptions
+                Fields = new List<EmbedFieldBuilder> { new EmbedFieldBuilder { Name = "Links", Value = links } },
+                Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x }),
+                Options = new PaginatorAppearanceOptions
                 {
                     FooterFormat = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}",
                     Timeout = TimeSpan.FromMinutes(10),
