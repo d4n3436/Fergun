@@ -99,6 +99,8 @@ namespace Fergun
 
         public const string DatabaseCredentialsFile = "dbcred.json";
 
+        public const string LavalinkConfigFile = "lavaconfig.json";
+
         public const string FergunDatabase = "FergunDB";
 
         /// <summary>

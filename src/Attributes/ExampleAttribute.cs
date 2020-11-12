@@ -8,10 +8,7 @@ namespace Fergun.Attributes
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     class ExampleAttribute : Attribute
     {
-        public string Example
-        {
-            get;
-        }
+        public string Example { get; }
 
         public ExampleAttribute(string example)
         {

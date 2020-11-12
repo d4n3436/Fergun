@@ -13,11 +13,11 @@ namespace Fergun.Utils
     {
         public static async Task<double> GetCpuUsageForProcessAsync()
         {
-            var startTime = DateTime.UtcNow;
+            var startTime = DateTimeOffset.UtcNow;
             var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
             await Task.Delay(500);
 
-            var endTime = DateTime.UtcNow;
+            var endTime = DateTimeOffset.UtcNow;
             var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
             var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
             var totalMsPassed = (endTime - startTime).TotalMilliseconds;

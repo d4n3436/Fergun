@@ -33,7 +33,7 @@ namespace Fergun
 #pragma warning restore CA1001
     {
         public static FergunDB Database { get; private set; }
-        public static DateTime Uptime { get; private set; }
+        public static DateTimeOffset Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; private set; }
@@ -49,22 +49,22 @@ namespace Fergun
         private static ReliabilityService _reliabilityService;
         private static CommandCacheService _commandCacheService;
         private static bool _firstConnect = true;
-        private static AuthDiscordBotListApi DblApi;
-        private static IDblSelfBot DblBot;
+        private static AuthDiscordBotListApi _dblApi;
+        private static IDblSelfBot _dblBot;
         private static DiscordBotsApi _discordBots;
         private static Timer _autoClear;
+        private static LavaConfig _lavaConfig;
 
         public FergunClient()
         {
-            _cmdService = new CommandService(Constants.CommandServiceConfig);
-            _logService = new LogService();
-            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
-
 #if DEBUG
             IsDebugMode = true;
 #else
             IsDebugMode = false;
 #endif
+            _cmdService = new CommandService(Constants.CommandServiceConfig);
+            _logService = new LogService();
+            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
         }
 
         ~FergunClient()
@@ -78,12 +78,13 @@ namespace Fergun
         public async Task InitializeAsync()
         {
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"Fergun v{Constants.Version}"));
-            await Task.Delay(3000);
 
             Languages = new ReadOnlyDictionary<string, CultureInfo>(GetAvailableCultures().ToDictionary(x => x.TwoLetterISOLanguageName, x => x));
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"{Languages.Count} available language(s) ({string.Join(", ", Languages.Keys)})."));
 
-            var dbAuth = await LoadDatabaseCredentialsAsync();
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Config", "Loading the database config..."));
+            var dbAuth = await LoadConfigAsync<MongoAuth>(Path.Combine(AppContext.BaseDirectory, Constants.DatabaseCredentialsFile));
+
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connecting to the database..."));
             Database = new FergunDB(Constants.FergunDatabase, dbAuth.ConnectionString);
             dbAuth = null;
@@ -112,6 +113,15 @@ namespace Fergun
             }
 
             GuildUtils.Initialize();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Config", "Loading Lavalink config..."));
+            _lavaConfig = await LoadConfigAsync<LavaConfig>(Path.Combine(AppContext.BaseDirectory, Constants.LavalinkConfigFile));
+
+            // LogSeverity.Debug is too verbose
+            if (_lavaConfig.LogSeverity == LogSeverity.Debug)
+            {
+                _lavaConfig.LogSeverity = LogSeverity.Verbose;
+            }
 
             bool useReliabilityService = false;
             if (FergunConfig.PresenceIntent ?? false)
@@ -171,8 +181,16 @@ namespace Fergun
             _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
             await _cmdHandlingService.InitializeAsync();
 
-            await UpdateLavalinkAsync();
-            await StartLavalinkAsync();
+            if (_lavaConfig.Hostname == "127.0.0.1" || _lavaConfig.Hostname == "0.0.0.0" || _lavaConfig.Hostname == "localhost")
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using local lavalink server. Updating and starting Lavalink..."));
+                await UpdateLavalinkAsync();
+                await StartLavalinkAsync();
+            }
+            else
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using remote lavalink server."));
+            }
 
             await _client.LoginAsync(TokenType.Bot, FergunConfig.Token);
             await _client.StartAsync();
@@ -183,55 +201,55 @@ namespace Fergun
             }
 
             // Block this task until the program is closed.
-            await Task.Delay(-1);
+            await Task.Delay(Timeout.Infinite);
         }
 
-        private async Task<MongoAuth> LoadDatabaseCredentialsAsync()
+        private async Task<T> LoadConfigAsync<T>(string path, bool createIfNotPresent = true) where T : class, new()
         {
-            string credentialsFile = Path.Combine(AppContext.BaseDirectory, Constants.DatabaseCredentialsFile);
-            MongoAuth dbCredentials = null;
-            bool hasCredentials = false;
-            if (File.Exists(credentialsFile))
+            T config = null;
+            bool hasConfig = false;
+
+            if (File.Exists(path))
             {
                 try
                 {
-                    dbCredentials = JsonConvert.DeserializeObject<MongoAuth>(File.ReadAllText(credentialsFile));
-                    if (dbCredentials == null)
+                    config = JsonConvert.DeserializeObject<T>(File.ReadAllText(path));
+                    if (config == null)
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Config", "Unknown error reading/deserializing the database login credentials file."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Config", "Unknown error reading/deserializing the config file."));
                     }
                     else
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "Loaded the database login credentials successfully."));
-                        hasCredentials = true;
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "Loaded the config successfully."));
+                        hasConfig = true;
                     }
                 }
                 catch (IOException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error reading the database login credentials file. Using default credentials", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error reading the config file. Using default config", e));
                 }
                 catch (JsonException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error deserializing the database login credentials file. Using default credentials", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Config", "Error deserializing the config file. Using default config", e));
                 }
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "No database login credentials file found. Using default credentials."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Config", "No config file found. Using default config."));
             }
 
-            if (!hasCredentials)
+            if (!hasConfig && createIfNotPresent)
             {
-                dbCredentials = MongoAuth.Default;
-                // Create the database login credentials file.
+                config = new T();
+                // Create a default config file.
                 try
                 {
-                    File.WriteAllText(credentialsFile, JsonConvert.SerializeObject(dbCredentials, Formatting.Indented));
+                    File.WriteAllText(path, JsonConvert.SerializeObject(config, Formatting.Indented));
                 }
                 catch (IOException) { }
             }
 
-            return dbCredentials;
+            return config;
         }
 
         private static async Task ExitWithInputTimeoutAsync(int timeout, int exitCode)
@@ -382,9 +400,9 @@ namespace Fergun
                 .AddSingleton(_cmdService)
                 .AddSingleton(_logService)
                 .AddSingleton(_commandCacheService)
-                .AddSingleton<InteractiveService>()
-                .AddSingleton<LavaConfig>()
+                .AddSingleton(_lavaConfig)
                 .AddSingleton<LavaNode>()
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>();
 
             if (_reliabilityService != null)
@@ -433,7 +451,7 @@ namespace Fergun
                     }
                     else
                     {
-                        DblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
+                        _dblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, FergunConfig.DblApiToken);
                         DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
                     }
 
@@ -448,7 +466,7 @@ namespace Fergun
 
                     await UpdateBotListStatsAsync();
                 }
-                Uptime = DateTime.UtcNow;
+                Uptime = DateTimeOffset.UtcNow;
                 _firstConnect = false;
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
@@ -567,10 +585,10 @@ namespace Fergun
         {
             try
             {
-                if (DblApi != null)
+                if (_dblApi != null)
                 {
-                    DblBot ??= await DblApi.GetMeAsync();
-                    await DblBot.UpdateStatsAsync(_client.Guilds.Count);
+                    _dblBot ??= await _dblApi.GetMeAsync();
+                    await _dblBot.UpdateStatsAsync(_client.Guilds.Count);
                 }
                 if (_discordBots != null)
                 {

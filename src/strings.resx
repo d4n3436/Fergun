@@ -2191,4 +2191,7 @@ Please try again later.</value>
 	<data name="NowhereToVote" xml:space="preserve">
 		<value>There's nowhere to vote.</value>
 	</data>
+	<data name="LavalinkNotConnected" xml:space="preserve">
+		<value>Could not connect to the Lavalink server. Please try again later.</value>
+	</data>
 </root>

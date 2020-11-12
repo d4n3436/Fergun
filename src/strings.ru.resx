@@ -2188,4 +2188,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="NowhereToVote" xml:space="preserve">
 		<value>Голосовать негде.</value>
 	</data>
+	<data name="LavalinkNotConnected" xml:space="preserve">
+		<value>Не удалось подключиться к серверу Lavalink. Пожалуйста, повторите попытку позже.</value>
+	</data>
 </root>

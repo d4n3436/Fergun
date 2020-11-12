@@ -20,7 +20,7 @@ namespace Fergun.Modules
 {
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
-    [UserMustBeInVoice("lyrics", ErrorMessage = "UserNotInVC")]
+    [UserMustBeInVoice("lyrics")]
     public class Music : FergunBase
     {
         private readonly MusicService _musicService;
@@ -37,8 +37,7 @@ namespace Fergun.Modules
         [Summary("joinSummary")]
         public async Task<RuntimeResult> Join()
         {
-            var user = Context.User as SocketGuildUser;
-            await SendEmbedAsync(await _musicService.JoinAsync(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.JoinAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel));
             return FergunResult.FromSuccess();
         }
 
@@ -47,7 +46,7 @@ namespace Fergun.Modules
         [Alias("disconnect", "quit", "exit")]
         public async Task Leave()
         {
-            var user = Context.User as SocketGuildUser;
+            var user = (SocketGuildUser)Context.User;
             bool connected = await _musicService.LeaveAsync(Context.Guild, user.VoiceChannel);
             await SendEmbedAsync(!connected ? Locate("BotNotConnected") : string.Format(Locate("LeftVC"), Format.Bold(user.VoiceChannel.Name)));
         }
@@ -161,8 +160,7 @@ namespace Fergun.Modules
         [Summary("moveSummary")]
         public async Task Move()
         {
-            var user = Context.User as SocketGuildUser;
-            await SendEmbedAsync(await _musicService.MoveAsync(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.MoveAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel));
         }
 
         [Command("nowplaying")]
@@ -188,8 +186,7 @@ namespace Fergun.Modules
         [Example("darude sandstorm")]
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
-            var user = Context.User as SocketGuildUser;
-            //await ReplyAsync(await _musicService.PlayAsync(query, Context.GuildId));
+            var user = (SocketGuildUser)Context.User;
             var (result, tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
             if (tracks == null)
             {

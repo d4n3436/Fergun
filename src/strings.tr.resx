@@ -2188,4 +2188,7 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	<data name="NowhereToVote" xml:space="preserve">
 		<value>Oy verecek yer yok.</value>
 	</data>
+	<data name="LavalinkNotConnected" xml:space="preserve">
+		<value>Lavalink sunucusuna bağlanılamadı. Lütfen daha sonra tekrar deneyiniz.</value>
+	</data>
 </root>

@@ -2200,4 +2200,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="NowhereToVote" xml:space="preserve">
 		<value>لا يوجد مكان للتصويت.</value>
 	</data>
+	<data name="LavalinkNotConnected" xml:space="preserve">
+		<value>تعذر الاتصال بخادم Lavalink. الرجاء المحاولة مرة أخرى لاحقاً.</value>
+	</data>
 </root>

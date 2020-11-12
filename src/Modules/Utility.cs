@@ -43,7 +43,7 @@ namespace Fergun.Modules
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
         private static XkcdComic _lastComic;
-        private static DateTimeOffset _timeToCheckComic;
+        private static DateTimeOffset _timeToCheckComic = DateTimeOffset.UtcNow;
         private static CommandService _cmdService;
         private static LogService _logService;
 
@@ -1635,6 +1635,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Xkcd([Summary("xkcdParam1")] int? number = null)
         {
             UpdateLastComic();
+            if (_lastComic == null)
+            {
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
             if (number != null && (number < 1 || number > _lastComic.Num))
             {
                 return FergunResult.FromError(string.Format(Locate("InvalidxkcdNumber"), _lastComic.Num));
@@ -1784,17 +1788,20 @@ namespace Fergun.Modules
 
         private static void UpdateLastComic()
         {
-            if (_timeToCheckComic != null && DateTimeOffset.UtcNow < _timeToCheckComic)
+            if (_timeToCheckComic < DateTimeOffset.UtcNow)
             {
-                return;
+                string response;
+                try
+                {
+                    using (WebClient wc = new WebClient())
+                    {
+                        response = wc.DownloadString("https://xkcd.com/info.0.json");
+                    }
+                }
+                catch (WebException) { return; }
+                _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
+                _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
             }
-            string response;
-            using (WebClient wc = new WebClient())
-            {
-                response = wc.DownloadString("https://xkcd.com/info.0.json");
-            }
-            _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
-            _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
         }
     }
 

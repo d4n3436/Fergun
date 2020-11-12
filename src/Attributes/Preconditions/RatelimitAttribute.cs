@@ -106,7 +106,7 @@ namespace Fergun.Attributes.Preconditions
             if (_noLimitForAdmins && context.User is IGuildUser gu && gu.GuildPermissions.Administrator)
                 return PreconditionResult.FromSuccess();
 
-            var now = DateTime.UtcNow;
+            var now = DateTimeOffset.UtcNow;
             var key = _applyPerGuild ? (context.User.Id, context.Guild?.Id) : (context.User.Id, null);
 
             var timeout = (_invokeTracker.TryGetValue(key, out var t)
@@ -132,9 +132,9 @@ namespace Fergun.Attributes.Preconditions
         private sealed class CommandTimeout
         {
             public uint TimesInvoked { get; set; }
-            public DateTime FirstInvoke { get; }
+            public DateTimeOffset FirstInvoke { get; }
 
-            public CommandTimeout(DateTime timeStarted)
+            public CommandTimeout(DateTimeOffset timeStarted)
             {
                 FirstInvoke = timeStarted;
             }

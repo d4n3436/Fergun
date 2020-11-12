@@ -488,7 +488,7 @@ namespace Fergun.Modules
             {
                 version += "-dev";
             }
-            var elapsed = DateTime.UtcNow - FergunClient.Uptime;
+            var elapsed = DateTimeOffset.UtcNow - FergunClient.Uptime;
 
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Stats")
@@ -733,7 +733,7 @@ namespace Fergun.Modules
         [Summary("uptimeSummary")]
         public async Task Uptime()
         {
-            var elapsed = DateTime.UtcNow - FergunClient.Uptime;
+            var elapsed = DateTimeOffset.UtcNow - FergunClient.Uptime;
 
             var builder = new EmbedBuilder
             {

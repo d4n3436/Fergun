@@ -23,15 +23,12 @@ namespace Fergun.Services
         private readonly LavaConfig _lavaConfig;
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
 
-        public MusicService(DiscordSocketClient client, LogService logService)
+        public MusicService(DiscordSocketClient client, LogService logService, LavaConfig lavaConfig)
         {
             _client = client;
             _logService = logService;
+            _lavaConfig = lavaConfig;
 
-            _lavaConfig = new LavaConfig
-            {
-                LogSeverity = LogSeverity.Info
-            };
             LavaNode = new LavaNode(_client, _lavaConfig);
 
             _client.Ready += ClientReadyAsync;
@@ -43,12 +40,14 @@ namespace Fergun.Services
             LavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
         }
 
-        private async Task ClientReadyAsync()
+        private Task ClientReadyAsync()
         {
             if (!LavaNode.IsConnected)
             {
-                await LavaNode.ConnectAsync();
+                _ = LavaNode.ConnectAsync();
             }
+
+            return Task.CompletedTask;
         }
 
         private async Task UserVoiceStateUpdatedAsync(SocketUser user, SocketVoiceState beforeState, SocketVoiceState afterState)
