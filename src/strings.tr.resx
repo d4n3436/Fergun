@@ -2163,8 +2163,8 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="ContactInfoNoServer" xml:space="preserve">
 		<value>Herhangi bir hata raporunuz, sorunuz veya öneriniz varsa, doğrudan mesaj ({0}) aracılığıyla benimle iletişime geçebilirsiniz.</value>
 	</data>
-	<data name="ValueNotSetInDatabase" xml:space="preserve">
-		<value>Veritabanında `{0}` değeri ayarlanmadı. Bu sorun devam ederse, geliştiricilerle iletişime geçin.</value>
+	<data name="ValueNotSetInConfig" xml:space="preserve">
+		<value>Yapılandırmada `{0}` değeri belirlenmedi. Bu sorun devam ederse, geliştiricilerle iletişime geçin.</value>
 	</data>
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>Kimliği bir bota veremezsiniz!</value>
@@ -2190,5 +2190,23 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	</data>
 	<data name="LavalinkNotConnected" xml:space="preserve">
 		<value>Lavalink sunucusuna bağlanılamadı. Lütfen daha sonra tekrar deneyiniz.</value>
+	</data>
+	<data name="ServerBlacklisted" xml:space="preserve">
+		<value>{0} sunucusu kara listeye alındı.</value>
+	</data>
+	<data name="ServerBlacklistedWithReason" xml:space="preserve">
+		<value>{0} sunucusu şu nedenle kara listeye alındı: {1}</value>
+	</data>
+	<data name="blacklistserverSummary" xml:space="preserve">
+		<value>Kara listeye bir sunucu ekler veya onu kaldırır.</value>
+	</data>
+	<data name="blacklistserverParam1" xml:space="preserve">
+		<value>Kara listeye alınacak sunucunun kimliği.</value>
+	</data>
+	<data name="blacklistserverParam2" xml:space="preserve">
+		<value>Kara listeye alınma nedeni.</value>
+	</data>
+	<data name="ServerBlacklistRemoved" xml:space="preserve">
+		<value>{0} sunucusu kara listeden kaldırıldı.</value>
 	</data>
 </root>

@@ -4,44 +4,44 @@ using Newtonsoft.Json;
 namespace Fergun
 {
     /// <summary>
-    /// A simple MongoDB auth class.
+    /// Represents a simple MongoDB auth config.
     /// </summary>
-    public class MongoAuth
+    public class MongoConfig
     {
         /// <summary>
-        /// The user.
+        /// Gets the user.
         /// </summary>
-        [JsonProperty("user")]
-        public string User { get; set; } = null;
+        [JsonProperty]
+        public string User { get; private set; }
 
         /// <summary>
-        /// The password.
+        /// Gets the password.
         /// </summary>
-        [JsonProperty("password")]
-        public string Password { get; set; } = null;
+        [JsonProperty]
+        public string Password { get; private set; }
 
         /// <summary>
-        /// The host where the mongod instance is running. Defaults to <c>localhost</c>.
+        /// Gets the host where the MongoDB server is running. The default is <c>localhost</c>.
         /// </summary>
-        [JsonProperty("host")]
-        public string Host { get; set; } = "localhost";
+        [JsonProperty]
+        public string Host { get; private set; } = "localhost";
 
         /// <summary>
-        /// The port where the mongod instance is running. Defaults to <c>27017</c>.
+        /// Gets the port where the MongoDB server is running. The default is <c>27017</c>.
         /// </summary>
-        [JsonProperty("port")]
-        public int Port { get; set; } = 27017;
+        [JsonProperty]
+        public int Port { get; private set; } = 27017;
 
         /// <summary>
-        /// The authentication database to use if an user and password is passed. Defaults to <c>admin</c>.
+        /// Gets the authentication database to use if an user and password is passed. The default is <c>admin</c>.
         /// </summary>
-        [JsonProperty("authDatabase")]
-        public string AuthDatabase { get; set; } = "admin";
+        [JsonProperty]
+        public string AuthDatabase { get; private set; } = "admin";
 
         /// <summary>
-        /// Gets a <see cref="MongoAuth"/> instance with the default values.
+        /// Gets a <see cref="MongoConfig"/> instance with the default values.
         /// </summary>
-        public static MongoAuth Default { get; } = new MongoAuth();
+        public static MongoConfig Default => new MongoConfig();
 
         /// <summary>
         /// Gets the connection string.

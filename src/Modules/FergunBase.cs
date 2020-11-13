@@ -207,7 +207,7 @@ namespace Fergun.Modules
         {
             var builder = new EmbedBuilder()
                 .WithDescription(text)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             return await ReplyAsync(embed: builder.Build());
         }

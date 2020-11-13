@@ -119,7 +119,7 @@ namespace Fergun.Extensions
             {
                 Title = command.Name,
                 Description = GuildUtils.Locate(command.Summary ?? "NoDescription", language),
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             if (command.Parameters.Count > 0)
@@ -280,24 +280,19 @@ namespace Fergun.Extensions
                     }
                     return strWriter.ToString();
                 }
-                //return JsonConvert.SerializeObject(obj,
-                //    new JsonSerializerSettings
-                //    {
-                //        Formatting = Formatting.Indented,
-                //        MaxDepth = 1,
-                //        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                //    });
             }
             catch (JsonSerializationException)
             {
-                return "Error";
+                return null;
             }
         }
     }
 
     public class CustomJsonTextWriter : JsonTextWriter
     {
-        public CustomJsonTextWriter(TextWriter textWriter) : base(textWriter) { }
+        public CustomJsonTextWriter(TextWriter textWriter) : base(textWriter)
+        {
+        }
 
         public int CurrentDepth { get; private set; }
 

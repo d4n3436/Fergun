@@ -51,7 +51,7 @@ namespace Fergun.Modules
                 .WithTitle("Fergun Changelog")
                 //.AddField($"v{version}", Locate($"Changelog{version}"))
                 .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", Constants.PreviousVersions.Append(Constants.Version).Where(x => x != version))))
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             var split = Locate($"Changelog{version}").SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToList();
             for (int i = 0; i < split.Count; i++)
@@ -86,7 +86,7 @@ namespace Fergun.Modules
         [Alias("commandstats")]
         public async Task<RuntimeResult> CmdStats()
         {
-            var stats = FergunConfig.CommandStats.OrderByDescending(x => x.Value);
+            var stats = DatabaseConfig.CommandStats.OrderByDescending(x => x.Value);
             int i = 1;
             string current = "";
             var pages = new List<EmbedBuilder>();
@@ -119,7 +119,7 @@ namespace Fergun.Modules
             {
                 Title = string.Format(Locate("CommandStatsInfo"), creationDate),
                 Pages = pages,
-                Color = new Color(FergunConfig.EmbedColor),
+                Color = new Color(FergunClient.Config.EmbedColor),
                 Options = new PaginatorAppearanceOptions()
                 {
                     FooterFormat = Locate("PaginatorFooter")
@@ -159,14 +159,13 @@ namespace Fergun.Modules
             }
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            guild.DisabledCommands ??= new List<string>();
             if (guild.DisabledCommands.Contains(command.Name))
             {
                 return FergunResult.FromError(string.Format(Locate("AlreadyDisabled"), Format.Code(command.Name)));
             }
 
             guild.DisabledCommands.Add(command.Name);
-            FergunClient.Database.UpdateRecord("Guilds", guild);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Disable: Disabled command \"{command.Name}\" in server {Context.Guild.Id}."));
 
             await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabled"), Format.Code(command.Name)));
@@ -196,11 +195,10 @@ namespace Fergun.Modules
             }
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            guild.DisabledCommands ??= new List<string>();
             if (guild.DisabledCommands.Contains(command.Name))
             {
                 guild.DisabledCommands.Remove(command.Name);
-                FergunClient.Database.UpdateRecord("Guilds", guild);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Enable: Enabled command \"{command.Name}\" in server {Context.Guild.Id}."));
 
                 await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabled"), Format.Code(command.Name)));
@@ -227,7 +225,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle("InspiroBot")
                 .WithImageUrl(img)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
         }
@@ -275,7 +273,7 @@ namespace Fergun.Modules
             builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
                 .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
                 async (context) => await HandleLanguageUpdateAsync(null)).AddCallbacks(callbacks);
@@ -294,7 +292,7 @@ namespace Fergun.Modules
                     return;
                 }
                 guild.Language = newLanguage;
-                FergunClient.Database.UpdateRecord("Guilds", guild);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
                 await message.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
@@ -326,7 +324,7 @@ namespace Fergun.Modules
 
             // null prefix = use the global prefix
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            if (newPrefix == FergunConfig.GlobalPrefix)
+            if (newPrefix == DatabaseConfig.GlobalPrefix)
             {
                 guild.Prefix = null;
             }
@@ -335,9 +333,9 @@ namespace Fergun.Modules
                 guild.Prefix = newPrefix;
             }
 
-            FergunClient.Database.UpdateRecord("Guilds", guild);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
             GuildUtils.PrefixCache[Context.Guild.Id] = newPrefix;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated prefix to: \"{newPrefix}\" in {Context.Guild.Name}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Prefix: Updated prefix to: \"{newPrefix}\" in {Context.Guild.Name}"));
 
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
@@ -521,7 +519,7 @@ namespace Fergun.Modules
             {
                 builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
             }
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
         }
@@ -532,13 +530,13 @@ namespace Fergun.Modules
         public async Task Support()
         {
             var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-            if (string.IsNullOrEmpty(FergunConfig.SupportServer))
+            if (string.IsNullOrEmpty(FergunClient.Config.SupportServer))
             {
                 await SendEmbedAsync(string.Format(Locate("ContactInfoNoServer"), owner.ToString()));
             }
             else
             {
-                await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunConfig.SupportServer, owner.ToString()));
+                await SendEmbedAsync(string.Format(Locate("ContactInfo"), FergunClient.Config.SupportServer, owner.ToString()));
             }
         }
 
@@ -551,7 +549,7 @@ namespace Fergun.Modules
             {
                 Title = Locate("tcdneSummary"),
                 ImageUrl = $"https://thiscatdoesnotexist.com/?{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             await ReplyAsync(embed: builder.Build());
@@ -566,7 +564,7 @@ namespace Fergun.Modules
             {
                 Title = Locate("tpdneSummary"),
                 ImageUrl = $"https://www.thispersondoesnotexist.com/image?{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}",
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             await ReplyAsync(embed: builder.Build());
@@ -587,7 +585,7 @@ namespace Fergun.Modules
             {
                 builder.WithTitle(Locate("CategoryList"))
                     .WithDescription(string.Join("\n", triviaCategories))
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
 
                 await ReplyAsync(embed: builder.Build());
                 return FergunResult.FromSuccess();
@@ -599,17 +597,17 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(Locate("BotOwnerOnly"));
                 }
-                List<TriviaPlayer> playerList = FergunClient.Database.LoadRecords<TriviaPlayer>("TriviaStats");
-                foreach (var player in playerList)
+                var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollecion);
+                foreach (var user in users)
                 {
-                    player.Points = 0;
-                    FergunClient.Database.UpdateRecord("TriviaStats", player);
+                    user.TriviaPoints = 0;
+                    FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, user);
                 }
                 return FergunResult.FromSuccess();
             }
 
-            TriviaPlayer currentPlayer = FergunClient.Database.Find<TriviaPlayer>("TriviaStats", x => x.ID == Context.User.Id)
-                ?? new TriviaPlayer(Context.User.Id);
+            UserConfig userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollecion, x => x.Id == Context.User.Id)
+                ?? new UserConfig(Context.User.Id);
 
             if (category == "leaderboard" || category == "ranks")
             {
@@ -620,22 +618,22 @@ namespace Fergun.Modules
                 string userList = "";
                 string pointsList = "";
                 int totalUsers = 0;
-                var playerList = FergunClient.Database.LoadRecords<TriviaPlayer>("TriviaStats").OrderByDescending(x => x.Points);
-                foreach (var player in playerList.Take(15))
+                var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollecion).OrderByDescending(x => x.TriviaPoints);
+                foreach (var user in users.Take(15))
                 {
-                    var user = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, player.ID);
-                    if (user != null)
+                    var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id);
+                    if (guildUser != null)
                     {
                         totalUsers++;
-                        userList += $"{user}\n";
-                        pointsList += $"{player.Points}\n";
+                        userList += $"{guildUser}\n";
+                        pointsList += $"{user.TriviaPoints}\n";
                     }
                 }
 
                 builder.WithTitle(Locate("TriviaLeaderboard"))
                     .AddField(Locate("User"), totalUsers == 0 ? "?" : userList, true)
                     .AddField(Locate("Points"), totalUsers == 0 ? "?" : pointsList, true)
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
                 await ReplyAsync(embed: builder.Build());
 
                 return FergunResult.FromSuccess();
@@ -687,7 +685,7 @@ namespace Fergun.Modules
                .AddField(Locate("Question"), Uri.UnescapeDataString(question.Question))
                .AddField(Locate("Options"), optionsText)
                .WithFooter(string.Format(Locate("TimeLeft"), time))
-               .WithColor(FergunConfig.EmbedColor);
+               .WithColor(FergunClient.Config.EmbedColor);
 
             ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
                 async (context) => await HandleTriviaReactionAsync(null)).AddCallbacks(callbacks);
@@ -704,27 +702,27 @@ namespace Fergun.Modules
                 builder = new EmbedBuilder();
                 if (option == null)
                 {
-                    currentPlayer.Points--;
+                    userConfig.TriviaPoints--;
                     builder.Title = $"❌ {Locate("TimesUp")}";
                     builder.Description = Locate("Lost1Point");
                 }
                 else if (option == question.CorrectAnswer)
                 {
-                    currentPlayer.Points++;
+                    userConfig.TriviaPoints++;
                     builder.Title = $"✅ {Locate("CorrectAnswer")}";
                     builder.Description = Locate("Won1Point");
                 }
                 else
                 {
-                    currentPlayer.Points--;
+                    userConfig.TriviaPoints--;
                     builder.Title = $"❌ {Locate("Incorrect")}";
                     builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
                 }
 
-                builder.WithFooter($"{Locate("Points")}: {currentPlayer.Points}")
-                    .WithColor(FergunConfig.EmbedColor);
+                builder.WithFooter($"{Locate("Points")}: {userConfig.TriviaPoints}")
+                    .WithColor(FergunClient.Config.EmbedColor);
 
-                FergunClient.Database.UpdateRecord("TriviaStats", currentPlayer);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, userConfig);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
             }
         }
@@ -739,7 +737,7 @@ namespace Fergun.Modules
             {
                 Title = "Bot uptime",
                 Description = elapsed.ToShortForm2(),
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             await ReplyAsync(embed: builder.Build());
@@ -761,7 +759,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder
             {
                 Description = string.Format(Locate("Vote"), $"{FergunClient.DblBotPage}/vote"),
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             await ReplyAsync(embed: builder.Build());

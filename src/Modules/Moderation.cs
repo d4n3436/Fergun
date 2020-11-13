@@ -110,7 +110,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder
             {
                 Description = message,
-                Color = new Color(FergunConfig.EmbedColor)
+                Color = new Color(FergunClient.Config.EmbedColor)
             };
 
             await ReplyAndDeleteAsync(null, false, builder.Build(), TimeSpan.FromSeconds(5));

@@ -89,24 +89,24 @@ namespace Fergun
             var result = _cmdService.Search(message.Content.Substring(argPos));
             if (!result.IsSuccess) return;
 
-            var blacklistedUser = FergunClient.Database.Find<BlacklistEntity>("Blacklist", x => x.ID == message.Author.Id);
-            if (blacklistedUser != null)
+            var blacklistedUser = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollecion, x => x.Id == message.Author.Id);
+            if (blacklistedUser != null && blacklistedUser.IsBlacklisted)
             {
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
-                if (blacklistedUser.Reason == null)
+                if (blacklistedUser.BlacklistReason == null)
                 {
                     await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
                 }
                 else
                 {
-                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.Reason), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.BlacklistReason), _services, message.Author.Mention);
                 }
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
                 return;
             }
 
-            var disabledCommands = GuildUtils.GetGuildConfig(message.Channel)?.DisabledCommands ?? new List<string>();
-            var disabled = disabledCommands.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
+            var disabledCommands = GuildUtils.GetGuildConfig(message.Channel)?.DisabledCommands;
+            var disabled = disabledCommands?.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
             if (disabled != null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the locally disabled command \"{disabled}\"."));
@@ -115,7 +115,7 @@ namespace Fergun
             }
             else
             {
-                var globalDisabled = FergunConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
+                var globalDisabled = DatabaseConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
                 if (globalDisabled.Key != null)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the globally disabled command \"{globalDisabled.Key}\"."));
@@ -144,10 +144,7 @@ namespace Fergun
             // command is unspecified when there was a search failure (command not found)
             if (!optionalCommand.IsSpecified)
             {
-                if (!context.Message.Content.StartsWith(FergunConfig.GlobalPrefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Unknown command: \"{context.Message.Content}\", sent by {context.User} in {context.Display()}"));
-                }
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Unknown command: \"{context.Message.Content}\", sent by {context.User} in {context.Display()}"));
                 return;
             }
             var command = optionalCommand.Value;
@@ -157,7 +154,7 @@ namespace Fergun
                 // Update the command stats
                 lock (_cmdStatsLock)
                 {
-                    var stats = FergunConfig.CommandStats ?? new Dictionary<string, int>();
+                    var stats = DatabaseConfig.CommandStats;
                     if (stats.ContainsKey(command.Name))
                     {
                         stats[command.Name]++;
@@ -166,7 +163,7 @@ namespace Fergun
                     {
                         stats.Add(command.Name, 1);
                     }
-                    FergunConfig.CommandStats = stats;
+                    DatabaseConfig.Update(x => x.CommandStats = stats);
                 }
             }
 
@@ -202,7 +199,7 @@ namespace Fergun
                     {
                         var builder = new EmbedBuilder()
                             .WithDescription($"\u26a0 {result.ErrorReason}")
-                            .WithColor(FergunConfig.EmbedColor);
+                            .WithColor(FergunClient.Config.EmbedColor);
                         try
                         {
                             await context.User.SendMessageAsync(embed: builder.Build());
@@ -253,9 +250,9 @@ namespace Fergun
                         var builder = new EmbedBuilder()
                             .WithTitle(GuildUtils.Locate("DiscordServerError", context.Channel))
                             .WithDescription($"\u26a0 {GuildUtils.Locate("DiscordServerErrorInfo", context.Channel)}")
-                            .AddField(GuildUtils.Locate("ErrorDetails", context.Channel), 
+                            .AddField(GuildUtils.Locate("ErrorDetails", context.Channel),
                             Format.Code($"Code: {(int)httpException.HttpCode}, Reason: {httpException.Reason}", "md"))
-                            .WithColor(FergunConfig.EmbedColor);
+                            .WithColor(FergunClient.Config.EmbedColor);
 
                         try
                         {
@@ -269,7 +266,7 @@ namespace Fergun
                         .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Name)}")
                         .AddField(GuildUtils.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
                         .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
-                        .WithColor(FergunConfig.EmbedColor);
+                        .WithColor(FergunClient.Config.EmbedColor);
 
                     var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
 
@@ -283,16 +280,10 @@ namespace Fergun
                     if (context.User.Id == owner.Id) break;
                     // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
 
-                    if (!ulong.TryParse(FergunConfig.LogChannel, out ulong channelId))
+                    var channel = await context.Client.GetChannelAsync(FergunClient.Config.LogChannel);
+                    if (channel == null || !(channel is IMessageChannel messageChannel))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel ID. Not possible to send the embed with the error info."));
-                        break;
-                    }
-
-                    var channel = await context.Client.GetChannelAsync(channelId);
-                    if (!(channel is IMessageChannel messageChannel))
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Invalid log channel. Not possible to send the embed with the error info."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Invalid log channel Id ({FergunClient.Config.LogChannel}). Not possible to send the embed with the error info."));
                         break;
                     }
 
@@ -302,7 +293,7 @@ namespace Fergun
                         .AddField(GuildUtils.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
                         .AddField("Jump url", context.Message.GetJumpUrl())
                         .AddField("Command", context.Message.Content.Truncate(EmbedFieldBuilder.MaxFieldValueLength))
-                        .WithColor(FergunConfig.EmbedColor);
+                        .WithColor(FergunClient.Config.EmbedColor);
 
                     try
                     {
@@ -338,7 +329,7 @@ namespace Fergun
         private static Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, string embedText, IServiceProvider services, string text = null)
         {
             var embed = new EmbedBuilder()
-                .WithColor(FergunConfig.EmbedColor)
+                .WithColor(FergunClient.Config.EmbedColor)
                 .WithDescription(embedText)
                 .Build();
 

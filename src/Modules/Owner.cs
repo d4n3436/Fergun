@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -55,32 +54,79 @@ namespace Fergun.Modules
             }
         }
 
-        [Command("blacklist")]
+        [Command("blacklist", RunMode = RunMode.Async)]
         [Summary("blacklistSummary")]
         [Example("666963870385923507 bot abuse")]
-        public async Task Blacklist([Summary("blacklistParam1")] ulong id,
+        public async Task Blacklist([Summary("blacklistParam1")] ulong userId,
             [Remainder, Summary("blacklistParam2")] string reason = null)
         {
-            var user = FergunClient.Database.Find<BlacklistEntity>("Blacklist", x => x.ID == id);
-            if (user == null)
+            var userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollecion, x => x.Id == userId) ?? new UserConfig(userId);
+            if (userConfig.IsBlacklisted)
             {
-                FergunClient.Database.InsertRecord("Blacklist", new BlacklistEntity(id, reason));
-                if (reason == null)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added ID {id} to the blacklist."));
-                    await SendEmbedAsync(string.Format(Locate("UserBlacklisted"), id));
-                }
-                else
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added ID {id} to the blacklist with reason: {reason}"));
-                    await SendEmbedAsync(string.Format(Locate("UserBlacklistedWithReason"), id, reason));
-                }
+                userConfig.IsBlacklisted = false;
+                userConfig.BlacklistReason = null;
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, userConfig);
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed user {userId} from the blacklist."));
+                await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), userId));
             }
             else
             {
-                FergunClient.Database.DeleteRecord("Blacklist", user);
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed ID {id} from the blacklist."));
-                await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), id));
+                userConfig.IsBlacklisted = true;
+                userConfig.BlacklistReason = reason;
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, userConfig);
+
+                if (reason == null)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added user {userId} to the blacklist."));
+                    await SendEmbedAsync(string.Format(Locate("UserBlacklisted"), userId));
+                }
+                else
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added user {userId} to the blacklist with reason: {reason}"));
+                    await SendEmbedAsync(string.Format(Locate("UserBlacklistedWithReason"), userId, reason));
+                }
+            }
+        }
+
+        [Command("blacklistserver", RunMode = RunMode.Async)]
+        [Summary("blacklistserverSummary")]
+        [Example("685963870363423500 bot farm")]
+        public async Task Blacklistserver([Summary("blacklistserverParam1")] ulong serverId,
+            [Remainder, Summary("blacklistserverParam2")] string reason = null)
+        {
+            var serverConfig = FergunClient.Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, x => x.Id == serverId) ?? new GuildConfig(serverId);
+            if (serverConfig.IsBlacklisted)
+            {
+                serverConfig.IsBlacklisted = false;
+                serverConfig.BlacklistReason = null;
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, serverConfig);
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed server {serverId} from the blacklist."));
+                await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), serverId));
+            }
+            else
+            {
+                serverConfig.IsBlacklisted = true;
+                serverConfig.BlacklistReason = reason;
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, serverConfig);
+
+                if (reason == null)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added server {serverId} to the blacklist."));
+                    await SendEmbedAsync(string.Format(Locate("ServerBlacklisted"), serverId));
+                }
+                else
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Added server {serverId} to the blacklist with reason: {reason}"));
+                    await SendEmbedAsync(string.Format(Locate("ServerBlacklistedWithReason"), serverId, reason));
+                }
+
+                var server = Context.Client.Guilds.FirstOrDefault(x => x.Id == serverId);
+                if (server != null)
+                {
+                    await server.LeaveAsync();
+                }
             }
         }
 
@@ -109,26 +155,6 @@ namespace Fergun.Modules
                     await Context.Message.AddReactionAsync(new Emoji("\u2705"));
                 }
             }
-        }
-
-        [Command("botcolor")]
-        [Summary("botcolorSummary")]
-        [Example("1")]
-        public async Task<RuntimeResult> Botcolor([Remainder, Summary("botcolorParam1")] string color)
-        {
-            if (!uint.TryParse(color, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint newcolor))
-            {
-                if (!uint.TryParse(color, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out newcolor))
-                {
-                    return FergunResult.FromError(Locate("InvalidColor"));
-                }
-            }
-            FergunConfig.EmbedColor = newcolor;
-            if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
-            {
-                await Context.Message.AddReactionAsync(new Emoji("\u2705"));
-            }
-            return FergunResult.FromSuccess();
         }
 
         [Command("eval", RunMode = RunMode.Async)]
@@ -217,7 +243,7 @@ namespace Fergun.Modules
                         .WithName(Locate("Type"))
                         .WithValue(Format.Code(returnType, "md"))
                     },
-                    Color = new Color(FergunConfig.EmbedColor),
+                    Color = new Color(FergunClient.Config.EmbedColor),
                     Options = new PaginatorAppearanceOptions()
                     {
                         FooterFormat = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}",
@@ -236,7 +262,7 @@ namespace Fergun.Modules
                     .AddField(Locate("Output"), Format.Code(value.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md"))
                     .AddField(Locate("Type"), Format.Code(returnType, "md"))
                     .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
 
                 await ReplyAsync(embed: builder.Build());
             }
@@ -254,7 +280,7 @@ namespace Fergun.Modules
             }
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            if (newPrefix == FergunConfig.GlobalPrefix)
+            if (newPrefix == DatabaseConfig.GlobalPrefix)
             {
                 guild.Prefix = null; //Default prefix
             }
@@ -263,8 +289,9 @@ namespace Fergun.Modules
                 guild.Prefix = newPrefix;
             }
 
-            FergunClient.Database.UpdateRecord("Guilds", guild);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
             GuildUtils.PrefixCache[Context.Guild.Id] = newPrefix;
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Forceprefix: Force updated prefix to: \"{newPrefix}\" in {Context.Guild.Name}"));
 
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
@@ -289,14 +316,14 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
-            var disabledCommands = FergunConfig.GloballyDisabledCommands;
+            var disabledCommands = DatabaseConfig.GloballyDisabledCommands;
             if (disabledCommands.ContainsKey(command.Name))
             {
                 return FergunResult.FromError(string.Format(Locate("AlreadyDisabledGlobally"), Format.Code(command.Name)));
             }
 
             disabledCommands.Add(command.Name, reason);
-            FergunConfig.GloballyDisabledCommands = disabledCommands;
+            DatabaseConfig.Update(x => x.GloballyDisabledCommands = disabledCommands);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globaldisable: Disabled command {command.Name} in all servers."));
 
             await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabledGlobally"), Format.Code(command.Name)));
@@ -322,11 +349,11 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
-            var disabledCommands = FergunConfig.GloballyDisabledCommands;
+            var disabledCommands = DatabaseConfig.GloballyDisabledCommands;
             if (disabledCommands.ContainsKey(command.Name))
             {
                 disabledCommands.Remove(command.Name);
-                FergunConfig.GloballyDisabledCommands = disabledCommands;
+                DatabaseConfig.Update(x => x.GloballyDisabledCommands = disabledCommands);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globalenable: Enabled command {command.Name} in all servers."));
 
                 await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabledGlobally"), Format.Code(command.Name)));
@@ -343,12 +370,18 @@ namespace Fergun.Modules
         [Example("f!")]
         public async Task<RuntimeResult> Globalprefix([Summary("globalprefixParam1")] string newPrefix)
         {
-            if (newPrefix == FergunConfig.GlobalPrefix)
+            if (newPrefix == DatabaseConfig.GlobalPrefix)
             {
                 return FergunResult.FromError(Locate("PrefixSameCurrentTarget"));
             }
-
-            FergunConfig.GlobalPrefix = newPrefix;
+            if (FergunClient.IsDebugMode)
+            {
+                DatabaseConfig.Update(x => x.DevGlobalPrefix = newPrefix);
+            }
+            else
+            {
+                DatabaseConfig.Update(x => x.GlobalPrefix = newPrefix);
+            }
             GuildUtils.CachedGlobalPrefix = newPrefix;
             await SendEmbedAsync(string.Format(Locate("NewGlobalPrefix"), newPrefix));
 

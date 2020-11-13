@@ -30,8 +30,6 @@ namespace Fergun
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
-            MessageCacheSize = 100,
-            AlwaysDownloadUsers = false,
             ConnectionTimeout = 30000,
             LogLevel = LogSeverity.Verbose,
             ExclusiveBulkDelete = true,
@@ -44,7 +42,7 @@ namespace Fergun
             // General + Moderation commands
             GatewayIntents.GuildMessages |
 
-            // Commands that uses paginators
+            // Paginator commands
             GatewayIntents.GuildMessageReactions |
 
             // Music commands
@@ -62,7 +60,7 @@ namespace Fergun
             IgnoreExtraArgs = true
         };
 
-        public static TimeSpan HttpClientTimeout { get; } = TimeSpan.FromSeconds(60);
+        public static TimeSpan HttpClientTimeout => TimeSpan.FromSeconds(60);
 
         public const GuildPermission InvitePermissions =
 
@@ -81,7 +79,7 @@ namespace Fergun
             GuildPermission.AddReactions |
             GuildPermission.ManageMessages |
 
-            // Commands that uses the emojis below
+            // Commands that uses external emojis
             GuildPermission.UseExternalEmojis |
 
             // Some utility commands
@@ -97,11 +95,17 @@ namespace Fergun
 
         public const string DevelopmentModuleName = "Dev";
 
-        public const string DatabaseCredentialsFile = "dbcred.json";
-
-        public const string LavalinkConfigFile = "lavaconfig.json";
+        public const string BotConfigFile = "botconfig.json";
 
         public const string FergunDatabase = "FergunDB";
+
+        public const string ConfigCollection = "Config";
+
+        public const string GuildConfigCollection = "GuildConfig";
+
+        public const string UserConfigCollecion = "UserConfig";
+
+        public const string AidAdventuresCollection = "AIDAdventures";
 
         /// <summary>
         /// Default attachment size limit in bytes.
@@ -146,16 +150,5 @@ namespace Fergun
         public const bool AidAutoTranslateDefault = false;
 
         public const bool TrackSelectionDefault = false;
-
-        public static string LoadingEmote { get; set; } = "<a:loading:721975158826598522>";
-        public static string OnlineEmote { get; set; } = "<:online:726601254016647241>";
-        public static string IdleEmote { get; set; } = "<:idle:726601265563566111>";
-        public static string DndEmote { get; set; } = "<:dnd:726601274434519090>";
-        public static string StreamingEmote { get; set; } = "<:streaming:728358352333045832>";
-        public static string OfflineEmote { get; set; } = "<:invisible:726601281455783946>";
-        public static string TextEmote { get; set; } = "<:text:728358376278458368>";
-        public static string VoiceEmote { get; set; } = "<:voice:728358400316145755>";
-        public static string MongoDbEmote { get; set; } = "<:mongodb:728358607195996271>";
-        public static string WebSocketEmote { get; set; } = "<:websocket:736733297232838736>";
     }
 }

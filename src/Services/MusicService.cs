@@ -78,7 +78,7 @@ namespace Fergun.Services
 
                         var builder = new EmbedBuilder()
                             .WithDescription("\u26A0 " + GuildUtils.Locate("LeftVCInactivity", player.TextChannel))
-                            .WithColor(FergunConfig.EmbedColor);
+                            .WithColor(FergunClient.Config.EmbedColor);
 
                         await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
                         await player.TextChannel.SendMessageAsync(embed: builder.Build());
@@ -117,7 +117,7 @@ namespace Fergun.Services
                     _loopDict.TryRemove(guildId, out _);
                     var builder2 = new EmbedBuilder()
                         .WithDescription(string.Format(GuildUtils.Locate("LoopEnded", args.Player.TextChannel), args.Track.ToTrackLink(false)))
-                        .WithColor(FergunConfig.EmbedColor);
+                        .WithColor(FergunClient.Config.EmbedColor);
                     await args.Player.TextChannel.SendMessageAsync(null, false, builder2.Build());
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Loop for track {args.Track.Title} ({args.Track.Url}) ended in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
                 }
@@ -131,7 +131,7 @@ namespace Fergun.Services
             if (!args.Player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
                 builder.WithDescription(GuildUtils.Locate("NoTracks", args.Player.TextChannel))
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
 
                 await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Queue now empty in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
@@ -141,7 +141,7 @@ namespace Fergun.Services
             await args.Player.PlayAsync(nextTrack);
             builder.WithTitle(GuildUtils.Locate("NowPlaying", args.Player.TextChannel))
                 .WithDescription(nextTrack.ToTrackLink())
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Now playing: {nextTrack.Title} ({nextTrack.Url}) in {args.Player.TextChannel.Guild.Name}/{args.Player.TextChannel.Name}"));
         }
@@ -150,7 +150,7 @@ namespace Fergun.Services
         {
             var builder = new EmbedBuilder()
                 .WithDescription($"\u26a0 {GuildUtils.Locate("PlayerError", args.Player.TextChannel)}:```{args.ErrorMessage}```")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
         }
@@ -159,7 +159,7 @@ namespace Fergun.Services
         {
             var builder = new EmbedBuilder()
                 .WithDescription($"\u26a0 {string.Format(GuildUtils.Locate("PlayerStuck", args.Player.TextChannel), args.Player.Track.Title, args.Threshold.TotalSeconds)}")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
         }
@@ -565,7 +565,7 @@ namespace Fergun.Services
                     var embed = new EmbedBuilder()
                         .WithTitle($"\u26a0 {GuildUtils.Locate("Warning", player.TextChannel)} \u26a0")
                         .WithDescription(GuildUtils.Locate("MusicPlayerShutdownWarning", player.TextChannel))
-                        .WithColor(FergunConfig.EmbedColor);
+                        .WithColor(FergunClient.Config.EmbedColor);
 
                     await player.TextChannel.SendMessageAsync(embed: embed.Build());
                 }

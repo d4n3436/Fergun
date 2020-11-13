@@ -25,9 +25,9 @@ namespace Fergun.Utils
         /// </summary>
         public static void Initialize()
         {
-            CachedGlobalPrefix = FergunConfig.GlobalPrefix;
-            var guilds = FergunClient.Database.LoadRecords<GuildConfig>("Guilds");
-            PrefixCache = new ConcurrentDictionary<ulong, string>(guilds?.ToDictionary(x => x.ID, x => x.Prefix) ?? new Dictionary<ulong, string>());
+            CachedGlobalPrefix = DatabaseConfig.GlobalPrefix;
+            var guilds = FergunClient.Database.GetAllDocuments<GuildConfig>(Constants.GuildConfigCollection);
+            PrefixCache = new ConcurrentDictionary<ulong, string>(guilds?.ToDictionary(x => x.Id, x => x.Prefix) ?? new Dictionary<ulong, string>());
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace Fergun.Utils
         /// <param name="guildId">The Id of the guild.</param>
         /// <returns>The configuration of the guild, or <c>null</c> if the guild cannot be found in the database.</returns>
         public static GuildConfig GetGuildConfig(ulong guildId)
-            => FergunClient.Database.Find<GuildConfig>("Guilds", x => x.ID == guildId);
+            => FergunClient.Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, x => x.Id == guildId);
 
         /// <summary>
         /// Returns the configuration of the specified guild.
@@ -74,7 +74,7 @@ namespace Fergun.Utils
         /// <param name="channel">The channel.</param>
         /// <returns>The prefix of the channel.</returns>
         public static string GetPrefix(IMessageChannel channel)
-            => GetGuildConfig(channel)?.Prefix ?? FergunConfig.GlobalPrefix;
+            => GetGuildConfig(channel)?.Prefix ?? DatabaseConfig.GlobalPrefix;
 
         /// <summary>
         /// Returns the language of the specified channel.
@@ -82,7 +82,7 @@ namespace Fergun.Utils
         /// <param name="channel">The channel.</param>
         /// <returns>The language of the channel.</returns>
         public static string GetLanguage(IMessageChannel channel)
-            => GetGuildConfig(channel)?.Language ?? FergunConfig.Language ?? Constants.DefaultLanguage;
+            => GetGuildConfig(channel)?.Language;
 
         /// <summary>
         /// Returns the localized value of a resource key in a channel.

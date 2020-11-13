@@ -42,7 +42,7 @@ namespace Fergun.Modules
 
         public AIDungeon(CommandService commands, LogService logService)
         {
-            _api ??= new AidAPI(FergunConfig.AiDungeonToken);
+            _api ??= new AidAPI(FergunClient.Config.AiDungeonToken);
             _cmdService ??= commands;
             _logService ??= logService;
         }
@@ -82,7 +82,7 @@ namespace Fergun.Modules
             builder.AddField(Locate("Commands"), list)
                 .WithFooter(Locate("HelpFooter2"), IconUrl)
                 //.AddField("Tips", "- " + string.Join("\n- ", GetValue("AIDTips").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)))
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -94,9 +94,9 @@ namespace Fergun.Modules
         [Alias("create")]
         public async Task<RuntimeResult> New()
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
             if (_modes == null)
@@ -175,7 +175,7 @@ namespace Fergun.Modules
                 .WithTitle(Locate("AIDungeonWelcome"))
                 .WithDescription(list)
                 .WithThumbnailUrl(IconUrl)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async (context) => await HandleAidReactionAsync(-1));
 
@@ -254,7 +254,7 @@ namespace Fergun.Modules
 
             await ReplyAsync(embed: builder.Build());
 
-            FergunClient.Database.InsertRecord("AIDAdventures", new AidAdventure(id, adventure.PublicId?.ToString(), Context.User.Id, false));
+            FergunClient.Database.InsertDocument(Constants.AidAdventuresCollection, new AidAdventure(id, adventure.PublicId?.ToString(), Context.User.Id, false));
 
             return FergunResult.FromSuccess();
         }
@@ -335,7 +335,7 @@ namespace Fergun.Modules
             //await message.DeleteAsync();
 
             builder.Title = "AI Dungeon";
-            builder.Description = Constants.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
+            builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
             _ = message.TryRemoveAllReactionsAsync();
             await ReplyAsync(embed: builder.Build());
@@ -462,7 +462,7 @@ namespace Fergun.Modules
             await userInput.TryDeleteAsync();
 
             builder.Title = "AI Dungeon";
-            builder.Description = $"{Constants.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";
+            builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";
 
             await ReplyAsync(embed: builder.Build());
 
@@ -573,12 +573,12 @@ namespace Fergun.Modules
 
         private async Task<string> RunAIDCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", uint actionId = 0)
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken));
+                return string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken));
             }
 
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             // check the id
             string checkResult = await CheckIdAsync(adventure);
             if (checkResult != null)
@@ -614,8 +614,8 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithAuthor(Context.User)
                 .WithTitle("AI Dungeon")
-                .WithDescription($"{Constants.LoadingEmote} {Locate(promptText)}")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate(promptText)}")
+                .WithColor(FergunClient.Config.EmbedColor);
 
             if (!_queue.ContainsKey(adventureId))
             {
@@ -629,7 +629,7 @@ namespace Fergun.Modules
             if (_queue[adventureId].CurrentCount == 0)
             {
                 wasWaiting = true;
-                builder.Description = $"{Constants.LoadingEmote} {Locate("WaitingQueue")}";
+                builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate("WaitingQueue")}";
             }
             await ReplyAsync(embed: builder.Build());
 
@@ -637,7 +637,7 @@ namespace Fergun.Modules
 
             if (wasWaiting)
             {
-                builder.Description = $"{Constants.LoadingEmote} {Locate(promptText)}";
+                builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate(promptText)}";
                 await ReplyAsync(embed: builder.Build());
             }
 
@@ -648,7 +648,7 @@ namespace Fergun.Modules
                 text = await TranslateSimplerAsync(text, GetLanguage(), "en");
             }
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Sending WebSocket request (Id: {adventure.ID}, publicId: {adventure.PublicId}, actionType: {actionType})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Sending WebSocket request (Id: {adventure.Id}, publicId: {adventure.PublicId}, actionType: {actionType})"));
             WebSocketResponse response;
             try
             {
@@ -781,25 +781,25 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Alter(uint adventureId)
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
 
             var builder = new EmbedBuilder()
-                .WithDescription($"{Constants.LoadingEmote} {Locate("Loading")}")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate("Loading")}")
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
             WebSocketResponse response;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Alter: Getting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Alter: Getting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
             try
             {
                 response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.GetAdventure));
@@ -888,13 +888,13 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Makepublic([Summary("makepublicParam1")] uint adventureId)
         {
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
-            if (Context.User.Id != adventure.OwnerID)
+            if (Context.User.Id != adventure.OwnerId)
             {
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
@@ -904,7 +904,7 @@ namespace Fergun.Modules
             }
 
             adventure.IsPublic = true;
-            FergunClient.Database.UpdateRecord("AIDAdventures", adventure);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.AidAdventuresCollection, adventure);
             await SendEmbedAsync(Locate("IDNowPublic"));
             return FergunResult.FromSuccess();
         }
@@ -914,13 +914,13 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Makeprivate([Summary("makeprivateParam1")] uint adventureId)
         {
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
-            if (Context.User.Id != adventure.OwnerID)
+            if (Context.User.Id != adventure.OwnerId)
             {
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
@@ -930,7 +930,7 @@ namespace Fergun.Modules
             }
 
             adventure.IsPublic = false;
-            FergunClient.Database.UpdateRecord("AIDAdventures", adventure);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.AidAdventuresCollection, adventure);
             await SendEmbedAsync(Locate("IDNowPrivate"));
             return FergunResult.FromSuccess();
         }
@@ -942,19 +942,19 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Idlist([Summary("idlistParam1")] IUser user = null)
         {
             user ??= Context.User;
-            List<AidAdventure> adventures = FergunClient.Database.FindMany<AidAdventure>("AIDAdventures", x => x.OwnerID == user.Id);
+            var adventures = FergunClient.Database.FindManyDocuments<AidAdventure>(Constants.AidAdventuresCollection, x => x.OwnerId == user.Id);
 
-            if (adventures.Count == 0)
+            if (!adventures.Any())
             {
                 return FergunResult.FromError(string.Format(Locate(user.Id == Context.User.Id ? "SelfNoIDs" : "NoIDs"), user.ToString()));
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle(string.Format(Locate("IDList"), user.ToString()))
-                .AddField("ID", string.Join("\n", adventures.Select(x => x.ID)), true)
+                .AddField("ID", string.Join("\n", adventures.Select(x => x.Id)), true)
                 .AddField(Locate("IsPublic"), string.Join("\n", adventures.Select(x => Locate(x.IsPublic))), true)
                 .WithFooter(Locate("IDListFooter"), IconUrl)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -965,19 +965,19 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Idinfo([Summary("idinfoParam1")] uint adventureId)
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
 
             WebSocketResponse response;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Idinfo: Getting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Idinfo: Getting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
             try
             {
                 response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.GetAdventure));
@@ -1019,7 +1019,7 @@ namespace Fergun.Modules
                 }
             }
 
-            var idOwner = Context.IsPrivate ? null : Context.Guild.GetUser(adventure.OwnerID);
+            var idOwner = Context.IsPrivate ? null : Context.Guild.GetUser(adventure.OwnerId);
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("IDInfo"))
@@ -1027,7 +1027,7 @@ namespace Fergun.Modules
                 .AddField(Locate("IsPublic"), Locate(adventure.IsPublic), true)
                 .AddField(Locate("Owner"), idOwner?.ToString() ?? Locate("NotAvailable"), true)
                 .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:", IconUrl)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             if (response.Payload.Data.Adventure.CreatedAt != null)
             {
@@ -1044,18 +1044,18 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Delete([Summary("deleteParam1")] uint adventureId)
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
-            if (Context.User.Id != adventure.OwnerID)
+            if (Context.User.Id != adventure.OwnerId)
             {
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
@@ -1065,7 +1065,7 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithDescription(Locate("AdventureDeletionPrompt"))
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async (context) => await HandleReactionAsync(true))
                 .AddCallBack(new Emoji("✅"), async (context, reaction) => await HandleReactionAsync(false));
@@ -1085,7 +1085,7 @@ namespace Fergun.Modules
                 }
                 string result;
                 WebSocketResponse response;
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
                 try
                 {
                     response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
@@ -1097,7 +1097,7 @@ namespace Fergun.Modules
                     }
                     else
                     {
-                        FergunClient.Database.DeleteRecord("AIDAdventures", adventure);
+                        FergunClient.Database.DeleteDocument(Constants.AidAdventuresCollection, adventure);
                         result = Locate("AdventureDeleted");
                     }
                 }
@@ -1126,12 +1126,12 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Dump([Summary("dumpParam1")] uint adventureId)
         {
-            if (string.IsNullOrEmpty(FergunConfig.AiDungeonToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.AiDungeonToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             string checkResult = await CheckIdAsync(adventure);
             if (checkResult != null)
             {
@@ -1139,13 +1139,13 @@ namespace Fergun.Modules
             }
 
             var builder = new EmbedBuilder()
-                .WithDescription($"{Constants.LoadingEmote} {Locate("DumpingAdventure")}")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate("DumpingAdventure")}")
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
             WebSocketResponse response;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Dump: Getting adventure (Id: {adventure.ID},  publicId: {adventure.PublicId})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Dump: Getting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
             try
             {
                 response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.GetAdventure));
@@ -1199,13 +1199,13 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Give([Summary("giveParam1")] uint adventureId, [Remainder, Summary("giveParam2")] IUser user)
         {
-            AidAdventure adventure = FergunClient.Database.Find<AidAdventure>("AIDAdventures", x => x.ID == adventureId);
+            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
             }
-            if (Context.User.Id != adventure.OwnerID)
+            if (Context.User.Id != adventure.OwnerId)
             {
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
@@ -1222,8 +1222,8 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("CannotGiveToBot"));
             }
 
-            adventure.OwnerID = user.Id;
-            FergunClient.Database.UpdateRecord("AIDAdventures", adventure);
+            adventure = new AidAdventure(adventure.Id, adventure.PublicId, user.Id, true);
+            FergunClient.Database.InsertOrUpdateDocument(Constants.AidAdventuresCollection, adventure);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Give: Transferred adventure ID from {Context.User} ({Context.User.Id}) to {user} ({user.Id})."));
 
             await SendEmbedAsync("✅ " + string.Format(Locate("GaveId"), user.ToString()));
@@ -1241,9 +1241,9 @@ namespace Fergun.Modules
             {
                 return Locate("PublicIdNull");
             }
-            if (!adventure.IsPublic && Context.User.Id != adventure.OwnerID)
+            if (!adventure.IsPublic && Context.User.Id != adventure.OwnerId)
             {
-                return string.Format(Locate("IDNotPublic"), (await Context.Client.Rest.GetUserAsync(adventure.OwnerID)).ToString());
+                return string.Format(Locate("IDNotPublic"), (await Context.Client.Rest.GetUserAsync(adventure.OwnerId)).ToString());
             }
             return null;
         }

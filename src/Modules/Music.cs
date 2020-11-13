@@ -29,7 +29,7 @@ namespace Fergun.Modules
         public Music(MusicService musicService)
         {
             _musicService = musicService;
-            _geniusApi ??= new GeniusApi(FergunConfig.GeniusApiToken);
+            _geniusApi ??= new GeniusApi(FergunClient.Config.GeniusApiToken);
         }
 
         [RequireBotPermission(GuildPermission.Connect, ErrorMessage = "BotRequireConnect")]
@@ -66,9 +66,9 @@ namespace Fergun.Modules
         [Example("never gonna give you up")]
         public async Task<RuntimeResult> Lyrics([Remainder, Summary("lyricsParam1")] string query = null)
         {
-            if (string.IsNullOrEmpty(FergunConfig.GeniusApiToken))
+            if (string.IsNullOrEmpty(FergunClient.Config.GeniusApiToken))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.GeniusApiToken)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.GeniusApiToken)));
             }
 
             bool keepHeaders = false;
@@ -139,7 +139,7 @@ namespace Fergun.Modules
             string title = genius.Response.Hits[0].Result.FullTitle;
             var pager = new PaginatedMessage
             {
-                Color = new Color(FergunConfig.EmbedColor),
+                Color = new Color(FergunClient.Config.EmbedColor),
                 Title = title.Truncate(EmbedBuilder.MaxTitleLength),
                 Fields = new List<EmbedFieldBuilder> { new EmbedFieldBuilder { Name = "Links", Value = links } },
                 Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x }),
@@ -210,7 +210,7 @@ namespace Fergun.Modules
                         .WithAuthor(user)
                         .WithTitle(Locate("SelectTrack"))
                         .WithDescription(list)
-                        .WithColor(FergunConfig.EmbedColor);
+                        .WithColor(FergunClient.Config.EmbedColor);
 
                     await ReplyAsync(embed: builder.Build());
 

@@ -70,9 +70,9 @@ namespace Fergun.Utils
                 links += $" | {Format.Url(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage)}";
                 links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote")}";
             }
-            if (!string.IsNullOrEmpty(FergunConfig.SupportServer))
+            if (!string.IsNullOrEmpty(FergunClient.Config.SupportServer))
             {
-                links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunConfig.SupportServer)}";
+                links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer)}";
             }
 
             return links;

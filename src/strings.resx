@@ -1281,6 +1281,15 @@ Track selection for `play`</value>
 	<data name="UserBlacklistRemoved" xml:space="preserve">
     <value>The user {0} was removed from the blacklist.</value>
   </data>
+	<data name="ServerBlacklisted" xml:space="preserve">
+    <value>The server {0} was blacklisted.</value>
+  </data>
+	<data name="ServerBlacklistedWithReason" xml:space="preserve">
+    <value>The server {0} was blacklisted with the reason: {1}</value>
+  </data>
+	<data name="ServerBlacklistRemoved" xml:space="preserve">
+    <value>The server {0} was removed from the blacklist.</value>
+  </data>
 	<data name="blacklistSummary" xml:space="preserve">
     <value>Adds an user to the blacklist, or removes it.</value>
   </data>
@@ -1288,6 +1297,15 @@ Track selection for `play`</value>
     <value>The ID of the user to blacklist.</value>
   </data>
 	<data name="blacklistParam2" xml:space="preserve">
+    <value>The reason for being blacklisted.</value>
+  </data>
+	<data name="blacklistserverSummary" xml:space="preserve">
+    <value>Adds a server to the blacklist, or removes it.</value>
+  </data>
+	<data name="blacklistserverParam1" xml:space="preserve">
+    <value>The ID of the server to blacklist.</value>
+  </data>
+	<data name="blacklistserverParam2" xml:space="preserve">
     <value>The reason for being blacklisted.</value>
   </data>
 	<data name="Blacklisted" xml:space="preserve">
@@ -2169,8 +2187,8 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a rare bug in `ocr` and `ocrtranslate` that occurred when a corrupted image was used.
 - Lots of other bug fixes.</value>
 	</data>
-	<data name="ValueNotSetInDatabase" xml:space="preserve">
-		<value>The value of `{0}` has not been established in the database. If this problem persists, contact the developers.</value>
+	<data name="ValueNotSetInConfig" xml:space="preserve">
+		<value>The value of `{0}` has not been established in the config. If this problem persists, contact the developers.</value>
 	</data>
 	<data name="NoAvailableLanguages" xml:space="preserve">
 		<value>It seems there are no available languages.</value>

@@ -2175,8 +2175,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="ContactInfoNoServer" xml:space="preserve">
 		<value>إذا كان لديك أي تقرير خطأ أو سؤال أو اقتراح ، يمكنك الاتصال بي عبر رسالة مباشرة ({0}).</value>
 	</data>
-	<data name="ValueNotSetInDatabase" xml:space="preserve">
-		<value>لم يتم تعيين قيمة `{0}` في قاعدة البيانات. إذا استمرت هذه المشكلة ، فاتصل بالمطورين.</value>
+	<data name="ValueNotSetInConfig" xml:space="preserve">
+		<value>لم يتم تحديد قيمة `{0}` في التهيئة. إذا استمرت هذه المشكلة ، فاتصل بالمطورين.</value>
 	</data>
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>لا يمكنك إعطاء المعرف لروبوت!</value>
@@ -2202,5 +2202,23 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="LavalinkNotConnected" xml:space="preserve">
 		<value>تعذر الاتصال بخادم Lavalink. الرجاء المحاولة مرة أخرى لاحقاً.</value>
+	</data>
+	<data name="ServerBlacklisted" xml:space="preserve">
+		<value>تم وضع الخادم {0} في القائمة السوداء.</value>
+	</data>
+	<data name="ServerBlacklistedWithReason" xml:space="preserve">
+		<value>تم وضع الخادم {0} في القائمة السوداء للسبب: {1}</value>
+	</data>
+	<data name="ServerBlacklistRemoved" xml:space="preserve">
+		<value>تمت إزالة الخادم {0} من القائمة السوداء.</value>
+	</data>
+	<data name="blacklistserverSummary" xml:space="preserve">
+		<value>يضيف خادمًا إلى القائمة السوداء أو يزيله.</value>
+	</data>
+	<data name="blacklistserverParam1" xml:space="preserve">
+		<value>معرف الخادم إلى القائمة السوداء.</value>
+	</data>
+	<data name="blacklistserverParam2" xml:space="preserve">
+		<value>سبب إدراجها في القائمة السوداء.</value>
 	</data>
 </root>

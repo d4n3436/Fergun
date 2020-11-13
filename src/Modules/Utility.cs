@@ -171,7 +171,7 @@ namespace Fergun.Modules
                 .AddField(Locate("LanguageChain"), string.Join(" -> ", languageChain))
                 .AddField(Locate("Result"), text)
                 .WithThumbnailUrl("https://fergun.is-inside.me/gXEDLZVr.png")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -241,7 +241,7 @@ namespace Fergun.Modules
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
             }
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -276,7 +276,7 @@ namespace Fergun.Modules
                     .WithDescription(text.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
             }
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -317,7 +317,7 @@ namespace Fergun.Modules
                 .AddField(Locate("Input"), Format.Code(expression.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
                 .AddField(Locate("Output"), Format.Code(result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
                 .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -366,7 +366,7 @@ namespace Fergun.Modules
             }
             builder.AddField(Locate("CreatedAt"), channel.CreatedAt, true)
                 .AddField(Locate("Mention"), MentionUtils.MentionChannel(channel.Id), true)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -467,7 +467,7 @@ namespace Fergun.Modules
                 .WithDescription(Locate("ConfigPrompt"))
                 .AddField(Locate("Option"), listToShow, true)
                 .AddField(Locate("Value"), valueList, true)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
                 .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
@@ -496,7 +496,7 @@ namespace Fergun.Modules
 
             async Task HandleReactionAsync(SocketReaction reaction)
             {
-                FergunClient.Database.UpdateRecord("Guilds", guild);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
                 valueList =
                     $"{Locate(guild.CaptionbotAutoTranslate)}\n" +
                     $"{Locate(guild.AidAutoTranslate)}\n" +
@@ -532,7 +532,7 @@ namespace Fergun.Modules
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
             }
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
         }
@@ -577,7 +577,7 @@ namespace Fergun.Modules
                     builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
                 }
                 builder.WithFooter(string.Format(Locate("HelpFooter"), version, visibleCommandCount))
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
 
                 await ReplyAsync(embed: builder.Build());
             }
@@ -717,7 +717,7 @@ namespace Fergun.Modules
                 },
                 Description = Locate("ImageSearch"),
                 Pages = pages,
-                Color = new Discord.Color(FergunConfig.EmbedColor),
+                Color = new Discord.Color(FergunClient.Config.EmbedColor),
                 Options = new PaginatorAppearanceOptions()
                 {
                     InformationText = Locate("PaginatorHelp"),
@@ -811,9 +811,9 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
-            if (string.IsNullOrEmpty(FergunConfig.OCRSpaceApiKey))
+            if (string.IsNullOrEmpty(FergunClient.Config.OCRSpaceApiKey))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.OCRSpaceApiKey)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.OCRSpaceApiKey)));
             }
 
             UrlFindResult result;
@@ -853,7 +853,7 @@ namespace Fergun.Modules
                     .WithTitle(Locate("OcrResults"))
                     .AddField(Locate("Output"), text)
                     .WithFooter(string.Format(Locate("ProcessingTime"), processTime))
-                    .WithColor(FergunConfig.EmbedColor);
+                    .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -922,7 +922,7 @@ namespace Fergun.Modules
                 .AddField(Locate("TargetLanguage"), translation.Target.FullName, false)
                 .AddField(Locate("Result"), translation.Text, false)
                 .WithFooter(string.Format(Locate("ProcessingTime"), processTime + sw.ElapsedMilliseconds))
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -935,7 +935,7 @@ namespace Fergun.Modules
         [Alias("haste")]
         public async Task<RuntimeResult> Paste([Remainder, Summary("pasteParam1")] string text)
         {
-            await SendEmbedAsync($"{Constants.LoadingEmote} {Locate("Uploading")}");
+            await SendEmbedAsync($"{FergunClient.Config.LoadingEmote} {Locate("Uploading")}");
             try
             {
                 await SendEmbedAsync(Format.Url(Locate("HastebinLink"), (await Hastebin.UploadAsync(text)).GetLink()));
@@ -957,12 +957,12 @@ namespace Fergun.Modules
             sw.Stop();
 
             var sw2 = Stopwatch.StartNew();
-            FergunClient.Database.Find<GuildConfig>("Guilds", _ => true);
+            FergunClient.Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, _ => true);
             sw2.Stop();
 
             await SendEmbedAsync($"⏱{Format.Bold("Message")}: {sw.ElapsedMilliseconds}ms\n\n" +
-                $"{Constants.WebSocketEmote}{Format.Bold("WebSocket")}: {Context.Client.Latency}ms\n\n" +
-                $"{Constants.MongoDbEmote}{Format.Bold("Database")}: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms");
+                $"{FergunClient.Config.WebSocketEmote}{Format.Bold("WebSocket")}: {Context.Client.Latency}ms\n\n" +
+                $"{FergunClient.Config.MongoDbEmote}{Format.Bold("Database")}: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms");
         }
 
         [LongRunning]
@@ -973,9 +973,9 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Resize([Summary("resizeParam1")] string url = null)
         {
-            if (string.IsNullOrEmpty(FergunConfig.DeepAiApiKey))
+            if (string.IsNullOrEmpty(FergunClient.Config.DeepAiApiKey))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.DeepAiApiKey)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.DeepAiApiKey)));
             }
 
             UrlFindResult result;
@@ -992,7 +992,7 @@ namespace Fergun.Modules
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Post, "https://api.deepai.org/api/waifu2x"))
                 {
-                    request.Headers.Add("Api-Key", FergunConfig.DeepAiApiKey);
+                    request.Headers.Add("Api-Key", FergunClient.Config.DeepAiApiKey);
                     request.Content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("image", url) });
                     var response = await _httpClient.SendAsync(request);
                     response.EnsureSuccessStatusCode();
@@ -1020,7 +1020,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("ResizeResults"))
                 .WithImageUrl(resultUrl)
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -1069,9 +1069,9 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com")]
         public async Task<RuntimeResult> Screenshot([Summary("screenshotParam1")] string url)
         {
-            if (string.IsNullOrEmpty(FergunConfig.ApiFlashAccessKey))
+            if (string.IsNullOrEmpty(FergunClient.Config.ApiFlashAccessKey))
             {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInDatabase"), nameof(FergunConfig.ApiFlashAccessKey)));
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.ApiFlashAccessKey)));
             }
 
             Uri uri;
@@ -1089,7 +1089,7 @@ namespace Fergun.Modules
             ApiFlashResponse response;
             try
             {
-                response = await ApiFlash.UrlToImageAsync(FergunConfig.ApiFlashAccessKey, uri.AbsoluteUri, ApiFlash.FormatType.png, "400,403,404,500-511");
+                response = await ApiFlash.UrlToImageAsync(FergunClient.Config.ApiFlashAccessKey, uri.AbsoluteUri, ApiFlash.FormatType.png, "400,403,404,500-511");
             }
             catch (ArgumentException e)
             {
@@ -1147,6 +1147,10 @@ namespace Fergun.Modules
                 server = Context.Guild;
             }
 
+            string channelCountInfo = $"{server.TextChannels.Count + server.VoiceChannels.Count} " +
+                $"({FergunClient.Config.TextEmote} {server.TextChannels.Count} **|** " +
+                $"{FergunClient.Config.VoiceEmote} {server.VoiceChannels.Count})";
+
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("ServerInfo"))
 
@@ -1155,7 +1159,7 @@ namespace Fergun.Modules
                 .AddField("ID", server.Id, true)
 
                 .AddField(Locate("CategoryCount"), server.CategoryChannels.Count, true)
-                .AddField(Locate("ChannelCount"), $"{server.TextChannels.Count + server.VoiceChannels.Count} ({Constants.TextEmote} {server.TextChannels.Count} **|** {Constants.VoiceEmote} {server.VoiceChannels.Count})", true)
+                .AddField(Locate("ChannelCount"), channelCountInfo, true)
                 .AddField(Locate("RoleCount"), server.Roles.Count, true)
 
                 .AddField(Locate("DefaultChannel"), server.DefaultChannel?.Mention ?? Locate("None"), true)
@@ -1169,11 +1173,11 @@ namespace Fergun.Modules
             if (server.HasAllMembers)
             {
                 builder.AddField(Locate("Members"), $"{server.MemberCount} (Bots: {server.Users.Count(x => x.IsBot)}) **|** " +
-                $"{Constants.OnlineEmote} {server.Users.Count(x => x.Status == UserStatus.Online)} **|** " +
-                $"{Constants.IdleEmote} {server.Users.Count(x => x.Status == UserStatus.Idle)} **|** " +
-                $"{Constants.DndEmote} {server.Users.Count(x => x.Status == UserStatus.DoNotDisturb)} **|** " +
-                $"{Constants.StreamingEmote} {server.Users.Count(x => x.Activities.Any(x => x.Type == ActivityType.Streaming))} **|** " +
-                $"{Constants.OfflineEmote} {server.Users.Count(x => x.Status == UserStatus.Offline)}");
+                $"{FergunClient.Config.OnlineEmote} {server.Users.Count(x => x.Status == UserStatus.Online)} **|** " +
+                $"{FergunClient.Config.IdleEmote} {server.Users.Count(x => x.Status == UserStatus.Idle)} **|** " +
+                $"{FergunClient.Config.DndEmote} {server.Users.Count(x => x.Status == UserStatus.DoNotDisturb)} **|** " +
+                $"{FergunClient.Config.StreamingEmote} {server.Users.Count(x => x.Activities.Any(x => x.Type == ActivityType.Streaming))} **|** " +
+                $"{FergunClient.Config.OfflineEmote} {server.Users.Count(x => x.Status == UserStatus.Offline)}");
             }
             else
             {
@@ -1200,7 +1204,7 @@ namespace Fergun.Modules
             //if (server.Features.Any(x => x == "BANNER"))
             //{
             //}
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
@@ -1230,7 +1234,7 @@ namespace Fergun.Modules
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
             }
-            builder.WithColor(FergunConfig.EmbedColor);
+            builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
         }
@@ -1278,7 +1282,7 @@ namespace Fergun.Modules
                 .AddField(Locate("TargetLanguage"), result.Target.FullName, false)
                 .AddField(Locate("Result"), result.Text, false)
                 .WithThumbnailUrl("https://fergun.is-inside.me/u7fSdkx8.png")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -1426,7 +1430,7 @@ namespace Fergun.Modules
             var pager = new PaginatedMessage()
             {
                 Pages = pages,
-                Color = new Discord.Color(FergunConfig.EmbedColor),
+                Color = new Discord.Color(FergunClient.Config.EmbedColor),
                 Options = new PaginatorAppearanceOptions()
                 {
                     FooterFormat = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")} - {Locate("PaginatorFooter")}",
@@ -1519,7 +1523,6 @@ namespace Fergun.Modules
                 .AddField(Locate("CreatedAt"), user.CreatedAt)
                 .AddField(Locate("GuildJoinDate"), guildUser?.JoinedAt?.ToString() ?? "N/A")
                 .AddField(Locate("BoostingSince"), guildUser?.PremiumSince?.ToString() ?? "N/A")
-                //.AddField(GetValue("Roles"), !(user is IGuildUser) || guildUser.RoleIds.Count == 1 ? GetValue("None") : string.Join(", ", guildUser.RoleIds.Skip(1).Select(x => Context.Guild.GetRole(x).Mention)))
                 .WithThumbnailUrl(avatarUrl)
                 .WithColor(new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B));
 
@@ -1591,7 +1594,7 @@ namespace Fergun.Modules
                 .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .WithFooter(Locate("WikipediaSearch"))
                 .WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png")
-                .WithColor(FergunConfig.EmbedColor);
+                .WithColor(FergunClient.Config.EmbedColor);
 
             string url = Context.User.ActiveClients.Any(x => x == ClientType.Mobile) ? article.ContentUrls.Mobile.Page : article.ContentUrls.Desktop.Page;
             if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
@@ -1706,7 +1709,7 @@ namespace Fergun.Modules
             OCRSpaceResponse ocr;
             try
             {
-                ocr = await OCRSpaceApi.PerformOcrFromUrlAsync(FergunConfig.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
+                ocr = await OCRSpaceApi.PerformOcrFromUrlAsync(FergunClient.Config.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
             }
             catch (WebException e)
             {

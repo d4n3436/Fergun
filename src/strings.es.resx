@@ -2165,8 +2165,8 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="ContactInfoNoServer" xml:space="preserve">
 		<value>Si tienes algún reporte de bug, pregunta o sugerencia, puedes contactarme vía mensaje directo ({0}).</value>
 	</data>
-	<data name="ValueNotSetInDatabase" xml:space="preserve">
-		<value>El valor de `{0}` no ha sido establecido en la base de datos. Si este problema persiste, contacta a los desarrolladores.</value>
+	<data name="ValueNotSetInConfig" xml:space="preserve">
+		<value>El valor de `{0}` no ha sido establecido en la configuración. Si este problema persiste, contacta a los desarrolladores.</value>
 	</data>
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>No puedes dar la ID a un bot!</value>
@@ -2192,5 +2192,23 @@ Por favor inténtelo de nuevo más tarde.</value>
 	</data>
 	<data name="LavalinkNotConnected" xml:space="preserve">
 		<value>No se pudo conectar al servidor de Lavalink. Por favor inténtelo de nuevo más tarde.</value>
+	</data>
+	<data name="ServerBlacklisted" xml:space="preserve">
+		<value>El servidor {0} fue agregado a la lista negra.</value>
+	</data>
+	<data name="ServerBlacklistedWithReason" xml:space="preserve">
+		<value>El servidor {0} fue agregado a la lista negra con la razón: {1}</value>
+	</data>
+	<data name="blacklistserverSummary" xml:space="preserve">
+		<value>Agrega un servidor a la lista negra, o lo elimina de ella.</value>
+	</data>
+	<data name="blacklistserverParam1" xml:space="preserve">
+		<value>La ID del servidor a agregar a la lista negra.</value>
+	</data>
+	<data name="blacklistserverParam2" xml:space="preserve">
+		<value>La razón de ser incluido en la lista negra.</value>
+	</data>
+	<data name="ServerBlacklistRemoved" xml:space="preserve">
+		<value>El servidor {0} fue eliminado de la lista negra.</value>
 	</data>
 </root>

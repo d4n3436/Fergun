@@ -2163,8 +2163,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="ContactInfoNoServer" xml:space="preserve">
 		<value>Если у вас есть отчет об ошибке, вопрос или предложение, вы можете связаться со мной через прямое сообщение ({0}).</value>
 	</data>
-	<data name="ValueNotSetInDatabase" xml:space="preserve">
-		<value>Значение `{0}` не было установлено в базе данных. Если проблема не исчезнет, обратитесь к разработчикам.</value>
+	<data name="ValueNotSetInConfig" xml:space="preserve">
+		<value>Значение `{0}` не установлено в конфигурации. Если проблема не исчезнет, обратитесь к разработчикам.</value>
 	</data>
 	<data name="CannotGiveToBot" xml:space="preserve">
 		<value>Вы не можете дать ID боту!</value>
@@ -2190,5 +2190,23 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	</data>
 	<data name="LavalinkNotConnected" xml:space="preserve">
 		<value>Не удалось подключиться к серверу Lavalink. Пожалуйста, повторите попытку позже.</value>
+	</data>
+	<data name="ServerBlacklisted" xml:space="preserve">
+		<value>Сервер {0} занесен в черный список.</value>
+	</data>
+	<data name="ServerBlacklistedWithReason" xml:space="preserve">
+		<value>Сервер {0} был занесен в черный список по причине: {1}</value>
+	</data>
+	<data name="blacklistserverSummary" xml:space="preserve">
+		<value>Добавляет сервер в черный список или удаляет его.</value>
+	</data>
+	<data name="blacklistserverParam1" xml:space="preserve">
+		<value>ID сервера в черный список.</value>
+	</data>
+	<data name="blacklistserverParam2" xml:space="preserve">
+		<value>Причина попадания в черный список.</value>
+	</data>
+	<data name="ServerBlacklistRemoved" xml:space="preserve">
+		<value>Сервер {0} был удален из черного списка.</value>
 	</data>
 </root>

@@ -25,8 +25,8 @@ namespace Fergun.Attributes
                 {
                     x.Content = null;
                     x.Embed = new EmbedBuilder()
-                    .WithDescription($"{Constants.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
-                    .WithColor(FergunConfig.EmbedColor)
+                    .WithDescription($"{FergunClient.Config.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
+                    .WithColor(FergunClient.Config.EmbedColor)
                     .Build();
                 });
             }
