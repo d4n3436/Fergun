@@ -14,7 +14,6 @@ namespace Fergun.Services
     {
         private static readonly string _appDirectory = AppContext.BaseDirectory;
         private readonly string _logDirectoryPath;
-        private readonly string _logDirectoryName;
         private static TextWriter _writer;
         private readonly object _writerLock = new object();
         private readonly Timer _timer;
@@ -22,8 +21,8 @@ namespace Fergun.Services
 
         public LogService()
         {
-            _logDirectoryName = FergunClient.IsDebugMode ? "logs_debug" : "logs";
-            _logDirectoryPath = Path.Combine(_appDirectory, _logDirectoryName);
+            string logDirectoryName = FergunClient.IsDebugMode ? "logs_debug" : "logs";
+            _logDirectoryPath = Path.Combine(_appDirectory, logDirectoryName);
 
             // Create the log directory if it doesn't exist
             // What would happen if the folder is deleted while logging..?
@@ -166,7 +165,6 @@ namespace Fergun.Services
             else if (disposing)
             {
                 _writer.Dispose();
-                _writer = null;
                 _timer.Dispose();
                 _disposed = true;
             }

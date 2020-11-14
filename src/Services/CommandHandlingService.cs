@@ -281,7 +281,7 @@ namespace Fergun
                     // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
 
                     var channel = await context.Client.GetChannelAsync(FergunClient.Config.LogChannel);
-                    if (channel == null || !(channel is IMessageChannel messageChannel))
+                    if (!(channel is IMessageChannel messageChannel))
                     {
                         await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Invalid log channel Id ({FergunClient.Config.LogChannel}). Not possible to send the embed with the error info."));
                         break;

@@ -578,7 +578,7 @@ namespace Fergun.Services
                     {
                         await LavaNode.LeaveAsync(player.VoiceChannel);
                     }
-                    catch (NullReferenceException) { };
+                    catch (NullReferenceException) { }
                 }
             }
         }

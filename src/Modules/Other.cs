@@ -408,7 +408,7 @@ namespace Fergun.Modules
             var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
             string cpu = null;
             long? totalRamUsage = null;
-            long? processRamUsage;
+            long processRamUsage;
             long? totalRam = null;
             string os = RuntimeInformation.OSDescription;
             if (FergunClient.IsLinux)
@@ -498,7 +498,7 @@ namespace Fergun.Modules
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("RAMUsage"),
-                $"{(processRamUsage == null || totalRam == null ? "?MB" : $"{processRamUsage}MB ({Math.Round((double)processRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
+                $"{processRamUsage}MB ({(totalRam == null ? 0 : Math.Round((double)processRamUsage / totalRam.Value * 100, 2))}%) " +
                 $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
                 $"/ {totalRam?.ToString() ?? "?"}MB", true)
 

@@ -668,11 +668,6 @@ namespace Fergun.Modules
             {
                 return Locate("ErrorInAPI");
             }
-            catch (Exception)
-            {
-                // Catch and throw any other exception to prevent locks
-                throw;
-            }
             finally
             {
                 _queue[adventureId].Release();
@@ -1029,10 +1024,7 @@ namespace Fergun.Modules
                 .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:", IconUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            if (response.Payload.Data.Adventure.CreatedAt != null)
-            {
-                builder.Timestamp = response.Payload.Data.Adventure.CreatedAt;
-            }
+            builder.Timestamp = response?.Payload?.Data?.Adventure?.CreatedAt;
 
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
@@ -1250,7 +1242,11 @@ namespace Fergun.Modules
 
         private string CheckResponse(WebSocketResponse response)
         {
-            if (response?.Payload?.Message != null)
+            if (response == null)
+            {
+                return Locate("ErrorInAPI");
+            }
+            if (response.Payload?.Message != null)
             {
                 return response.Payload.Message;
             }

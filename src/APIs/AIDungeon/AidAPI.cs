@@ -28,7 +28,7 @@ namespace Fergun.APIs.AIDungeon
         {
             if (string.IsNullOrEmpty(Token))
             {
-                throw new NullReferenceException("Token can't be empty.");
+                throw new ArgumentNullException(nameof(Token), "Token can't be empty.");
             }
 
             ClientWebSocket webSocket = new ClientWebSocket();

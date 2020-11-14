@@ -139,7 +139,7 @@ namespace Fergun.Extensions
                 {
                     result = process.StandardError.ReadToEnd();
                 }
-            };
+            }
 
             return result;
         }

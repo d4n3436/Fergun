@@ -25,7 +25,7 @@ namespace Fergun.Attributes.Preconditions
         private readonly ulong[] _guildIds = Array.Empty<ulong>();
 
         /// <inheritdoc />
-        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo _, IServiceProvider _1)
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             return _guildIds.Length == 0 || Array.Exists(_guildIds, x => x == context.Guild.Id)
                 ? Task.FromResult(PreconditionResult.FromError(ErrorMessage ?? "Disabled command / module."))

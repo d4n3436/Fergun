@@ -430,9 +430,7 @@ namespace Fergun
                         }
                     }
                 }
-                catch (CultureNotFoundException)
-                {
-                }
+                catch (CultureNotFoundException) { }
             }
             return result;
         }

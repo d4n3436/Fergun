@@ -49,7 +49,6 @@ namespace Fergun.APIs
             bool extractText = false, string acceptLanguage = "", string userAgent = "", string headers = "", string cookies = "", int latitude = 0,
             int longitude = 0, uint accuracy = 0, string proxy = "")
         {
-
             if (string.IsNullOrEmpty(accessKey))
             {
                 throw new ArgumentNullException(nameof(accessKey));
@@ -84,15 +83,15 @@ namespace Fergun.APIs
                 }
                 query["ttl"] = ttl.ToString();
             }
-            if (fresh != false)
+            if (fresh)
             {
                 query["fresh"] = "true";
             }
-            if (fullPage != false)
+            if (fullPage)
             {
                 query["full_page"] = "true";
             }
-            if (scrollPage != false)
+            if (scrollPage)
             {
                 query["scroll_page"] = "true";
             }
@@ -100,7 +99,7 @@ namespace Fergun.APIs
             {
                 query["width"] = width.ToString();
             }
-            if (height != 1080 && fullPage != true)
+            if (height != 1080 && !fullPage)
             {
                 query["height"] = height.ToString();
             }
@@ -124,11 +123,11 @@ namespace Fergun.APIs
                 }
                 query["quality"] = quality.ToString();
             }
-            if (transparent != false && format == FormatType.png)
+            if (transparent && format == FormatType.png)
             {
                 query["transparent"] = "true";
             }
-            if (thumbnailWidth != 0 && fullPage != true)
+            if (thumbnailWidth != 0 && !fullPage)
             {
                 query["thumbnail_width"] = thumbnailWidth.ToString();
             }
@@ -144,11 +143,11 @@ namespace Fergun.APIs
             {
                 query["js"] = js;
             }
-            if (extractHtml != false)
+            if (extractHtml)
             {
                 query["extract_html"] = "true";
             }
-            if (extractText != false)
+            if (extractText)
             {
                 query["extract_text"] = "true";
             }

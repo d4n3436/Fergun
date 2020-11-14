@@ -429,7 +429,7 @@ namespace Fergun.Modules
                 {
                     bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                     stream.Position = 0;
-                    var msg = await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{_color}.png");
+                    await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{_color}.png");
                 }
             }
 
@@ -1545,7 +1545,7 @@ namespace Fergun.Modules
                 response = await wc.DownloadStringTaskAsync($"https://{GetLanguage()}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
             }
             //response = '[' + SearchResponse.Substring(SearchResponse.IndexOf(',') + 1, SearchResponse.Length - SearchResponse.IndexOf(',') - 1);
-            List<dynamic> search = search = JsonConvert.DeserializeObject<List<dynamic>>(response);
+            List<dynamic> search = JsonConvert.DeserializeObject<List<dynamic>>(response);
             string langToUse = GetLanguage();
             if (search[1].Count == 0)
             {
@@ -1732,9 +1732,6 @@ namespace Fergun.Modules
 
             return (ocr.ProcessingTimeInMilliseconds, text);
         }
-
-        private static async Task<SimpleTranslationResult> TranslateSimpleAsync(string text, Language target, Language source)
-            => await TranslateSimpleAsync(text, target.ISO639, source == Language.Auto ? "" : source.ISO639);
 
         private static async Task<SimpleTranslationResult> TranslateSimpleAsync(string text, string target, string source = "")
         {

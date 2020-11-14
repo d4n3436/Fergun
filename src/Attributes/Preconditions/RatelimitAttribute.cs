@@ -46,12 +46,12 @@ namespace Fergun.Attributes.Preconditions
         /// </param>
         public RatelimitAttribute(
             uint times, double period, Measure measure,
-            RatelimitFlags flags = RatelimitFlags.None)
+            RatelimitOptions flags = RatelimitOptions.None)
         {
             InvokeLimit = times;
-            _noLimitInDMs = (flags & RatelimitFlags.NoLimitInDMs) == RatelimitFlags.NoLimitInDMs;
-            _noLimitForAdmins = (flags & RatelimitFlags.NoLimitForAdmins) == RatelimitFlags.NoLimitForAdmins;
-            _applyPerGuild = (flags & RatelimitFlags.ApplyPerGuild) == RatelimitFlags.ApplyPerGuild;
+            _noLimitInDMs = (flags & RatelimitOptions.NoLimitInDMs) == RatelimitOptions.NoLimitInDMs;
+            _noLimitForAdmins = (flags & RatelimitOptions.NoLimitForAdmins) == RatelimitOptions.NoLimitForAdmins;
+            _applyPerGuild = (flags & RatelimitOptions.ApplyPerGuild) == RatelimitOptions.ApplyPerGuild;
 
             InvokeLimitPeriod = measure switch
             {
@@ -83,19 +83,19 @@ namespace Fergun.Attributes.Preconditions
         /// </remarks>
         public RatelimitAttribute(
             uint times, TimeSpan period,
-            RatelimitFlags flags = RatelimitFlags.None)
+            RatelimitOptions flags = RatelimitOptions.None)
         {
             InvokeLimit = times;
-            _noLimitInDMs = (flags & RatelimitFlags.NoLimitInDMs) == RatelimitFlags.NoLimitInDMs;
-            _noLimitForAdmins = (flags & RatelimitFlags.NoLimitForAdmins) == RatelimitFlags.NoLimitForAdmins;
-            _applyPerGuild = (flags & RatelimitFlags.ApplyPerGuild) == RatelimitFlags.ApplyPerGuild;
+            _noLimitInDMs = (flags & RatelimitOptions.NoLimitInDMs) == RatelimitOptions.NoLimitInDMs;
+            _noLimitForAdmins = (flags & RatelimitOptions.NoLimitForAdmins) == RatelimitOptions.NoLimitForAdmins;
+            _applyPerGuild = (flags & RatelimitOptions.ApplyPerGuild) == RatelimitOptions.ApplyPerGuild;
 
             InvokeLimitPeriod = period;
         }
 
         /// <inheritdoc />
         public override async Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context, CommandInfo _, IServiceProvider __)
+            ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if ((await context.Client.GetApplicationInfoAsync()).Owner.Id == context.User.Id)
                 return PreconditionResult.FromSuccess();
@@ -166,7 +166,7 @@ namespace Fergun.Attributes.Preconditions
     ///     Determines the behavior of the <see cref="RatelimitAttribute"/>.
     /// </summary>
     [Flags]
-    public enum RatelimitFlags
+    public enum RatelimitOptions
     {
         /// <summary>
         ///     Set none of the flags.

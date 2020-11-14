@@ -34,7 +34,7 @@ namespace Fergun.Attributes.Preconditions
 
         /// <inheritdoc />
         public override async Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context, ParameterInfo __, object value, IServiceProvider ___)
+            ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
         {
             if (value is IGuildUser user)
             {
