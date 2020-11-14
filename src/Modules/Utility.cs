@@ -30,6 +30,7 @@ using GoogleTranslateFreeApi;
 using NCalc;
 using Newtonsoft.Json;
 using YoutubeExplode;
+using YoutubeExplode.Videos;
 
 namespace Fergun.Modules
 {
@@ -1666,6 +1667,30 @@ namespace Fergun.Modules
                 .WithTimestamp(new DateTime(int.Parse(comic.Year), int.Parse(comic.Month), int.Parse(comic.Day)));
 
             await ReplyAsync(embed: builder.Build());
+            return FergunResult.FromSuccess();
+        }
+
+        [Command("youtube", RunMode = RunMode.Async)]
+        [Summary("youtubeSummary")]
+        [Alias("yt")]
+        public async Task<RuntimeResult> Youtube([Remainder, Summary("youtubeParam1")] string query)
+        {
+            IReadOnlyList<Video> videos;
+            try
+            {
+                videos = await _ytClient.Search.GetVideosAsync(query, 0, 1);
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
+                return FergunResult.FromError(e.Message);
+            }
+            if (videos.Count == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+            await ReplyAsync(videos[0].Url);
+
             return FergunResult.FromSuccess();
         }
 
