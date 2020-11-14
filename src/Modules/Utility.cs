@@ -1633,6 +1633,41 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
+        [LongRunning]
+        [Command("wolframalpha", RunMode = RunMode.Async)]
+        [Summary("wolframalphaSummary")]
+        [Alias("wolfram", "wa")]
+        [Example("2 + 2")]
+        public async Task<RuntimeResult> Wolframalpha([Remainder, Summary("wolframalphaParam1")] string query)
+        {
+            if (string.IsNullOrEmpty(FergunClient.Config.WolframAlphaAppId))
+            {
+                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.WolframAlphaAppId)));
+            }
+
+            string result;
+            try
+            {
+                result = await _httpClient.GetStringAsync(new Uri($"https://api.wolframalpha.com/v1/result?i={Uri.EscapeDataString(query)}&appid={FergunClient.Config.WolframAlphaAppId}"));
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling WolframAlpha API", e));
+                return FergunResult.FromError(e.Message);
+            }
+
+            var builder = new EmbedBuilder()
+                .WithAuthor("Wolfram Alpha", "https://fergun.is-inside.me/W3gbxqzY.png")
+                .AddField(Locate("Input"), Format.Code(query.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                .AddField(Locate("Output"), Format.Code(result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                .WithFooter("wolframalpha.com")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            await ReplyAsync(embed: builder.Build());
+
+            return FergunResult.FromSuccess();
+        }
+
         [Command("xkcd")]
         [Summary("xkcdSummary")]
         [Example("1000")]

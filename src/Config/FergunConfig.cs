@@ -67,6 +67,12 @@ namespace Fergun
         public string OCRSpaceApiKey { get; private set; }
 
         /// <summary>
+        /// Gets the WolframAlpha App ID.
+        /// </summary>
+        [JsonProperty]
+        public string WolframAlphaAppId { get; private set; }
+
+        /// <summary>
         /// Gets the raw value of the color the bot will use in its embeds.
         /// </summary>
         [JsonProperty]
