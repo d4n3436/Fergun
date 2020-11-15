@@ -16,6 +16,7 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.BingTranslator;
+using Fergun.APIs.Dictionary;
 using Fergun.APIs.DuckDuckGo;
 using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
@@ -507,6 +508,128 @@ namespace Fergun.Modules
                 _ = message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
             }
+        }
+
+        [LongRunning]
+        [Command("define", RunMode = RunMode.Async)]
+        [Summary("defineSummary")]
+        [Alias("def", "definition", "dictionary")]
+        public async Task<RuntimeResult> Define([Remainder, Summary("defineParam1")] string word)
+        {
+            IReadOnlyList<DefinitionCategory> results;
+            try
+            {
+                results = await DictionaryApi.GetDefinitionsAsync(word, GetLanguage(), true);
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling Dictionary API", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling Dictionary API", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+            catch (JsonReaderException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error deserializing Dictionary API response", e));
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+
+            if (results == null || results.Count == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+
+            var definitions = new List<SimpleDefinitionInfo>();
+            foreach (var result in results)
+            {
+                foreach (var meaning in result.Meanings)
+                {
+                    foreach (var definition in meaning.Definitions)
+                    {
+                        definitions.Add(new SimpleDefinitionInfo
+                        {
+                            Word = result.Word,
+                            PartOfSpeech = meaning.PartOfSpeech,
+                            Definition = definition.Definition,
+                            Example = definition.Example,
+                            Synonyms = definition.Synonyms,
+                            Antonyms = definition.Antonyms
+                        });
+                    }
+                }
+            }
+
+            var pages = definitions.Select(x =>
+            {
+                var fields = new List<EmbedFieldBuilder>
+                {
+                    new EmbedFieldBuilder
+                    {
+                        Name = Locate("Word"),
+                        Value =  x.PartOfSpeech == null || x.PartOfSpeech == "undefined" ? x.Word : $"{x.Word} ({x.PartOfSpeech})",
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        Name = Locate("Definition"),
+                        Value = x.Definition
+                    }
+                };
+                if (!string.IsNullOrEmpty(x.Example))
+                {
+                    fields.Add(new EmbedFieldBuilder
+                    {
+                        Name = Locate("Example"),
+                        Value = x.Example
+                    });
+                }
+                if (x.Synonyms.Count > 0)
+                {
+                    fields.Add(new EmbedFieldBuilder
+                    {
+                        Name = Locate("Synonyms"),
+                        Value = string.Join(", ", x.Synonyms)
+                    });
+                }
+                if (x.Antonyms.Count > 0)
+                {
+                    fields.Add(new EmbedFieldBuilder
+                    {
+                        Name = Locate("Antonyms"),
+                        Value = string.Join(", ", x.Antonyms)
+                    });
+                }
+
+                return new EmbedBuilder { Fields = fields };
+            });
+
+            var pager = new PaginatedMessage
+            {
+                Title = "Define",
+                Pages = pages,
+                Color = new Discord.Color(FergunClient.Config.EmbedColor),
+                Options = new PaginatorAppearanceOptions
+                {
+                    FooterFormat = Locate("PaginatorFooter")
+                }
+            };
+
+            var reactions = new ReactionList
+            {
+                First = definitions.Count >= 3,
+                Backward = true,
+                Forward = true,
+                Last = definitions.Count >= 3,
+                Stop = true,
+                Jump = definitions.Count >= 4,
+                Info = false
+            };
+
+            await PagedReplyAsync(pager, reactions);
+
+            return FergunResult.FromSuccess();
         }
 
         [Command("editsnipe", RunMode = RunMode.Async)]
