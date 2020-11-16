@@ -143,7 +143,7 @@ namespace Fergun.Modules
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Original language: {originalLang}"));
 
                     // Fallback to English if the detected language is not supported by Bing.
-                    if (BingTranslatorApi.SupportedLanguages.IndexOf(originalLang) == -1)
+                    if (!BingTranslatorApi.SupportedLanguages.Any(x => x == originalLang))
                     {
                         await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Badtranslator: Original language not supported by Bing. Fallback to English."));
                         originalLang = "en";
