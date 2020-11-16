@@ -20,6 +20,7 @@ using Fergun.APIs.Dictionary;
 using Fergun.APIs.DuckDuckGo;
 using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
+using Fergun.APIs.WaybackMachine;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
@@ -55,6 +56,118 @@ namespace Fergun.Modules
         {
             _cmdService ??= commands;
             _logService ??= logService;
+        }
+
+        [RequireNsfw(ErrorMessage = "NSFWOnly")]
+        [RequireBotPermission(ChannelPermission.AttachFiles, ErrorMessage = "BotRequireAttachFiles")]
+        [LongRunning]
+        [Command("archive", RunMode = RunMode.Async), Ratelimit(1, 1.5, Measure.Minutes)]
+        [Summary("archiveSummary")]
+        [Remarks("TimestampFormat")]
+        [Alias("waybackmachine", "wb")]
+        public async Task<RuntimeResult> Archive([Summary("archiveParam1")] string url, [Summary("archiveParam2")] ulong timestamp)
+        {
+            double length = Math.Floor(Math.Log10(timestamp) + 1);
+            if (length < 4 || length > 14)
+            {
+                return FergunResult.FromError(Locate("InvalidTimestamp"));
+            }
+
+            Uri uri;
+            try
+            {
+                uri = new UriBuilder(Uri.UnescapeDataString(url)).Uri;
+            }
+            catch (UriFormatException)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Archive: Invalid url: {Uri.UnescapeDataString(url)}"));
+                return FergunResult.FromError(Locate("InvalidUrl"));
+            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Archive: Url: {uri.AbsoluteUri}"));
+
+            WaybackResponse waybackResponse;
+            try
+            {
+                waybackResponse = await WaybackApi.GetSnapshotAsync(uri.AbsoluteUri, timestamp);
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error in Wayback Machine API, url: {url}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error in Wayback Machine API, url: {url}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
+            var snapshot = waybackResponse.ArchivedSnapshots?.Closest;
+
+            if (snapshot == null)
+            {
+                return FergunResult.FromError(Locate("NoSnapshots"));
+            }
+
+            bool success = DateTime.TryParseExact(snapshot.Timestamp, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var datetime);
+
+            var builder = new EmbedBuilder()
+                .WithTitle("Wayback Machine")
+                .AddField("Url", Format.Url(Locate("ClickHere"), snapshot.Url))
+                .AddField(Locate("Timestamp"), success ? datetime.ToString() : "?")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            if (string.IsNullOrEmpty(FergunClient.Config.ApiFlashAccessKey))
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Archive: ApiFlash access key is null or empty, sending only the embed."));
+
+                await ReplyAsync(embed: builder.Build());
+
+                return FergunResult.FromSuccess();
+            }
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Archive: Requesting screenshot of url: {snapshot.Url}"));
+            ApiFlashResponse response;
+            try
+            {
+                response = await ApiFlash.UrlToImageAsync(FergunClient.Config.ApiFlashAccessKey, snapshot.Url, ApiFlash.FormatType.png, "400,403,404,500-511");
+            }
+            catch (ArgumentException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Archive: Error in ApiFlash API", e));
+                return FergunResult.FromError(Locate("InvalidUrl"));
+            }
+            catch (WebException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Archive: Error in ApiFlash API", e));
+                return FergunResult.FromError(e.Message);
+            }
+
+            if (response.ErrorMessage != null)
+            {
+                return FergunResult.FromError(response.ErrorMessage);
+            }
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Archive: Sending the embed..."));
+            try
+            {
+                builder.ImageUrl = "attachment://screenshot.png";
+                using (Stream image = await _httpClient.GetStreamAsync(new Uri(response.Url)))
+                {
+                    await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png", embed: builder.Build());
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the image from url: {url}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
+            return FergunResult.FromSuccess();
         }
 
         [Command("avatar", RunMode = RunMode.Async)]
