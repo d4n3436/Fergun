@@ -65,6 +65,7 @@ namespace Fergun.Modules
         [Summary("archiveSummary")]
         [Remarks("TimestampFormat")]
         [Alias("waybackmachine", "wb")]
+        [Example("https://www.youtube.com 2008")]
         public async Task<RuntimeResult> Archive([Summary("archiveParam1")] string url, [Summary("archiveParam2")] ulong timestamp)
         {
             double length = Math.Floor(Math.Log10(timestamp) + 1);
@@ -627,6 +628,7 @@ namespace Fergun.Modules
         [Command("define", RunMode = RunMode.Async)]
         [Summary("defineSummary")]
         [Alias("def", "definition", "dictionary")]
+        [Example("hi")]
         public async Task<RuntimeResult> Define([Remainder, Summary("defineParam1")] string word)
         {
             IReadOnlyList<DefinitionCategory> results;
@@ -1449,6 +1451,7 @@ namespace Fergun.Modules
         [Command("shorten", RunMode = RunMode.Async), Ratelimit(1, 1, Measure.Minutes)]
         [Summary("shortenSummary")]
         [Alias("short")]
+        [Example("https://www.fergun.com")]
         public async Task<RuntimeResult> Shorten([Summary("shortenParam1")] string url)
         {
             Uri uri;
@@ -1991,6 +1994,7 @@ namespace Fergun.Modules
         [Command("youtube", RunMode = RunMode.Async)]
         [Summary("youtubeSummary")]
         [Alias("yt")]
+        [Example("discord")]
         public async Task<RuntimeResult> Youtube([Remainder, Summary("youtubeParam1")] string query)
         {
             IReadOnlyList<Video> videos;
