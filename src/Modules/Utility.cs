@@ -36,6 +36,7 @@ using YoutubeExplode.Videos;
 
 namespace Fergun.Modules
 {
+    [Order(1)]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Utility : FergunBase
@@ -45,6 +46,8 @@ namespace Fergun.Modules
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
+        private static Dictionary<string, string> _commandListCache;
+        private static int _cachedVisibleCmdCount = -1;
         private static XkcdComic _lastComic;
         private static DateTimeOffset _timeToCheckComic = DateTimeOffset.UtcNow;
         private static CommandService _cmdService;
@@ -71,7 +74,7 @@ namespace Fergun.Modules
             double length = Math.Floor(Math.Log10(timestamp) + 1);
             if (length < 4 || length > 14)
             {
-                return FergunResult.FromError(Locate("InvalidTimestamp"));
+                return FergunResult.FromError($"{Locate("InvalidTimestamp")} {Locate("TimestampFormat")}");
             }
 
             Uri uri;
@@ -625,7 +628,7 @@ namespace Fergun.Modules
         }
 
         [LongRunning]
-        [Command("define", RunMode = RunMode.Async)]
+        [Command("define", RunMode = RunMode.Async), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("defineSummary")]
         [Alias("def", "definition", "dictionary")]
         [Example("hi")]
@@ -786,24 +789,18 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder();
             if (commandName == null)
             {
-                var textCommands = _cmdService.Commands.Where(x => x.Module.Name == "Text").Select(x => x.Name);
-                var utilityCommands = _cmdService.Commands.Where(x => x.Module.Name == "Utility").Select(x => x.Name);
-                var moderationCommands = _cmdService.Commands.Where(x => x.Module.Name == "Moderation").Select(x => x.Name);
-                var musicCommands = _cmdService.Commands.Where(x => x.Module.Name == "Music").Select(x => x.Name);
-                var aidCommands = _cmdService.Commands.Where(x => x.Module.Name == "AIDungeon").Select(x => x.Name);
-                var otherCommands = _cmdService.Commands.Where(x => x.Module.Name == "Other").Select(x => x.Name);
-                var ownerCommands = _cmdService.Commands.Where(x => x.Module.Name == "Owner").Select(x => x.Name);
-                int visibleCommandCount = _cmdService.Commands.Count(x => x.Module.Name != Constants.DevelopmentModuleName);
+                builder.Title = Locate("CommandList");
 
-                builder.WithTitle(Locate("CommandList"))
-                    .AddField(Locate("TextCommands"), string.Join(", ", textCommands))
-                    .AddField(Locate("UtilityCommands"), string.Join(", ", utilityCommands))
-                    .AddField(Locate("ModerationCommands"), string.Join(", ", moderationCommands))
-                    .AddField(Locate("MusicCommands"), string.Join(", ", musicCommands))
-                    .AddField(string.Format(Locate("AIDCommands"), GetPrefix()), string.Join(", ", aidCommands))
-                    .AddField(Locate("OtherCommands"), string.Join(", ", otherCommands))
-                    .AddField(Locate("OwnerCommands"), string.Join(", ", ownerCommands))
-                    .AddField(Locate("Notes"), string.Format(Locate("NotesInfo"), GetPrefix()));
+                InitializeCmdListCache();
+
+                foreach (var module in _commandListCache)
+                {
+                    string name = module.Key == "AIDungeon" ?
+                        string.Format(Locate($"{module.Key}Commands"), GetPrefix()) :
+                        Locate($"{module.Key}Commands");
+
+                    builder.AddField(name, module.Value);
+                }
 
                 string version = $"v{Constants.Version}";
                 if (FergunClient.IsDebugMode)
@@ -814,7 +811,7 @@ namespace Fergun.Modules
                 {
                     builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
                 }
-                builder.WithFooter(string.Format(Locate("HelpFooter"), version, visibleCommandCount))
+                builder.WithFooter(string.Format(Locate("HelpFooter"), version, _cachedVisibleCmdCount))
                     .WithColor(FergunClient.Config.EmbedColor);
 
                 await ReplyAsync(embed: builder.Build());
@@ -1920,7 +1917,7 @@ namespace Fergun.Modules
         }
 
         [LongRunning]
-        [Command("wolframalpha", RunMode = RunMode.Async)]
+        [Command("wolframalpha", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("wolframalphaSummary")]
         [Alias("wolfram", "wa")]
         [Example("2 + 2")]
@@ -2148,6 +2145,27 @@ namespace Fergun.Modules
                 catch (WebException) { return; }
                 _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
                 _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
+            }
+        }
+
+        private static void InitializeCmdListCache()
+        {
+            if (_commandListCache == null)
+            {
+                _commandListCache = new Dictionary<string, string>();
+
+                var modules = _cmdService.Modules
+                    .Where(x => x.Name != Constants.DevelopmentModuleName && x.Commands.Count > 0)
+                    .OrderBy(x => x.Attributes.OfType<OrderAttribute>()?.FirstOrDefault()?.Order ?? int.MaxValue);
+
+                foreach (var module in modules)
+                {
+                    _commandListCache.Add(module.Name, string.Join(", ", module.Commands.Select(x => x.Name)));
+                }
+            }
+            if (_cachedVisibleCmdCount == -1)
+            {
+                _cachedVisibleCmdCount = _cmdService.Commands.Count(x => x.Module.Name != Constants.DevelopmentModuleName);
             }
         }
     }

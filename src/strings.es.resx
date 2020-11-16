@@ -1100,7 +1100,7 @@ Puedes usar Say luego de el texto para hablar.</value>
 	<data name="Softbanned" xml:space="preserve">
     <value>El usuario {0} fue softbaneado.</value>
   </data>
-	<data name="AIDCommands" xml:space="preserve">
+	<data name="AIDungeonCommands" xml:space="preserve">
     <value>AI Dungeon (usa {0}aid &lt;comando&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">

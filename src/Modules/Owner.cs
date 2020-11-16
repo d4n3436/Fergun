@@ -17,6 +17,7 @@ using Microsoft.CodeAnalysis.Scripting;
 
 namespace Fergun.Modules
 {
+    [Order(6)]
     [AlwaysEnabled]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [RequireOwner(ErrorMessage = "BotOwnerOnly")]

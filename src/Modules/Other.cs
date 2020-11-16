@@ -21,6 +21,7 @@ using Fergun.Utils;
 
 namespace Fergun.Modules
 {
+    [Order(5)]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Other : FergunBase

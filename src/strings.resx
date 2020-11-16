@@ -1100,7 +1100,7 @@ You can use Say before the text to talk.</value>
 	<data name="Softbanned" xml:space="preserve">
     <value>User {0} was softbanned.</value>
   </data>
-	<data name="AIDCommands" xml:space="preserve">
+	<data name="AIDungeonCommands" xml:space="preserve">
     <value>AI Dungeon (use {0}aid &lt;command&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">

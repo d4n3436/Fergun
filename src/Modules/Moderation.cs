@@ -11,6 +11,7 @@ using Fergun.Extensions;
 
 namespace Fergun.Modules
 {
+    [Order(2)]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]

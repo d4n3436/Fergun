@@ -18,6 +18,7 @@ using Victoria.Enums;
 
 namespace Fergun.Modules
 {
+    [Order(3)]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [UserMustBeInVoice("lyrics", "spotify")]

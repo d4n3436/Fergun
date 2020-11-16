@@ -1103,7 +1103,7 @@
 	<data name="Softbanned" xml:space="preserve">
     <value>Пользователь {0} был заблокирован.</value>
   </data>
-	<data name="AIDCommands" xml:space="preserve">
+	<data name="AIDungeonCommands" xml:space="preserve">
     <value>AI Dungeon (используйте {0}aid &lt;command&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">

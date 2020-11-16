@@ -26,6 +26,7 @@ namespace Fergun.Modules
 {
     using ActionType = APIs.AIDungeon.ActionType;
 
+    [Order(4)]
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
     [Name("AIDungeon"), Group("aid"), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class AIDungeon : FergunBase

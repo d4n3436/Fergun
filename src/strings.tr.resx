@@ -1100,7 +1100,7 @@ Konuşmak için metinden önce Say'ı kullanabilirsiniz.</value>
 	<data name="Softbanned" xml:space="preserve">
     <value>{0} kullanıcısı yazılımla yasaklandı.</value>
   </data>
-	<data name="AIDCommands" xml:space="preserve">
+	<data name="AIDungeonCommands" xml:space="preserve">
     <value>AI Dungeon (kullanım {0}aid &lt;komut&gt;)</value>
   </data>
 	<data name="RevertingLastAction" xml:space="preserve">
