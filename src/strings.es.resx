@@ -2211,4 +2211,91 @@ Por favor inténtelo de nuevo más tarde.</value>
 	<data name="ServerBlacklistRemoved" xml:space="preserve">
 		<value>El servidor {0} fue eliminado de la lista negra.</value>
 	</data>
+	<data name="NoPresenceIntent" xml:space="preserve">
+		<value>No puedo obtener el estado de Spotify porque no tengo: Guild Presences Intent.</value>
+	</data>
+	<data name="NoSpotifyStatus" xml:space="preserve">
+		<value>No se encontró ningún estado de Spotify para el usuario {0}.</value>
+	</data>
+	<data name="ClickHere" xml:space="preserve">
+		<value>Click aquí</value>
+	</data>
+	<data name="Title" xml:space="preserve">
+		<value>Título</value>
+	</data>
+	<data name="Artists" xml:space="preserve">
+		<value>Artista(s)</value>
+	</data>
+	<data name="Album" xml:space="preserve">
+		<value>Álbum</value>
+	</data>
+	<data name="Duration" xml:space="preserve">
+		<value>Duración</value>
+	</data>
+	<data name="Lyrics" xml:space="preserve">
+		<value>Letra</value>
+	</data>
+	<data name="TrackUrl" xml:space="preserve">
+		<value>Url de la pista musical</value>
+	</data>
+	<data name="spotifySummary" xml:space="preserve">
+		<value>Obtiene la información del estado de Spotify de un usuario.</value>
+	</data>
+	<data name="spotifyParam1" xml:space="preserve">
+		<value>El usuario a obtener la información de estado de Spotify.</value>
+	</data>
+	<data name="wolframalphaSummary" xml:space="preserve">
+		<value>Obtiene una respuesta de Wolfram|Alpha basado en la consulta.</value>
+	</data>
+	<data name="wolframalphaParam1" xml:space="preserve">
+		<value>La consulta a enviar.</value>
+	</data>
+	<data name="defineSummary" xml:space="preserve">
+		<value>Obtiene definiciones de una palabra.</value>
+	</data>
+	<data name="defineParam1" xml:space="preserve">
+		<value>La palabra a buscar.</value>
+	</data>
+	<data name="Word" xml:space="preserve">
+		<value>Palabra</value>
+	</data>
+	<data name="Definition" xml:space="preserve">
+		<value>Definición</value>
+	</data>
+	<data name="Synonyms" xml:space="preserve">
+		<value>Sinónimos</value>
+	</data>
+	<data name="Antonyms" xml:space="preserve">
+		<value>Antónimos</value>
+	</data>
+	<data name="archiveSummary" xml:space="preserve">
+		<value>Obtiene una captura de pantalla de un sitio web en el año/mes/día especifado usando una marca de tiempo.</value>
+	</data>
+	<data name="archiveParam1" xml:space="preserve">
+		<value>La Url del sitio web a tomar una captura de pantalla.</value>
+	</data>
+	<data name="archiveParam2" xml:space="preserve">
+		<value>La marca de tiempo con el formato especificado.</value>
+	</data>
+	<data name="TimestampFormat" xml:space="preserve">
+		<value>La marca de tiempo debe tener el formato `YYYYMMDDhhmmss`, donde `YYYY` es requerido y los otros valores son opcionales.</value>
+	</data>
+	<data name="InvalidTimestamp" xml:space="preserve">
+		<value>Marca de tiempo inválida.</value>
+	</data>
+	<data name="NoSnapshots" xml:space="preserve">
+		<value>No se encontraron instantáneas para la url y marca de tiempo especificados.</value>
+	</data>
+	<data name="Timestamp" xml:space="preserve">
+		<value>Marca de tiempo</value>
+	</data>
+	<data name="CouldNotFindLine" xml:space="preserve">
+		<value>No se pudo encontrar el número de línea del método del comando.</value>
+	</data>
+	<data name="shortenSummary" xml:space="preserve">
+		<value>Acorta una Url.</value>
+	</data>
+	<data name="shortenParam1" xml:space="preserve">
+		<value>La Url a acortar.</value>
+	</data>
 </root>

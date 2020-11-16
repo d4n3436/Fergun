@@ -2212,4 +2212,91 @@ Please try again later.</value>
 	<data name="LavalinkNotConnected" xml:space="preserve">
 		<value>Could not connect to the Lavalink server. Please try again later.</value>
 	</data>
+	<data name="NoPresenceIntent" xml:space="preserve">
+		<value>Cannot get Spotify status because I don't have the Guild Presences intent.</value>
+	</data>
+	<data name="NoSpotifyStatus" xml:space="preserve">
+		<value>No Spotify status found for user {0}.</value>
+	</data>
+	<data name="ClickHere" xml:space="preserve">
+		<value>Click here</value>
+	</data>
+	<data name="Title" xml:space="preserve">
+		<value>Title</value>
+	</data>
+	<data name="Artists" xml:space="preserve">
+		<value>Artist(s)</value>
+	</data>
+	<data name="Album" xml:space="preserve">
+		<value>Album</value>
+	</data>
+	<data name="Duration" xml:space="preserve">
+		<value>Duration</value>
+	</data>
+	<data name="Lyrics" xml:space="preserve">
+		<value>Lyrics</value>
+	</data>
+	<data name="TrackUrl" xml:space="preserve">
+		<value>Track Url</value>
+	</data>
+	<data name="spotifySummary" xml:space="preserve">
+		<value>Gets the Spotify status info of an user.</value>
+	</data>
+	<data name="spotifyParam1" xml:space="preserve">
+		<value>The user to get its Spotify status info.</value>
+	</data>
+	<data name="wolframalphaSummary" xml:space="preserve">
+		<value>Gets a response from Wolfram|Alpha based on the query,</value>
+	</data>
+	<data name="wolframalphaParam1" xml:space="preserve">
+		<value>The query to send.</value>
+	</data>
+	<data name="defineSummary" xml:space="preserve">
+		<value>Gets definitions of a word.</value>
+	</data>
+	<data name="defineParam1" xml:space="preserve">
+		<value>The word to search.</value>
+	</data>
+	<data name="Word" xml:space="preserve">
+		<value>Word</value>
+	</data>
+	<data name="Definition" xml:space="preserve">
+		<value>Definition</value>
+	</data>
+	<data name="Synonyms" xml:space="preserve">
+		<value>Synonyms</value>
+	</data>
+	<data name="Antonyms" xml:space="preserve">
+		<value>Antonyms</value>
+	</data>
+	<data name="archiveSummary" xml:space="preserve">
+		<value>Gets an screenshot of a website in the specified year/month/day using a timestamp.</value>
+	</data>
+	<data name="archiveParam1" xml:space="preserve">
+		<value>The Url of the website to take a screenshot.</value>
+	</data>
+	<data name="archiveParam2" xml:space="preserve">
+		<value>A timestamp with the specified format.</value>
+	</data>
+	<data name="TimestampFormat" xml:space="preserve">
+		<value>The timestamp must have format `YYYYMMDDhhmmss`, where `YYYY` is required and the other values are optional.</value>
+	</data>
+	<data name="InvalidTimestamp" xml:space="preserve">
+		<value>Invalid timestamp.</value>
+	</data>
+	<data name="NoSnapshots" xml:space="preserve">
+		<value>No snapshots found for specified url and timestamp.</value>
+	</data>
+	<data name="Timestamp" xml:space="preserve">
+		<value>Timestamp</value>
+	</data>
+	<data name="CouldNotFindLine" xml:space="preserve">
+		<value>Could not find the command method line.</value>
+	</data>
+	<data name="shortenSummary" xml:space="preserve">
+		<value>Shortens a Url.</value>
+	</data>
+	<data name="shortenParam1" xml:space="preserve">
+		<value>The Url to shorten.</value>
+	</data>
 </root>

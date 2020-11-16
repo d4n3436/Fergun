@@ -2209,4 +2209,91 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="ServerBlacklistRemoved" xml:space="preserve">
 		<value>Сервер {0} был удален из черного списка.</value>
 	</data>
+	<data name="NoPresenceIntent" xml:space="preserve">
+		<value>Не могу получить статус Spotify, потому что у меня нет: Guild Presences Intent.</value>
+	</data>
+	<data name="NoSpotifyStatus" xml:space="preserve">
+		<value>Для пользователя {0} не найден статус Spotify.</value>
+	</data>
+	<data name="ClickHere" xml:space="preserve">
+		<value>кликните сюда</value>
+	</data>
+	<data name="Title" xml:space="preserve">
+		<value>заглавие</value>
+	</data>
+	<data name="Artists" xml:space="preserve">
+		<value>Художники</value>
+	</data>
+	<data name="Album" xml:space="preserve">
+		<value>Альбом</value>
+	</data>
+	<data name="Duration" xml:space="preserve">
+		<value>Продолжительность</value>
+	</data>
+	<data name="Lyrics" xml:space="preserve">
+		<value>Текст песни</value>
+	</data>
+	<data name="TrackUrl" xml:space="preserve">
+		<value>URL отслеживания</value>
+	</data>
+	<data name="spotifySummary" xml:space="preserve">
+		<value>Получает информацию о статусе Spotify пользователя.</value>
+	</data>
+	<data name="spotifyParam1" xml:space="preserve">
+		<value>Пользователь, который получает информацию о статусе Spotify.</value>
+	</data>
+	<data name="wolframalphaSummary" xml:space="preserve">
+		<value>Получает ответ от Wolfram | Alpha на основе запроса,</value>
+	</data>
+	<data name="wolframalphaParam1" xml:space="preserve">
+		<value>Запрос для отправки.</value>
+	</data>
+	<data name="defineSummary" xml:space="preserve">
+		<value>Получает определения слова.</value>
+	</data>
+	<data name="defineParam1" xml:space="preserve">
+		<value>Слово для поиска.</value>
+	</data>
+	<data name="Word" xml:space="preserve">
+		<value>слово</value>
+	</data>
+	<data name="Definition" xml:space="preserve">
+		<value>Определение</value>
+	</data>
+	<data name="Synonyms" xml:space="preserve">
+		<value>Синонимы</value>
+	</data>
+	<data name="Antonyms" xml:space="preserve">
+		<value>Антонимы</value>
+	</data>
+	<data name="archiveParam1" xml:space="preserve">
+		<value>URL-адрес веб-сайта, на котором нужно сделать снимок экрана.</value>
+	</data>
+	<data name="archiveParam2" xml:space="preserve">
+		<value>Отметка времени в указанном формате.</value>
+	</data>
+	<data name="TimestampFormat" xml:space="preserve">
+		<value>Отметка времени должна иметь формат `YYYYMMDDhhmmss`, где `YYYY` является обязательным, а другие значения необязательны.</value>
+	</data>
+	<data name="InvalidTimestamp" xml:space="preserve">
+		<value>Неверная метка времени.</value>
+	</data>
+	<data name="NoSnapshots" xml:space="preserve">
+		<value>Для указанного URL и отметки времени не найдено снимков.</value>
+	</data>
+	<data name="archiveSummary" xml:space="preserve">
+		<value>Получает снимок экрана веб-сайта в указанный год / месяц / день с использованием метки времени.</value>
+	</data>
+	<data name="Timestamp" xml:space="preserve">
+		<value>Отметка времени</value>
+	</data>
+	<data name="CouldNotFindLine" xml:space="preserve">
+		<value>Не удалось найти строку командного метода.</value>
+	</data>
+	<data name="shortenSummary" xml:space="preserve">
+		<value>Укорачивает URL.</value>
+	</data>
+	<data name="shortenParam1" xml:space="preserve">
+		<value>URL-адрес, который нужно сократить.</value>
+	</data>
 </root>

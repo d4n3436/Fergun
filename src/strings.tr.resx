@@ -2209,4 +2209,91 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	<data name="ServerBlacklistRemoved" xml:space="preserve">
 		<value>{0} sunucusu kara listeden kaldırıldı.</value>
 	</data>
+	<data name="NoPresenceIntent" xml:space="preserve">
+		<value>Guild Presences Intent sahip olmadığım için Spotify durumu alınamıyor</value>
+	</data>
+	<data name="NoSpotifyStatus" xml:space="preserve">
+		<value>{0} kullanıcısı için Spotify durumu bulunamadı.</value>
+	</data>
+	<data name="ClickHere" xml:space="preserve">
+		<value>Buraya Tıkla</value>
+	</data>
+	<data name="Title" xml:space="preserve">
+		<value>Başlık</value>
+	</data>
+	<data name="Artists" xml:space="preserve">
+		<value>Sanatçı(lar)</value>
+	</data>
+	<data name="Album" xml:space="preserve">
+		<value>Albüm</value>
+	</data>
+	<data name="Duration" xml:space="preserve">
+		<value>Süresi</value>
+	</data>
+	<data name="Lyrics" xml:space="preserve">
+		<value>Şarkı sözleri</value>
+	</data>
+	<data name="TrackUrl" xml:space="preserve">
+		<value>Takip URL'si</value>
+	</data>
+	<data name="spotifySummary" xml:space="preserve">
+		<value>Bir kullanıcının Spotify durum bilgisini alır.</value>
+	</data>
+	<data name="spotifyParam1" xml:space="preserve">
+		<value>Kullanıcı, Spotify durum bilgisini alacak.</value>
+	</data>
+	<data name="wolframalphaSummary" xml:space="preserve">
+		<value>Wolfram | Alpha'dan sorguya göre bir yanıt alır,</value>
+	</data>
+	<data name="wolframalphaParam1" xml:space="preserve">
+		<value>Gönderilecek sorgu.</value>
+	</data>
+	<data name="defineSummary" xml:space="preserve">
+		<value>Bir kelimenin tanımlarını alır.</value>
+	</data>
+	<data name="defineParam1" xml:space="preserve">
+		<value>Слово для поиска.</value>
+	</data>
+	<data name="Word" xml:space="preserve">
+		<value>Kelime</value>
+	</data>
+	<data name="Definition" xml:space="preserve">
+		<value>Tanım</value>
+	</data>
+	<data name="Synonyms" xml:space="preserve">
+		<value>Eş anlamlı</value>
+	</data>
+	<data name="Antonyms" xml:space="preserve">
+		<value>Zıt anlamlılar</value>
+	</data>
+	<data name="archiveParam1" xml:space="preserve">
+		<value>Ekran görüntüsü almak için web sitesinin URL'si.</value>
+	</data>
+	<data name="archiveParam2" xml:space="preserve">
+		<value>Belirtilen biçime sahip bir zaman damgası.</value>
+	</data>
+	<data name="TimestampFormat" xml:space="preserve">
+		<value>Zaman damgası, `YYYYMMDDhhmmss` biçiminde olmalıdır; burada `YYYY` gereklidir ve diğer değerler isteğe bağlıdır.</value>
+	</data>
+	<data name="InvalidTimestamp" xml:space="preserve">
+		<value>Geçersiz zaman damgası.</value>
+	</data>
+	<data name="NoSnapshots" xml:space="preserve">
+		<value>Belirtilen url ve zaman damgası için anlık görüntü bulunamadı.</value>
+	</data>
+	<data name="archiveSummary" xml:space="preserve">
+		<value>Zaman damgası kullanarak belirtilen yıl / ay / gün içindeki bir web sitesinin ekran görüntüsünü alır.</value>
+	</data>
+	<data name="Timestamp" xml:space="preserve">
+		<value>Zaman damgası</value>
+	</data>
+	<data name="CouldNotFindLine" xml:space="preserve">
+		<value>Komut yöntemi satırı bulunamadı.</value>
+	</data>
+	<data name="shortenSummary" xml:space="preserve">
+		<value>Bir URL'yi kısaltır.</value>
+	</data>
+	<data name="shortenParam1" xml:space="preserve">
+		<value>Kısaltılacak URL.</value>
+	</data>
 </root>
