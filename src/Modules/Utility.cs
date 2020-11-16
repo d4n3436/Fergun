@@ -1445,6 +1445,54 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
+        [LongRunning]
+        [Command("shorten", RunMode = RunMode.Async), Ratelimit(1, 1, Measure.Minutes)]
+        [Summary("shortenSummary")]
+        [Alias("short")]
+        public async Task<RuntimeResult> Shorten([Summary("shortenParam1")] string url)
+        {
+            Uri uri;
+            try
+            {
+                uri = new UriBuilder(Uri.UnescapeDataString(url)).Uri;
+            }
+            catch (UriFormatException)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Shorten: Invalid url: {Uri.UnescapeDataString(url)}"));
+                return FergunResult.FromError(Locate("InvalidUrl"));
+            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Shorten: Url: {uri.AbsoluteUri}"));
+
+            HttpResponseMessage response;
+            try
+            {
+                // GetStringAsync() hides the content message in case of error.
+                response = await _httpClient.GetAsync(new Uri($"https://is.gd/create.php?format=simple&url={Uri.EscapeDataString(uri.AbsoluteUri)}"));
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error in is.gd API, url: {url}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error in is.gd API, url: {url}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
+            string shortenedUrl = await response.Content.ReadAsStringAsync();
+
+            if (shortenedUrl.StartsWith("Error:", StringComparison.OrdinalIgnoreCase))
+            {
+                return FergunResult.FromError(shortenedUrl);
+            }
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Shorten: Shortened Url: {shortenedUrl}"));
+            await ReplyAsync(shortenedUrl);
+
+            return FergunResult.FromSuccess();
+        }
+
         [Command("snipe", RunMode = RunMode.Async)]
         [Summary("snipeSummary")]
         [Example("#help")]
