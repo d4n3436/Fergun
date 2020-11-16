@@ -675,7 +675,7 @@ namespace Fergun.Modules
                 var utilityCommands = _cmdService.Commands.Where(x => x.Module.Name == "Utility").Select(x => x.Name);
                 var moderationCommands = _cmdService.Commands.Where(x => x.Module.Name == "Moderation").Select(x => x.Name);
                 var musicCommands = _cmdService.Commands.Where(x => x.Module.Name == "Music").Select(x => x.Name);
-                var aidCommands = _cmdService.Commands.Where(x => x.Module.Name == "aid").Select(x => x.Name);
+                var aidCommands = _cmdService.Commands.Where(x => x.Module.Name == "AIDungeon").Select(x => x.Name);
                 var otherCommands = _cmdService.Commands.Where(x => x.Module.Name == "Other").Select(x => x.Name);
                 var ownerCommands = _cmdService.Commands.Where(x => x.Module.Name == "Owner").Select(x => x.Name);
                 int visibleCommandCount = _cmdService.Commands.Count(x => x.Module.Name != Constants.DevelopmentModuleName);
@@ -684,7 +684,6 @@ namespace Fergun.Modules
                     .AddField(Locate("TextCommands"), string.Join(", ", textCommands))
                     .AddField(Locate("UtilityCommands"), string.Join(", ", utilityCommands))
                     .AddField(Locate("ModerationCommands"), string.Join(", ", moderationCommands))
-                    //.AddField(GetValue("EntertainmentCommands"), "trivia, ...")
                     .AddField(Locate("MusicCommands"), string.Join(", ", musicCommands))
                     .AddField(string.Format(Locate("AIDCommands"), GetPrefix()), string.Join(", ", aidCommands))
                     .AddField(Locate("OtherCommands"), string.Join(", ", otherCommands))

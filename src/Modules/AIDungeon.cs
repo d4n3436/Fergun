@@ -27,7 +27,7 @@ namespace Fergun.Modules
     using ActionType = APIs.AIDungeon.ActionType;
 
     [RequireBotPermission(Constants.MinimunRequiredPermissions)]
-    [Group("aid"), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+    [Name("AIDungeon"), Group("aid"), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class AIDungeon : FergunBase
     {
         public const string IconUrl = "https://fergun.is-inside.me/CypOix5S.png";
@@ -57,7 +57,7 @@ namespace Fergun.Modules
                 .AddField(Locate("AIDHowToPlayTitle"), Locate("AIDHowToPlayText"))
                 .AddField(Locate("InputTypes"), Locate("InputTypesList"));
 
-            var aidCommands = _cmdService.Modules.FirstOrDefault(x => x.Group == "aid");
+            var aidCommands = _cmdService.Modules.FirstOrDefault(x => x.Name == "AIDungeon");
             if (aidCommands == null)
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));

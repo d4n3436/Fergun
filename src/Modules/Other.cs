@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
@@ -26,6 +27,7 @@ namespace Fergun.Modules
     {
         private static readonly string[] triviaCategories = Enum.GetNames(typeof(QuestionCategory)).Select(x => x.ToLowerInvariant()).Skip(1).ToArray();
         private static readonly string[] triviaDifficulties = Enum.GetNames(typeof(QuestionDifficulty)).Select(x => x.ToLowerInvariant()).ToArray();
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static CommandService _cmdService;
         private static LogService _logService;
 
@@ -64,12 +66,12 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        //[LongRunning]
+        [LongRunning]
         [Command("code", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("codeSummary")]
         [Alias("source")]
         [Example("img")]
-        public async Task<RuntimeResult> Code([Summary("codeParam1")] string commandName = null)
+        public async Task<RuntimeResult> Code([Remainder, Summary("codeParam1")] string commandName)
         {
             var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
             if (command == null)
@@ -77,8 +79,41 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
-            // TODO: Get links pointing command methods from the GitHub repo.
-            return await Task.FromResult(FergunResult.FromError("WIP"));
+            string link = $"{Constants.GitHubRepository}/raw/master/src/Modules/{command.Module.Name}.cs";
+            string code;
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Code: Downloading code from: {link}"));
+            try
+            {
+                code = await _httpClient.GetStringAsync(new Uri(link));
+            }
+            catch (HttpRequestException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error downloading the code for module: {command.Module.Name}", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error downloading the code for module: {command.Module.Name}", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
+
+            // Not the best way to get the line number of a method, but it just works ¯\_(ツ)_/¯
+            bool found = false;
+            var lines = code.Replace("\r", "", StringComparison.OrdinalIgnoreCase).Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].Contains($"[Command(\"{command.Name}\"", StringComparison.OrdinalIgnoreCase))
+                {
+                    found = true;
+                }
+                if (found && lines[i].Contains("public async Task", StringComparison.OrdinalIgnoreCase))
+                {
+                    await ReplyAsync($"{Constants.GitHubRepository}/blob/master/src/Modules/{command.Module.Name}.cs#L{i + 1}");
+                    return FergunResult.FromSuccess();
+                }
+            }
+
+            return FergunResult.FromError(Locate("CouldNotFindLine"));
         }
 
         [Command("cmdstats", RunMode = RunMode.Async)]
