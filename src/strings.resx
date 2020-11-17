@@ -2299,4 +2299,37 @@ Please try again later.</value>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>The Url to shorten.</value>
 	</data>
+	<data name="Changelog1.6" xml:space="preserve">
+		<value>- Fergun is now open source!
+- New commands: `wolframalpha`, `spotify`, `define`, `archive`, `shorten`, and `blacklistserver`.
+- Added back `youtube`.
+- Lots of internal changes to make the bot easy to self-host.
+
+- Added a prefix cache system. Now the response times should be faster.
+- [help] Added a command list cache.
+- [stats] Improved the methods to get the bot memory usage.
+- [repeat] Improved the performance, limiting the maximum possible length of text to avoid allocating memory unnecessarily.
+- Improved the performance of the logging and interactive service.
+- [cmdstats] Reduced the number of commands displayed per page.
+- [calc] Now using a different math library.
+- [urban] Now can be used in non-NSFW channels.
+- [code] Rewrote to get a link pointing to the specified command method line from the repository.
+
+- [userinfo] Fixed a bug that caused the activity field to be empty if the user had an emote in their status.
+- [lyrics] Fixed a bug in the parser that caused bold text to be overlapped.
+- [give] Fixed a bug that allowed to give IDs to bots.
+- Fixed some bugs in the Bing Translator wrapper.
+
+- [new] Removed the character limit in the custom mode creation.
+- [alter] Removed the character limit.
+- Removed the paginator/video cache.
+- Removed the word list that `badtranslator` used.
+- Removed `nothing` and `botcolor`.
+
+- Now Fergun will send a warning message when a command fails due to a 5xx error.
+- Now Fergun will send a warning message when a music command is used when there's no connection to a Lavalink server.
+- Now when editing a command message with a paginator, the response message will be deleted if the reactions cannot be removed.
+- Now when editing a command message to a command that attaches files, the "Loading" message will be correctly deleted.
+- Lots of minor bug fixes.</value>
+	</data>
 </root>

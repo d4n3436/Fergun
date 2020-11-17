@@ -8,7 +8,7 @@ namespace Fergun
 {
     public static class Constants
     {
-        public static string Version { get; } = "1.4.8";
+        public static string Version { get; } = "1.6";
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>
         {
@@ -25,7 +25,8 @@ namespace Fergun
             "1.3",
             "1.3.3",
             "1.3.6",
-            "1.4"
+            "1.4",
+            "1.4.8"
         };
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig

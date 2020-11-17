@@ -2298,4 +2298,37 @@ Por favor inténtelo de nuevo más tarde.</value>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>La Url a acortar.</value>
 	</data>
+	<data name="Changelog1.6" xml:space="preserve">
+		<value>- ¡Fergun ahora es de código abierto!
+- Nuevos comandos: `wolframalpha`, `spotify`, `define`, `archive`, `shorten` y `blacklistserver`.
+- Añadido de nuevo `youtube`.
+- Muchos cambios internos para facilitar el self-hosting del bot.
+
+- Se agregó un sistema de caché de prefijo. Ahora los tiempos de respuesta deberían ser más rápidos.
+- [help] Se agregó la caché de lista de comandos.
+- [cmdstats] Se mejoraron los métodos para obtener el uso de la memoria del bot.
+- [repeat] Se mejoró el rendimiento, limitando la máxima longitud posible de texto para evitar asignar memoria innecesariamente.
+- Se mejoró el rendimiento del servicio de registro e interactivo.
+- [cmdstats] Se redujo el número de comandos mostrados por página.
+- [calc] Ahora usa una biblioteca matemática diferente.
+- [urban] Ahora se puede utilizar en canales que no son NSFW.
+- [code] Reescrito para obtener un enlace que apunta a la línea del método de comando especificado desde el repositorio.
+
+- [userinfo] Se corrigió un error que causaba que el campo de actividad estuviera vacío si el usuario tenía un emote en su estado.
+- [lyrics] Se corrigió un error en el analizador que causaba que el texto en negrita se superpusiera.
+- [give] Se corrigió un error que permitía dar ID a bots.
+- Se corrigieron algunos errores en el contenedor de Bing Translator.
+
+- [new] Se eliminó el límite de caracteres en la creación del modo personalizado.
+- [alter] Eliminado el límite de caracteres.
+- Se eliminó el paginador / caché de video.
+- Se eliminó la lista de palabras que usaba `badtranslator`.
+- Eliminado `nothing` y `botcolor`.
+
+- Ahora Fergun enviará un mensaje de advertencia cuando un comando falle debido a un error 5xx.
+- Ahora Fergun enviará un mensaje de advertencia cuando se use un comando de música cuando no haya conexión a un servidor de Lavalink.
+- Ahora al editar un mensaje de comando con un paginador, el mensaje de respuesta se eliminará si las reacciones no se pueden eliminar.
+- Ahora al editar un mensaje de comando a un comando que adjunta archivos, el mensaje "Cargando" se eliminará correctamente.
+- Muchas correcciones de errores menores.</value>
+	</data>
 </root>

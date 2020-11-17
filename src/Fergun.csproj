@@ -3,10 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>1.4.8</Version>
+    <Version>1.6</Version>
     <LangVersion>8.0</LangVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Authors>d4n3436</Authors>
   </PropertyGroup>
   
   <ItemGroup>

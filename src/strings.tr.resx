@@ -2296,4 +2296,37 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>Kısaltılacak URL.</value>
 	</data>
+	<data name="Changelog1.6" xml:space="preserve">
+		<value>- Fergun artık açık kaynak!
+- Yeni komutlar: `wolframalpha`, `spotify`, `define`, `archive`, `shorten` ve `blacklistserver`.
+- `youtube` geri eklendi.
+- Botun kendi kendine barındırılmasını kolaylaştırmak için birçok dahili değişiklik.
+
+- Bir önek önbellek sistemi eklendi. Şimdi yanıt süreleri daha hızlı olmalı.
+- [help] Bir komut listesi önbelleği eklendi.
+- [stats] Bot bellek kullanımını alma yöntemleri iyileştirildi.
+- [repeat] Gereksiz bellek ayırmayı önlemek için mümkün olan maksimum metin uzunluğunu sınırlayarak performansı iyileştirdi.
+- Günlük kaydı ve etkileşimli hizmetin performansı iyileştirildi.
+- [cmdstats] Sayfa başına görüntülenen komut sayısı azaltıldı.
+- [calc] Şimdi farklı bir matematik kitaplığı kullanılıyor.
+- [urban] Artık NSFW olmayan kanallarda kullanılabilir.
+- [code] Depodan belirtilen komut yöntemi satırına işaret eden bir bağlantı almak için yeniden yaz.
+
+- [userinfo] Kullanıcının durumunda bir ifade varsa etkinlik alanının boş olmasına neden olan bir hata düzeltildi.
+- [lyrics] Ayrıştırıcıda kalın metnin üst üste binmesine neden olan bir hata düzeltildi.
+- [give] Botlara kimlik verilmesine izin veren bir hata düzeltildi.
+- Bing Translator sarmalayıcısındaki bazı hatalar düzeltildi.
+
+- [new] Özel mod oluşturmada karakter sınırı kaldırıldı.
+- [alter] Karakter sınırı kaldırıldı.
+- Sayfalayıcı / video önbelleği kaldırıldı.
+- `badtranslator` tarafından kullanılan kelime listesi kaldırıldı.
+- `nothing` ve `botcolor` kaldırıldı.
+
+- Şimdi Fergun, bir 5xx hatası nedeniyle bir komut başarısız olduğunda bir uyarı mesajı gönderecek.
+- Şimdi Fergun, bir Lavalink sunucusuna bağlantı olmadığında bir müzik komutu kullanıldığında bir uyarı mesajı gönderecek.
+- Şimdi bir sayfalayıcı ile bir komut mesajını düzenlerken, reaksiyonlar kaldırılamazsa, yanıt mesajı silinecektir.
+- Artık dosyaları ekleyen bir komuta yönelik bir komut mesajını düzenlerken, "Yükleniyor" mesajı doğru şekilde silinecek.
+- Çok sayıda küçük hata düzeltmesi.</value>
+	</data>
 </root>
