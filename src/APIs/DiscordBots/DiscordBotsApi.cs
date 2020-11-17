@@ -113,7 +113,7 @@ namespace Fergun.APIs.DiscordBots
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiToken);
-                    var response = await client.PostAsync(new Uri($"bots/{id}/stats", UriKind.Relative), content);
+                    var response = await client.PostAsync(new Uri($"{ApiEndpoint}bots/{id}/stats"), content);
                     json = await response.Content.ReadAsStringAsync();
                 }
             }
