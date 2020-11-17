@@ -4,24 +4,24 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Version>1.4.8</Version>
-  <LangVersion>8.0</LangVersion>
-  <NeutralLanguage>en</NeutralLanguage>
-  <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <LangVersion>8.0</LangVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="CoreCLR-NCalc" Version="2.2.88" />
-    <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201028.4" />
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
+    <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201115.2" />
     <PackageReference Include="DiscordBotsList.Api" Version="1.4.0" />
     <PackageReference Include="GoogleTranslateFreeApi" Version="1.1.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.7.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.8.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.9" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.3" />
-    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
     <PackageReference Include="Victoria" Version="5.1.9" />
     <PackageReference Include="YoutubeExplode" Version="5.1.8" />
   </ItemGroup>
