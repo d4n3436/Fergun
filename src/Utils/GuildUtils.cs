@@ -82,7 +82,7 @@ namespace Fergun.Utils
         /// <param name="channel">The channel.</param>
         /// <returns>The language of the channel.</returns>
         public static string GetLanguage(IMessageChannel channel)
-            => GetGuildConfig(channel)?.Language;
+            => GetGuildConfig(channel)?.Language ?? Constants.DefaultLanguage;
 
         /// <summary>
         /// Returns the localized value of a resource key in a channel.
