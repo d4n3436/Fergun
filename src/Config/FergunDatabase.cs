@@ -137,23 +137,23 @@ namespace Fergun
         }
 
         /// <summary>
-        /// Gets a single document.
+        /// Gets the first document in the collection.
         /// </summary>
         /// <param name="collection">The collection.</param>
-        public T GetSingleDocument<T>(string collection)
+        public T GetFirstDocument<T>(string collection)
         {
             var c = _database.GetCollection<T>(collection);
-            return c.Find(new BsonDocument()).Single();
+            return c.Find(new BsonDocument()).FirstOrDefault();
         }
 
         /// <summary>
-        /// Gets a single document asynchronously.
+        /// Gets the first document in the collection asynchronously.
         /// </summary>
         /// <param name="collection">The collection.</param>
-        public async Task<T> GetSingleDocumentAsync<T>(string collection)
+        public async Task<T> GetFirstDocumentAsync<T>(string collection)
         {
             var c = _database.GetCollection<T>(collection);
-            return await c.Find(new BsonDocument()).SingleAsync();
+            return await (await c.FindAsync(new BsonDocument())).FirstOrDefaultAsync();
         }
 
         /// <summary>

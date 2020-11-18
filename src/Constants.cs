@@ -141,6 +141,10 @@ namespace Fergun
 
         public const string DefaultLanguage = "en";
 
+        public const string DefaultPrefix = "f!";
+
+        public const string DefaultDevPrefix = "f!!";
+
         public const uint DefaultEmbedColor = 16750877;
 
         public const int MaxTracksToDisplay = 10;

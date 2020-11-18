@@ -43,7 +43,7 @@ namespace Fergun
 
         private static BaseDatabaseConfig GetConfig()
         {
-            return FergunClient.Database.GetSingleDocument<BaseDatabaseConfig>(Constants.ConfigCollection);
+            return FergunClient.Database.GetFirstDocument<BaseDatabaseConfig>(Constants.ConfigCollection) ?? new BaseDatabaseConfig();
         }
     }
 
@@ -52,8 +52,8 @@ namespace Fergun
     {
         [BsonId]
         public ObjectId ObjectId { get; set; }
-        public string GlobalPrefix { get; set; }
-        public string DevGlobalPrefix { get; set; }
+        public string GlobalPrefix { get; set; } = Constants.DefaultPrefix;
+        public string DevGlobalPrefix { get; set; } = Constants.DefaultDevPrefix;
         public string Language { get; set; }
         public IDictionary<string, int> CommandStats { get; set; } = new Dictionary<string, int>();
         public IDictionary<string, string> GloballyDisabledCommands { get; set; } = new Dictionary<string, string>();

@@ -39,6 +39,12 @@ namespace Fergun
         public string AuthDatabase { get; private set; } = "admin";
 
         /// <summary>
+        /// Gets whether the hostname corresponds to a DNS SRV record (+srv).
+        /// </summary>
+        [JsonProperty]
+        public bool IsSrv { get; private set; } = false;
+
+        /// <summary>
         /// Gets a <see cref="MongoConfig"/> instance with the default values.
         /// </summary>
         public static MongoConfig Default => new MongoConfig();
@@ -51,12 +57,16 @@ namespace Fergun
         {
             get
             {
-                string cs = "mongodb://";
+                string cs = $"mongodb{(IsSrv ? "+srv" : "")}://";
                 if (!string.IsNullOrEmpty(User) && !string.IsNullOrEmpty(Password))
                 {
                     cs += $"{Uri.EscapeDataString(User)}:{Uri.EscapeDataString(Password)}@";
                 }
-                cs += $"{Host}:{Port}";
+                cs += Host;
+                if (!IsSrv)
+                {
+                    cs += $":{Port}";
+                }
                 if (!string.IsNullOrEmpty(User) && !string.IsNullOrEmpty(Password))
                 {
                     cs += $"/{AuthDatabase}";

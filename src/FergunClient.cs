@@ -110,26 +110,27 @@ namespace Fergun
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connecting to the database..."));
-            Database = new FergunDatabase(Constants.FergunDatabase, Config.DatabaseConfig.ConnectionString);
+            bool isDbConnected = false;
+            Exception dbException = null;
+            try
+            {
+                Database = new FergunDatabase(Constants.FergunDatabase, Config.DatabaseConfig.ConnectionString);
+                isDbConnected = Database.IsConnected;
+            }
+            catch (TimeoutException e)
+            {
+                dbException = e;
+            }
 
-            if (Database.IsConnected)
+            if (isDbConnected)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connected to the database successfully."));
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "Could not connect to the database."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "Could not connect to the database.", dbException));
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", "Ensure the MongoDB server you're trying to log in is running"));
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", $"and make sure the server credentials in the config file ({Constants.BotConfigFile}) are correct."));
-
-                Console.Write("Closing in 30 seconds... Press any key to exit now.");
-                await ExitWithInputTimeoutAsync(30, 1);
-            }
-
-            if (string.IsNullOrEmpty(DatabaseConfig.GlobalPrefix))
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Critical, "Database", "The bot prefix has not been set."));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Database", $"Please set a value in the field \"{(IsDebugMode ? "Dev" : "")}GlobalPrefix\", in collection \"Config\", in the database."));
 
                 Console.Write("Closing in 30 seconds... Press any key to exit now.");
                 await ExitWithInputTimeoutAsync(30, 1);
