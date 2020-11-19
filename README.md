@@ -19,7 +19,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 
 ## Setup
 ### 0. Prerequisites
-* A Discord bot application (You can create one [here](https://discord.com/developers/applications))
+* A Discord bot application (You can create one [here](https://discord.com/developers/applications)).
 
 * [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download)
 
@@ -28,8 +28,9 @@ Have any questions or need help with the bot? Join the [support server](https://
 
 ### 1. Building the bot
 * Clone  the repository:
-`git clone https://github.com/d4n3436/Fergun.git`
-Or  [download from GitHub](https://github.com/d4n3436/Fergun/archive/master.zip).
+  `git clone https://github.com/d4n3436/Fergun.git`
+
+  Or  [download from GitHub](https://github.com/d4n3436/Fergun/archive/master.zip).
 
 * Build the bot (change `Release` to `Debug` for a debug build):
   ```
@@ -48,14 +49,19 @@ If you want to use the music module with a local Lavalink server, follow this st
   mkdir Lavalink
   ```
   
-* Download the [Lavalink binaries](https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar) and save it the folder:
- `wget https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar -O Lavalink.jar`
- Nightly binaries:
- `wget https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1 -O Lavalink.jar`
+* Download the [Lavalink binaries](https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar) and save it in the folder:
+
+  `wget https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar -O Lavalink.jar`
+ 
+  Nightly binaries:
+ 
+  `wget https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1 -O Lavalink.jar`
  
  * Download [application.yml](https://raw.githubusercontent.com/Frederikam/Lavalink/master/LavalinkServer/application.yml.example%20-O%20application.yml) and save it in the folder:
- `wget https://raw.githubusercontent.com/Frederikam/Lavalink/master/LavalinkServer/application.yml.example -O application.yml`
- Be sure to save it as `application.yml` and not `application.yml.example`.
+ 
+   `wget https://raw.githubusercontent.com/Frederikam/Lavalink/master/LavalinkServer/application.yml.example -O application.yml`
+ 
+   Be sure to save it as `application.yml` and not `application.yml.example`.
 
 
 ### 3. Running the bot
