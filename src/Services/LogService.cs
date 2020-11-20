@@ -2,7 +2,6 @@
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -16,7 +15,7 @@ namespace Fergun.Services
         private readonly string _logDirectoryPath;
         private static TextWriter _writer;
         private readonly object _writerLock = new object();
-        private readonly Timer _timer;
+        private int _currentDay;
         private bool _disposed;
 
         public LogService()
@@ -29,10 +28,9 @@ namespace Fergun.Services
             if (!Directory.Exists(_logDirectoryPath))
                 Directory.CreateDirectory(_logDirectoryPath);
 
-            _timer = new Timer(OnNewDay, null, GetNextMidnight(), Timeout.InfiniteTimeSpan);
-
-            _ = CompressYesterdayLogsAsync();
+            _currentDay = DateTimeOffset.UtcNow.Day;
             _writer = TextWriter.Synchronized(File.AppendText(GetLogFile()));
+            CompressYesterdayLogs();
         }
 
         public LogService(DiscordSocketClient client, CommandService cmdService) : this()
@@ -47,6 +45,13 @@ namespace Fergun.Services
 
             lock (_writerLock)
             {
+                if (_currentDay != DateTimeOffset.UtcNow.Day)
+                {
+                    _currentDay = DateTimeOffset.UtcNow.Day;
+                    _writer = TextWriter.Synchronized(File.AppendText(GetLogFile()));
+                    CompressYesterdayLogs();
+                }
+
                 switch (message.Severity)
                 {
                     case LogSeverity.Critical:
@@ -79,29 +84,17 @@ namespace Fergun.Services
             await Task.CompletedTask;
         }
 
-        private void OnNewDay(object state)
-        {
-            lock (_writerLock)
-            {
-                _writer = TextWriter.Synchronized(File.AppendText(GetLogFile()));
-            }
-            _ = CompressYesterdayLogsAsync();
-
-            // Reset the timer for more accuracy.
-            _timer.Change(GetNextMidnight(), Timeout.InfiniteTimeSpan);
-        }
-
         private string GetLogFile() => Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow:dd-MM-yyyy}.txt");
 
         private static TimeSpan GetNextMidnight() => DateTime.UtcNow.AddDays(1).Date - DateTime.UtcNow;
 
-        private async Task CompressYesterdayLogsAsync()
+        private void CompressYesterdayLogs()
         {
             string yesterday = Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow.AddDays(-1):dd-MM-yyyy}.txt");
             // If the yesterday log file exists, compress it.
             if (File.Exists(yesterday))
             {
-                await CompressAsync(yesterday);
+                _ = CompressAsync(yesterday);
             }
         }
 
@@ -165,7 +158,6 @@ namespace Fergun.Services
             else if (disposing)
             {
                 _writer.Dispose();
-                _timer.Dispose();
                 _disposed = true;
             }
         }
