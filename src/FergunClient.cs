@@ -446,7 +446,7 @@ namespace Fergun
 
                     if (string.IsNullOrEmpty(Config.DblApiToken))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", $"Top.gg API token is empty or has not been established. Bot server count will not be sent to the API."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or has not been established. Bot server count will not be sent to the API."));
                     }
                     else
                     {
@@ -454,9 +454,9 @@ namespace Fergun
                         DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
                     }
 
-                    if (string.IsNullOrEmpty(Config.DblApiToken))
+                    if (string.IsNullOrEmpty(Config.DiscordBotsApiToken))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", $"DiscordBots API token is empty or has not been established. Bot server count will not be sent to the API."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or has not been established. Bot server count will not be sent to the API."));
                     }
                     else
                     {
@@ -578,9 +578,22 @@ namespace Fergun
         {
             try
             {
-                if (_dblApi != null)
+                if (_dblApi != null && _dblBot == null)
                 {
-                    _dblBot ??= await _dblApi.GetMeAsync();
+                    try
+                    {
+                        _dblBot = await _dblApi.GetMeAsync();
+                    }
+                    catch (NullReferenceException)
+                    {
+                        _dblApi = null;
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not get the bot info from DBL API, make sure the bot is listed in DBL and the token is valid"));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Bot server count will not be sent to DBL API."));
+                    }
+                }
+
+                if (_dblBot != null)
+                {
                     await _dblBot.UpdateStatsAsync(_client.Guilds.Count);
                 }
                 if (_discordBots != null)
