@@ -17,8 +17,6 @@ namespace Fergun.Readers
     public class UserTypeReader<T> : TypeReader
         where T : class, IUser
     {
-        private static readonly UserEqualityComparer _defaultComparer = new UserEqualityComparer();
-
         /// <inheritdoc />
         public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
@@ -46,8 +44,8 @@ namespace Fergun.Readers
             var channelUsers = await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync().ConfigureAwait(false);
 
             var users = usersFromGuildSearch
-                .Union(guildUsers, _defaultComparer)
-                .Union(channelUsers, _defaultComparer)
+                .Union(guildUsers, UserEqualityComparer.Instance)
+                .Union(channelUsers, UserEqualityComparer.Instance)
                 .ToArray();
 
             //By Username + Discriminator (0.7-0.8)
@@ -91,26 +89,25 @@ namespace Fergun.Readers
             if (context.Guild != null)
             {
                 user = await context.Guild.GetUserAsync(id).ConfigureAwait(false)
-                       ?? await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
+                    ?? await ((BaseSocketClient)context.Client).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
             }
             else
             {
                 user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
             }
 
-            return user ?? await (context.Client as DiscordSocketClient).Rest.GetUserAsync(id).ConfigureAwait(false);
+            return user ?? await ((BaseSocketClient)context.Client).Rest.GetUserAsync(id).ConfigureAwait(false);
         }
 
         private static void AddResult(IDictionary<ulong, TypeReaderValue> results, T user, float score)
         {
-            if (!results.ContainsKey(user.Id))
-            {
-                results.Add(user.Id, new TypeReaderValue(user, score));
-            }
+            results.TryAdd(user.Id, new TypeReaderValue(user, score));
         }
 
         private class UserEqualityComparer : IEqualityComparer<IUser>
         {
+            public static readonly UserEqualityComparer Instance = new UserEqualityComparer();
+
             public bool Equals(IUser x, IUser y) => x.Id == y.Id;
 
             public int GetHashCode(IUser obj) => obj.Id.GetHashCode();

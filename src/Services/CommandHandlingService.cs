@@ -18,7 +18,7 @@ namespace Fergun.Services
 {
     public class CommandHandlingService
     {
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordShardedClient _client;
         private readonly LogService _logService;
         private readonly CommandService _cmdService;
         private readonly IServiceProvider _services;
@@ -28,7 +28,7 @@ namespace Fergun.Services
         private static readonly object _userLock = new object();
         private static readonly object _cmdStatsLock = new object();
 
-        public CommandHandlingService(DiscordSocketClient client, CommandService commands, LogService logService, IServiceProvider services)
+        public CommandHandlingService(DiscordShardedClient client, CommandService commands, LogService logService, IServiceProvider services)
         {
             _client = client;
             _cmdService = commands;
@@ -139,7 +139,7 @@ namespace Fergun.Services
                 else
                 {
                     // Create a WebSocket-based command context based on the message
-                    var context = new SocketCommandContext(_client, message);
+                    var context = new ShardedCommandContext(_client, message);
 
                     // Execute the command with the command context we just
                     // created, along with the service provider for precondition checks.

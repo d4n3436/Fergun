@@ -24,6 +24,18 @@ namespace Fergun.Services
         private bool _disposed;
         private int _lastServerCount;
 
+        public BotListService(DiscordSocketClient client, string topGgToken = null, string discordBotsToken = null,
+            TimeSpan? updatePeriod = null, Func<LogMessage, Task> logger = null)
+            : this((BaseSocketClient)client, topGgToken, discordBotsToken, updatePeriod, logger)
+        {
+        }
+
+        public BotListService(DiscordShardedClient client, string topGgToken = null, string discordBotsToken = null,
+            TimeSpan? updatePeriod = null, Func<LogMessage, Task> logger = null)
+            : this((BaseSocketClient)client, topGgToken, discordBotsToken, updatePeriod, logger)
+        {
+        }
+
         public BotListService(BaseSocketClient client, string topGgToken = null, string discordBotsToken = null,
             TimeSpan? updatePeriod = null, Func<LogMessage, Task> logger = null)
         {
@@ -75,7 +87,6 @@ namespace Fergun.Services
         /// <summary>
         /// Manually updates the bot list server count using the client's guild count.
         /// </summary>
-
         public async Task UpdateStatsAsync() => await UpdateStatsAsync(_client.Guilds.Count);
 
         /// <summary>

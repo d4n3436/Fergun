@@ -33,7 +33,7 @@ namespace Fergun.Services
             CompressYesterdayLogs();
         }
 
-        public LogService(DiscordSocketClient client, CommandService cmdService) : this()
+        public LogService(DiscordShardedClient client, CommandService cmdService) : this()
         {
             client.Log += LogAsync;
             cmdService.Log += LogAsync;

@@ -33,7 +33,7 @@ namespace Fergun.Services
         private readonly ConcurrentDictionary<ulong, DateTimeOffset> _lastCommandUsageTimes = new ConcurrentDictionary<ulong, DateTimeOffset>();
         private readonly bool _onlyCacheUserDeletedEditedMessages;
         private readonly Func<LogMessage, Task> _logger;
-        private readonly DiscordSocketClient _client;
+        private readonly BaseSocketClient _client;
         private readonly double _maxMessageTime;
         private readonly int _messageCacheSize;
         private readonly int _minCommandTime;
@@ -44,6 +44,20 @@ namespace Fergun.Services
         {
             IsDisabled = true;
             _disposed = true;
+        }
+
+        /// <inheritdoc cref="MessageCacheService(BaseSocketClient, int, Func{LogMessage, Task}, int, double, int, bool)"/>
+        public MessageCacheService(DiscordSocketClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
+            int period = 3600000, double maxMessageTime = 6, int minCommandTime = 12, bool onlyCacheUserDeletedEditedMessages = true)
+            : this((BaseSocketClient)client, messageCacheSize, logger, period, maxMessageTime, minCommandTime, onlyCacheUserDeletedEditedMessages)
+        {
+        }
+
+        /// <inheritdoc cref="MessageCacheService(BaseSocketClient, int, Func{LogMessage, Task}, int, double, int, bool)"/>
+        public MessageCacheService(DiscordShardedClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
+            int period = 3600000, double maxMessageTime = 6, int minCommandTime = 12, bool onlyCacheUserDeletedEditedMessages = true)
+            : this((BaseSocketClient)client, messageCacheSize, logger, period, maxMessageTime, minCommandTime, onlyCacheUserDeletedEditedMessages)
+        {
         }
 
         /// <summary>
@@ -57,7 +71,7 @@ namespace Fergun.Services
         /// <param name="minCommandTime">The min. hours since a command has to be used in a guild for the messages to be cached there. Setting this to 0 disables this requirement.<br/>
         /// Use <see cref="UpdateLastCommandUsageTime(ulong)"/> in your command handler to update the last time a command was used.</param>
         /// <param name="onlyCacheUserDeletedEditedMessages">Whether to only save messages from users in the edited/deleted messages cache.</param>
-        public MessageCacheService(DiscordSocketClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
+        public MessageCacheService(BaseSocketClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
             int period = 3600000, double maxMessageTime = 6, int minCommandTime = 12, bool onlyCacheUserDeletedEditedMessages = true)
         {
             _client = client;

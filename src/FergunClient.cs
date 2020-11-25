@@ -32,8 +32,9 @@ namespace Fergun
         public static string InviteLink { get; private set; }
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
-        private DiscordSocketClient _client;
+        private DiscordShardedClient _client;
         private LogService _logService;
+        private bool _firstConnect = true;
 
         public FergunClient()
         {
@@ -128,8 +129,11 @@ namespace Fergun
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Messages to search limit: {Config.MessagesToSearchLimit}"));
 
-            _client = new DiscordSocketClient(Constants.ClientConfig);
-            _client.Ready += ClientReady;
+            Constants.ClientConfig.TotalShards = Config.TotalShards;
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Total shards: {Constants.ClientConfig.TotalShards?.ToString() ?? "Automatic"}"));
+
+            _client = new DiscordShardedClient(Constants.ClientConfig);
+            _client.ShardReady += ShardReady;
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
 
@@ -374,21 +378,21 @@ namespace Fergun
                 .AddSingleton<MusicService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton(s => Config.UseMessageCacheService && Config.MessageCacheSize > 0
-                ? new MessageCacheService(s.GetRequiredService<DiscordSocketClient>(), Config.MessageCacheSize,
+                ? new MessageCacheService(s.GetRequiredService<DiscordShardedClient>(), Config.MessageCacheSize,
                 s.GetRequiredService<LogService>().LogAsync,
                 Constants.MessageCacheClearInterval,
                 Constants.MaxMessageCacheLongevity)
                 : MessageCacheService.Disabled)
                 .AddSingleton(s => Config.UseCommandCacheService
-                ? new CommandCacheService(s.GetRequiredService<DiscordSocketClient>(), Constants.MessageCacheCapacity,
+                ? new CommandCacheService(s.GetRequiredService<DiscordShardedClient>(), Constants.MessageCacheCapacity,
                 s.GetRequiredService<CommandHandlingService>().HandleCommandAsync,
                 s.GetRequiredService<LogService>().LogAsync, Constants.CommandCacheClearInterval,
                 Constants.MaxCommandCacheLongevity, s.GetRequiredService<MessageCacheService>())
                 : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService,
-                s => new ReliabilityService(s.GetRequiredService<DiscordSocketClient>(), s.GetRequiredService<LogService>().LogAsync))
+                s => new ReliabilityService(s.GetRequiredService<DiscordShardedClient>(), s.GetRequiredService<LogService>().LogAsync))
                 .AddSingletonIf(!IsDebugMode,
-                s => new BotListService(s.GetRequiredService<DiscordSocketClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
+                s => new BotListService(s.GetRequiredService<DiscordShardedClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
                 logger: s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
         }
@@ -414,12 +418,15 @@ namespace Fergun
             return result;
         }
 
-        private async Task ClientReady()
+        private async Task ShardReady(DiscordSocketClient client)
         {
-            _client.Ready -= ClientReady;
-            Uptime = DateTimeOffset.UtcNow;
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"Shard {client.ShardId} is online!"));
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
+            if (!_firstConnect)
+                return;
+
+            _firstConnect = false;
+            Uptime = DateTimeOffset.UtcNow;
 
             if (!IsDebugMode)
             {

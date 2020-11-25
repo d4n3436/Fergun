@@ -22,7 +22,7 @@ namespace Fergun.Services
         private readonly Func<LogMessage, Task> _logger;
         private int _count;
         private bool _disposed;
-        private readonly DiscordSocketClient _client;
+        private readonly BaseSocketClient _client;
         private readonly Func<SocketMessage, Task> _cmdHandler;
         private readonly double _maxMessageTime;
         private readonly MessageCacheService _messageCache;
@@ -31,6 +31,20 @@ namespace Fergun.Services
         {
             IsDisabled = true;
             _disposed = true;
+        }
+
+        /// <inheritdoc cref="CommandCacheService(BaseSocketClient, int, Func{SocketMessage, Task}, Func{LogMessage, Task}, int, double, MessageCacheService)"/>
+        public CommandCacheService(DiscordSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
+            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, MessageCacheService messageCache = null)
+            : this((BaseSocketClient)client, capacity, cmdHandler, logger, period, maxMessageTime, messageCache)
+        {
+        }
+
+        /// <inheritdoc cref="CommandCacheService(BaseSocketClient, int, Func{SocketMessage, Task}, Func{LogMessage, Task}, int, double, MessageCacheService)"/>
+        public CommandCacheService(DiscordShardedClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
+            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, MessageCacheService messageCache = null)
+            : this((BaseSocketClient)client, capacity, cmdHandler, logger, period, maxMessageTime, messageCache)
+        {
         }
 
         /// <summary>
@@ -44,7 +58,7 @@ namespace Fergun.Services
         /// <param name="maxMessageTime">The max. message longevity, in hours.</param>
         /// <param name="messageCache">The message cache.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if capacity is less than 1.</exception>
-        public CommandCacheService(DiscordSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
+        public CommandCacheService(BaseSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
             Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, MessageCacheService messageCache = null)
         {
             _client = client;

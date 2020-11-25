@@ -146,6 +146,12 @@ namespace Fergun
         public string DonationUrl { get; private set; }
 
         /// <summary>
+        /// Gets the total number of shards to use.
+        /// </summary>
+        [JsonProperty]
+        public int? TotalShards { get; private set; }
+
+        /// <summary>
         /// Gets the MongoDB server authentication info.
         /// </summary>
         [JsonProperty]

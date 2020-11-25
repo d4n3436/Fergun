@@ -20,19 +20,19 @@ namespace Fergun.Services
     {
         public LavaNode LavaNode { get; }
 
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordShardedClient _client;
         private readonly LogService _logService;
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
         private static readonly string[] _timeFormats = { @"m\:ss", @"mm\:ss", @"h\:mm\:ss", @"hh\:mm\:ss" };
 
-        public MusicService(DiscordSocketClient client, LogService logService, LavaConfig lavaConfig)
+        public MusicService(DiscordShardedClient client, LogService logService, LavaConfig lavaConfig)
         {
             _client = client;
             _logService = logService;
 
             LavaNode = new LavaNode(_client, lavaConfig);
 
-            _client.Ready += ClientReadyAsync;
+            _client.ShardReady += ShardReadyAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdatedAsync;
             LavaNode.OnLog += LogAsync;
             LavaNode.OnTrackEnded += OnTrackEndedAsync;
@@ -41,7 +41,7 @@ namespace Fergun.Services
             LavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
         }
 
-        private Task ClientReadyAsync()
+        private Task ShardReadyAsync(DiscordSocketClient client)
         {
             if (!LavaNode.IsConnected)
             {

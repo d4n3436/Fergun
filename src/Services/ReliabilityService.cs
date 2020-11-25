@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -17,7 +18,7 @@ namespace Fergun.Services
     // [Bash (Unix)] https://stackoverflow.com/a/697064
     public class ReliabilityService : IDisposable
     {
-        private readonly DiscordSocketClient _client;
+        private readonly IDiscordClient _client;
         private readonly Func<LogMessage, Task> _logger;
         private CancellationTokenSource _cts;
         private bool _isReconnecting;
@@ -38,14 +39,29 @@ namespace Fergun.Services
             _timeout = timeout ?? TimeSpan.FromSeconds(30);
             _attemptReset = attemptReset;
 
-            _client.Connected += ConnectedAsync;
-            _client.Disconnected += DisconnectedAsync;
+            client.Connected += ConnectedAsync;
+            client.Disconnected += DisconnectedAsync;
+        }
+
+        public ReliabilityService(DiscordShardedClient client, Func<LogMessage, Task> logger = null, TimeSpan? timeout = null, bool attemptReset = true)
+        {
+            _cts = new CancellationTokenSource();
+            _client = client;
+            _logger = logger ?? (_ => Task.CompletedTask);
+            _timeout = timeout ?? TimeSpan.FromSeconds(30);
+            _attemptReset = attemptReset;
+
+            client.ShardConnected += ShardConnectedAsync;
+            client.ShardDisconnected += ShardDisconnectedAsync;
         }
 
         /// <summary>
         /// Disposes the cancellation token
         /// and unsubscribes from the <see cref="DiscordSocketClient.Connected"/> and <see cref="DiscordSocketClient.Disconnected"/> events.
         /// </summary>
+        /// <remarks>
+        /// If a sharded client is used, unsubscribes from the <see cref="DiscordShardedClient.ShardConnected"/> and <see cref="DiscordShardedClient.ShardDisconnected"/> events.
+        /// </remarks>
         public void Dispose()
         {
             Dispose(true);
@@ -63,8 +79,19 @@ namespace Fergun.Services
             _cts.Dispose();
             _cts = null;
 
-            _client.Connected -= ConnectedAsync;
-            _client.Disconnected -= DisconnectedAsync;
+            switch (_client)
+            {
+                case DiscordSocketClient socketClient:
+                    socketClient.Connected -= ConnectedAsync;
+                    socketClient.Disconnected -= DisconnectedAsync;
+                    break;
+
+                case DiscordShardedClient shardedClient:
+                    shardedClient.ShardConnected -= ShardConnectedAsync;
+                    shardedClient.ShardDisconnected -= ShardDisconnectedAsync;
+                    break;
+            }
+
             _disposed = true;
         }
 
@@ -80,7 +107,9 @@ namespace Fergun.Services
             return Task.CompletedTask;
         }
 
-        private Task DisconnectedAsync(Exception exception)
+        private Task ShardConnectedAsync(DiscordSocketClient client) => ConnectedAsync();
+
+        public Task DisconnectedAsync(Exception exception)
         {
             if (exception is GatewayReconnectException)
             {
@@ -100,6 +129,13 @@ namespace Fergun.Services
                 });
             }
             return Task.CompletedTask;
+        }
+
+        private Task ShardDisconnectedAsync(Exception exception, DiscordSocketClient client)
+        {
+            return ((DiscordShardedClient)_client).Shards.All(x => x.ConnectionState == ConnectionState.Disconnected)
+                ? DisconnectedAsync(exception)
+                : Task.CompletedTask;
         }
 
         private async Task CheckStateAsync()
