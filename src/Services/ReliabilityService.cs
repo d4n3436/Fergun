@@ -44,7 +44,7 @@ namespace Fergun.Services
 
         /// <summary>
         /// Disposes the cancellation token
-        /// and unsubscribes from the <see cref="BaseSocketClient.Connected"/> and <see cref="BaseSocketClient.Disconnected"/> events.
+        /// and unsubscribes from the <see cref="DiscordSocketClient.Connected"/> and <see cref="DiscordSocketClient.Disconnected"/> events.
         /// </summary>
         public void Dispose()
         {
@@ -58,32 +58,29 @@ namespace Fergun.Services
             {
                 throw new ObjectDisposedException(nameof(ReliabilityService), "Service has been disposed.");
             }
-            else if (disposing)
-            {
-                _cts.Dispose();
-                _cts = null;
 
-                _client.Connected -= ConnectedAsync;
-                _client.Disconnected -= DisconnectedAsync;
-                _disposed = true;
-            }
+            if (!disposing) return;
+            _cts.Dispose();
+            _cts = null;
+
+            _client.Connected -= ConnectedAsync;
+            _client.Disconnected -= DisconnectedAsync;
+            _disposed = true;
         }
 
-        public Task ConnectedAsync()
+        private Task ConnectedAsync()
         {
-            if (!_isReconnecting)
-            {
-                // Cancel all previous state checks and reset the CancelToken - client is back online
-                _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, resetting cancel tokens..."));
-                _cts.Cancel();
-                _cts = new CancellationTokenSource();
-                _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, cancel tokens reset."));
-            }
+            if (_isReconnecting) return Task.CompletedTask;
+            // Cancel all previous state checks and reset the CancelToken - client is back online
+            _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, resetting cancel tokens..."));
+            _cts.Cancel();
+            _cts = new CancellationTokenSource();
+            _ = _logger(new LogMessage(LogSeverity.Debug, _logSource, "Client reconnected, cancel tokens reset."));
 
             return Task.CompletedTask;
         }
 
-        public Task DisconnectedAsync(Exception exception)
+        private Task DisconnectedAsync(Exception exception)
         {
             if (exception is GatewayReconnectException)
             {
@@ -128,7 +125,7 @@ namespace Fergun.Services
                     FailFast();
                 }
                 else if (connect.IsCompletedSuccessfully)
-                    await _logger(new LogMessage(LogSeverity.Info, _logSource, "Client reset succesfully!"));
+                    await _logger(new LogMessage(LogSeverity.Info, _logSource, "Client reset successfully!"));
                 return;
             }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace Fergun.Extensions
 {
@@ -33,17 +34,17 @@ namespace Fergun.Extensions
         /// <param name="input">The string to convert.</param>
         public static string ToFullWidth(this string input)
         {
-            string output = "";
-            foreach (char currentchar in input.ToCharArray())
+            var sb = new StringBuilder(input.Length);
+            foreach (char ch in input)
             {
-                if (0x21 <= currentchar && currentchar <= 0x7E) // ASCII chars, excluding space
-                    output += (char)(currentchar + 0xFEE0);
-                else if (currentchar == 0x20)
-                    output += (char)0x3000;
+                if (0x21 <= ch && ch <= 0x7E) // ASCII chars, excluding space
+                    sb.Append((char)(ch + 0xFEE0));
+                else if (ch == 0x20)
+                    sb.Append((char)0x3000);
                 else
-                    output += currentchar;
+                    sb.Append(ch);
             }
-            return output;
+            return sb.ToString();
         }
 
         /// <summary>
@@ -75,33 +76,28 @@ namespace Fergun.Extensions
 
         public static IEnumerable<string> SplitBySeparatorWithLimit(this string text, char separator, int maxLength)
         {
-            string current = "";
-            List<string> list = new List<string>();
-
+            var sb = new StringBuilder();
             foreach (var part in text.Split(separator))
             {
-                if (part.Length + current.Length >= maxLength)
+                if (part.Length + sb.Length >= maxLength)
                 {
-                    list.Add(current);
-                    current = part + separator;
+                    yield return sb.ToString();
+                    sb.Clear();
                 }
-                else
-                {
-                    current += part + separator;
-                }
-            }
-            if (!string.IsNullOrEmpty(current))
-            {
-                list.Add(current);
-            }
 
-            return list;
+                sb.Append(part);
+                sb.Append(separator);
+            }
+            if (sb.Length != 0)
+            {
+                yield return sb.ToString();
+            }
         }
 
         public static int ToColor(this string str)
         {
             int hash = 0;
-            foreach (char ch in str.ToCharArray())
+            foreach (char ch in str)
             {
                 hash = ch + ((hash << 5) - hash);
             }
@@ -125,23 +121,13 @@ namespace Fergun.Extensions
                 WorkingDirectory = FergunClient.IsLinux ? "/home" : ""
             };
 
-            string result;
-            using (var process = new Process())
-            {
-                process.StartInfo = startInfo;
-                process.Start();
-                process.WaitForExit(10000);
-                if (process.ExitCode == 0)
-                {
-                    result = process.StandardOutput.ReadToEnd();
-                }
-                else
-                {
-                    result = process.StandardError.ReadToEnd();
-                }
-            }
+            using var process = new Process { StartInfo = startInfo };
+            process.Start();
+            process.WaitForExit(10000);
 
-            return result;
+            return process.ExitCode == 0
+                ? process.StandardOutput.ReadToEnd()
+                : process.StandardError.ReadToEnd();
         }
     }
 }

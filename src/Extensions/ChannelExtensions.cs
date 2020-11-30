@@ -15,6 +15,7 @@ namespace Fergun.Extensions
         /// <summary>
         /// Tries to delete a message.
         /// </summary>
+        /// <param name="channel">The source channel.</param>
         /// <param name="messageId">The message Id.</param>
         public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, ulong messageId)
         {
@@ -25,6 +26,7 @@ namespace Fergun.Extensions
         /// <summary>
         /// Tries to delete a message.
         /// </summary>
+        /// <param name="channel">The source channel.</param>
         /// <param name="message">The message.</param>
         public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, IMessage message)
         {
@@ -74,7 +76,7 @@ namespace Fergun.Extensions
             // Get the last x messages of the current channel
             var messages = await channel.GetMessagesAsync(messageCount, messageCount > 0 ? CacheMode.CacheOnly : CacheMode.AllowDownload).FlattenAsync();
 
-            // Try to get the last message with any attachment, embed image url or that contains an url
+            // Try to get the last message with any attachment, embed image url or that contains a url
             var filtered = messages.FirstOrDefault(x =>
             x.Attachments.Any(y => !onlyImage || y.Width != null && y.Height != null)
             || x.Embeds.Any(y => !onlyImage || y.Image != null || y.Thumbnail != null)
@@ -100,13 +102,13 @@ namespace Fergun.Extensions
                 var thumbnail = embed.Thumbnail;
                 if (onlyImage)
                 {
-                    if (image?.Height != null && image?.Width != null)
+                    if (image?.Height != null && image.Value.Width != null)
                     {
-                        url = image?.Url;
+                        url = image.Value.Url;
                     }
-                    else if (thumbnail?.Height != null && thumbnail?.Width != null)
+                    else if (thumbnail?.Height != null && thumbnail.Value.Width != null)
                     {
-                        url = thumbnail?.Url;
+                        url = thumbnail.Value.Url;
                     }
                     else
                     {
@@ -144,7 +146,6 @@ namespace Fergun.Extensions
             }
             return (url, UrlFindResult.UrlFound);
         }
-
     }
 
     public enum UrlFindResult

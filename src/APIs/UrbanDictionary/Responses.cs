@@ -19,7 +19,7 @@ namespace Fergun.APIs.UrbanDictionary
         public string Permalink { get; set; }
 
         [JsonProperty("thumbs_up")]
-        public long ThumbsUp { get; set; }
+        public int ThumbsUp { get; set; }
 
         [JsonProperty("sound_urls", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> SoundUrls { get; set; }
@@ -31,7 +31,7 @@ namespace Fergun.APIs.UrbanDictionary
         public string Word { get; set; }
 
         [JsonProperty("defid")]
-        public long Defid { get; set; }
+        public int DefinitionId { get; set; }
 
         [JsonProperty("current_vote")]
         public string CurrentVote { get; set; }
@@ -43,6 +43,6 @@ namespace Fergun.APIs.UrbanDictionary
         public string Example { get; set; }
 
         [JsonProperty("thumbs_down")]
-        public long ThumbsDown { get; set; }
+        public int ThumbsDown { get; set; }
     }
 }

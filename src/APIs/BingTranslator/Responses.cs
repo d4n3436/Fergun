@@ -18,7 +18,7 @@ namespace Fergun.APIs.BingTranslator
         public string Language { get; set; }
 
         [JsonProperty("score")]
-        public long Score { get; set; }
+        public float Score { get; set; }
     }
 
     public class Translation
@@ -36,9 +36,9 @@ namespace Fergun.APIs.BingTranslator
     public class SentLen
     {
         [JsonProperty("srcSentLen")]
-        public List<long> SrcSentLen { get; set; }
+        public List<int> SrcSentLen { get; set; }
 
         [JsonProperty("transSentLen")]
-        public List<long> TransSentLen { get; set; }
+        public List<int> TransSentLen { get; set; }
     }
 }

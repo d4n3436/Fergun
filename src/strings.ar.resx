@@ -869,10 +869,7 @@
 	<data name="uptimeSummary" xml:space="preserve">
     <value>يظهر وقت تشغيل البوت.</value>
   </data>
-	<data name="waveSummary" xml:space="preserve">
-    <value>هم</value>
-  </data>
-	<data name="languageSummary" xml:space="preserve">
+  <data name="languageSummary" xml:space="preserve">
     <value>يضبط لغة البوت.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -973,7 +970,7 @@
 مع الوضع: ** {0} **
 والشخصية: ** {1} ** ...</value>
   </data>
-	<data name="CustomChararacterCreation" xml:space="preserve">
+	<data name="CustomCharacterCreation" xml:space="preserve">
     <value>إنشاء شخصية مخصصة</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">

@@ -12,7 +12,7 @@ namespace Fergun.Responses
         public string Title { get; set; }
 
         [JsonProperty("displaytitle")]
-        public string Displaytitle { get; set; }
+        public string DisplayTitle { get; set; }
 
         [JsonProperty("namespace")]
         public NamespaceData Namespace { get; set; }
@@ -24,13 +24,13 @@ namespace Fergun.Responses
         public Titles Titles { get; set; }
 
         [JsonProperty("pageid")]
-        public long Pageid { get; set; }
+        public int PageId { get; set; }
 
         [JsonProperty("thumbnail")]
         public ImageData Thumbnail { get; set; }
 
         [JsonProperty("originalimage")]
-        public ImageData Originalimage { get; set; }
+        public ImageData OriginalImage { get; set; }
 
         [JsonProperty("lang")]
         public string Lang { get; set; }
@@ -114,7 +114,7 @@ namespace Fergun.Responses
     public class NamespaceData
     {
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("text")]
         public string Text { get; set; }
@@ -126,10 +126,10 @@ namespace Fergun.Responses
         public string Source { get; set; }
 
         [JsonProperty("width")]
-        public long Width { get; set; }
+        public int Width { get; set; }
 
         [JsonProperty("height")]
-        public long Height { get; set; }
+        public int Height { get; set; }
     }
 
     public class Titles

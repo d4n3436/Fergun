@@ -32,7 +32,7 @@ namespace Fergun
         /// <param name="aidAutoTranslate">Whether the response of the AI Dungeon API should be translated to the server's language.</param>
         /// <param name="trackSelection">Whether the track selection message should be sent instead of playing the first result automatically in the server.</param>
         public GuildConfig(ulong id, bool isBlacklisted = false, string blacklistReason = null,
-            string prefix = null, string language = null, IList<string> disabledCommands = null,
+            string prefix = null, string language = null, ICollection<string> disabledCommands = null,
             bool captionbotAutoTranslate = false, bool aidAutoTranslate = false, bool trackSelection = false)
             : this(id)
         {

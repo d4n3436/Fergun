@@ -10,11 +10,10 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Fergun.Extensions;
-using Fergun.Services;
 using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Fergun
+namespace Fergun.Services
 {
     public class CommandHandlingService
     {
@@ -65,7 +64,10 @@ namespace Fergun
             if (message.Author.IsBot) return;
 
             // Ignore ...ignored users
-            if (_ignoredUsers.Contains(message.Author.Id)) return;
+            lock (_userLock)
+            {
+                if (_ignoredUsers.Contains(message.Author.Id)) return;
+            }
 
             // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
@@ -83,13 +85,13 @@ namespace Fergun
 
             // Determine if the message is a command based on the prefix or mention
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
-                message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
+                  message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
 
             var result = _cmdService.Search(message.Content.Substring(argPos));
             if (!result.IsSuccess) return;
 
-            var blacklistedUser = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollecion, x => x.Id == message.Author.Id);
+            var blacklistedUser = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollection, x => x.Id == message.Author.Id);
             if (blacklistedUser != null && blacklistedUser.IsBlacklisted)
             {
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
@@ -195,7 +197,7 @@ namespace Fergun
                         permissions = guildUser.GetPermissions((IGuildChannel)context.Channel);
                     }
 
-                    if (!permissions.Has(Constants.MinimunRequiredPermissions))
+                    if (!permissions.Has(Constants.MinimumRequiredPermissions))
                     {
                         var builder = new EmbedBuilder()
                             .WithDescription($"\u26a0 {result.ErrorReason}")
@@ -206,7 +208,7 @@ namespace Fergun
                         }
                         catch (HttpException e) when (e.DiscordCode == 50007)
                         {
-                            await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Unable to send a DM about the minimun required permissions to the user."));
+                            await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Unable to send a DM about the minimum required permissions to the user."));
                         }
                     }
                     else
@@ -251,7 +253,7 @@ namespace Fergun
                             .WithTitle(GuildUtils.Locate("DiscordServerError", context.Channel))
                             .WithDescription($"\u26a0 {GuildUtils.Locate("DiscordServerErrorInfo", context.Channel)}")
                             .AddField(GuildUtils.Locate("ErrorDetails", context.Channel),
-                            Format.Code($"Code: {(int)httpException.HttpCode}, Reason: {httpException.Reason}", "md"))
+                                Format.Code($"Code: {(int)httpException.HttpCode}, Reason: {httpException.Reason}", "md"))
                             .WithColor(FergunClient.Config.EmbedColor);
 
                         try
@@ -304,16 +306,13 @@ namespace Fergun
                         await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error while sending the embed in the log channel", e));
                     }
                     break;
-
-                default:
-                    break;
             }
 
             _ = IgnoreUserAsync(context.User.Id, TimeSpan.FromSeconds(ignoreTime));
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Name}\" for {context.User} in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
         }
 
-        public static async Task IgnoreUserAsync(ulong id, TimeSpan time)
+        private static async Task IgnoreUserAsync(ulong id, TimeSpan time)
         {
             lock (_userLock)
             {

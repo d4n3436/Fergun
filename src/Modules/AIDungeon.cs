@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -27,12 +28,10 @@ namespace Fergun.Modules
     using ActionType = APIs.AIDungeon.ActionType;
 
     [Order(4)]
-    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [RequireBotPermission(Constants.MinimumRequiredPermissions)]
     [Name("AIDungeon"), Group("aid"), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class AIDungeon : FergunBase
     {
-        public const string IconUrl = "https://fergun.is-inside.me/CypOix5S.png";
-
         private static AidAPI _api;
         private static readonly ConcurrentDictionary<uint, SemaphoreSlim> _queue = new ConcurrentDictionary<uint, SemaphoreSlim>();
         private static readonly Random _rng = new Random();
@@ -64,24 +63,27 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            string list = "";
+            var list = new StringBuilder();
             foreach (var command in aidCommands.Commands)
             {
-                list += $"`{command.Name}";
+                list.Append($"`{command.Name}");
                 foreach (var parameter in command.Parameters)
                 {
-                    list += ' ';
-                    list += parameter.IsOptional ? '[' : '<';
-                    list += parameter.Name;
+                    list.Append(' ');
+                    list.Append(parameter.IsOptional ? '[' : '<');
+                    list.Append(parameter.Name);
                     if (parameter.IsRemainder || parameter.IsMultiple)
-                        list += "...";
-                    list += parameter.IsOptional ? ']' : '>';
+                    {
+                        list.Append("...");
+                    }
+
+                    list.Append(parameter.IsOptional ? ']' : '>');
                 }
-                list += $"`: {Locate(command.Summary)}\n\n";
+                list.Append($"`: {Locate(command.Summary)}\n\n");
             }
 
-            builder.AddField(Locate("Commands"), list)
-                .WithFooter(Locate("HelpFooter2"), IconUrl)
+            builder.AddField(Locate("Commands"), list.ToString())
+                .WithFooter(Locate("HelpFooter2"), Constants.AiDungeonLogoUrl)
                 //.AddField("Tips", "- " + string.Join("\n- ", GetValue("AIDTips").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)))
                 .WithColor(FergunClient.Config.EmbedColor);
 
@@ -149,9 +151,8 @@ namespace Fergun.Modules
             }
 
             int modeIndex = -1;
-            AutoResetEvent stopEvent = new AutoResetEvent(false);
+            var stopEvent = new AutoResetEvent(false);
             bool hasReacted = false;
-            IUserMessage message = null;
             var builder = new EmbedBuilder();
 
             async Task HandleAidReactionAsync(int index)
@@ -164,24 +165,24 @@ namespace Fergun.Modules
             }
 
             var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
-            string list = $"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n";
+            var list = new StringBuilder($"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n");
             for (int i = 0; i < _modes.Count; i++)
             {
                 int index = i;
                 callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReactionAsync(index)));
-                list += $"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n";
+                list.Append($"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n");
             }
 
             builder.WithAuthor(Context.User)
                 .WithTitle(Locate("AIDungeonWelcome"))
-                .WithDescription(list)
-                .WithThumbnailUrl(IconUrl)
+                .WithDescription(list.ToString())
+                .WithThumbnailUrl(Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async (context) => await HandleAidReactionAsync(-1));
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReactionAsync(-1));
 
             data.AddCallbacks(callbacks);
-            message = await InlineReactionReplyAsync(data);
+            var message = await InlineReactionReplyAsync(data);
             stopEvent.WaitOne();
             stopEvent.Dispose();
 
@@ -233,13 +234,8 @@ namespace Fergun.Modules
             string initialPrompt = actionList[actionList.Count - 1].Text;
             if (actionList.Count > 1)
             {
-                string previousAction = "";
                 actionList.RemoveAt(actionList.Count - 1);
-                foreach (var action in actionList)
-                {
-                    previousAction += action.Text;
-                }
-                initialPrompt = previousAction + initialPrompt;
+                initialPrompt = string.Concat(actionList.Select(x => x.Text)) + initialPrompt;
             }
 
             if (AutoTranslate() && !string.IsNullOrEmpty(initialPrompt))
@@ -251,7 +247,7 @@ namespace Fergun.Modules
             uint id = uint.Parse(adventure.Id, CultureInfo.InvariantCulture);
 
             builder.Description = initialPrompt.Truncate(EmbedBuilder.MaxDescriptionLength);
-            builder.WithFooter($"ID: {id} - Tip: {string.Format(Locate("FirstTip"), GetPrefix())}", IconUrl);
+            builder.WithFooter($"ID: {id} - Tip: {string.Format(Locate("FirstTip"), GetPrefix())}", Constants.AiDungeonLogoUrl);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -296,9 +292,7 @@ namespace Fergun.Modules
 
             int characterIndex = -1;
             bool hasReacted = false;
-            AutoResetEvent stopEvent = new AutoResetEvent(false);
-
-            string list = "";
+            var stopEvent = new AutoResetEvent(false);
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
 
             async Task HandleAidReaction2Async(int index)
@@ -311,17 +305,18 @@ namespace Fergun.Modules
             }
 
             var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
+            var list = new StringBuilder();
             for (int i = 0; i < characters.Count; i++)
             {
                 int index = i;
-                list += $"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n";
+                list.Append($"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n");
                 callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReaction2Async(index)));
             }
 
             builder.Title = Locate("CharacterSelect");
-            builder.Description = list;
+            builder.Description = list.ToString();
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async (context) => await HandleAidReaction2Async(-1));
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReaction2Async(-1));
 
             data.AddCallbacks(callbacks);
 
@@ -445,7 +440,7 @@ namespace Fergun.Modules
 
         private async Task<(string, WebSocketAdventure)> CreateCustomAdventureAsync(int modeIndex, EmbedBuilder builder)
         {
-            builder.Title = Locate("CustomChararacterCreation");
+            builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
             var message = await ReplyAsync(embed: builder.Build());
@@ -572,7 +567,7 @@ namespace Fergun.Modules
             return (null, response.Payload.Data.Adventure);
         }
 
-        private async Task<string> RunAIDCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", uint actionId = 0)
+        private async Task<string> SendAidCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", uint actionId = 0)
         {
             if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
@@ -618,12 +613,9 @@ namespace Fergun.Modules
                 .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate(promptText)}")
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            if (!_queue.ContainsKey(adventureId))
+            if (!_queue.ContainsKey(adventureId) && !_queue.TryAdd(adventureId, new SemaphoreSlim(1)))
             {
-                if (!_queue.TryAdd(adventureId, new SemaphoreSlim(1)))
-                {
-                    return Locate("AnErrorOccurred");
-                }
+                return Locate("AnErrorOccurred");
             }
 
             bool wasWaiting = false;
@@ -704,7 +696,7 @@ namespace Fergun.Modules
             }
 
             builder.WithDescription(actionType == ActionType.Remember ? $"{Locate("TheAIWillNowRemember")}\n{text}" : textToShow)
-                .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", IconUrl);
+                .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", Constants.AiDungeonLogoUrl);
 
             await ReplyAsync(embed: builder.Build());
 
@@ -718,13 +710,11 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Continue([Summary("continueParam1")] uint adventureId,
             [Remainder, Summary("continueParam2")] string text = "")
         {
-            string result = await RunAIDCommandAsync(adventureId, "GeneratingStory", text: text);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "GeneratingStory", text: text);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("undo", RunMode = RunMode.Async)]
@@ -733,13 +723,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Undo([Summary("undoParam1")] uint adventureId)
         {
-            string result = await RunAIDCommandAsync(adventureId, "RevertingLastAction", ActionType.Undo);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "RevertingLastAction", ActionType.Undo);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("redo", RunMode = RunMode.Async)]
@@ -747,13 +735,11 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Redo([Summary("redoParam1")] uint adventureId)
         {
-            string result = await RunAIDCommandAsync(adventureId, "RedoingLastAction", ActionType.Redo);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "RedoingLastAction", ActionType.Redo);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("remember", RunMode = RunMode.Async)]
@@ -762,13 +748,11 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Remember([Summary("rememberParam1")] uint adventureId,
             [Remainder, Summary("rememberParam2")] string text)
         {
-            string result = await RunAIDCommandAsync(adventureId, "EditingStoryContext", ActionType.Remember, text);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "EditingStoryContext", ActionType.Remember, text);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("alter", RunMode = RunMode.Async)]
@@ -856,13 +840,11 @@ namespace Fergun.Modules
 
             await userInput.TryDeleteAsync();
 
-            string result = await RunAIDCommandAsync(adventureId, "Loading", ActionType.Alter, newOutput, actionId);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "Loading", ActionType.Alter, newOutput, actionId);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("retry", RunMode = RunMode.Async)]
@@ -870,19 +852,17 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Retry([Summary("retryParam1")] uint adventureId)
         {
-            string result = await RunAIDCommandAsync(adventureId, "GeneratingNewResponse", ActionType.Retry);
-            if (result != null)
-            {
-                return FergunResult.FromError(result);
-            }
+            string result = await SendAidCommandAsync(adventureId, "GeneratingNewResponse", ActionType.Retry);
 
-            return FergunResult.FromSuccess();
+            return result != null
+                ? FergunResult.FromError(result)
+                : FergunResult.FromSuccess();
         }
 
         [Command("makepublic")]
         [Summary("makepublicSummary")]
         [Example("2582734")]
-        public async Task<RuntimeResult> Makepublic([Summary("makepublicParam1")] uint adventureId)
+        public async Task<RuntimeResult> MakePublic([Summary("makepublicParam1")] uint adventureId)
         {
             AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
@@ -908,7 +888,7 @@ namespace Fergun.Modules
         [Command("makeprivate")]
         [Summary("makeprivateSummary")]
         [Example("2582734")]
-        public async Task<RuntimeResult> Makeprivate([Summary("makeprivateParam1")] uint adventureId)
+        public async Task<RuntimeResult> MakePrivate([Summary("makeprivateParam1")] uint adventureId)
         {
             AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
@@ -935,21 +915,21 @@ namespace Fergun.Modules
         [Alias("ids", "list")]
         [Summary("idlistSummary")]
         [Example("Discord#1234")]
-        public async Task<RuntimeResult> Idlist([Summary("idlistParam1")] IUser user = null)
+        public async Task<RuntimeResult> IdList([Summary("idlistParam1")] IUser user = null)
         {
             user ??= Context.User;
             var adventures = FergunClient.Database.FindManyDocuments<AidAdventure>(Constants.AidAdventuresCollection, x => x.OwnerId == user.Id);
 
             if (!adventures.Any())
             {
-                return FergunResult.FromError(string.Format(Locate(user.Id == Context.User.Id ? "SelfNoIDs" : "NoIDs"), user.ToString()));
+                return FergunResult.FromError(string.Format(Locate(user.Id == Context.User.Id ? "SelfNoIDs" : "NoIDs"), user));
             }
 
             var builder = new EmbedBuilder()
-                .WithTitle(string.Format(Locate("IDList"), user.ToString()))
+                .WithTitle(string.Format(Locate("IDList"), user))
                 .AddField("ID", string.Join("\n", adventures.Select(x => x.Id)), true)
                 .AddField(Locate("IsPublic"), string.Join("\n", adventures.Select(x => Locate(x.IsPublic))), true)
-                .WithFooter(Locate("IDListFooter"), IconUrl)
+                .WithFooter(Locate("IDListFooter"), Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
@@ -959,7 +939,7 @@ namespace Fergun.Modules
         [Command("idinfo", RunMode = RunMode.Async)]
         [Summary("idinfoSummary")]
         [Example("2582734")]
-        public async Task<RuntimeResult> Idinfo([Summary("idinfoParam1")] uint adventureId)
+        public async Task<RuntimeResult> IdInfo([Summary("idinfoParam1")] uint adventureId)
         {
             if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
@@ -1022,7 +1002,7 @@ namespace Fergun.Modules
                 .WithDescription(initialPrompt)
                 .AddField(Locate("IsPublic"), Locate(adventure.IsPublic), true)
                 .AddField(Locate("Owner"), idOwner?.ToString() ?? Locate("NotAvailable"), true)
-                .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:", IconUrl)
+                .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:", Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
             builder.Timestamp = response?.Payload?.Data?.Adventure?.CreatedAt;
@@ -1053,14 +1033,14 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
 
-            bool hasRacted = false;
+            bool hasReacted = false;
             IUserMessage message = null;
 
             var builder = new EmbedBuilder()
                 .WithDescription(Locate("AdventureDeletionPrompt"))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async (context) => await HandleReactionAsync(true))
+            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async context => await HandleReactionAsync(true))
                 .AddCallBack(new Emoji("✅"), async (context, reaction) => await HandleReactionAsync(false));
 
             message = await InlineReactionReplyAsync(data);
@@ -1069,19 +1049,18 @@ namespace Fergun.Modules
 
             async Task HandleReactionAsync(bool timeout)
             {
-                if (hasRacted) return;
-                hasRacted = true;
+                if (hasReacted) return;
+                hasReacted = true;
                 if (timeout)
                 {
                     await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
                     return;
                 }
                 string result;
-                WebSocketResponse response;
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
                 try
                 {
-                    response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
+                    var response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
 
                     string error = CheckResponse(response);
                     if (error != null)
@@ -1219,7 +1198,7 @@ namespace Fergun.Modules
             FergunClient.Database.InsertOrUpdateDocument(Constants.AidAdventuresCollection, adventure);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Give: Transferred adventure ID from {Context.User} ({Context.User.Id}) to {user} ({user.Id})."));
 
-            await SendEmbedAsync("✅ " + string.Format(Locate("GaveId"), user.ToString()));
+            await SendEmbedAsync("✅ " + string.Format(Locate("GaveId"), user));
 
             return FergunResult.FromSuccess();
         }
@@ -1236,7 +1215,7 @@ namespace Fergun.Modules
             }
             if (!adventure.IsPublic && Context.User.Id != adventure.OwnerId)
             {
-                return string.Format(Locate("IDNotPublic"), (await Context.Client.Rest.GetUserAsync(adventure.OwnerId)).ToString());
+                return string.Format(Locate("IDNotPublic"), await Context.Client.Rest.GetUserAsync(adventure.OwnerId));
             }
             return null;
         }
@@ -1251,11 +1230,11 @@ namespace Fergun.Modules
             {
                 return response.Payload.Message;
             }
-            if (response.Payload.Errors != null && response.Payload.Errors.Count > 0)
+            if (response.Payload?.Errors != null && response.Payload.Errors.Count > 0)
             {
                 return response.Payload.Errors[0].Message;
             }
-            var data = response.Payload.Data;
+            var data = response.Payload?.Data;
             if (data == null)
             {
                 return Locate("ErrorInAPI");
@@ -1272,20 +1251,15 @@ namespace Fergun.Modules
             {
                 return data.EditAction.Message;
             }
-            if (data.SubscribeAdventure?.Error != null)
-            {
-                return data.SubscribeAdventure.Error.Message;
-            }
-            if (data.Adventure?.Error != null)
-            {
-                return data.Adventure.Error.Message;
-            }
-            return null;
+
+            return data.SubscribeAdventure?.Error != null
+                ? data.SubscribeAdventure.Error.Message
+                : data.Adventure?.Error?.Message;
         }
 
         private string GetTip()
         {
-            var tips = Locate("AIDTips").Split(Environment.NewLine, StringSplitOptions.None);
+            var tips = Locate("AIDTips").Split(Environment.NewLine);
             return tips[_rng.Next(tips.Length)];
         }
 

@@ -4,6 +4,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -18,7 +19,7 @@ namespace Fergun.Extensions
 {
     public static class Extensions
     {
-        // Copy pasted from SocketGuildUser Hiearchy property to be used with RestGuildUser
+        // Copy pasted from SocketGuildUser Hierarchy property to be used with RestGuildUser
         public static int GetHierarchy(this IGuildUser user)
         {
             if (user.Guild.OwnerId == user.Id)
@@ -86,26 +87,27 @@ namespace Fergun.Extensions
                 return "string";
             if (type == typeof(object))
                 return "object";
-            if (type.IsGenericType)
+
+            if (!type.IsGenericType) return type.Name;
+
+            string arguments = string.Join(", ", type.GetGenericArguments().Select(GetFriendlyName).ToArray());
+            if (type.Name.Contains("Nullable", StringComparison.OrdinalIgnoreCase))
             {
-                string arguments = string.Join(", ", type.GetGenericArguments().Select(x => GetFriendlyName(x)).ToArray());
-                if (type.Name.Contains("Nullable", StringComparison.OrdinalIgnoreCase))
-                {
-                    return arguments + "?";
-                }
-                return $"{type.Name.Split('`')[0]}<{arguments}>";
+                return arguments + "?";
             }
-            return type.Name;
+
+            return $"{type.Name.Split('`')[0]}<{arguments}>";
         }
 
         public static string FileExtensionFromEncoder(this System.Drawing.Imaging.ImageFormat format)
         {
             return ImageCodecInfo.GetImageEncoders()
-                                 .FirstOrDefault(x => x.FormatID == format.Guid)?
-                                 .FilenameExtension?.Split(';', StringSplitOptions.RemoveEmptyEntries)?
-                                 .FirstOrDefault()?
-                                 .Trim('*')?
-                                 .ToLowerInvariant() ?? ".jpg";
+                .FirstOrDefault(x => x.FormatID == format.Guid)
+                ?.FilenameExtension
+                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault()
+                ?.Trim('*')
+                .ToLowerInvariant() ?? ".jpg";
         }
 
         public static string ToTrackLink(this LavaTrack track, bool withTime = true)
@@ -125,40 +127,48 @@ namespace Fergun.Extensions
             if (command.Parameters.Count > 0)
             {
                 // Add parameters: param1 (type) (Optional): description
-                string field = "";
+                var field = new StringBuilder();
                 foreach (var parameter in command.Parameters)
                 {
-                    field += $"{parameter.Name} ({parameter.Type.GetFriendlyName()})";
+                    field.Append($"{parameter.Name} ({parameter.Type.GetFriendlyName()})");
                     if (parameter.IsOptional)
-                        field += ' ' + GuildUtils.Locate("Optional", language);
-                    field += $": {GuildUtils.Locate(parameter.Summary ?? "NoDescription", language)}\n";
+                    {
+                        field.Append(' ');
+                        field.Append(GuildUtils.Locate("Optional", language));
+                    }
+
+                    field.Append($": {GuildUtils.Locate(parameter.Summary ?? "NoDescription", language)}\n");
                 }
-                builder.AddField(GuildUtils.Locate("Parameters", language), field);
+                builder.AddField(GuildUtils.Locate("Parameters", language), field.ToString());
             }
 
             // Add usage field (`prefix group command <param1> [param2...]`)
-            string usage = '`' + prefix;
+            var usage = new StringBuilder('`' + prefix);
             if (!string.IsNullOrEmpty(command.Module.Group))
             {
-                usage += command.Module.Group + ' ';
+                usage.Append(command.Module.Group);
+                usage.Append(' ');
             }
-            usage += command.Name;
+            usage.Append(command.Name);
             foreach (var parameter in command.Parameters)
             {
-                usage += ' ';
-                usage += parameter.IsOptional ? '[' : '<';
-                usage += parameter.Name;
+                usage.Append(' ');
+                usage.Append(parameter.IsOptional ? '[' : '<');
+                usage.Append(parameter.Name);
                 if (parameter.IsRemainder || parameter.IsMultiple)
-                    usage += "...";
-                usage += parameter.IsOptional ? ']' : '>';
+                {
+                    usage.Append("...");
+                }
+
+                usage.Append(parameter.IsOptional ? ']' : '>');
             }
-            usage += '`';
-            builder.AddField(GuildUtils.Locate("Usage", language), usage);
+            usage.Append('`');
+            builder.AddField(GuildUtils.Locate("Usage", language), usage.ToString());
 
             // Add example if the command has parameters
             if (command.Parameters.Count > 0)
             {
-                var attribute = command.Attributes.FirstOrDefault(x => x is ExampleAttribute);
+                var attribute = command.Attributes.OfType<ExampleAttribute>().FirstOrDefault();
                 if (attribute != null)
                 {
                     string example = prefix;
@@ -166,7 +176,7 @@ namespace Fergun.Extensions
                     {
                         example += command.Module.Group + ' ';
                     }
-                    example += $"{command.Name} {(attribute as ExampleAttribute).Example}";
+                    example += $"{command.Name} {attribute.Example}";
                     builder.AddField(GuildUtils.Locate("Example", language), example);
                 }
             }
@@ -177,11 +187,11 @@ namespace Fergun.Extensions
                 builder.AddField(GuildUtils.Locate("Notes", language), GuildUtils.Locate(command.Remarks, language));
             }
 
-            var modulePreconds = command.Module.Preconditions;
-            var commandPreconds = command.Preconditions;
+            var modulePreconditions = command.Module.Preconditions;
+            var commandPreconditions = command.Preconditions;
 
             // Add ratelimit info if present
-            var ratelimit = commandPreconds.Concat(modulePreconds).OfType<RatelimitAttribute>().FirstOrDefault();
+            var ratelimit = commandPreconditions.Concat(modulePreconditions).OfType<RatelimitAttribute>().FirstOrDefault();
 
             if (ratelimit != null)
             {
@@ -189,31 +199,34 @@ namespace Fergun.Extensions
             }
 
             // Add required permissions if there's any
-            var preconditions = modulePreconds
-                .Concat(commandPreconds).Where(x => !(x is RatelimitAttribute) && !(x is LongRunningAttribute) && !(x is DisabledAttribute));
+            var preconditions = modulePreconditions
+                .Concat(commandPreconditions).Where(x => !(x is RatelimitAttribute) && !(x is LongRunningAttribute) && !(x is DisabledAttribute));
 
-            if (preconditions.Any())
+            var list = new StringBuilder();
+            foreach (var precondition in preconditions)
             {
-                string list = "";
-                foreach (var precondition in preconditions)
+                string name = precondition.GetType().Name;
+                list.Append(Format.Code(name.Substring(0, name.Length - 9)));
+                switch (precondition)
                 {
-                    string name = precondition.GetType().Name;
-                    list += Format.Code(name.Substring(0, name.Length - 9));
-                    if (precondition is RequireContextAttribute requireContext)
-                    {
-                        list += ": " + requireContext.Contexts.ToString();
-                    }
-                    else if (precondition is RequireUserPermissionAttribute requireUser)
-                    {
-                        list += $": {requireUser.GuildPermission?.ToString() ?? requireUser.ChannelPermission?.ToString()}";
-                    }
-                    else if (precondition is RequireBotPermissionAttribute requireBot)
-                    {
-                        list += $": {requireBot.GuildPermission?.ToString() ?? requireBot.ChannelPermission?.ToString()}";
-                    }
-                    list += "\n";
+                    case RequireContextAttribute requireContext:
+                        list.Append($": {requireContext.Contexts}");
+                        break;
+
+                    case RequireUserPermissionAttribute requireUser:
+                        list.Append($": {requireUser.GuildPermission?.ToString() ?? requireUser.ChannelPermission?.ToString()}");
+                        break;
+
+                    case RequireBotPermissionAttribute requireBot:
+                        list.Append($": {requireBot.GuildPermission?.ToString() ?? requireBot.ChannelPermission?.ToString()}");
+                        break;
                 }
-                builder.AddField(GuildUtils.Locate("Requirements", language), list);
+                list.Append('\n');
+            }
+
+            if (list.Length != 0)
+            {
+                builder.AddField(GuildUtils.Locate("Requirements", language), list.ToString());
             }
 
             // Add aliases if present
@@ -265,21 +278,17 @@ namespace Fergun.Extensions
         {
             try
             {
-                using (var strWriter = new StringWriter())
+                using var strWriter = new StringWriter();
+                using var jsonWriter = new CustomJsonTextWriter(strWriter);
+                var resolver = new CustomContractResolver(() => jsonWriter.CurrentDepth <= maxDepth);
+                var serializer = new JsonSerializer
                 {
-                    using (var jsonWriter = new CustomJsonTextWriter(strWriter))
-                    {
-                        var resolver = new CustomContractResolver(() => jsonWriter.CurrentDepth <= maxDepth);
-                        var serializer = new JsonSerializer
-                        {
-                            ContractResolver = resolver,
-                            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                            Formatting = Formatting.Indented
-                        };
-                        serializer.Serialize(jsonWriter, obj);
-                    }
-                    return strWriter.ToString();
-                }
+                    ContractResolver = resolver,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    Formatting = Formatting.Indented
+                };
+                serializer.Serialize(jsonWriter, obj);
+                return strWriter.ToString();
             }
             catch (JsonSerializationException)
             {

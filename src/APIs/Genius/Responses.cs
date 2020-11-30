@@ -15,7 +15,7 @@ namespace Fergun.APIs.Genius
     public class Meta
     {
         [JsonProperty("status")]
-        public long Status { get; set; }
+        public int Status { get; set; }
     }
 
     public class Response
@@ -42,7 +42,7 @@ namespace Fergun.APIs.Genius
     public class Result
     {
         [JsonProperty("annotation_count")]
-        public long AnnotationCount { get; set; }
+        public int AnnotationCount { get; set; }
 
         [JsonProperty("api_path")]
         public string ApiPath { get; set; }
@@ -57,10 +57,10 @@ namespace Fergun.APIs.Genius
         public string HeaderImageUrl { get; set; }
 
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("lyrics_owner_id")]
-        public long LyricsOwnerId { get; set; }
+        public int LyricsOwnerId { get; set; }
 
         [JsonProperty("lyrics_state")]
         public string LyricsState { get; set; }
@@ -69,7 +69,7 @@ namespace Fergun.APIs.Genius
         public string Path { get; set; }
 
         [JsonProperty("pyongs_count")]
-        public long? PyongsCount { get; set; }
+        public int? PyongsCount { get; set; }
 
         [JsonProperty("song_art_image_thumbnail_url")]
         public string SongArtImageThumbnailUrl { get; set; }
@@ -102,7 +102,7 @@ namespace Fergun.APIs.Genius
         public string HeaderImageUrl { get; set; }
 
         [JsonProperty("id")]
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         [JsonProperty("image_url")]
         public string ImageUrl { get; set; }
@@ -120,21 +120,21 @@ namespace Fergun.APIs.Genius
         public string Url { get; set; }
 
         [JsonProperty("iq", NullValueHandling = NullValueHandling.Ignore)]
-        public long? Iq { get; set; }
+        public int? Iq { get; set; }
     }
 
     public class Stats
     {
         [JsonProperty("unreviewed_annotations")]
-        public long UnreviewedAnnotations { get; set; }
+        public int UnreviewedAnnotations { get; set; }
 
         [JsonProperty("concurrents", NullValueHandling = NullValueHandling.Ignore)]
-        public long? Concurrents { get; set; }
+        public int? Concurrents { get; set; }
 
         [JsonProperty("hot")]
         public bool Hot { get; set; }
 
         [JsonProperty("pageviews", NullValueHandling = NullValueHandling.Ignore)]
-        public long? Pageviews { get; set; }
+        public int? PageViews { get; set; }
     }
 }

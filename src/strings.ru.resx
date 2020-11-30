@@ -872,10 +872,7 @@
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Показывает время работы бота.</value>
   </data>
-	<data name="waveSummary" xml:space="preserve">
-    <value>хмм</value>
-  </data>
-	<data name="languageSummary" xml:space="preserve">
+  <data name="languageSummary" xml:space="preserve">
     <value>Устанавливает язык бота.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -906,8 +903,8 @@
 	<data name="ManageMessages" xml:space="preserve">
     <value>Управление сообщениями</value>
   </data>
-	<data name="Connect" xml:space="preserve">
-    <value>Connect</value>
+  <data name="Connect" xml:space="preserve">
+    <value>Подключить</value>
   </data>
 	<data name="Speak" xml:space="preserve">
     <value>Разговаривать</value>
@@ -976,7 +973,7 @@
 в режиме: ** {0} **
 и персонаж: ** {1} ** ...</value>
   </data>
-	<data name="CustomChararacterCreation" xml:space="preserve">
+	<data name="CustomCharacterCreation" xml:space="preserve">
     <value>Создание собственного персонажа</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
@@ -1042,8 +1039,8 @@
 	<data name="AboutAIDTitle" xml:space="preserve">
     <value>Об AI Dungeon</value>
   </data>
-	<data name="AIDHelp" xml:space="preserve">
-    <value>AI Dungeon Help</value>
+  <data name="AIDHelp" xml:space="preserve">
+    <value>Справка AI Dungeon</value>
   </data>
 	<data name="AIDHowToPlayTitle" xml:space="preserve">
     <value>Как играть</value>
@@ -1451,11 +1448,11 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="ServerFeatures" xml:space="preserve">
     <value>особенности</value>
   </data>
-	<data name="BoostTier" xml:space="preserve">
-    <value>Nitro Boost Tier</value>
+  <data name="BoostTier" xml:space="preserve">
+    <value>Уровень Nitro Boost</value>
   </data>
-	<data name="BoostCount" xml:space="preserve">
-    <value>Nitro Boost Count</value>
+  <data name="BoostCount" xml:space="preserve">
+    <value>Счетчик нитроускорения</value>
   </data>
 	<data name="SeekTimeHigherOrEqual" xml:space="preserve">
     <value>Время перехода ({0}) не может быть больше или равно длине трека ({1})</value>
@@ -2014,11 +2011,11 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="VoiceChannel" xml:space="preserve">
     <value>речевой канал</value>
   </data>
-	<data name="DMChannel" xml:space="preserve">
-    <value>DM Channel</value>
+  <data name="DMChannel" xml:space="preserve">
+    <value>Канал DM</value>
   </data>
-	<data name="Bitrate" xml:space="preserve">
-    <value>Bitrate</value>
+  <data name="Bitrate" xml:space="preserve">
+    <value>Битрейт</value>
   </data>
 	<data name="UserLimit" xml:space="preserve">
     <value>Лимит пользователя</value>
@@ -2136,7 +2133,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Улучшен скребок текстов песен.
 
 - Теперь Фергун выйдет из голосового канала, если на нем только боты.
-- Теперь {0} покажет '?' и '~x' общее количество пользователей, когда кеш гильдии не заполнен.
+- Теперь `roleinfo` покажет '?' и '~x' общее количество пользователей, когда кеш гильдии не заполнен.
 
 - Исправлены действия и активные клиенты, не отображаемые в `userinfo`.
 - Исправлена ​​ошибка в `lyrics`, из-за которой параметр "-headers" игнорировался, когда передавался только он.

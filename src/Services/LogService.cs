@@ -86,8 +86,6 @@ namespace Fergun.Services
 
         private string GetLogFile() => Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow:dd-MM-yyyy}.txt");
 
-        private static TimeSpan GetNextMidnight() => DateTime.UtcNow.AddDays(1).Date - DateTime.UtcNow;
-
         private void CompressYesterdayLogs()
         {
             string yesterday = Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow.AddDays(-1):dd-MM-yyyy}.txt");
@@ -98,12 +96,12 @@ namespace Fergun.Services
             }
         }
 
-        static private async Task CompressAsync(string filePath)
+        private static async Task CompressAsync(string filePath)
         {
-            using (var msi = new MemoryStream(await File.ReadAllBytesAsync(filePath)))
-            using (var mso = new MemoryStream())
+            await using (var msi = new MemoryStream(await File.ReadAllBytesAsync(filePath)))
+            await using (var mso = new MemoryStream())
             {
-                using (var gs = new GZipStream(mso, CompressionMode.Compress))
+                await using (var gs = new GZipStream(mso, CompressionMode.Compress))
                 {
                     await msi.CopyToAsync(gs);
                 }
@@ -116,18 +114,18 @@ namespace Fergun.Services
         {
             string msg = message.Message;
             string exMessage = message.Exception?.ToString();
-            int padWidth = 32;
+            const int padWidth = 32;
             int capacity = 30 + padWidth + (msg?.Length ?? 0) + (exMessage?.Length ?? 0);
 
             var builder = new StringBuilder($"[{DateTimeOffset.UtcNow:HH:mm:ss}] [{message.Source}/{message.Severity}]".PadRight(padWidth), capacity);
 
             if (!string.IsNullOrEmpty(msg))
             {
-                for (int i = 0; i < msg.Length; i++)
+                foreach (var ch in msg)
                 {
                     //Strip control chars
-                    if (!char.IsControl(msg[i]))
-                        builder.Append(msg[i]);
+                    if (!char.IsControl(ch))
+                        builder.Append(ch);
                 }
             }
             if (exMessage != null)
@@ -155,11 +153,10 @@ namespace Fergun.Services
             {
                 throw new ObjectDisposedException(nameof(LogService), "Service has been disposed.");
             }
-            else if (disposing)
-            {
-                _writer.Dispose();
-                _disposed = true;
-            }
+
+            if (!disposing) return;
+            _writer.Dispose();
+            _disposed = true;
         }
     }
 }

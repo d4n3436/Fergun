@@ -93,19 +93,19 @@ namespace Fergun.APIs.DuckDuckGo
     public class TokenNotFoundException : Exception
     {
         public TokenNotFoundException()
-        { }
-
-        public TokenNotFoundException(string message)
-            : base(message)
-        { }
-
-        public TokenNotFoundException(string message, Exception innerException)
-            : base(message, innerException)
-        { }
-
-        protected TokenNotFoundException(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            throw new NotImplementedException();
+        }
+
+        public TokenNotFoundException(string message) : base(message)
+        {
+        }
+
+        public TokenNotFoundException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+
+        protected TokenNotFoundException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
+        {
         }
     }
 

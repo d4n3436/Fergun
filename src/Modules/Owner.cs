@@ -19,7 +19,7 @@ namespace Fergun.Modules
 {
     [Order(6)]
     [AlwaysEnabled]
-    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [RequireBotPermission(Constants.MinimumRequiredPermissions)]
     [RequireOwner(ErrorMessage = "BotOwnerOnly")]
     public class Owner : FergunBase
     {
@@ -61,12 +61,12 @@ namespace Fergun.Modules
         public async Task Blacklist([Summary("blacklistParam1")] ulong userId,
             [Remainder, Summary("blacklistParam2")] string reason = null)
         {
-            var userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollecion, x => x.Id == userId) ?? new UserConfig(userId);
+            var userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollection, x => x.Id == userId) ?? new UserConfig(userId);
             if (userConfig.IsBlacklisted)
             {
                 userConfig.IsBlacklisted = false;
                 userConfig.BlacklistReason = null;
-                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, userConfig);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed user {userId} from the blacklist."));
                 await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), userId));
@@ -75,7 +75,7 @@ namespace Fergun.Modules
             {
                 userConfig.IsBlacklisted = true;
                 userConfig.BlacklistReason = reason;
-                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollecion, userConfig);
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
 
                 if (reason == null)
                 {
@@ -93,7 +93,7 @@ namespace Fergun.Modules
         [Command("blacklistserver", RunMode = RunMode.Async)]
         [Summary("blacklistserverSummary")]
         [Example("685963870363423500 bot farm")]
-        public async Task Blacklistserver([Summary("blacklistserverParam1")] ulong serverId,
+        public async Task BlacklistServer([Summary("blacklistserverParam1")] ulong serverId,
             [Remainder, Summary("blacklistserverParam2")] string reason = null)
         {
             var serverConfig = FergunClient.Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, x => x.Id == serverId) ?? new GuildConfig(serverId);
@@ -134,7 +134,7 @@ namespace Fergun.Modules
         [Command("botgame")]
         [Summary("botgameSummary")]
         [Example("f!help | fergun.com")]
-        public async Task Botgame([Remainder, Summary("botgameParam1")] string text)
+        public async Task BotGame([Remainder, Summary("botgameParam1")] string text)
         {
             await Context.Client.SetGameAsync(text);
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
@@ -146,7 +146,7 @@ namespace Fergun.Modules
         [Command("botstatus")]
         [Summary("botstatusSummary")]
         [Example("1")]
-        public async Task Botstatus([Summary("botstatusParam1")] uint status)
+        public async Task BotStatus([Summary("botstatusParam1")] uint status)
         {
             if (status <= 5)
             {
@@ -180,8 +180,10 @@ namespace Fergun.Modules
             _scriptAssemblies ??= AppDomain.CurrentDomain.GetAssemblies()
                 .Where(x => !x.IsDynamic && !string.IsNullOrWhiteSpace(x.Location));
 
-            _scriptNamespaces ??= Assembly.GetEntryAssembly()?.GetTypes()?
-                .Where(x => !string.IsNullOrWhiteSpace(x.Namespace))?.Select(x => x.Namespace)?.Distinct()
+            _scriptNamespaces ??= Assembly.GetEntryAssembly()?.GetTypes()
+                .Where(x => !string.IsNullOrWhiteSpace(x.Namespace))
+                .Select(x => x.Namespace)
+                .Distinct()
                 .Append("System")
                 .Append("System.IO")
                 .Append("System.Math")
@@ -197,18 +199,18 @@ namespace Fergun.Modules
 
             var script = CSharpScript.Create(code, _scriptOptions, typeof(EvaluationEnvironment));
             object returnValue;
-            string returnType = null;
+            string returnType;
             try
             {
                 var globals = new EvaluationEnvironment(Context);
                 var scriptState = await script.RunAsync(globals);
                 returnValue = scriptState?.ReturnValue;
-                returnType = returnValue?.GetType()?.Name ?? "none";
+                returnType = returnValue?.GetType().Name ?? "none";
             }
             catch (CompilationErrorException e)
             {
                 returnValue = e.Message;
-                returnType = e.GetType()?.Name ?? "none";
+                returnType = e.GetType().Name;
             }
             if (silent)
             {
@@ -216,36 +218,36 @@ namespace Fergun.Modules
             }
             sw.Stop();
 
-            if (returnValue == null)
+            string value = returnValue?.ToString();
+            if (value == null)
             {
                 await SendEmbedAsync(Locate("EvalNoReturnValue"));
                 return;
             }
 
-            string value = returnValue.ToString();
             if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
                 var pages = value
                     .SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10)
                     .Select(x => new EmbedBuilder { Description = Format.Code(x.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md") });
 
-                var pager = new PaginatedMessage()
+                var pager = new PaginatedMessage
                 {
-                    Author = new EmbedAuthorBuilder()
+                    Author = new EmbedAuthorBuilder
                     {
                         Name = Context.User.ToString(),
                         IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
                     },
                     Title = Locate("EvalResults"),
                     Pages = pages,
-                    Fields = new List<EmbedFieldBuilder>()
+                    Fields = new List<EmbedFieldBuilder>
                     {
                         new EmbedFieldBuilder()
-                        .WithName(Locate("Type"))
-                        .WithValue(Format.Code(returnType, "md"))
+                            .WithName(Locate("Type"))
+                            .WithValue(Format.Code(returnType, "md"))
                     },
                     Color = new Color(FergunClient.Config.EmbedColor),
-                    Options = new PaginatorAppearanceOptions()
+                    Options = new PaginatorAppearanceOptions
                     {
                         FooterFormat = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}",
                         Timeout = TimeSpan.FromMinutes(10),
@@ -273,7 +275,7 @@ namespace Fergun.Modules
         [Command("forceprefix")]
         [Summary("forceprefixSummary")]
         [Example("!")]
-        public async Task<RuntimeResult> Forceprefix([Summary("prefixParam1")] string newPrefix)
+        public async Task<RuntimeResult> ForcePrefix([Summary("prefixParam1")] string newPrefix)
         {
             if (newPrefix == GetPrefix())
             {
@@ -281,14 +283,7 @@ namespace Fergun.Modules
             }
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            if (newPrefix == DatabaseConfig.GlobalPrefix)
-            {
-                guild.Prefix = null; //Default prefix
-            }
-            else
-            {
-                guild.Prefix = newPrefix;
-            }
+            guild.Prefix = newPrefix == DatabaseConfig.GlobalPrefix ? null : newPrefix;
 
             FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
             GuildUtils.PrefixCache[Context.Guild.Id] = newPrefix;
@@ -301,7 +296,7 @@ namespace Fergun.Modules
         [Command("globaldisable", RunMode = RunMode.Async)]
         [Summary("globaldisableSummary")]
         [Example("img")]
-        public async Task<RuntimeResult> Globaldisable([Summary("globaldisableParam1")] string commandName,
+        public async Task<RuntimeResult> GlobalDisable([Summary("globaldisableParam1")] string commandName,
             [Remainder, Summary("globaldisableParam2")] string reason = null)
         {
             var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
@@ -335,7 +330,7 @@ namespace Fergun.Modules
         [Command("globalenable", RunMode = RunMode.Async)]
         [Summary("globalenableSummary")]
         [Example("img")]
-        public async Task<RuntimeResult> Globalenable([Summary("globalenableParam1")] string commandName)
+        public async Task<RuntimeResult> GlobalEnable([Summary("globalenableParam1")] string commandName)
         {
             var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
             if (command != null)
@@ -369,7 +364,7 @@ namespace Fergun.Modules
         [Command("globalprefix")]
         [Summary("globalprefixSummary")]
         [Example("f!")]
-        public async Task<RuntimeResult> Globalprefix([Summary("globalprefixParam1")] string newPrefix)
+        public async Task<RuntimeResult> GlobalPrefix([Summary("globalprefixParam1")] string newPrefix)
         {
             if (newPrefix == DatabaseConfig.GlobalPrefix)
             {

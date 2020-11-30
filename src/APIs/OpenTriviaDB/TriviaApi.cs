@@ -47,7 +47,7 @@ namespace Fergun.APIs.OpenTriviaDB
         {
             if (amount < 1 || amount > 50)
             {
-                throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be between 1 and 50.");
+                throw new ArgumentOutOfRangeException(nameof(amount), amount, "Amount must be between 1 and 50.");
             }
 
             string query = $"amount={amount}";

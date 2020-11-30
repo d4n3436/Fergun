@@ -98,6 +98,6 @@ namespace Fergun.Interactive
         /// <summary>
         /// Delete the message.
         /// </summary>
-        DeleteMessage,
+        DeleteMessage
     }
 }

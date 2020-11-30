@@ -5,8 +5,8 @@ namespace Fergun.Attributes
     /// <summary>
     /// Attaches an example to your command.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    class ExampleAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ExampleAttribute : Attribute
     {
         public string Example { get; }
 

@@ -19,7 +19,7 @@ using Victoria.Enums;
 namespace Fergun.Modules
 {
     [Order(3)]
-    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [RequireBotPermission(Constants.MinimumRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [UserMustBeInVoice("lyrics", "spotify")]
     public class Music : FergunBase
@@ -91,7 +91,7 @@ namespace Fergun.Modules
                 }
                 else
                 {
-                    var spotify = Context.User.Activities?.OfType<SpotifyGame>()?.FirstOrDefault();
+                    var spotify = Context.User.Activities?.OfType<SpotifyGame>().FirstOrDefault();
                     if (spotify == null)
                     {
                         return FergunResult.FromError(Locate("LyricsQueryNotPassed"));
@@ -169,7 +169,7 @@ namespace Fergun.Modules
         [Command("nowplaying")]
         [Summary("nowplayingSummary")]
         [Alias("np")]
-        public async Task Nowplaying()
+        public async Task NowPlaying()
         {
             await SendEmbedAsync(_musicService.GetCurrentTrack(Context.Guild, Context.Channel as ITextChannel));
         }
@@ -256,7 +256,7 @@ namespace Fergun.Modules
             }
 
             user ??= Context.User;
-            var spotify = user.Activities?.OfType<SpotifyGame>()?.FirstOrDefault();
+            var spotify = user.Activities?.OfType<SpotifyGame>().FirstOrDefault();
             if (spotify == null)
             {
                 return FergunResult.FromError(string.Format(Locate("NoSpotifyStatus"), user));
@@ -265,10 +265,9 @@ namespace Fergun.Modules
             string lyricsUrl = "?";
             if (!string.IsNullOrEmpty(FergunClient.Config.GeniusApiToken))
             {
-                GeniusResponse genius;
                 try
                 {
-                    genius = await _geniusApi.SearchAsync($"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}");
+                    var genius = await _geniusApi.SearchAsync($"{string.Join(", ", spotify.Artists)} - {spotify.TrackTitle}");
                     if (genius.Meta.Status == 200 && genius.Response.Hits.Count > 0)
                     {
                         lyricsUrl = Format.Url(Locate("ClickHere"), genius.Response.Hits[0].Result.Url);
@@ -281,7 +280,7 @@ namespace Fergun.Modules
             }
 
             var builder = new EmbedBuilder()
-                .WithAuthor("Spotify", "https://i.ibb.co/XJQnL4j/spotify.png")
+                .WithAuthor("Spotify", Constants.SpotifyLogoUrl)
                 .WithThumbnailUrl(spotify.AlbumArtUrl)
 
                 .AddField(Locate("Title"), spotify.TrackTitle, true)

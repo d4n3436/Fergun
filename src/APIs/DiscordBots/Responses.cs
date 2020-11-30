@@ -7,13 +7,13 @@ namespace Fergun.APIs.DiscordBots
     public class BotsResponse
     {
         [JsonProperty("count")]
-        public long Count { get; set; }
+        public int Count { get; set; }
 
         [JsonProperty("limit")]
-        public long Limit { get; set; }
+        public int Limit { get; set; }
 
         [JsonProperty("page")]
-        public long Page { get; set; }
+        public int Page { get; set; }
 
         [JsonProperty("bots")]
         public List<Bot> Bots { get; set; }
@@ -67,10 +67,10 @@ namespace Fergun.APIs.DiscordBots
         public string OpenSource { get; set; }
 
         [JsonProperty("shardCount")]
-        public long ShardCount { get; set; }
+        public int ShardCount { get; set; }
 
         [JsonProperty("guildCount")]
-        public long GuildCount { get; set; }
+        public int GuildCount { get; set; }
 
         [JsonProperty("verified")]
         public bool Verified { get; set; }

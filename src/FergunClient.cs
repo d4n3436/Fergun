@@ -40,7 +40,7 @@ namespace Fergun
         public static string InviteLink { get; private set; }
         public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
-        public static ReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
+        public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordSocketClient _client;
         private LogService _logService;
@@ -69,10 +69,7 @@ namespace Fergun
 
         ~FergunClient()
         {
-            if (_autoClear != null)
-            {
-                _autoClear.Dispose();
-            }
+            _autoClear?.Dispose();
         }
 
         public async Task InitializeAsync()
@@ -92,7 +89,8 @@ namespace Fergun
             }
             try
             {
-                TokenUtils.ValidateToken(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token);
+                if (Config != null)
+                    TokenUtils.ValidateToken(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token);
             }
             catch (ArgumentException e)
             {
@@ -282,9 +280,9 @@ namespace Fergun
                 if (!IsLinux)
                 {
                     // Try to get the java exe path
-                    var enviromentPath = Environment.GetEnvironmentVariable("PATH");
-                    var paths = enviromentPath.Split(Path.PathSeparator);
-                    var exePath = paths.FirstOrDefault(x => File.Exists(Path.Combine(x, "java.exe")));
+                    var exePath = Environment.GetEnvironmentVariable("PATH")
+                        ?.Split(Path.PathSeparator)
+                        .FirstOrDefault(x => File.Exists(Path.Combine(x, "java.exe")));
 
                     if (exePath != null)
                     {
@@ -306,27 +304,25 @@ namespace Fergun
             string remoteVersion;
             try
             {
-                using (WebClient wc = new WebClient())
-                {
-                    remoteVersion = await wc.DownloadStringTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/VERSION.txt?guest=1");
-                }
+                using var wc = new WebClient();
+                remoteVersion = await wc.DownloadStringTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/VERSION.txt?guest=1");
             }
             catch (WebException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading VERSION.txt", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while downloading VERSION.txt", e));
                 return;
             }
 
-            string localVersion;
             if (File.Exists(versionFile))
             {
+                string localVersion;
                 try
                 {
                     localVersion = File.ReadAllText(versionFile);
                 }
                 catch (IOException e)
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while reading local VERSION.txt", e));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while reading local VERSION.txt", e));
                     return;
                 }
                 if (localVersion != remoteVersion)
@@ -341,7 +337,7 @@ namespace Fergun
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "Local VERSION.txt not found or can't be read. Asuming the remote version is newer than the local..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "Local VERSION.txt not found or can't be read. Assuming the remote version is newer than the local..."));
             }
 
             Process[] processList = Process.GetProcessesByName("java");
@@ -357,21 +353,19 @@ namespace Fergun
             }
             catch (IOException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while renaming local Lavalink.jar", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while renaming local Lavalink.jar", e));
                 return;
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Downloading the new dev build of Lavalink..."));
             try
             {
-                using (WebClient wc = new WebClient())
-                {
-                    await wc.DownloadFileTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1", lavalinkFile);
-                }
+                using var wc = new WebClient();
+                await wc.DownloadFileTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1", lavalinkFile);
             }
             catch (WebException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while downloading the new dev build", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while downloading the new dev build", e));
                 try
                 {
                     if (File.Exists(lavalinkFile))
@@ -389,7 +383,7 @@ namespace Fergun
             }
             catch (IOException e)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", $"An error occurred while updating local VERSION.txt", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while updating local VERSION.txt", e));
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Finished updating Lavalink."));
         }
@@ -422,13 +416,11 @@ namespace Fergun
             {
                 try
                 {
-                    if (!culture.Equals(CultureInfo.InvariantCulture))
+                    if (culture.Equals(CultureInfo.InvariantCulture)) continue;
+                    ResourceSet rs = strings.ResourceManager.GetResourceSet(culture, true, false);
+                    if (rs != null)
                     {
-                        ResourceSet rs = strings.ResourceManager.GetResourceSet(culture, true, false);
-                        if (rs != null)
-                        {
-                            result.Add(culture);
-                        }
+                        result.Add(culture);
                     }
                 }
                 catch (CultureNotFoundException) { }
@@ -446,7 +438,7 @@ namespace Fergun
 
                     if (string.IsNullOrEmpty(Config.DblApiToken))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or has not been established. Bot server count will not be sent to the API."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or not set. Bot server count will not be sent to the API."));
                     }
                     else
                     {
@@ -456,7 +448,7 @@ namespace Fergun
 
                     if (string.IsNullOrEmpty(Config.DiscordBotsApiToken))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or has not been established. Bot server count will not be sent to the API."));
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or not set. Bot server count will not be sent to the API."));
                     }
                     else
                     {
@@ -538,7 +530,7 @@ namespace Fergun
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "JoinGuild", $"Bot has joined the guild \"{guild.Name}\" ({guild.Id})"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "JoinGuild", $"Bot joined the guild \"{guild.Name}\" ({guild.Id})"));
                 if (guild.PreferredLocale != null)
                 {
                     string languageCode = guild.PreferredCulture.TwoLetterISOLanguageName;
@@ -559,7 +551,7 @@ namespace Fergun
 
         private async Task LeftGuild(SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Bot has left the guild \"{guild.Name}\" ({guild.Id})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Bot left the guild \"{guild.Name}\" ({guild.Id})"));
             var config = Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, x => x.Id == guild.Id);
             if (config != null && !config.IsBlacklisted)
             {

@@ -30,10 +30,10 @@ namespace Fergun.APIs.DuckDuckGo
     public class Result
     {
         [JsonProperty("width")]
-        public long Width { get; set; }
+        public int Width { get; set; }
 
         [JsonProperty("height")]
-        public long Height { get; set; }
+        public int Height { get; set; }
 
         [JsonProperty("thumbnail")]
         public string Thumbnail { get; set; }

@@ -23,11 +23,11 @@ namespace Fergun.APIs.BingTranslator
 
         public static async Task<List<BingResult>> TranslateAsync(string text, string toLanguage, string fromLanguage = "auto-detect")
         {
-            if (!SupportedLanguages.Any(x => x == toLanguage))
+            if (SupportedLanguages.All(x => x != toLanguage))
             {
                 throw new ArgumentException("Invalid target language.", nameof(toLanguage));
             }
-            if (fromLanguage != "auto-detect" && !SupportedLanguages.Any(x => x == fromLanguage))
+            if (fromLanguage != "auto-detect" && SupportedLanguages.All(x => x != fromLanguage))
             {
                 throw new ArgumentException("Invalid source language.", nameof(fromLanguage));
             }

@@ -44,13 +44,7 @@ namespace Fergun.Utils
         /// <param name="channel">The channel.</param>
         /// <returns>The configuration of the guild, or <c>null</c> if the guild cannot be found in the database.</returns>
         public static GuildConfig GetGuildConfig(IMessageChannel channel)
-        {
-            if (channel.IsPrivate())
-            {
-                return null;
-            }
-            return GetGuildConfig(((IGuildChannel)channel).GuildId);
-        }
+            => channel.IsPrivate() ? null : GetGuildConfig(((IGuildChannel)channel).GuildId);
 
         /// <summary>
         /// Returns the configuration of the specified guild Id.

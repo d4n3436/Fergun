@@ -54,7 +54,7 @@ namespace Fergun.APIs.DiscordBots
             }
             if (unverified)
             {
-                q += $"&unverified={unverified}";
+                q += "&unverified=true";
             }
             if (!string.IsNullOrEmpty(lib))
             {
@@ -82,7 +82,7 @@ namespace Fergun.APIs.DiscordBots
             string q = "";
             if (sanitized)
             {
-                q += $"sanitized={sanitized}";
+                q += "sanitized=true";
             }
             string json;
             using (var client = new HttpClient())
@@ -110,12 +110,10 @@ namespace Fergun.APIs.DiscordBots
             string json;
             using (var content = new StringContent(JsonConvert.SerializeObject(dict), Encoding.UTF8, "application/json"))
             {
-                using (var client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiToken);
-                    var response = await client.PostAsync(new Uri($"{ApiEndpoint}bots/{id}/stats"), content);
-                    json = await response.Content.ReadAsStringAsync();
-                }
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(_apiToken);
+                var response = await client.PostAsync(new Uri($"{ApiEndpoint}bots/{id}/stats"), content);
+                json = await response.Content.ReadAsStringAsync();
             }
             return JsonConvert.DeserializeObject<StatsResponse>(json);
         }
@@ -125,7 +123,7 @@ namespace Fergun.APIs.DiscordBots
             None,
             Username,
             Id,
-            Guildcount,
+            GuildCount,
             Library,
             Author
         }

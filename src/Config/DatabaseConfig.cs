@@ -33,7 +33,7 @@ namespace Fergun
         /// <summary>
         /// Modifies the database config with the specified properties.
         /// </summary>
-        /// <param name="action">A delegate containing the properties to modify the confg with.</param>
+        /// <param name="action">A delegate containing the properties to modify the config with.</param>
         public static void Update(Action<BaseDatabaseConfig> action)
         {
             var cfg = GetConfig();

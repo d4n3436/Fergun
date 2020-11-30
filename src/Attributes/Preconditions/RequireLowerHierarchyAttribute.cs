@@ -11,7 +11,7 @@ namespace Fergun.Attributes.Preconditions
     ///     whose Hierarchy value must be
     ///     lower than that of the Bot.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Parameter)]
     public sealed class RequireLowerHierarchyAttribute : ParameterPreconditionAttribute
     {
         private readonly string _errorMessage;
@@ -19,7 +19,6 @@ namespace Fergun.Attributes.Preconditions
 
         public RequireLowerHierarchyAttribute()
         {
-
         }
 
         public RequireLowerHierarchyAttribute(string errorMessage)

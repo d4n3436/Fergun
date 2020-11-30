@@ -16,20 +16,19 @@ namespace Fergun.Services
 {
     public class MusicService
     {
-        public LavaNode LavaNode { get; private set; }
+        public LavaNode LavaNode { get; }
 
         private readonly DiscordSocketClient _client;
         private readonly LogService _logService;
-        private readonly LavaConfig _lavaConfig;
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
+        private static readonly string[] _timeFormats = { @"m\:ss", @"mm\:ss", @"h\:mm\:ss", @"hh\:mm\:ss" };
 
         public MusicService(DiscordSocketClient client, LogService logService, LavaConfig lavaConfig)
         {
             _client = client;
             _logService = logService;
-            _lavaConfig = lavaConfig;
 
-            LavaNode = new LavaNode(_client, _lavaConfig);
+            LavaNode = new LavaNode(_client, lavaConfig);
 
             _client.Ready += ClientReadyAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdatedAsync;
@@ -52,39 +51,39 @@ namespace Fergun.Services
 
         private async Task UserVoiceStateUpdatedAsync(SocketUser user, SocketVoiceState beforeState, SocketVoiceState afterState)
         {
-            if (user is SocketGuildUser guildUser && LavaNode.TryGetPlayer(guildUser.Guild, out var player))
+            // Someone left a voice channel
+            if (user is SocketGuildUser guildUser
+                && LavaNode.TryGetPlayer(guildUser.Guild, out var player)
+                && player.VoiceChannel != null
+                && afterState.VoiceChannel == null)
             {
-                // Someone has left a voice channel
-                if (player.VoiceChannel != null && afterState.VoiceChannel == null)
+                // Fergun left a voice channel that has a player
+                if (user.Id == _client.CurrentUser.Id)
                 {
-                    // Fergun has left a voice channel that has a player
-                    if (user.Id == _client.CurrentUser.Id)
+                    if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
                     {
-                        if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
-                        {
-                            _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
-                        }
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because I got kicked out."));
-
-                        await LavaNode.LeaveAsync(player.VoiceChannel);
+                        _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
                     }
-                    // There are no users (only bots) in the voice channel
-                    else if ((player.VoiceChannel as SocketVoiceChannel).Users.All(x => x.IsBot))
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because I got kicked out."));
+
+                    await LavaNode.LeaveAsync(player.VoiceChannel);
+                }
+                // There are no users (or only bots) in the voice channel
+                else if (((SocketVoiceChannel)player.VoiceChannel).Users.All(x => x.IsBot))
+                {
+                    if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
                     {
-                        if (_loopDict.ContainsKey(player.VoiceChannel.GuildId))
-                        {
-                            _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
-                        }
-
-                        var builder = new EmbedBuilder()
-                            .WithDescription("\u26A0 " + GuildUtils.Locate("LeftVCInactivity", player.TextChannel))
-                            .WithColor(FergunClient.Config.EmbedColor);
-
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
-                        await player.TextChannel.SendMessageAsync(embed: builder.Build());
-
-                        await LavaNode.LeaveAsync(player.VoiceChannel);
+                        _loopDict.TryRemove(player.VoiceChannel.GuildId, out _);
                     }
+
+                    var builder = new EmbedBuilder()
+                        .WithDescription("\u26A0 " + GuildUtils.Locate("LeftVCInactivity", player.TextChannel))
+                        .WithColor(FergunClient.Config.EmbedColor);
+
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
+                    await player.TextChannel.SendMessageAsync(embed: builder.Build());
+
+                    await LavaNode.LeaveAsync(player.VoiceChannel);
                 }
             }
         }
@@ -105,7 +104,7 @@ namespace Fergun.Services
 
         private async Task OnTrackEndedAsync(TrackEndedEventArgs args)
         {
-            if (!VictoriaExtensions.ShouldPlayNext(args.Reason))
+            if (!args.Reason.ShouldPlayNext())
                 return;
 
             var builder = new EmbedBuilder();
@@ -128,7 +127,7 @@ namespace Fergun.Services
                     return;
                 }
             }
-            if (!args.Player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
+            if (!args.Player.Queue.TryDequeue(out var nextTrack))
             {
                 builder.WithDescription(GuildUtils.Locate("NoTracks", args.Player.TextChannel))
                     .WithColor(FergunClient.Config.EmbedColor);
@@ -175,15 +174,15 @@ namespace Fergun.Services
         public async Task<bool> LeaveAsync(IGuild guild, SocketVoiceChannel voiceChannel)
         {
             bool hasPlayer = LavaNode.HasPlayer(guild);
-            if (hasPlayer)
+            if (!hasPlayer) return false;
+
+            if (_loopDict.ContainsKey(guild.Id))
             {
-                if (_loopDict.ContainsKey(guild.Id))
-                {
-                    _loopDict.TryRemove(guild.Id, out _);
-                }
-                await LavaNode.LeaveAsync(voiceChannel);
+                _loopDict.TryRemove(guild.Id, out _);
             }
-            return hasPlayer;
+            await LavaNode.LeaveAsync(voiceChannel);
+
+            return true;
         }
 
         public async Task<string> MoveAsync(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
@@ -240,43 +239,39 @@ namespace Fergun.Services
                         player.Queue.Enqueue(track);
                         time += track.Duration;
                     }
-                    // if player wasnt playing anything
+                    // if player wasn't playing anything
                     await player.PlayAsync(search.Tracks[0]);
                     return (string.Format(GuildUtils.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks[0].ToTrackLink()), null);
                 }
             }
-            else
-            {
-                LavaTrack track;
-                if (search.Tracks.Count == 0)
-                {
-                    return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
-                }
-                if (search.Tracks.Count == 1)
-                {
-                    track = search.Tracks[0];
-                }
-                else
-                {
-                    return (null, search.Tracks);
-                }
 
-                if (!LavaNode.TryGetPlayer(guild, out player))
-                {
-                    await LavaNode.JoinAsync(voiceChannel, textChannel);
-                    player = LavaNode.GetPlayer(guild);
-                }
-                if (player.PlayerState == PlayerState.Playing)
-                {
-                    player.Queue.Enqueue(track);
-                    return (string.Format(GuildUtils.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink()), null);
-                }
-                else
-                {
-                    await player.PlayAsync(track);
-                    return (string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink()), null);
-                }
+            LavaTrack firstTrack;
+            switch (search.Tracks.Count)
+            {
+                case 0:
+                    return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
+
+                case 1:
+                    firstTrack = search.Tracks[0];
+                    break;
+
+                default:
+                    return (null, search.Tracks);
             }
+
+            if (!LavaNode.TryGetPlayer(guild, out player))
+            {
+                await LavaNode.JoinAsync(voiceChannel, textChannel);
+                player = LavaNode.GetPlayer(guild);
+            }
+            if (player.PlayerState == PlayerState.Playing)
+            {
+                player.Queue.Enqueue(firstTrack);
+                return (string.Format(GuildUtils.Locate("PlayerTrackAdded", textChannel), firstTrack.ToTrackLink()), null);
+            }
+
+            await player.PlayAsync(firstTrack);
+            return (string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), firstTrack.ToTrackLink()), null);
         }
 
         public async Task<string> PlayTrack(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel, LavaTrack track)
@@ -294,12 +289,10 @@ namespace Fergun.Services
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Added {track.Title} ({track.Url}) to the queue in {textChannel.Guild.Name}/{textChannel.Name}"));
                 return string.Format(GuildUtils.Locate("PlayerTrackAdded", textChannel), track.ToTrackLink());
             }
-            else
-            {
-                await player.PlayAsync(track);
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Now playing: {track.Title} ({track.Url}) in {textChannel.Guild.Name}/{textChannel.Name}"));
-                return string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink());
-            }
+
+            await player.PlayAsync(track);
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Now playing: {track.Title} ({track.Url}) in {textChannel.Guild.Name}/{textChannel.Name}"));
+            return string.Format(GuildUtils.Locate("PlayerNowPlaying", textChannel), track.ToTrackLink());
         }
 
         public async Task<string> ReplayAsync(IGuild guild, ITextChannel textChannel)
@@ -307,7 +300,7 @@ namespace Fergun.Services
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (player == null)
                 return GuildUtils.Locate("EmptyQueue", textChannel);
-            else if (!hasPlayer || player.PlayerState != PlayerState.Playing)
+            if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             await player.SeekAsync(TimeSpan.Zero);
             return string.Format(GuildUtils.Locate("Replaying", textChannel), player.Track.ToTrackLink());
@@ -331,9 +324,8 @@ namespace Fergun.Services
 
                 return string.Format(GuildUtils.Locate("SeekComplete", textChannel), second, TimeSpan.FromSeconds(second).ToShortForm(), player.Track.Duration.ToShortForm());
             }
-            // Assume its a string with the formats below
-            string[] timeformats = { @"m\:ss", @"mm\:ss", @"h\:mm\:ss", @"hh\:mm\:ss" };
-            if (!TimeSpan.TryParseExact(time, timeformats, CultureInfo.InvariantCulture, out TimeSpan span))
+
+            if (!TimeSpan.TryParseExact(time, _timeFormats, CultureInfo.InvariantCulture, out TimeSpan span))
             {
                 return GuildUtils.Locate("SeekInvalidFormat", textChannel);
             }
@@ -407,11 +399,9 @@ namespace Fergun.Services
                 await player.PauseAsync();
                 return GuildUtils.Locate("PlayerPaused", textChannel);
             }
-            else
-            {
-                await player.ResumeAsync();
-                return GuildUtils.Locate("PlaybackResumed", textChannel);
-            }
+
+            await player.ResumeAsync();
+            return GuildUtils.Locate("PlaybackResumed", textChannel);
         }
 
         public async Task<string> ResumeAsync(IGuild guild, ITextChannel textChannel)
@@ -420,13 +410,11 @@ namespace Fergun.Services
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
-            if (player.PlayerState == PlayerState.Paused)
-            {
-                await player.ResumeAsync();
-                return GuildUtils.Locate("PlaybackResumed", textChannel);
-            }
+            if (player.PlayerState != PlayerState.Paused)
+                return GuildUtils.Locate("PlayerNotPaused", textChannel);
 
-            return GuildUtils.Locate("PlayerNotPaused", textChannel);
+            await player.ResumeAsync();
+            return GuildUtils.Locate("PlaybackResumed", textChannel);
         }
 
         public string GetCurrentTrack(IGuild guild, ITextChannel textChannel)
@@ -472,18 +460,19 @@ namespace Fergun.Services
             bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
-            if (player.Queue.Count == 0)
-            {
-                return GuildUtils.Locate("EmptyQueue", textChannel);
-            }
-            else if (player.Queue.Count == 1)
-            {
-                return GuildUtils.Locate("Queue1Item", textChannel);
-            }
 
-            player.Queue.Shuffle();
+            switch (player.Queue.Count)
+            {
+                case 0:
+                    return GuildUtils.Locate("EmptyQueue", textChannel);
 
-            return GuildUtils.Locate("QueueShuffled", textChannel);
+                case 1:
+                    return GuildUtils.Locate("Queue1Item", textChannel);
+
+                default:
+                    player.Queue.Shuffle();
+                    return GuildUtils.Locate("QueueShuffled", textChannel);
+            }
         }
 
         public string RemoveAt(IGuild guild, ITextChannel textChannel, int index)
@@ -512,12 +501,10 @@ namespace Fergun.Services
                 return (false, GuildUtils.Locate("PlayerNotPlaying", textChannel));
 
             var artworkLink = await player.Track.FetchArtworkAsync();
-            if (string.IsNullOrEmpty(artworkLink))
-            {
-                return (false, GuildUtils.Locate("AnErrorOccurred", textChannel));
-            }
-            else
-                return (true, artworkLink);
+
+            return string.IsNullOrEmpty(artworkLink)
+                ? (false, GuildUtils.Locate("AnErrorOccurred", textChannel))
+                : (true, artworkLink);
         }
 
         public string Loop(uint? count, IGuild guild, ITextChannel textChannel)
@@ -528,12 +515,11 @@ namespace Fergun.Services
 
             if (!count.HasValue)
             {
-                if (_loopDict.ContainsKey(guild.Id))
-                {
-                    _loopDict.TryRemove(guild.Id, out _);
-                    return GuildUtils.Locate("LoopDisabled", textChannel);
-                }
-                return string.Format(GuildUtils.Locate("LoopNoValuePassed", textChannel), GuildUtils.GetPrefix(textChannel));
+                if (!_loopDict.ContainsKey(guild.Id))
+                    return string.Format(GuildUtils.Locate("LoopNoValuePassed", textChannel), GuildUtils.GetPrefix(textChannel));
+
+                _loopDict.TryRemove(guild.Id, out _);
+                return GuildUtils.Locate("LoopDisabled", textChannel);
             }
 
             uint countValue = count.Value;

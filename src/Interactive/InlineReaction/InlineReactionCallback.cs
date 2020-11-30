@@ -111,11 +111,10 @@ namespace Fergun.Interactive
             if (_data.SingleUsePerUser)
             {
                 // Ensure that we only allow users to react a single time.
-                if (!_data.ReactorIDs.Contains(reaction.UserId))
-                {
-                    await reactionCallbackItem.Callback(Context, reaction);
-                    _data.ReactorIDs.Add(reaction.UserId);
-                }
+                if (_data.ReactorIDs.Contains(reaction.UserId)) return _data.ExpiresAfterUse;
+
+                await reactionCallbackItem.Callback(Context, reaction);
+                _data.ReactorIDs.Add(reaction.UserId);
             }
             else
             {

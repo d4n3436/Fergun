@@ -60,7 +60,7 @@ namespace Fergun.Services
             // Create a timer that will clear out cached messages.
             _autoClear = new Timer(OnTimerFired, null, period, period);
 
-            _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"Service initialized, MessageDeleted and OnMessageModified event handlers registered."));
+            _logger(new LogMessage(LogSeverity.Info, "CmdCache", "Service initialized, MessageDeleted and OnMessageModified event handlers registered."));
         }
 
         /// <summary>
@@ -183,17 +183,16 @@ namespace Fergun.Services
             {
                 throw new ObjectDisposedException(nameof(CommandCacheService), "Service has been disposed.");
             }
-            else if (disposing)
-            {
-                _autoClear.Dispose();
-                _autoClear = null;
 
-                _client.MessageDeleted -= OnMessageDeleted;
-                _client.MessageUpdated -= OnMessageModified;
-                _disposed = true;
+            if (!disposing) return;
+            _autoClear.Dispose();
+            _autoClear = null;
 
-                _logger(new LogMessage(LogSeverity.Info, "CmdCache", "Cache disposed successfully."));
-            }
+            _client.MessageDeleted -= OnMessageDeleted;
+            _client.MessageUpdated -= OnMessageModified;
+            _disposed = true;
+
+            _logger(new LogMessage(LogSeverity.Info, "CmdCache", "Cache disposed successfully."));
         }
 
         private void UpdateCount() => Interlocked.Exchange(ref _count, _cache.Count);
@@ -338,9 +337,11 @@ namespace Fergun.Services
         /// <summary>
         /// Sends a file to this message channel with an optional caption, then adds it to the command cache.
         /// </summary>
+        /// <param name="channel">The source channel.</param>
         /// <param name="cache">The command cache that the messages should be added to.</param>
         /// <param name="commandId">The ID of the command message.</param>
         /// <param name="stream">The <see cref="Stream" /> of the file to be sent.</param>
+        /// <param name="filename">The name of the attachment.</param>
         /// <param name="text">The message to be sent.</param>
         /// <param name="isTTS">Whether the message should be read aloud by Discord or not.</param>
         /// <param name="embed">The <see cref="EmbedType.Rich"/> <see cref="Embed"/> to be sent.</param>

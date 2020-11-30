@@ -283,11 +283,10 @@ namespace Fergun.Interactive
             {
                 throw new ObjectDisposedException(nameof(InteractiveService), "Service has been disposed.");
             }
-            else if (disposing)
-            {
-                (_client as BaseSocketClient).ReactionAdded -= HandleReactionAsync;
-                _disposed = true;
-            }
+
+            if (!disposing) return;
+            ((BaseSocketClient)_client).ReactionAdded -= HandleReactionAsync;
+            _disposed = true;
         }
 
         /// <summary>

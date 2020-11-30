@@ -187,7 +187,7 @@ namespace Fergun.Modules
         /// Returns the localized value of a boolean.
         /// </summary>
         /// <param name="boolean">The boolean to localize.</param>
-        /// <returns>The localized boolean, or <paramref name="key"/> if the value cannot be found.</returns>
+        /// <returns>The localized boolean.</returns>
         public string Locate(bool boolean) => GuildUtils.Locate(boolean ? "Yes" : "No", Context.Channel);
 
         /// <summary>

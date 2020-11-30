@@ -178,7 +178,7 @@
     <value>The text must have 3 or more characters.</value>
   </data>
 	<data name="TooLongToDisplay" xml:space="preserve">
-    <value>The resulting text is too long to display ({0})</value>
+    <value>The resulting text is too long to display ({0}).</value>
   </data>
 	<data name="normalizeSummary" xml:space="preserve">
     <value>Normalizes a text.</value>
@@ -278,7 +278,7 @@
     <value>The url of an image to use.</value>
   </data>
 	<data name="NoUrlPassed" xml:space="preserve">
-    <value>Not specifying an url will make the command to search for the last x messages in cache for a link or an attachment.</value>
+    <value>Not specifying a url will make the command to search for the last x messages in cache for a link or an attachment.</value>
   </data>
 	<data name="AttachmentNotImage" xml:space="preserve">
     <value>The attachment is not an image.</value>
@@ -311,7 +311,7 @@
     <value>Image search cap reached :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>Performs OCR to an image with OCR.SPACE</value>
+    <value>Performs OCR to an image with OCR.SPACE.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>The url of an image to use.</value>
@@ -404,7 +404,7 @@
     <value>Text to speech.</value>
   </data>
 	<data name="ttsParam1" xml:space="preserve">
-    <value>The target language in ISO code (`en`, `es`, `br`, etc.), fallbacks to English if the target is invalid.</value>
+    <value>The target language in ISO code (`en`, `es`, `br`, etc.), fallback to English if the target is invalid.</value>
   </data>
 	<data name="ttsParam2" xml:space="preserve">
     <value>The text to convert.</value>
@@ -483,7 +483,7 @@
 Creating cache...</value>
   </data>
 	<data name="banSummary" xml:space="preserve">
-    <value>Bans an user.</value>
+    <value>Bans a user.</value>
   </data>
 	<data name="banParam1" xml:space="preserve">
     <value>The user to ban.</value>
@@ -510,7 +510,7 @@ Creating cache...</value>
     <value>The number of messages to clear.</value>
   </data>
 	<data name="clearParam2" xml:space="preserve">
-    <value>An user to delete its messages.</value>
+    <value>A user to delete its messages.</value>
   </data>
 	<data name="NumberOutOfIndex" xml:space="preserve">
     <value>The number must be between {0} and {1}.</value>
@@ -522,7 +522,7 @@ Creating cache...</value>
     <value>by</value>
   </data>
 	<data name="hackbanSummary" xml:space="preserve">
-    <value>Hackbans an user.</value>
+    <value>Hackbans a user.</value>
   </data>
 	<data name="hackbanParam1" xml:space="preserve">
     <value>The ID of the user to hackban.</value>
@@ -534,7 +534,7 @@ Creating cache...</value>
     <value>User {0} was hackbanned.</value>
   </data>
 	<data name="kickSummary" xml:space="preserve">
-    <value>Kicks an user.</value>
+    <value>Kicks a user.</value>
   </data>
 	<data name="kickParam1" xml:space="preserve">
     <value>The user to kick.</value>
@@ -546,7 +546,7 @@ Creating cache...</value>
     <value>User {0} was kicked.</value>
   </data>
 	<data name="nickSummary" xml:space="preserve">
-    <value>Changes the nickname of an user.</value>
+    <value>Changes the nickname of a user.</value>
   </data>
 	<data name="nickParam1" xml:space="preserve">
     <value>The user to change its nickname.</value>
@@ -555,7 +555,7 @@ Creating cache...</value>
     <value>The new nickname. Leave this empty to remove the nickname.</value>
   </data>
 	<data name="unbanSummary" xml:space="preserve">
-    <value>Unbans an user.</value>
+    <value>Unbans a user.</value>
   </data>
 	<data name="unbanParam1" xml:space="preserve">
     <value>The user ID to unban.</value>
@@ -870,10 +870,7 @@ Now playing: {1}</value>
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Shows the bot up-time.</value>
   </data>
-	<data name="waveSummary" xml:space="preserve">
-    <value>hmm</value>
-  </data>
-	<data name="languageSummary" xml:space="preserve">
+  <data name="languageSummary" xml:space="preserve">
     <value>Sets the bot language.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -973,7 +970,7 @@ Select a mode:</value>
 with the mode: **{0}**
 and the character: **{1}**...</value>
   </data>
-	<data name="CustomChararacterCreation" xml:space="preserve">
+	<data name="CustomCharacterCreation" xml:space="preserve">
     <value>Custom character creation</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
@@ -1080,7 +1077,7 @@ You can use Say before the text to talk.</value>
     <value>I can't do that.</value>
   </data>
 	<data name="softbanSummary" xml:space="preserve">
-    <value>Softbans an user (kick + delete user messages).</value>
+    <value>Softbans a user (kick + delete user messages).</value>
   </data>
 	<data name="softbanParam1" xml:space="preserve">
     <value>The user to softban.</value>
@@ -1119,7 +1116,7 @@ You can use Say before the text to talk.</value>
     <value>Invalid text.</value>
   </data>
 	<data name="clearRemarks" xml:space="preserve">
-    <value>If an user is passed, the command will try to delete all the messages from the user in the last `count` messages.
+    <value>If a user is passed, the command will try to delete all the messages from the user in the last `count` messages.
 The limit of days that the bot can search messages is 14.</value>
   </data>
 	<data name="BanMembers" xml:space="preserve">
@@ -1159,7 +1156,7 @@ The limit of days that the bot can search messages is 14.</value>
     <value>Adds a reaction to a message.</value>
   </data>
 	<data name="reactionParam1" xml:space="preserve">
-    <value>The reaction to add (only one)</value>
+    <value>The reaction to add (only one).</value>
   </data>
 	<data name="reactionParam2" xml:space="preserve">
     <value>The message ID to add a reaction (must be from same channel the command is executed).</value>
@@ -1205,10 +1202,10 @@ Use `{0}help {1}` to get more info about the command.</value>
     <value>Cannot seek this track.</value>
   </data>
 	<data name="SeekHigherOrEqual" xml:space="preserve">
-    <value>The second to go ({0}) cannot be higher or equal than the track's length ({1})</value>
+    <value>The second to go ({0}) cannot be higher or equal than the track's length ({1}).</value>
   </data>
 	<data name="SeekComplete" xml:space="preserve">
-    <value>Skipped to second {0} ({1} of {2})</value>
+    <value>Skipped to second {0} ({1} of {2}).</value>
   </data>
 	<data name="ErrorInTranslation" xml:space="preserve">
     <value>An error occurred in the translation API. Please try again later.</value>
@@ -1291,7 +1288,7 @@ Track selection for `play`</value>
     <value>The server {0} was removed from the blacklist.</value>
   </data>
 	<data name="blacklistSummary" xml:space="preserve">
-    <value>Adds an user to the blacklist, or removes it.</value>
+    <value>Adds a user to the blacklist, or removes it.</value>
   </data>
 	<data name="blacklistParam1" xml:space="preserve">
     <value>The ID of the user to blacklist.</value>
@@ -1319,7 +1316,7 @@ Track selection for `play`</value>
 - New language (Spanish)
 - New commands (`language`, `xkcd`, `nowplaying`, `snipe`, `changelog`)
 - `ytrandom` now works much better.
-- The command list and the help comand are now dynamic.
+- The command list and the help command are now dynamic.
 - Fixed some bugs.</value>
   </data>
 	<data name="Changelog1.0" xml:space="preserve">
@@ -1473,7 +1470,7 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
     <value>Nitro Boost Count</value>
   </data>
 	<data name="SeekTimeHigherOrEqual" xml:space="preserve">
-    <value>The time to go ({0}) cannot be higher or equal than the track's length ({1})</value>
+    <value>The time to go ({0}) cannot be higher or equal than the track's length ({1}).</value>
   </data>
 	<data name="SeekTimeComplete" xml:space="preserve">
     <value>Skipped to {0} of {1}</value>
@@ -1761,7 +1758,7 @@ This prevents duplicating the localization methods for each module, and the resp
   </data>
 	<data name="ErrorParsingLyrics" xml:space="preserve">
     <value>An error occurred while parsing the lyrics for {0}.
-Maybe its's an instrumental?</value>
+Maybe it's an instrumental?</value>
   </data>
 	<data name="MustBeLowerThan" xml:space="preserve">
     <value>Parameter `{0}` must be lower than {1}.</value>
@@ -1803,11 +1800,11 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 
 - Updated the AI Dungeon module and API wrapper, fixed some bugs with the responses and updated the `idinfo` and `alter` commands. Now all the commands are supported.
 
-- Now `userinfo` and `avatar` will show the info/avatar of an user that isn't in the server by passing its ID.
+- Now `userinfo` and `avatar` will show the info/avatar of a user that isn't in the server by passing its ID.
 - Now `userinfo` and `avatar` will show the default avatar if the user doesn't have an avatar.
 - Now `lyrics` will show the lyrics of the current track playing in your Spotify activity, if there's one.
 - Now `lyrics` shows correctly the track name when an error happens.
-- Now it's possible to use `softban` with an user ID.
+- Now it's possible to use `softban` with a user ID.
 - Now some commands will upload its results to Hastebin when the content is too long.
 
 - Fixed some bugs in `tpdne`, `tcdne`, `repeat`, the command service and the paginator system.</value>
@@ -1950,7 +1947,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
     <value>The adventure ID. You have to own this ID.</value>
   </data>
 	<data name="idlistSummary" xml:space="preserve">
-    <value>Gets the ID list of an user.</value>
+    <value>Gets the ID list of a user.</value>
   </data>
 	<data name="idlistParam1" xml:space="preserve">
     <value>The user to get its IDs.</value>
@@ -1997,7 +1994,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
     <value>- New command: `cmdstats`.
 
 - Now the `first` and `last` paginator buttons in `img` and `urban` will only appear when there are 3 or more pages, and the `jump` button when there are 4 or more pages.
-- Now Fergun will send a direct message to warn an user when the bot doesn't have the minimun required permissions in the current channel (`SendMessages` and `EmbedLinks`).
+- Now Fergun will send a direct message to warn a user when the bot doesn't have the minimum required permissions in the current channel (`SendMessages` and `EmbedLinks`).
 - Now Fergun supports multiple user activities, this is useful in `userinfo` and `lyrics` (when the Spotify activity is hidden by the custom status).
 - Added ratelimit and required permissions info in the command help.
 
@@ -2150,7 +2147,7 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 - Fixed a bug that caused some moderation commands to fail because the user hierarchy was calculated incorrectly.</value>
 	</data>
 	<data name="giveSummary" xml:space="preserve">
-		<value>Gives (transfers) the specified ID to an user.</value>
+		<value>Gives (transfers) the specified ID to a user.</value>
 	</data>
 	<data name="giveParam1" xml:space="preserve">
 		<value>The adventure ID.</value>
@@ -2240,13 +2237,13 @@ Please try again later.</value>
 		<value>Track Url</value>
 	</data>
 	<data name="spotifySummary" xml:space="preserve">
-		<value>Gets the Spotify status info of an user.</value>
+		<value>Gets the Spotify status info of a user.</value>
 	</data>
 	<data name="spotifyParam1" xml:space="preserve">
 		<value>The user to get its Spotify status info.</value>
 	</data>
 	<data name="wolframalphaSummary" xml:space="preserve">
-		<value>Gets a response from Wolfram|Alpha based on the query,</value>
+		<value>Gets a response from Wolfram|Alpha based on the query.</value>
 	</data>
 	<data name="wolframalphaParam1" xml:space="preserve">
 		<value>The query to send.</value>
@@ -2270,7 +2267,7 @@ Please try again later.</value>
 		<value>Antonyms</value>
 	</data>
 	<data name="archiveSummary" xml:space="preserve">
-		<value>Gets an screenshot of a website in the specified year/month/day using a timestamp.</value>
+		<value>Gets a screenshot of a website in the specified year/month/day using a timestamp.</value>
 	</data>
 	<data name="archiveParam1" xml:space="preserve">
 		<value>The Url of the website to take a screenshot.</value>

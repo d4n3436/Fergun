@@ -10,7 +10,7 @@ namespace Fergun
     {
         public static string Version { get; } = "1.6";
 
-        public static IReadOnlyList<string> PreviousVersions { get; } = new List<string>
+        public static IReadOnlyList<string> PreviousVersions { get; } = new[]
         {
             "0.8",
             "0.9",
@@ -90,7 +90,7 @@ namespace Fergun
             GuildPermission.Connect |
             GuildPermission.Speak;
 
-        public const ChannelPermission MinimunRequiredPermissions = ChannelPermission.SendMessages | ChannelPermission.EmbedLinks;
+        public const ChannelPermission MinimumRequiredPermissions = ChannelPermission.SendMessages | ChannelPermission.EmbedLinks;
 
         public const string GitHubRepository = "https://github.com/d4n3436/Fergun";
 
@@ -104,13 +104,10 @@ namespace Fergun
 
         public const string GuildConfigCollection = "GuildConfig";
 
-        public const string UserConfigCollecion = "UserConfig";
+        public const string UserConfigCollection = "UserConfig";
 
         public const string AidAdventuresCollection = "AIDAdventures";
 
-        /// <summary>
-        /// Default attachment size limit in bytes.
-        /// </summary>
         public const int AttachmentSizeLimit = 8 * 1024 * 1024;
 
         public const double GlobalRatelimitPeriod = 10.0 / 60.0; // 1/6 of a minute or 10 seconds
@@ -155,5 +152,18 @@ namespace Fergun
         public const bool AidAutoTranslateDefault = false;
 
         public const bool TrackSelectionDefault = false;
+
+        // Logos
+        public const string AiDungeonLogoUrl = "https://fergun.is-inside.me/CypOix5S.png";
+
+        public const string SpotifyLogoUrl = "https://i.ibb.co/XJQnL4j/spotify.png";
+
+        public const string GoogleTranslateLogoUrl = "https://fergun.is-inside.me/u7fSdkx8.png";
+
+        public const string BadTranslatorLogoUrl = "https://fergun.is-inside.me/gXEDLZVr.png";
+
+        public const string WikipediaLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png";
+
+        public const string WolframAlphaLogoUrl = "https://fergun.is-inside.me/W3gbxqzY.png";
     }
 }

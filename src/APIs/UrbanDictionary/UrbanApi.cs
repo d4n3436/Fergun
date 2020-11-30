@@ -11,7 +11,7 @@ namespace Fergun.APIs.UrbanDictionary
         public static UrbanResponse SearchWord(string word)
         {
             string response;
-            using (WebClient wc = new WebClient())
+            using (var wc = new WebClient())
             {
                 response = wc.DownloadString($"{ApiEndpoint}define?term={Uri.EscapeDataString(word)}");
             }
@@ -21,7 +21,7 @@ namespace Fergun.APIs.UrbanDictionary
         public static UrbanResponse GetRandomWords()
         {
             string response;
-            using (WebClient wc = new WebClient())
+            using (var wc = new WebClient())
             {
                 response = wc.DownloadString($"{ApiEndpoint}random");
             }

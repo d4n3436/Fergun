@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,7 +18,7 @@ namespace Fergun.Attributes.Preconditions
     ///         and will not persist with restarts.
     ///     </note>
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
     public sealed class RatelimitAttribute : PreconditionAttribute
     {
         /// <inheritdoc />
@@ -58,8 +59,7 @@ namespace Fergun.Attributes.Preconditions
                 Measure.Days => TimeSpan.FromDays(period),
                 Measure.Hours => TimeSpan.FromHours(period),
                 Measure.Minutes => TimeSpan.FromMinutes(period),
-                _ => throw new ArgumentOutOfRangeException(paramName: nameof(period),
-                    message: "Argument was not within the valid range.")
+                _ => throw new ArgumentOutOfRangeException(nameof(period), "Argument was not within the valid range.")
             };
         }
 
@@ -73,11 +73,11 @@ namespace Fergun.Attributes.Preconditions
         ///     The amount of time since first invoke a user has until the limit is lifted.
         /// </param>
         /// <param name="flags">
-        ///     Flags to set bahavior of the ratelimit.
+        ///     Flags to set the behavior of the ratelimit.
         /// </param>
         /// <remarks>
         ///     <note type="warning">
-        ///         This is a convinience constructor overload for use with the dynamic
+        ///         This is a convenient constructor overload for use with the dynamic
         ///         command builders, but not with the Class &amp; Method-style commands.
         ///     </note>
         /// </remarks>
@@ -109,9 +109,8 @@ namespace Fergun.Attributes.Preconditions
             var now = DateTimeOffset.UtcNow;
             var key = _applyPerGuild ? (context.User.Id, context.Guild?.Id) : (context.User.Id, null);
 
-            var timeout = (_invokeTracker.TryGetValue(key, out var t)
-                && ((now - t.FirstInvoke) < InvokeLimitPeriod))
-                    ? t : new CommandTimeout(now);
+            var timeout = _invokeTracker.TryGetValue(key, out var t)
+                          && now - t.FirstInvoke < InvokeLimitPeriod ? t : new CommandTimeout(now);
 
             timeout.TimesInvoked++;
 
@@ -120,13 +119,11 @@ namespace Fergun.Attributes.Preconditions
                 _invokeTracker[key] = timeout;
                 return PreconditionResult.FromSuccess();
             }
-            else
-            {
-                double cooldown = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
 
-                return PreconditionResult.FromError(
-                    ErrorMessage ?? "(Cooldown) " + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(cooldown, 2).ToString()));
-            }
+            double cooldown = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
+
+            return PreconditionResult.FromError(
+                ErrorMessage ?? "(Cooldown) " + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(cooldown, 2).ToString(CultureInfo.InvariantCulture)));
         }
 
         private sealed class CommandTimeout

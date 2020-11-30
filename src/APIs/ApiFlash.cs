@@ -8,10 +8,10 @@ namespace Fergun.APIs
 {
     public static class ApiFlash
     {
-        private const string ApiEndpoint = "https://api.apiflash.com/v1/urltoimage";
+        public const string ApiEndpoint = "https://api.apiflash.com/v1/urltoimage";
 
         /// <summary>
-        /// Takes an screenshot from an Url.
+        /// Takes a screenshot from an Url.
         /// </summary>
         /// <param name="accessKey">A valid access key allowing you to make API calls.</param>
         /// <param name="url">The complete URL of the website for which you want to capture a screenshot. The URL must include the protocol (http:// or https://) to be processed correctly.</param>
@@ -42,7 +42,7 @@ namespace Fergun.APIs
         /// <param name="accuracy">Accuracy value to use when emulating geo-location.</param>
         /// <param name="proxy">The address of a proxy server through which the screenshot should be captured. The proxy address should be formatted as address:port or user:password@address:port if authentication is needed.</param>
         /// <returns>An ApiFlashResponse object containing the Url of the image or the error message.</returns>
-        public static async Task<ApiFlashResponse> UrlToImageAsync(string accessKey, string url, FormatType format = FormatType.jpeg, string failOnStatus = "",
+        public static async Task<ApiFlashResponse> UrlToImageAsync(string accessKey, string url, FormatType format = FormatType.Jpeg, string failOnStatus = "",
             uint ttl = 86400, bool fresh = false, bool fullPage = false, bool scrollPage = false,
             uint width = 1920, uint height = 1080, uint delay = 0, string waitFor = "", uint quality = 80,
             bool transparent = false, uint thumbnailWidth = 0, uint scaleFactor = 1, string css = "", string js = "", bool extractHtml = false,
@@ -65,11 +65,11 @@ namespace Fergun.APIs
             var query = HttpUtility.ParseQueryString(string.Empty);
             query["access_key"] = accessKey;
             query["url"] = url;
-            query["response_type"] = ResponseType.json.ToString();
+            query["response_type"] = ResponseType.Json.ToString().ToLowerInvariant();
 
-            if (format != FormatType.jpeg)
+            if (format != FormatType.Jpeg)
             {
-                query["format"] = format.ToString();
+                query["format"] = format.ToString().ToLowerInvariant();
             }
             if (!string.IsNullOrEmpty(failOnStatus)) // check valid
             {
@@ -79,7 +79,7 @@ namespace Fergun.APIs
             {
                 if (ttl > 2592000)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(ttl), "Value must be between 0 and 2592000.");
+                    throw new ArgumentOutOfRangeException(nameof(ttl), ttl, "Value must be between 0 and 2592000.");
                 }
                 query["ttl"] = ttl.ToString();
             }
@@ -107,7 +107,7 @@ namespace Fergun.APIs
             {
                 if (delay > 10)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(delay), "Value must be between 0 and 10.");
+                    throw new ArgumentOutOfRangeException(nameof(delay), delay, "Value must be between 0 and 10.");
                 }
                 query["delay"] = delay.ToString();
             }
@@ -119,11 +119,11 @@ namespace Fergun.APIs
             {
                 if (quality > 100)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(quality), "Value must be between 0 and 100.");
+                    throw new ArgumentOutOfRangeException(nameof(quality), quality, "Value must be between 0 and 100.");
                 }
                 query["quality"] = quality.ToString();
             }
-            if (transparent && format == FormatType.png)
+            if (transparent && format == FormatType.Png)
             {
                 query["transparent"] = "true";
             }
@@ -171,7 +171,7 @@ namespace Fergun.APIs
             {
                 if (latitude < -90 || latitude > 90)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(latitude), "Value must be between -90 and 90.");
+                    throw new ArgumentOutOfRangeException(nameof(latitude), latitude, "Value must be between -90 and 90.");
                 }
                 query["latitude"] = latitude.ToString();
             }
@@ -179,7 +179,7 @@ namespace Fergun.APIs
             {
                 if (longitude < -180 || longitude > 180)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(longitude), "Value must be between -180 and 180.");
+                    throw new ArgumentOutOfRangeException(nameof(longitude), longitude, "Value must be between -180 and 180.");
                 }
                 query["longitude"] = longitude.ToString();
             }
@@ -208,7 +208,7 @@ namespace Fergun.APIs
                 throw new ArgumentNullException(nameof(accessKey));
             }
             string json;
-            using (WebClient wc = new WebClient())
+            using (var wc = new WebClient())
             {
                 json = await wc.DownloadStringTaskAsync($"{ApiEndpoint}/quota?access_key={accessKey}");
             }
@@ -217,14 +217,14 @@ namespace Fergun.APIs
 
         public enum FormatType
         {
-            jpeg,
-            png
+            Jpeg,
+            Png
         }
 
         public enum ResponseType
         {
-            image,
-            json
+            Image,
+            Json
         }
     }
 

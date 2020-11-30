@@ -11,7 +11,7 @@ namespace Fergun.Attributes
     /// <summary>
     /// An attribute that sends the typing state to the current channel (useful for long-running commands).
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
     public class LongRunningAttribute : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
@@ -25,9 +25,9 @@ namespace Fergun.Attributes
                 {
                     x.Content = null;
                     x.Embed = new EmbedBuilder()
-                    .WithDescription($"{FergunClient.Config.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
-                    .WithColor(FergunClient.Config.EmbedColor)
-                    .Build();
+                        .WithDescription($"{FergunClient.Config.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
+                        .WithColor(FergunClient.Config.EmbedColor)
+                        .Build();
                 });
             }
             else

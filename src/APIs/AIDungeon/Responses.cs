@@ -223,7 +223,7 @@ namespace Fergun.APIs.AIDungeon
         public string Message { get; set; }
 
         [JsonProperty("time", NullValueHandling = NullValueHandling.Ignore)]
-        public long? Time { get; set; }
+        public int? Time { get; set; }
 
         [JsonProperty("__typename", NullValueHandling = NullValueHandling.Ignore)]
         public string Typename { get; set; }
@@ -274,7 +274,7 @@ namespace Fergun.APIs.AIDungeon
         public string Message { get; set; }
 
         [JsonProperty("time")]
-        public long Time { get; set; }
+        public int Time { get; set; }
     }
 
     public class History

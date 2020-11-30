@@ -12,7 +12,7 @@ using Fergun.Extensions;
 namespace Fergun.Modules
 {
     [Order(2)]
-    [RequireBotPermission(Constants.MinimunRequiredPermissions)]
+    [RequireBotPermission(Constants.MinimumRequiredPermissions)]
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     public class Moderation : FergunBase
@@ -31,7 +31,7 @@ namespace Fergun.Modules
                 await ReplyAsync(Locate("BanSameUser"));
                 return FergunResult.FromSuccess();
             }
-            if ((await Context.Guild.GetBanAsync(user)) != null)
+            if (await Context.Guild.GetBanAsync(user) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
@@ -64,9 +64,9 @@ namespace Fergun.Modules
             var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).FlattenAsync();
 
             // Get the total message count before being filtered.
-            int totalMsgs = messages.Count();
+            int totalMessages = messages.Count();
 
-            if (totalMsgs == 0)
+            if (totalMessages == 0)
             {
                 return FergunResult.FromError(Locate("NothingToDelete"));
             }
@@ -81,7 +81,7 @@ namespace Fergun.Modules
                 }
             }
 
-            // Get messages younger whan 2 weeks
+            // Get messages younger than 2 weeks
             messages = messages.Where(x => x.CreatedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
             if (!messages.Any())
             {
@@ -90,7 +90,7 @@ namespace Fergun.Modules
 
             try
             {
-                await (Context.Channel as ITextChannel).DeleteMessagesAsync(messages.Append(Context.Message));
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages.Append(Context.Message));
             }
             catch (HttpException e) when (e.HttpCode == HttpStatusCode.NotFound) { }
 
@@ -103,9 +103,9 @@ namespace Fergun.Modules
             {
                 message = string.Format(Locate("DeletedMessages"), messages.Count());
             }
-            if (totalMsgs != messages.Count())
+            if (totalMessages != messages.Count())
             {
-                message += "\n" + string.Format(Locate("SomeMessagesNotDeleted"), totalMsgs - messages.Count());
+                message += "\n" + string.Format(Locate("SomeMessagesNotDeleted"), totalMessages - messages.Count());
             }
 
             var builder = new EmbedBuilder
@@ -127,7 +127,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Hackban([Summary("hackbanParam1")] ulong userId,
             [Remainder, Summary("hackbanParam2")] string reason = null)
         {
-            if ((await Context.Guild.GetBanAsync(userId)) != null)
+            if (await Context.Guild.GetBanAsync(userId) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
@@ -137,12 +137,9 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("InvalidID"));
             }
             var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, userId);
-            if (guildUser != null)
+            if (guildUser != null && Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
             {
-                if (Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
-                {
-                    return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
-                }
+                return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
             }
 
             await Context.Guild.AddBanAsync(userId, 0, reason);
@@ -187,11 +184,9 @@ namespace Fergun.Modules
             }
             if (guildUser.Nickname == newNick)
             {
-                if (newNick == null)
-                {
-                    return FergunResult.FromSuccess();
-                }
-                return FergunResult.FromError(Locate("CurrentNewNickEqual"));
+                return newNick == null
+                    ? FergunResult.FromSuccess()
+                    : FergunResult.FromError(Locate("CurrentNewNickEqual"));
             }
 
             await guildUser.ModifyAsync(x => x.Nickname = newNick);
@@ -218,16 +213,13 @@ namespace Fergun.Modules
                 return FergunResult.FromSuccess();
             }
 
-            if ((await Context.Guild.GetBanAsync(user)) != null)
+            if (await Context.Guild.GetBanAsync(user) != null)
             {
                 return FergunResult.FromError(Locate("AlreadyBanned"));
             }
-            if (user is IGuildUser guildUser)
+            if (user is IGuildUser guildUser && Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
             {
-                if (Context.Guild.CurrentUser.Hierarchy <= guildUser.GetHierarchy())
-                {
-                    return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
-                }
+                return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
             }
             if (days > 7)
             {

@@ -46,7 +46,7 @@ namespace Fergun.APIs.AIDungeon
         {
             var inputData = new InputData
             {
-                PublicId = publicId,
+                PublicId = publicId
             };
 
             if (!string.IsNullOrEmpty(text) &&

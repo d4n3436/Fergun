@@ -21,7 +21,7 @@ namespace Fergun.APIs.Genius
         {
             if (string.IsNullOrEmpty(_apiToken))
             {
-                throw new ArgumentNullException(nameof(_apiToken), "You must provide a valid token.");
+                throw new InvalidOperationException("You must provide a valid token.");
             }
             string response;
             using (var client = new HttpClient())

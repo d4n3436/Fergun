@@ -36,7 +36,7 @@ namespace Fergun.APIs
         }
 
         /// <summary>
-        /// Sends a request to Google Translate's Text-to-Speech API.
+        /// Sends a request to Google Translate Text-to-Speech API.
         /// </summary>
         /// <param name="text">The text to be read.</param>
         /// <param name="language">The language (IETF language tag) to read the text in.</param>
@@ -124,7 +124,7 @@ namespace Fergun.APIs
         /// Preprocesses, tokenizes, cleans and minimizes the text.
         /// </summary>
         /// <param name="text"></param>
-        /// <returns></returns>
+        /// <returns>The tokenized text.</returns>
         private static IEnumerable<string> Tokenize(string text)
         {
             text = text.Trim();
@@ -189,11 +189,13 @@ namespace Fergun.APIs
         /// <summary>
         /// Runs a series of regex substitutions for each regex created.
         /// </summary>
+        /// <param name="text">The text to apply the regex.</param>
         /// <param name="searchArgs">String element(s) to be each passed to <paramref name="searchFunc"/> to create a regex pattern.</param>
         /// <param name="searchFunc">
-        /// A lamdba that takes a string and returns a string.
+        /// A lambda that takes and returns a string.
         /// It should take an element of <paramref name="searchArgs"/> and return a valid regex search pattern string.
         /// </param>
+        /// <param name="replacement">The replacement string</param>
         /// <param name="options">The regex options to use in the regex.</param>
         private static string RegexPreprocess<T>(string text, IEnumerable<T> searchArgs, Func<string, string> searchFunc, string replacement, RegexOptions options = RegexOptions.None)
         {
@@ -211,12 +213,12 @@ namespace Fergun.APIs
         /// </summary>
         /// <param name="patterns">String element(s) to be each passed to <paramref name="patternFunc"/> to create a regex pattern.</param>
         /// <param name="patternFunc">
-        /// A lamdba that takes a string and returns a string.
+        /// A lambda that takes and returns a string.
         /// It should take an element of <paramref name="patterns"/> and return a valid regex pattern group string.
         /// </param>
         private static string BuildPattern<T>(IEnumerable<T> patterns, Func<string, string> patternFunc)
         {
-            var alts = patterns.Select(arg => patternFunc(Regex.Escape(arg.ToString())));
+            var alts = patterns.Select(arg => patternFunc(Regex.Escape(arg.ToString() ?? string.Empty)));
             return string.Join('|', alts);
         }
 
@@ -249,10 +251,8 @@ namespace Fergun.APIs
 
                 return new[] { text.Substring(0, index) }.Concat(Minimize(text.Substring(index), delimiter, maxSize));
             }
-            else
-            {
-                return new[] { text };
-            }
+
+            return new[] { text };
         }
 
         /// <summary>
@@ -262,13 +262,13 @@ namespace Fergun.APIs
         /// <returns></returns>
         private static string MakeToken(string text)
         {
-            long a, b;
             // Get the hours since epoch
             // Other methods:
             // a = b = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalHours;
             // a = b = (long)TimeSpan.FromSeconds(DateTimeOffset.Now.ToUnixTimeSeconds()).TotalHours;
-            a = b = DateTimeOffset.Now.ToUnixTimeSeconds() / 3600;
-            foreach (char ch in text.ToCharArray())
+            long b;
+            long a = b = DateTimeOffset.Now.ToUnixTimeSeconds() / 3600;
+            foreach (char ch in text)
             {
                 a = WorkToken(a + ch, _salt1);
             }
@@ -316,10 +316,10 @@ namespace Fergun.APIs
         /// </summary>
         private static class Symbols
         {
-            public static IReadOnlyList<string> Abbreviations { get; } = new List<string>()
+            public static IReadOnlyList<string> Abbreviations { get; } = new List<string>
             {
                 "dr", "jr", "mr", "mrs", "ms", "msgr", "prof", "sr", "st"
-            };
+            }.AsReadOnly();
 
             public const string PunctuationMarks = "?!？！.,¡()][¿…‥،;:—。，、：\n";
 

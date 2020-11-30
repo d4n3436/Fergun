@@ -17,6 +17,7 @@ namespace Fergun
         /// <param name="sourceEvent">The source event of the message.</param>
         public CachedMessage(IMessage message, DateTimeOffset cachedAt, SourceEvent sourceEvent)
         {
+            Id = message.Id;
             Author = message.Author;
             Attachments = message.Attachments;
             Channel = message.Channel;

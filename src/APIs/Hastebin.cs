@@ -14,14 +14,12 @@ namespace Fergun.APIs
 
         public static async Task<HastebinResponse> UploadAsync(string content)
         {
-            using (var stringContent = new StringContent(content, Encoding.UTF8))
-            {
-                var response = await _client.PostAsync(new Uri("/documents", UriKind.Relative), stringContent);
-                response.EnsureSuccessStatusCode();
+            using var stringContent = new StringContent(content, Encoding.UTF8);
+            var response = await _client.PostAsync(new Uri("/documents", UriKind.Relative), stringContent);
+            response.EnsureSuccessStatusCode();
 
-                string json = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<HastebinResponse>(json);
-            }
+            string json = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<HastebinResponse>(json);
         }
 
         public static string GetLink(this HastebinResponse response) => $"{ApiEndpoint}/{response.Key}";

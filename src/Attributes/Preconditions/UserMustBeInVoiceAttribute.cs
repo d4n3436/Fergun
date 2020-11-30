@@ -15,7 +15,7 @@ namespace Fergun.Attributes.Preconditions
     ///     and the Lavalink node is connected.
     ///     This precondition automatically applies <see cref="RequireContextAttribute"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
     public sealed class UserMustBeInVoiceAttribute : RequireContextAttribute
     {
         /// <inheritdoc />

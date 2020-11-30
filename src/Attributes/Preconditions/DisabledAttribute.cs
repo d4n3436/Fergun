@@ -7,7 +7,7 @@ namespace Fergun.Attributes.Preconditions
     /// <summary>
     /// Disables the command or module globally or on a specific guild.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class DisabledAttribute : RequireContextAttribute
     {
         public DisabledAttribute() : base(ContextType.Guild)
@@ -16,7 +16,7 @@ namespace Fergun.Attributes.Preconditions
 
         public DisabledAttribute(params ulong[] guildIds) : this()
         {
-             _guildIds = guildIds;
+            _guildIds = guildIds;
         }
 
         /// <inheritdoc />

@@ -136,7 +136,7 @@
     <value>Notas</value>
   </data>
 	<data name="NotesInfo" xml:space="preserve">
-    <value>Usa `{0}help [comando]` para obtener mas información sobre un comando. </value>
+    <value>Usa `{0}help [comando]` para obtener mas información sobre un comando.</value>
   </data>
 	<data name="OtherCommands" xml:space="preserve">
     <value>Otros comandos</value>
@@ -178,7 +178,7 @@
     <value>El texto debe tener 3 o mas carácteres.</value>
   </data>
 	<data name="TooLongToDisplay" xml:space="preserve">
-    <value>El texto resultante es demasiado largo para ser mostrados ({0})</value>
+    <value>El texto resultante es demasiado largo para ser mostrado ({0}).</value>
   </data>
 	<data name="normalizeSummary" xml:space="preserve">
     <value>Normaliza un texto.</value>
@@ -311,7 +311,7 @@
     <value>Límite de búsqueda de imágenes alcanzada :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>Realiza OCR  a una imagen con OCR.SPACE</value>
+    <value>Realiza OCR  a una imagen con OCR.SPACE.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>La url de una imagen a usar.</value>
@@ -467,7 +467,7 @@
     <value>El número debe estar entre 1 y {0}.</value>
   </data>
 	<data name="youtubeSummary" xml:space="preserve">
-    <value>Busca un video en YouTube</value>
+    <value>Busca un video en YouTube.</value>
   </data>
 	<data name="youtubeParam1" xml:space="preserve">
     <value>Las palabras clave a buscar.</value>
@@ -476,7 +476,7 @@
     <value>No se encontró resultados.</value>
   </data>
 	<data name="ytrandomSummary" xml:space="preserve">
-    <value>Retorna un video "aleatorio" de YouTube</value>
+    <value>Envía un video "aleatorio" de YouTube.</value>
   </data>
 	<data name="EmptyCache" xml:space="preserve">
     <value>Sin videos en el caché
@@ -870,10 +870,7 @@ Reproduciendo ahora: {1}</value>
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Muestra el tiempo de actividad del bot.</value>
   </data>
-	<data name="waveSummary" xml:space="preserve">
-    <value>hmm</value>
-  </data>
-	<data name="languageSummary" xml:space="preserve">
+  <data name="languageSummary" xml:space="preserve">
     <value>Establece el idioma del bot.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -973,7 +970,7 @@ Selecciona un modo:</value>
 con el modo: **{0}**
 y el personaje: **{1}**...</value>
   </data>
-	<data name="CustomChararacterCreation" xml:space="preserve">
+	<data name="CustomCharacterCreation" xml:space="preserve">
     <value>Creación personalizada de personaje</value>
   </data>
 	<data name="CustomCharacterPrompt" xml:space="preserve">
@@ -1158,7 +1155,7 @@ Puedes usar Say luego de el texto para hablar.</value>
     <value>Agrega una reacción a un mensaje.</value>
   </data>
 	<data name="reactionParam1" xml:space="preserve">
-    <value>La reacción a agregar (solo una)</value>
+    <value>La reacción a agregar (solo una).</value>
   </data>
 	<data name="reactionParam2" xml:space="preserve">
     <value>La ID del mensaje a agregar la reacción (debe ser del mismo canal donde el comando es ejecutado).</value>
@@ -1204,10 +1201,10 @@ Usa `{0}help {1}` para obtener mas información del comando.</value>
     <value>No puedo cambiar la posición de esta pista.</value>
   </data>
 	<data name="SeekHigherOrEqual" xml:space="preserve">
-    <value>El segundo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1})</value>
+    <value>El segundo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1}).</value>
   </data>
 	<data name="SeekComplete" xml:space="preserve">
-    <value>Saltado al segundo {0} ({1} de {2})</value>
+    <value>Saltado al segundo {0} ({1} de {2}).</value>
   </data>
 	<data name="ErrorInTranslation" xml:space="preserve">
     <value>Ocurrió un error en la API de traducción.</value>
@@ -1319,13 +1316,13 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
     <value>Necesitas el permiso `Banear miembros` para usar este comando.</value>
   </data>
 	<data name="BotRequireBanMembers" xml:space="preserve">
-    <value>Necesito el permiso `Banear miembros` para ejecutar este comando</value>
+    <value>Necesito el permiso `Banear miembros` para ejecutar este comando.</value>
   </data>
 	<data name="UserRequireManageMessages" xml:space="preserve">
     <value>Necesitas el permiso `Manejar mensajes` para usar este comando.</value>
   </data>
 	<data name="BotRequireManageMessages" xml:space="preserve">
-    <value>Necesito el permiso `Manejar mensajes` para ejecutar este comando</value>
+    <value>Necesito el permiso `Manejar mensajes` para ejecutar este comando.</value>
   </data>
 	<data name="UserRequireKickMembers" xml:space="preserve">
     <value>Necesitas el permiso `Expulsar miembros` para usar este comando.</value>
@@ -1454,7 +1451,7 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
     <value>Cantidad de mejoras</value>
   </data>
 	<data name="SeekTimeHigherOrEqual" xml:space="preserve">
-    <value>El tiempo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1})</value>
+    <value>El tiempo a ir ({0}) no puede ser mayor o igual que la longitud de la pista ({1}).</value>
   </data>
 	<data name="SeekTimeComplete" xml:space="preserve">
     <value>Saltado a {0} de {1}</value>

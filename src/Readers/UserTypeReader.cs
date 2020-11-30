@@ -90,9 +90,9 @@ namespace Fergun.Readers
                     AddResult(results, guildUser as T, guildUser.Nickname == input ? 0.60f : 0.50f);
             }
 
-            if (results.Count > 0)
-                return TypeReaderResult.FromSuccess(results.Values.ToImmutableArray());
-            return TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
+            return results.Count > 0
+                ? TypeReaderResult.FromSuccess(results.Values.ToImmutableArray())
+                : TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
         }
 
         private static async Task<IUser> GetUserFromIdAsync(ICommandContext context, ulong id)
@@ -100,24 +100,18 @@ namespace Fergun.Readers
             IUser user;
             if (context.Guild != null)
             {
-                user = await context.Guild.GetUserAsync(id);
-                if (user == null)
-                {
-                    user = await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
-                }
+                user = await context.Guild.GetUserAsync(id)
+                       ?? await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
             }
             else
             {
                 user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
             }
-            if (user == null)
-            {
-                user = await (context.Client as DiscordSocketClient).Rest.GetUserAsync(id).ConfigureAwait(false);
-            }
-            return user;
+
+            return user ?? await (context.Client as DiscordSocketClient).Rest.GetUserAsync(id).ConfigureAwait(false);
         }
 
-        private static void AddResult(Dictionary<ulong, TypeReaderValue> results, T user, float score)
+        private static void AddResult(IDictionary<ulong, TypeReaderValue> results, T user, float score)
         {
             if (user != null && !results.ContainsKey(user.Id))
                 results.Add(user.Id, new TypeReaderValue(user, score));

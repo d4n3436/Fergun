@@ -107,7 +107,7 @@ namespace Fergun.Interactive
                 Interactive.RemoveReactionCallback(oldMessage);
                 if (oldMessage.Reactions.Count > 0)
                 {
-                    // There's still reactions (that means the bot doesnt't have ManageMessages perms)
+                    // There's still reactions (that means the bot doesn't have ManageMessages perms)
                     await oldMessage.DeleteAsync();
                     Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed).ConfigureAwait(false);
                 }
@@ -158,7 +158,7 @@ namespace Fergun.Interactive
         /// <returns>
         /// A task representing the asynchronous operation.
         /// </returns>
-        private async Task OnStopAsync(IUserMessage message, ActionOnTimeout actionOnStop)
+        private async Task OnStopAsync(IMessage message, ActionOnTimeout actionOnStop)
         {
             if (!Interactive.ContainsKey(message.Id)) return;
             Interactive.RemoveReactionCallback(message);

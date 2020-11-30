@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,7 +9,7 @@
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Authors>d4n3436</Authors>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="Discord.Net" Version="2.3.0-dev-20201115.2" />

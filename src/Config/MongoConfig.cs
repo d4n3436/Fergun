@@ -42,7 +42,7 @@ namespace Fergun
         /// Gets whether the hostname corresponds to a DNS SRV record (+srv).
         /// </summary>
         [JsonProperty]
-        public bool IsSrv { get; private set; } = false;
+        public bool IsSrv { get; private set; }
 
         /// <summary>
         /// Gets a <see cref="MongoConfig"/> instance with the default values.
