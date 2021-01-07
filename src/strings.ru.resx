@@ -872,7 +872,7 @@
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Показывает время работы бота.</value>
   </data>
-  <data name="languageSummary" xml:space="preserve">
+	<data name="languageSummary" xml:space="preserve">
     <value>Устанавливает язык бота.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -903,7 +903,7 @@
 	<data name="ManageMessages" xml:space="preserve">
     <value>Управление сообщениями</value>
   </data>
-  <data name="Connect" xml:space="preserve">
+	<data name="Connect" xml:space="preserve">
     <value>Подключить</value>
   </data>
 	<data name="Speak" xml:space="preserve">
@@ -1039,7 +1039,7 @@
 	<data name="AboutAIDTitle" xml:space="preserve">
     <value>Об AI Dungeon</value>
   </data>
-  <data name="AIDHelp" xml:space="preserve">
+	<data name="AIDHelp" xml:space="preserve">
     <value>Справка AI Dungeon</value>
   </data>
 	<data name="AIDHowToPlayTitle" xml:space="preserve">
@@ -1448,10 +1448,10 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="ServerFeatures" xml:space="preserve">
     <value>особенности</value>
   </data>
-  <data name="BoostTier" xml:space="preserve">
+	<data name="BoostTier" xml:space="preserve">
     <value>Уровень Nitro Boost</value>
   </data>
-  <data name="BoostCount" xml:space="preserve">
+	<data name="BoostCount" xml:space="preserve">
     <value>Счетчик нитроускорения</value>
   </data>
 	<data name="SeekTimeHigherOrEqual" xml:space="preserve">
@@ -2011,10 +2011,10 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="VoiceChannel" xml:space="preserve">
     <value>речевой канал</value>
   </data>
-  <data name="DMChannel" xml:space="preserve">
+	<data name="DMChannel" xml:space="preserve">
     <value>Канал DM</value>
   </data>
-  <data name="Bitrate" xml:space="preserve">
+	<data name="Bitrate" xml:space="preserve">
     <value>Битрейт</value>
   </data>
 	<data name="UserLimit" xml:space="preserve">
@@ -2325,5 +2325,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Теперь при редактировании командного сообщения с помощью пагинатора ответное сообщение будет удаляться, если нельзя удалить реакции.
 - Теперь при редактировании командного сообщения к команде, которая прикрепляет файлы, сообщение «Загрузка» будет правильно удаляться.
 - Множество мелких исправлений ошибок.</value>
+	</data>
+	<data name="alterParam1" xml:space="preserve">
+		<value>Приключение ID.</value>
 	</data>
 </root>

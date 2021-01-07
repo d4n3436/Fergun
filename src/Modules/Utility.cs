@@ -813,7 +813,10 @@ namespace Fergun.Modules
             else
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Help: Getting help for command: {commandName}"));
-                var command = _cmdService.Commands.FirstOrDefault(x => x.Aliases.Any(y => y == commandName.ToLowerInvariant()) && x.Module.Name != Constants.DevelopmentModuleName);
+
+                var command = _cmdService.Commands.FirstOrDefault(x => // Match commands ignoring their groups.
+                    x.Aliases.Any(y => (y.Split(' ').ElementAtOrDefault(1) ?? y) == commandName.ToLowerInvariant()) &&
+                    x.Module.Name != Constants.DevelopmentModuleName);
                 if (command == null)
                 {
                     return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));

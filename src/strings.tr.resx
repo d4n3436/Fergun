@@ -869,7 +869,7 @@
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Botun çalışma süresini gösterir.</value>
   </data>
-  <data name="languageSummary" xml:space="preserve">
+	<data name="languageSummary" xml:space="preserve">
     <value>Bot dilini ayarlar.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -903,7 +903,7 @@
 	<data name="Connect" xml:space="preserve">
     <value>Bağlan</value>
   </data>
-  <data name="Speak" xml:space="preserve">
+	<data name="Speak" xml:space="preserve">
     <value>Konuş</value>
   </data>
 	<data name="evalSummary" xml:space="preserve">
@@ -2325,5 +2325,8 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 - Şimdi bir sayfalayıcı ile bir komut mesajını düzenlerken, reaksiyonlar kaldırılamazsa, yanıt mesajı silinecektir.
 - Artık dosyaları ekleyen bir komuta yönelik bir komut mesajını düzenlerken, "Yükleniyor" mesajı doğru şekilde silinecek.
 - Çok sayıda küçük hata düzeltmesi.</value>
+	</data>
+	<data name="alterParam1" xml:space="preserve">
+		<value>macera kimliği.</value>
 	</data>
 </root>

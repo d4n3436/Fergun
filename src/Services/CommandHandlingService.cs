@@ -22,7 +22,7 @@ namespace Fergun.Services
         private readonly CommandService _cmdService;
         private readonly IServiceProvider _services;
 
-        private static readonly List<ulong> _ignoredUsers = new List<ulong>();
+        private static readonly HashSet<ulong> _ignoredUsers = new HashSet<ulong>();
         private static readonly object _userLock = new object();
         private static readonly object _cmdStatsLock = new object();
 
@@ -108,7 +108,9 @@ namespace Fergun.Services
             }
 
             var disabledCommands = GuildUtils.GetGuildConfig(message.Channel)?.DisabledCommands;
-            var disabled = disabledCommands?.FirstOrDefault(x => result.Commands.Any(y => x == y.Alias));
+            var disabled = disabledCommands?.FirstOrDefault(x => result.Commands.Any(y =>
+                x == (y.Command.Module.Group == null ? y.Command.Name : $"{y.Command.Module.Group} {y.Command.Name}")));
+
             if (disabled != null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the locally disabled command \"{disabled}\"."));
@@ -117,7 +119,10 @@ namespace Fergun.Services
             }
             else
             {
-                var globalDisabled = DatabaseConfig.GloballyDisabledCommands.FirstOrDefault(x => result.Commands.Any(y => x.Key == y.Alias));
+                var globalDisabled = DatabaseConfig.GloballyDisabledCommands.FirstOrDefault(x =>
+                    result.Commands.Any(y =>
+                        x.Key == (y.Command.Module.Group == null ? y.Command.Name : $"{y.Command.Module.Group} {y.Command.Name}")));
+
                 if (globalDisabled.Key != null)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the globally disabled command \"{globalDisabled.Key}\"."));

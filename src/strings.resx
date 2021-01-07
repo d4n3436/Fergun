@@ -870,7 +870,7 @@ Now playing: {1}</value>
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Shows the bot up-time.</value>
   </data>
-  <data name="languageSummary" xml:space="preserve">
+	<data name="languageSummary" xml:space="preserve">
     <value>Sets the bot language.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -1927,6 +1927,9 @@ Story: This input stops the AI from putting "You" in front of your input.</value
   </data>
 	<data name="alterSummary" xml:space="preserve">
     <value>Edits the last response.</value>
+  </data>
+	<data name="alterParam1" xml:space="preserve">
+    <value>The adventure ID.</value>
   </data>
 	<data name="retrySummary" xml:space="preserve">
     <value>Retries the last action and generates a new response.</value>

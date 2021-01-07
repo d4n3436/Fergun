@@ -194,17 +194,18 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
+            string complete = command.Module.Group == null ? command.Name : $"{command.Module.Group} {command.Name}";
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            if (guild.DisabledCommands.Contains(command.Name))
+            if (guild.DisabledCommands.Contains(complete))
             {
-                return FergunResult.FromError(string.Format(Locate("AlreadyDisabled"), Format.Code(command.Name)));
+                return FergunResult.FromError(string.Format(Locate("AlreadyDisabled"), Format.Code(complete)));
             }
 
-            guild.DisabledCommands.Add(command.Name);
+            guild.DisabledCommands.Add(complete);
             FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Disable: Disabled command \"{command.Name}\" in server {Context.Guild.Id}."));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Disable: Disabled command \"{complete}\" in server {Context.Guild.Id}."));
 
-            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabled"), Format.Code(command.Name)));
+            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabled"), Format.Code(complete)));
 
             return FergunResult.FromSuccess();
         }
@@ -230,18 +231,19 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
+            string complete = command.Module.Group == null ? command.Name : $"{command.Module.Group} {command.Name}";
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            if (guild.DisabledCommands.Contains(command.Name))
+            if (guild.DisabledCommands.Contains(complete))
             {
-                guild.DisabledCommands.Remove(command.Name);
+                guild.DisabledCommands.Remove(complete);
                 FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Enable: Enabled command \"{command.Name}\" in server {Context.Guild.Id}."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Enable: Enabled command \"{complete}\" in server {Context.Guild.Id}."));
 
-                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabled"), Format.Code(command.Name)));
+                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabled"), Format.Code(complete)));
             }
             else
             {
-                return FergunResult.FromError(string.Format(Locate("AlreadyEnabled"), Format.Code(command.Name)));
+                return FergunResult.FromError(string.Format(Locate("AlreadyEnabled"), Format.Code(complete)));
             }
 
             return FergunResult.FromSuccess();

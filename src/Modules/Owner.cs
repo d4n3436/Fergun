@@ -312,17 +312,18 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
+            string complete = command.Module.Group == null ? command.Name : $"{command.Module.Group} {command.Name}";
             var disabledCommands = DatabaseConfig.GloballyDisabledCommands;
-            if (disabledCommands.ContainsKey(command.Name))
+            if (disabledCommands.ContainsKey(complete))
             {
-                return FergunResult.FromError(string.Format(Locate("AlreadyDisabledGlobally"), Format.Code(command.Name)));
+                return FergunResult.FromError(string.Format(Locate("AlreadyDisabledGlobally"), Format.Code(complete)));
             }
 
-            disabledCommands.Add(command.Name, reason);
+            disabledCommands.Add(complete, reason);
             DatabaseConfig.Update(x => x.GloballyDisabledCommands = disabledCommands);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globaldisable: Disabled command {command.Name} in all servers."));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globaldisable: Disabled command \"{complete}\" in all servers."));
 
-            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabledGlobally"), Format.Code(command.Name)));
+            await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandDisabledGlobally"), Format.Code(complete)));
 
             return FergunResult.FromSuccess();
         }
@@ -345,18 +346,19 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("CommandNotFound"), GetPrefix()));
             }
 
+            string complete = command.Module.Group == null ? command.Name : $"{command.Module.Group} {command.Name}";
             var disabledCommands = DatabaseConfig.GloballyDisabledCommands;
-            if (disabledCommands.ContainsKey(command.Name))
+            if (disabledCommands.ContainsKey(complete))
             {
-                disabledCommands.Remove(command.Name);
+                disabledCommands.Remove(complete);
                 DatabaseConfig.Update(x => x.GloballyDisabledCommands = disabledCommands);
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globalenable: Enabled command {command.Name} in all servers."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Globalenable: Enabled command \"{complete}\" in all servers."));
 
-                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabledGlobally"), Format.Code(command.Name)));
+                await SendEmbedAsync("\u2705 " + string.Format(Locate("CommandEnabledGlobally"), Format.Code(complete)));
             }
             else
             {
-                return FergunResult.FromError(string.Format(Locate("AlreadyEnabledGlobally"), Format.Code(command.Name)));
+                return FergunResult.FromError(string.Format(Locate("AlreadyEnabledGlobally"), Format.Code(complete)));
             }
             return FergunResult.FromSuccess();
         }

@@ -870,7 +870,7 @@ Reproduciendo ahora: {1}</value>
 	<data name="uptimeSummary" xml:space="preserve">
     <value>Muestra el tiempo de actividad del bot.</value>
   </data>
-  <data name="languageSummary" xml:space="preserve">
+	<data name="languageSummary" xml:space="preserve">
     <value>Establece el idioma del bot.</value>
   </data>
 	<data name="NewLanguage" xml:space="preserve">
@@ -2327,5 +2327,8 @@ Por favor inténtelo de nuevo más tarde.</value>
 - Ahora al editar un mensaje de comando con un paginador, el mensaje de respuesta se eliminará si las reacciones no se pueden eliminar.
 - Ahora al editar un mensaje de comando a un comando que adjunta archivos, el mensaje "Cargando" se eliminará correctamente.
 - Muchas correcciones de errores menores.</value>
+	</data>
+	<data name="alterParam1" xml:space="preserve">
+		<value>La ID de aventura.</value>
 	</data>
 </root>

@@ -759,7 +759,7 @@ namespace Fergun.Modules
         [Summary("alterSummary")]
         [Alias("edit")]
         [Example("2582734")]
-        public async Task<RuntimeResult> Alter(uint adventureId)
+        public async Task<RuntimeResult> Alter([Summary("alterParam1")] uint adventureId)
         {
             if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
