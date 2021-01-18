@@ -1279,6 +1279,7 @@ namespace Fergun.Modules
         // Fallback to original text if fails
         private static async Task<string> TranslateSimplerAsync(string text, string from, string to)
         {
+            /*
             try
             {
                 var translator = new GoogleTranslator();
@@ -1287,15 +1288,16 @@ namespace Fergun.Modules
             }
             catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is SystemException)
             {
-                try
-                {
-                    var result = await BingTranslatorApi.TranslateAsync(text, to, from);
-                    return result[0].Translations[0].Text;
-                }
-                catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is ArgumentException)
-                {
-                    return text;
-                }
+            }
+            */
+            try
+            {
+                var result = await BingTranslatorApi.TranslateAsync(text, to, from);
+                return result[0].Translations[0].Text;
+            }
+            catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is ArgumentException)
+            {
+                return text;
             }
         }
     }

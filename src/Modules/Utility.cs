@@ -1410,27 +1410,11 @@ namespace Fergun.Modules
                 builder.AddField(Locate("Members"), server.MemberCount, true);
             }
 
-            //if (server.Emotes.Count == 0)
-            //{
-            //    builder.AddField("Emotes", Locate("None"), false);
-            //}
-            //else
-            //{
-            //    var chunks = string.Join(" ", server.Emotes.Select(x => x.ToString()))
-            //        .SplitToLines(EmbedFieldBuilder.MaxFieldValueLength)
-            //        .ToList();
-            //    for (int i = 0; i < chunks.Count; i++)
-            //    {
-            //        builder.AddField(i == 0 ? "Emotes" : "\u200B", chunks[i], false);
-            //    }
-            //}
-            //builder.AddField("Emotes: ", server.Emotes.Any() ? string.Join(" ", server.Emotes.ToList()).Truncate(1021) + "..." : "(None)", false);
-            builder.AddField(Locate("CreatedAt"), server.CreatedAt, true);
-            builder.WithThumbnailUrl(server.Features.Any(x => x == "ANIMATED_ICON") ? Path.ChangeExtension(server.IconUrl, "gif") : server.IconUrl);
-            //if (server.Features.Any(x => x == "BANNER"))
-            //{
-            //}
-            builder.WithColor(FergunClient.Config.EmbedColor);
+            builder.AddField(Locate("CreatedAt"), server.CreatedAt, true)
+                .WithThumbnailUrl(server.Features.Any(x => x == "ANIMATED_ICON") ? Path.ChangeExtension(server.IconUrl, "gif") : server.IconUrl)
+                .WithImageUrl(server.BannerUrl)
+                .WithColor(FergunClient.Config.EmbedColor);
+
             await ReplyAsync(embed: builder.Build());
             return FergunResult.FromSuccess();
         }
@@ -2068,10 +2052,11 @@ namespace Fergun.Modules
             Language resultTarget = GoogleTranslator.GetLanguageByISO(target);
             Language resultSource = null;
 
-            bool useBing = false;
+            //bool useBing = true;
             text = text.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Target: {resultTarget}"));
+            /*
             try
             {
                 var translator = new GoogleTranslator();
@@ -2087,22 +2072,20 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
                 useBing = true;
             }
-            if (useBing)
+            */
+            try
             {
-                try
-                {
-                    var result = await BingTranslatorApi.TranslateAsync(text, target);
+                var result = await BingTranslatorApi.TranslateAsync(text, target);
 
-                    resultTranslation = result[0].Translations[0].Text;
-                    resultSource = GoogleTranslator.GetLanguageByISO(result[0].DetectedLanguage.Language);
+                resultTranslation = result[0].Translations[0].Text;
+                resultSource = GoogleTranslator.GetLanguageByISO(result[0].DetectedLanguage.Language);
 
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
-                }
-                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
-                    resultError = "ErrorInTranslation";
-                }
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
+            }
+            catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
+                resultError = "ErrorInTranslation";
             }
 
             return new SimpleTranslationResult
