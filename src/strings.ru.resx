@@ -1892,6 +1892,9 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="alterSummary" xml:space="preserve">
     <value>Редактирует последний ответ.</value>
   </data>
+	<data name="alterParam1" xml:space="preserve">
+    <value>Приключение ID.</value>
+  </data>
 	<data name="retrySummary" xml:space="preserve">
     <value>Повторит последнее действие и порождает новый ответ.</value>
   </data>
@@ -2326,7 +2329,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Теперь при редактировании командного сообщения к команде, которая прикрепляет файлы, сообщение «Загрузка» будет правильно удаляться.
 - Множество мелких исправлений ошибок.</value>
 	</data>
-	<data name="alterParam1" xml:space="preserve">
-		<value>Приключение ID.</value>
+	<data name="Badges" xml:space="preserve">
+		<value>Значки</value>
 	</data>
 </root>

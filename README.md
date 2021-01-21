@@ -1,5 +1,5 @@
 ﻿# Fergun
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)]([https://discord.gg/5w5GEKE]) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/5w5GEKE)
 
 Fergun is a multipurpose and multilanguage bot with lots of useful commands (Utility, Music, Moderation, and AI Dungeon).
 
@@ -30,9 +30,9 @@ Have any questions or need help with the bot? Join the [support server](https://
 * Clone  the repository:
   `git clone https://github.com/d4n3436/Fergun.git`
 
-  Or  [download from GitHub](https://github.com/d4n3436/Fergun/archive/master.zip).
+  Or [download from GitHub](https://github.com/d4n3436/Fergun/archive/master.zip).
 
-* Build the bot (change `Release` to `Debug` for a debug build):
+* Build the bot (change `Release` to `Debug` in a debug build):
   ```
   cd Fergun
   dotnet build -c Release
@@ -40,7 +40,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 
 
 ### 2. Setting up a local Lavalink server (Optional)
-If you want to use the music module with a local Lavalink server, follow this steps:
+If you want to use the music module with a local Lavalink server, follow these steps:
 *  [Install JDK 11+](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
 
 * Create a folder in the build folder called "Lavalink" (change `Release` to `Debug` in a debug build):
@@ -50,7 +50,7 @@ If you want to use the music module with a local Lavalink server, follow this st
   ```
   
 * Download the [Lavalink binaries](https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar) and save it in the folder:
-
+ 
   `wget https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar -O Lavalink.jar`
  
   Nightly binaries:
@@ -66,8 +66,9 @@ If you want to use the music module with a local Lavalink server, follow this st
 
 ### 3. Running the bot
 * Go to the build folder if you haven't done it before (change `Release` to `Debug` in a debug build):
+ 
   `cd src/bin/Release/netcoreapp3.1`
-  
+ 
 * Start the bot by double clicking `Fergun.exe` or with the command `dotnet Fergun.dll`.
 
 * You will see the error message: "No config file found. Creating default config file." The error is self explanatory.
@@ -86,13 +87,12 @@ Note: If you set up a local Lavalink server the bot should be runnning the serve
 
 
 ### 4. Testing and changing the default prefix
-The default bot prefix is `f!` (`f!!` for Debug builds), a `@mention` can also be used as a prefix.
+The default bot prefix is `f!` (`f!!` in Debug builds), a `@mention` can also be used as a prefix.
 
 To test the bot use the `ping` command: `f!ping`.
 You should see an embed with the response times.
 
 To change the default (global) bot prefix use `globalprefix <newPrefix>`: `f!globalprefix !`.
-
 This will set the global prefix to `!` and save it in the database.
 
 To change the prefix in the current server simply use `prefix <newPrefix>`.
@@ -105,14 +105,14 @@ To shut down the bot use `logout`.
 ### 5. More configuration
 `botconfig.json` documentation:
 
-| Key | Value | How to get one / Notes
+| Key | Description | How to get one / Notes
 |--|--|--|
 | `Token` | The bot token. | [Create a Discord application](https://discord.com/developers/applications).
 | `DevToken` | The development bot token, used in Debug builds. | ^
 | `DblApiToken` | The Discord Bot List API token, used to update the bot server count in top.gg. | [Add a bot in top.gg](https://top.gg/bot/new), then [here](https://top.gg/api/docs).
 | `DiscordBotsApiToken` | The Discord Bots API token, used to update the bot server count in discord.bots.gg. | [Add a bot in discord.bots.gg](https://discord.bots.gg/bots/add), then [here](https://discord.bots.gg/docs).
 | `GeniusApiToken` | The Genius API token, used in the commands `lyrics` and `spotify`. | https://docs.genius.com
-| `AiDungeonToken` | The AI Dungeon user token, used in the AI Dungeon module. | ¯\\_(ツ)_/¯
+| `AiDungeonToken` | The AI Dungeon user token, used in the AI Dungeon module. | See [below](#6-obtaining-the-ai-dungeon-token).
 | `DeepAiApiKey` | The DeepAI API key, used in `resize`. | https://deepai.org/api-docs
 | `ApiFlashAccessKey` | The ApiFlash access key, used in `screenshot` and `archive`. | https://apiflash.com
 | `WolframAlphaAppId` | The WolframAlpha App ID, used in `wolframalpha`. | https://products.wolframalpha.com/api
@@ -123,11 +123,21 @@ To shut down the bot use `logout`.
 | `ServerMembersIntent` | Whether the Guild Members intent should be used. Used in user join/leave/kick events and for downloading the entire member list. | If your bot is in more than 100 servers this requires [verification and whitelisting](https://support.discord.com/hc/en-us/articles/360040720412)
 | `MessageCacheSize` | The message cache size, used in commands that gets cached messages in a channel. | The default value is 100, setting this to 0 disables the message cache.
 | `AlwaysDownloadUsers` | Whether all users should be downloaded to the cache. | `ServerMembersIntent` is required for this to work.
-| `UseReliabilityService` | Whether the reliability service should be used. | The reliability service is a service that shutdowns the bot in case of a deadlock.<br/>The service requires that the bot is being run by a daemon that handles Exit Code 1 as a restart.<br/>Daemon for [Powershell](https://gitlab.com/snippets/21444) and [Bash](https://stackoverflow.com/a/697064),
+| `UseReliabilityService` | Whether the reliability service should be used. | The reliability service is a service that shutdowns the bot in case of a deadlock.<br/>The service requires that the bot is being run by a daemon that handles Exit Code 1 as a restart.<br/>Daemon for [Powershell](https://gitlab.com/snippets/21444) and [Bash](https://stackoverflow.com/a/697064).
 | `DatabaseConfig` | The database configuration. | ...
 | `LavaConfig` | The Lavalink server configuration | ...
-| `(...)Emote` | The emotes that are used in some commands. | `LoadingEmote` is used in a "Loading" message.<br/>`MongoDbEmote` and `WebSocketEmote` are used in `ping`.<br/>The rest emotes are used in `serverinfo`.
+| `(...)Emote` | The emotes that are used in some commands. | `LoadingEmote` is used in a "Loading" message.<br/>`MongoDbEmote` and `WebSocketEmote` are used in `ping`.<br/>`BoosterEmote` and `UserFlagsEmotes` are used in `userinfo`.<br/>The rest are used in `serverinfo`.
 
+### 6. Obtaining the AI Dungeon token
+
+(These steps may differ depending on what web browser you're using. Here I'll use Google Chrome.)
+
+* Go to https://play.aidungeon.io in your web browser and log in.
+* Open the Developer tools (press F12).
+* Go to the `Network` tab and click the `WS` button.
+* Press F5. A `subscriptions` connection should appear.
+* Click it, go to the `Messages` tab and scroll up to the first message.
+* Click the first message. The token is the value of the `token` key.
 
 ## License
 Unless where otherwise stated, Fergun is licensed in the [MIT license](LICENSE).

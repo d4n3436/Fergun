@@ -2332,4 +2332,7 @@ Please try again later.</value>
 - Now when editing a command message to a command that attaches files, the "Loading" message will be correctly deleted.
 - Lots of minor bug fixes.</value>
 	</data>
+	<data name="Badges" xml:space="preserve">
+		<value>Badges</value>
+	</data>
 </root>

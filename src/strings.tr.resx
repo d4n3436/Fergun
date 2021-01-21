@@ -1892,6 +1892,9 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="alterSummary" xml:space="preserve">
     <value>Geçen tepkisini düzenler.</value>
   </data>
+	<data name="alterParam1" xml:space="preserve">
+    <value>macera kimliği.</value>
+  </data>
 	<data name="retrySummary" xml:space="preserve">
     <value>Son eylemi yeniden dener ve yeni bir yanıt oluşturur.</value>
   </data>
@@ -2326,7 +2329,7 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 - Artık dosyaları ekleyen bir komuta yönelik bir komut mesajını düzenlerken, "Yükleniyor" mesajı doğru şekilde silinecek.
 - Çok sayıda küçük hata düzeltmesi.</value>
 	</data>
-	<data name="alterParam1" xml:space="preserve">
-		<value>macera kimliği.</value>
+	<data name="Badges" xml:space="preserve">
+		<value>Rozet</value>
 	</data>
 </root>

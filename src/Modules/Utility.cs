@@ -1740,7 +1740,26 @@ namespace Fergun.Modules
                     x == ClientType.Web ? "🌐" : ""));
             }
 
+            var flags = user.PublicFlags ?? UserProperties.None;
+
+            string badges = flags == UserProperties.None ? null
+                : string.Join(' ',
+                Enum.GetValues(typeof(UserProperties))
+                    .Cast<Enum>()
+                    .Where(flags.HasFlag)
+                    .Select(x => FergunClient.Config.UserFlagsEmotes.TryGetValue(x.ToString(), out string emote) ? emote : null)
+                    .Distinct());
+
             var guildUser = user as IGuildUser;
+
+            if (guildUser?.PremiumSince != null)
+            {
+                badges += " " + FergunClient.Config.BoosterEmote;
+            }
+            else if (string.IsNullOrEmpty(badges))
+            {
+                badges = Locate("None");
+            }
 
             if (!(user is RestUser))
             {
@@ -1776,6 +1795,7 @@ namespace Fergun.Modules
                 .AddField("ID", user.Id)
                 .AddField(Locate("Activity"), activities, true)
                 .AddField(Locate("ActiveClients"), clients, true)
+                .AddField(Locate("Badges"), badges)
                 .AddField(Locate("IsBot"), Locate(user.IsBot))
                 .AddField(Locate("CreatedAt"), user.CreatedAt)
                 .AddField(Locate("GuildJoinDate"), guildUser?.JoinedAt?.ToString() ?? "N/A")

@@ -1904,6 +1904,9 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="alterSummary" xml:space="preserve">
     <value>التعديلات استجابة الماضية.</value>
   </data>
+	<data name="alterParam1" xml:space="preserve">
+    <value>معرف المغامرة.</value>
+  </data>
 	<data name="retrySummary" xml:space="preserve">
     <value>عمليات إعادة الإجراء الأخير ويولد استجابة جديدة.</value>
   </data>
@@ -2338,7 +2341,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - الآن عند تحرير رسالة أمر لأمر مرفق بملفات ، سيتم حذف رسالة "جارٍ التحميل" بشكل صحيح.
 - الكثير من إصلاحات الأخطاء الطفيفة.</value>
 	</data>
-	<data name="alterParam1" xml:space="preserve">
-		<value>معرف المغامرة.</value>
+	<data name="Badges" xml:space="preserve">
+		<value>شارات</value>
 	</data>
 </root>

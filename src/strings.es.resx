@@ -1894,6 +1894,9 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="alterSummary" xml:space="preserve">
     <value>Edita la última respuesta.</value>
   </data>
+	<data name="alterParam1" xml:space="preserve">
+    <value>La ID de aventura.</value>
+  </data>
 	<data name="retrySummary" xml:space="preserve">
     <value>Reintenta la última acción y genera una nueva respuesta.</value>
   </data>
@@ -2328,7 +2331,7 @@ Por favor inténtelo de nuevo más tarde.</value>
 - Ahora al editar un mensaje de comando a un comando que adjunta archivos, el mensaje "Cargando" se eliminará correctamente.
 - Muchas correcciones de errores menores.</value>
 	</data>
-	<data name="alterParam1" xml:space="preserve">
-		<value>La ID de aventura.</value>
+	<data name="Badges" xml:space="preserve">
+		<value>Insignias</value>
 	</data>
 </root>

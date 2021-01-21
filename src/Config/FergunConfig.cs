@@ -1,4 +1,8 @@
-﻿using Discord;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Discord;
 using Newtonsoft.Json;
 using Victoria;
 
@@ -191,5 +195,18 @@ namespace Fergun
         /// </summary>
         [JsonProperty]
         public string WebSocketEmote { get; private set; }
+
+        /// <summary>
+        /// Gets the Nitro booster emote.
+        /// </summary>
+        [JsonProperty]
+        public string BoosterEmote { get; internal set; }
+
+        /// <summary>
+        /// Gets user flags emotes.
+        /// </summary>
+        [JsonProperty]
+        public IReadOnlyDictionary<string, string> UserFlagsEmotes { get; private set; }
+            = new ReadOnlyDictionary<string, string>(Enum.GetNames(typeof(UserProperties)).ToDictionary(x => x, x => (string)null));
     }
 }
