@@ -18,6 +18,7 @@ using Fergun.APIs;
 using Fergun.APIs.BingTranslator;
 using Fergun.APIs.Dictionary;
 using Fergun.APIs.DuckDuckGo;
+using Fergun.APIs.GTranslate;
 using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
 using Fergun.APIs.WaybackMachine;
@@ -644,19 +645,14 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling Dictionary API", e));
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
-            catch (JsonReaderException e)
+            catch (JsonException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error deserializing Dictionary API response", e));
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            if (results == null || results.Count == 0)
-            {
-                return FergunResult.FromError(Locate("NoResultsFound"));
-            }
-
             var definitions = new List<SimpleDefinitionInfo>();
-            foreach (var result in results)
+            foreach (var result in results ?? Enumerable.Empty<DefinitionCategory>())
             {
                 foreach (var meaning in result.Meanings)
                 {
@@ -673,6 +669,11 @@ namespace Fergun.Modules
                         });
                     }
                 }
+            }
+
+            if (definitions.Count == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
             var pages = definitions.Select(x =>
@@ -2072,40 +2073,66 @@ namespace Fergun.Modules
             Language resultTarget = GoogleTranslator.GetLanguageByISO(target);
             Language resultSource = null;
 
-            //bool useBing = true;
+            bool useGTranslate = false;
             text = text.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Target: {resultTarget}"));
-            /*
-            try
-            {
-                var translator = new GoogleTranslator();
-                var result = await translator.TranslateLiteAsync(text, string.IsNullOrEmpty(source) ? Language.Auto : new Language("", source), resultTarget);
 
-                resultTranslation = result.MergedTranslation;
-                resultSource = result.LanguageDetections[0].Language;
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
-            }
-            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is TaskCanceledException || e is SystemException)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
-                useBing = true;
-            }
-            */
             try
             {
                 var result = await BingTranslatorApi.TranslateAsync(text, target);
 
                 resultTranslation = result[0].Translations[0].Text;
-                resultSource = GoogleTranslator.GetLanguageByISO(result[0].DetectedLanguage.Language);
+                string language = result[0].DetectedLanguage.Language;
 
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
+                // Convert Bing Translator language codes to Google Translate equivalent.
+                switch (language)
+                {
+                    case "nb":
+                        language = "no";
+                        break;
+
+                    case "pt-pt":
+                        language = "pt";
+                        break;
+
+                    case "zh-Hans":
+                        language = "zh-CN";
+                        break;
+
+                    case "zh-Hant":
+                        language = "zh-TW";
+                        break;
+                }
+
+                resultSource = GoogleTranslator.GetLanguageByISO(language) ?? Language.English;
+
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator",
+                    $"Detected language: {result[0].DetectedLanguage.Language}"));
             }
             catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
-                resultError = "ErrorInTranslation";
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using GTranslate", e));
+                useGTranslate = true;
+            }
+
+            if (useGTranslate)
+            {
+                try
+                {
+                    var translator = new GTranslator();
+                    var result = await translator.TranslateAsync(text, target, string.IsNullOrEmpty(source) ? "auto" : source);
+
+                    resultTranslation = result.Translation;
+                    resultSource = GoogleTranslator.GetLanguageByISO(result.SourceLanguage) ?? Language.English;
+
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
+                }
+                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
+                    resultError = "ErrorInTranslation";
+                }
             }
 
             return new SimpleTranslationResult

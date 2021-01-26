@@ -15,6 +15,7 @@ using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.AIDungeon;
 using Fergun.APIs.BingTranslator;
+using Fergun.APIs.GTranslate;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
@@ -1279,25 +1280,23 @@ namespace Fergun.Modules
         // Fallback to original text if fails
         private static async Task<string> TranslateSimplerAsync(string text, string from, string to)
         {
-            /*
-            try
-            {
-                var translator = new GoogleTranslator();
-                var result = await translator.TranslateLiteAsync(text, new Language("", from), new Language("", to));
-                return result.MergedTranslation;
-            }
-            catch (Exception e) when (e is GoogleTranslateIPBannedException || e is HttpRequestException || e is SystemException)
-            {
-            }
-            */
             try
             {
                 var result = await BingTranslatorApi.TranslateAsync(text, to, from);
                 return result[0].Translations[0].Text;
             }
-            catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is ArgumentException)
+            catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
             {
-                return text;
+                try
+                {
+                    var translator = new GTranslator();
+                    var result = await translator.TranslateAsync(text, to, from);
+                    return result.Translation;
+                }
+                catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is TaskCanceledException)
+                {
+                    return text;
+                }
             }
         }
     }

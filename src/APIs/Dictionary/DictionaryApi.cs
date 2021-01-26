@@ -60,7 +60,7 @@ namespace Fergun.APIs.Dictionary
                 {
                     if (!fallback || language == DefaultLanguage)
                     {
-                        return new List<DefinitionCategory>().AsReadOnly();
+                        return Array.Empty<DefinitionCategory>();
                     }
 
                     // Fallback to the default language.
@@ -79,7 +79,7 @@ namespace Fergun.APIs.Dictionary
         /// <summary>
         /// Gets a read-only list containing the supported languages.
         /// </summary>
-        public static IReadOnlyList<string> SupportedLanguages { get; } = new List<string>
+        public static IReadOnlyList<string> SupportedLanguages { get; } = new[]
         {
             "en",
             "hi",
@@ -93,6 +93,6 @@ namespace Fergun.APIs.Dictionary
             "pt-BR",
             "ar",
             "tr"
-        }.AsReadOnly();
+        };
     }
 }
