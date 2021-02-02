@@ -290,7 +290,7 @@
     <value>La url no es una imagen válida.</value>
   </data>
 	<data name="imgSummary" xml:space="preserve">
-    <value>Busca una imagen con DuckDuckGo.</value>
+    <value>Busca imágenes con Google Images.</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>Las palabras clave a buscar.</value>
@@ -2333,5 +2333,11 @@ Por favor inténtelo de nuevo más tarde.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Insignias</value>
+	</data>
+	<data name="img2Summary" xml:space="preserve">
+		<value>Busca imágenes con DuckDuckGo,</value>
+	</data>
+	<data name="img2Param1" xml:space="preserve">
+		<value>Las palabras clave a buscar.</value>
 	</data>
 </root>

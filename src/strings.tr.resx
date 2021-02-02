@@ -289,7 +289,7 @@
     <value>URL geçerli bir resim değil.</value>
   </data>
 	<data name="imgSummary" xml:space="preserve">
-    <value>DuckDuckGo ile bir resim arar.</value>
+    <value>Google Görseller ile görselleri arar.</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>Aranacak anahtar kelimeler.</value>
@@ -2331,5 +2331,11 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Rozet</value>
+	</data>
+	<data name="img2Summary" xml:space="preserve">
+		<value>DuckDuckGo ile görüntüleri arar.</value>
+	</data>
+	<data name="img2Param1" xml:space="preserve">
+		<value>Aranacak anahtar kelimeler.</value>
 	</data>
 </root>

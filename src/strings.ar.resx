@@ -289,7 +289,7 @@
     <value>عنوان url ليس صورة صالحة.</value>
   </data>
 	<data name="imgSummary" xml:space="preserve">
-    <value>البحث عن صورة مع دك دك غو.</value>
+    <value>يبحث عن الصور باستخدام صور Google.</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>الكلمة (الكلمات) الرئيسية للبحث.</value>
@@ -2343,5 +2343,11 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>شارات</value>
+	</data>
+	<data name="img2Summary" xml:space="preserve">
+		<value>يبحث عن الصور باستخدام DuckDuckGo.</value>
+	</data>
+	<data name="img2Param1" xml:space="preserve">
+		<value>الكلمة (الكلمات) الرئيسية للبحث.</value>
 	</data>
 </root>

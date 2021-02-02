@@ -316,7 +316,7 @@
     <value>URL не является допустимым изображением.</value>
   </data>
 	<data name="imgSummary" xml:space="preserve">
-    <value>Ищет изображение с DuckDuckGo.</value>
+    <value>Ищет изображения с помощью Google Images.</value>
   </data>
 	<data name="UrbanFooter" xml:space="preserve">
     <value>Городской словарь - Страница {0} из {1}</value>
@@ -2331,5 +2331,11 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Значки</value>
+	</data>
+	<data name="img2Summary" xml:space="preserve">
+		<value>Ищет изображения с DuckDuckGo.</value>
+	</data>
+	<data name="img2Param1" xml:space="preserve">
+		<value>Ключевое слово (а) для поиска.</value>
 	</data>
 </root>

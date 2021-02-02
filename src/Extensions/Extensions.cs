@@ -264,6 +264,12 @@ namespace Fergun.Extensions
             return context.Channel.Display() + (displayUser ? $"/{context.User}" : "");
         }
 
+        public static bool IsNsfw(this ICommandContext context)
+        {
+            // Considering a DM channel a SFW channel.
+            return context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
+        }
+
         public static string Display(this IChannel channel)
         {
             return (channel is IGuildChannel guildChannel ? $"{guildChannel.Guild.Name}/" : "") + channel.Name;

@@ -30,6 +30,7 @@ using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
 using GoogleTranslateFreeApi;
+using GScraper;
 using NCalc;
 using Newtonsoft.Json;
 using YoutubeExplode;
@@ -47,6 +48,7 @@ namespace Fergun.Modules
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
+        private static readonly GoogleScraper _gscraper = new GoogleScraper();
         private static Dictionary<string, string> _commandListCache;
         private static int _cachedVisibleCmdCount = -1;
         private static XkcdComic _lastComic;
@@ -776,6 +778,7 @@ namespace Fergun.Modules
         }
 
         [AlwaysEnabled]
+        [LongRunning]
         [Command("help")]
         [Summary("helpSummary")]
         [Example("help")]
@@ -889,9 +892,34 @@ namespace Fergun.Modules
         [LongRunning]
         [Command("img", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("imgSummary")]
-        [Alias("im", "image", "ddgi")]
+        [Alias("im", "image")]
         [Example("discord")]
         public async Task<RuntimeResult> Img([Remainder, Summary("imgParam1")] string query)
+        {
+            query = query.Trim();
+            bool isNsfwChannel = Context.IsNsfw();
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
+
+            IReadOnlyList<ImageResult> images;
+            try
+            {
+                images = await _gscraper.GetImagesAsync(query, safeSearch: !isNsfwChannel);
+            }
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is GScraperException)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images. Using DuckDuckGo", e));
+                return await Img2(query);
+            }
+
+            return await SendPaginatedImagesAsync(images);
+        }
+
+        [LongRunning]
+        [Command("img2", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+        [Summary("img2Summary")]
+        [Alias("im2", "image2", "ddgi")]
+        [Example("discord")]
+        public async Task<RuntimeResult> Img2([Remainder, Summary("img2Param1")] string query)
         {
             query = query.Replace("!", "", StringComparison.OrdinalIgnoreCase).Trim();
             if (string.IsNullOrEmpty(query))
@@ -903,9 +931,9 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("MustBeLowerThan"), nameof(query), DdgApi.MaxLength));
             }
 
-            // Considering a DM channel a SFW channel.
-            bool isNsfwChannel = !Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
+            bool isNsfwChannel = Context.IsNsfw();
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img2: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
+
             DdgResponse search;
             try
             {
@@ -916,65 +944,21 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
                 return FergunResult.FromError(e.Message);
             }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
+            }
             catch (TokenNotFoundException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
-            if (search.Results.Count == 0)
-            {
-                return FergunResult.FromError(Locate("NoResultsFound"));
-            }
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Results count: {search.Results.Count}"));
 
-            var pages = search.Results
-                .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
-                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute))
-                .Select(x => new EmbedBuilder
-                {
-                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
-                    Url = x.Url
-                })
-                .ToList();
-
-            var pager = new PaginatedMessage
-            {
-                Author = new EmbedAuthorBuilder
-                {
-                    Name = Context.User.ToString(),
-                    IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-                },
-                Description = Locate("ImageSearch"),
-                Pages = pages,
-                Color = new Discord.Color(FergunClient.Config.EmbedColor),
-                Options = new PaginatorAppearanceOptions
-                {
-                    InformationText = Locate("PaginatorHelp"),
-                    FooterFormat = Locate("PaginatorFooter"),
-                    Timeout = TimeSpan.FromMinutes(10),
-                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
-                }
-            };
-
-            var reactions = new ReactionList
-            {
-                First = pages.Count >= 3,
-                Backward = true,
-                Forward = true,
-                Last = pages.Count >= 3,
-                Stop = true,
-                Jump = pages.Count >= 4,
-                Info = false
-            };
-
-            await PagedReplyAsync(pager, reactions);
-
-            return FergunResult.FromSuccess();
+            return await SendPaginatedImagesAsync(search);
         }
 
-        //[LongRunning]
+        [LongRunning]
         [RequireBotPermission(ChannelPermission.AttachFiles, ErrorMessage = "BotRequireAttachFiles")]
         [Command("invert", RunMode = RunMode.Async), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("invertSummary")]
@@ -1397,7 +1381,7 @@ namespace Fergun.Modules
                 .AddField(Locate("BoostCount"), server.PremiumSubscriptionCount, true)
                 .AddField(Locate("ServerFeatures"), server.Features.Count == 0 ? Locate("None") : string.Join(", ", server.Features), true);
 
-            if (server.HasAllMembers)
+            if (server.HasAllMembers && FergunClient.Config.PresenceIntent)
             {
                 builder.AddField(Locate("Members"), $"{server.MemberCount} (Bots: {server.Users.Count(x => x.IsBot)}) **|** " +
                 $"{FergunClient.Config.OnlineEmote} {server.Users.Count(x => x.Status == UserStatus.Online)} **|** " +
@@ -1408,7 +1392,7 @@ namespace Fergun.Modules
             }
             else
             {
-                builder.AddField(Locate("Members"), server.MemberCount, true);
+                builder.AddField(Locate("Members"), server.HasAllMembers ? "~" : "" + server.MemberCount, true);
             }
 
             builder.AddField(Locate("CreatedAt"), server.CreatedAt, true)
@@ -1978,6 +1962,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
+        [LongRunning]
         [Command("youtube", RunMode = RunMode.Async)]
         [Summary("youtubeSummary")]
         [Alias("yt")]
@@ -2158,6 +2143,86 @@ namespace Fergun.Modules
 
             _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
+        }
+
+        private async Task<FergunResult> SendPaginatedImagesAsync(IReadOnlyCollection<ImageResult> images)
+        {
+            var pages = images
+                .Where(x =>
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)), UriKind.Absolute) &&
+                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute))
+                .Select(x => new EmbedBuilder
+                {
+                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
+                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)),
+                    Url = x.ContextLink
+                })
+                .ToList();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {images.Count} (filtered: {images.Count - pages.Count})"));
+
+            return await SendPaginatedImagesAsync(pages);
+        }
+
+        private async Task<FergunResult> SendPaginatedImagesAsync(DdgResponse search)
+        {
+            var pages = search.Results
+                .Where(x =>
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute))
+                .Select(x => new EmbedBuilder
+                {
+                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
+                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
+                    Url = x.Url
+                })
+                .ToList();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {search.Results.Count} (filtered: {search.Results.Count - pages.Count})"));
+
+            return await SendPaginatedImagesAsync(pages);
+        }
+
+        private async Task<FergunResult> SendPaginatedImagesAsync(IReadOnlyCollection<EmbedBuilder> pages)
+        {
+            if (pages.Count == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+
+            var pager = new PaginatedMessage
+            {
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = Context.User.ToString(),
+                    IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
+                },
+                Description = Locate("ImageSearch"),
+                Pages = pages,
+                Color = new Discord.Color(FergunClient.Config.EmbedColor),
+                Options = new PaginatorAppearanceOptions
+                {
+                    InformationText = Locate("PaginatorHelp"),
+                    FooterFormat = Locate("PaginatorFooter"),
+                    Timeout = TimeSpan.FromMinutes(10),
+                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
+                }
+            };
+
+            var reactions = new ReactionList
+            {
+                First = pages.Count >= 3,
+                Backward = true,
+                Forward = true,
+                Last = pages.Count >= 3,
+                Stop = true,
+                Jump = pages.Count >= 4,
+                Info = false
+            };
+
+            await PagedReplyAsync(pager, reactions);
+
+            return FergunResult.FromSuccess();
         }
 
         private static void InitializeCmdListCache()

@@ -290,7 +290,7 @@
     <value>The url is not a valid image.</value>
   </data>
 	<data name="imgSummary" xml:space="preserve">
-    <value>Searches for an image with DuckDuckGo.</value>
+    <value>Searches for images with Google Images.</value>
   </data>
 	<data name="imgParam1" xml:space="preserve">
     <value>The keyword(s) to search.</value>
@@ -2334,5 +2334,11 @@ Please try again later.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Badges</value>
+	</data>
+	<data name="img2Summary" xml:space="preserve">
+		<value>Searches for images with DuckDuckGo.</value>
+	</data>
+	<data name="img2Param1" xml:space="preserve">
+		<value>The keyword(s) to search.</value>
 	</data>
 </root>
