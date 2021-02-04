@@ -34,6 +34,7 @@ using GScraper;
 using NCalc;
 using Newtonsoft.Json;
 using YoutubeExplode;
+using YoutubeExplode.Exceptions;
 using YoutubeExplode.Videos;
 
 namespace Fergun.Modules
@@ -779,7 +780,7 @@ namespace Fergun.Modules
 
         [AlwaysEnabled]
         [LongRunning]
-        [Command("help")]
+        [Command("help", RunMode = RunMode.Async)]
         [Summary("helpSummary")]
         [Example("help")]
         public async Task<RuntimeResult> Help([Remainder, Summary("helpParam1")] string commandName = null)
@@ -1163,7 +1164,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("ping")]
+        [Command("ping", RunMode = RunMode.Async)]
         [Summary("pingSummary")]
         public async Task Ping()
         {
@@ -1979,6 +1980,11 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
                 return FergunResult.FromError(e.Message);
             }
+            catch (YoutubeExplodeException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
+                return FergunResult.FromError(Locate("ErrorInAPI"));
+            }
             if (videos.Count == 0)
             {
                 return FergunResult.FromError(Locate("NoResultsFound"));
@@ -1997,11 +2003,26 @@ namespace Fergun.Modules
             for (int i = 0; i < 10; i++)
             {
                 string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
-                var items = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
-                if (items.Count != 0)
+                IReadOnlyList<Video> videos;
+                try
                 {
-                    string id = items[RngInstance.Next(items.Count)].Id;
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Using id: {id} (random string: {randStr}, search count: {items.Count})"));
+                   videos = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
+                }
+                catch (HttpRequestException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Ytrandom: Error obtaining videos (query: {randStr})", e));
+                    return FergunResult.FromError(e.Message);
+                }
+                catch (YoutubeExplodeException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Ytrandom: Error obtaining videos (query: {randStr})", e));
+                    return FergunResult.FromError(Locate("ErrorInAPI"));
+                }
+
+                if (videos.Count != 0)
+                {
+                    string id = videos[RngInstance.Next(videos.Count)].Id;
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Using id: {id} (random string: {randStr}, search count: {videos.Count})"));
 
                     await ReplyAsync($"https://www.youtube.com/watch?v={id}");
                     return FergunResult.FromSuccess();
