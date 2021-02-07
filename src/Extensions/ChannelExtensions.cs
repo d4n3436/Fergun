@@ -74,7 +74,7 @@ namespace Fergun.Extensions
             }
 
             // Get the last x messages of the current channel
-            var messages = await channel.GetMessagesAsync(messageCount, messageCount > 0 ? CacheMode.CacheOnly : CacheMode.AllowDownload).FlattenAsync();
+            var messages = await channel.GetMessagesAsync(messageCount).FlattenAsync();
 
             // Try to get the last message with any attachment, embed image url or that contains a url
             var filtered = messages.FirstOrDefault(x =>
