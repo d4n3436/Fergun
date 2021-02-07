@@ -418,10 +418,11 @@ namespace Fergun.Modules
             {
                 result = ex.Evaluate().ToString();
             }
-            catch (ArgumentException)
+            catch (Exception e) when (e is ArgumentException || e is EvaluationException || e is OverflowException)
             {
                 return FergunResult.FromError(Locate("InvalidExpression"));
             }
+
             sw.Stop();
             if (result == null)
             {
