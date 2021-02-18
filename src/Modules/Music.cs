@@ -145,7 +145,7 @@ namespace Fergun.Modules
                 Color = new Color(FergunClient.Config.EmbedColor),
                 Title = title.Truncate(EmbedBuilder.MaxTitleLength),
                 Fields = new List<EmbedFieldBuilder> { new EmbedFieldBuilder { Name = "Links", Value = links } },
-                Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x }),
+                Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x.Truncate(EmbedBuilder.MaxDescriptionLength) }),
                 Options = new PaginatorAppearanceOptions
                 {
                     FooterFormat = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}",
