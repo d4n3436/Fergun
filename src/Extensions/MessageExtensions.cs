@@ -53,7 +53,8 @@ namespace Fergun.Extensions
 
             // get the updated message with the reactions
             message = await message.Channel.GetMessageAsync(message.Id);
-            if (message.Reactions.Count == 0) return false;
+
+            if (message == null || message.Reactions.Count == 0) return false;
 
             bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
 
