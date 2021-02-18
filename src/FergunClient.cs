@@ -28,9 +28,7 @@ using Victoria;
 
 namespace Fergun
 {
-#pragma warning disable CA1001
     public class FergunClient
-#pragma warning restore CA1001
     {
         public static FergunDatabase Database { get; private set; }
         public static FergunConfig Config { get; private set; }
@@ -38,7 +36,6 @@ namespace Fergun
         public static bool IsDebugMode { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; private set; }
-        public static bool IsLinux { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
         public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
@@ -277,7 +274,7 @@ namespace Fergun
                     CreateNoWindow = false,
                     WindowStyle = ProcessWindowStyle.Minimized
                 };
-                if (!IsLinux)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     // Try to get the java exe path
                     var exePath = Environment.GetEnvironmentVariable("PATH")

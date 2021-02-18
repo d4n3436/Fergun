@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
@@ -76,6 +77,35 @@ namespace Fergun.Utils
             }
 
             return links;
+        }
+
+        public static string RunCommand(string command)
+        {
+            // TODO: Add support to the remaining platforms
+            bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            if (!isLinux && !isWindows)
+                return null;
+
+            var escapedArgs = command.Replace("\"", "\\\"", StringComparison.OrdinalIgnoreCase);
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = isLinux ? "/bin/bash" : "cmd.exe",
+                Arguments = isLinux ? $"-c \"{escapedArgs}\"" : $"/c {escapedArgs}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = isLinux ? "/home" : ""
+            };
+
+            using var process = new Process { StartInfo = startInfo };
+            process.Start();
+            process.WaitForExit(10000);
+
+            return process.ExitCode == 0
+                ? process.StandardOutput.ReadToEnd()
+                : process.StandardError.ReadToEnd();
         }
     }
 }

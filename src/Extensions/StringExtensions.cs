@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -105,29 +104,6 @@ namespace Fergun.Extensions
             //string c = (hash & 0x00FFFFFF).ToString("X4").ToUpperInvariant();
 
             //return "00000".Substring(0, 6 - c.Length) + c;
-        }
-
-        public static string RunCommand(this string command)
-        {
-            var escapedArgs = command.Replace("\"", "\\\"", StringComparison.OrdinalIgnoreCase);
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = FergunClient.IsLinux ? "/bin/bash" : "cmd.exe",
-                Arguments = FergunClient.IsLinux ? $"-c \"{escapedArgs}\"" : $"/c {escapedArgs}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = FergunClient.IsLinux ? "/home" : ""
-            };
-
-            using var process = new Process { StartInfo = startInfo };
-            process.Start();
-            process.WaitForExit(10000);
-
-            return process.ExitCode == 0
-                ? process.StandardOutput.ReadToEnd()
-                : process.StandardError.ReadToEnd();
         }
     }
 }

@@ -440,10 +440,11 @@ namespace Fergun.Modules
             var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
             string cpu = null;
             long? totalRamUsage = null;
-            long processRamUsage;
+            long processRamUsage = 0;
             long? totalRam = null;
             string os = RuntimeInformation.OSDescription;
-            if (FergunClient.IsLinux)
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // CPU Name
                 if (File.Exists("/proc/cpuinfo"))
@@ -460,7 +461,7 @@ namespace Fergun.Modules
                 }
 
                 // Total RAM & total RAM usage
-                var output = "free -m".RunCommand()?.Split(Environment.NewLine);
+                var output = CommandUtils.RunCommand("free -m")?.Split(Environment.NewLine);
                 var memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
                 if (long.TryParse(memory?.ElementAtOrDefault(1), out temp)) totalRam = temp;
@@ -469,18 +470,16 @@ namespace Fergun.Modules
                 // Process RAM usage
                 processRamUsage = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024;
             }
-            else
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // CPU Name
-                cpu = "wmic cpu get name"
-                    .RunCommand()
+                cpu = CommandUtils.RunCommand("wmic cpu get name")
                     ?.Trim()
                     .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
                     .ElementAtOrDefault(1);
 
                 // Total RAM & total RAM usage
-                var output = "wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value"
-                    .RunCommand()
+                var output = CommandUtils.RunCommand("wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value")
                     ?.Trim()
                     .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
@@ -507,6 +506,10 @@ namespace Fergun.Modules
 
                 // Process RAM usage
                 processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
+            }
+            else
+            {
+                // TODO: Get system info from the remaining platforms
             }
 
             int totalUsers = 0;

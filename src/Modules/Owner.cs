@@ -44,7 +44,7 @@ namespace Fergun.Modules
         [Example("ping discord.com -c 4")]
         public async Task Bash([Remainder] string command)
         {
-            string result = command.RunCommand();
+            string result = CommandUtils.RunCommand(command);
             if (string.IsNullOrWhiteSpace(result))
             {
                 await SendEmbedAsync("No output.");
