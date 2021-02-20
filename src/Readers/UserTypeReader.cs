@@ -40,14 +40,17 @@ namespace Fergun.Readers
 
             if (context.Guild != null)
             {
-                // TODO: A way to know if the current user has server members intent and use the method below
-                /*
-                guildUsers = await context.Guild.SearchUsersAsync(input, 10).ConfigureAwait(false);
-                if (guildUsers.Count == 1)
+                // If the application has guild members intent, use the search endpoint
+                // Ideally, the application flags should be used here, but it returns 0 for some reason
+                if ((Constants.ClientConfig.GatewayIntents & GatewayIntents.GuildMembers) == GatewayIntents.GuildMembers)
                 {
-                    return TypeReaderResult.FromSuccess(guildUsers.First() as T);
+                    guildUsers = await context.Guild.SearchUsersAsync(input, 10).ConfigureAwait(false);
+                    foreach (var guildUser in guildUsers)
+                    {
+                        AddResult(results, guildUser as T, 0.60f);
+                    }
                 }
-                */
+
                 guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
             }
 
