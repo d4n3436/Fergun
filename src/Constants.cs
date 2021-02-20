@@ -31,9 +31,9 @@ namespace Fergun
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
-            ConnectionTimeout = 30000,
             LogLevel = LogSeverity.Verbose,
             ExclusiveBulkDelete = true,
+            UseSystemClock = false,
             GatewayIntents =
             GatewayIntents.Guilds |
 
