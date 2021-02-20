@@ -1904,10 +1904,17 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.WolframAlphaAppId)));
             }
 
-            string result;
+            string output;
             try
             {
-                result = await _httpClient.GetStringAsync(new Uri($"https://api.wolframalpha.com/v1/result?i={Uri.EscapeDataString(query)}&appid={FergunClient.Config.WolframAlphaAppId}"));
+                var response = await _httpClient.GetAsync(new Uri($"https://api.wolframalpha.com/v1/result?i={Uri.EscapeDataString(query)}&appid={FergunClient.Config.WolframAlphaAppId}"));
+                if (response.StatusCode == HttpStatusCode.NotImplemented)
+                {
+                    return FergunResult.FromError("The input could not be interpreted by the API.");
+                }
+
+                response.EnsureSuccessStatusCode();
+                output = await response.Content.ReadAsStringAsync();
             }
             catch (HttpRequestException e)
             {
@@ -1918,7 +1925,7 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithAuthor("Wolfram Alpha", Constants.WolframAlphaLogoUrl)
                 .AddField(Locate("Input"), Format.Code(query.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                .AddField(Locate("Output"), Format.Code(result.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
+                .AddField(Locate("Output"), Format.Code(output.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
                 .WithFooter("wolframalpha.com")
                 .WithColor(FergunClient.Config.EmbedColor);
 
