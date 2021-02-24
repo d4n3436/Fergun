@@ -55,7 +55,7 @@ namespace Fergun
         public string GlobalPrefix { get; set; } = Constants.DefaultPrefix;
         public string DevGlobalPrefix { get; set; } = Constants.DefaultDevPrefix;
         public string Language { get; set; }
-        public IDictionary<string, int> CommandStats { get; set; }
-        public IDictionary<string, string> GloballyDisabledCommands { get; set; }
+        public IDictionary<string, int> CommandStats { get; set; } = new Dictionary<string, int>();
+        public IDictionary<string, string> GloballyDisabledCommands { get; set; } = new Dictionary<string, string>();
     }
 }
