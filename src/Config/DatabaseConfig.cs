@@ -23,12 +23,12 @@ namespace Fergun
         /// <summary>
         /// Gets a dictionary containing the command stats.
         /// </summary>
-        public static IDictionary<string, int> CommandStats => GetConfig().CommandStats;
+        public static IDictionary<string, int> CommandStats => GetConfig().CommandStats ?? new Dictionary<string, int>();
 
         /// <summary>
         /// Gets a dictionary containing the commands that have been disabled globally.
         /// </summary>
-        public static IDictionary<string, string> GloballyDisabledCommands => GetConfig().GloballyDisabledCommands;
+        public static IDictionary<string, string> GloballyDisabledCommands => GetConfig().GloballyDisabledCommands ?? new Dictionary<string, string>();
 
         /// <summary>
         /// Modifies the database config with the specified properties.
@@ -55,7 +55,7 @@ namespace Fergun
         public string GlobalPrefix { get; set; } = Constants.DefaultPrefix;
         public string DevGlobalPrefix { get; set; } = Constants.DefaultDevPrefix;
         public string Language { get; set; }
-        public IDictionary<string, int> CommandStats { get; set; } = new Dictionary<string, int>();
-        public IDictionary<string, string> GloballyDisabledCommands { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, int> CommandStats { get; set; }
+        public IDictionary<string, string> GloballyDisabledCommands { get; set; }
     }
 }

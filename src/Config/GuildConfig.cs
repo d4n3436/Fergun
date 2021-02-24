@@ -46,6 +46,8 @@ namespace Fergun
             TrackSelection = trackSelection;
         }
 
+        private ICollection<string> _disabledCommands;
+
         /// <inheritdoc/>
         [BsonId]
         public ObjectId ObjectId { get; set; }
@@ -72,7 +74,11 @@ namespace Fergun
         /// <summary>
         /// Gets or sets a collection of disabled commands for this server.
         /// </summary>
-        public ICollection<string> DisabledCommands { get; set; } = new List<string>();
+        public ICollection<string> DisabledCommands
+        {
+            get => _disabledCommands ??= new List<string>();
+            set => _disabledCommands = value;
+        }
 
         /// <summary>
         /// Gets or sets whether the CaptionBot result should be translated to this server's language.
