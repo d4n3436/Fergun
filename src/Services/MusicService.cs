@@ -364,6 +364,8 @@ namespace Fergun.Services
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player == null)
                 return GuildUtils.Locate("PlayerError", textChannel);
+            if (player.PlayerState == PlayerState.Stopped)
+                return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player.Queue.Count == 0)
                 return GuildUtils.Locate("EmptyQueue", textChannel);
 
