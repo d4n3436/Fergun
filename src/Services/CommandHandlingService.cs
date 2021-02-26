@@ -63,14 +63,11 @@ namespace Fergun.Services
             // Ignore messages from bots
             if (message.Author.IsBot) return;
 
-            // Ignore ...ignored users
+            // Ignore... ignored users
             lock (_userLock)
             {
                 if (_ignoredUsers.Contains(message.Author.Id)) return;
             }
-
-            // Create a number to track where the prefix ends and the command begins
-            int argPos = 0;
 
             string prefix = GuildUtils.GetCachedPrefix(message.Channel);
             if (message.Content == prefix) return;
@@ -83,6 +80,9 @@ namespace Fergun.Services
                 return;
             }
 
+            // Create a number to track where the prefix ends and the command begins
+            int argPos = 0;
+
             // Determine if the message is a command based on the prefix or mention
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
                   message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
@@ -91,17 +91,16 @@ namespace Fergun.Services
             var result = _cmdService.Search(message.Content.Substring(argPos));
             if (!result.IsSuccess) return;
 
-            var blacklistedUser = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollection, x => x.Id == message.Author.Id);
-            if (blacklistedUser != null && blacklistedUser.IsBlacklisted)
+            if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsBlacklisted)
             {
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
-                if (blacklistedUser.BlacklistReason == null)
+                if (userConfig.BlacklistReason == null)
                 {
                     await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
                 }
                 else
                 {
-                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), blacklistedUser.BlacklistReason), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), userConfig.BlacklistReason), _services, message.Author.Mention);
                 }
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
                 return;

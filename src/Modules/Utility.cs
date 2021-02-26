@@ -339,7 +339,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigEditSnipe([Summary("bigeditsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = FergunClient.MessageCache
+            var messages = FergunClient.MessageCache.Values
                 .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .Take(20);
@@ -357,6 +357,11 @@ namespace Fergun.Modules
                 builder.WithTitle("Big edit snipe")
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
+
+                if (RngInstance.Next(5) == 4)
+                {
+                    builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
+                }
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -370,7 +375,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigSnipe([Summary("bigsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = FergunClient.MessageCache
+            var messages = FergunClient.MessageCache.Values
                 .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .Take(20);
@@ -392,6 +397,11 @@ namespace Fergun.Modules
                 builder.WithTitle("Big snipe")
                     .WithDescription(text.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
+
+                if (RngInstance.Next(5) == 4)
+                {
+                    builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
+                }
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -757,7 +767,7 @@ namespace Fergun.Modules
         public async Task EditSnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = FergunClient.MessageCache
+            var message = FergunClient.MessageCache.Values
                 .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
@@ -773,6 +783,11 @@ namespace Fergun.Modules
                     .WithDescription(message.Content.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
+
+                if (RngInstance.Next(5) == 4)
+                {
+                    builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
+                }
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -1461,7 +1476,7 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = FergunClient.MessageCache
+            var message = FergunClient.MessageCache.Values
                 .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
@@ -1479,6 +1494,11 @@ namespace Fergun.Modules
                     .WithDescription(text.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
+
+                if (RngInstance.Next(5) == 4)
+                {
+                    builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
+                }
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 

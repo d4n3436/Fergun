@@ -21,6 +21,12 @@ namespace Fergun.Utils
         public static ConcurrentDictionary<ulong, string> PrefixCache { get; private set; }
 
         /// <summary>
+        /// Gets or sets the user config cache.
+        /// </summary>
+        /// <remarks>These configs may not be up-to-date if their values are modified externally.</remarks>
+        public static ConcurrentDictionary<ulong, UserConfig> UserConfigCache { get; private set; }
+
+        /// <summary>
         /// Initializes the prefix cache.
         /// </summary>
         public static void Initialize()
@@ -28,6 +34,9 @@ namespace Fergun.Utils
             CachedGlobalPrefix = DatabaseConfig.GlobalPrefix;
             var guilds = FergunClient.Database.GetAllDocuments<GuildConfig>(Constants.GuildConfigCollection);
             PrefixCache = new ConcurrentDictionary<ulong, string>(guilds?.ToDictionary(x => x.Id, x => x.Prefix) ?? new Dictionary<ulong, string>());
+            var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollection);
+            UserConfigCache = new ConcurrentDictionary<ulong, UserConfig>(
+                users?.Where(x => x != null).ToDictionary(x => x.Id, x => x) ?? new Dictionary<ulong, UserConfig>());
         }
 
         /// <summary>

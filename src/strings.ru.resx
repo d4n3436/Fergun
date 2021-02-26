@@ -2338,4 +2338,44 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 	<data name="img2Param1" xml:space="preserve">
 		<value>Ключевое слово (а) для поиска.</value>
 	</data>
+	<data name="privacySummary" xml:space="preserve">
+		<value>Отображает политику конфиденциальности и конфигурацию конфиденциальности.</value>
+	</data>
+	<data name="PrivacyPolicy" xml:space="preserve">
+		<value>Политика конфиденциальности</value>
+	</data>
+	<data name="WhatDataWeCollect" xml:space="preserve">
+		<value>Какие данные мы собираем</value>
+	</data>
+	<data name="WhatDataWeCollectList" xml:space="preserve">
+		<value>а. Конфигурация сервера (ID сервера, настраиваемый префикс, язык бота, отключенные команды и т. Д.)
+б. Конфигурация пользователя / статистика (идентификатор пользователя, игровые очки викторины, конфигурация конфиденциальности и статус черного списка)
+c. AI Dungeon adventures (идентификатор приключения, идентификатор владельца и доступность использования)
+d. Временный сбор удаленных / отредактированных сообщений, используемый в командах «snipe» (`snipe`,` editsnipe`, `bigsnipe` и `bigeditsnipe`)</value>
+	</data>
+	<data name="WhenWeCollectData" xml:space="preserve">
+		<value>Когда мы его соберем</value>
+	</data>
+	<data name="WhenWeCollectDataList" xml:space="preserve">
+		<value>а. Когда вы устанавливаете собственный префикс, язык или другую конфигурацию. Эти данные удаляются, когда бот покидает этот сервер.
+б. Когда вы играете в викторину, вы используете конфигурацию конфиденциальности или попадаете в черный список.
+c. Когда вы создаете приключение AI Dungeon с ботом. Эти данные удаляются, когда вы используете команду `aid delete`.
+d. Когда сообщение удалено / отредактировано. Эти сообщения можно увидеть только с помощью команд "snipe" в канале, где сообщение было удалено / отредактировано.
+Эти сообщения хранятся только 6 часов, и вы можете отказаться от них, используя приведенные ниже реакции.</value>
+	</data>
+	<data name="PrivacyConfig" xml:space="preserve">
+		<value>Конфигурация конфиденциальности</value>
+	</data>
+	<data name="PrivacyConfigInfo" xml:space="preserve">
+		<value>Здесь вы найдете некоторые настройки, которые вы можете изменить, чтобы улучшить свою конфиденциальность.</value>
+	</data>
+	<data name="PrivacyConfigList" xml:space="preserve">
+		<value>Отказаться от временного сбора удаленных / отредактированных сообщений в командах "snipe"</value>
+	</data>
+	<data name="Privacy" xml:space="preserve">
+		<value>Конфиденциальность</value>
+	</data>
+	<data name="SnipePrivacy" xml:space="preserve">
+		<value>Не хотите, чтобы ваше сообщение отображалось здесь? См. `privacy`.</value>
+	</data>
 </root>

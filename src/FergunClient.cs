@@ -36,7 +36,7 @@ namespace Fergun
         public static bool IsDebugMode { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; private set; }
-        public static ConcurrentBag<CachedMessage> MessageCache { get; } = new ConcurrentBag<CachedMessage>();
+        public static ConcurrentDictionary<ulong, CachedMessage> MessageCache { get; } = new ConcurrentDictionary<ulong, CachedMessage>();
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordSocketClient _client;
@@ -462,24 +462,25 @@ namespace Fergun
 
         private void OnTimerFired(object state)
         {
-            var purge = MessageCache.Where(p =>
+            var toPurge = MessageCache.Where(p =>
             {
-                TimeSpan difference = DateTimeOffset.UtcNow - p.CreatedAt;
+                TimeSpan difference = DateTimeOffset.UtcNow - p.Value.CreatedAt;
                 return difference.TotalHours >= Constants.MaxMessageCacheLongevity;
             }).ToList();
 
-            var removed = purge.Where(p => MessageCache.TryTake(out _));
+            int removed = toPurge.Count(p => MessageCache.TryRemove(p.Key, out _));
 
-            _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed.Count()} deleted / edited messages from the cache."));
+            _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
         }
 
         private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
         {
             if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
+            if (GuildUtils.UserConfigCache.TryGetValue(after.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
             IMessage before = cachedbefore.Value;
             if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
-            MessageCache.Add(new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated));
+            MessageCache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
         }
 
@@ -487,8 +488,9 @@ namespace Fergun
         {
             IMessage message = cache.Value;
             if (message?.Source != MessageSource.User) return;
+            if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
 
-            MessageCache.Add(new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted));
+            MessageCache[message.Id] = new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted);
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
         }
 

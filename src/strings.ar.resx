@@ -2350,4 +2350,44 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="img2Param1" xml:space="preserve">
 		<value>الكلمة (الكلمات) الرئيسية للبحث.</value>
 	</data>
+	<data name="privacySummary" xml:space="preserve">
+		<value>يعرض سياسة الخصوصية وتكوين الخصوصية.</value>
+	</data>
+	<data name="PrivacyPolicy" xml:space="preserve">
+		<value>سياسة خاصة</value>
+	</data>
+	<data name="WhatDataWeCollect" xml:space="preserve">
+		<value>ما البيانات التي نجمعها</value>
+	</data>
+	<data name="WhatDataWeCollectList" xml:space="preserve">
+		<value>أ. تكوين الخادم (معرف الخادم ، البادئة المخصصة ، لغة الروبوت ، الأوامر المعطلة ، إلخ)
+ب. تكوين / إحصائيات المستخدم (معرّف المستخدم ونقاط لعبة Trivia وتكوين الخصوصية وحالة القائمة السوداء)
+ج. مغامرات AI Dungeon (معرف المغامرة ومعرف المالك وتوافر الاستخدام)
+د. مجموعة مؤقتة من الرسائل المحذوفة / المعدلة ، والمستخدمة في أمري "snipe" (`snipe`, `editsnipe`, `bigsnipe`  و `bigeditsnipe`)</value>
+	</data>
+	<data name="WhenWeCollectData" xml:space="preserve">
+		<value>متى نجمعها</value>
+	</data>
+	<data name="WhenWeCollectDataList" xml:space="preserve">
+		<value>أ. عندما تقوم بتعيين بادئة مخصصة أو لغة أو تكوين آخر. تتم إزالة هذه البيانات عندما يغادر الروبوت ذلك الخادم.
+ب. عندما تلعب لعبة Trivia ، فإنك تستخدم تكوين الخصوصية أو يتم إدراجك في القائمة السوداء.
+ج. عندما تنشئ مغامرة AI Dungeon مع الروبوت. تتم إزالة هذه البيانات عند استخدام الأمر `aid delete`.
+د. عندما يتم حذف / تحرير رسالة. يمكن رؤية هذه الرسائل فقط باستخدام أوامر "snipe" في القناة حيث تم حذف / تحرير الرسالة.
+يتم تخزين هذه الرسائل لمدة 6 ساعات فقط ، ويمكنك أن تقرر إلغاء الاشتراك باستخدام ردود الفعل أدناه.</value>
+	</data>
+	<data name="PrivacyConfig" xml:space="preserve">
+		<value>تكوين الخصوصية</value>
+	</data>
+	<data name="PrivacyConfigInfo" xml:space="preserve">
+		<value>ستجد هنا بعض الإعدادات التي يمكنك تغييرها لتحسين خصوصيتك.</value>
+	</data>
+	<data name="PrivacyConfigList" xml:space="preserve">
+		<value>إلغاء الاشتراك من المجموعة المؤقتة للرسائل المحذوفة / المعدلة في أوامر "snipe"</value>
+	</data>
+	<data name="Privacy" xml:space="preserve">
+		<value>خصوصية</value>
+	</data>
+	<data name="SnipePrivacy" xml:space="preserve">
+		<value>ألا تريد عرض رسالتك هنا؟ راجع `privacy`.</value>
+	</data>
 </root>

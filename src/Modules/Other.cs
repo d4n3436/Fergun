@@ -327,14 +327,14 @@ namespace Fergun.Modules
                 hasReacted = true;
                 if (newLanguage == null)
                 {
-                    await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
+                    await message!.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
                     return;
                 }
                 guild.Language = newLanguage;
                 FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
-                await message.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
+                await message!.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
             }
         }
 
@@ -371,6 +371,72 @@ namespace Fergun.Modules
 
             await SendEmbedAsync(string.Format(Locate("NewPrefix"), newPrefix));
             return FergunResult.FromSuccess();
+        }
+
+        [AlwaysEnabled]
+        [LongRunning]
+        [Command("privacy", RunMode = RunMode.Async), Ratelimit(1, 1, Measure.Minutes)]
+        [Summary("privacySummary")]
+        public async Task<RuntimeResult> Privacy()
+        {
+            string listToShow = "";
+            string[] configList = Locate("PrivacyConfigList").Split(Environment.NewLine);
+            for (int i = 0; i < configList.Length; i++)
+            {
+                listToShow += $"**{i + 1}.** {configList[i]}\n";
+            }
+
+            var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id));
+
+            string valueList = Locate(userConfig!.IsOptedOutSnipe);
+
+            IUserMessage message = null;
+
+            var builder = new EmbedBuilder()
+                .WithTitle(Locate("PrivacyPolicy"))
+                .AddField(Locate("WhatDataWeCollect"), Locate("WhatDataWeCollectList"))
+                .AddField(Locate("WhenWeCollectData"), Locate("WhenWeCollectDataList"))
+                .AddField(Locate("PrivacyConfig"), Locate("PrivacyConfigInfo"))
+                .AddField(Locate("Option"), listToShow, true)
+                .AddField(Locate("Value"), valueList, true)
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(5))
+                .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
+                {
+                    userConfig.IsOptedOutSnipe = !userConfig.IsOptedOutSnipe;
+                    await HandleReactionAsync(reaction);
+                })
+                .AddCallBack(new Emoji("❌"), async (_, reaction) =>
+                {
+                    await message.TryDeleteAsync();
+                });
+
+            message = await InlineReactionReplyAsync(data);
+
+            return FergunResult.FromSuccess();
+
+            async Task HandleReactionAsync(SocketReaction reaction)
+            {
+                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
+                valueList = Locate(userConfig.IsOptedOutSnipe);
+
+                if (reaction.Emote.Name == "1️⃣" && userConfig.IsOptedOutSnipe)
+                {
+                    var toPurge = FergunClient.MessageCache.Where(p => p.Value.Author.Id == reaction.UserId).ToList();
+                    var removed = toPurge.Count(p => FergunClient.MessageCache.TryRemove(p.Key, out _));
+                    if (removed > 0)
+                    {
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command",
+                            $"Privacy: Removed {removed} deleted/edited messages from the cache from user {reaction.UserId}."));
+                    }
+                }
+
+                builder.Fields[4] = new EmbedFieldBuilder { Name = Locate("Value"), Value = valueList, IsInline = true };
+                _ = message!.RemoveReactionAsync(reaction.Emote, reaction.UserId);
+                await message.ModifyAsync(x => x.Embed = builder.Build());
+            }
         }
 
         [Command("reaction")]
@@ -633,17 +699,17 @@ namespace Fergun.Modules
                 {
                     return FergunResult.FromError(Locate("BotOwnerOnly"));
                 }
-                var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollection);
-                foreach (var user in users)
+
+                foreach (var user in GuildUtils.UserConfigCache.Values)
                 {
+                    GuildUtils.UserConfigCache[user.Id].TriviaPoints = 0;
                     user.TriviaPoints = 0;
                     FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, user);
                 }
                 return FergunResult.FromSuccess();
             }
 
-            UserConfig userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollection, x => x.Id == Context.User.Id)
-                ?? new UserConfig(Context.User.Id);
+            var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id));
 
             if (category == "leaderboard" || category == "ranks")
             {
@@ -654,8 +720,7 @@ namespace Fergun.Modules
                 string userList = "";
                 string pointsList = "";
                 int totalUsers = 0;
-                var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollection).OrderByDescending(x => x.TriviaPoints);
-                foreach (var user in users.Take(15))
+                foreach (var user in GuildUtils.UserConfigCache.Values.Take(15))
                 {
                     var guildUser = await Context.Client.Rest.GetGuildUserAsync(Context.Guild.Id, user.Id);
                     if (guildUser == null) continue;
@@ -737,19 +802,19 @@ namespace Fergun.Modules
                 builder = new EmbedBuilder();
                 if (option == null)
                 {
-                    userConfig.TriviaPoints--;
+                    userConfig!.TriviaPoints--;
                     builder.Title = $"❌ {Locate("TimesUp")}";
                     builder.Description = Locate("Lost1Point");
                 }
                 else if (option == question.CorrectAnswer)
                 {
-                    userConfig.TriviaPoints++;
+                    userConfig!.TriviaPoints++;
                     builder.Title = $"✅ {Locate("CorrectAnswer")}";
                     builder.Description = Locate("Won1Point");
                 }
                 else
                 {
-                    userConfig.TriviaPoints--;
+                    userConfig!.TriviaPoints--;
                     builder.Title = $"❌ {Locate("Incorrect")}";
                     builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
                 }
@@ -758,7 +823,8 @@ namespace Fergun.Modules
                     .WithColor(FergunClient.Config.EmbedColor);
 
                 FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
-                await message.ModifyAsync(x => x.Embed = builder.Build());
+                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
+                await message!.ModifyAsync(x => x.Embed = builder.Build());
             }
         }
 

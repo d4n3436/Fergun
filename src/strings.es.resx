@@ -2340,4 +2340,44 @@ Por favor inténtelo de nuevo más tarde.</value>
 	<data name="img2Param1" xml:space="preserve">
 		<value>Las palabras clave a buscar.</value>
 	</data>
+	<data name="privacySummary" xml:space="preserve">
+		<value>Muestra la política de privacidad y la configuración de privacidad.</value>
+	</data>
+	<data name="PrivacyPolicy" xml:space="preserve">
+		<value>Política de Privacidad</value>
+	</data>
+	<data name="WhatDataWeCollect" xml:space="preserve">
+		<value>Que datos recopilamos</value>
+	</data>
+	<data name="WhatDataWeCollectList" xml:space="preserve">
+		<value>a. Configuración de servidores (ID de servidor, prefijo personalizado, idioma del bot, comandos deshabilitados, etc)
+b. Configuración/Estadísticas de usuario (ID de usuario, Puntos de juego de trivia, configuración de privacidad y estado en la lista negra)
+c. Aventuras de AI Dungeon (ID de aventura, ID del dueño y disponibilidad de uso)
+d. Recopilado temporal de mensajes eliminados/editados, usado en los comandos de "snipe" (`snipe`, `editsnipe`, `bigsnipe` and `bigeditsnipe`)</value>
+	</data>
+	<data name="WhenWeCollectData" xml:space="preserve">
+		<value>Cuándo lo recopilamos</value>
+	</data>
+	<data name="WhenWeCollectDataList" xml:space="preserve">
+		<value>a. Cuando estableces un prefijo personalizado, idioma u otra configuración. Estos datos son eliminados cuando el bot sale de ese servidor.
+b. Cuando juegas Trivia, usas la configuración de privacidad o estás en la lista negra.
+c. Cuando creas una aventura de AI Dungeon con el bot. Estos datos son eliminados cuando usas el comando `aid delete`.
+d. Cuando un mensaje es eliminado/editado. Estos mensajes solo pueden ser vistos usando los comandos de "snipe" en el canal donde el mensaje fue eliminado/editado.
+Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar utilizando las siguientes reacciones.</value>
+	</data>
+	<data name="PrivacyConfig" xml:space="preserve">
+		<value>Configuración de privacidad</value>
+	</data>
+	<data name="PrivacyConfigInfo" xml:space="preserve">
+		<value>Aquí encontrarás algunos ajustes que puedes cambiar para mejorar tu privacidad.</value>
+	</data>
+	<data name="PrivacyConfigList" xml:space="preserve">
+		<value>Optar por no participar en la colección temporal de mensajes eliminados/editados en los comandos de "snipe"</value>
+	</data>
+	<data name="Privacy" xml:space="preserve">
+		<value>Privacidad</value>
+	</data>
+	<data name="SnipePrivacy" xml:space="preserve">
+		<value>¿No quieres que tu mensaje se muestre aquí? Vea `privacy`.</value>
+	</data>
 </root>

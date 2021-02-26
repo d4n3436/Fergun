@@ -2338,4 +2338,44 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	<data name="img2Param1" xml:space="preserve">
 		<value>Aranacak anahtar kelimeler.</value>
 	</data>
+	<data name="privacySummary" xml:space="preserve">
+		<value>Gizlilik politikasını ve gizlilik yapılandırmasını görüntüler.</value>
+	</data>
+	<data name="PrivacyPolicy" xml:space="preserve">
+		<value>Gizlilik Politikası</value>
+	</data>
+	<data name="WhatDataWeCollect" xml:space="preserve">
+		<value>Hangi verileri topluyoruz</value>
+	</data>
+	<data name="WhatDataWeCollectList" xml:space="preserve">
+		<value>a. Sunucu yapılandırması (sunucu kimliği, özel önek, bot dili, devre dışı bırakılan komutlar vb.)
+b. Kullanıcı yapılandırması / istatistikleri (kullanıcı kimliği, Trivia oyun puanları, gizlilik yapılandırması ve kara liste durumu)
+c. AI Dungeon maceraları (macera kimliği, sahip kimliği ve kullanım durumu)
+d. "snipe" komutlarında kullanılan silinmiş / düzenlenmiş mesajların geçici koleksiyonu (`snipe`, `editsnipe`, `bigsnipe` ve `bigeditsnipe`)</value>
+	</data>
+	<data name="WhenWeCollectData" xml:space="preserve">
+		<value>Ne zaman toplayacağız</value>
+	</data>
+	<data name="WhenWeCollectDataList" xml:space="preserve">
+		<value>a. Özel bir önek, dil veya başka bir yapılandırma ayarladığınızda. Bot bu sunucudan çıktığında bu veriler kaldırılır.
+b. Bir Trivia oyunu oynadığınızda, gizlilik yapılandırmasını kullanırsınız veya kara listeye alınırsınız.
+c. Botla bir AI Dungeon macerası oluşturduğunuzda. `aid delete` komutunu kullandığınızda bu veriler kaldırılır.
+d. Bir mesaj silindiğinde / düzenlendiğinde. Bu mesajlar, sadece mesajın silindiği / düzenlendiği kanalda "snipe" komutları kullanılarak görülebilir.
+Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları kullanarak vazgeçmeye karar verebilirsiniz.</value>
+	</data>
+	<data name="PrivacyConfig" xml:space="preserve">
+		<value>Gizlilik yapılandırması</value>
+	</data>
+	<data name="PrivacyConfigInfo" xml:space="preserve">
+		<value>Burada, gizliliğinizi iyileştirmek için değiştirebileceğiniz bazı ayarlar bulacaksınız.</value>
+	</data>
+	<data name="PrivacyConfigList" xml:space="preserve">
+		<value>"snipe" komutlarında silinen / düzenlenen mesajların geçici olarak toplanmasını devre dışı bırakın</value>
+	</data>
+	<data name="Privacy" xml:space="preserve">
+		<value>Gizlilik</value>
+	</data>
+	<data name="SnipePrivacy" xml:space="preserve">
+		<value>Mesajınızın burada görüntülenmesini istemiyor musunuz? Bkz. `privacy`.</value>
+	</data>
 </root>

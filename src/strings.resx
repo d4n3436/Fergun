@@ -2341,4 +2341,44 @@ Please try again later.</value>
 	<data name="img2Param1" xml:space="preserve">
 		<value>The keyword(s) to search.</value>
 	</data>
+	<data name="privacySummary" xml:space="preserve">
+		<value>Displays the privacy policy and the privacy configuration.</value>
+	</data>
+	<data name="PrivacyPolicy" xml:space="preserve">
+		<value>Privacy Policy</value>
+	</data>
+	<data name="WhatDataWeCollect" xml:space="preserve">
+		<value>What data we collect</value>
+	</data>
+	<data name="WhatDataWeCollectList" xml:space="preserve">
+		<value>a. Server configuration (server ID, custom prefix, bot language, disabled commands, etc)
+b. User configuration/stats (user ID, Trivia game points, privacy configuration and blacklist status)
+c. AI Dungeon adventures (adventure ID, owner ID and availability of use)
+d. Temporary collection of deleted/edited messages, used in the "snipe" commands (`snipe`, `editsnipe`, `bigsnipe` and `bigeditsnipe`)</value>
+	</data>
+	<data name="WhenWeCollectData" xml:space="preserve">
+		<value>When we collect it</value>
+	</data>
+	<data name="WhenWeCollectDataList" xml:space="preserve">
+		<value>a. When you set a custom prefix, language, or other configuration. This data is removed when the bot leaves that server.
+b. When you play a Trivia game, you use the privacy configuration or you're blacklisted.
+c. When you create an AI Dungeon adventure with the bot. This data is removed when you use the `aid delete` command.
+d. When a message is deleted/edited. These messages can only be seen using the "snipe" commands in the channel where the message was deleted/edited.
+These messages are only stored for 6 hours, and you can decide to opt out using the reactions below.</value>
+	</data>
+	<data name="PrivacyConfig" xml:space="preserve">
+		<value>Privacy configuration</value>
+	</data>
+	<data name="PrivacyConfigInfo" xml:space="preserve">
+		<value>Here you'll find some settings that you can change to improve your privacy.</value>
+	</data>
+	<data name="PrivacyConfigList" xml:space="preserve">
+		<value>Opt out of the temporary collection of deleted/edited messages in the "snipe" commands</value>
+	</data>
+	<data name="Privacy" xml:space="preserve">
+		<value>Privacy</value>
+	</data>
+	<data name="SnipePrivacy" xml:space="preserve">
+		<value>Don't want your message to be displayed here? See `privacy`.</value>
+	</data>
 </root>

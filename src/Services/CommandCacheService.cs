@@ -201,18 +201,18 @@ namespace Fergun.Services
         {
             // Get all messages where the timestamp is older than the specified max message longevity, then convert it to a list. The result of where merely contains references to the original
             // collection, so iterating and removing will throw an exception. Converting it to a list first avoids this.
-            var purge = _cache.Where(p =>
+            var toPurge = _cache.Where(p =>
             {
                 TimeSpan difference = DateTimeOffset.UtcNow - SnowflakeUtils.FromSnowflake(p.Key);
 
                 return difference.TotalHours >= _maxMessageTime;
             }).ToList();
 
-            var removed = purge.Where(p => TryRemove(p.Key));
+            int removed = toPurge.Count(p => TryRemove(p.Key));
 
             UpdateCount();
 
-            _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Cleaned {removed.Count()} item(s) from the cache."));
+            _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Cleaned {removed} item(s) from the cache."));
         }
 
         private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)

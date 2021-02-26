@@ -61,12 +61,13 @@ namespace Fergun.Modules
         public async Task Blacklist([Summary("blacklistParam1")] ulong userId,
             [Remainder, Summary("blacklistParam2")] string reason = null)
         {
-            var userConfig = FergunClient.Database.FindDocument<UserConfig>(Constants.UserConfigCollection, x => x.Id == userId) ?? new UserConfig(userId);
-            if (userConfig.IsBlacklisted)
+            var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id));
+            if (userConfig!.IsBlacklisted)
             {
                 userConfig.IsBlacklisted = false;
                 userConfig.BlacklistReason = null;
                 FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"Removed user {userId} from the blacklist."));
                 await SendEmbedAsync(string.Format(Locate("UserBlacklistRemoved"), userId));
@@ -76,6 +77,7 @@ namespace Fergun.Modules
                 userConfig.IsBlacklisted = true;
                 userConfig.BlacklistReason = reason;
                 FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
 
                 if (reason == null)
                 {

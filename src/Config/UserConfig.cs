@@ -49,5 +49,10 @@ namespace Fergun
         /// Gets or sets the Trivia points of this user.
         /// </summary>
         public int TriviaPoints { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the user has opted out the temporary collection of deleted/edited messages in the "snipe" commands.
+        /// </summary>
+        public bool IsOptedOutSnipe { get; set; }
     }
 }
