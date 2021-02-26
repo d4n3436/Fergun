@@ -35,7 +35,7 @@ using NCalc;
 using Newtonsoft.Json;
 using YoutubeExplode;
 using YoutubeExplode.Exceptions;
-using YoutubeExplode.Videos;
+using YoutubeExplode.Playlists;
 
 namespace Fergun.Modules
 {
@@ -1998,10 +1998,10 @@ namespace Fergun.Modules
         [Example("discord")]
         public async Task<RuntimeResult> YouTube([Remainder, Summary("youtubeParam1")] string query)
         {
-            IReadOnlyList<Video> videos;
+            IReadOnlyList<PlaylistVideo> videos;
             try
             {
-                videos = await _ytClient.Search.GetVideosAsync(query, 0, 1);
+                videos = await _ytClient.Search.GetVideosAsync(query, 0, 1).BufferAsync(1);
             }
             catch (HttpRequestException e)
             {
@@ -2031,7 +2031,7 @@ namespace Fergun.Modules
             for (int i = 0; i < 10; i++)
             {
                 string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
-                IReadOnlyList<Video> videos;
+                IReadOnlyList<PlaylistVideo> videos;
                 try
                 {
                    videos = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
