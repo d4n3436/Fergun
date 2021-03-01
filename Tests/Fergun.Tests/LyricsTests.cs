@@ -6,7 +6,7 @@ namespace Fergun.Tests
 {
     public class LyricsTests
     {
-        [Theory]
+        [Theory(Skip = "Temporarily disabled until a solution for the IP block is found")]
         [InlineData("https://genius.com/Luis-fonsi-despacito-lyrics", true)]
         [InlineData("https://genius.com/Eminem-rap-god-lyrics", true)]
         [InlineData("https://genius.com/Ed-sheeran-shape-of-you-lyrics", false)]
