@@ -1729,7 +1729,7 @@ namespace Fergun.Modules
         {
             user ??= Context.User;
 
-            string activities = Locate("None");
+            string activities = "";
             if (user.Activities.Count > 0)
             {
                 activities = string.Join('\n', user.Activities.Select(x =>
@@ -1738,14 +1738,24 @@ namespace Fergun.Modules
                         : $"{x.Type} {x.Name}"));
             }
 
+            if (string.IsNullOrWhiteSpace(activities))
+                activities = Locate("None");
+
             string clients = "?";
             if (user.ActiveClients.Count > 0)
             {
                 clients = string.Join(' ', user.ActiveClients.Select(x =>
-                    x == ClientType.Desktop ? "🖥" :
-                    x == ClientType.Mobile ? "📱" :
-                    x == ClientType.Web ? "🌐" : ""));
+                    x switch
+                    {
+                        ClientType.Desktop => "🖥",
+                        ClientType.Mobile => "📱",
+                        ClientType.Web => "🌐",
+                        _ => ""
+                    }));
             }
+
+            if (string.IsNullOrWhiteSpace(clients))
+                clients = "?";
 
             var flags = user.PublicFlags ?? UserProperties.None;
 
@@ -1763,7 +1773,7 @@ namespace Fergun.Modules
             {
                 badges += " " + FergunClient.Config.BoosterEmote;
             }
-            else if (string.IsNullOrEmpty(badges))
+            if (string.IsNullOrWhiteSpace(badges))
             {
                 badges = Locate("None");
             }
