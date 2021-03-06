@@ -199,6 +199,9 @@ namespace Fergun.Services
 
         public async Task<(string, IReadOnlyList<LavaTrack>)> PlayAsync(string query, IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
         {
+            if (voiceChannel == null)
+                return (GuildUtils.Locate("PlayerError", textChannel), null);
+
             var search = await LavaNode.SearchYouTubeAsync(query);
 
             if (search.LoadStatus == LoadStatus.NoMatches || search.LoadStatus == LoadStatus.LoadFailed)
@@ -276,7 +279,10 @@ namespace Fergun.Services
 
         public async Task<string> PlayTrack(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel, LavaTrack track)
         {
-            if (!LavaNode.TryGetPlayer(guild, out var player))
+            if (voiceChannel == null)
+                return GuildUtils.Locate("PlayerError", textChannel);
+
+            if (!LavaNode.TryGetPlayer(guild, out var player) || player == null)
             {
                 await LavaNode.JoinAsync(voiceChannel, textChannel);
                 player = LavaNode.GetPlayer(guild);
