@@ -577,7 +577,7 @@ namespace Fergun.Modules
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
             string listToShow = "";
-            string[] configList = Locate("ConfigList").Split(Environment.NewLine);
+            string[] configList = Locate("ConfigList").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
             for (int i = 0; i < configList.Length; i++)
             {
                 listToShow += $"**{i + 1}.** {configList[i]}\n";

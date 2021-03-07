@@ -380,7 +380,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Privacy()
         {
             string listToShow = "";
-            string[] configList = Locate("PrivacyConfigList").Split(Environment.NewLine);
+            string[] configList = Locate("PrivacyConfigList").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
             for (int i = 0; i < configList.Length; i++)
             {
                 listToShow += $"**{i + 1}.** {configList[i]}\n";

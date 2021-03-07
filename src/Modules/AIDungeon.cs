@@ -85,7 +85,6 @@ namespace Fergun.Modules
 
             builder.AddField(Locate("Commands"), list.ToString())
                 .WithFooter(Locate("HelpFooter2"), Constants.AiDungeonLogoUrl)
-                //.AddField("Tips", "- " + string.Join("\n- ", GetValue("AIDTips").Split(new string[] { Environment.NewLine }, StringSplitOptions.None)))
                 .WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
@@ -1260,7 +1259,7 @@ namespace Fergun.Modules
 
         private string GetTip()
         {
-            var tips = Locate("AIDTips").Split(Environment.NewLine);
+            var tips = Locate("AIDTips").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
             return tips[_rng.Next(tips.Length)];
         }
 
