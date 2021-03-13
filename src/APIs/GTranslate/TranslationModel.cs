@@ -143,27 +143,7 @@ namespace Fergun.APIs.GTranslate
         [JsonProperty("backend", NullValueHandling = NullValueHandling.Ignore)]
         public int? Backend { get; set; }
 
-        //[JsonProperty("translation_engine_debug_info", NullValueHandling = NullValueHandling.Ignore)]
-        //public List<TranslationEngineDebugInfo> TranslationEngineDebugInfo { get; set; }
-
         [JsonProperty("translit", NullValueHandling = NullValueHandling.Ignore)]
         public string Transliteration { get; set; }
     }
-
-    /*
-    public class TranslationEngineDebugInfo
-    {
-        [JsonProperty("model_tracking")]
-        public ModelTracking ModelTracking { get; set; }
-    }
-
-    public class ModelTracking
-    {
-        [JsonProperty("checkpoint_md5")]
-        public string CheckpointMd5 { get; set; }
-
-        [JsonProperty("launch_doc")]
-        public string LaunchDoc { get; set; }
-    }
-    */
 }

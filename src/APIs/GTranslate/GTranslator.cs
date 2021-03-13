@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -68,12 +69,9 @@ namespace Fergun.APIs.GTranslate
                        $"&tl={to}" +
                        $"&q={Uri.EscapeDataString(text)}";
 
-            // TODO:
-            // Find a way to avoid getting incomplete translations (has_untranslatable_chunk).
             string json = await _httpClient.GetStringAsync(new Uri(q, UriKind.Relative)).ConfigureAwait(false);
             var model = JsonConvert.DeserializeObject<TranslationModel>(json);
 
-            var sentence = model.Sentences.Count == 0 ? null : model.Sentences[0];
             var alts = new List<AlternativeTranslation>();
             if (model.AlternativeTranslations.Count > 0)
             {
@@ -88,11 +86,12 @@ namespace Fergun.APIs.GTranslate
 
             for (int i = 0; i < modelLd.SourceLanguages.Count; i++)
             {
-                ld.Add(new LanguageDetection(modelLd.SourceLanguages[i], modelLd.SourceLanguageConfidences[i]));
+                ld.Add(new LanguageDetection(model.LanguageDetection.SourceLanguages[i], modelLd.SourceLanguageConfidences[i]));
             }
 
-            return new TranslationResult(sentence?.Translation, text, to, model.Source, sentence?.Transliteration,
-                model.Confidence, alts.AsReadOnly(), ld.AsReadOnly());
+            return new TranslationResult(string.Concat(model.Sentences.Select(x => x.Translation)), text, to,
+                model.Source, string.Concat(model.Sentences.Select(x => x.Transliteration)), model.Confidence,
+                alts.AsReadOnly(), ld.AsReadOnly());
         }
 
         /// <inheritdoc />
