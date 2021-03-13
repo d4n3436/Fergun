@@ -15,7 +15,7 @@ namespace Fergun.Tests
         public async Task TranslationNotEmptyTest(string text, string to)
         {
             // Arrange
-            var translator = new GTranslator();
+            using var translator = new GTranslator();
 
             // Act
             var results = await translator.TranslateAsync(text, to);

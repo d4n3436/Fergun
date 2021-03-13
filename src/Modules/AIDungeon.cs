@@ -1281,16 +1281,17 @@ namespace Fergun.Modules
         {
             try
             {
-                var result = await BingTranslatorApi.TranslateAsync(text, to, from);
-                return result[0].Translations[0].Text;
+                using var translator = new GTranslator();
+                var result = await translator.TranslateAsync(text, to, from);
+                return result.Translation;
+                
             }
             catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
             {
                 try
                 {
-                    var translator = new GTranslator();
-                    var result = await translator.TranslateAsync(text, to, from);
-                    return result.Translation;
+                    var result = await BingTranslatorApi.TranslateAsync(text, to, from);
+                    return result[0].Translations[0].Text;
                 }
                 catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is TaskCanceledException)
                 {
