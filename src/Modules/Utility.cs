@@ -740,7 +740,8 @@ namespace Fergun.Modules
                 Color = new Discord.Color(FergunClient.Config.EmbedColor),
                 Options = new PaginatorAppearanceOptions
                 {
-                    FooterFormat = Locate("PaginatorFooter")
+                    FooterFormat = Locate("PaginatorFooter"),
+                    Timeout = TimeSpan.FromMinutes(10)
                 }
             };
 
