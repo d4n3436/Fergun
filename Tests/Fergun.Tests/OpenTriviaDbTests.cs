@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Fergun.APIs.OpenTriviaDB;
 using Xunit;
 
@@ -12,10 +13,10 @@ namespace Fergun.Tests
         [InlineData(10, QuestionCategory.Computers, QuestionDifficulty.Easy, QuestionType.Multiple, ResponseEncoding.url3986)]
         [InlineData(30, QuestionCategory.VideoGames, QuestionDifficulty.Hard, QuestionType.Multiple, ResponseEncoding.base64)]
         [InlineData(1, QuestionCategory.Animals, QuestionDifficulty.Medium, QuestionType.Boolean, ResponseEncoding.urlLegacy)]
-        public void QuestionsNotEmptyTest(uint amount, QuestionCategory category, QuestionDifficulty difficulty, QuestionType type, ResponseEncoding encoding)
+        public async Task QuestionsNotEmptyTest(uint amount, QuestionCategory category, QuestionDifficulty difficulty, QuestionType type, ResponseEncoding encoding)
         {
             // Act
-            var response = TriviaApi.RequestQuestions(amount, category, difficulty, type, encoding);
+            var response = await TriviaApi.RequestQuestionsAsync(amount, category, difficulty, type, encoding);
 
             // Assert
             Assert.NotEmpty(response.Questions);
@@ -25,27 +26,27 @@ namespace Fergun.Tests
         [InlineData(0)]
         [InlineData(300)]
         [InlineData(100)]
-        public void QuestionsInvalidAmountTest(uint amount)
+        public async Task QuestionsInvalidAmountTest(uint amount)
         {
             // Act and Assert
-            Assert.Throws<ArgumentOutOfRangeException>(() => TriviaApi.RequestQuestions(amount));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await TriviaApi.RequestQuestionsAsync(amount));
         }
 
         [Fact]
-        public void CategoryListNotEmptyTest()
+        public async Task CategoryListNotEmptyTest()
         {
             // Act
-            var response = TriviaApi.RequestCategoryList();
+            var response = await TriviaApi.RequestCategoryListAsync();
 
             // Assert
             Assert.NotEmpty(response.CategoryList);
         }
 
         [Fact]
-        public void GlobalQuestionCountNotEmptyTest()
+        public async Task GlobalQuestionCountNotEmptyTest()
         {
             // Act
-            var response = TriviaApi.RequestGlobalQuestionCount();
+            var response = await TriviaApi.RequestGlobalQuestionCountAsync();
 
             // Assert
             Assert.NotEmpty(response.CategoriesQuestionCount);
@@ -54,23 +55,23 @@ namespace Fergun.Tests
 
         [Theory]
         [MemberData(nameof(Categories))]
-        public void NumberOfQuestionsInCategoryNotNullTest(QuestionCategory category)
+        public async Task NumberOfQuestionsInCategoryNotNullTest(QuestionCategory category)
         {
             // Arrange
             if (category == QuestionCategory.Any) return;
 
             // Act
-            var response = TriviaApi.RequestNumberOfQuestionsInCategory(category);
+            var response = await TriviaApi.RequestNumberOfQuestionsInCategoryAsync(category);
 
             // Assert
             Assert.NotNull(response.CategoryQuestionCount);
         }
 
         [Fact]
-        public void SessionTokenNotNullTest()
+        public async Task SessionTokenNotNullTest()
         {
             // Act
-            var response = TriviaApi.SendSessionTokenCommand(TokenCommand.Request);
+            var response = await TriviaApi.SendSessionTokenCommandAsync(TokenCommand.Request);
 
             // Assert
             Assert.NotNull(response.Token);

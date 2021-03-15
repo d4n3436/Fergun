@@ -1,4 +1,5 @@
-﻿using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Fergun.Responses;
 using Newtonsoft.Json;
 using Xunit;
@@ -8,20 +9,20 @@ namespace Fergun.Tests
     public class XkcdTests
     {
         [Fact]
-        public void XkcdAvailableTest()
+        public async Task XkcdAvailableTest()
         {
             // Arrange
-            using var wc = new WebClient();
+            using var httpClient = new HttpClient();
 
             // Act
-            string response = wc.DownloadString("https://xkcd.com/info.0.json"); // Last comic
+            string response = await httpClient.GetStringAsync("https://xkcd.com/info.0.json"); // Last comic
             var comic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
             // Assert
             Assert.NotNull(comic);
 
             // Act
-            response = wc.DownloadString($"https://xkcd.com/{comic.Num - 1}/info.0.json"); // Previous comic
+            response = await httpClient.GetStringAsync($"https://xkcd.com/{comic.Num - 1}/info.0.json"); // Previous comic
             var prevComic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
             // Assert

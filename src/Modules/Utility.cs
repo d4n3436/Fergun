@@ -144,10 +144,15 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Archive: Error in ApiFlash API", e));
                 return FergunResult.FromError(Locate("InvalidUrl"));
             }
-            catch (WebException e)
+            catch (HttpRequestException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Archive: Error in ApiFlash API", e));
                 return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Archive: Error in ApiFlash API", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
             if (response.ErrorMessage != null)
@@ -1327,10 +1332,15 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Screenshot: Error in API", e));
                 return FergunResult.FromError(Locate("InvalidUrl"));
             }
-            catch (WebException e)
+            catch (HttpRequestException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Screenshot: Error in API", e));
                 return FergunResult.FromError(e.Message);
+            }
+            catch (TaskCanceledException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Screenshot: Error in API", e));
+                return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
             if (response.ErrorMessage != null)
@@ -1616,9 +1626,9 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Urban: Getting random words..."));
                 try
                 {
-                    search = UrbanApi.GetRandomWords();
+                    search = await UrbanApi.GetRandomWordsAsync();
                 }
-                catch (WebException e)
+                catch (HttpRequestException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Urban: Error in API", e));
                     return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
@@ -1629,9 +1639,9 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Urban: Query \"{query}\""));
                 try
                 {
-                    search = UrbanApi.SearchWord(query);
+                    search = await UrbanApi.SearchWordAsync(query);
                 }
-                catch (WebException e)
+                catch (HttpRequestException e)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Urban: Error in API", e));
                     return FergunResult.FromError($"Error in Urban Dictionary API: {e.Message}");
@@ -1833,12 +1843,8 @@ namespace Fergun.Modules
         [Example("Discord")]
         public async Task<RuntimeResult> Wikipedia([Remainder, Summary("wikipediaParam1")] string query)
         {
-            string response;
-            using (var wc = new WebClient())
-            {
-                // I would want to know who did the awful json response structure.
-                response = await wc.DownloadStringTaskAsync($"https://{GetLanguage()}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
-            }
+            // I would want to know who did the awful json response structure.
+            string response = await _httpClient.GetStringAsync($"https://{GetLanguage()}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
 
             var search = JsonConvert.DeserializeObject<List<dynamic>>(response);
             string langToUse = GetLanguage();
@@ -1851,11 +1857,10 @@ namespace Fergun.Modules
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Wikipedia: No results found on non-English Wikipedia. Searching on English Wikipedia."));
                 langToUse = "en";
-                using (var wc = new WebClient())
-                {
-                    response = await wc.DownloadStringTaskAsync($"https://{langToUse}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
-                }
+
+                response = await _httpClient.GetStringAsync($"https://{langToUse}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
                 search = JsonConvert.DeserializeObject<List<dynamic>>(response);
+
                 if (search[1].Count == 0)
                 {
                     return FergunResult.FromError(Locate("NoResults"));
@@ -1865,14 +1870,13 @@ namespace Fergun.Modules
 
             try
             {
-                using var wc = new WebClient();
                 string articleUrl = search[^1][0];
                 string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
 
-                response = await wc.DownloadStringTaskAsync(apiUrl);
+                response = await _httpClient.GetStringAsync(apiUrl);
             }
-            catch (WebException e)
+            catch (HttpRequestException e)
             {
                 return FergunResult.FromError(e.Message);
             }
@@ -1970,7 +1974,7 @@ namespace Fergun.Modules
         [Example("1000")]
         public async Task<RuntimeResult> Xkcd([Summary("xkcdParam1")] int? number = null)
         {
-            UpdateLastComic();
+            await UpdateLastComicAsync();
             if (_lastComic == null)
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
@@ -1983,11 +1987,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError("404 Not Found");
             }
-            string response;
-            using (var wc = new WebClient())
-            {
-                response = await wc.DownloadStringTaskAsync($"https://xkcd.com/{number ?? RngInstance.Next(1, _lastComic.Num)}/info.0.json");
-            }
+            string response = await _httpClient.GetStringAsync($"https://xkcd.com/{number ?? RngInstance.Next(1, _lastComic.Num)}/info.0.json");
 
             var comic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
@@ -2088,7 +2088,7 @@ namespace Fergun.Modules
             {
                 ocr = await OCRSpaceApi.PerformOcrFromUrlAsync(FergunClient.Config.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
             }
-            catch (WebException e)
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "OcrSimple", "Error in OCR", e));
                 return ("OcrApiError", null);
@@ -2178,17 +2178,17 @@ namespace Fergun.Modules
             };
         }
 
-        private static void UpdateLastComic()
+        private static async Task UpdateLastComicAsync()
         {
             if (_timeToCheckComic >= DateTimeOffset.UtcNow) return;
 
             string response;
             try
             {
-                using var wc = new WebClient();
-                response = wc.DownloadString("https://xkcd.com/info.0.json");
+                response = await _httpClient.GetStringAsync("https://xkcd.com/info.0.json");
+
             }
-            catch (WebException) { return; }
+            catch (HttpRequestException) { return; }
 
             _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);

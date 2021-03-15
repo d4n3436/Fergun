@@ -1,7 +1,6 @@
-﻿using System;
-using System.Net;
+using System;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Newtonsoft.Json;
 
 namespace Fergun.APIs
@@ -9,6 +8,8 @@ namespace Fergun.APIs
     public static class ApiFlash
     {
         public const string ApiEndpoint = "https://api.apiflash.com/v1/urltoimage";
+
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         /// <summary>
         /// Takes a screenshot from an Url.
@@ -62,18 +63,17 @@ namespace Fergun.APIs
                 throw new ArgumentException("The Url is not well formed.", nameof(url));
             }
 
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["access_key"] = accessKey;
-            query["url"] = url;
-            query["response_type"] = ResponseType.Json.ToString().ToLowerInvariant();
+            string q = $"access_key={accessKey}"
+                       + $"&url={url}"
+                       + $"&response_type={ResponseType.Json.ToString().ToLowerInvariant()}";
 
             if (format != FormatType.Jpeg)
             {
-                query["format"] = format.ToString().ToLowerInvariant();
+                q += $"&format={format.ToString().ToLowerInvariant()}";
             }
             if (!string.IsNullOrEmpty(failOnStatus)) // check valid
             {
-                query["fail_on_status"] = failOnStatus;
+                q += $"&fail_on_status={failOnStatus}";
             }
             if (ttl != 86400)
             {
@@ -81,27 +81,27 @@ namespace Fergun.APIs
                 {
                     throw new ArgumentOutOfRangeException(nameof(ttl), ttl, "Value must be between 0 and 2592000.");
                 }
-                query["ttl"] = ttl.ToString();
+                q += $"&ttl={ttl}";
             }
             if (fresh)
             {
-                query["fresh"] = "true";
+                q += "&fresh=true";
             }
             if (fullPage)
             {
-                query["full_page"] = "true";
+                q += "&full_page=true";
             }
             if (scrollPage)
             {
-                query["scroll_page"] = "true";
+                q += "&scroll_page=true";
             }
             if (width != 1920)
             {
-                query["width"] = width.ToString();
+                q += $"&width={width}";
             }
             if (height != 1080 && !fullPage)
             {
-                query["height"] = height.ToString();
+                q += $"&height={height}";
             }
             if (delay != 0)
             {
@@ -109,11 +109,11 @@ namespace Fergun.APIs
                 {
                     throw new ArgumentOutOfRangeException(nameof(delay), delay, "Value must be between 0 and 10.");
                 }
-                query["delay"] = delay.ToString();
+                q += $"&delay={delay}";
             }
             if (!string.IsNullOrEmpty(waitFor))
             {
-                query["wait_for"] = waitFor;
+                q += $"&wait_for={waitFor}";
             }
             if (quality != 80)
             {
@@ -121,51 +121,51 @@ namespace Fergun.APIs
                 {
                     throw new ArgumentOutOfRangeException(nameof(quality), quality, "Value must be between 0 and 100.");
                 }
-                query["quality"] = quality.ToString();
+                q += $"&quality={quality}";
             }
             if (transparent && format == FormatType.Png)
             {
-                query["transparent"] = "true";
+                q += "&transparent=true";
             }
             if (thumbnailWidth != 0 && !fullPage)
             {
-                query["thumbnail_width"] = thumbnailWidth.ToString();
+                q += $"&thumbnail_width={thumbnailWidth}";
             }
             if (scaleFactor != 1)
             {
-                query["scale_factor"] = scaleFactor.ToString();
+                q += $"&scale_factor={scaleFactor}";
             }
             if (!string.IsNullOrEmpty(css))
             {
-                query["css"] = css;
+                q += $"&css={css}";
             }
             if (!string.IsNullOrEmpty(js))
             {
-                query["js"] = js;
+                q += $"&js={js}";
             }
             if (extractHtml)
             {
-                query["extract_html"] = "true";
+                q += "&extract_html=true";
             }
             if (extractText)
             {
-                query["extract_text"] = "true";
+                q += "&extract_text=true";
             }
             if (!string.IsNullOrEmpty(acceptLanguage))
             {
-                query["accept_language"] = acceptLanguage;
+                q += $"&accept_language={acceptLanguage}";
             }
             if (!string.IsNullOrEmpty(userAgent))
             {
-                query["user_agent"] = userAgent;
+                q += $"&user_agent={userAgent}";
             }
             if (!string.IsNullOrEmpty(headers))
             {
-                query["headers"] = headers;
+                q += $"&headers={headers}";
             }
             if (!string.IsNullOrEmpty(cookies))
             {
-                query["cookies"] = cookies;
+                q += $"&cookies={cookies}";
             }
             if (latitude != 0)
             {
@@ -173,7 +173,7 @@ namespace Fergun.APIs
                 {
                     throw new ArgumentOutOfRangeException(nameof(latitude), latitude, "Value must be between -90 and 90.");
                 }
-                query["latitude"] = latitude.ToString();
+                q += $"&latitude={latitude}";
             }
             if (longitude != 0)
             {
@@ -181,23 +181,18 @@ namespace Fergun.APIs
                 {
                     throw new ArgumentOutOfRangeException(nameof(longitude), longitude, "Value must be between -180 and 180.");
                 }
-                query["longitude"] = longitude.ToString();
+                q += $"&longitude={longitude}";
             }
             if (accuracy != 0)
             {
-                query["accuracy"] = accuracy.ToString();
+                q += $"&accuracy={accuracy}";
             }
             if (!string.IsNullOrEmpty(proxy)) // check valid
             {
-                query["proxy"] = proxy;
+                q += $"&proxy={proxy}";
             }
 
-            string json;
-
-            using (var wc = new WebClient())
-            {
-                json = await wc.DownloadStringTaskAsync($"{ApiEndpoint}?{query}");
-            }
+            string json = await _httpClient.GetStringAsync($"{ApiEndpoint}?{q}");
             return JsonConvert.DeserializeObject<ApiFlashResponse>(json);
         }
 
@@ -207,11 +202,8 @@ namespace Fergun.APIs
             {
                 throw new ArgumentNullException(nameof(accessKey));
             }
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = await wc.DownloadStringTaskAsync($"{ApiEndpoint}/quota?access_key={accessKey}");
-            }
+
+            string json = await _httpClient.GetStringAsync($"{ApiEndpoint}/quota?access_key={accessKey}");
             return JsonConvert.DeserializeObject<ApiFlashQuotaResponse>(json);
         }
 

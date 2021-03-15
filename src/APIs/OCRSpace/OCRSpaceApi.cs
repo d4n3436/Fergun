@@ -1,7 +1,6 @@
-﻿using System;
-using System.Net;
+using System;
+using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using Newtonsoft.Json;
 
 namespace Fergun.APIs.OCRSpace
@@ -10,6 +9,8 @@ namespace Fergun.APIs.OCRSpace
     {
         // https://api.ocr.space/parse/image
         public const string ApiEndpoint = "https://api.ocr.space/parse/imageurl";
+
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         /// <summary>
         /// Performs OCR from a Url.
@@ -41,36 +42,31 @@ namespace Fergun.APIs.OCRSpace
             //    throw new ArgumentException("The Url is not well formed.", nameof(Url));
             //}
 
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["apikey"] = apiKey;
-            query["url"] = url;
+            string q = $"apikey={apiKey}"
+                       + $"&url={url}"
+                       + $"&isOverlayRequired={isOverlayRequired}"
+                       + $"&detectOrientation={detectOrientation}"
+                       + $"&isCreateSearchablePdf={isCreateSearchablePdf}"
+                       + $"&isSearchablePdfHideTextLayer={isSearchablePdfHideTextLayer}"
+                       + $"&scale={scale}"
+                       + $"&isTable={isTable}"
+                       + $"&OCREngine={ocrEngine:D}";
 
             //if (string.IsNullOrEmpty(Language) && OCREngine == OCREngine.Engine1)
             //{
             //    throw new ArgumentException("Automatic language detection can only be used on Engine 2.", nameof(Language));
             //}
+
             if (!string.IsNullOrEmpty(language))
             {
-                query["language"] = language;
+                q += $"&language={language}";
             }
-            query["isOverlayRequired"] = isOverlayRequired.ToString();
             if (fileType != null)
             {
-                query["filetype"] = fileType.ToString()?.ToUpperInvariant();
+                q += $"&filetype={fileType.ToString()?.ToUpperInvariant()}";
             }
-            query["detectOrientation"] = detectOrientation.ToString();
-            query["isCreateSearchablePdf"] = isCreateSearchablePdf.ToString();
-            query["isSearchablePdfHideTextLayer"] = isSearchablePdfHideTextLayer.ToString();
-            query["scale"] = scale.ToString();
-            query["isTable"] = isTable.ToString();
-            query["OCREngine"] = ocrEngine.ToString("D");
 
-            string json;
-
-            using (var wc = new WebClient())
-            {
-                json = await wc.DownloadStringTaskAsync($"{ApiEndpoint}?{query}");
-            }
+            string json = await _httpClient.GetStringAsync($"{ApiEndpoint}?{q}");
             return JsonConvert.DeserializeObject<OCRSpaceResponse>(json);
         }
     }

@@ -1,30 +1,25 @@
-﻿using System;
-using System.Net;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Fergun.APIs.UrbanDictionary
 {
     public static class UrbanApi
     {
-        public const string ApiEndpoint = "https://api.urbandictionary.com/v0/";
+        public const string ApiEndpoint = "https://api.urbandictionary.com/v0";
 
-        public static UrbanResponse SearchWord(string word)
+        private static readonly HttpClient _httpClient = new HttpClient();
+
+        public static async Task<UrbanResponse> SearchWordAsync(string word)
         {
-            string response;
-            using (var wc = new WebClient())
-            {
-                response = wc.DownloadString($"{ApiEndpoint}define?term={Uri.EscapeDataString(word)}");
-            }
+            string response = await _httpClient.GetStringAsync($"{ApiEndpoint}/define?term={Uri.EscapeDataString(word)}");
             return JsonConvert.DeserializeObject<UrbanResponse>(response);
         }
 
-        public static UrbanResponse GetRandomWords()
+        public static async Task<UrbanResponse> GetRandomWordsAsync()
         {
-            string response;
-            using (var wc = new WebClient())
-            {
-                response = wc.DownloadString($"{ApiEndpoint}random");
-            }
+            string response = await _httpClient.GetStringAsync($"{ApiEndpoint}/random");
             return JsonConvert.DeserializeObject<UrbanResponse>(response);
         }
     }

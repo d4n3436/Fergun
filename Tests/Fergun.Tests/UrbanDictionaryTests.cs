@@ -1,4 +1,5 @@
-﻿using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Fergun.APIs.UrbanDictionary;
 using Xunit;
 
@@ -12,10 +13,10 @@ namespace Fergun.Tests
         [InlineData("cringe")]
         [InlineData("pog")]
         [InlineData("gg")]
-        public void SearchNotEmptyTest(string word)
+        public async Task SearchNotEmptyTest(string word)
         {
             // Act
-            var response = UrbanApi.SearchWord(word);
+            var response = await UrbanApi.SearchWordAsync(word);
 
             // Assert
             Assert.NotEmpty(response.Definitions);
@@ -24,17 +25,17 @@ namespace Fergun.Tests
         [Theory]
         [InlineData("a")]
         [InlineData("!")]
-        public void InvalidSearchTest(string word)
+        public async Task InvalidSearchTest(string word)
         {
             // Act and Assert
-            Assert.Throws<WebException>(() => UrbanApi.SearchWord(word));
+            await Assert.ThrowsAsync<HttpRequestException>(async () => await UrbanApi.SearchWordAsync(word));
         }
 
         [Fact]
-        public void RandomSearchNotEmptyTest()
+        public async Task RandomSearchNotEmptyTest()
         {
             // Act
-            var response = UrbanApi.GetRandomWords();
+            var response = await UrbanApi.GetRandomWordsAsync();
 
             // Assert
             Assert.NotEmpty(response.Definitions);

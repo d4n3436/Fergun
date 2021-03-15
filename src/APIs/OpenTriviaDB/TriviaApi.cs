@@ -1,5 +1,6 @@
-﻿using System;
-using System.Net;
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace Fergun.APIs.OpenTriviaDB
@@ -12,6 +13,8 @@ namespace Fergun.APIs.OpenTriviaDB
         public const string ApiCategoryCountEndpoint = "https://opentdb.com/api_count.php";
         public const string ApiGlobalCountEndpoint = "https://opentdb.com/api_count_global.php";
 
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         /// <summary>
         /// Requests questions from the API.
         /// </summary>
@@ -23,18 +26,14 @@ namespace Fergun.APIs.OpenTriviaDB
         /// <param name="sessionToken">A session token. This token prevents the API from giving you the same question twice until 6 hours of inactivity or you reset the token.</param>
         /// <returns>A <see cref="QuestionsResponse"/> object.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when <paramref name="amount"/> is out of range.</exception>
-        public static QuestionsResponse RequestQuestions(uint amount,
+        public static async Task<QuestionsResponse> RequestQuestionsAsync(uint amount,
                                                          QuestionCategory category = QuestionCategory.Any,
                                                          QuestionDifficulty difficulty = QuestionDifficulty.Any,
                                                          QuestionType type = QuestionType.Any,
                                                          ResponseEncoding encoding = ResponseEncoding.Default,
                                                          string sessionToken = "")
         {
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = wc.DownloadString(GenerateApiUrl(amount, category, difficulty, type, encoding, sessionToken));
-            }
+            string json = await _httpClient.GetStringAsync(GenerateApiUrl(amount, category, difficulty, type, encoding, sessionToken));
             return JsonConvert.DeserializeObject<QuestionsResponse>(json);
         }
 
@@ -86,7 +85,7 @@ namespace Fergun.APIs.OpenTriviaDB
         /// <param name="command">The command to send. It can be "Request" (Requests a session token) or "Reset" (Resets the provided session token)</param>
         /// <param name="sessionToken">Resets the provided session token, only if one is passed and command is set to "Reset".</param>
         /// <returns>A <see cref="SessionTokenResponse"/> object.</returns>
-        public static SessionTokenResponse SendSessionTokenCommand(TokenCommand command, string sessionToken = "")
+        public static async Task<SessionTokenResponse> SendSessionTokenCommandAsync(TokenCommand command, string sessionToken = "")
         {
             string query = $"command={command.ToString().ToLowerInvariant()}";
 
@@ -99,11 +98,7 @@ namespace Fergun.APIs.OpenTriviaDB
                 query += $"&token={sessionToken}";
             }
 
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = wc.DownloadString($"{ApiTokenEndpoint}?{query}");
-            }
+            string json = await _httpClient.GetStringAsync($"{ApiTokenEndpoint}?{query}");
             return JsonConvert.DeserializeObject<SessionTokenResponse>(json);
         }
 
@@ -111,13 +106,9 @@ namespace Fergun.APIs.OpenTriviaDB
         /// Requests the list of categories and IDs in the database.
         /// </summary>
         /// <returns>A <see cref="CategoryListResponse"/> object.</returns>
-        public static CategoryListResponse RequestCategoryList()
+        public static async Task<CategoryListResponse> RequestCategoryListAsync()
         {
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = wc.DownloadString(ApiCategoryEndpoint);
-            }
+            string json = await _httpClient.GetStringAsync(ApiCategoryEndpoint);
             return JsonConvert.DeserializeObject<CategoryListResponse>(json);
         }
 
@@ -127,18 +118,14 @@ namespace Fergun.APIs.OpenTriviaDB
         /// <param name="category">The category to request.</param>
         /// <returns>A <see cref="NumberOfQuestionsInCategoryResponse"/> object.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="category"/> is <see cref="QuestionCategory.Any"/>.</exception>
-        public static NumberOfQuestionsInCategoryResponse RequestNumberOfQuestionsInCategory(QuestionCategory category)
+        public static async Task<NumberOfQuestionsInCategoryResponse> RequestNumberOfQuestionsInCategoryAsync(QuestionCategory category)
         {
             if (category == QuestionCategory.Any)
             {
                 throw new ArgumentException("You must specify a category.", nameof(category));
             }
 
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = wc.DownloadString($"{ApiCategoryCountEndpoint}?category={category:D}");
-            }
+            string json = await _httpClient.GetStringAsync($"{ApiCategoryCountEndpoint}?category={category:D}");
             return JsonConvert.DeserializeObject<NumberOfQuestionsInCategoryResponse>(json);
         }
 
@@ -146,13 +133,9 @@ namespace Fergun.APIs.OpenTriviaDB
         /// Requests the total number of questions in the database.
         /// </summary>
         /// <returns>A <see cref="GlobalQuestionCountResponse"/> object.</returns>
-        public static GlobalQuestionCountResponse RequestGlobalQuestionCount()
+        public static async Task<GlobalQuestionCountResponse> RequestGlobalQuestionCountAsync()
         {
-            string json;
-            using (var wc = new WebClient())
-            {
-                json = wc.DownloadString(ApiGlobalCountEndpoint);
-            }
+            string json = await _httpClient.GetStringAsync(ApiGlobalCountEndpoint);
             return JsonConvert.DeserializeObject<GlobalQuestionCountResponse>(json);
         }
     }

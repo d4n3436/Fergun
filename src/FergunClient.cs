@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -298,12 +297,13 @@ namespace Fergun
 
             if (!File.Exists(lavalinkFile)) return;
             string remoteVersion;
+            using var httpClient = new HttpClient();
+
             try
             {
-                using var wc = new WebClient();
-                remoteVersion = await wc.DownloadStringTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/VERSION.txt?guest=1");
+                remoteVersion = await httpClient.GetStringAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/VERSION.txt?guest=1");
             }
-            catch (WebException e)
+            catch (HttpRequestException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while downloading VERSION.txt", e));
                 return;
@@ -356,10 +356,13 @@ namespace Fergun
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Downloading the new dev build of Lavalink..."));
             try
             {
-                using var wc = new WebClient();
-                await wc.DownloadFileTaskAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1", lavalinkFile);
+                var response = await httpClient.GetAsync("https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1");
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                var file = new FileInfo(lavalinkFile);
+                await using var fileStream = file.OpenWrite();
+                await stream.CopyToAsync(fileStream);
             }
-            catch (WebException e)
+            catch (HttpRequestException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "An error occurred while downloading the new dev build", e));
                 try

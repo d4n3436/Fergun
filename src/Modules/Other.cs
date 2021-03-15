@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -254,11 +253,7 @@ namespace Fergun.Modules
         [Summary("inspirobotSummary")]
         public async Task InspiroBot()
         {
-            string img;
-            using (var wc = new WebClient())
-            {
-                img = await wc.DownloadStringTaskAsync("https://inspirobot.me/api?generate=true");
-            }
+            string img = await _httpClient.GetStringAsync("https://inspirobot.me/api?generate=true");
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Inspirobot: Generated url: {img}"));
 
             var builder = new EmbedBuilder()
@@ -748,7 +743,7 @@ namespace Fergun.Modules
                     index = 0;
                 }
             }
-            var trivia = TriviaApi.RequestQuestions(1, category == null ? QuestionCategory.Any : (QuestionCategory)(index + 9), encoding: ResponseEncoding.url3986);
+            var trivia = await TriviaApi.RequestQuestionsAsync(1, category == null ? QuestionCategory.Any : (QuestionCategory)(index + 9), encoding: ResponseEncoding.url3986);
 
             if (trivia.ResponseCode != 0)
             {
