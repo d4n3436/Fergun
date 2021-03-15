@@ -94,7 +94,7 @@ namespace Fergun.APIs.OCRSpace
     /// </summary>
     public enum OcrEngine
     {
-        Engine1 = 1,
+        Engine1,
         Engine2
     }
 }

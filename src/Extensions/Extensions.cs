@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing.Imaging;
 using System.IO;
@@ -30,7 +30,7 @@ namespace Fergun.Extensions
             int maxPos = 0;
             for (int i = 0; i < user.RoleIds.Count; i++)
             {
-                IRole role = user.Guild.GetRole(user.RoleIds.ElementAt(i));
+                var role = user.Guild.GetRole(user.RoleIds.ElementAt(i));
                 if (role != null && role.Position > maxPos)
                 {
                     maxPos = role.Position;
@@ -49,7 +49,7 @@ namespace Fergun.Extensions
             {
                 n--;
                 int k = rng.Next(n + 1);
-                T value = list[k];
+                var value = list[k];
                 list[k] = list[n];
                 list[n] = value;
             }
@@ -259,15 +259,15 @@ namespace Fergun.Extensions
             return context.Channel.GetLastUrlAsync(messageCount, onlyImage, context.Message, url, maxSize);
         }
 
-        public static string Display(this ICommandContext context, bool displayUser = false)
-        {
-            return context.Channel.Display() + (displayUser ? $"/{context.User}" : "");
-        }
-
         public static bool IsNsfw(this ICommandContext context)
         {
             // Considering a DM channel a SFW channel.
             return context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
+        }
+
+        public static string Display(this ICommandContext context, bool displayUser = false)
+        {
+            return context.Channel.Display() + (displayUser ? $"/{context.User}" : "");
         }
 
         public static string Display(this IChannel channel)

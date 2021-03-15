@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,10 +62,14 @@ namespace Fergun.Extensions
             return containsKeywords.Any(keyword => input.Contains(keyword, comparisonType));
         }
 
-        public static bool IsBase64(this string s)
+        public static bool TryBase64Decode(this string s, out string decoded)
         {
-            Span<byte> buffer = new Span<byte>(new byte[s.Length]);
-            return Convert.TryFromBase64String(s, buffer, out int _);
+            var buffer = new Span<byte>(new byte[s.Length]);
+            bool success = Convert.TryFromBase64String(s, buffer, out int bytesWritten);
+
+            decoded = success ? Encoding.UTF8.GetString(buffer.Slice(0, bytesWritten)) : null;
+
+            return success;
         }
 
         public static string ToTitleCase(this string s)

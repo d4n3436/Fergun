@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -314,7 +314,7 @@ namespace Fergun.Modules
                 .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
+            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
                 async context => await HandleLanguageUpdateAsync(null)).AddCallbacks(callbacks);
 
             message = await InlineReactionReplyAsync(data);
@@ -464,7 +464,7 @@ namespace Fergun.Modules
                 IEmote emote;
                 if (reaction.Length > 2)
                 {
-                    if (!Emote.TryParse(reaction, out Emote tempEmote))
+                    if (!Emote.TryParse(reaction, out var tempEmote))
                     {
                         return FergunResult.FromError(Locate("InvalidReaction"));
                     }
@@ -756,7 +756,7 @@ namespace Fergun.Modules
             }
             var question = trivia.Questions[0];
 
-            List<string> options = new List<string>(question.IncorrectAnswers)
+            var options = new List<string>(question.IncorrectAnswers)
             {
                 question.CorrectAnswer
             };
@@ -787,7 +787,7 @@ namespace Fergun.Modules
                 .WithFooter(string.Format(Locate("TimeLeft"), time))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
+            var data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
                 async context => await HandleTriviaReactionAsync(null)).AddCallbacks(callbacks);
 
             message = await InlineReactionReplyAsync(data);

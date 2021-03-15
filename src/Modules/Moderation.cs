@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -61,10 +61,10 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("NumberOutOfIndex"), 1, DiscordConfig.MaxMessagesPerBatch));
             }
 
-            var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).FlattenAsync();
+            var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).Flatten().ToListAsync();
 
             // Get the total message count before being filtered.
-            int totalMessages = messages.Count();
+            int totalMessages = messages.Count;
 
             if (totalMessages == 0)
             {
@@ -74,38 +74,35 @@ namespace Fergun.Modules
             if (user != null)
             {
                 // Get messages by user
-                messages = messages.Where(x => x.Author.Id == user.Id);
-                if (!messages.Any())
+                messages.RemoveAll(x => x.Author.Id != user.Id);
+                if (messages.Count == 0)
                 {
                     return FergunResult.FromError(string.Format(Locate("ClearNotFound"), user.Mention, count));
                 }
             }
 
             // Get messages younger than 2 weeks
-            messages = messages.Where(x => x.CreatedAt > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
-            if (!messages.Any())
+            messages.RemoveAll(x => x.CreatedAt <= DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(14)));
+            if (messages.Count == 0)
             {
                 return FergunResult.FromError(Locate("MessagesOlderThan2Weeks"));
             }
 
+            messages.Add(Context.Message);
+
             try
             {
-                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages.Append(Context.Message));
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
             }
             catch (HttpException e) when (e.HttpCode == HttpStatusCode.NotFound) { }
 
-            string message;
-            if (user != null)
+            string message = user != null
+                ? string.Format(Locate("DeletedMessagesByUser"), messages.Count, user.Mention)
+                : string.Format(Locate("DeletedMessages"), messages.Count);
+
+            if (totalMessages != messages.Count)
             {
-                message = string.Format(Locate("DeletedMessagesByUser"), messages.Count(), user.Mention);
-            }
-            else
-            {
-                message = string.Format(Locate("DeletedMessages"), messages.Count());
-            }
-            if (totalMessages != messages.Count())
-            {
-                message += "\n" + string.Format(Locate("SomeMessagesNotDeleted"), totalMessages - messages.Count());
+                message += "\n" + string.Format(Locate("SomeMessagesNotDeleted"), totalMessages - messages.Count);
             }
 
             var builder = new EmbedBuilder

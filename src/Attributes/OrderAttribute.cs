@@ -6,7 +6,7 @@ namespace Fergun.Attributes
     /// Marks the order of a module, a lower value equals higher order.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class OrderAttribute : Attribute
+    public sealed class OrderAttribute : Attribute
     {
         public int Order { get; }
 

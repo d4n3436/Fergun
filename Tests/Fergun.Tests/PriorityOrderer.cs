@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit.Abstractions;
@@ -12,11 +12,11 @@ namespace Fergun.Tests
         {
             var sortedMethods = new SortedDictionary<int, List<TTestCase>>();
 
-            foreach (TTestCase testCase in testCases)
+            foreach (var testCase in testCases)
             {
                 int priority = 0;
 
-                foreach (IAttributeInfo attr in testCase.TestMethod.Method.GetCustomAttributes((typeof(TestPriorityAttribute).AssemblyQualifiedName)))
+                foreach (var attr in testCase.TestMethod.Method.GetCustomAttributes((typeof(TestPriorityAttribute).AssemblyQualifiedName)))
                     priority = attr.GetNamedArgument<int>("Priority");
 
                 GetOrCreate(sortedMethods, priority).Add(testCase);
@@ -25,7 +25,7 @@ namespace Fergun.Tests
             foreach (var list in sortedMethods.Keys.Select(priority => sortedMethods[priority]))
             {
                 list.Sort((x, y) => StringComparer.OrdinalIgnoreCase.Compare(x.TestMethod.Method.Name, y.TestMethod.Method.Name));
-                foreach (TTestCase testCase in list)
+                foreach (var testCase in list)
                     yield return testCase;
             }
         }

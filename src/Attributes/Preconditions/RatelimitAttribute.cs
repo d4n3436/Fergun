@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -23,7 +23,9 @@ namespace Fergun.Attributes.Preconditions
     {
         /// <inheritdoc />
         public override string ErrorMessage { get; set; }
+
         public uint InvokeLimit { get; }
+
         public TimeSpan InvokeLimitPeriod { get; }
 
         private readonly bool _noLimitInDMs;
@@ -120,7 +122,7 @@ namespace Fergun.Attributes.Preconditions
                 return PreconditionResult.FromSuccess();
             }
 
-            double cooldown = (InvokeLimitPeriod - (now - t.FirstInvoke)).TotalSeconds;
+            double cooldown = (InvokeLimitPeriod - (now - timeout.FirstInvoke)).TotalSeconds;
 
             return PreconditionResult.FromError(
                 ErrorMessage ?? "(Cooldown) " + string.Format(GuildUtils.Locate("Ratelimited", context.Channel), Math.Round(cooldown, 2).ToString(CultureInfo.InvariantCulture)));

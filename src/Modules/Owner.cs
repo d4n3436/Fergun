@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -165,7 +165,7 @@ namespace Fergun.Modules
         [Example("return Context.Client.Guilds.Count();")]
         public async Task Eval([Remainder, Summary("evalParam1")] string code)
         {
-            Stopwatch sw = new Stopwatch();
+            var sw = new Stopwatch();
             code = code.Trim('`'); //Remove code block tags
             bool silent = false;
             if (code.EndsWith("-s", StringComparison.OrdinalIgnoreCase))

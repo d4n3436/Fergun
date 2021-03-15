@@ -37,24 +37,14 @@ namespace Fergun.APIs.BingTranslator
             }
 
             // Convert Google Translate language codes to Bing Translator equivalent.
-            switch (toLanguage)
+            toLanguage = toLanguage switch
             {
-                case "no":
-                    toLanguage = "nb";
-                    break;
-
-                case "pt":
-                    toLanguage = "pt-pt";
-                    break;
-
-                case "zh-CN":
-                    toLanguage = "zh-Hans";
-                    break;
-
-                case "zh-TW":
-                    toLanguage = "zh-Hant";
-                    break;
-            }
+                "no" => "nb",
+                "pt" => "pt-pt",
+                "zh-CN" => "zh-Hans",
+                "zh-TW" => "zh-Hant",
+                _ => toLanguage
+            };
 
             var data = new Dictionary<string, string>
             {

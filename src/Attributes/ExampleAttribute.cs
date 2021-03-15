@@ -6,7 +6,7 @@ namespace Fergun.Attributes
     /// Attaches an example to your command.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class ExampleAttribute : Attribute
+    public sealed class ExampleAttribute : Attribute
     {
         public string Example { get; }
 

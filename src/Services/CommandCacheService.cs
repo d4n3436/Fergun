@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -203,8 +203,7 @@ namespace Fergun.Services
             // collection, so iterating and removing will throw an exception. Converting it to a list first avoids this.
             var toPurge = _cache.Where(p =>
             {
-                TimeSpan difference = DateTimeOffset.UtcNow - SnowflakeUtils.FromSnowflake(p.Key);
-
+                var difference = DateTimeOffset.UtcNow - SnowflakeUtils.FromSnowflake(p.Key);
                 return difference.TotalHours >= _maxMessageTime;
             }).ToList();
 
@@ -244,7 +243,7 @@ namespace Fergun.Services
             {
                 // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
                 if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
-                IMessage before = cacheable.Value;
+                var before = cacheable.Value;
                 if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))

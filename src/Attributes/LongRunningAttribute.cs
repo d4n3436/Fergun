@@ -12,7 +12,7 @@ namespace Fergun.Attributes
     /// An attribute that sends the typing state to the current channel (useful for long-running commands).
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
-    public class LongRunningAttribute : PreconditionAttribute
+    public sealed class LongRunningAttribute : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {

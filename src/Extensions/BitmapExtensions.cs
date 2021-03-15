@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -8,7 +8,7 @@ namespace Fergun.Extensions
     public static class BitmapExtensions
     {
         /// <summary>
-        /// Resize the image to the specified width and height.
+        /// Resizes the image to the specified width and height.
         /// </summary>
         /// <param name="image">The image to resize.</param>
         /// <param name="width">The width to resize to.</param>
@@ -38,13 +38,13 @@ namespace Fergun.Extensions
         public static Bitmap InvertColor(this Bitmap source)
         {
             //create a blank bitmap the same size as original
-            Bitmap newBitmap = new Bitmap(source.Width, source.Height);
+            var newBitmap = new Bitmap(source.Width, source.Height);
 
             //get a graphics object from the new image
-            Graphics g = Graphics.FromImage(newBitmap);
+            var g = Graphics.FromImage(newBitmap);
 
             // create the negative color matrix
-            ColorMatrix colorMatrix = new ColorMatrix(new[]
+            var colorMatrix = new ColorMatrix(new[]
             {
                 new float[] {-1, 0, 0, 0, 0},
                 new float[] {0, -1, 0, 0, 0},
@@ -54,7 +54,7 @@ namespace Fergun.Extensions
             });
 
             // create some image attributes
-            ImageAttributes attributes = new ImageAttributes();
+            var attributes = new ImageAttributes();
 
             attributes.SetColorMatrix(colorMatrix);
 
@@ -100,7 +100,7 @@ namespace Fergun.Extensions
             {
                 for (int y = 0; y < bmp.Height; y++)
                 {
-                    Color pixel = bmp.GetPixel(x, y);
+                    var pixel = bmp.GetPixel(x, y);
                     r += pixel.R;
                     g += pixel.G;
                     b += pixel.B;

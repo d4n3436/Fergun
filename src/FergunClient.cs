@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Resources;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,7 +98,7 @@ namespace Fergun
             }
 
             // LogSeverity.Debug is too verbose
-            if (Config.LavaConfig.LogSeverity == LogSeverity.Debug)
+            if (Config!.LavaConfig.LogSeverity == LogSeverity.Debug)
             {
                 Config.LavaConfig.LogSeverity = LogSeverity.Verbose;
             }
@@ -256,7 +255,7 @@ namespace Fergun
 
         private async Task StartLavalinkAsync()
         {
-            Process[] processList = Process.GetProcessesByName("java");
+            var processList = Process.GetProcessesByName("java");
             if (processList.Length == 0)
             {
                 string lavalinkFile = Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar");
@@ -265,7 +264,7 @@ namespace Fergun
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Lavalink", "Lavalink.jar not found."));
                     return;
                 }
-                ProcessStartInfo process = new ProcessStartInfo
+                var process = new ProcessStartInfo
                 {
                     FileName = "java",
                     Arguments = $"-jar \"{Path.Combine(AppContext.BaseDirectory, "Lavalink")}/Lavalink.jar\"",
@@ -337,7 +336,7 @@ namespace Fergun
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "Local VERSION.txt not found or can't be read. Assuming the remote version is newer than the local..."));
             }
 
-            Process[] processList = Process.GetProcessesByName("java");
+            var processList = Process.GetProcessesByName("java");
             if (processList.Length != 0)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "There's a running instance of Lavalink (or a java app) and it's not possible to kill it since it's probably in use."));
@@ -406,15 +405,15 @@ namespace Fergun
 
         private static IEnumerable<CultureInfo> GetAvailableCultures()
         {
-            List<CultureInfo> result = new List<CultureInfo>();
+            var result = new List<CultureInfo>();
 
-            CultureInfo[] cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
-            foreach (CultureInfo culture in cultures)
+            var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            foreach (var culture in cultures)
             {
                 try
                 {
                     if (culture.Equals(CultureInfo.InvariantCulture)) continue;
-                    ResourceSet rs = strings.ResourceManager.GetResourceSet(culture, true, false);
+                    var rs = strings.ResourceManager.GetResourceSet(culture, true, false);
                     if (rs != null)
                     {
                         result.Add(culture);
@@ -464,7 +463,7 @@ namespace Fergun
         {
             var toPurge = MessageCache.Where(p =>
             {
-                TimeSpan difference = DateTimeOffset.UtcNow - p.Value.CreatedAt;
+                var difference = DateTimeOffset.UtcNow - p.Value.CreatedAt;
                 return difference.TotalHours >= Constants.MaxMessageCacheLongevity;
             }).ToList();
 
@@ -477,7 +476,7 @@ namespace Fergun
         {
             if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
             if (GuildUtils.UserConfigCache.TryGetValue(after.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
-            IMessage before = cachedbefore.Value;
+            var before = cachedbefore.Value;
             if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
             MessageCache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated);
@@ -486,7 +485,7 @@ namespace Fergun
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            IMessage message = cache.Value;
+            var message = cache.Value;
             if (message?.Source != MessageSource.User) return;
             if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
 

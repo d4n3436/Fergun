@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,7 +21,6 @@ using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
-using GoogleTranslateFreeApi;
 using Newtonsoft.Json;
 
 namespace Fergun.Modules
@@ -43,7 +42,7 @@ namespace Fergun.Modules
 
         public AIDungeon(CommandService commands, LogService logService)
         {
-            _api ??= new AidAPI(FergunClient.Config.AiDungeonToken);
+            _api ??= new AidAPI(FergunClient.Config.AiDungeonToken ?? "");
             _cmdService ??= commands;
             _logService ??= logService;
         }
@@ -179,7 +178,7 @@ namespace Fergun.Modules
                 .WithThumbnailUrl(Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReactionAsync(-1));
+            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReactionAsync(-1));
 
             data.AddCallbacks(callbacks);
             var message = await InlineReactionReplyAsync(data);
@@ -231,7 +230,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
-            string initialPrompt = actionList[actionList.Count - 1].Text;
+            string initialPrompt = actionList[^1].Text;
             if (actionList.Count > 1)
             {
                 actionList.RemoveAt(actionList.Count - 1);
@@ -316,7 +315,7 @@ namespace Fergun.Modules
             builder.Title = Locate("CharacterSelect");
             builder.Description = list.ToString();
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReaction2Async(-1));
+            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReaction2Async(-1));
 
             data.AddCallbacks(callbacks);
 
@@ -574,7 +573,7 @@ namespace Fergun.Modules
                 return string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken));
             }
 
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             // check the id
             string checkResult = await CheckIdAsync(adventure);
             if (checkResult != null)
@@ -681,12 +680,12 @@ namespace Fergun.Modules
                 return Locate("ErrorInAPI");
             }
 
-            string textToShow = actionList[actionList.Count - 1].Text;
+            string textToShow = actionList[^1].Text;
             if (actionType == ActionType.Do ||
                 actionType == ActionType.Say ||
                 actionType == ActionType.Story)
             {
-                textToShow = actionList[actionList.Count - 2].Text + textToShow;
+                textToShow = actionList[^2].Text + textToShow;
             }
 
             if (!string.IsNullOrEmpty(textToShow) && AutoTranslate())
@@ -766,7 +765,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
@@ -812,7 +811,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("ErrorInAPI"));
             }
 
-            var lastAction = actionList[actionList.Count - 1];
+            var lastAction = actionList[^1];
             string oldOutput = lastAction.Text;
 
             uint actionId = uint.Parse(lastAction.Id, CultureInfo.InvariantCulture);
@@ -864,7 +863,7 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> MakePublic([Summary("makepublicParam1")] uint adventureId)
         {
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
@@ -890,7 +889,7 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> MakePrivate([Summary("makeprivateParam1")] uint adventureId)
         {
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
@@ -918,9 +917,9 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> IdList([Summary("idlistParam1")] IUser user = null)
         {
             user ??= Context.User;
-            var adventures = FergunClient.Database.FindManyDocuments<AidAdventure>(Constants.AidAdventuresCollection, x => x.OwnerId == user.Id);
+            var adventures = FergunClient.Database.FindManyDocuments<AidAdventure>(Constants.AidAdventuresCollection, x => x.OwnerId == user.Id).ToArray();
 
-            if (!adventures.Any())
+            if (adventures.Length == 0)
             {
                 return FergunResult.FromError(string.Format(Locate(user.Id == Context.User.Id ? "SelfNoIDs" : "NoIDs"), user));
             }
@@ -946,7 +945,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             if (adventure == null)
             {
                 return FergunResult.FromError(Locate("IDNotFound"));
@@ -1022,7 +1021,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
@@ -1040,7 +1039,7 @@ namespace Fergun.Modules
                 .WithDescription(Locate("AdventureDeletionPrompt"))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async context => await HandleReactionAsync(true))
+            var data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async context => await HandleReactionAsync(true))
                 .AddCallBack(new Emoji("✅"), async (context, reaction) => await HandleReactionAsync(false));
 
             message = await InlineReactionReplyAsync(data);
@@ -1103,7 +1102,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.AiDungeonToken)));
             }
 
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
             string checkResult = await CheckIdAsync(adventure);
             if (checkResult != null)
             {
@@ -1171,7 +1170,7 @@ namespace Fergun.Modules
         [Example("2582734")]
         public async Task<RuntimeResult> Give([Summary("giveParam1")] uint adventureId, [Remainder, Summary("giveParam2")] IUser user)
         {
-            AidAdventure adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
+            var adventure = FergunClient.Database.FindDocument<AidAdventure>(Constants.AidAdventuresCollection, x => x.Id == adventureId);
 
             if (adventure == null)
             {
@@ -1284,7 +1283,6 @@ namespace Fergun.Modules
                 using var translator = new GTranslator();
                 var result = await translator.TranslateAsync(text, to, from);
                 return result.Translation;
-                
             }
             catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
             {

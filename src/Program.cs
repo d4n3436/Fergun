@@ -1,19 +1,19 @@
-﻿using System;
+using System;
 using System.Globalization;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fergun
 {
-    internal class Program
+    internal static class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             // Exceptions in english
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            new FergunClient().InitializeAsync().GetAwaiter().GetResult();
+
+            await new FergunClient().InitializeAsync();
         }
     }
 }

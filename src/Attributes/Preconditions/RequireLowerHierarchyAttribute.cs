@@ -14,8 +14,9 @@ namespace Fergun.Attributes.Preconditions
     [AttributeUsage(AttributeTargets.Parameter)]
     public sealed class RequireLowerHierarchyAttribute : ParameterPreconditionAttribute
     {
-        private readonly string _errorMessage;
-        private readonly bool _ignoreNotGuildContext;
+        public string ErrorMessage { get; }
+
+        public bool IgnoreNotGuildContext { get; }
 
         public RequireLowerHierarchyAttribute()
         {
@@ -23,29 +24,30 @@ namespace Fergun.Attributes.Preconditions
 
         public RequireLowerHierarchyAttribute(string errorMessage)
         {
-            _errorMessage = errorMessage;
+            ErrorMessage = errorMessage;
         }
 
         public RequireLowerHierarchyAttribute(string errorMessage, bool ignoreNotGuildContext) : this(errorMessage)
         {
-            _ignoreNotGuildContext = ignoreNotGuildContext;
+            IgnoreNotGuildContext = ignoreNotGuildContext;
         }
 
         /// <inheritdoc />
         public override async Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
         {
-            if (value is IGuildUser user)
+            if (!(value is IGuildUser user))
             {
-                int botHierarchy = (await user.Guild.GetCurrentUserAsync()).GetHierarchy();
-                int userHierarchy = user.GetHierarchy();
-                return botHierarchy > userHierarchy
+                return IgnoreNotGuildContext
                     ? PreconditionResult.FromSuccess()
-                    : PreconditionResult.FromError(_errorMessage ?? "Specified user must be lower in hierarchy.");
+                    : PreconditionResult.FromError("Command requires Guild context.");
             }
-            return _ignoreNotGuildContext
+
+            int botHierarchy = (await user.Guild.GetCurrentUserAsync()).GetHierarchy();
+            int userHierarchy = user.GetHierarchy();
+            return botHierarchy > userHierarchy
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError("Command requires Guild context.");
+                : PreconditionResult.FromError(ErrorMessage ?? "Specified user must be lower in hierarchy.");
         }
     }
 }

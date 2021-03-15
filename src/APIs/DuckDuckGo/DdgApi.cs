@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
@@ -64,7 +64,7 @@ namespace Fergun.APIs.DuckDuckGo
         {
             var content = await _client.GetStringAsync(new Uri($"?q={Uri.EscapeDataString(keywords)}", UriKind.Relative));
 
-            Match match = _tokenRegex.Match(content);
+            var match = _tokenRegex.Match(content);
             if (match.Success)
             {
                 return match.Groups[1].Value;

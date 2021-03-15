@@ -8,7 +8,8 @@
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Authors>d4n3436</Authors>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <AnalysisLevel>4</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

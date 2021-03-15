@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -223,11 +223,11 @@ namespace Fergun.Services
                     player = LavaNode.GetPlayer(guild);
                 }
 
-                TimeSpan time = TimeSpan.Zero;
+                var time = TimeSpan.Zero;
                 if (player.PlayerState == PlayerState.Playing)
                 {
                     int trackCount = Math.Min(10, search.Tracks.Count);
-                    foreach (LavaTrack track in search.Tracks.Take(10))
+                    foreach (var track in search.Tracks.Take(10))
                     {
                         player.Queue.Enqueue(track);
                         time += track.Duration;
@@ -237,7 +237,7 @@ namespace Fergun.Services
                 else
                 {
                     int trackCount = Math.Min(9, search.Tracks.Count);
-                    foreach (LavaTrack track in search.Tracks.Take(10).Skip(1))
+                    foreach (var track in search.Tracks.Take(10).Skip(1))
                     {
                         player.Queue.Enqueue(track);
                         time += track.Duration;
@@ -331,7 +331,7 @@ namespace Fergun.Services
                 return string.Format(GuildUtils.Locate("SeekComplete", textChannel), second, TimeSpan.FromSeconds(second).ToShortForm(), player.Track.Duration.ToShortForm());
             }
 
-            if (!TimeSpan.TryParseExact(time, _timeFormats, CultureInfo.InvariantCulture, out TimeSpan span))
+            if (!TimeSpan.TryParseExact(time, _timeFormats, CultureInfo.InvariantCulture, out var span))
             {
                 return GuildUtils.Locate("SeekInvalidFormat", textChannel);
             }
@@ -548,11 +548,11 @@ namespace Fergun.Services
 
         public async Task ShutdownAllPlayersAsync()
         {
-            var players = LavaNode.Players.Where(x => x != null);
+            var players = LavaNode.Players.Where(x => x != null).ToArray();
 
-            if (players.Any())
+            if (players.Length > 0)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Count()} music players..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Length} music players..."));
 
                 foreach (var player in players)
                 {

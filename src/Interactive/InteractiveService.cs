@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Discord;
@@ -109,7 +109,7 @@ namespace Fergun.Interactive
             context.Client.MessageReceived += Func;
 
             var trigger = eventTrigger.Task;
-            var delay = Task.Delay(timeout.Value);
+            var delay = Task.Delay(timeout!.Value);
             var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
 
             context.Client.MessageReceived -= Func;
@@ -181,7 +181,7 @@ namespace Fergun.Interactive
 
             _ = Task.Run(async () =>
             {
-                await Task.Delay(timeout.Value).ConfigureAwait(false);
+                await Task.Delay(timeout!.Value).ConfigureAwait(false);
                 await message.DeleteAsync().ConfigureAwait(false);
             });
 

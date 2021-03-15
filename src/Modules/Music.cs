@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -80,14 +80,9 @@ namespace Fergun.Modules
                 bool hasPlayer = _musicService.LavaNode.TryGetPlayer(Context.Guild, out var player);
                 if (hasPlayer && player.PlayerState == PlayerState.Playing)
                 {
-                    if (player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase))
-                    {
-                        query = player.Track.Title;
-                    }
-                    else
-                    {
-                        query = $"{player.Track.Author} - {player.Track.Title}";
-                    }
+                    query = player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase)
+                        ? player.Track.Title
+                        : $"{player.Track.Author} - {player.Track.Title}";
                 }
                 else
                 {
@@ -190,7 +185,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = (SocketGuildUser)Context.User;
-            var (result, tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            (string result, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
             if (tracks == null)
             {
                 await SendEmbedAsync(result);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -159,7 +159,7 @@ namespace Fergun.Modules
             try
             {
                 builder.ImageUrl = "attachment://screenshot.png";
-                await using Stream image = await _httpClient.GetStreamAsync(new Uri(response.Url));
+                await using var image = await _httpClient.GetStreamAsync(new Uri(response.Url));
                 await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png", embed: builder.Build());
             }
             catch (HttpRequestException e)
@@ -194,8 +194,8 @@ namespace Fergun.Modules
             System.Drawing.Color avatarColor;
             try
             {
-                await using Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                using Bitmap img = new Bitmap(response);
+                await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
+                using var img = new Bitmap(response);
                 avatarColor = img.GetAverageColor();
             }
             catch (HttpRequestException e)
@@ -228,7 +228,7 @@ namespace Fergun.Modules
         [Example("i don't know what to say lol")]
         public async Task<RuntimeResult> BadTranslator([Remainder, Summary("badtranslatorParam1")] string text)
         {
-            List<string> languageChain = new List<string>();
+            var languageChain = new List<string>();
             const int chainCount = 7;
             string originalLang = null;
             for (int i = 0; i < chainCount; i++)
@@ -247,7 +247,7 @@ namespace Fergun.Modules
                     } while (languageChain.Contains(targetLang));
                 }
 
-                SimpleTranslationResult translation = await TranslateSimpleAsync(text, targetLang);
+                var translation = await TranslateSimpleAsync(text, targetLang);
                 if (translation.Error != null)
                 {
                     return FergunResult.FromError(Locate(translation.Error));
@@ -301,12 +301,12 @@ namespace Fergun.Modules
         [Example("aGVsbG8gd29ybGQ=")]
         public async Task<RuntimeResult> Base64Decode([Remainder, Summary("base64decodeParam1")] string text)
         {
-            if (!text.IsBase64())
+            if (!text.TryBase64Decode(out string decoded))
             {
                 return FergunResult.FromError(Locate("base64decodeInvalid"));
             }
 
-            await ReplyAsync(Encoding.UTF8.GetString(Convert.FromBase64String(text)), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(decoded, allowedMentions: AllowedMentions.None);
             return FergunResult.FromSuccess();
         }
 
@@ -417,7 +417,7 @@ namespace Fergun.Modules
         {
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Calc: expression: {expression}"));
 
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             var ex = new Expression(expression);
             if (ex.HasErrors())
             {
@@ -549,9 +549,9 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Color: {color.Truncate(30)} -> {rawColor} -> {argbColor}"));
             }
 
-            using (Bitmap bmp = new Bitmap(500, 500))
+            using (var bmp = new Bitmap(500, 500))
             {
-                using (Graphics g = Graphics.FromImage(bmp))
+                using (var g = Graphics.FromImage(bmp))
                 {
                     g.Clear(System.Drawing.Color.FromArgb(argbColor.R, argbColor.G, argbColor.B));
                 }
@@ -598,7 +598,7 @@ namespace Fergun.Modules
                 .AddField(Locate("Value"), valueList, true)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            ReactionCallbackData data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
+            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
                 .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
                 {
                     guild.CaptionbotAutoTranslate = !guild.CaptionbotAutoTranslate;
@@ -1009,11 +1009,11 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
-            using (Bitmap img = new Bitmap(response))
-            using (Bitmap inverted = img.InvertColor())
+            using (var img = new Bitmap(response))
+            using (var inverted = img.InvertColor())
             await using (Stream invertedFile = new MemoryStream())
             {
-                System.Drawing.Imaging.ImageFormat format = inverted.RawFormat;
+                var format = inverted.RawFormat;
                 if (inverted.RawFormat.Guid == System.Drawing.Imaging.ImageFormat.MemoryBmp.Guid)
                 {
                     format = System.Drawing.Imaging.ImageFormat.Jpeg;
@@ -1242,7 +1242,7 @@ namespace Fergun.Modules
             }
 
             dynamic obj = JsonConvert.DeserializeObject(json);
-            string resultUrl = (string)obj.output_url;
+            string resultUrl = (string)obj?.output_url;
             if (string.IsNullOrWhiteSpace(resultUrl))
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
@@ -1340,7 +1340,7 @@ namespace Fergun.Modules
 
             try
             {
-                await using Stream image = await _httpClient.GetStreamAsync(new Uri(response.Url));
+                await using var image = await _httpClient.GetStreamAsync(new Uri(response.Url));
                 await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png");
             }
             catch (HttpRequestException e)
@@ -1791,8 +1791,8 @@ namespace Fergun.Modules
             System.Drawing.Color avatarColor;
             try
             {
-                await using Stream response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                using Bitmap img = new Bitmap(response);
+                await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
+                using var img = new Bitmap(response);
                 avatarColor = img.GetAverageColor();
             }
             catch (HttpRequestException e)
@@ -1839,8 +1839,8 @@ namespace Fergun.Modules
                 // I would want to know who did the awful json response structure.
                 response = await wc.DownloadStringTaskAsync($"https://{GetLanguage()}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
             }
-            //response = '[' + SearchResponse.Substring(SearchResponse.IndexOf(',') + 1, SearchResponse.Length - SearchResponse.IndexOf(',') - 1);
-            List<dynamic> search = JsonConvert.DeserializeObject<List<dynamic>>(response);
+
+            var search = JsonConvert.DeserializeObject<List<dynamic>>(response);
             string langToUse = GetLanguage();
             if (search[1].Count == 0)
             {
@@ -1866,7 +1866,7 @@ namespace Fergun.Modules
             try
             {
                 using var wc = new WebClient();
-                string articleUrl = search[search.Count - 1][0];
+                string articleUrl = search[^1][0];
                 string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
 
@@ -1905,7 +1905,7 @@ namespace Fergun.Modules
                 }
             }
 
-            if (!Context.IsPrivate && (Context.Channel as ITextChannel).IsNsfw && article.OriginalImage?.Source != null)
+            if (Context.IsNsfw() && article.OriginalImage?.Source != null)
             {
                 string decodedUrl = Uri.UnescapeDataString(article.OriginalImage.Source);
                 if (Uri.IsWellFormedUriString(decodedUrl, UriKind.Absolute))
@@ -1989,7 +1989,7 @@ namespace Fergun.Modules
                 response = await wc.DownloadStringTaskAsync($"https://xkcd.com/{number ?? RngInstance.Next(1, _lastComic.Num)}/info.0.json");
             }
 
-            XkcdComic comic = JsonConvert.DeserializeObject<XkcdComic>(response);
+            var comic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
             var builder = new EmbedBuilder()
                 .WithTitle(comic.Title.Truncate(EmbedBuilder.MaxTitleLength))
@@ -2081,7 +2081,7 @@ namespace Fergun.Modules
                 return ("InvalidFileType", null);
             }
 
-            OcrEngine engine = fileType == FileType.Gif ? OcrEngine.Engine1 : OcrEngine.Engine2;
+            var engine = fileType == FileType.Gif ? OcrEngine.Engine1 : OcrEngine.Engine2;
 
             OCRSpaceResponse ocr;
             try
@@ -2115,7 +2115,7 @@ namespace Fergun.Modules
         {
             string resultError = null;
             string resultTranslation = null;
-            Language resultTarget = GoogleTranslator.GetLanguageByISO(target);
+            var resultTarget = GoogleTranslator.GetLanguageByISO(target);
             Language resultSource = null;
 
             bool useBing = false;
@@ -2149,24 +2149,14 @@ namespace Fergun.Modules
                     string language = result[0].DetectedLanguage.Language;
 
                     // Convert Bing Translator language codes to Google Translate equivalent.
-                    switch (language)
+                    language = language switch
                     {
-                        case "nb":
-                            language = "no";
-                            break;
-
-                        case "pt-pt":
-                            language = "pt";
-                            break;
-
-                        case "zh-Hans":
-                            language = "zh-CN";
-                            break;
-
-                        case "zh-Hant":
-                            language = "zh-TW";
-                            break;
-                    }
+                        "nb" => "no",
+                        "pt-pt" => "pt",
+                        "zh-Hans" => "zh-CN",
+                        "zh-Hant" => "zh-TW",
+                        _ => language
+                    };
 
                     resultSource = GoogleTranslator.GetLanguageByISO(language) ?? Language.English;
 

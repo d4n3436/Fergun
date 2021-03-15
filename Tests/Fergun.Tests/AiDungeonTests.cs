@@ -137,7 +137,7 @@ namespace Fergun.Tests
             Assert.NotEmpty(actionList);
 
             // Get initial prompt
-            string initialPrompt = actionList[actionList.Count - 1].Text;
+            string initialPrompt = actionList[^1].Text;
             if (actionList.Count > 1)
             {
                 actionList.RemoveAt(actionList.Count - 1);
@@ -195,7 +195,7 @@ namespace Fergun.Tests
             Assert.NotNull(actionList);
             Assert.NotEmpty(actionList);
 
-            var lastAction = actionList[actionList.Count - 1];
+            var lastAction = actionList[^1];
 
             _fixture.LastActionId = uint.Parse(lastAction.Id, CultureInfo.InvariantCulture);
         }

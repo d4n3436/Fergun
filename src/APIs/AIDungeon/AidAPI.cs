@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.WebSockets;
@@ -15,23 +15,14 @@ namespace Fergun.APIs.AIDungeon
         public const string WebSocketEndpoint = "wss://api.aidungeon.io/subscriptions";
         public const string AllScenariosId = "edd5fdc0-9c81-11ea-a76c-177e6c0711b5";
 
-        public AidAPI()
-        {
-        }
-
         public AidAPI(string token)
         {
-            _token = token;
+            _token = token ?? throw new ArgumentNullException(nameof(token));
         }
 
         private async Task<WebSocketResponse> SendWebSocketRequestInternalAsync(WebSocketRequest request, bool subscribeAdventure)
         {
-            if (string.IsNullOrEmpty(_token))
-            {
-                throw new InvalidOperationException("Token can't be empty.");
-            }
-
-            ClientWebSocket webSocket = new ClientWebSocket();
+            var webSocket = new ClientWebSocket();
             webSocket.Options.AddSubProtocol("graphql-ws");
 
             await webSocket.ConnectAsync(new Uri(WebSocketEndpoint), CancellationToken.None);
@@ -74,7 +65,7 @@ namespace Fergun.APIs.AIDungeon
                     do
                     {
                         result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-                        ms.Write(buffer.Array, buffer.Offset, result.Count);
+                        ms.Write(buffer.Array!, buffer.Offset, result.Count);
                     }
                     while (!result.EndOfMessage);
 
@@ -112,7 +103,7 @@ namespace Fergun.APIs.AIDungeon
                 return response;
             }
             // Now the websocket doesn't return the adventure after sending an action request,
-            // so I'm gonna send an adventure request instead because the other way (keep an websocket alive and wait for the response)
+            // so I'm gonna send an adventure request instead because the other way (keep a websocket alive and wait for the response)
             // is too hard to make (at least to me)
             return await SendWebSocketRequestAsync(new WebSocketRequest(publicId, RequestType.GetAdventure));
         }

@@ -9,13 +9,6 @@ namespace Fergun.Interactive
     public class PaginatedMessage : EmbedBuilder
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
-        /// </summary>
-        public PaginatedMessage() : base()
-        {
-        }
-
-        /// <summary>
         /// Gets or sets the pages. The embeds in this collection will override the base embed.
         /// </summary>
         public IEnumerable<EmbedBuilder> Pages { get; set; } = new List<EmbedBuilder>();

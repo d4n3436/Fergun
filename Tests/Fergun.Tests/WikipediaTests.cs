@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,7 +15,6 @@ namespace Fergun.Tests
         [InlineData("discord")]
         [InlineData("windows 10")]
         [InlineData("c#")]
-
         public async Task WikipediaAvailableTest(string query)
         {
             // Arrange
@@ -30,7 +29,7 @@ namespace Fergun.Tests
             Assert.NotEmpty(search[1]);
 
             // Arrange
-            string articleUrl = search[search.Count - 1][0];
+            string articleUrl = search[^1][0];
 
             // Act
             response = await httpClient.GetStringAsync($"https://en.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}");

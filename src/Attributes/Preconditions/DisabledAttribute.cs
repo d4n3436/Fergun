@@ -8,7 +8,7 @@ namespace Fergun.Attributes.Preconditions
     /// Disables the command or module globally or on a specific guild.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public class DisabledAttribute : RequireContextAttribute
+    public sealed class DisabledAttribute : RequireContextAttribute
     {
         public DisabledAttribute() : base(ContextType.Guild)
         {
