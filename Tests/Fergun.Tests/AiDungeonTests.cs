@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Fergun.Tests
 
         public string NormalAdventureId { get; set; }
 
-        public uint LastActionId { get; set; }
+        public long LastActionId { get; set; }
     }
 
     [CollectionDefinition(nameof(AiDungeonTests), DisableParallelization = true)]
@@ -197,7 +197,7 @@ namespace Fergun.Tests
 
             var lastAction = actionList[^1];
 
-            _fixture.LastActionId = uint.Parse(lastAction.Id, CultureInfo.InvariantCulture);
+            _fixture.LastActionId = long.Parse(lastAction.Id, CultureInfo.InvariantCulture);
         }
 
         [Fact]

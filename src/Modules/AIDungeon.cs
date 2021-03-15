@@ -243,7 +243,7 @@ namespace Fergun.Modules
                 initialPrompt = await TranslateSimplerAsync(initialPrompt, "en", GetLanguage());
             }
 
-            uint id = uint.Parse(adventure.Id, CultureInfo.InvariantCulture);
+            long id = long.Parse(adventure.Id, CultureInfo.InvariantCulture);
 
             builder.Description = initialPrompt.Truncate(EmbedBuilder.MaxDescriptionLength);
             builder.WithFooter($"ID: {id} - Tip: {string.Format(Locate("FirstTip"), GetPrefix())}", Constants.AiDungeonLogoUrl);
@@ -566,7 +566,7 @@ namespace Fergun.Modules
             return (null, response.Payload.Data.Adventure);
         }
 
-        private async Task<string> SendAidCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", uint actionId = 0)
+        private async Task<string> SendAidCommandAsync(uint adventureId, string promptText, ActionType actionType = ActionType.Continue, string text = "", long actionId = 0)
         {
             if (string.IsNullOrEmpty(FergunClient.Config.AiDungeonToken))
             {
@@ -814,7 +814,7 @@ namespace Fergun.Modules
             var lastAction = actionList[^1];
             string oldOutput = lastAction.Text;
 
-            uint actionId = uint.Parse(lastAction.Id, CultureInfo.InvariantCulture);
+            long actionId = long.Parse(lastAction.Id, CultureInfo.InvariantCulture);
 
             if (AutoTranslate())
             {

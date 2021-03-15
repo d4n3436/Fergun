@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 namespace Fergun.APIs.AIDungeon
 {
@@ -42,7 +42,7 @@ namespace Fergun.APIs.AIDungeon
             }
         }
 
-        public WebSocketRequest(string publicId, ActionType action, string text = "", uint actionId = 0)
+        public WebSocketRequest(string publicId, ActionType action, string text = "", long actionId = 0)
         {
             var inputData = new InputData
             {

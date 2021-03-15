@@ -93,7 +93,7 @@ namespace Fergun.APIs.AIDungeon
             }
         }
 
-        public async Task<WebSocketResponse> SendWebSocketRequestAsync(string publicId, ActionType action, string text = "", uint actionId = 0)
+        public async Task<WebSocketResponse> SendWebSocketRequestAsync(string publicId, ActionType action, string text = "", long actionId = 0)
         {
             var response = await SendWebSocketRequestAsync(new WebSocketRequest(publicId, action, text, actionId), true);
             // some checks for errors

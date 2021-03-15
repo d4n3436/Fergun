@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Fergun
@@ -16,7 +16,7 @@ namespace Fergun
         /// <param name="publicId">The public Id of the adventure.</param>
         /// <param name="ownerId">The owner Id of the adventure.</param>
         /// <param name="isPublic">Whether the adventure is public.</param>
-        public AidAdventure(uint id, string publicId, ulong ownerId, bool isPublic)
+        public AidAdventure(long id, string publicId, ulong ownerId, bool isPublic)
         {
             Id = id;
             PublicId = publicId;
@@ -31,7 +31,7 @@ namespace Fergun
         /// <summary>
         /// Gets or sets the Id of this adventure.
         /// </summary>
-        public uint Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Gets or sets the public Id of this adventure.
