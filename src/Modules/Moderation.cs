@@ -88,11 +88,9 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("MessagesOlderThan2Weeks"));
             }
 
-            messages.Add(Context.Message);
-
             try
             {
-                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
+                await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages.Append(Context.Message));
             }
             catch (HttpException e) when (e.HttpCode == HttpStatusCode.NotFound) { }
 
