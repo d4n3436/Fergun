@@ -61,6 +61,7 @@ namespace Fergun.APIs.GTranslate
         /// <param name="to">The target language.</param>
         /// <param name="from">The source language.</param>
         /// <returns>A task that represents the asynchronous translation operation. The task contains the translation result.</returns>
+        /// <exception cref="TranslationException">Thrown when an error occurs during the translation process.</exception>
         public async Task<TranslationResult> TranslateAsync(string text, string to, string from = "auto")
         {
             string q = "?client=dict-chrome-ex" +
@@ -78,9 +79,14 @@ namespace Fergun.APIs.GTranslate
                 .FirstOrDefault()?
                 .FirstOrDefault()?
                 .FirstOrDefault()?
-                .ToString() ?? "";
+                .ToString();
 
-            string sourceLanguage = response?
+            if (translation == null)
+            {
+                throw new TranslationException("Error parsing the translation response.");
+            }
+
+            string sourceLanguage = response
                 .ElementAtOrDefault(2)?
                 .ToString() ?? "";
 

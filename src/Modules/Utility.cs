@@ -2133,7 +2133,7 @@ namespace Fergun.Modules
 
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
             }
-            catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException)
+            catch (Exception e) when (e is TranslationException || e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating, using Bing", e));
                 useBing = true;

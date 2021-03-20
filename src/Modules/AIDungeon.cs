@@ -1284,7 +1284,7 @@ namespace Fergun.Modules
                 var result = await translator.TranslateAsync(text, to, from);
                 return result.Translation;
             }
-            catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
+            catch (Exception e) when (e is TranslationException || e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
             {
                 try
                 {

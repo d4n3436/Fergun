@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Fergun.APIs.GTranslate;
 using Xunit;
 
@@ -21,7 +21,7 @@ namespace Fergun.Tests
             var results = await translator.TranslateAsync(text, to);
 
             // Assert
-            Assert.NotNull(results.Translation);
+            Assert.NotNull(results?.Translation);
         }
     }
 }
