@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Fergun.APIs;
 using Xunit;
 
@@ -6,7 +6,7 @@ namespace Fergun.Tests
 {
     public class HastebinTests
     {
-        [Theory(Skip = "Hastebin is down")]
+        [Theory]
         [InlineData("hi")]
         [InlineData("The quick brown fox jumps over the lazy dog.")]
         [InlineData("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")]
@@ -16,7 +16,7 @@ namespace Fergun.Tests
             var response = await Hastebin.UploadAsync(content);
 
             // Assert
-            Assert.False(string.IsNullOrEmpty(response.Key));
+            Assert.False(string.IsNullOrEmpty(response));
         }
     }
 }

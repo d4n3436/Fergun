@@ -278,8 +278,8 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(text);
-                    text = Format.Url(Locate("HastebinLink"), response.GetLink());
+                    var hastebinUrl = await Hastebin.UploadAsync(text);
+                    text = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
@@ -326,8 +326,7 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(text);
-                    text = response.GetLink();
+                    text = await Hastebin.UploadAsync(text);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
@@ -1073,8 +1072,8 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(text);
-                    text = Format.Url(Locate("HastebinLink"), response.GetLink());
+                    var hastebinUrl = await Hastebin.UploadAsync(text);
+                    text = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
@@ -1139,8 +1138,8 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(translation.Text);
-                    translation.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
+                    var hastebinUrl = await Hastebin.UploadAsync(translation.Text);
+                    translation.Text = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
@@ -1176,7 +1175,8 @@ namespace Fergun.Modules
             await SendEmbedAsync($"{FergunClient.Config.LoadingEmote} {Locate("Uploading")}");
             try
             {
-                await SendEmbedAsync(Format.Url(Locate("HastebinLink"), (await Hastebin.UploadAsync(text)).GetLink()));
+                string hastebinUrl = await Hastebin.UploadAsync(text);
+                await SendEmbedAsync(Format.Url(Locate("HastebinLink"), hastebinUrl));
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
@@ -1539,8 +1539,8 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var response = await Hastebin.UploadAsync(result.Text);
-                    result.Text = Format.Url(Locate("HastebinLink"), response.GetLink());
+                    var hastebinUrl = await Hastebin.UploadAsync(result.Text);
+                    result.Text = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
