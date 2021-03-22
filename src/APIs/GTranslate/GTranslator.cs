@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Fergun.APIs.GTranslate
@@ -70,27 +72,54 @@ namespace Fergun.APIs.GTranslate
                        $"&q={Uri.EscapeDataString(text)}";
 
             string json = await _httpClient.GetStringAsync(new Uri(q, UriKind.Relative)).ConfigureAwait(false);
+            try
+            {
+                var model = JsonConvert.DeserializeObject<TranslationModel>(json);
 
-            var response = JToken.Parse(json)
+                var alts = new List<AlternativeTranslation>();
+                if (model.AlternativeTranslations.Count > 0)
+                {
+                    foreach (var alt in model.AlternativeTranslations[0].Alternative)
+                    {
+                        alts.Add(new AlternativeTranslation(alt.WordPostProcess, alt.Score));
+                    }
+                }
+
+                var ld = new List<LanguageDetection>();
+                var modelLd = model.LanguageDetection;
+
+                for (int i = 0; i < modelLd.SourceLanguages.Count; i++)
+                {
+                    ld.Add(new LanguageDetection(model.LanguageDetection.SourceLanguages[i], modelLd.SourceLanguageConfidences[i]));
+                }
+
+                return new TranslationResult(string.Concat(model.Sentences.Select(x => x.Translation)), text, to,
+                    model.Source, string.Concat(model.Sentences.Select(x => x.Transliteration)), model.Confidence,
+                    alts.AsReadOnly(), ld.AsReadOnly());
+            }
+            catch (JsonSerializationException)
+            {
+                var response = JToken.Parse(json)
                 .FirstOrDefault()?
                 .FirstOrDefault();
 
-            string translation = response?
-                .FirstOrDefault()?
-                .FirstOrDefault()?
-                .FirstOrDefault()?
-                .ToString();
+                string translation = response?
+                    .FirstOrDefault()?
+                    .FirstOrDefault()?
+                    .FirstOrDefault()?
+                    .ToString();
 
-            if (translation == null)
-            {
-                throw new TranslationException("Error parsing the translation response.");
+                if (translation == null)
+                {
+                    throw new TranslationException("Error parsing the translation response.");
+                }
+
+                string sourceLanguage = response
+                    .ElementAtOrDefault(2)?
+                    .ToString() ?? "";
+
+                return new TranslationResult(translation, text, to, sourceLanguage);
             }
-
-            string sourceLanguage = response
-                .ElementAtOrDefault(2)?
-                .ToString() ?? "";
-
-            return new TranslationResult(translation, text, to, sourceLanguage);
         }
 
         /// <inheritdoc />
