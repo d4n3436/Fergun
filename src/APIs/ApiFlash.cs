@@ -64,7 +64,7 @@ namespace Fergun.APIs
             }
 
             string q = $"access_key={accessKey}"
-                       + $"&url={url}"
+                       + $"&url={Uri.EscapeDataString(url)}"
                        + $"&response_type={ResponseType.Json.ToString().ToLowerInvariant()}";
 
             if (format != FormatType.Jpeg)
