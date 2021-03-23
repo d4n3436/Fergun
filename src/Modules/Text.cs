@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -45,7 +44,7 @@ namespace Fergun.Modules
         [Example("hello")]
         public async Task Randomize([Remainder, Summary("randomizeParam1")] string text)
         {
-            await ReplyAsync(new string(text.ToCharArray().OrderBy(s => RngInstance.Next(2) == 0).ToArray()).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.Randomize(RngInstance), allowedMentions: AllowedMentions.None);
         }
 
         [Command("repeat")]
@@ -68,7 +67,7 @@ namespace Fergun.Modules
         [Example("hello")]
         public async Task Reverse([Remainder, Summary("reverseParam1")] string text)
         {
-            await ReplyAsync(text.Reverse().Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.Reverse(), allowedMentions: AllowedMentions.None);
         }
 
         [Command("reverselines")]
@@ -86,7 +85,7 @@ namespace Fergun.Modules
         [Example("one two three")]
         public async Task ReverseWords([Remainder, Summary("reversewordsParam1")] string text)
         {
-            await ReplyAsync(string.Join(" ", text.Split(' ').Reverse()).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.ReverseWords().Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
         }
 
         [Command("sarcasm")]
@@ -95,7 +94,7 @@ namespace Fergun.Modules
         [Example("you can't do that!")]
         public async Task Sarcasm([Remainder, Summary("sarcasmParam1")] string text)
         {
-            await ReplyAsync(string.Concat(text.ToLowerInvariant().Select(x => RngInstance.Next(2) == 0 ? char.ToUpperInvariant(x) : x)).Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.ToRandomCase(RngInstance), allowedMentions: AllowedMentions.None);
         }
 
         [Command("vaporwave")]

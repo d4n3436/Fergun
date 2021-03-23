@@ -40,9 +40,9 @@ namespace Fergun.Extensions
             return maxPos;
         }
 
-        public static void Shuffle<T>(this IList<T> list)
+        public static void Shuffle<T>(this IList<T> list, Random rng = null)
         {
-            var rng = new Random();
+            rng ??= new Random();
 
             int n = list.Count;
             while (n > 1)
