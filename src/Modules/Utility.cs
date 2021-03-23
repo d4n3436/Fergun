@@ -1367,6 +1367,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
+        [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [Command("serverinfo", RunMode = RunMode.Async)]
         [Summary("serverinfoSummary")]
         [Alias("server", "guild", "guildinfo")]
