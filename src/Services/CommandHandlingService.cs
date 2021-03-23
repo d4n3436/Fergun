@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -63,17 +63,16 @@ namespace Fergun.Services
             // Ignore messages from bots
             if (message.Author.IsBot) return;
 
-            // Ignore... ignored users
-            lock (_userLock)
-            {
-                if (_ignoredUsers.Contains(message.Author.Id)) return;
-            }
-
             string prefix = GuildUtils.GetCachedPrefix(message.Channel);
             if (message.Content == prefix) return;
 
             if (message.Content == _client.CurrentUser.Mention)
             {
+                lock (_userLock)
+                {
+                    if (_ignoredUsers.Contains(message.Author.Id)) return;
+                }
+
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
                 await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix), _services);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} mentioned me."));
@@ -87,6 +86,12 @@ namespace Fergun.Services
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
                   message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
                 return;
+
+            // Ignore ignored users
+            lock (_userLock)
+            {
+                if (_ignoredUsers.Contains(message.Author.Id)) return;
+            }
 
             var result = _cmdService.Search(message.Content.Substring(argPos));
             if (!result.IsSuccess) return;
