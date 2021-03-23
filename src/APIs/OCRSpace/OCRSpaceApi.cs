@@ -37,10 +37,6 @@ namespace Fergun.APIs.OCRSpace
             {
                 throw new ArgumentNullException(nameof(url));
             }
-            //if (!Uri.IsWellFormedUriString(Url, UriKind.Absolute))
-            //{
-            //    throw new ArgumentException("The Url is not well formed.", nameof(Url));
-            //}
 
             string q = $"apikey={apiKey}"
                        + $"&url={url}"
@@ -51,11 +47,6 @@ namespace Fergun.APIs.OCRSpace
                        + $"&scale={scale}"
                        + $"&isTable={isTable}"
                        + $"&OCREngine={ocrEngine:D}";
-
-            //if (string.IsNullOrEmpty(Language) && OCREngine == OCREngine.Engine1)
-            //{
-            //    throw new ArgumentException("Automatic language detection can only be used on Engine 2.", nameof(Language));
-            //}
 
             if (!string.IsNullOrEmpty(language))
             {
@@ -90,7 +81,7 @@ namespace Fergun.APIs.OCRSpace
     /// </summary>
     public enum OcrEngine
     {
-        Engine1,
+        Engine1 = 1,
         Engine2
     }
 }
