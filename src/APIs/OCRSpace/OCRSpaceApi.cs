@@ -39,7 +39,7 @@ namespace Fergun.APIs.OCRSpace
             }
 
             string q = $"apikey={apiKey}"
-                       + $"&url={url}"
+                       + $"&url={Uri.EscapeDataString(url)}"
                        + $"&isOverlayRequired={isOverlayRequired}"
                        + $"&detectOrientation={detectOrientation}"
                        + $"&isCreateSearchablePdf={isCreateSearchablePdf}"
