@@ -546,11 +546,11 @@ namespace Fergun.Services
             return string.Format(GuildUtils.Locate("NowLooping", textChannel), countValue);
         }
 
-        public async Task ShutdownAllPlayersAsync()
+        public async Task<int> ShutdownAllPlayersAsync(bool simulate)
         {
             var players = LavaNode.Players.Where(x => x != null).ToArray();
 
-            if (players.Length > 0)
+            if (!simulate && players.Length > 0)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Logout", $"Shutting down {players.Length} music players..."));
 
@@ -575,6 +575,8 @@ namespace Fergun.Services
                     catch (NullReferenceException) { }
                 }
             }
+
+            return players.Length;
         }
     }
 }

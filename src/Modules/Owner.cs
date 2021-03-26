@@ -388,12 +388,17 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("logout")]
+        [Command("logout", RunMode = RunMode.Async)]
         [Summary("logoutSummary")]
         [Alias("die")]
-        public async Task<RuntimeResult> Logout()
+        public async Task<RuntimeResult> Logout([Summary("logoutParam1")]  bool simulate = false)
         {
-            await _musicService.ShutdownAllPlayersAsync();
+            int count = await _musicService.ShutdownAllPlayersAsync(simulate);
+            if (simulate)
+            {
+                await SendEmbedAsync($"Disconnecting the bot would shut down {count} music player(s).");
+                return FergunResult.FromSuccess();
+            }
 
             await ReplyAsync("Bye bye");
             await Context.Client.SetStatusAsync(UserStatus.Invisible);
@@ -405,11 +410,16 @@ namespace Fergun.Modules
             return FergunResult.FromError("Wait. This line was not supposed to be reached.");
         }
 
-        [Command("restart")]
+        [Command("restart", RunMode = RunMode.Async)]
         [Summary("restartSummary")]
-        public async Task<RuntimeResult> Restart()
+        public async Task<RuntimeResult> Restart([Summary("restartParam1")] bool simulate = false)
         {
-            await _musicService.ShutdownAllPlayersAsync();
+            int count = await _musicService.ShutdownAllPlayersAsync(simulate);
+            if (simulate)
+            {
+                await SendEmbedAsync($"Restarting the bot would shut down {count} music player(s).");
+                return FergunResult.FromSuccess();
+            }
 
             if (Context.Guild.CurrentUser.GuildPermissions.AddReactions)
             {
