@@ -122,6 +122,7 @@ To shut down the bot use `logout`.
 | `PresenceIntent` | Whether the Guild Presences intent should be used. Used in multiple commands, required in `spotify`. | If your bot is in more than 100 servers this requires [verification and whitelisting](https://support.discord.com/hc/en-us/articles/360040720412).
 | `ServerMembersIntent` | Whether the Guild Members intent should be used. Used in user join/leave/kick events and for downloading the entire member list. | If your bot is in more than 100 servers this requires [verification and whitelisting](https://support.discord.com/hc/en-us/articles/360040720412)
 | `MessageCacheSize` | The message cache size, used in commands that gets cached messages in a channel. | The default value is 100, setting this to 0 disables the message cache.
+| `MessagesToSearchLimit` | The number of messages to search in a channel. | This is used in commands that searches for a Url in the messages of a channel.
 | `AlwaysDownloadUsers` | Whether all users should be downloaded to the cache. | `ServerMembersIntent` is required for this to work.
 | `UseReliabilityService` | Whether the reliability service should be used. | The reliability service is a service that shutdowns the bot in case of a deadlock.<br/>The service requires that the bot is being run by a daemon that handles Exit Code 1 as a restart.<br/>Daemon for [Powershell](https://gitlab.com/snippets/21444) and [Bash](https://stackoverflow.com/a/697064).
 | `DatabaseConfig` | The database configuration. | ...

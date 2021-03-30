@@ -152,6 +152,8 @@ namespace Fergun
             Constants.ClientConfig.MessageCacheSize = Config.MessageCacheSize;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Message cache size: {Constants.ClientConfig.MessageCacheSize}"));
 
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Messages to search limit: {Config.MessagesToSearchLimit}"));
+
             _client = new DiscordSocketClient(Constants.ClientConfig);
             _client.Ready += ClientReady;
             _client.JoinedGuild += JoinedGuild;

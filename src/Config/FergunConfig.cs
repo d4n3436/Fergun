@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -111,6 +111,15 @@ namespace Fergun
         /// </summary>
         [JsonProperty]
         public int MessageCacheSize { get; private set; } = 100;
+
+        /// <summary>
+        /// Gets the number of messages to search in a channel.
+        /// </summary>
+        /// <remarks>
+        /// This property is used in commands that searches for a Url in the messages of a channel.
+        /// </remarks>
+        [JsonProperty]
+        public int MessagesToSearchLimit { get; private set; } = 100;
 
         /// <summary>
         /// Gets whether all users should be downloaded to the cache.
