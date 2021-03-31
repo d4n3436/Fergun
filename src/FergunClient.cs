@@ -39,11 +39,7 @@ namespace Fergun
 
         private DiscordSocketClient _client;
         private LogService _logService;
-        private readonly CommandService _cmdService;
-        private static IServiceProvider _services;
         private static CommandHandlingService _cmdHandlingService;
-        private static ReliabilityService _reliabilityService;
-        private static CommandCacheService _commandCacheService;
         private static bool _firstConnect = true;
         private static AuthDiscordBotListApi _dblApi;
         private static IDblSelfBot _dblBot;
@@ -57,7 +53,6 @@ namespace Fergun
 #else
             IsDebugMode = false;
 #endif
-            _cmdService = new CommandService(Constants.CommandServiceConfig);
             _logService = new LogService();
             _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
         }
@@ -146,6 +141,8 @@ namespace Fergun
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", "The bot will be shut down in case of deadlock. Remember to use a daemon!"));
             }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Using command cache service: {Config.UseCommandCacheService}"));
+
             Constants.ClientConfig.AlwaysDownloadUsers = Config.AlwaysDownloadUsers;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Always download users: {Constants.ClientConfig.AlwaysDownloadUsers}"));
 
@@ -167,20 +164,10 @@ namespace Fergun
             _client.UserUnbanned += UserUnbanned;
 
             _logService.Dispose();
-            _logService = new LogService(_client, _cmdService);
-            if (Config.UseReliabilityService)
-            {
-                _reliabilityService = new ReliabilityService(_client, x => _ = _logService.LogAsync(x));
-            }
+            var services = SetupServices();
+            _logService = services.GetRequiredService<LogService>();
 
-            _commandCacheService = new CommandCacheService(_client, Constants.MessageCacheCapacity,
-                message => _ = _cmdHandlingService.HandleCommandAsync(message),
-                log => _ = _logService.LogAsync(log),
-                Constants.CommandCacheClearInterval, Constants.MaxCommandCacheLongevity);
-
-            _services = SetupServices();
-
-            _cmdHandlingService = new CommandHandlingService(_client, _cmdService, _logService, _services);
+            _cmdHandlingService = new CommandHandlingService(_client, services.GetRequiredService<CommandService>(), _logService, services);
             await _cmdHandlingService.InitializeAsync();
 
             if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
@@ -391,21 +378,21 @@ namespace Fergun
 
         private IServiceProvider SetupServices()
         {
-            var collection = new ServiceCollection()
-                .AddSingleton(_client)
-                .AddSingleton(_cmdService)
-                .AddSingleton(_logService)
-                .AddSingleton(_commandCacheService)
+            return new ServiceCollection()
+                .AddSingleton(Constants.CommandServiceConfig)
                 .AddSingleton(Config.LavaConfig)
+                .AddSingleton(_client)
+                .AddSingleton<CommandService>()
+                .AddSingleton<LogService>()
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
-                .AddSingleton<MusicService>();
-
-            if (_reliabilityService != null)
-            {
-                collection.AddSingleton(_reliabilityService);
-            }
-            return collection.BuildServiceProvider();
+                .AddSingleton<MusicService>()
+                .AddSingleton(new CommandCacheService(_client, Constants.MessageCacheCapacity,
+                    message => _ = _cmdHandlingService.HandleCommandAsync(message),
+                    log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval,
+                    Constants.MaxCommandCacheLongevity, !Config.UseCommandCacheService))
+                .AddSingletonIf(Config.UseReliabilityService, new ReliabilityService(_client, message => _ = _logService.LogAsync(message)))
+                .BuildServiceProvider();
         }
 
         private static IEnumerable<CultureInfo> GetAvailableCultures()
@@ -485,7 +472,7 @@ namespace Fergun
             if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
             MessageCache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
         }
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
@@ -495,32 +482,32 @@ namespace Fergun
             if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
 
             MessageCache[message.Id] = new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
         }
 
         private async Task UserJoined(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserLeft(SocketGuildUser user)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
         }
 
         private async Task UserBanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
         }
 
         private async Task UserUnbanned(SocketUser user, SocketGuild guild)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
         }
 
         private async Task JoinedGuild(SocketGuild guild)

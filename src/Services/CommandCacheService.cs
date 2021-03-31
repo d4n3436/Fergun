@@ -35,10 +35,14 @@ namespace Fergun.Services
         /// <param name="logger">An optional method to use for logging.</param>
         /// <param name="period">The interval between invocations of the cache clearing, in milliseconds.</param>
         /// <param name="maxMessageTime">The max. message longevity, in hours.</param>
+        /// <param name="disable">Disable the command cache system. Added because there is no easy way to disable the service while using the command cache module.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if capacity is less than 1.</exception>
         public CommandCacheService(DiscordSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
-            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0)
+            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, bool disable = false)
         {
+            IsDisabled = disable;
+            if (IsDisabled) return;
+
             _client = client;
 
             _client.MessageDeleted += OnMessageDeleted;
@@ -77,6 +81,8 @@ namespace Fergun.Services
         /// Gets the number of command/response pairs in the cache.
         /// </summary>
         public int Count => _count;
+
+        public bool IsDisabled { get; }
 
         /// <summary>
         /// Adds a key and a value to the cache, or update the value if the key already exists.
@@ -185,6 +191,7 @@ namespace Fergun.Services
             }
 
             if (!disposing) return;
+            if (IsDisabled) return;
             _autoClear.Dispose();
             _autoClear = null;
 
@@ -228,7 +235,7 @@ namespace Fergun.Services
                     }
                     else
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"Command message ({cacheable.Id}) deleted but the response ({responseId}) was already deleted."));
+                        await _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"Command message ({cacheable.Id}) deleted but the response ({responseId}) was already deleted."));
                     }
                     TryRemove(cacheable.Id);
                 }
@@ -243,15 +250,13 @@ namespace Fergun.Services
             {
                 // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
                 if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
-                var before = cacheable.Value;
-                if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
                     var response = await channel.GetMessageAsync(responseId);
                     if (response == null)
                     {
-                        await _logger(new LogMessage(LogSeverity.Warning, "CmdCache", $"A command message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
+                        await _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"A command message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
                         TryRemove(cacheable.Id);
                     }
                     else
@@ -312,6 +317,11 @@ namespace Fergun.Services
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
             RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
         {
+            if (Cache.IsDisabled)
+            {
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
+            }
+
             IUserMessage response;
             bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
             if (found && (response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId)) != null)
@@ -351,9 +361,11 @@ namespace Fergun.Services
         /// <param name="allowedMentions">
         /// Specifies if notifications are sent for mentioned users and roles in the message <paramref name="text"/>. If <c>null</c>, all mentioned roles and users will be notified.
         /// </param>
+        /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
         /// <returns>A task that represents an asynchronous send operation for delivering the message. The task result contains the sent message.</returns>
-        public static async Task<IUserMessage> SendCachedFileAsync(this IMessageChannel channel, CommandCacheService cache, ulong commandId, Stream stream, string filename,
-            string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, bool isSpoiler = false, AllowedMentions allowedMentions = null)
+        public static async Task<IUserMessage> SendCachedFileAsync(this IMessageChannel channel, CommandCacheService cache, ulong commandId,
+            Stream stream, string filename, string text = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, bool isSpoiler = false,
+            AllowedMentions allowedMentions = null, MessageReference messageReference = null)
         {
             IUserMessage response;
             bool found = cache.TryGetValue(commandId, out ulong responseId);
@@ -362,9 +374,12 @@ namespace Fergun.Services
                 await response.DeleteAsync();
             }
 
-            response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions);
+            response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions, messageReference);
 
-            cache.Add(commandId, response.Id);
+            if (!cache.IsDisabled)
+            {
+                cache.Add(commandId, response.Id);
+            }
 
             return response;
         }

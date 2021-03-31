@@ -1172,11 +1172,15 @@ namespace Fergun.Modules
         [Alias("haste")]
         public async Task<RuntimeResult> Paste([Remainder, Summary("pasteParam1")] string text)
         {
-            await SendEmbedAsync($"{FergunClient.Config.LoadingEmote} {Locate("Uploading")}");
+            var message = await SendEmbedAsync($"{FergunClient.Config.LoadingEmote} {Locate("Uploading")}");
             try
             {
                 string hastebinUrl = await Hastebin.UploadAsync(text);
-                await SendEmbedAsync(Format.Url(Locate("HastebinLink"), hastebinUrl));
+                var builder = new EmbedBuilder()
+                    .WithDescription(Format.Url(Locate("HastebinLink"), hastebinUrl))
+                    .WithColor(FergunClient.Config.EmbedColor);
+
+                await message.ModifyAsync(x => x.Embed = builder.Build());
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
@@ -1191,16 +1195,20 @@ namespace Fergun.Modules
         public async Task Ping()
         {
             var sw = Stopwatch.StartNew();
-            await SendEmbedAsync(Format.Bold("Pong!"));
+            var message = await SendEmbedAsync(Format.Bold("Pong!"));
             sw.Stop();
 
             var sw2 = Stopwatch.StartNew();
             FergunClient.Database.FindDocument<GuildConfig>(Constants.GuildConfigCollection, _ => true);
             sw2.Stop();
 
-            await SendEmbedAsync($"⏱{Format.Bold("Message")}: {sw.ElapsedMilliseconds}ms\n\n" +
+            var builder = new EmbedBuilder()
+                .WithDescription($"⏱{Format.Bold("Message")}: {sw.ElapsedMilliseconds}ms\n\n" +
                                  $"{FergunClient.Config.WebSocketEmote}{Format.Bold("WebSocket")}: {Context.Client.Latency}ms\n\n" +
-                                 $"{FergunClient.Config.MongoDbEmote}{Format.Bold("Database")}: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms");
+                                 $"{FergunClient.Config.MongoDbEmote}{Format.Bold("Database")}: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            await message.ModifyAsync(x => x.Embed = builder.Build());
         }
 
         [LongRunning]

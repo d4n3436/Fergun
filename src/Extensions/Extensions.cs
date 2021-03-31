@@ -11,6 +11,7 @@ using Discord.Commands;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Victoria;
@@ -278,6 +279,11 @@ namespace Fergun.Extensions
         public static string Display(this IMessage message)
         {
             return message.Channel.Display() + $"/{message.Author}";
+        }
+
+        public static IServiceCollection AddSingletonIf<TService>(this IServiceCollection services, bool condition, TService implementationInstance) where TService : class
+        {
+            return condition ? services.AddSingleton(implementationInstance) : services;
         }
 
         public static string Dump<T>(this T obj, int maxDepth = 2)

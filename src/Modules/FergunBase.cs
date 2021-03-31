@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -98,7 +98,11 @@ namespace Fergun.Modules
         {
             var response = await Interactive.SendMessageWithReactionCallbacksAsync(Context, callbackData, fromSourceUser);
 
-            Cache.Add(Context.Message, response);
+            if (!Cache.IsDisabled)
+            {
+                Cache.Add(Context.Message, response);
+            }
+
             return response;
         }
 
@@ -152,7 +156,11 @@ namespace Fergun.Modules
             else
             {
                 response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion).ConfigureAwait(false);
-                Cache.Add(Context.Message, response);
+
+                if (!Cache.IsDisabled)
+                {
+                    Cache.Add(Context.Message, response);
+                }
             }
 
             return response;

@@ -1,4 +1,4 @@
-﻿# Fergun
+# Fergun
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/5w5GEKE)
 
 Fergun is a multipurpose and multilanguage bot with lots of useful commands (Utility, Music, Moderation, and AI Dungeon).
@@ -125,6 +125,7 @@ To shut down the bot use `logout`.
 | `MessagesToSearchLimit` | The number of messages to search in a channel. | This is used in commands that searches for a Url in the messages of a channel.
 | `AlwaysDownloadUsers` | Whether all users should be downloaded to the cache. | `ServerMembersIntent` is required for this to work.
 | `UseReliabilityService` | Whether the reliability service should be used. | The reliability service is a service that shutdowns the bot in case of a deadlock.<br/>The service requires that the bot is being run by a daemon that handles Exit Code 1 as a restart.<br/>Daemon for [Powershell](https://gitlab.com/snippets/21444) and [Bash](https://stackoverflow.com/a/697064).
+| `UseCommandCacheService` | Whether the command cache service should be used. | The command cache service is a service that tracks command (user) messages and the bot response messages.<br/>When a command message is modified or deleted, the bot will also modify or delete the corresponding response message automatically.
 | `DatabaseConfig` | The database configuration. | ...
 | `LavaConfig` | The Lavalink server configuration | ...
 | `(...)Emote` | The emotes that are used in some commands. | `LoadingEmote` is used in a "Loading" message.<br/>`MongoDbEmote` and `WebSocketEmote` are used in `ping`.<br/>`BoosterEmote` and `UserFlagsEmotes` are used in `userinfo`.<br/>The rest are used in `serverinfo`.

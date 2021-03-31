@@ -192,6 +192,7 @@ namespace Fergun.Modules
             }
             else
             {
+                IUserMessage message = null;
                 LavaTrack selectedTrack;
                 bool trackSelection = GetGuildConfig()?.TrackSelection ?? Constants.TrackSelectionDefault;
                 if (trackSelection)
@@ -210,7 +211,7 @@ namespace Fergun.Modules
                         .WithDescription(list)
                         .WithColor(FergunClient.Config.EmbedColor);
 
-                    await ReplyAsync(embed: builder.Build());
+                    message = await ReplyAsync(embed: builder.Build());
 
                     var response = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
 
@@ -234,7 +235,18 @@ namespace Fergun.Modules
                     selectedTrack = tracks[0];
                 }
                 var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, selectedTrack);
-                await SendEmbedAsync(result2);
+                var builder2 = new EmbedBuilder()
+                    .WithDescription(result2)
+                    .WithColor(FergunClient.Config.EmbedColor);
+
+                if (message == null)
+                {
+                    await ReplyAsync(embed: builder2.Build());
+                }
+                else
+                {
+                    await message.ModifyAsync(x => x.Embed = builder2.Build());
+                }
             }
             return FergunResult.FromSuccess();
         }

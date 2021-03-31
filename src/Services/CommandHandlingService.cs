@@ -74,7 +74,7 @@ namespace Fergun.Services
                 }
 
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
-                await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix), _services);
+                await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix));
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} mentioned me."));
                 return;
             }
@@ -101,11 +101,11 @@ namespace Fergun.Services
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
                 if (userConfig.BlacklistReason == null)
                 {
-                    await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), message.Author.Mention);
                 }
                 else
                 {
-                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), userConfig.BlacklistReason), _services, message.Author.Mention);
+                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), userConfig.BlacklistReason), message.Author.Mention);
                 }
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
                 return;
@@ -118,7 +118,7 @@ namespace Fergun.Services
             if (disabled != null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the locally disabled command \"{disabled}\"."));
-                await SendEmbedAsync(message, "\u26a0 " + string.Format(GuildUtils.Locate("CommandDisabled", message.Channel), Format.Code(disabled)), _services);
+                await SendEmbedAsync(message, "\u26a0 " + string.Format(GuildUtils.Locate("CommandDisabled", message.Channel), Format.Code(disabled)));
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
             }
             else
@@ -131,7 +131,7 @@ namespace Fergun.Services
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the globally disabled command \"{globalDisabled.Key}\"."));
                     await SendEmbedAsync(message, $"\u26a0 {string.Format(GuildUtils.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
-                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{GuildUtils.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}", _services);
+                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{GuildUtils.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}");
                     _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
                 }
                 else
@@ -191,7 +191,7 @@ namespace Fergun.Services
                 case CommandError.ParseFailed:
                     string language = GuildUtils.GetLanguage(context.Channel);
                     string prefix = GuildUtils.GetPrefix(context.Channel);
-                    await SendEmbedAsync(context.Message, command.ToHelpEmbed(language, prefix), _services);
+                    await SendEmbedAsync(context.Message, command.ToHelpEmbed(language, prefix));
                     break;
 
                 case CommandError.UnmetPrecondition when command.Module.Name != Constants.DevelopmentModuleName:
@@ -226,7 +226,7 @@ namespace Fergun.Services
                         {
                             ignoreTime = Constants.CooldownIgnoreTime;
                         }
-                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(result.ErrorReason, context.Channel)}", _services);
+                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(result.ErrorReason, context.Channel)}");
                     }
                     break;
 
@@ -241,15 +241,15 @@ namespace Fergun.Services
                     reason = reason.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase);
                     // Locate the string to the current language of the guild
                     reason = GuildUtils.Locate(reason, context.Channel);
-                    await SendEmbedAsync(context.Message, $"\u26a0 {reason}", _services);
+                    await SendEmbedAsync(context.Message, $"\u26a0 {reason}");
                     break;
 
                 case CommandError.MultipleMatches:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}", _services);
+                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}");
                     break;
 
                 case CommandError.Unsuccessful:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength), _services);
+                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
                     break;
 
                 case CommandError.Exception when result is ExecuteResult execResult:
@@ -267,7 +267,7 @@ namespace Fergun.Services
 
                         try
                         {
-                            await SendEmbedAsync(context.Message, builder.Build(), _services);
+                            await SendEmbedAsync(context.Message, builder.Build());
                         }
                         catch (HttpException) { }
                         break;
@@ -286,7 +286,7 @@ namespace Fergun.Services
                         builder2.WithFooter(GuildUtils.Locate("ErrorSentToOwner", context.Channel));
                     }
 
-                    await SendEmbedAsync(context.Message, builder2.Build(), _services);
+                    await SendEmbedAsync(context.Message, builder2.Build());
 
                     if (context.User.Id == owner.Id) break;
                     // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
@@ -334,22 +334,26 @@ namespace Fergun.Services
             }
         }
 
-        private static Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, string embedText, IServiceProvider services, string text = null)
+        private Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, string embedText, string text = null)
         {
             var embed = new EmbedBuilder()
                 .WithColor(FergunClient.Config.EmbedColor)
                 .WithDescription(embedText)
                 .Build();
 
-            return SendEmbedAsync(userMessage, embed, services, text);
+            return SendEmbedAsync(userMessage, embed, text);
         }
 
-        private static async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, IServiceProvider services, string text = null)
+        private async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, string text = null)
         {
+            var cache = _services.GetService<CommandCacheService>();
+            if (cache == null || cache.IsDisabled)
+            {
+                return await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+            }
+
             IUserMessage response;
-            ulong messageId = 0;
-            var cache = services.GetService<CommandCacheService>();
-            bool found = cache != null && cache.TryGetValue(userMessage.Id, out messageId);
+            bool found = cache.TryGetValue(userMessage.Id, out ulong messageId);
 
             if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId)) != null)
             {
@@ -362,8 +366,8 @@ namespace Fergun.Services
             }
             else
             {
-                response = await userMessage.Channel.SendMessageAsync(null, false, embed).ConfigureAwait(false);
-                cache?.Add(userMessage, response);
+                response = await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                cache.Add(userMessage, response);
             }
 
             return response;
