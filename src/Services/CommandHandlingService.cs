@@ -21,6 +21,7 @@ namespace Fergun.Services
         private readonly LogService _logService;
         private readonly CommandService _cmdService;
         private readonly IServiceProvider _services;
+        private bool _isValidLogChannel = true;
 
         private static readonly HashSet<ulong> _ignoredUsers = new HashSet<ulong>();
         private static readonly object _userLock = new object();
@@ -288,12 +289,13 @@ namespace Fergun.Services
 
                     await SendEmbedAsync(context.Message, builder2.Build());
 
-                    if (context.User.Id == owner.Id) break;
+                    if (context.User.Id == owner.Id || !_isValidLogChannel || FergunClient.Config.LogChannel == 0) break;
                     // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
 
                     var channel = await context.Client.GetChannelAsync(FergunClient.Config.LogChannel);
                     if (!(channel is IMessageChannel messageChannel))
                     {
+                        _isValidLogChannel = false;
                         await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Invalid log channel Id ({FergunClient.Config.LogChannel}). Not possible to send the embed with the error info."));
                         break;
                     }
