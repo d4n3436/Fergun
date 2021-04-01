@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -34,7 +33,6 @@ namespace Fergun
         public static bool IsDebugMode { get; private set; }
         public static string DblBotPage { get; private set; }
         public static string InviteLink { get; private set; }
-        public static ConcurrentDictionary<ulong, CachedMessage> MessageCache { get; } = new ConcurrentDictionary<ulong, CachedMessage>();
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordSocketClient _client;
@@ -44,7 +42,6 @@ namespace Fergun
         private static AuthDiscordBotListApi _dblApi;
         private static IDblSelfBot _dblBot;
         private static DiscordBotsApi _discordBots;
-        private static Timer _autoClear;
 
         public FergunClient()
         {
@@ -54,12 +51,6 @@ namespace Fergun
             IsDebugMode = false;
 #endif
             _logService = new LogService();
-            _autoClear = new Timer(OnTimerFired, null, Constants.MessageCacheClearInterval, Constants.MessageCacheClearInterval);
-        }
-
-        ~FergunClient()
-        {
-            _autoClear?.Dispose();
         }
 
         public async Task InitializeAsync()
@@ -143,6 +134,8 @@ namespace Fergun
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Using command cache service: {Config.UseCommandCacheService}"));
 
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Using message cache service: {Config.UseMessageCacheService}"));
+
             Constants.ClientConfig.AlwaysDownloadUsers = Config.AlwaysDownloadUsers;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Always download users: {Constants.ClientConfig.AlwaysDownloadUsers}"));
 
@@ -155,8 +148,6 @@ namespace Fergun
             _client.Ready += ClientReady;
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
-            _client.MessageUpdated += MessageUpdated;
-            _client.MessageDeleted += MessageDeleted;
             _client.MessagesBulkDeleted += MessagesBulkDeleted;
             _client.UserJoined += UserJoined;
             _client.UserLeft += UserLeft;
@@ -387,11 +378,18 @@ namespace Fergun
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>()
-                .AddSingleton(new CommandCacheService(_client, Constants.MessageCacheCapacity,
+                .AddSingleton(Config.UseCommandCacheService
+                    ? new CommandCacheService(_client, Constants.MessageCacheCapacity,
                     message => _ = _cmdHandlingService.HandleCommandAsync(message),
                     log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval,
-                    Constants.MaxCommandCacheLongevity, !Config.UseCommandCacheService))
+                    Constants.MaxCommandCacheLongevity)
+                    : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService, new ReliabilityService(_client, message => _ = _logService.LogAsync(message)))
+                .AddSingleton(Config.UseMessageCacheService
+                    ? new MessageCacheService(_client, GuildUtils.UserConfigCache,
+                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval,
+                    Constants.MaxMessageCacheLongevity)
+                    : MessageCacheService.Disabled)
                 .BuildServiceProvider();
         }
 
@@ -449,40 +447,6 @@ namespace Fergun
                 _firstConnect = false;
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
-        }
-
-        private void OnTimerFired(object state)
-        {
-            var toPurge = MessageCache.Where(p =>
-            {
-                var difference = DateTimeOffset.UtcNow - p.Value.CreatedAt;
-                return difference.TotalHours >= Constants.MaxMessageCacheLongevity;
-            }).ToList();
-
-            int removed = toPurge.Count(p => MessageCache.TryRemove(p.Key, out _));
-
-            _ = _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
-        }
-
-        private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
-        {
-            if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
-            if (GuildUtils.UserConfigCache.TryGetValue(after.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
-            var before = cachedbefore.Value;
-            if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
-
-            MessageCache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, SourceEvent.MessageUpdated);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
-        }
-
-        private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
-        {
-            var message = cache.Value;
-            if (message?.Source != MessageSource.User) return;
-            if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
-
-            MessageCache[message.Id] = new CachedMessage(message, DateTimeOffset.UtcNow, SourceEvent.MessageDeleted);
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)

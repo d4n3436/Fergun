@@ -26,6 +26,12 @@ namespace Fergun.Services
         private readonly Func<SocketMessage, Task> _cmdHandler;
         private readonly double _maxMessageTime;
 
+        private CommandCacheService()
+        {
+            IsDisabled = true;
+            _disposed = true;
+        }
+
         /// <summary>
         /// Initializes the cache with a maximum capacity, tracking the client's message deleted event, and optionally the client's message modified event.
         /// </summary>
@@ -35,14 +41,10 @@ namespace Fergun.Services
         /// <param name="logger">An optional method to use for logging.</param>
         /// <param name="period">The interval between invocations of the cache clearing, in milliseconds.</param>
         /// <param name="maxMessageTime">The max. message longevity, in hours.</param>
-        /// <param name="disable">Disable the command cache system. Added because there is no easy way to disable the service while using the command cache module.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if capacity is less than 1.</exception>
         public CommandCacheService(DiscordSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
-            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, bool disable = false)
+            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0)
         {
-            IsDisabled = disable;
-            if (IsDisabled) return;
-
             _client = client;
 
             _client.MessageDeleted += OnMessageDeleted;
@@ -66,6 +68,11 @@ namespace Fergun.Services
 
             _logger(new LogMessage(LogSeverity.Info, "CmdCache", "Service initialized, MessageDeleted and OnMessageModified event handlers registered."));
         }
+
+        /// <summary>
+        /// Returns a disabled instance of <see cref="CommandCacheService"/>.
+        /// </summary>
+        public static CommandCacheService Disabled => new CommandCacheService();
 
         /// <summary>
         /// Gets all the keys in the cache. Will claim all locks until the operation is complete.
@@ -191,7 +198,6 @@ namespace Fergun.Services
             }
 
             if (!disposing) return;
-            if (IsDisabled) return;
             _autoClear.Dispose();
             _autoClear = null;
 

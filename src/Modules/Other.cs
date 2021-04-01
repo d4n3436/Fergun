@@ -30,11 +30,13 @@ namespace Fergun.Modules
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static CommandService _cmdService;
         private static LogService _logService;
+        private static MessageCacheService _messageCache;
 
-        public Other(CommandService commands, LogService logService)
+        public Other(CommandService commands, LogService logService, MessageCacheService messageCache)
         {
             _cmdService ??= commands;
             _logService ??= logService;
+            _messageCache ??= messageCache;
         }
 
         [Command("changelog")]
@@ -419,8 +421,7 @@ namespace Fergun.Modules
 
                 if (reaction.Emote.Name == "1️⃣" && userConfig.IsOptedOutSnipe)
                 {
-                    var toPurge = FergunClient.MessageCache.Where(p => p.Value.Author.Id == reaction.UserId).ToList();
-                    var removed = toPurge.Count(p => FergunClient.MessageCache.TryRemove(p.Key, out _));
+                    int removed = _messageCache.ClearOnPredicate(x => x.Value.Author.Id == reaction.UserId);
                     if (removed > 0)
                     {
                         await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command",

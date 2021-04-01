@@ -56,13 +56,15 @@ namespace Fergun.Modules
         private static DateTimeOffset _timeToCheckComic = DateTimeOffset.UtcNow;
         private static CommandService _cmdService;
         private static LogService _logService;
+        private static MessageCacheService _messageCache;
 
         private static Random RngInstance => _rng ??= new Random();
 
-        public Utility(CommandService commands, LogService logService)
+        public Utility(CommandService commands, LogService logService, MessageCacheService messageCache)
         {
             _cmdService ??= commands;
             _logService ??= logService;
+            _messageCache ??= messageCache;
         }
 
         [RequireNsfw(ErrorMessage = "NSFWOnly")]
@@ -343,13 +345,14 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigEditSnipe([Summary("bigeditsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = FergunClient.MessageCache.Values
-                .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var messages = _messageCache.Values
+                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
-                .Take(20);
+                .Take(20)
+                .ToArray();
 
             var builder = new EmbedBuilder();
-            if (!messages.Any())
+            if (messages.Length == 0)
             {
                 builder.WithDescription(string.Format(Locate("NothingToSnipe"), MentionUtils.MentionChannel(channel.Id)));
             }
@@ -379,13 +382,14 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigSnipe([Summary("bigsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = FergunClient.MessageCache.Values
-                .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+            var messages = _messageCache.Values
+                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
-                .Take(20);
+                .Take(20)
+                .ToArray();
 
             var builder = new EmbedBuilder();
-            if (!messages.Any())
+            if (messages.Length == 0)
             {
                 builder.WithDescription(string.Format(Locate("NothingToSnipe"), MentionUtils.MentionChannel(channel.Id)));
             }
@@ -772,8 +776,8 @@ namespace Fergun.Modules
         public async Task EditSnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = FergunClient.MessageCache.Values
-                .Where(x => x.SourceEvent == SourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var message = _messageCache.Values
+                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
 
@@ -1496,8 +1500,8 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = FergunClient.MessageCache.Values
-                .Where(x => x.SourceEvent == SourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+            var message = _messageCache.Values
+                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
 

@@ -140,6 +140,12 @@ namespace Fergun
         public bool UseCommandCacheService { get; private set; } = true;
 
         /// <summary>
+        /// Gets whether the message cache service should be used.
+        /// </summary>
+        [JsonProperty]
+        public bool UseMessageCacheService { get; private set; } = true;
+
+        /// <summary>
         /// Gets the MongoDB server authentication info.
         /// </summary>
         [JsonProperty]
