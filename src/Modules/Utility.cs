@@ -29,7 +29,6 @@ using Fergun.Interactive;
 using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
-using GoogleTranslateFreeApi;
 using GScraper;
 using NCalc;
 using Newtonsoft.Json;
@@ -250,7 +249,7 @@ namespace Fergun.Modules
                     // Get unique and random languages.
                     do
                     {
-                        targetLang = BingTranslatorApi.SupportedLanguages[RngInstance.Next(BingTranslatorApi.SupportedLanguages.Count)];
+                        targetLang = GTranslator.SupportedLanguages.Keys.ElementAt(RngInstance.Next(GTranslator.SupportedLanguages.Count));
                     } while (languageChain.Contains(targetLang));
                 }
 
@@ -261,13 +260,11 @@ namespace Fergun.Modules
                 }
                 if (i == 0)
                 {
-                    originalLang = translation.Source.ISO639;
+                    originalLang = translation.Source;
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Original language: {originalLang}"));
 
-                    // Fallback to English if the detected language is not supported by Bing.
-                    if (BingTranslatorApi.SupportedLanguages.All(x => x != originalLang))
+                    if (!GTranslator.SupportedLanguages.ContainsKey(originalLang))
                     {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Badtranslator: Original language not supported by Bing. Fallback to English."));
                         originalLang = "en";
                     }
                     languageChain.Add(originalLang);
@@ -1110,9 +1107,9 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> OcrTranslate([Summary("ocrtranslateParam1")] string target,
             [Summary("ocrtranslateParam2")] string url = null)
         {
-            if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
+            if (!GTranslator.SupportedLanguages.ContainsKey(target))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", BingTranslatorApi.SupportedLanguages.Select(x => Format.Code(x)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", GTranslator.SupportedLanguages.Select(x => Format.Code(x.Key)))}");
             }
 
             UrlFindResult result;
@@ -1159,8 +1156,8 @@ namespace Fergun.Modules
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("OcrtrResults"))
                 .AddField(Locate("Input"), Format.Code(text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                .AddField(Locate("SourceLanguage"), translation.Source?.FullName ?? "???")
-                .AddField(Locate("TargetLanguage"), translation.Target.FullName)
+                .AddField(Locate("SourceLanguage"), GTranslator.SupportedLanguages.GetValueOrDefault(translation.Source, "???"))
+                .AddField(Locate("TargetLanguage"), GTranslator.SupportedLanguages.GetValueOrDefault(translation.Target, "???"))
                 .AddField(Locate("Result"), translation.Text)
                 .WithFooter(string.Format(Locate("ProcessingTime"), processTime + sw.ElapsedMilliseconds))
                 .WithColor(FergunClient.Config.EmbedColor);
@@ -1537,9 +1534,9 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Translate([Summary("translateParam1")] string target,
             [Remainder, Summary("translateParam2")] string text)
         {
-            if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
+            if (!GTranslator.SupportedLanguages.ContainsKey(target))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", BingTranslatorApi.SupportedLanguages.Select(x => Format.Code(x)))}");
+                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", GTranslator.SupportedLanguages.Select(x => Format.Code(x.Key)))}");
             }
 
             var result = await TranslateSimpleAsync(text, target);
@@ -1568,8 +1565,8 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("TranslationResults"))
-                .AddField(Locate("SourceLanguage"), result.Source?.FullName ?? "???")
-                .AddField(Locate("TargetLanguage"), result.Target.FullName)
+                .AddField(Locate("SourceLanguage"), GTranslator.SupportedLanguages.GetValueOrDefault(result.Source, "???"))
+                .AddField(Locate("TargetLanguage"), GTranslator.SupportedLanguages.GetValueOrDefault(result.Target, "???"))
                 .AddField(Locate("Result"), result.Text)
                 .WithThumbnailUrl(Constants.GoogleTranslateLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
@@ -1591,7 +1588,7 @@ namespace Fergun.Modules
             target = target.ToLowerInvariant();
             text = text.ToLowerInvariant();
 
-            if (!GoogleTranslator.IsLanguageSupported(new Language("", target)))
+            if (!GTranslator.SupportedLanguages.ContainsKey(target))
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"TTS: Target language not supported ({target})"));
                 //return CustomResult.FromError(GetValue("InvalidLanguage"));
@@ -2126,25 +2123,23 @@ namespace Fergun.Modules
 
         private static async Task<SimpleTranslationResult> TranslateSimpleAsync(string text, string target, string source = "")
         {
-            string resultError = null;
-            string resultTranslation = null;
-            var resultTarget = GoogleTranslator.GetLanguageByISO(target);
-            Language resultSource = null;
+            string error = null;
+            string translation = null;
 
             bool useBing = false;
             text = text.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase).Trim();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Target: {resultTarget}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Target language: {target}"));
 
             try
             {
                 using var translator = new GTranslator();
                 var result = await translator.TranslateAsync(text, target, string.IsNullOrEmpty(source) ? "auto" : source);
 
-                resultTranslation = result.Translation;
-                resultSource = GoogleTranslator.GetLanguageByISO(result.SourceLanguage) ?? Language.English;
+                translation = result.Translation;
+                source = result.SourceLanguage;
 
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {resultSource}"));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {source}"));
             }
             catch (Exception e) when (e is TranslationException || e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException)
             {
@@ -2158,36 +2153,34 @@ namespace Fergun.Modules
                 {
                     var result = await BingTranslatorApi.TranslateAsync(text, target);
 
-                    resultTranslation = result[0].Translations[0].Text;
-                    string language = result[0].DetectedLanguage.Language;
+                    translation = result[0].Translations[0].Text;
+                    source = result[0].DetectedLanguage.Language;
 
                     // Convert Bing Translator language codes to Google Translate equivalent.
-                    language = language switch
+                    source = source switch
                     {
                         "nb" => "no",
                         "pt-pt" => "pt",
                         "zh-Hans" => "zh-CN",
                         "zh-Hant" => "zh-TW",
-                        _ => language
+                        _ => source
                     };
 
-                    resultSource = GoogleTranslator.GetLanguageByISO(language) ?? Language.English;
-
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {result[0].DetectedLanguage.Language}"));
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {source}"));
                 }
                 catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
-                    resultError = "ErrorInTranslation";
+                    error = "ErrorInTranslation";
                 }
             }
 
             return new SimpleTranslationResult
             {
-                Error = resultError,
-                Text = resultTranslation,
-                Source = resultSource,
-                Target = resultTarget
+                Error = error,
+                Text = translation,
+                Source = source,
+                Target = target
             };
         }
 
@@ -2312,8 +2305,8 @@ namespace Fergun.Modules
     public class SimpleTranslationResult
     {
         public string Error { get; set; }
-        public Language Source { get; set; }
-        public Language Target { get; set; }
+        public string Source { get; set; }
+        public string Target { get; set; }
         public string Text { get; set; }
     }
 }
