@@ -402,14 +402,17 @@ namespace Fergun.Services
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
-            if (player.PlayerState == PlayerState.Playing)
+            switch (player.PlayerState)
             {
-                await player.PauseAsync();
-                return GuildUtils.Locate("PlayerPaused", textChannel);
+                case PlayerState.Playing:
+                    await player.PauseAsync();
+                    return GuildUtils.Locate("PlayerPaused", textChannel);
+                case PlayerState.Stopped:
+                    return GuildUtils.Locate("PlayerNotPlaying", textChannel);
+                default:
+                    await player.ResumeAsync();
+                    return GuildUtils.Locate("PlaybackResumed", textChannel);
             }
-
-            await player.ResumeAsync();
-            return GuildUtils.Locate("PlaybackResumed", textChannel);
         }
 
         public async Task<string> ResumeAsync(IGuild guild, ITextChannel textChannel)
