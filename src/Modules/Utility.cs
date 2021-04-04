@@ -2205,7 +2205,9 @@ namespace Fergun.Modules
             var pages = images
                 .Where(x =>
                     Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)), UriKind.Absolute) &&
-                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute))
+                    x.Link.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute) &&
+                    x.ContextLink.StartsWith("http", StringComparison.Ordinal))
                 .Select(x => new EmbedBuilder
                 {
                     Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
@@ -2224,7 +2226,9 @@ namespace Fergun.Modules
             var pages = search.Results
                 .Where(x =>
                     Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
-                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute))
+                    x.Image.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
+                    x.Url.StartsWith("http", StringComparison.Ordinal))
                 .Select(x => new EmbedBuilder
                 {
                     Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
