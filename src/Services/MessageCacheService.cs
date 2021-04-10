@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Fergun.Extensions;
 
 namespace Fergun.Services
 {
@@ -94,25 +93,36 @@ namespace Fergun.Services
             _ = _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
         }
 
-        private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
+        private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
             var message = cache.Value;
-            if (message?.Source != MessageSource.User) return;
-            if (_userConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
+
+            if (message?.Source != MessageSource.User)
+                return Task.CompletedTask;
+
+            if (_userConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe)
+                return Task.CompletedTask;
 
             _cache[message.Id] = new CachedMessage(message, DateTimeOffset.UtcNow, CachedMessageSourceEvent.MessageDeleted);
-            await _logger(new LogMessage(LogSeverity.Debug, "MsgDeleted", $"1 message deleted by {message.Author} in {channel.Display()}"));
+
+            return Task.CompletedTask;
         }
 
-        private async Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
+        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
         {
-            if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
-            if (_userConfigCache.TryGetValue(after.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe) return;
+            if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User)
+                return Task.CompletedTask;
+
             var before = cachedbefore.Value;
-            if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content) return;
+
+            if (string.IsNullOrEmpty(before?.Content) || before.Content == after.Content)
+                return Task.CompletedTask;
+
+            if (_userConfigCache.TryGetValue(after.Author.Id, out var userConfig) && userConfig.IsOptedOutSnipe)
+                return Task.CompletedTask;
 
             _cache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, CachedMessageSourceEvent.MessageUpdated);
-            await _logger(new LogMessage(LogSeverity.Debug, "MsgUpdated", $"1 message edited by {after.Author} in {channel.Display()}"));
+            return Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)
