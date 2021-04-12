@@ -1528,8 +1528,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 - إصلاح الخلل في wikipedia أن عاد خطأ 404 عندما لم يتم العثور على مقال باللغة الحالية للبوت.
 ... والمزيد من الاصلاحات.</value>
   </data>
-	<data name="ErrorSentToOwner" xml:space="preserve">
-    <value>تم إخطار المالك عن الخطأ وسيتم التحقيق في هذه القضية.</value>
+	<data name="ErrorHelp" xml:space="preserve">
+    <value>في حالة استمرار حدوث ذلك ، يرجى الإبلاغ عن هذا الخطأ في [خادم الدعم]({0}) أو فتح مشكلة في [مستودع GitHub]({1}) تصف الخطأ وخطوات إعادة إنتاجه.</value>
   </data>
 	<data name="bashSummary" xml:space="preserve">
     <value>يدير أمر باش.</value>

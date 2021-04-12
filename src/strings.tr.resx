@@ -1521,8 +1521,8 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
 - Wikipedia'da botun geçerli dilinde bir makale bulunmadığında 404 hatasını döndüren bir hata düzeltildi.
 ... ve daha fazla hata düzeltmesi.</value>
   </data>
-	<data name="ErrorSentToOwner" xml:space="preserve">
-    <value>Hata hakkında cihaz sahibi bilgilendirildi ve sorun araştırılacak.</value>
+	<data name="ErrorHelp" xml:space="preserve">
+    <value>Bu devam ederse lütfen bu hatayı [destek sunucusunda]({0}) bildirin veya [GitHub deposunda]({1}) hatayı ve hatayı yeniden oluşturma adımlarını açıklayan bir sorunu açın.</value>
   </data>
 	<data name="bashSummary" xml:space="preserve">
     <value>Bir bash komutu çalıştırır.</value>

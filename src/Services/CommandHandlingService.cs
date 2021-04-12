@@ -274,18 +274,20 @@ namespace Fergun.Services
                         break;
                     }
 
+                    var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
+
+                    string errorMessage = Format.Code(exception.Message, "cs");
+
+                    if (context.User.Id == owner.Id)
+                    {
+                        errorMessage += "\n" + string.Format(GuildUtils.Locate("ErrorHelp", context.Channel), FergunClient.Config.SupportServer, Constants.GitHubRepository);
+                    }
+
                     var builder2 = new EmbedBuilder()
                         .WithTitle($"\u274c {GuildUtils.Locate("FailedExecution", context.Channel)} {Format.Code(command.Name)}")
                         .AddField(GuildUtils.Locate("ErrorType", context.Channel), Format.Code(exception.GetType().Name, "cs"))
-                        .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), Format.Code(exception.Message, "cs"))
+                        .AddField(GuildUtils.Locate("ErrorMessage", context.Channel), errorMessage)
                         .WithColor(FergunClient.Config.EmbedColor);
-
-                    var owner = (await context.Client.GetApplicationInfoAsync()).Owner;
-
-                    if (context.User.Id != owner.Id)
-                    {
-                        builder2.WithFooter(GuildUtils.Locate("ErrorSentToOwner", context.Channel));
-                    }
 
                     await SendEmbedAsync(context.Message, builder2.Build());
 

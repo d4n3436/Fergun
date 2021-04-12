@@ -1524,8 +1524,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
 - Исправлена ​​ошибка в `wikipedia`, которая возвращала ошибку 404, когда статья не была найдена на текущем языке бота.
 ... и другие исправления ошибок.</value>
   </data>
-	<data name="ErrorSentToOwner" xml:space="preserve">
-    <value>Владелец был уведомлен об ошибке, и проблема будет расследована.</value>
+	<data name="ErrorHelp" xml:space="preserve">
+    <value>Если это продолжится, сообщите об этой ошибке на [сервере поддержки]({0}) или откройте проблему в [репозитории GitHub]({1}), описав ошибку и шаги по ее воспроизведению.</value>
   </data>
 	<data name="bashSummary" xml:space="preserve">
     <value>Запускает команду bash.</value>

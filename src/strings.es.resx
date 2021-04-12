@@ -1521,8 +1521,8 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
 - Se corrigió un error en `wikipedia` que devolvía el error 404 cuando no se encontraba un artículo en el idioma actual del bot.
 ...y más correcciones de errores.</value>
   </data>
-	<data name="ErrorSentToOwner" xml:space="preserve">
-    <value>El dueño ha sido notificado acerca del error y el problema será investigado.</value>
+	<data name="ErrorHelp" xml:space="preserve">
+    <value>Si esto sigue sucediendo, reporte este error en el [servidor de soporte]({0}) o abra un issue (propuesta) en el [repositorio de GitHub]({1}) describiendo el error y los pasos para reproducirlo.</value>
   </data>
 	<data name="bashSummary" xml:space="preserve">
     <value>Ejecuta un comando de bash.</value>
