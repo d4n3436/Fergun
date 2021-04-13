@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ namespace Fergun.APIs.WaybackMachine
 {
     public static class WaybackApi
     {
-        public const string ApiEndpoint = "http://archive.org/wayback/available";
+        public const string ApiEndpoint = "https://archive.org/wayback/available";
 
         private static readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri(ApiEndpoint) };
 

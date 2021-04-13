@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Fergun.APIs.WaybackMachine;
 using Xunit;
@@ -15,10 +15,10 @@ namespace Fergun.Tests
         public async Task SnapshotNotNullTest(string url, ulong timestamp)
         {
             // Act
-            var results = await WaybackApi.GetSnapshotAsync(url, timestamp);
+            var result = await WaybackApi.GetSnapshotAsync(url, timestamp);
 
             // Assert
-            Assert.True(results.ArchivedSnapshots.Closest.Available);
+            Assert.NotNull(result);
         }
 
         [Theory]
