@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
@@ -70,6 +70,28 @@ namespace Fergun.Extensions
                 await (message as IUserMessage).RemoveReactionsAsync(message.Author, botReactions);
             }
             return true;
+        }
+
+        /// <summary>
+        /// Modifies this message or re-sends it if no longer exists.
+        /// </summary>
+        /// <returns>A new message or a modified one.</returns>
+        public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null, AllowedMentions allowedMentions = null)
+        {
+            bool isValid = await message.Channel.GetMessageAsync(message.Id) != null;
+            if (!isValid)
+            {
+                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions);
+            }
+
+            await message.ModifyAsync(x =>
+            {
+                x.Content = content;
+                x.Embed = embed;
+                x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
+            });
+
+            return await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
         }
     }
 }

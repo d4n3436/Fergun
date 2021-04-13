@@ -245,7 +245,7 @@ namespace Fergun.Modules
                 }
                 else
                 {
-                    await message.ModifyAsync(x => x.Embed = builder2.Build());
+                    await message.ModifyOrResendAsync(embed: builder2.Build());
                 }
             }
             return FergunResult.FromSuccess();
