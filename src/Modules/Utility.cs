@@ -2086,7 +2086,7 @@ namespace Fergun.Modules
         // TODO Use Engine 1 if the image is too small (30x30)
         private static async Task<(string, string)> OcrSimpleAsync(string url)
         {
-            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url)).Substring(6), true, out FileType fileType))
+            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url))?.Substring(6), true, out FileType fileType))
             {
                 return ("InvalidFileType", null);
             }
