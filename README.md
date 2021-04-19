@@ -49,17 +49,17 @@ If you want to use the music module with a local Lavalink server, follow these s
   mkdir Lavalink
   ```
   
-* Download the [Lavalink binaries](https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar) and save it in the folder:
+* Download the [Lavalink binaries](https://github.com/freyacodes/Lavalink/releases/latest/download/Lavalink.jar) and save it in the folder:
  
-  `wget https://github.com/Frederikam/Lavalink/releases/latest/download/Lavalink.jar -O Lavalink.jar`
+  `wget https://github.com/freyacodes/Lavalink/releases/latest/download/Lavalink.jar -O Lavalink.jar`
  
-  Nightly binaries:
+  [Nightly binaries](https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1):
  
   `wget https://ci.fredboat.com/repository/download/Lavalink_Build/lastSuccessful/Lavalink.jar?guest=1 -O Lavalink.jar`
  
- * Download [application.yml](https://raw.githubusercontent.com/Frederikam/Lavalink/master/LavalinkServer/application.yml.example%20-O%20application.yml) and save it in the folder:
+ * Download [application.yml](https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example%20-O%20application.yml) and save it in the folder:
  
-   `wget https://raw.githubusercontent.com/Frederikam/Lavalink/master/LavalinkServer/application.yml.example -O application.yml`
+   `wget https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example -O application.yml`
  
    Be sure to save it as `application.yml` and not `application.yml.example`.
 
@@ -83,7 +83,7 @@ If you want to use the music module with a local Lavalink server, follow these s
 
 * Start the bot again, now the bot should be running with the minimal config.
 
-Note: If you set up a local Lavalink server the bot should be runnning the server automatically.
+Note: If you set up a local Lavalink server the bot should be running the server automatically.
 
 
 ### 4. Testing and changing the default prefix
