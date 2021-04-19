@@ -33,8 +33,9 @@ using GScraper;
 using NCalc;
 using Newtonsoft.Json;
 using YoutubeExplode;
+using YoutubeExplode.Common;
 using YoutubeExplode.Exceptions;
-using YoutubeExplode.Playlists;
+using YoutubeExplode.Search;
 
 namespace Fergun.Modules
 {
@@ -2019,10 +2020,10 @@ namespace Fergun.Modules
         [Example("discord")]
         public async Task<RuntimeResult> YouTube([Remainder, Summary("youtubeParam1")] string query)
         {
-            IReadOnlyList<PlaylistVideo> videos;
+            VideoSearchResult video;
             try
             {
-                videos = await _ytClient.Search.GetVideosAsync(query, 0, 1).BufferAsync(1);
+                video = await _ytClient.Search.GetVideosAsync(query).FirstOrDefaultAsync();
             }
             catch (HttpRequestException e)
             {
@@ -2034,11 +2035,12 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
                 return FergunResult.FromError(Locate("ErrorInAPI"));
             }
-            if (videos.Count == 0)
+            if (video == null)
             {
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
-            await ReplyAsync(videos[0].Url);
+
+            await ReplyAsync(video.Url);
 
             return FergunResult.FromSuccess();
         }
@@ -2052,10 +2054,10 @@ namespace Fergun.Modules
             for (int i = 0; i < 10; i++)
             {
                 string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
-                IReadOnlyList<PlaylistVideo> videos;
+                IReadOnlyList<VideoSearchResult> videos;
                 try
                 {
-                   videos = await _ytClient.Search.GetVideosAsync(randStr).BufferAsync(5);
+                    videos = await _ytClient.Search.GetVideosAsync(randStr).Take(5);
                 }
                 catch (HttpRequestException e)
                 {
