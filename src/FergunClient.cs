@@ -82,18 +82,12 @@ namespace Fergun
                 await ExitWithInputTimeoutAsync(30, 1);
             }
 
-            // LogSeverity.Debug is too verbose
-            if (Config!.LavaConfig.LogSeverity == LogSeverity.Debug)
-            {
-                Config.LavaConfig.LogSeverity = LogSeverity.Verbose;
-            }
-
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Database", "Connecting to the database..."));
             bool isDbConnected = false;
             Exception dbException = null;
             try
             {
-                Database = new FergunDatabase(Constants.FergunDatabase, Config.DatabaseConfig.ConnectionString);
+                Database = new FergunDatabase(Constants.FergunDatabase, Config!.DatabaseConfig.ConnectionString);
                 isDbConnected = Database.IsConnected;
             }
             catch (TimeoutException e)
@@ -117,7 +111,7 @@ namespace Fergun
 
             GuildUtils.Initialize();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Using presence intent: {Config.PresenceIntent}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Using presence intent: {Config!.PresenceIntent}"));
             if (Config.PresenceIntent)
             {
                 Constants.ClientConfig.GatewayIntents |= GatewayIntents.GuildPresences;
@@ -154,23 +148,39 @@ namespace Fergun
             _client.UserBanned += UserBanned;
             _client.UserUnbanned += UserUnbanned;
 
+            // LogSeverity.Debug is too verbose
+            if (Config.LavaConfig.LogSeverity == LogSeverity.Debug)
+            {
+                Config.LavaConfig.LogSeverity = LogSeverity.Verbose;
+            }
+
+            if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
+            {
+                bool hasLavalink = File.Exists(Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar"));
+                if (hasLavalink)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using local lavalink server. Updating and starting Lavalink..."));
+                    await UpdateLavalinkAsync();
+                    await StartLavalinkAsync();
+                }
+                else
+                {
+                    // Ignore all log messages from Victoria
+                    Config.LavaConfig.LogSeverity = LogSeverity.Critical;
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Lavalink.jar not found."));
+                }
+            }
+            else
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using remote lavalink server."));
+            }
+
             _logService.Dispose();
             var services = SetupServices();
             _logService = services.GetRequiredService<LogService>();
 
             _cmdHandlingService = new CommandHandlingService(_client, services.GetRequiredService<CommandService>(), _logService, services);
             await _cmdHandlingService.InitializeAsync();
-
-            if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using local lavalink server. Updating and starting Lavalink..."));
-                await UpdateLavalinkAsync();
-                await StartLavalinkAsync();
-            }
-            else
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using remote lavalink server."));
-            }
 
             await _client.LoginAsync(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token, false);
             await _client.StartAsync();
@@ -232,17 +242,14 @@ namespace Fergun
             Environment.Exit(exitCode);
         }
 
-        private async Task StartLavalinkAsync()
+        private static async Task StartLavalinkAsync()
         {
             var processList = Process.GetProcessesByName("java");
             if (processList.Length == 0)
             {
                 string lavalinkFile = Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar");
-                if (!File.Exists(lavalinkFile))
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Lavalink", "Lavalink.jar not found."));
-                    return;
-                }
+                if (!File.Exists(lavalinkFile)) return;
+
                 var process = new ProcessStartInfo
                 {
                     FileName = "java",
@@ -274,8 +281,6 @@ namespace Fergun
             string lavalinkDir = Path.Combine(AppContext.BaseDirectory, "Lavalink");
             string lavalinkFile = Path.Combine(lavalinkDir, "Lavalink.jar");
             string versionFile = Path.Combine(lavalinkDir, "VERSION.txt");
-
-            if (!File.Exists(lavalinkFile)) return;
             string remoteVersion;
             using var httpClient = new HttpClient();
 
@@ -313,7 +318,7 @@ namespace Fergun
             }
             else
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "LLUpdater", "Local VERSION.txt not found or can't be read. Assuming the remote version is newer than the local..."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LLUpdater", "Local VERSION.txt not found or can't be read. Assuming the remote version is newer than the local..."));
             }
 
             var processList = Process.GetProcessesByName("java");
