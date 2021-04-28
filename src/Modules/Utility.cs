@@ -1435,7 +1435,7 @@ namespace Fergun.Modules
             }
 
             builder.AddField(Locate("CreatedAt"), server.CreatedAt, true)
-                .WithThumbnailUrl(server.Features.Any(x => x == "ANIMATED_ICON") ? Path.ChangeExtension(server.IconUrl, "gif") : server.IconUrl)
+                .WithThumbnailUrl($"https://cdn.discordapp.com/icons/{server.Id}/{server.IconId}")
                 .WithImageUrl(server.BannerUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
