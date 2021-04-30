@@ -40,7 +40,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("UserNotFound"));
             }
 
-            await Context.Guild.AddBanAsync(user, 0, reason);
+            await Context.Guild.AddBanAsync(user, 0, reason?.Truncate(512));
             await SendEmbedAsync(string.Format(Locate("Banned"), user.Mention));
             return FergunResult.FromSuccess();
         }
@@ -137,7 +137,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("UserNotLowerHierarchy"));
             }
 
-            await Context.Guild.AddBanAsync(userId, 0, reason);
+            await Context.Guild.AddBanAsync(userId, 0, reason?.Truncate(512));
             await SendEmbedAsync(string.Format(Locate("Hackbanned"), user));
             return FergunResult.FromSuccess();
         }
@@ -151,12 +151,11 @@ namespace Fergun.Modules
             [Summary("kickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("kickParam2")] string reason = null)
         {
-            // IGuildUser parameter is bugged.
             if (!(user is IGuildUser guildUser))
             {
                 return FergunResult.FromError(Locate("UserNotFound"));
             }
-            await guildUser.KickAsync(reason);
+            await guildUser.KickAsync(reason?.Truncate(512));
             await SendEmbedAsync(string.Format(Locate("Kicked"), user.Mention));
 
             return FergunResult.FromSuccess();
@@ -172,11 +171,12 @@ namespace Fergun.Modules
             [Summary("nickParam1"), RequireLowerHierarchy("UserNotLowerHierarchy")] IUser user,
             [Remainder, Summary("nickParam2")] string newNick = null)
         {
-            // IGuildUser parameter is bugged.
             if (!(user is IGuildUser guildUser))
             {
                 return FergunResult.FromError(Locate("UserNotFound"));
             }
+
+            newNick = newNick?.Truncate(32);
             if (guildUser.Nickname == newNick)
             {
                 return newNick == null
@@ -221,7 +221,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("MustBeLowerThan"), nameof(days), 7));
             }
 
-            await Context.Guild.AddBanAsync(user.Id, (int)days, reason);
+            await Context.Guild.AddBanAsync(user.Id, (int)days, reason?.Truncate(512));
             await Context.Guild.RemoveBanAsync(user.Id);
             await SendEmbedAsync(string.Format(Locate("Softbanned"), user));
 
