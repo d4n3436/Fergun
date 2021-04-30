@@ -472,31 +472,37 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("ChannelInfo"))
-                .AddField(Locate("Name"), channel.Name, true)
+                .AddField(Locate("Name"), channel.Name ?? "?", true)
                 .AddField("ID", channel.Id, true);
 
-            if (channel is ITextChannel textChannel)
+            switch (channel)
             {
-                builder.AddField(Locate("Type"), Locate(channel is SocketNewsChannel ? "AnnouncementChannel" : "TextChannel"), true)
-                    .AddField(Locate("Topic"), string.IsNullOrEmpty(textChannel.Topic) ? Locate("None") : textChannel.Topic, true)
-                    .AddField(Locate("IsNSFW"), Locate(textChannel.IsNsfw), true)
-                    .AddField(Locate("SlowMode"), TimeSpan.FromSeconds(channel is SocketNewsChannel ? 0 : textChannel.SlowModeInterval).ToShortForm2(), true)
-                    .AddField(Locate("Category"), textChannel.CategoryId.HasValue ? Context.Guild.GetCategoryChannel(textChannel.CategoryId.Value).Name : Locate("None"), true);
-            }
-            else if (channel is IVoiceChannel voiceChannel)
-            {
-                builder.AddField(Locate("Type"), Locate("VoiceChannel"), true)
-                    .AddField(Locate("Bitrate"), $"{voiceChannel.Bitrate / 1000}kbps", true)
-                    .AddField(Locate("UserLimit"), voiceChannel.UserLimit?.ToString() ?? Locate("NoLimit"), true);
-            }
-            else if (channel is SocketCategoryChannel categoryChannel)
-            {
-                builder.AddField(Locate("Type"), Locate("Category"), true)
-                    .AddField(Locate("Channels"), categoryChannel.Channels.Count, true);
-            }
-            else if (channel is IDMChannel)
-            {
-                builder.AddField(Locate("Type"), Locate("DMChannel"), true);
+                case ITextChannel textChannel:
+                    builder.AddField(Locate("Type"), Locate(channel is SocketNewsChannel ? "AnnouncementChannel" : "TextChannel"), true)
+                        .AddField(Locate("Topic"), string.IsNullOrEmpty(textChannel.Topic) ? Locate("None") : textChannel.Topic, true)
+                        .AddField(Locate("IsNSFW"), Locate(textChannel.IsNsfw), true)
+                        .AddField(Locate("SlowMode"), TimeSpan.FromSeconds(channel is SocketNewsChannel ? 0 : textChannel.SlowModeInterval).ToShortForm2(), true)
+                        .AddField(Locate("Category"), textChannel.CategoryId.HasValue ? Context.Guild.GetCategoryChannel(textChannel.CategoryId.Value).Name : Locate("None"), true);
+                    break;
+
+                case IVoiceChannel voiceChannel:
+                    builder.AddField(Locate("Type"), Locate("VoiceChannel"), true)
+                        .AddField(Locate("Bitrate"), $"{voiceChannel.Bitrate / 1000}kbps", true)
+                        .AddField(Locate("UserLimit"), voiceChannel.UserLimit?.ToString() ?? Locate("NoLimit"), true);
+                    break;
+
+                case SocketCategoryChannel categoryChannel:
+                    builder.AddField(Locate("Type"), Locate("Category"), true)
+                        .AddField(Locate("Channels"), categoryChannel.Channels.Count, true);
+                    break;
+
+                case IDMChannel _:
+                    builder.AddField(Locate("Type"), Locate("DMChannel"), true);
+                    break;
+
+                default:
+                    builder.AddField(Locate("Type"), "?", true);
+                    break;
             }
             if (channel is IGuildChannel guildChannel)
             {
