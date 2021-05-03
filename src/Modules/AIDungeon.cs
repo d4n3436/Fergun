@@ -675,21 +675,30 @@ namespace Fergun.Modules
                 return Locate("ErrorInAPI");
             }
 
-            string textToShow = actionList[^1].Text;
-            if (actionType == ActionType.Do ||
-                actionType == ActionType.Say ||
-                actionType == ActionType.Story)
+            string textToShow;
+
+            if (actionType != ActionType.Remember)
             {
-                textToShow = actionList[^2].Text + textToShow;
+                textToShow = actionList[^1].Text;
+                if (actionType == ActionType.Do ||
+                    actionType == ActionType.Say ||
+                    actionType == ActionType.Story)
+                {
+                    textToShow = actionList[^2].Text + textToShow;
+                }
+
+                if (!string.IsNullOrEmpty(textToShow) && AutoTranslate())
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text to \"{GetLanguage()}\"."));
+                    textToShow = await TranslateSimplerAsync(textToShow, "en", GetLanguage());
+                }
+            }
+            else
+            {
+                textToShow = $"{Locate("TheAIWillNowRemember")}\n{text}";
             }
 
-            if (!string.IsNullOrEmpty(textToShow) && AutoTranslate())
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text to \"{GetLanguage()}\"."));
-                textToShow = await TranslateSimplerAsync(textToShow, "en", GetLanguage());
-            }
-
-            builder.WithDescription(actionType == ActionType.Remember ? $"{Locate("TheAIWillNowRemember")}\n{text}" : textToShow)
+            builder.WithDescription(textToShow.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", Constants.AiDungeonLogoUrl);
 
             await message.ModifyOrResendAsync(embed: builder.Build());
@@ -993,7 +1002,7 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("IDInfo"))
-                .WithDescription(initialPrompt)
+                .WithDescription(initialPrompt.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .AddField(Locate("IsPublic"), Locate(adventure.IsPublic), true)
                 .AddField(Locate("Owner"), idOwner?.ToString() ?? Locate("NotAvailable"), true)
                 .WithFooter($"ID: {adventureId} - {Locate("CreatedAt")}:", Constants.AiDungeonLogoUrl)
