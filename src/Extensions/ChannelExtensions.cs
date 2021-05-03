@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -66,11 +66,7 @@ namespace Fergun.Extensions
                     return (null, UrlFindResult.UrlNotImage);
                 }
                 size = await StringUtils.GetUrlContentLengthAsync(url);
-                if (size != null && size > maxSize)
-                {
-                    return (null, UrlFindResult.UrlFileTooLarge);
-                }
-                return (url, UrlFindResult.UrlFound);
+                return size > maxSize ? (null, UrlFindResult.UrlFileTooLarge) : (url, UrlFindResult.UrlFound);
             }
 
             // Get the last x messages of the current channel
@@ -140,11 +136,7 @@ namespace Fergun.Extensions
                 size = await StringUtils.GetUrlContentLengthAsync(url);
             }
 
-            if (size != null && size > maxSize)
-            {
-                return (null, UrlFindResult.UrlFileTooLarge);
-            }
-            return (url, UrlFindResult.UrlFound);
+            return size > maxSize ? (null, UrlFindResult.UrlFileTooLarge) : (url, UrlFindResult.UrlFound);
         }
     }
 

@@ -7,39 +7,18 @@ namespace Fergun.APIs.AIDungeon
         public WebSocketRequest(string id, RequestType requestType, string prompt = null)
         {
             Payload = new WebSocketPayload();
-            if (requestType == RequestType.CreateAdventure)
+            Payload.Query = requestType switch
             {
-                Payload.Variables = new PayloadVariables
-                {
-                    ScenarioId = id,
-                    Prompt = prompt
-                };
-                Payload.Query = "mutation ($scenarioId: String, $prompt: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n";
-            }
-            else if (requestType == RequestType.GetScenario)
-            {
-                Payload.Variables = new PayloadVariables
-                {
-                    PublicId = id
-                };
-                Payload.Query = "query ($publicId: String) {\n  scenario(publicId: $publicId) {\n    ...SelectOptionScenarioFragment\n    __typename\n  }\n}\n\nfragment SelectOptionScenarioFragment on Scenario {\n  id\n  prompt\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n";
-            }
-            else if (requestType == RequestType.GetAdventure)
-            {
-                Payload.Variables = new PayloadVariables
-                {
-                    PublicId = id
-                };
-                Payload.Query = "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    userId\n    userJoined\n    publicId\n    actions {\n      id\n      text\n      __typename\n    }\n    ...ContentHeadingFragment\n    __typename\n  }\n}\n\nfragment ContentHeadingFragment on Searchable {\n  id\n  title\n  description\n  tags\n  published\n  publicId\n  actionCount\n  createdAt\n  updatedAt\n  deletedAt\n  user {\n    id\n    username\n    hasPremium\n    avatar\n    isDeveloper\n    __typename\n  }\n  ...VoteButtonFragment\n  ...CommentButtonFragment\n  __typename\n}\n\nfragment VoteButtonFragment on Votable {\n  id\n  userVote\n  totalUpvotes\n  __typename\n}\n\nfragment CommentButtonFragment on Commentable {\n  id\n  publicId\n  allowComments\n  totalComments\n  __typename\n}\n";
-            }
-            else if (requestType == RequestType.DeleteAdventure)
-            {
-                Payload.Variables = new PayloadVariables
-                {
-                    PublicId = id
-                };
-                Payload.Query = "mutation ($publicId: String) {\n  deleteAdventure(publicId: $publicId) {\n    id\n    publicId\n    deletedAt\n    __typename\n  }\n}\n";
-            }
+                RequestType.CreateAdventure => "mutation ($scenarioId: String, $prompt: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n",
+                RequestType.GetScenario => "query ($publicId: String) {\n  scenario(publicId: $publicId) {\n    ...SelectOptionScenarioFragment\n    __typename\n  }\n}\n\nfragment SelectOptionScenarioFragment on Scenario {\n  id\n  prompt\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n",
+                RequestType.GetAdventure => "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    userId\n    userJoined\n    publicId\n    actions {\n      id\n      text\n      __typename\n    }\n    ...ContentHeadingFragment\n    __typename\n  }\n}\n\nfragment ContentHeadingFragment on Searchable {\n  id\n  title\n  description\n  tags\n  published\n  publicId\n  actionCount\n  createdAt\n  updatedAt\n  deletedAt\n  user {\n    id\n    username\n    hasPremium\n    avatar\n    isDeveloper\n    __typename\n  }\n  ...VoteButtonFragment\n  ...CommentButtonFragment\n  __typename\n}\n\nfragment VoteButtonFragment on Votable {\n  id\n  userVote\n  totalUpvotes\n  __typename\n}\n\nfragment CommentButtonFragment on Commentable {\n  id\n  publicId\n  allowComments\n  totalComments\n  __typename\n}\n",
+                RequestType.DeleteAdventure => "mutation ($publicId: String) {\n  deleteAdventure(publicId: $publicId) {\n    id\n    publicId\n    deletedAt\n    __typename\n  }\n}\n",
+                _ => Payload.Query
+            };
+
+            Payload.Variables = requestType == RequestType.CreateAdventure ?
+                new PayloadVariables { ScenarioId = id, Prompt = prompt } :
+                new PayloadVariables { PublicId = id };
         }
 
         public WebSocketRequest(string publicId, ActionType action, string text = "", long actionId = 0)

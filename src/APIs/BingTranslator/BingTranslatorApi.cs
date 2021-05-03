@@ -64,7 +64,7 @@ namespace Fergun.APIs.BingTranslator
             return JsonConvert.DeserializeObject<List<BingResult>>(json);
         }
 
-        public static IReadOnlyList<string> SupportedLanguages { get; } = new List<string>
+        public static IReadOnlyList<string> SupportedLanguages { get; } = new[]
         {
             "af",
             "ar",
@@ -123,6 +123,6 @@ namespace Fergun.APIs.BingTranslator
             "ur",
             "vi",
             "cy"
-        }.AsReadOnly();
+        };
     }
 }

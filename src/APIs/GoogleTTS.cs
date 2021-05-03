@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -316,10 +316,10 @@ namespace Fergun.APIs
         /// </summary>
         private static class Symbols
         {
-            public static IReadOnlyList<string> Abbreviations { get; } = new List<string>
+            public static IReadOnlyList<string> Abbreviations { get; } = new[]
             {
                 "dr", "jr", "mr", "mrs", "ms", "msgr", "prof", "sr", "st"
-            }.AsReadOnly();
+            };
 
             public const string PunctuationMarks = "?!？！.,¡()][¿…‥،;:—。，、：\n";
 

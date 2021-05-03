@@ -83,7 +83,7 @@ namespace Fergun.Tests
 
             string id = filteredModeList[rng.Next(filteredModeList.Count)].PublicId?.ToString();
 
-            // Get scenario list from the a random mode
+            // Get scenario list from a random mode
             response = await api.SendWebSocketRequestAsync(new WebSocketRequest(id, RequestType.GetScenario));
 
             AssertResponseIsValid(response);
