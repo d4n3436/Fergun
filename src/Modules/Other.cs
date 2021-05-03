@@ -172,7 +172,7 @@ namespace Fergun.Modules
         [Summary("cringeSummary")]
         public async Task Cringe()
         {
-            await ReplyAsync("https://fergun.is-inside.me/MyAxVm6x.mp4");
+            await ReplyAsync("https://cdn.discordapp.com/attachments/838832564583661638/838834775417421874/cringe.mp4");
         }
 
         [AlwaysEnabled]

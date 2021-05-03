@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
@@ -154,16 +154,16 @@ namespace Fergun
         public const bool TrackSelectionDefault = false;
 
         // Logos
-        public const string AiDungeonLogoUrl = "https://fergun.is-inside.me/CypOix5S.png";
+        public const string AiDungeonLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834077905059850/aidungeon.png";
 
-        public const string SpotifyLogoUrl = "https://i.ibb.co/XJQnL4j/spotify.png";
+        public const string SpotifyLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833381298143334/spotify.png";
 
-        public const string GoogleTranslateLogoUrl = "https://fergun.is-inside.me/u7fSdkx8.png";
+        public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";
 
-        public const string BadTranslatorLogoUrl = "https://fergun.is-inside.me/gXEDLZVr.png";
+        public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834302049452062/badtranslator.png";
 
         public const string WikipediaLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png";
 
-        public const string WolframAlphaLogoUrl = "https://fergun.is-inside.me/W3gbxqzY.png";
+        public const string WolframAlphaLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834461638131722/wolframalpha.png";
     }
 }
