@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -84,11 +84,11 @@ namespace Fergun.Services
             await Task.CompletedTask;
         }
 
-        private string GetLogFile() => Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow:dd-MM-yyyy}.txt");
+        private string GetLogFile() => Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow:yyyy-MM-dd}.txt");
 
         private void CompressYesterdayLogs()
         {
-            string yesterday = Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow.AddDays(-1):dd-MM-yyyy}.txt");
+            string yesterday = Path.Combine(_logDirectoryPath, $"{DateTimeOffset.UtcNow.AddDays(-1):yyyy-MM-dd}.txt");
             // If the yesterday log file exists, compress it.
             if (File.Exists(yesterday))
             {
