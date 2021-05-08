@@ -21,7 +21,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 ### 0. Prerequisites
 * A Discord bot application (You can create one [here](https://discord.com/developers/applications)).
 
-* [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download)
+* [.NET 5 SDK](https://dotnet.microsoft.com/download)
 
 * A MongoDB server (You can get a Free Tier cluster [here](https://docs.atlas.mongodb.com/tutorial/deploy-free-tier-cluster/) or install the system to your local machine [here](https://docs.mongodb.com/manual/administration/install-community/)).
 
@@ -45,7 +45,7 @@ If you want to use the music module with a local Lavalink server, follow these s
 
 * Create a folder in the build folder called "Lavalink" (change `Release` to `Debug` in a debug build):
   ```
-  cd src/bin/Release/netcoreapp3.1
+  cd src/bin/Release/net5.0
   mkdir Lavalink
   ```
   
@@ -67,7 +67,7 @@ If you want to use the music module with a local Lavalink server, follow these s
 ### 3. Running the bot
 * Go to the build folder if you haven't done it before (change `Release` to `Debug` in a debug build):
  
-  `cd src/bin/Release/netcoreapp3.1`
+  `cd src/bin/Release/net5.0`
  
 * Start the bot by double clicking `Fergun.exe` or with the command `dotnet Fergun.dll`.
 
