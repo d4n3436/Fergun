@@ -38,7 +38,6 @@ namespace Fergun
         private DiscordSocketClient _client;
         private LogService _logService;
         private static CommandHandlingService _cmdHandlingService;
-        private static bool _firstConnect = true;
         private static AuthDiscordBotListApi _dblApi;
         private static IDblSelfBot _dblBot;
         private static DiscordBotsApi _discordBots;
@@ -421,37 +420,36 @@ namespace Fergun
 
         private async Task ClientReady()
         {
-            if (_firstConnect)
-            {
-                if (!IsDebugMode)
-                {
-                    InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)Constants.InvitePermissions}";
+            _client.Ready -= ClientReady;
+            Uptime = DateTimeOffset.UtcNow;
 
-                    if (string.IsNullOrEmpty(Config.DblApiToken))
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or not set. Bot server count will not be sent to the API."));
-                    }
-                    else
-                    {
-                        _dblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, Config.DblApiToken);
-                        DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
-                    }
-
-                    if (string.IsNullOrEmpty(Config.DiscordBotsApiToken))
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or not set. Bot server count will not be sent to the API."));
-                    }
-                    else
-                    {
-                        _discordBots = new DiscordBotsApi(Config.DiscordBotsApiToken);
-                    }
-
-                    await UpdateBotListStatsAsync();
-                }
-                Uptime = DateTimeOffset.UtcNow;
-                _firstConnect = false;
-            }
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", $"{_client.CurrentUser.Username} is online!"));
+
+            if (!IsDebugMode)
+            {
+                InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)Constants.InvitePermissions}";
+
+                if (string.IsNullOrEmpty(Config.DblApiToken))
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or not set. Bot server count will not be sent to the API."));
+                }
+                else
+                {
+                    _dblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, Config.DblApiToken);
+                    DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
+                }
+
+                if (string.IsNullOrEmpty(Config.DiscordBotsApiToken))
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or not set. Bot server count will not be sent to the API."));
+                }
+                else
+                {
+                    _discordBots = new DiscordBotsApi(Config.DiscordBotsApiToken);
+                }
+
+                await UpdateBotListStatsAsync();
+            }
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
