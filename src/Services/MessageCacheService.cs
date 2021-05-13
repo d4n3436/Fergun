@@ -14,7 +14,7 @@ namespace Fergun.Services
     /// </summary>
     public class MessageCacheService : IDisposable
     {
-        private readonly ConcurrentDictionary<ulong, CachedMessage> _cache = new ConcurrentDictionary<ulong, CachedMessage>();
+        private readonly ConcurrentDictionary<ulong, ICachedMessage> _cache = new ConcurrentDictionary<ulong, ICachedMessage>();
         private readonly IReadOnlyDictionary<ulong, UserConfig> _userConfigCache;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
@@ -49,7 +49,7 @@ namespace Fergun.Services
         /// <summary>
         /// Gets the message cache.
         /// </summary>
-        public IReadOnlyDictionary<ulong, CachedMessage> Cache => _cache;
+        public IReadOnlyDictionary<ulong, ICachedMessage> Cache => _cache;
 
         /// <summary>
         /// Gets a collection containing the keys in the cache.
@@ -59,7 +59,7 @@ namespace Fergun.Services
         /// <summary>
         /// Gets a collection containing the values in the cache.
         /// </summary>
-        public ICollection<CachedMessage> Values => _cache.Values;
+        public ICollection<ICachedMessage> Values => _cache.Values;
 
         public bool IsDisabled { get; }
 
@@ -73,7 +73,7 @@ namespace Fergun.Services
         /// </summary>
         /// <param name="predicate">The predicate.</param>
         /// <returns>The number of removed messages.</returns>
-        public int ClearOnPredicate(Func<KeyValuePair<ulong, CachedMessage>, bool> predicate)
+        public int ClearOnPredicate(Func<KeyValuePair<ulong, ICachedMessage>, bool> predicate)
         {
             var toPurge = _cache.Where(predicate).ToList();
             return toPurge.Count(p => _cache.TryRemove(p.Key, out _));
@@ -122,6 +122,7 @@ namespace Fergun.Services
                 return Task.CompletedTask;
 
             _cache[before.Id] = new CachedMessage(before, DateTimeOffset.UtcNow, CachedMessageSourceEvent.MessageUpdated);
+
             return Task.CompletedTask;
         }
 
@@ -143,56 +144,12 @@ namespace Fergun.Services
     }
 
     /// <summary>
-    /// Represents a cached message.
+    /// Represents a generic cached message.
     /// </summary>
-    public class CachedMessage : ISnowflakeEntity
+    public interface ICachedMessage : IMessage
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CachedMessage"/> class.
-        /// </summary>
-        /// <param name="message">The base message.</param>
-        /// <param name="cachedAt">When the message was cached.</param>
-        /// <param name="sourceEvent">The source event of the message.</param>
-        public CachedMessage(IMessage message, DateTimeOffset cachedAt, CachedMessageSourceEvent sourceEvent)
-        {
-            Id = message.Id;
-            Author = message.Author;
-            Attachments = message.Attachments;
-            Channel = message.Channel;
-            Content = message.Content;
-            CreatedAt = message.CreatedAt;
-            CachedAt = cachedAt;
-            SourceEvent = sourceEvent;
-        }
-
-        /// <inheritdoc/>
-        public ulong Id { get; }
-
-        /// <summary>
-        /// Gets the author of this message.
-        /// </summary>
-        public IUser Author { get; }
-
-        /// <summary>
-        /// Gets all attachments included in this message.
-        /// </summary>
-        public IReadOnlyCollection<IAttachment> Attachments { get; }
-
-        /// <summary>
-        /// Gets the source channel of this message.
-        /// </summary>
-        public IChannel Channel { get; }
-
-        /// <summary>
-        /// Gets the content of this message.
-        /// </summary>
-        public string Content { get; }
-
-        /// <inheritdoc/>
-        public DateTimeOffset CreatedAt { get; }
-
-        /// <summary>
-        /// Gets the time this message was cached.
+        /// Gets when this message was cached.
         /// </summary>
         public DateTimeOffset CachedAt { get; }
 
@@ -203,10 +160,139 @@ namespace Fergun.Services
     }
 
     /// <summary>
+    /// Represents a cached message.
+    /// </summary>
+    public class CachedMessage : ICachedMessage
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CachedMessage"/> class.
+        /// </summary>
+        /// <param name="message">The original message.</param>
+        /// <param name="cachedAt">When the message was cached.</param>
+        /// <param name="sourceEvent">The source event of the message.</param>
+        public CachedMessage(IMessage message, DateTimeOffset cachedAt, CachedMessageSourceEvent sourceEvent)
+        {
+            _message = message;
+            CachedAt = cachedAt;
+            SourceEvent = sourceEvent;
+        }
+
+        private readonly IMessage _message;
+
+        /// <inheritdoc/>
+        public DateTimeOffset CachedAt { get; }
+
+        /// <inheritdoc/>
+        public CachedMessageSourceEvent SourceEvent { get; }
+
+        /// <inheritdoc />
+        public ulong Id => _message.Id;
+
+        /// <inheritdoc />
+        public DateTimeOffset CreatedAt => _message.CreatedAt;
+
+        /// <inheritdoc />
+        public MessageType Type => _message.Type;
+
+        /// <inheritdoc />
+        public MessageSource Source => _message.Source;
+
+        /// <inheritdoc />
+        public bool IsTTS => _message.IsTTS;
+
+        /// <inheritdoc />
+        public bool IsPinned => _message.IsPinned;
+
+        /// <inheritdoc />
+        public bool IsSuppressed => _message.IsSuppressed;
+
+        /// <inheritdoc />
+        public bool MentionedEveryone => _message.MentionedEveryone;
+
+        /// <inheritdoc />
+        public string Content => _message.Content;
+
+        /// <inheritdoc />
+        public DateTimeOffset Timestamp => _message.Timestamp;
+
+        /// <inheritdoc />
+        public DateTimeOffset? EditedTimestamp => _message.EditedTimestamp;
+
+        /// <inheritdoc />
+        public IMessageChannel Channel => _message.Channel;
+
+        /// <inheritdoc />
+        public IUser Author => _message.Author;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<IAttachment> Attachments => _message.Attachments;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<IEmbed> Embeds => _message.Embeds;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ITag> Tags => _message.Tags;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ulong> MentionedChannelIds => _message.MentionedChannelIds;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ulong> MentionedRoleIds => _message.MentionedRoleIds;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ulong> MentionedUserIds => _message.MentionedUserIds;
+
+        /// <inheritdoc />
+        public MessageActivity Activity => _message.Activity;
+
+        /// <inheritdoc />
+        public MessageApplication Application => _message.Application;
+
+        /// <inheritdoc />
+        public MessageReference Reference => _message.Reference;
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<IEmote, ReactionMetadata> Reactions => _message.Reactions;
+
+        /// <inheritdoc />
+        public MessageFlags? Flags => _message.Flags;
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
+
+        /// <inheritdoc />
+        public Task DeleteAsync(RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public Task AddReactionAsync(IEmote emote, RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public Task RemoveReactionAsync(IEmote emote, IUser user, RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public Task RemoveReactionAsync(IEmote emote, ulong userId, RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public Task RemoveAllReactionsAsync(RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public Task RemoveAllReactionsForEmoteAsync(IEmote emote, RequestOptions options = null) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public IAsyncEnumerable<IReadOnlyCollection<IUser>> GetReactionUsersAsync(IEmote emoji, int limit, RequestOptions options = null)
+            => throw new NotSupportedException();
+    }
+
+    /// <summary>
     /// Represents the event where a message gets cached.
     /// </summary>
     public enum CachedMessageSourceEvent
     {
+        /// <summary>
+        /// The message has been received.
+        /// </summary>
+        MessageReceived,
+
         /// <summary>
         /// The message has been deleted.
         /// </summary>
