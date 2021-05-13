@@ -46,8 +46,6 @@ namespace Fergun
         {
 #if DEBUG
             IsDebugMode = true;
-#else
-            IsDebugMode = false;
 #endif
             _logService = new LogService();
         }
