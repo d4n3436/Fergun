@@ -27,6 +27,7 @@ namespace Fergun.Services
             = new ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>>();
 
         private readonly ConcurrentDictionary<ulong, DateTimeOffset> _lastCommandUsageTimes = new ConcurrentDictionary<ulong, DateTimeOffset>();
+        private readonly bool _onlyCacheUserDeletedEditedMessages;
         private readonly Func<LogMessage, Task> _logger;
         private readonly DiscordSocketClient _client;
         private readonly double _maxMessageTime;
@@ -48,8 +49,9 @@ namespace Fergun.Services
         /// <param name="logger">The logger.</param>
         /// <param name="period">The period between cleanings. This only applies to edited/deleted messages.</param>
         /// <param name="maxMessageTime">The max. time the messages can be kept in the cache. This only applies to edited/deleted messages.</param>
+        /// <param name="onlyCacheUserDeletedEditedMessages">Whether to only save messages from users in the edited/deleted messages cache.</param>
         public MessageCacheService(DiscordSocketClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
-            int period = 3600000, double maxMessageTime = 6)
+            int period = 3600000, double maxMessageTime = 6, bool onlyCacheUserDeletedEditedMessages = true)
         {
             _client = client;
             _client.MessageReceived += MessageReceived;
@@ -61,6 +63,7 @@ namespace Fergun.Services
             _autoClear = new Timer(OnTimerFired, null, period, period);
             _messageCacheSize = messageCacheSize;
             _maxMessageTime = maxMessageTime;
+            _onlyCacheUserDeletedEditedMessages = onlyCacheUserDeletedEditedMessages;
         }
 
         /// <summary>
@@ -121,7 +124,9 @@ namespace Fergun.Services
         /// <param name="channelId">The channel id.</param>
         /// <returns>Whether the channel has been removed from all caches.</returns>
         public bool TryClear(ulong channelId)
-            => _cache.TryRemove(channelId, out _) && _orderedCache.TryRemove(channelId, out _) && _editedDeletedCache.TryRemove(channelId, out _);
+            => _cache.TryRemove(channelId, out _)
+               && _orderedCache.TryRemove(channelId, out _)
+               && _editedDeletedCache.TryRemove(channelId, out _);
 
         /// <summary>
         /// Attempts to get a cached message associated to the provided id.
@@ -271,7 +276,7 @@ namespace Fergun.Services
                     Debug.WriteLine($"Added message {message.Id} to the cache.");
                     Debug.WriteLine($"Messages in cached channel: {cachedChannel.Count}, queue: {channelQueue.Count}");
 
-                    while (channelQueue.Count > _messageCacheSize && channelQueue.TryDequeue(out ulong msgId))
+                    while (cachedChannel.Count > _messageCacheSize && channelQueue.TryDequeue(out ulong msgId))
                     {
                         Debug.WriteLine($"Removed {msgId} from the cache.");
                         cachedChannel.TryRemove(msgId, out _);
@@ -284,16 +289,20 @@ namespace Fergun.Services
 
         private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
+            // The default message cache removes deleted message from its cache, here we just move the message to the long term cache
             if (TryRemoveCachedMessage(channel, cache.Id, out var message))
             {
-                message.CachedAt = DateTimeOffset.UtcNow;
-                message.SourceEvent = MessageSourceEvent.MessageDeleted;
+                if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
+                {
+                    message.CachedAt = DateTimeOffset.UtcNow;
+                    message.SourceEvent = MessageSourceEvent.MessageDeleted;
 
-                // move cached message to the long term cache
-                var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                cachedChannel[cache.Id] = message;
+                    // move cached message to the long term cache
+                    var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                    cachedChannel[cache.Id] = message;
 
-                Debug.WriteLine($"Moved cached message {cache.Id} to long term cache (MessageReceived -> MessageDeleted)");
+                    Debug.WriteLine($"Moved cached message {cache.Id} to long term cache (MessageReceived -> MessageDeleted)");
+                }
             }
             else if (TryGetCachedMessage(channel, cache.Id, out message, MessageSourceEvent.MessageUpdated))
             {
@@ -307,18 +316,27 @@ namespace Fergun.Services
 
         private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
         {
-            if (TryRemoveCachedMessage(channel, cachedbefore.Id, out var message))
+            // We need to simulate the functionality of the default message cache,
+            // so we update the message in the short term cache instead of removing it
+            if (TryGetCachedMessage(channel, cachedbefore.Id, out var message))
             {
-                // move cached message to the long term cache
-                var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                cachedChannel[cachedbefore.Id] = new CachedMessage(after, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                _cache[channel.Id][cachedbefore.Id] = new CachedMessage(after, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
 
-                Debug.WriteLine($"Moved cached message {cachedbefore.Id} to long term cache (MessageReceived -> MessageUpdated)");
+                if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
+                {
+                    // "Copy" the cached message to the long term cache
+                    var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                    cachedChannel[cachedbefore.Id] = new CachedMessage(after, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+
+                    Debug.WriteLine($"Copied cached message {cachedbefore.Id} to long term cache (MessageReceived -> MessageUpdated)");
+                }
             }
             else if (TryGetCachedMessage(channel, cachedbefore.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+
                 message.OriginalMessage = null;
+                // Create a new cached message containing the previous and current messages
                 cachedChannel[cachedbefore.Id] = new CachedMessage(after, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
                 Debug.WriteLine($"Added original message to cached message {cachedbefore.Id} (MessageUpdated)");
             }
@@ -442,7 +460,7 @@ namespace Fergun.Services
         /// <inheritdoc/>
         public MessageType Type => _message.Type;
 
-        /// <inheritdo />
+        /// <inheritdoc/>
         public MessageSource Source => _message.Source;
 
         /// <inheritdoc/>
