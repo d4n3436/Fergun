@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -23,7 +24,10 @@ namespace Fergun.Services
             = new ConcurrentDictionary<ulong, ConcurrentQueue<ulong>>();
 
         // long term cache
-        private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>> _editedDeletedCache
+        private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>> _editedCache
+            = new ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>>();
+
+        private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>> _deletedCache
             = new ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>>();
 
         private readonly ConcurrentDictionary<ulong, DateTimeOffset> _lastCommandUsageTimes = new ConcurrentDictionary<ulong, DateTimeOffset>();
@@ -32,6 +36,7 @@ namespace Fergun.Services
         private readonly DiscordSocketClient _client;
         private readonly double _maxMessageTime;
         private readonly int _messageCacheSize;
+        private readonly int _minCommandTime;
         private Timer _autoClear;
         private bool _disposed;
 
@@ -49,9 +54,11 @@ namespace Fergun.Services
         /// <param name="logger">The logger.</param>
         /// <param name="period">The period between cleanings. This only applies to edited/deleted messages.</param>
         /// <param name="maxMessageTime">The max. time the messages can be kept in the cache. This only applies to edited/deleted messages.</param>
+        /// <param name="minCommandTime">The min. hours since a command has to be used in a guild for the messages to be cached there. Setting this to 0 disables this requirement.<br/>
+        /// Use <see cref="UpdateLastCommandUsageTime(ulong)"/> in your command handler to update the last time a command was used.</param>
         /// <param name="onlyCacheUserDeletedEditedMessages">Whether to only save messages from users in the edited/deleted messages cache.</param>
         public MessageCacheService(DiscordSocketClient client, int messageCacheSize, Func<LogMessage, Task> logger = null,
-            int period = 3600000, double maxMessageTime = 6, bool onlyCacheUserDeletedEditedMessages = true)
+            int period = 3600000, double maxMessageTime = 6, int minCommandTime = 12, bool onlyCacheUserDeletedEditedMessages = true)
         {
             _client = client;
             _client.MessageReceived += MessageReceived;
@@ -64,6 +71,7 @@ namespace Fergun.Services
             _autoClear = new Timer(OnTimerFired, null, period, period);
             _messageCacheSize = messageCacheSize;
             _maxMessageTime = maxMessageTime;
+            _minCommandTime = minCommandTime;
             _onlyCacheUserDeletedEditedMessages = onlyCacheUserDeletedEditedMessages;
         }
 
@@ -108,7 +116,8 @@ namespace Fergun.Services
         {
             _cache.Clear();
             _orderedCache.Clear();
-            _editedDeletedCache.Clear();
+            _editedCache.Clear();
+            _deletedCache.Clear();
             _lastCommandUsageTimes.Clear();
         }
 
@@ -123,11 +132,12 @@ namespace Fergun.Services
         /// Attempts to clear all the messages from the cache in the specified channel.
         /// </summary>
         /// <param name="channelId">The channel id.</param>
-        /// <returns>Whether the channel has been removed from all caches.</returns>
+        /// <returns>Whether the channel has been removed from at least one cache.</returns>
         public bool TryClear(ulong channelId)
             => _cache.TryRemove(channelId, out _)
-               && _orderedCache.TryRemove(channelId, out _)
-               && _editedDeletedCache.TryRemove(channelId, out _);
+               || _orderedCache.TryRemove(channelId, out _)
+               || _editedCache.TryRemove(channelId, out _)
+               || _deletedCache.TryRemove(channelId, out _);
 
         /// <summary>
         /// Attempts to get a cached message associated to the provided id.
@@ -234,15 +244,22 @@ namespace Fergun.Services
             GC.SuppressFinalize(this);
         }
 
-        private ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>> GetCacheForEvent(MessageSourceEvent sourceEvent) =>
-            sourceEvent == MessageSourceEvent.MessageReceived ? _cache : _editedDeletedCache;
+        internal IEnumerable<ulong> GetMessageQueue(ulong channelId) => _orderedCache.GetValueOrDefault(channelId) ?? Enumerable.Empty<ulong>();
 
-        private void OnTimerFired(object state)
+        private ConcurrentDictionary<ulong, ConcurrentDictionary<ulong, ICachedMessage>> GetCacheForEvent(MessageSourceEvent sourceEvent) =>
+            sourceEvent switch
+            {
+                MessageSourceEvent.MessageReceived => _cache,
+                MessageSourceEvent.MessageUpdated => _editedCache,
+                _ => _deletedCache
+            };
+
+        // This only applies to the long term cache.
+        private int ClearOldMessages(MessageSourceEvent sourceEvent)
         {
-            // This only applies to the long term cache.
             int removed = 0;
 
-            foreach (var cachedChannel in _editedDeletedCache)
+            foreach (var cachedChannel in GetCacheForEvent(sourceEvent))
             {
                 foreach (var cachedMessage in cachedChannel.Value)
                 {
@@ -254,38 +271,51 @@ namespace Fergun.Services
                 }
             }
 
+            return removed;
+        }
+
+        private void OnTimerFired(object state)
+        {
+            int removed = ClearOldMessages(MessageSourceEvent.MessageUpdated) +
+                          ClearOldMessages(MessageSourceEvent.MessageDeleted);
+
             _ = _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
         }
 
         private Task MessageReceived(SocketMessage message)
         {
+            HandleReceivedMessage(message);
+            return Task.CompletedTask;
+        }
+
+        private void HandleReceivedMessage(IMessage message)
+        {
             Debug.WriteLine($"Received message {message.Id}: {message.Content}");
 
-            if (message.Channel is IGuildChannel guildChannel && _lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
+            if (!(message.Channel is IGuildChannel guildChannel) || !_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
+                return;
+
+            var now = DateTimeOffset.Now;
+
+            if (_minCommandTime != 0 && (lastUsageTime <= now.AddHours(-_minCommandTime) || lastUsageTime > now))
+                return;
+
+            Debug.WriteLine($"Last command usage time of guild {guildChannel.GuildId} is inside the last 12 hours!");
+            var cachedChannel = _cache.GetOrAdd(message.Channel.Id,
+                new ConcurrentDictionary<ulong, ICachedMessage>(Environment.ProcessorCount, (int)(_messageCacheSize * 1.05)));
+
+            var channelQueue = _orderedCache.GetOrAdd(message.Channel.Id, new ConcurrentQueue<ulong>());
+
+            cachedChannel[message.Id] = new CachedMessage(message, message.CreatedAt, MessageSourceEvent.MessageReceived);
+            channelQueue.Enqueue(message.Id);
+            Debug.WriteLine($"Added message {message.Id} to the cache.");
+            Debug.WriteLine($"Messages in cached channel: {cachedChannel.Count}, queue: {channelQueue.Count}");
+
+            while (cachedChannel.Count > _messageCacheSize && channelQueue.TryDequeue(out ulong msgId))
             {
-                var now = DateTimeOffset.Now;
-                if (lastUsageTime > now.AddHours(-12) && lastUsageTime <= now)
-                {
-                    Debug.WriteLine($"Last command usage time of guild {guildChannel.GuildId} is inside the last 12 hours!");
-                    var cachedChannel = _cache.GetOrAdd(message.Channel.Id,
-                        new ConcurrentDictionary<ulong, ICachedMessage>(Environment.ProcessorCount, (int)(_messageCacheSize * 1.05)));
-
-                    var channelQueue = _orderedCache.GetOrAdd(message.Channel.Id, new ConcurrentQueue<ulong>());
-
-                    cachedChannel[message.Id] = new CachedMessage(message, message.CreatedAt, MessageSourceEvent.MessageReceived);
-                    channelQueue.Enqueue(message.Id);
-                    Debug.WriteLine($"Added message {message.Id} to the cache.");
-                    Debug.WriteLine($"Messages in cached channel: {cachedChannel.Count}, queue: {channelQueue.Count}");
-
-                    while (cachedChannel.Count > _messageCacheSize && channelQueue.TryDequeue(out ulong msgId))
-                    {
-                        Debug.WriteLine($"Removed {msgId} from the cache.");
-                        cachedChannel.TryRemove(msgId, out _);
-                    }
-                }
+                Debug.WriteLine($"Removed {msgId} from the cache.");
+                cachedChannel.TryRemove(msgId, out _);
             }
-
-            return Task.CompletedTask;
         }
 
         private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
@@ -296,26 +326,30 @@ namespace Fergun.Services
 
         private void HandleDeletedMessage(ulong messageId, IMessageChannel channel)
         {
-            // The default message cache removes deleted message from its cache, here we just move the message to the long term cache
+            // The default message cache removes deleted message from its cache, here we just move the message to the deleted messages
             if (TryRemoveCachedMessage(channel, messageId, out var message))
             {
-                if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
-                {
-                    message.CachedAt = DateTimeOffset.UtcNow;
-                    message.SourceEvent = MessageSourceEvent.MessageDeleted;
+                if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
 
-                    // move cached message to the long term cache
-                    var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                    cachedChannel[messageId] = message;
+                message.CachedAt = DateTimeOffset.UtcNow;
+                message.SourceEvent = MessageSourceEvent.MessageDeleted;
 
-                    Debug.WriteLine($"Moved cached message {messageId} to long term cache (MessageReceived -> MessageDeleted)");
-                }
+                // move cached message to the deleted messages cache
+                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                cachedChannel[messageId] = message;
+
+                Debug.WriteLine($"Moved cached message {messageId} to the deleted messages cache (MessageReceived -> MessageDeleted)");
             }
             else if (TryGetCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.CachedAt = DateTimeOffset.UtcNow;
                 message.SourceEvent = MessageSourceEvent.MessageDeleted;
-                Debug.WriteLine($"Changed cached message {messageId} source event (MessageUpdated -> MessageDeleted)");
+
+                // move cached message to the deleted messages cache
+                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                cachedChannel[messageId] = message;
+
+                Debug.WriteLine($"Moved cached message {messageId} to the deleted messages cache (MessageUpdated -> MessageDeleted)");
             }
         }
 
@@ -327,29 +361,28 @@ namespace Fergun.Services
 
         private void HandleUpdatedMessage(IMessage updatedMessage, IMessageChannel channel)
         {
-            // We need to simulate the functionality of the default message cache,
-            // so we update the message in the short term cache instead of removing it
-            if (TryGetCachedMessage(channel, updatedMessage.Id, out var message))
+            if (TryGetCachedMessage(channel, updatedMessage.Id, out var message, MessageSourceEvent.MessageUpdated))
             {
-                _cache[channel.Id][updatedMessage.Id] = new CachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
-
-                if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
-                {
-                    // "Copy" the cached message to the long term cache
-                    var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                    cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
-
-                    Debug.WriteLine($"Copied cached message {updatedMessage.Id} to long term cache (MessageReceived -> MessageUpdated)");
-                }
-            }
-            else if (TryGetCachedMessage(channel, updatedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
-            {
-                var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                var cachedChannel = _editedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
 
                 message.OriginalMessage = null;
                 // Create a new cached message containing the previous and current messages
                 cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
                 Debug.WriteLine($"Added original message to cached message {updatedMessage.Id} (MessageUpdated)");
+            }
+            else if (TryGetCachedMessage(channel, updatedMessage.Id, out message))
+            {
+                // We need to simulate the functionality of the default message cache,
+                // so we update the message in the short term cache instead of removing it
+                _cache[channel.Id][updatedMessage.Id] = new CachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+
+                if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
+
+                // "Copy" the cached message to the edited messages cache
+                var cachedChannel = _editedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+
+                Debug.WriteLine($"Copied cached message {updatedMessage.Id} to the edited messages cache (MessageReceived -> MessageUpdated)");
             }
         }
 
@@ -547,26 +580,26 @@ namespace Fergun.Services
         public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
 
         /// <inheritdoc/>
-        public Task DeleteAsync(RequestOptions options = null) => throw new NotSupportedException();
+        public Task DeleteAsync(RequestOptions options = null) => _message.DeleteAsync(options);
 
         /// <inheritdoc/>
-        public Task AddReactionAsync(IEmote emote, RequestOptions options = null) => throw new NotSupportedException();
+        public Task AddReactionAsync(IEmote emote, RequestOptions options = null) => _message.AddReactionAsync(emote, options);
 
         /// <inheritdoc/>
-        public Task RemoveReactionAsync(IEmote emote, IUser user, RequestOptions options = null) => throw new NotSupportedException();
+        public Task RemoveReactionAsync(IEmote emote, IUser user, RequestOptions options = null) => _message.RemoveReactionAsync(emote, user, options);
 
         /// <inheritdoc/>
-        public Task RemoveReactionAsync(IEmote emote, ulong userId, RequestOptions options = null) => throw new NotSupportedException();
+        public Task RemoveReactionAsync(IEmote emote, ulong userId, RequestOptions options = null) => _message.RemoveReactionAsync(emote, userId, options);
 
         /// <inheritdoc/>
-        public Task RemoveAllReactionsAsync(RequestOptions options = null) => throw new NotSupportedException();
+        public Task RemoveAllReactionsAsync(RequestOptions options = null) => _message.RemoveAllReactionsAsync(options);
 
         /// <inheritdoc/>
-        public Task RemoveAllReactionsForEmoteAsync(IEmote emote, RequestOptions options = null) => throw new NotSupportedException();
+        public Task RemoveAllReactionsForEmoteAsync(IEmote emote, RequestOptions options = null) => _message.RemoveAllReactionsForEmoteAsync(emote, options);
 
         /// <inheritdoc/>
         public IAsyncEnumerable<IReadOnlyCollection<IUser>> GetReactionUsersAsync(IEmote emoji, int limit, RequestOptions options = null)
-            => throw new NotSupportedException();
+            => _message.GetReactionUsersAsync(emoji, limit, options);
 
         private string DebuggerDisplay => $"{Author}: {Content} ({Id}{(Attachments.Count > 0 ? $", {Attachments.Count} Attachments" : "")})";
     }
@@ -595,23 +628,239 @@ namespace Fergun.Services
     public static class MessageCacheExtensions
     {
         /// <summary>
-        /// Gets a message from this message channel using the optimized cache, and using <see cref="IMessageChannel.GetMessageAsync(ulong, CacheMode, RequestOptions)"/> as a fallback.
+        /// Gets a message from this message channel.
         /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="cache">The snowflake identifier of this message.</param>
-        /// <param name="messageId">The id of the cached message.</param>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="messageId">The snowflake identifier of the message.</param>
         /// <param name="sourceEvent">The source event.</param>
         /// <param name="mode"></param>
         /// <param name="options"></param>
         /// <returns>A task that represents an asynchronous get operation for retrieving the message. The task result contains
         /// the retrieved message; <c>null</c> if no message is found with the specified identifier.</returns>
-        public static Task<IMessage> GetMessageAsync(this IMessageChannel channel, MessageCacheService cache, ulong messageId,
+        public static async Task<IMessage> GetMessageAsync(this IMessageChannel channel, MessageCacheService cache, ulong messageId,
             MessageSourceEvent sourceEvent = MessageSourceEvent.MessageReceived, CacheMode mode = CacheMode.AllowDownload, RequestOptions options = null)
         {
-            if (cache.IsDisabled || !cache.TryGetCachedMessage(messageId, out var message, sourceEvent))
-                return channel.GetMessageAsync(messageId, mode, options);
+            if (cache.IsDisabled || mode != CacheMode.CacheOnly || !cache.TryGetCachedMessage(messageId, out var message, sourceEvent))
+            {
+                return sourceEvent == MessageSourceEvent.MessageReceived ? await channel.GetMessageAsync(messageId, mode, options) : null;
+            }
 
-            return Task.FromResult(message as IMessage);
+            return message;
+        }
+
+        /// <summary>
+        /// Gets a cached message from this message channel from the optimized cache.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="messageId">The snowflake identifier of the message.</param>
+        /// <param name="sourceEvent">The source event.</param>
+        /// <returns>A task that represents an asynchronous get operation for retrieving the message. The task result contains
+        /// the retrieved message; <c>null</c> if no message is found with the specified identifier.</returns>
+        public static ICachedMessage GetCachedMessage(this IMessageChannel channel, MessageCacheService cache, ulong messageId,
+            MessageSourceEvent sourceEvent = MessageSourceEvent.MessageReceived)
+        {
+            cache.TryGetCachedMessage(channel, messageId, out var message, sourceEvent);
+            return message;
+        }
+
+        /// <summary>
+        /// Gets the last N messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="limit">The numbers of message to be gotten from.</param>
+        /// <param name="options">The options to be used when sending the request.</param>
+        /// <returns>A paged collection of messages.</returns>
+        public static IAsyncEnumerable<IReadOnlyCollection<IMessage>> GetMessagesAsync(this IMessageChannel channel, MessageCacheService cache,
+            int limit = DiscordConfig.MaxMessagesPerBatch, RequestOptions options = null)
+            => GetMessagesInternalAsync(channel, cache, null, Direction.Before, limit, CacheMode.AllowDownload, options);
+
+        /// <summary>
+        /// Gets the last N messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="fromMessageId">The ID of the starting message to get the messages from.</param>
+        /// <param name="dir">The direction of the messages to be gotten from.</param>
+        /// <param name="limit">The numbers of message to be gotten from.</param>
+        /// <param name="options">The options to be used when sending the request.</param>
+        /// <returns>A paged collection of messages.</returns>
+        public static IAsyncEnumerable<IReadOnlyCollection<IMessage>> GetMessagesAsync(this IMessageChannel channel, MessageCacheService cache,
+            ulong fromMessageId, Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch, RequestOptions options = null)
+            => GetMessagesInternalAsync(channel, cache, fromMessageId, dir, limit, CacheMode.AllowDownload, options);
+
+        /// <summary>
+        /// Gets the last N messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="fromMessage">The starting message to get the messages from.</param>
+        /// <param name="dir">The direction of the messages to be gotten from.</param>
+        /// <param name="limit">The numbers of message to be gotten from.</param>
+        /// <param name="options">The options to be used when sending the request.</param>
+        /// <returns>A paged collection of messages.</returns>
+        public static IAsyncEnumerable<IReadOnlyCollection<IMessage>> GetMessagesAsync(this IMessageChannel channel, MessageCacheService cache,
+            IMessage fromMessage, Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch, RequestOptions options = null)
+            => GetMessagesInternalAsync(channel, cache, fromMessage.Id, dir, limit, CacheMode.AllowDownload, options);
+
+        /// <summary>
+        /// Gets a collection of cached messages from this message channel.
+        /// </summary>
+        /// <remarks>Unlike the other overloads, this method allows you to get all the cached messages from a channel, and also allows you to specify a source event.</remarks>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="sourceEvent">The source event.</param>
+        /// <returns>A read-only collection of cached messages.</returns>
+        public static IReadOnlyCollection<ICachedMessage> GetCachedMessages(this IMessageChannel channel, MessageCacheService cache,
+            MessageSourceEvent sourceEvent = MessageSourceEvent.MessageReceived)
+            => cache
+                .GetCacheForChannel(channel, sourceEvent)
+                .Values
+                .ToArray();
+
+        /// <summary>
+        /// Gets the last N cached messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="limit">The number of messages to get.</param>
+        /// <returns>A read-only collection of cached messages.</returns>
+        public static IReadOnlyCollection<ICachedMessage> GetCachedMessages(this IMessageChannel channel, MessageCacheService cache,
+            int limit = DiscordConfig.MaxMessagesPerBatch)
+            => GetCachedMessagesInternal(channel, cache, null, Direction.Before, limit);
+
+        /// <summary>
+        /// Gets the last N cached messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="fromMessageId">The message ID to start the fetching from.</param>
+        /// <param name="dir">The direction of which the message should be gotten from.</param>
+        /// <param name="limit">The number of messages to get.</param>
+        /// <returns>A read-only collection of cached messages.</returns>
+        public static IReadOnlyCollection<ICachedMessage> GetCachedMessages(this IMessageChannel channel, MessageCacheService cache, ulong fromMessageId,
+            Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
+            => GetCachedMessagesInternal(channel, cache, fromMessageId, dir, limit);
+
+        /// <summary>
+        /// Gets the last N cached messages from this message channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="cache">The message cache service.</param>
+        /// <param name="fromMessage">The message to start the fetching from.</param>
+        /// <param name="dir">The direction of which the message should be gotten from.</param>
+        /// <param name="limit">The number of messages to get.</param>
+        /// <returns>A read-only collection of cached messages.</returns>
+        public static IReadOnlyCollection<ICachedMessage> GetCachedMessages(this IMessageChannel channel, MessageCacheService cache, IMessage fromMessage,
+            Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
+            => GetCachedMessagesInternal(channel, cache, fromMessage.Id, dir, limit);
+
+        private static IReadOnlyCollection<ICachedMessage> GetCachedMessagesInternal(IMessageChannel channel, MessageCacheService cache,
+            ulong? fromMessageId, Direction dir, int limit)
+            => !cache.IsDisabled ? GetMany(cache, channel, fromMessageId, dir, limit) : Array.Empty<CachedMessage>();
+
+        private static IAsyncEnumerable<IReadOnlyCollection<IMessage>> GetMessagesInternalAsync(IMessageChannel channel, MessageCacheService cache,
+            ulong? fromMessageId, Direction dir, int limit, CacheMode mode, RequestOptions options)
+        {
+            if (dir == Direction.After && fromMessageId == null)
+                return AsyncEnumerable.Empty<IReadOnlyCollection<IMessage>>();
+
+            var cachedMessages = GetMany(cache, channel, fromMessageId, dir, limit);
+            var result = AsyncEnumerable.Empty<IReadOnlyCollection<IMessage>>();
+
+            switch (dir)
+            {
+                case Direction.Before:
+                {
+                    limit -= cachedMessages.Count;
+                    if (mode == CacheMode.CacheOnly || limit <= 0)
+                        return result;
+
+                    //Download remaining messages
+                    ulong? minId = cachedMessages.Count > 0 ? cachedMessages.Min(x => x.Id) : fromMessageId;
+                    var downloadedMessages = channel.GetMessagesAsync(minId ?? 0, dir, limit, CacheMode.AllowDownload, options);
+                    return cachedMessages.Count != 0 ? result.Concat(downloadedMessages) : downloadedMessages;
+                }
+                case Direction.After:
+                {
+                    limit -= cachedMessages.Count;
+                    if (mode == CacheMode.CacheOnly || limit <= 0)
+                        return result;
+
+                    //Download remaining messages
+                    ulong maxId = cachedMessages.Count > 0 ? cachedMessages.Max(x => x.Id) : fromMessageId ?? 0;
+                    var downloadedMessages = channel.GetMessagesAsync(maxId, dir, limit, CacheMode.AllowDownload, options);
+                    return cachedMessages.Count != 0 ? result.Concat(downloadedMessages) : downloadedMessages;
+                }
+                //Direction.Around
+                default:
+                {
+                    if (mode == CacheMode.CacheOnly || limit <= cachedMessages.Count)
+                        return result;
+
+                    //Cache isn't useful here since Discord will send them anyways
+                    return channel.GetMessagesAsync(fromMessageId ?? 0, dir, limit, CacheMode.AllowDownload, options);
+                }
+            }
+        }
+
+        private static IReadOnlyCollection<CachedMessage> GetMany(MessageCacheService cache, IMessageChannel channel,
+            ulong? fromMessageId, Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
+            => GetMany(cache, channel.Id, fromMessageId, dir, limit);
+
+        private static IReadOnlyCollection<CachedMessage> GetMany(MessageCacheService cache, ulong channelId, ulong? fromMessageId,
+            Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
+        {
+
+            if (limit < 0) throw new ArgumentOutOfRangeException(nameof(limit));
+            if (limit == 0) return Array.Empty<CachedMessage>();
+
+            var cachedChannel = cache.GetCacheForChannel(channelId);
+            if (cachedChannel.Count == 0)
+                return Array.Empty<CachedMessage>();
+
+            var orderedChannel = cache.GetMessageQueue(channelId);
+
+            IEnumerable<ulong> cachedMessageIds;
+            if (fromMessageId == null)
+                cachedMessageIds = orderedChannel;
+            else switch (dir)
+            {
+                case Direction.Before:
+                    cachedMessageIds = orderedChannel.Where(x => x < fromMessageId.Value);
+                    break;
+                case Direction.After:
+                    cachedMessageIds = orderedChannel.Where(x => x > fromMessageId.Value);
+                    break;
+                //Direction.Around
+                default:
+                {
+                    if (!cachedChannel.TryGetValue(fromMessageId.Value, out var msg))
+                        return Array.Empty<CachedMessage>();
+
+                    int around = limit / 2;
+                    var before = GetMany(cache, channelId, fromMessageId, Direction.Before, around);
+                    var after = GetMany(cache, channelId, fromMessageId, Direction.After, around).Reverse();
+
+                    return after
+                        .Append(msg as CachedMessage)
+                        .Concat(before)
+                        .ToArray();
+                }
+            }
+
+            if (dir == Direction.Before)
+                cachedMessageIds = cachedMessageIds.Reverse();
+            if (dir == Direction.Around) // Only happens if fromMessageId is null, should only get "around" and itself (+1)
+                limit = limit / 2 + 1;
+
+            return cachedMessageIds
+                .Select(x => cachedChannel.TryGetValue(x, out var msg) ? msg as CachedMessage : null)
+                .Where(x => x != null)
+                .Take(limit)
+                .ToArray();
         }
     }
 }

@@ -346,8 +346,8 @@ namespace Fergun.Modules
             var messages = _messageCache
                 .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
                 .Values
-                .Where(x => x.SourceEvent == MessageSourceEvent.MessageUpdated)
                 .OrderByDescending(x => x.CachedAt)
+                .Where(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe)
                 .Take(20)
                 .ToArray();
 
@@ -359,7 +359,8 @@ namespace Fergun.Modules
             else
             {
                 var text = messages.Select(x =>
-                    $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - x.CreatedAt).Minutes)})\n{x.Content.Truncate(200)}\n\n");
+                    $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - (x.OriginalMessage?.CreatedAt ?? x.CreatedAt)).Minutes)})" +
+                    $"\n{(x.OriginalMessage?.Content ?? x.Content).Truncate(200)}\n\n");
 
                 builder.WithTitle("Big edit snipe")
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
@@ -385,8 +386,8 @@ namespace Fergun.Modules
             var messages = _messageCache
                 .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
                 .Values
-                .Where(x => x.SourceEvent == MessageSourceEvent.MessageDeleted)
                 .OrderByDescending(x => x.CachedAt)
+                .Where(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe)
                 .Take(20)
                 .ToArray();
 
@@ -787,9 +788,8 @@ namespace Fergun.Modules
             var message = _messageCache
                 .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
                 .Values
-                .Where(x => x.SourceEvent == MessageSourceEvent.MessageUpdated)
                 .OrderByDescending(x => x.CachedAt)
-                .FirstOrDefault();
+                .FirstOrDefault(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe);
 
             var builder = new EmbedBuilder();
             if (message == null)
@@ -799,7 +799,7 @@ namespace Fergun.Modules
             else
             {
                 builder.WithAuthor(message.Author)
-                    .WithDescription(message.Content.Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .WithDescription((message.OriginalMessage?.Content ?? message.Content).Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
 
@@ -1510,12 +1510,12 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
+
             var message = _messageCache
                 .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
                 .Values
-                .Where(x => x.SourceEvent == MessageSourceEvent.MessageDeleted)
                 .OrderByDescending(x => x.CachedAt)
-                .FirstOrDefault();
+                .FirstOrDefault(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe);
 
             var builder = new EmbedBuilder();
             if (message == null)
