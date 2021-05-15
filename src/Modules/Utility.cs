@@ -343,8 +343,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigEditSnipe([Summary("bigeditsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var messages = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
+                .Values
+                .Where(x => x.SourceEvent == MessageSourceEvent.MessageUpdated)
                 .OrderByDescending(x => x.CachedAt)
                 .Take(20)
                 .ToArray();
@@ -380,8 +382,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigSnipe([Summary("bigsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+            var messages = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
+                .Values
+                .Where(x => x.SourceEvent == MessageSourceEvent.MessageDeleted)
                 .OrderByDescending(x => x.CachedAt)
                 .Take(20)
                 .ToArray();
@@ -780,8 +784,10 @@ namespace Fergun.Modules
         public async Task EditSnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var message = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
+                .Values
+                .Where(x => x.SourceEvent == MessageSourceEvent.MessageUpdated)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
 
@@ -1504,8 +1510,10 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+            var message = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
+                .Values
+                .Where(x => x.SourceEvent == MessageSourceEvent.MessageDeleted)
                 .OrderByDescending(x => x.CachedAt)
                 .FirstOrDefault();
 

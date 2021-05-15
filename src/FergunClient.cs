@@ -130,7 +130,7 @@ namespace Fergun
             Constants.ClientConfig.AlwaysDownloadUsers = Config.AlwaysDownloadUsers;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Always download users: {Constants.ClientConfig.AlwaysDownloadUsers}"));
 
-            Constants.ClientConfig.MessageCacheSize = Config.MessageCacheSize;
+            Constants.ClientConfig.MessageCacheSize = Config.UseMessageCacheService ? 0 : Config.MessageCacheSize;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Message cache size: {Constants.ClientConfig.MessageCacheSize}"));
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Messages to search limit: {Config.MessagesToSearchLimit}"));
@@ -388,9 +388,8 @@ namespace Fergun
                     : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService, new ReliabilityService(_client, message => _ = _logService.LogAsync(message)))
                 .AddSingleton(Config.UseMessageCacheService
-                    ? new MessageCacheService(_client, GuildUtils.UserConfigCache,
-                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval,
-                    Constants.MaxMessageCacheLongevity)
+                    ? new MessageCacheService(_client, Config.MessageCacheSize,
+                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval, Constants.MaxMessageCacheLongevity)
                     : MessageCacheService.Disabled)
                 .BuildServiceProvider();
         }

@@ -159,6 +159,10 @@ namespace Fergun.Services
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Unknown command: \"{context.Message.Content}\", sent by {context.User} in {context.Display()}"));
                 return;
             }
+
+            // Update the last time a command was used in this guild.
+            _services.GetService<MessageCacheService>()?.UpdateLastCommandUsageTime(context.Guild.Id);
+
             var command = optionalCommand.Value;
 
             if (command.Module.Name != Constants.DevelopmentModuleName)
@@ -181,6 +185,8 @@ namespace Fergun.Services
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess) return;
+
+            // Update the last time anyone in the guild has used a command
 
             double ignoreTime = Constants.DefaultIgnoreTime;
             switch (result.Error)

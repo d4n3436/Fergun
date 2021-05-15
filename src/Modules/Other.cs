@@ -419,16 +419,6 @@ namespace Fergun.Modules
                 GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
                 valueList = Locate(userConfig.IsOptedOutSnipe);
 
-                if (reaction.Emote.Name == "1️⃣" && userConfig.IsOptedOutSnipe)
-                {
-                    int removed = _messageCache.ClearOnPredicate(x => x.Value.Author.Id == reaction.UserId);
-                    if (removed > 0)
-                    {
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command",
-                            $"Privacy: Removed {removed} deleted/edited messages from the cache from user {reaction.UserId}."));
-                    }
-                }
-
                 builder.Fields[4] = new EmbedFieldBuilder { Name = Locate("Value"), Value = valueList, IsInline = true };
                 _ = message!.RemoveReactionAsync(reaction.Emote, reaction.UserId);
                 await message.ModifyAsync(x => x.Embed = builder.Build());
