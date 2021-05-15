@@ -57,6 +57,7 @@ namespace Fergun.Services
             _client.MessageReceived += MessageReceived;
             _client.MessageDeleted += MessageDeleted;
             _client.MessageUpdated += MessageUpdated;
+            _client.MessagesBulkDeleted += MessagesBulkDeleted;
             _client.LeftGuild += LeftGuild;
 
             _logger = logger ?? (_ => Task.CompletedTask);
@@ -289,8 +290,14 @@ namespace Fergun.Services
 
         private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
+            HandleDeletedMessage(cache.Id, channel);
+            return Task.CompletedTask;
+        }
+
+        private void HandleDeletedMessage(ulong messageId, IMessageChannel channel)
+        {
             // The default message cache removes deleted message from its cache, here we just move the message to the long term cache
-            if (TryRemoveCachedMessage(channel, cache.Id, out var message))
+            if (TryRemoveCachedMessage(channel, messageId, out var message))
             {
                 if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
                 {
@@ -299,46 +306,58 @@ namespace Fergun.Services
 
                     // move cached message to the long term cache
                     var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                    cachedChannel[cache.Id] = message;
+                    cachedChannel[messageId] = message;
 
-                    Debug.WriteLine($"Moved cached message {cache.Id} to long term cache (MessageReceived -> MessageDeleted)");
+                    Debug.WriteLine($"Moved cached message {messageId} to long term cache (MessageReceived -> MessageDeleted)");
                 }
             }
-            else if (TryGetCachedMessage(channel, cache.Id, out message, MessageSourceEvent.MessageUpdated))
+            else if (TryGetCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.CachedAt = DateTimeOffset.UtcNow;
                 message.SourceEvent = MessageSourceEvent.MessageDeleted;
-                Debug.WriteLine($"Changed cached message {cache.Id} source event (MessageUpdated -> MessageDeleted)");
+                Debug.WriteLine($"Changed cached message {messageId} source event (MessageUpdated -> MessageDeleted)");
             }
+        }
 
+        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage updatedMessage, ISocketMessageChannel channel)
+        {
+            HandleUpdatedMessage(updatedMessage, channel);
             return Task.CompletedTask;
         }
 
-        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage after, ISocketMessageChannel channel)
+        private void HandleUpdatedMessage(IMessage updatedMessage, IMessageChannel channel)
         {
             // We need to simulate the functionality of the default message cache,
             // so we update the message in the short term cache instead of removing it
-            if (TryGetCachedMessage(channel, cachedbefore.Id, out var message))
+            if (TryGetCachedMessage(channel, updatedMessage.Id, out var message))
             {
-                _cache[channel.Id][cachedbefore.Id] = new CachedMessage(after, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                _cache[channel.Id][updatedMessage.Id] = new CachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
 
                 if (!_onlyCacheUserDeletedEditedMessages || message.Source == MessageSource.User)
                 {
                     // "Copy" the cached message to the long term cache
                     var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                    cachedChannel[cachedbefore.Id] = new CachedMessage(after, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                    cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
 
-                    Debug.WriteLine($"Copied cached message {cachedbefore.Id} to long term cache (MessageReceived -> MessageUpdated)");
+                    Debug.WriteLine($"Copied cached message {updatedMessage.Id} to long term cache (MessageReceived -> MessageUpdated)");
                 }
             }
-            else if (TryGetCachedMessage(channel, cachedbefore.Id, out message, MessageSourceEvent.MessageUpdated))
+            else if (TryGetCachedMessage(channel, updatedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 var cachedChannel = _editedDeletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
 
                 message.OriginalMessage = null;
                 // Create a new cached message containing the previous and current messages
-                cachedChannel[cachedbefore.Id] = new CachedMessage(after, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
-                Debug.WriteLine($"Added original message to cached message {cachedbefore.Id} (MessageUpdated)");
+                cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                Debug.WriteLine($"Added original message to cached message {updatedMessage.Id} (MessageUpdated)");
+            }
+        }
+
+        private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> cachedMessages, ISocketMessageChannel channel)
+        {
+            foreach (var cached in cachedMessages)
+            {
+                HandleDeletedMessage(cached.Id, channel);
             }
 
             return Task.CompletedTask;
