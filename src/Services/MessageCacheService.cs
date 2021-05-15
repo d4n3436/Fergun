@@ -392,6 +392,7 @@ namespace Fergun.Services
             _client.MessageReceived -= MessageReceived;
             _client.MessageDeleted -= MessageDeleted;
             _client.MessageUpdated -= MessageUpdated;
+            _client.MessagesBulkDeleted -= MessagesBulkDeleted;
             _client.LeftGuild -= LeftGuild;
 
             _disposed = true;
