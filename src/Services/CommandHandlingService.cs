@@ -160,8 +160,11 @@ namespace Fergun.Services
                 return;
             }
 
-            // Update the last time a command was used in this guild.
-            _services.GetService<MessageCacheService>()?.UpdateLastCommandUsageTime(context.Guild.Id);
+            if (context.Guild != null)
+            {
+                // Update the last time a command was used in this guild.
+                _services.GetService<MessageCacheService>()?.UpdateLastCommandUsageTime(context.Guild.Id);
+            }
 
             var command = optionalCommand.Value;
 
@@ -364,15 +367,16 @@ namespace Fergun.Services
 
             IUserMessage response;
             bool found = cache.TryGetValue(userMessage.Id, out ulong messageId);
+            var messageCache = _services.GetService<MessageCacheService>();
 
-            if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId)) != null)
+            if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId)) != null)
             {
                 await response.ModifyAsync(x =>
                 {
                     x.Content = text;
                     x.Embed = embed;
                 });
-                response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageId);
+                response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId);
             }
             else
             {

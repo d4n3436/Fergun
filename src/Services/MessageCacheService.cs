@@ -234,7 +234,6 @@ namespace Fergun.Services
         public void UpdateLastCommandUsageTime(ulong guildId, DateTimeOffset dateTime)
         {
             _lastCommandUsageTimes[guildId] = dateTime;
-            Debug.WriteLine($"Updated last command usage time for guild {guildId} to {dateTime}");
         }
 
         /// <inheritdoc/>
@@ -254,16 +253,28 @@ namespace Fergun.Services
                 _ => _deletedCache
             };
 
+        private static ICachedMessage CreateCachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+            => message is IUserMessage userMessage
+                ? new CachedUserMessage(userMessage, cachedAt, sourceEvent)
+                : new CachedMessage(message, cachedAt, sourceEvent);
+
+
+        private static ICachedMessage CreateCachedMessage(IMessage message, IMessage originalMessage, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+            => message is IUserMessage userMessage
+                ? new CachedUserMessage(userMessage, originalMessage, cachedAt, sourceEvent)
+                : new CachedMessage(message, originalMessage, cachedAt, sourceEvent);
+
         // This only applies to the long term cache.
         private int ClearOldMessages(MessageSourceEvent sourceEvent)
         {
             int removed = 0;
+            var now = DateTimeOffset.UtcNow;
 
             foreach (var cachedChannel in GetCacheForEvent(sourceEvent))
             {
                 foreach (var cachedMessage in cachedChannel.Value)
                 {
-                    if ((DateTimeOffset.UtcNow - cachedMessage.Value.CreatedAt).TotalHours >= _maxMessageTime)
+                    if ((now - SnowflakeUtils.FromSnowflake(cachedMessage.Key)).TotalHours >= _maxMessageTime)
                     {
                         cachedChannel.Value.TryRemove(cachedMessage.Key, out _);
                         removed++;
@@ -276,10 +287,13 @@ namespace Fergun.Services
 
         private void OnTimerFired(object state)
         {
-            int removed = ClearOldMessages(MessageSourceEvent.MessageUpdated) +
-                          ClearOldMessages(MessageSourceEvent.MessageDeleted);
+            _ = Task.Run(() =>
+            {
+                int removed = ClearOldMessages(MessageSourceEvent.MessageUpdated) +
+                              ClearOldMessages(MessageSourceEvent.MessageDeleted);
 
-            _ = _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
+                _ = _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Cleaned {removed} deleted / edited messages from the cache."));
+            });
         }
 
         private Task MessageReceived(SocketMessage message)
@@ -290,8 +304,6 @@ namespace Fergun.Services
 
         private void HandleReceivedMessage(IMessage message)
         {
-            Debug.WriteLine($"Received message {message.Id}: {message.Content}");
-
             if (!(message.Channel is IGuildChannel guildChannel) || !_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
                 return;
 
@@ -300,20 +312,16 @@ namespace Fergun.Services
             if (_minCommandTime != 0 && (lastUsageTime <= now.AddHours(-_minCommandTime) || lastUsageTime > now))
                 return;
 
-            Debug.WriteLine($"Last command usage time of guild {guildChannel.GuildId} is inside the last 12 hours!");
             var cachedChannel = _cache.GetOrAdd(message.Channel.Id,
                 new ConcurrentDictionary<ulong, ICachedMessage>(Environment.ProcessorCount, (int)(_messageCacheSize * 1.05)));
 
             var channelQueue = _orderedCache.GetOrAdd(message.Channel.Id, new ConcurrentQueue<ulong>());
 
-            cachedChannel[message.Id] = new CachedMessage(message, message.CreatedAt, MessageSourceEvent.MessageReceived);
+            cachedChannel[message.Id] = CreateCachedMessage(message, message.CreatedAt, MessageSourceEvent.MessageReceived);
             channelQueue.Enqueue(message.Id);
-            Debug.WriteLine($"Added message {message.Id} to the cache.");
-            Debug.WriteLine($"Messages in cached channel: {cachedChannel.Count}, queue: {channelQueue.Count}");
 
             while (cachedChannel.Count > _messageCacheSize && channelQueue.TryDequeue(out ulong msgId))
             {
-                Debug.WriteLine($"Removed {msgId} from the cache.");
                 cachedChannel.TryRemove(msgId, out _);
             }
         }
@@ -337,8 +345,6 @@ namespace Fergun.Services
                 // move cached message to the deleted messages cache
                 var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
                 cachedChannel[messageId] = message;
-
-                Debug.WriteLine($"Moved cached message {messageId} to the deleted messages cache (MessageReceived -> MessageDeleted)");
             }
             else if (TryGetCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated))
             {
@@ -348,8 +354,6 @@ namespace Fergun.Services
                 // move cached message to the deleted messages cache
                 var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
                 cachedChannel[messageId] = message;
-
-                Debug.WriteLine($"Moved cached message {messageId} to the deleted messages cache (MessageUpdated -> MessageDeleted)");
             }
         }
 
@@ -367,46 +371,51 @@ namespace Fergun.Services
 
                 message.OriginalMessage = null;
                 // Create a new cached message containing the previous and current messages
-                cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
-                Debug.WriteLine($"Added original message to cached message {updatedMessage.Id} (MessageUpdated)");
+                cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
             }
             else if (TryGetCachedMessage(channel, updatedMessage.Id, out message))
             {
                 // We need to simulate the functionality of the default message cache,
                 // so we update the message in the short term cache instead of removing it
-                _cache[channel.Id][updatedMessage.Id] = new CachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                _cache[channel.Id][updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
 
                 if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
 
                 // "Copy" the cached message to the edited messages cache
                 var cachedChannel = _editedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
-                cachedChannel[updatedMessage.Id] = new CachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
-
-                Debug.WriteLine($"Copied cached message {updatedMessage.Id} to the edited messages cache (MessageReceived -> MessageUpdated)");
+                cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
             }
         }
 
         private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> cachedMessages, ISocketMessageChannel channel)
         {
-            foreach (var cached in cachedMessages)
+            _ = Task.Run(() =>
             {
-                HandleDeletedMessage(cached.Id, channel);
-            }
+                foreach (var cached in cachedMessages)
+                {
+                    HandleDeletedMessage(cached.Id, channel);
+                }
+            });
 
             return Task.CompletedTask;
         }
 
-        private async Task LeftGuild(SocketGuild guild)
+        private Task LeftGuild(SocketGuild guild)
         {
-            int count = 0;
-            foreach (var channel in guild.TextChannels)
+            _ = Task.Run(async () =>
             {
-                if (TryClear(channel))
-                    count++;
-            }
+                int count = 0;
+                foreach (var channel in guild.TextChannels)
+                {
+                    if (TryClear(channel))
+                        count++;
+                }
 
-            _lastCommandUsageTimes.TryRemove(guild.Id, out _);
-            await _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Removed {count} cached channels from guild {guild.Id}"));
+                _lastCommandUsageTimes.TryRemove(guild.Id, out _);
+                await _logger(new LogMessage(LogSeverity.Verbose, "MsgCache", $"Removed {count} cached channels from guild {guild.Id}"));
+            });
+
+            return Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -460,6 +469,65 @@ namespace Fergun.Services
     }
 
     /// <summary>
+    /// Represents a cached user message.
+    /// </summary>
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
+    public class CachedUserMessage : CachedMessage, IUserMessage
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CachedUserMessage"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="cachedAt">When the message was cached.</param>
+        /// <param name="sourceEvent">The source event of the message.</param>
+        internal CachedUserMessage(IUserMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+        : base(message, cachedAt, sourceEvent)
+        {
+            _userMessage = (IUserMessage)_message;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CachedUserMessage"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="originalMessage">The original message (prior to being edited).</param>
+        /// <param name="cachedAt">When the message was cached.</param>
+        /// <param name="sourceEvent">The source event of the message.</param>
+        internal CachedUserMessage(IUserMessage message, IMessage originalMessage, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+            : base(message, originalMessage, cachedAt, sourceEvent)
+        {
+            _userMessage = (IUserMessage)_message;
+        }
+
+        private readonly IUserMessage _userMessage;
+
+        /// <inheritdoc/>
+        public Task ModifyAsync(Action<MessageProperties> func, RequestOptions options = null)
+            => _userMessage.ModifyAsync(func, options);
+
+        /// <inheritdoc/>
+        public Task ModifySuppressionAsync(bool suppressEmbeds, RequestOptions options = null)
+            => _userMessage.ModifySuppressionAsync(suppressEmbeds, options);
+
+        /// <inheritdoc/>
+        public Task PinAsync(RequestOptions options = null) => _userMessage.PinAsync(options);
+
+        /// <inheritdoc/>
+        public Task UnpinAsync(RequestOptions options = null) => _userMessage.UnpinAsync(options);
+
+        /// <inheritdoc/>
+        public Task CrosspostAsync(RequestOptions options = null) => _userMessage.CrosspostAsync(options);
+
+        /// <inheritdoc/>
+        public string Resolve(TagHandling userHandling = TagHandling.Name, TagHandling channelHandling = TagHandling.Name,
+            TagHandling roleHandling = TagHandling.Name, TagHandling everyoneHandling = TagHandling.Ignore, TagHandling emojiHandling = TagHandling.Name)
+            => _userMessage.Resolve(userHandling, channelHandling, roleHandling, everyoneHandling, emojiHandling);
+
+        /// <inheritdoc/>
+        public IUserMessage ReferencedMessage => _userMessage.ReferencedMessage;
+    }
+
+    /// <summary>
     /// Represents a cached message.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
@@ -471,7 +539,7 @@ namespace Fergun.Services
         /// <param name="message">The message.</param>
         /// <param name="cachedAt">When the message was cached.</param>
         /// <param name="sourceEvent">The source event of the message.</param>
-        public CachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+        internal CachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
         {
             _message = message;
             CachedAt = cachedAt;
@@ -485,7 +553,7 @@ namespace Fergun.Services
         /// <param name="originalMessage">The original message (prior to being edited).</param>
         /// <param name="cachedAt">When the message was cached.</param>
         /// <param name="sourceEvent">The source event of the message.</param>
-        public CachedMessage(IMessage message, IMessage originalMessage, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+        internal CachedMessage(IMessage message, IMessage originalMessage, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
         {
             _message = message;
             OriginalMessage = originalMessage;
@@ -493,7 +561,7 @@ namespace Fergun.Services
             SourceEvent = sourceEvent;
         }
 
-        private readonly IMessage _message;
+        protected readonly IMessage _message;
 
         /// <inheritdoc/>
         public IMessage OriginalMessage { get; set; }
@@ -601,7 +669,7 @@ namespace Fergun.Services
         public IAsyncEnumerable<IReadOnlyCollection<IUser>> GetReactionUsersAsync(IEmote emoji, int limit, RequestOptions options = null)
             => _message.GetReactionUsersAsync(emoji, limit, options);
 
-        private string DebuggerDisplay => $"{Author}: {Content} ({Id}{(Attachments.Count > 0 ? $", {Attachments.Count} Attachments" : "")})";
+        protected string DebuggerDisplay => $"{Author}: {Content} ({Id}{(Attachments.Count > 0 ? $", {Attachments.Count} Attachments" : "")})";
     }
 
     /// <summary>
@@ -641,9 +709,11 @@ namespace Fergun.Services
         public static async Task<IMessage> GetMessageAsync(this IMessageChannel channel, MessageCacheService cache, ulong messageId,
             MessageSourceEvent sourceEvent = MessageSourceEvent.MessageReceived, CacheMode mode = CacheMode.AllowDownload, RequestOptions options = null)
         {
-            if (cache.IsDisabled || mode != CacheMode.CacheOnly || !cache.TryGetCachedMessage(messageId, out var message, sourceEvent))
+            if (cache == null || cache.IsDisabled || !cache.TryGetCachedMessage(channel, messageId, out var message, sourceEvent))
             {
-                return sourceEvent == MessageSourceEvent.MessageReceived ? await channel.GetMessageAsync(messageId, mode, options) : null;
+                return sourceEvent == MessageSourceEvent.MessageReceived && mode == CacheMode.AllowDownload
+                    ? await channel.GetMessageAsync(messageId, mode, options)
+                    : null;
             }
 
             return message;
@@ -759,7 +829,7 @@ namespace Fergun.Services
 
         private static IReadOnlyCollection<ICachedMessage> GetCachedMessagesInternal(IMessageChannel channel, MessageCacheService cache,
             ulong? fromMessageId, Direction dir, int limit)
-            => !cache.IsDisabled ? GetMany(cache, channel, fromMessageId, dir, limit) : Array.Empty<CachedMessage>();
+            => cache == null || cache.IsDisabled ? Array.Empty<ICachedMessage>() : GetMany(cache, channel, fromMessageId, dir, limit);
 
         private static IAsyncEnumerable<IReadOnlyCollection<IMessage>> GetMessagesInternalAsync(IMessageChannel channel, MessageCacheService cache,
             ulong? fromMessageId, Direction dir, int limit, CacheMode mode, RequestOptions options)
@@ -768,7 +838,7 @@ namespace Fergun.Services
                 return AsyncEnumerable.Empty<IReadOnlyCollection<IMessage>>();
 
             var cachedMessages = GetMany(cache, channel, fromMessageId, dir, limit);
-            var result = AsyncEnumerable.Empty<IReadOnlyCollection<IMessage>>();
+            var result = ImmutableArray.Create(cachedMessages).ToAsyncEnumerable<IReadOnlyCollection<IMessage>>();
 
             switch (dir)
             {
@@ -806,20 +876,20 @@ namespace Fergun.Services
             }
         }
 
-        private static IReadOnlyCollection<CachedMessage> GetMany(MessageCacheService cache, IMessageChannel channel,
+        private static IReadOnlyCollection<ICachedMessage> GetMany(MessageCacheService cache, IMessageChannel channel,
             ulong? fromMessageId, Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
             => GetMany(cache, channel.Id, fromMessageId, dir, limit);
 
-        private static IReadOnlyCollection<CachedMessage> GetMany(MessageCacheService cache, ulong channelId, ulong? fromMessageId,
+        private static IReadOnlyCollection<ICachedMessage> GetMany(MessageCacheService cache, ulong channelId, ulong? fromMessageId,
             Direction dir, int limit = DiscordConfig.MaxMessagesPerBatch)
         {
 
             if (limit < 0) throw new ArgumentOutOfRangeException(nameof(limit));
-            if (limit == 0) return Array.Empty<CachedMessage>();
+            if (cache == null || cache.IsDisabled || limit == 0) return Array.Empty<ICachedMessage>();
 
             var cachedChannel = cache.GetCacheForChannel(channelId);
             if (cachedChannel.Count == 0)
-                return Array.Empty<CachedMessage>();
+                return Array.Empty<ICachedMessage>();
 
             var orderedChannel = cache.GetMessageQueue(channelId);
 
@@ -838,14 +908,14 @@ namespace Fergun.Services
                 default:
                 {
                     if (!cachedChannel.TryGetValue(fromMessageId.Value, out var msg))
-                        return Array.Empty<CachedMessage>();
+                        return Array.Empty<ICachedMessage>();
 
                     int around = limit / 2;
                     var before = GetMany(cache, channelId, fromMessageId, Direction.Before, around);
                     var after = GetMany(cache, channelId, fromMessageId, Direction.After, around).Reverse();
 
                     return after
-                        .Append(msg as CachedMessage)
+                        .Append(msg)
                         .Concat(before)
                         .ToArray();
                 }
@@ -857,7 +927,7 @@ namespace Fergun.Services
                 limit = limit / 2 + 1;
 
             return cachedMessageIds
-                .Select(x => cachedChannel.TryGetValue(x, out var msg) ? msg as CachedMessage : null)
+                .Select(x => cachedChannel.TryGetValue(x, out var msg) ? msg : null)
                 .Where(x => x != null)
                 .Take(limit)
                 .ToArray();

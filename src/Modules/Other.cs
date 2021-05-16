@@ -439,7 +439,7 @@ namespace Fergun.Modules
             }
             else
             {
-                msg = await Context.Channel.GetMessageAsync(messageId.Value);
+                msg = await Context.Channel.GetMessageAsync(_messageCache, messageId.Value);
                 if (msg == null)
                 {
                     return FergunResult.FromError(Locate("InvalidMessageID"));

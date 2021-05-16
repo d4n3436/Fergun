@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using Fergun.Services;
 
 namespace Fergun.Extensions
 {
@@ -11,11 +12,13 @@ namespace Fergun.Extensions
         /// <summary>
         /// Tries to delete this message.
         /// </summary>
-        public static async Task<bool> TryDeleteAsync(this IMessage message)
+        /// <param name="message">The message.</param>
+        /// <param name="cache">The message cache service.</param>
+        public static async Task<bool> TryDeleteAsync(this IMessage message, MessageCacheService cache = null)
         {
             if (message == null) return false;
 
-            message = await message.Channel.GetMessageAsync(message.Id);
+            message = await message.Channel.GetMessageAsync(cache, message.Id);
 
             if (message == null) return false;
 
@@ -47,12 +50,12 @@ namespace Fergun.Extensions
         /// <summary>
         /// Tries to remove all reactions from this message.
         /// </summary>
-        public static async Task<bool> TryRemoveAllReactionsAsync(this IMessage message)
+        public static async Task<bool> TryRemoveAllReactionsAsync(this IMessage message, MessageCacheService cache = null)
         {
             if (message == null) return false;
 
             // get the updated message with the reactions
-            message = await message.Channel.GetMessageAsync(message.Id);
+            message = await message.Channel.GetMessageAsync(cache, message.Id);
 
             if (message == null || message.Reactions.Count == 0) return false;
 
@@ -76,9 +79,10 @@ namespace Fergun.Extensions
         /// Modifies this message or re-sends it if no longer exists.
         /// </summary>
         /// <returns>A new message or a modified one.</returns>
-        public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null, AllowedMentions allowedMentions = null)
+        public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null,
+            AllowedMentions allowedMentions = null, MessageCacheService cache = null)
         {
-            bool isValid = await message.Channel.GetMessageAsync(message.Id) != null;
+            bool isValid = await message.Channel.GetMessageAsync(cache, message.Id) != null;
             if (!isValid)
             {
                 return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions);

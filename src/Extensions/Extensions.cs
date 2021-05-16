@@ -10,6 +10,7 @@ using Discord;
 using Discord.Commands;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
+using Fergun.Services;
 using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -250,14 +251,15 @@ namespace Fergun.Extensions
         /// </summary>
         /// <param name="context">The channel to search.</param>
         /// <param name="messageCount">The number of messages to search.</param>
+        /// <param name="cache">The message cache service.</param>
         /// <param name="onlyImage">Get only urls of images.</param>
         /// <param name="url">An optional url to use before searching in the channel.</param>
         /// <param name="maxSize">The maximum file size in bytes, <see cref="Constants.AttachmentSizeLimit"/> by default.</param>
         /// <returns>A task that represents an asynchronous search operation.</returns>
-        public static Task<(string, UrlFindResult)> GetLastUrlAsync(this ICommandContext context, int messageCount, bool onlyImage = false,
-            string url = null, long maxSize = Constants.AttachmentSizeLimit)
+        public static Task<(string, UrlFindResult)> GetLastUrlAsync(this ICommandContext context, int messageCount, MessageCacheService cache = null,
+            bool onlyImage = false, string url = null, long maxSize = Constants.AttachmentSizeLimit)
         {
-            return context.Channel.GetLastUrlAsync(messageCount, onlyImage, context.Message, url, maxSize);
+            return context.Channel.GetLastUrlAsync(messageCount, cache, onlyImage, context.Message, url, maxSize);
         }
 
         public static bool IsNsfw(this ICommandContext context)

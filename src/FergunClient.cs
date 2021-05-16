@@ -37,7 +37,8 @@ namespace Fergun
 
         private DiscordSocketClient _client;
         private LogService _logService;
-        private static CommandHandlingService _cmdHandlingService;
+        private MessageCacheService _messageCacheService;
+        private CommandHandlingService _cmdHandlingService;
         private static AuthDiscordBotListApi _dblApi;
         private static IDblSelfBot _dblBot;
         private static DiscordBotsApi _discordBots;
@@ -173,6 +174,12 @@ namespace Fergun
             }
 
             _logService.Dispose();
+
+            _messageCacheService = Config.UseMessageCacheService
+                ? new MessageCacheService(_client, Config.MessageCacheSize,
+                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval, Constants.MaxMessageCacheLongevity)
+                : MessageCacheService.Disabled;
+
             var services = SetupServices();
             _logService = services.GetRequiredService<LogService>();
 
@@ -380,17 +387,14 @@ namespace Fergun
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>()
+                .AddSingleton(_messageCacheService)
                 .AddSingleton(Config.UseCommandCacheService
                     ? new CommandCacheService(_client, Constants.MessageCacheCapacity,
                     message => _ = _cmdHandlingService.HandleCommandAsync(message),
                     log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval,
-                    Constants.MaxCommandCacheLongevity)
+                    Constants.MaxCommandCacheLongevity, _messageCacheService)
                     : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService, new ReliabilityService(_client, message => _ = _logService.LogAsync(message)))
-                .AddSingleton(Config.UseMessageCacheService
-                    ? new MessageCacheService(_client, Config.MessageCacheSize,
-                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval, Constants.MaxMessageCacheLongevity)
-                    : MessageCacheService.Disabled)
                 .BuildServiceProvider();
         }
 

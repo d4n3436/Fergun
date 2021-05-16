@@ -876,7 +876,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
         {
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1003,7 +1003,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Invert([Remainder, Summary("invertParam1")] string url = null)
         {
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1068,7 +1068,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1126,7 +1126,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1239,7 +1239,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));

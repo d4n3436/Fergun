@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -19,7 +19,9 @@ namespace Fergun.Attributes
             IUserMessage response;
             ulong messageId = 0;
             bool? found = services.GetService<CommandCacheService>()?.TryGetValue(context.Message.Id, out messageId);
-            if ((found ?? false) && (response = (IUserMessage)await context.Channel.GetMessageAsync(messageId)) != null)
+            var cache = services.GetService<MessageCacheService>();
+
+            if ((found ?? false) && (response = (IUserMessage)await context.Channel.GetMessageAsync(cache, messageId)) != null)
             {
                 await response.ModifyAsync(x =>
                 {

@@ -26,6 +26,11 @@ namespace Fergun.Modules
         public InteractiveService Interactive { get; set; }
 
         /// <summary>
+        /// Gets or sets the message cache service.
+        /// </summary>
+        public MessageCacheService MessageCache { get; set; }
+
+        /// <summary>
         /// Waits for the next message in the source channel.
         /// </summary>
         /// <param name="criterion">
@@ -149,7 +154,7 @@ namespace Fergun.Modules
             IUserMessage response;
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
-                response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId).ConfigureAwait(false);
+                response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
                 response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion, response).ConfigureAwait(false);
             }
@@ -163,6 +168,34 @@ namespace Fergun.Modules
                 }
             }
 
+            return response;
+        }
+
+        /// <inheritdoc/>
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
+        {
+            if (Cache.IsDisabled)
+            {
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
+            }
+
+            IUserMessage response;
+            bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
+            if (found && (response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId)) != null)
+            {
+                await response.ModifyAsync(x =>
+                {
+                    x.Content = message;
+                    x.Embed = embed;
+                }).ConfigureAwait(false);
+
+                response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
+            }
+            else
+            {
+                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
+                Cache.Add(Context.Message, response);
+            }
             return response;
         }
 

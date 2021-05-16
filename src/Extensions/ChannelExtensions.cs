@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Fergun.Services;
 using Fergun.Utils;
 
 namespace Fergun.Extensions
@@ -16,21 +17,20 @@ namespace Fergun.Extensions
         /// Tries to delete a message.
         /// </summary>
         /// <param name="channel">The source channel.</param>
-        /// <param name="messageId">The message Id.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, ulong messageId)
-        {
-            var message = await channel.GetMessageAsync(messageId);
-            return await message.TryDeleteAsync();
-        }
+        /// <param name="message">The message.</param>
+        /// <param name="cache">The message cache service.</param>
+        public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, IMessage message, MessageCacheService cache = null)
+            => await channel.TryDeleteMessageAsync(message.Id, cache);
 
         /// <summary>
         /// Tries to delete a message.
         /// </summary>
         /// <param name="channel">The source channel.</param>
-        /// <param name="message">The message.</param>
-        public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, IMessage message)
+        /// <param name="messageId">The message Id.</param>
+        /// <param name="cache">The message cache service.</param>
+        public static async Task<bool> TryDeleteMessageAsync(this IMessageChannel channel, ulong messageId, MessageCacheService cache = null)
         {
-            message = await channel.GetMessageAsync(message.Id);
+            var message = await channel.GetMessageAsync(cache, messageId);
             return await message.TryDeleteAsync();
         }
 
@@ -41,13 +41,14 @@ namespace Fergun.Extensions
         /// </summary>
         /// <param name="channel">The channel to search.</param>
         /// <param name="messageCount">The number of messages to search.</param>
+        /// <param name="cache">The message cache service.</param>
         /// <param name="onlyImage">Get only urls of images.</param>
         /// <param name="message">An optional message to search first before searching in the channel.</param>
         /// <param name="url">An optional url to use before searching in the channel.</param>
         /// <param name="maxSize">The maximum file size in bytes, <see cref="Constants.AttachmentSizeLimit"/> by default.</param>
         /// <returns>A task that represents an asynchronous search operation.</returns>
-        public static async Task<(string url, UrlFindResult result)> GetLastUrlAsync(this IMessageChannel channel, int messageCount, bool onlyImage = false,
-            IMessage message = null, string url = null, long maxSize = Constants.AttachmentSizeLimit)
+        public static async Task<(string url, UrlFindResult result)> GetLastUrlAsync(this IMessageChannel channel,  int messageCount,
+            MessageCacheService cache = null, bool onlyImage = false, IMessage message = null, string url = null, long maxSize = Constants.AttachmentSizeLimit)
         {
             long? size = null;
             if (message != null && message.Attachments.Count > 0)
@@ -70,7 +71,7 @@ namespace Fergun.Extensions
             }
 
             // Get the last x messages of the current channel
-            var messages = await channel.GetMessagesAsync(messageCount).FlattenAsync();
+            var messages = await channel.GetMessagesAsync(cache, messageCount).FlattenAsync();
 
             // Try to get the last message with any attachment, embed image url or that contains a url
             var filtered = messages.FirstOrDefault(x =>
