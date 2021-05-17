@@ -1194,7 +1194,7 @@ namespace Fergun.Modules
                     .WithDescription(Format.Url(Locate("HastebinLink"), hastebinUrl))
                     .WithColor(FergunClient.Config.EmbedColor);
 
-                await message.ModifyOrResendAsync(embed: builder.Build());
+                await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {

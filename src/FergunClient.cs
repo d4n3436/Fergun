@@ -132,7 +132,7 @@ namespace Fergun
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Always download users: {Constants.ClientConfig.AlwaysDownloadUsers}"));
 
             Constants.ClientConfig.MessageCacheSize = Config.UseMessageCacheService ? 0 : Config.MessageCacheSize;
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Message cache size: {Constants.ClientConfig.MessageCacheSize}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Message cache size: {Config.MessageCacheSize}"));
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Messages to search limit: {Config.MessagesToSearchLimit}"));
 
@@ -175,7 +175,7 @@ namespace Fergun
 
             _logService.Dispose();
 
-            _messageCacheService = Config.UseMessageCacheService
+            _messageCacheService = Config.UseMessageCacheService && Config.MessageCacheSize > 0
                 ? new MessageCacheService(_client, Config.MessageCacheSize,
                     log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval, Constants.MaxMessageCacheLongevity)
                 : MessageCacheService.Disabled;

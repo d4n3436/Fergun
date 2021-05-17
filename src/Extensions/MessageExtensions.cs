@@ -95,7 +95,7 @@ namespace Fergun.Extensions
                 x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
             });
 
-            return await message.Channel.GetMessageAsync(message.Id) as IUserMessage;
+            return await message.Channel.GetMessageAsync(cache, message.Id) as IUserMessage;
         }
     }
 }

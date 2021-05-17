@@ -39,12 +39,14 @@ namespace Fergun.Modules
 
         private static CommandService _cmdService;
         private static LogService _logService;
+        private static MessageCacheService _messageCache;
 
-        public AIDungeon(CommandService commands, LogService logService)
+        public AIDungeon(CommandService commands, LogService logService, MessageCacheService messageCache)
         {
             _api ??= new AidAPI(FergunClient.Config.AiDungeonToken ?? "");
             _cmdService ??= commands;
             _logService ??= logService;
+            _messageCache ??= messageCache;
         }
 
         [Command("info")]
@@ -245,7 +247,7 @@ namespace Fergun.Modules
             builder.Description = initialPrompt.Truncate(EmbedBuilder.MaxDescriptionLength);
             builder.WithFooter($"ID: {id} - Tip: {string.Format(Locate("FirstTip"), GetPrefix())}", Constants.AiDungeonLogoUrl);
 
-            await creationResponse.Message.ModifyOrResendAsync(embed: builder.Build());
+            await creationResponse.Message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             FergunClient.Database.InsertDocument(Constants.AidAdventuresCollection, new AidAdventure(id, creationResponse.Adventure.PublicId?.ToString(), Context.User.Id, false));
 
@@ -331,7 +333,7 @@ namespace Fergun.Modules
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
             _ = message.TryRemoveAllReactionsAsync();
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting info for character: {characters.Keys.ElementAt(characterIndex)} ({characters.Values.ElementAt(characterIndex)})"));
             try
@@ -440,7 +442,7 @@ namespace Fergun.Modules
             builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
             _ = message.TryRemoveAllReactionsAsync();
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
@@ -457,7 +459,7 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";
 
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             // Get custom adventure ID
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting custom adventure ID... ({_modes.Values.ElementAt(modeIndex)})"));
@@ -625,7 +627,7 @@ namespace Fergun.Modules
             if (wasWaiting)
             {
                 builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate(promptText)}";
-                await message.ModifyOrResendAsync(embed: builder.Build());
+                await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
             }
 
             // if a text is passed
@@ -701,7 +703,7 @@ namespace Fergun.Modules
             builder.WithDescription(textToShow.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", Constants.AiDungeonLogoUrl);
 
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             return null;
         }
@@ -830,7 +832,7 @@ namespace Fergun.Modules
                 .WithTitle("AI Dungeon")
                 .WithDescription(string.Format(Locate("NewOutputPrompt"), $"```{oldOutput.Truncate(EmbedBuilder.MaxDescriptionLength - 50)}```"));
 
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
 
@@ -1091,7 +1093,7 @@ namespace Fergun.Modules
                     result = Locate("ErrorInAPI");
                 }
 
-                await message.ModifyOrResendAsync(embed: builder.WithDescription(result).Build());
+                await message.ModifyOrResendAsync(embed: builder.WithDescription(result).Build(), cache: _messageCache);
             }
         }
 
@@ -1163,7 +1165,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            await message.ModifyOrResendAsync(embed: builder.Build());
+            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             return FergunResult.FromSuccess();
         }

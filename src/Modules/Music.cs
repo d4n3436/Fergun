@@ -27,11 +27,13 @@ namespace Fergun.Modules
         private readonly MusicService _musicService;
         private static LogService _logService;
         private static GeniusApi _geniusApi;
+        private static MessageCacheService _messageCache;
 
-        public Music(MusicService musicService, LogService logService)
+        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache)
         {
             _musicService = musicService;
             _logService ??= logService;
+            _messageCache ??= messageCache;
             _geniusApi ??= new GeniusApi(FergunClient.Config.GeniusApiToken);
         }
 
@@ -245,7 +247,7 @@ namespace Fergun.Modules
                 }
                 else
                 {
-                    await message.ModifyOrResendAsync(embed: builder2.Build());
+                    await message.ModifyOrResendAsync(embed: builder2.Build(), cache: _messageCache);
                 }
             }
             return FergunResult.FromSuccess();
