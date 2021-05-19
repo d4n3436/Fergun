@@ -344,8 +344,7 @@ namespace Fergun.Services
             {
                 if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
 
-                message.CachedAt = DateTimeOffset.UtcNow;
-                message.SourceEvent = MessageSourceEvent.MessageDeleted;
+                message.Update(DateTimeOffset.UtcNow, MessageSourceEvent.MessageDeleted);
 
                 // move cached message to the deleted messages cache
                 var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
@@ -353,8 +352,7 @@ namespace Fergun.Services
             }
             else if (TryGetCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated)) // An updated message gets deleted
             {
-                message.CachedAt = DateTimeOffset.UtcNow;
-                message.SourceEvent = MessageSourceEvent.MessageDeleted;
+                message.Update(DateTimeOffset.UtcNow, MessageSourceEvent.MessageDeleted);
 
                 // move cached message to the deleted messages cache
                 var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
@@ -381,7 +379,7 @@ namespace Fergun.Services
             {
                 var cachedChannel = _editedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
 
-                message.OriginalMessage = null;
+                message.Update(null);
 
                 bool useUpdatedEmbeds = updatedMessage.Author is SocketUnknownUser && updatedMessage.Embeds.Count != message.Embeds.Count;
 
@@ -512,9 +510,11 @@ namespace Fergun.Services
     public interface IEditedMessage : IMessage
     {
         /// <summary>
-        /// Gets ot sets the original message prior to being edited. This property is only present if the message has been edited once.
+        /// Gets the original message prior to being edited. This property is only present if the message has been edited once.
         /// </summary>
-        public IMessage OriginalMessage { get; set; }
+        public IMessage OriginalMessage { get; }
+
+        internal void Update(IMessage originalMessage);
     }
 
     /// <summary>
@@ -523,14 +523,16 @@ namespace Fergun.Services
     public interface ICachedMessage : IEditedMessage
     {
         /// <summary>
-        /// Gets or sets when this message was cached.
+        /// Gets when this message was cached.
         /// </summary>
-        public DateTimeOffset CachedAt { get; set; }
+        public DateTimeOffset CachedAt { get; }
 
         /// <summary>
-        /// Gets or sets the source event of this message.
+        /// Gets the source event of this message.
         /// </summary>
-        public MessageSourceEvent SourceEvent { get; set; }
+        public MessageSourceEvent SourceEvent { get; }
+
+        internal void Update(DateTimeOffset cachedAt, MessageSourceEvent sourceEvent);
     }
 
     /// <summary>
@@ -649,17 +651,17 @@ namespace Fergun.Services
             _embeds = embeds;
         }
 
-        protected readonly IMessage _message;
-        protected readonly IReadOnlyCollection<IEmbed> _embeds;
+        private protected readonly IMessage _message;
+        private protected readonly IReadOnlyCollection<IEmbed> _embeds;
 
         /// <inheritdoc/>
-        public IMessage OriginalMessage { get; set; }
+        public IMessage OriginalMessage { get; private set; }
 
         /// <inheritdoc/>
-        public DateTimeOffset CachedAt { get; set; }
+        public DateTimeOffset CachedAt { get; private set; }
 
         /// <inheritdoc/>
-        public MessageSourceEvent SourceEvent { get; set; }
+        public MessageSourceEvent SourceEvent { get; private set; }
 
         /// <inheritdoc/>
         public ulong Id => _message.Id;
@@ -757,6 +759,14 @@ namespace Fergun.Services
         /// <inheritdoc/>
         public IAsyncEnumerable<IReadOnlyCollection<IUser>> GetReactionUsersAsync(IEmote emoji, int limit, RequestOptions options = null)
             => _message.GetReactionUsersAsync(emoji, limit, options);
+
+        void IEditedMessage.Update(IMessage originalMessage) => OriginalMessage = originalMessage;
+
+        void ICachedMessage.Update(DateTimeOffset cachedAt, MessageSourceEvent sourceEvent)
+        {
+            CachedAt = cachedAt;
+            SourceEvent = sourceEvent;
+        }
 
         protected string DebuggerDisplay => $"{Author}: {Content} ({Id}{(Attachments.Count > 0 ? $", {Attachments.Count} Attachments" : "")})";
     }
