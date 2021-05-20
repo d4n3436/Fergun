@@ -45,8 +45,8 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [RequireUserPermission(GuildPermission.ManageMessages, ErrorMessage = "UserRequireManageMessages")]
-        [RequireBotPermission(GuildPermission.ManageMessages, ErrorMessage = "BotRequireManageMessages")]
+        [RequireUserPermission(ChannelPermission.ManageMessages, ErrorMessage = "UserRequireManageMessages")]
+        [RequireBotPermission(ChannelPermission.ManageMessages, ErrorMessage = "BotRequireManageMessages")]
         [Command("clear", RunMode = RunMode.Async)]
         [Summary("clearSummary")]
         [Alias("purge", "prune")]
