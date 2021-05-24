@@ -255,7 +255,11 @@ namespace Fergun.Services
             _ = Task.Run(async () =>
             {
                 // Prevent the double reply that happens when the message is "updated" with an embed or image/video preview.
-                if (string.IsNullOrEmpty(after?.Content) || after.Source != MessageSource.User) return;
+                if (after.Source != MessageSource.User ||
+                    after.Author is SocketUnknownUser ||
+                    string.IsNullOrEmpty(after.Content) ||
+                    cacheable.HasValue && cacheable.Value.Content == after.Content)
+                    return;
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
