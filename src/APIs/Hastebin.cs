@@ -45,7 +45,8 @@ namespace Fergun.APIs
 
         private class HastebinResponse
         {
-            public string Key { get; }
+            [JsonProperty]
+            public string Key { get; private set; }
         }
     }
 }
