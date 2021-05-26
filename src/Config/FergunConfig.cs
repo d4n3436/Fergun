@@ -107,7 +107,7 @@ namespace Fergun
         public bool ServerMembersIntent { get; private set; }
 
         /// <summary>
-        /// Gets the message cache size.
+        /// Gets the message cache size. If <see cref="UseMessageCacheService"/> is set to <see langword="true"/>, this property will be used in the optimized cache service instead.
         /// </summary>
         [JsonProperty]
         public int MessageCacheSize { get; private set; } = 100;
@@ -140,7 +140,7 @@ namespace Fergun
         public bool UseCommandCacheService { get; private set; } = true;
 
         /// <summary>
-        /// Gets whether the message cache service should be used.
+        /// Gets whether the optimized message cache service should be used.
         /// </summary>
         [JsonProperty]
         public bool UseMessageCacheService { get; private set; } = true;

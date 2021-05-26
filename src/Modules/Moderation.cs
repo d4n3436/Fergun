@@ -8,6 +8,7 @@ using Discord.Net;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
+using Fergun.Services;
 
 namespace Fergun.Modules
 {
@@ -17,6 +18,13 @@ namespace Fergun.Modules
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     public class Moderation : FergunBase
     {
+        private static MessageCacheService _messageCache;
+
+        public Moderation(MessageCacheService messageCache)
+        {
+            _messageCache ??= messageCache;
+        }
+
         [RequireUserPermission(GuildPermission.BanMembers, ErrorMessage = "UserRequireBanMembers")]
         [RequireBotPermission(GuildPermission.BanMembers, ErrorMessage = "BotRequireBanMembers")]
         [Command("ban")]
@@ -61,7 +69,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("NumberOutOfIndex"), 1, DiscordConfig.MaxMessagesPerBatch));
             }
 
-            var messages = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, count).Flatten().ToListAsync();
+            var messages = await Context.Channel.GetMessagesAsync(_messageCache, Context.Message, Direction.Before, count).Flatten().ToListAsync();
 
             // Get the total message count before being filtered.
             int totalMessages = messages.Count;

@@ -343,9 +343,11 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigEditSnipe([Summary("bigeditsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var messages = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
+                .Values
                 .OrderByDescending(x => x.CachedAt)
+                .Where(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe)
                 .Take(20)
                 .ToArray();
 
@@ -357,7 +359,8 @@ namespace Fergun.Modules
             else
             {
                 var text = messages.Select(x =>
-                    $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - x.CreatedAt).Minutes)})\n{x.Content.Truncate(200)}\n\n");
+                    $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - (x.OriginalMessage?.CreatedAt ?? x.CreatedAt)).Minutes)})" +
+                    $"\n{(x.OriginalMessage?.Content ?? x.Content).Truncate(200)}\n\n");
 
                 builder.WithTitle("Big edit snipe")
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
@@ -380,9 +383,11 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> BigSnipe([Summary("bigsnipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var messages = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+            var messages = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
+                .Values
                 .OrderByDescending(x => x.CachedAt)
+                .Where(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe)
                 .Take(20)
                 .ToArray();
 
@@ -780,10 +785,11 @@ namespace Fergun.Modules
         public async Task EditSnipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageUpdated && x.Channel.Id == channel.Id)
+            var message = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageUpdated)
+                .Values
                 .OrderByDescending(x => x.CachedAt)
-                .FirstOrDefault();
+                .FirstOrDefault(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe);
 
             var builder = new EmbedBuilder();
             if (message == null)
@@ -793,7 +799,7 @@ namespace Fergun.Modules
             else
             {
                 builder.WithAuthor(message.Author)
-                    .WithDescription(message.Content.Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .WithDescription((message.OriginalMessage?.Content ?? message.Content).Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
 
@@ -870,7 +876,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
         {
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -997,7 +1003,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Invert([Remainder, Summary("invertParam1")] string url = null)
         {
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1062,7 +1068,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1120,7 +1126,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1188,7 +1194,7 @@ namespace Fergun.Modules
                     .WithDescription(Format.Url(Locate("HastebinLink"), hastebinUrl))
                     .WithColor(FergunClient.Config.EmbedColor);
 
-                await message.ModifyOrResendAsync(embed: builder.Build());
+                await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
@@ -1233,7 +1239,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1504,10 +1510,12 @@ namespace Fergun.Modules
         public async Task Snipe([Summary("snipeParam1")] IMessageChannel channel = null)
         {
             channel ??= Context.Channel;
-            var message = _messageCache.Values
-                .Where(x => x.SourceEvent == CachedMessageSourceEvent.MessageDeleted && x.Channel.Id == channel.Id)
+
+            var message = _messageCache
+                .GetCacheForChannel(channel, MessageSourceEvent.MessageDeleted)
+                .Values
                 .OrderByDescending(x => x.CachedAt)
-                .FirstOrDefault();
+                .FirstOrDefault(x => !GuildUtils.UserConfigCache.TryGetValue(x.Author.Id, out var config) || !config.IsOptedOutSnipe);
 
             var builder = new EmbedBuilder();
             if (message == null)

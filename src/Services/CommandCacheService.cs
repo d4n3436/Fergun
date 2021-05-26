@@ -25,6 +25,7 @@ namespace Fergun.Services
         private readonly DiscordSocketClient _client;
         private readonly Func<SocketMessage, Task> _cmdHandler;
         private readonly double _maxMessageTime;
+        private readonly MessageCacheService _messageCache;
 
         private CommandCacheService()
         {
@@ -41,9 +42,10 @@ namespace Fergun.Services
         /// <param name="logger">An optional method to use for logging.</param>
         /// <param name="period">The interval between invocations of the cache clearing, in milliseconds.</param>
         /// <param name="maxMessageTime">The max. message longevity, in hours.</param>
+        /// <param name="messageCache">The message cache.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if capacity is less than 1.</exception>
         public CommandCacheService(DiscordSocketClient client, int capacity = 200, Func<SocketMessage, Task> cmdHandler = null,
-            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0)
+            Func<LogMessage, Task> logger = null, int period = 1800000, double maxMessageTime = 2.0, MessageCacheService messageCache = null)
         {
             _client = client;
 
@@ -62,6 +64,7 @@ namespace Fergun.Services
 
             _max = capacity;
             _maxMessageTime = maxMessageTime;
+            _messageCache = messageCache;
 
             // Create a timer that will clear out cached messages.
             _autoClear = new Timer(OnTimerFired, null, period, period);
@@ -233,7 +236,7 @@ namespace Fergun.Services
             {
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
-                    var message = await channel.GetMessageAsync(responseId);
+                    var message = await channel.GetMessageAsync(_messageCache, responseId);
                     if (message != null)
                     {
                         await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Command message ({cacheable.Id}) deleted. Deleting the response..."));
@@ -263,7 +266,7 @@ namespace Fergun.Services
 
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
-                    var response = await channel.GetMessageAsync(responseId);
+                    var response = await channel.GetMessageAsync(_messageCache, responseId);
                     if (response == null)
                     {
                         await _logger(new LogMessage(LogSeverity.Info, "CmdCache", $"A command message ({cacheable.Id}) associated to a response was found but the response ({responseId}) was already deleted."));
