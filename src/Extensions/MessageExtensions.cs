@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
@@ -61,18 +60,11 @@ namespace Fergun.Extensions
 
             bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
 
-            if (manageMessages)
-            {
-                await message.RemoveAllReactionsAsync();
-            }
-            else
-            {
-                var botReactions = message.Reactions.Where(x => x.Value.IsMe).Select(x => x.Key).ToArray();
-                if (botReactions.Length == 0) return false;
+            if (!manageMessages) return false;
 
-                await (message as IUserMessage).RemoveReactionsAsync(message.Author, botReactions);
-            }
+            await message.RemoveAllReactionsAsync();
             return true;
+
         }
 
         /// <summary>

@@ -332,7 +332,17 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
-            _ = message.TryRemoveAllReactionsAsync();
+            bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
+
+            if (manageMessages)
+            {
+                await message.TryRemoveAllReactionsAsync(_messageCache);
+            }
+            else
+            {
+                await message.TryDeleteAsync(_messageCache);
+            }
+
             await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting info for character: {characters.Keys.ElementAt(characterIndex)} ({characters.Values.ElementAt(characterIndex)})"));
@@ -442,8 +452,18 @@ namespace Fergun.Modules
             builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
+            bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
+
+            if (manageMessages)
+            {
+                await message.TryRemoveAllReactionsAsync(_messageCache);
+            }
+            else
+            {
+                await message.TryDeleteAsync(_messageCache);
+            }
+
             await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
-            _ = message.TryRemoveAllReactionsAsync();
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
 

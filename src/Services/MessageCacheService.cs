@@ -61,11 +61,19 @@ namespace Fergun.Services
             int period = 3600000, double maxMessageTime = 6, int minCommandTime = 12, bool onlyCacheUserDeletedEditedMessages = true)
         {
             _client = client;
+
             _client.MessageReceived += MessageReceived;
             _client.MessageDeleted += MessageDeleted;
             _client.MessageUpdated += MessageUpdated;
             _client.MessagesBulkDeleted += MessagesBulkDeleted;
+
+            _client.ReactionAdded += ReactionAdded;
+            _client.ReactionRemoved += ReactionRemoved;
+            _client.ReactionsCleared += ReactionsCleared;
+            _client.ReactionsRemovedForEmote += ReactionsRemovedForEmote;
+
             _client.ChannelDestroyed += ChannelDestroyed;
+
             _client.LeftGuild += LeftGuild;
 
             _logger = logger ?? (_ => Task.CompletedTask);
@@ -265,9 +273,13 @@ namespace Fergun.Services
 
         private static ICachedMessage CreateCachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent, IMessage originalMessage,
             IReadOnlyCollection<IEmbed> embeds)
+            => CreateCachedMessage(message, cachedAt, sourceEvent, originalMessage, embeds, null);
+
+        private static ICachedMessage CreateCachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent, IMessage originalMessage,
+            IReadOnlyCollection<IEmbed> embeds, List<SocketReaction> reactions)
             => message is IUserMessage userMessage
-                ? new CachedUserMessage(userMessage, cachedAt, sourceEvent, originalMessage, embeds)
-                : new CachedMessage(message, cachedAt, sourceEvent, originalMessage, embeds);
+                ? new CachedUserMessage(userMessage, cachedAt, sourceEvent, originalMessage, embeds, reactions)
+                : new CachedMessage(message, cachedAt, sourceEvent, originalMessage, embeds, reactions);
 
         // This only applies to the long term cache.
         private int ClearOldMessages(MessageSourceEvent sourceEvent)
@@ -380,22 +392,25 @@ namespace Fergun.Services
                 var cachedChannel = _editedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
 
                 message.Update(null);
+                var reactions = (message as CachedMessage)?._reactions;
 
                 bool useUpdatedEmbeds = updatedMessage.Author is SocketUnknownUser && updatedMessage.Embeds.Count != message.Embeds.Count;
 
                 if (useUpdatedEmbeds)
                 {
                     // "Add" the updated embeds to the existing message
-                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(message, message.CachedAt, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds);
+                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(message, message.CachedAt, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds, reactions);
                 }
                 else if (!(updatedMessage.Author is SocketUnknownUser))
                 {
                     // Create a new cached message containing the previous and current messages
-                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, message);
+                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, message, null, reactions);
                 }
             }
             else if (TryGetCachedMessage(channel, updatedMessage.Id, out message)) // A message gets updated
             {
+                var reactions = (message as CachedMessage)?._reactions;
+
                 bool useUpdatedEmbeds = updatedMessage.Author is SocketUnknownUser && updatedMessage.Embeds.Count != message.Embeds.Count;
 
                 // We need to simulate the functionality of the default message cache,
@@ -404,11 +419,11 @@ namespace Fergun.Services
                 if (useUpdatedEmbeds)
                 {
                     // "Add" the updated embeds to the existing message
-                    _cache[channel.Id][updatedMessage.Id] = CreateCachedMessage(message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds);
+                    _cache[channel.Id][updatedMessage.Id] = CreateCachedMessage(message, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds, reactions);
                 }
                 else if (!(updatedMessage.Author is SocketUnknownUser))
                 {
-                    _cache[channel.Id][updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated);
+                    _cache[channel.Id][updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, null, null, reactions);
                 }
 
                 if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
@@ -418,12 +433,12 @@ namespace Fergun.Services
                 if (useUpdatedEmbeds)
                 {
                     // "Add" the updated embeds to the existing message
-                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(message, message.CachedAt, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds);
+                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(message, message.CachedAt, MessageSourceEvent.MessageUpdated, null, updatedMessage.Embeds, reactions);
                 }
                 else if (!(updatedMessage.Author is SocketUnknownUser))
                 {
                     // "Copy" the cached message to the edited messages cache
-                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, message);
+                    cachedChannel[updatedMessage.Id] = CreateCachedMessage(updatedMessage, DateTimeOffset.UtcNow, MessageSourceEvent.MessageUpdated, message, null, reactions);
                 }
             }
         }
@@ -442,6 +457,66 @@ namespace Fergun.Services
                     HandleDeletedMessage(cached.Id, channel);
                 }
             });
+
+            return Task.CompletedTask;
+        }
+
+        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, SocketReaction reaction)
+        {
+            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            {
+                message.AddReaction(reaction);
+            }
+
+            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            {
+                message.AddReaction(reaction);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task ReactionRemoved(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, SocketReaction reaction)
+        {
+            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            {
+                message.RemoveReaction(reaction);
+            }
+
+            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            {
+                message.RemoveReaction(reaction);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task ReactionsCleared(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel)
+        {
+            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            {
+                message.RemoveAllReactions();
+            }
+
+            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            {
+                message.RemoveAllReactions();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task ReactionsRemovedForEmote(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, IEmote emote)
+        {
+            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            {
+                message.RemoveAllReactionsForEmote(emote);
+            }
+
+            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            {
+                message.RemoveAllReactionsForEmote(emote);
+            }
 
             return Task.CompletedTask;
         }
@@ -497,7 +572,14 @@ namespace Fergun.Services
             _client.MessageDeleted -= MessageDeleted;
             _client.MessageUpdated -= MessageUpdated;
             _client.MessagesBulkDeleted -= MessagesBulkDeleted;
+
+            _client.ReactionAdded -= ReactionAdded;
+            _client.ReactionRemoved -= ReactionRemoved;
+            _client.ReactionsCleared -= ReactionsCleared;
+            _client.ReactionsRemovedForEmote -= ReactionsRemovedForEmote;
+
             _client.ChannelDestroyed -= ChannelDestroyed;
+
             _client.LeftGuild -= LeftGuild;
 
             _disposed = true;
@@ -533,6 +615,14 @@ namespace Fergun.Services
         public MessageSourceEvent SourceEvent { get; }
 
         internal void Update(DateTimeOffset cachedAt, MessageSourceEvent sourceEvent);
+
+        internal void AddReaction(SocketReaction reaction);
+
+        internal void RemoveReaction(SocketReaction reaction);
+
+        internal void RemoveAllReactions();
+
+        internal void RemoveAllReactionsForEmote(IEmote emote);
     }
 
     /// <summary>
@@ -575,6 +665,21 @@ namespace Fergun.Services
         internal CachedUserMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent, IMessage originalMessage,
             IReadOnlyCollection<IEmbed> embeds)
             : base(message, cachedAt, sourceEvent, originalMessage, embeds)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CachedMessage"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="cachedAt">When the message was cached.</param>
+        /// <param name="sourceEvent">The source event of the message.</param>
+        /// <param name="originalMessage">The original message (prior to being edited).</param>
+        /// <param name="embeds">A collection of embeds.</param>
+        /// <param name="reactions">A collection of reactions.</param>
+        internal CachedUserMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent, IMessage originalMessage,
+            IReadOnlyCollection<IEmbed> embeds, List<SocketReaction> reactions)
+            : base(message, cachedAt, sourceEvent, originalMessage, embeds, reactions)
         {
         }
 
@@ -651,8 +756,25 @@ namespace Fergun.Services
             _embeds = embeds;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CachedMessage"/> class.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <param name="cachedAt">When the message was cached.</param>
+        /// <param name="sourceEvent">The source event of the message.</param>
+        /// <param name="originalMessage">The original message (prior to being edited).</param>
+        /// <param name="embeds">A collection of embeds.</param>
+        /// <param name="reactions">A collection of reactions.</param>
+        internal CachedMessage(IMessage message, DateTimeOffset cachedAt, MessageSourceEvent sourceEvent, IMessage originalMessage,
+            IReadOnlyCollection<IEmbed> embeds, List<SocketReaction> reactions)
+            : this(message, cachedAt, sourceEvent, originalMessage, embeds)
+        {
+            _reactions = reactions;
+        }
+
         private protected readonly IMessage _message;
         private protected readonly IReadOnlyCollection<IEmbed> _embeds;
+        internal List<SocketReaction> _reactions;
 
         /// <inheritdoc/>
         public IMessage OriginalMessage { get; private set; }
@@ -730,7 +852,9 @@ namespace Fergun.Services
         public MessageReference Reference => _message.Reference;
 
         /// <inheritdoc/>
-        public IReadOnlyDictionary<IEmote, ReactionMetadata> Reactions => _message.Reactions;
+        public IReadOnlyDictionary<IEmote, ReactionMetadata> Reactions =>
+            _reactions?.GroupBy(r => r.Emote).ToDictionary(x => x.Key, x => default(ReactionMetadata)) // It's not possible to create a ReactionMetadata instance, so we use the default value.
+            ?? _message.Reactions;
 
         /// <inheritdoc/>
         public MessageFlags? Flags => _message.Flags;
@@ -767,6 +891,18 @@ namespace Fergun.Services
             CachedAt = cachedAt;
             SourceEvent = sourceEvent;
         }
+
+        void ICachedMessage.AddReaction(SocketReaction reaction)
+        {
+            _reactions ??= new List<SocketReaction>();
+            _reactions.Add(reaction);
+        }
+
+        void ICachedMessage.RemoveReaction(SocketReaction reaction) => _reactions?.Remove(reaction);
+
+        void ICachedMessage.RemoveAllReactions() => _reactions?.Clear();
+
+        void ICachedMessage.RemoveAllReactionsForEmote(IEmote emote) => _reactions?.RemoveAll(x => x.Emote.Equals(emote));
 
         protected string DebuggerDisplay => $"{Author}: {Content} ({Id}{(Attachments.Count > 0 ? $", {Attachments.Count} Attachments" : "")})";
     }
