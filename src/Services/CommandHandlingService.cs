@@ -287,7 +287,7 @@ namespace Fergun.Services
 
                     string errorMessage = Format.Code(exception.Message, "cs");
 
-                    if (context.User.Id == owner.Id)
+                    if (context.User.Id != owner.Id)
                     {
                         errorMessage += "\n" + string.Format(GuildUtils.Locate("ErrorHelp", context.Channel), FergunClient.Config.SupportServer, Constants.GitHubRepository);
                     }
