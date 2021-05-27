@@ -58,7 +58,8 @@ namespace Fergun.Extensions
 
             if (message == null || message.Reactions.Count == 0) return false;
 
-            bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
+            bool manageMessages = message.Channel is SocketGuildChannel guildChannel &&
+                                  guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages;
 
             if (!manageMessages) return false;
 

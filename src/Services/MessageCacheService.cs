@@ -362,12 +362,16 @@ namespace Fergun.Services
                 var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
                 cachedChannel[messageId] = message;
             }
-            else if (TryGetCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated)) // An updated message gets deleted
+            if (TryRemoveCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated)) // An updated message gets deleted
             {
+                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+
+                // Avoid adding again the deleted message
+                if (cachedChannel.ContainsKey(messageId)) return;
+
                 message.Update(DateTimeOffset.UtcNow, MessageSourceEvent.MessageDeleted);
 
                 // move cached message to the deleted messages cache
-                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
                 cachedChannel[messageId] = message;
             }
         }

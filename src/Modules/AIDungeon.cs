@@ -332,7 +332,7 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
-            bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
+            bool manageMessages = message.Channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages;
 
             if (manageMessages)
             {
@@ -341,9 +341,13 @@ namespace Fergun.Modules
             else
             {
                 await message.TryDeleteAsync(_messageCache);
+
+                // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
+                // For some reason the message cache doesn't remove the cached message instantly
+                await Task.Delay(1000);
             }
 
-            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting info for character: {characters.Keys.ElementAt(characterIndex)} ({characters.Values.ElementAt(characterIndex)})"));
             try
@@ -452,7 +456,7 @@ namespace Fergun.Modules
             builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
-            bool manageMessages = message.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)message.Channel).ManageMessages;
+            bool manageMessages = message.Channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages;
 
             if (manageMessages)
             {
@@ -461,9 +465,13 @@ namespace Fergun.Modules
             else
             {
                 await message.TryDeleteAsync(_messageCache);
+
+                // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
+                // For some reason the message cache doesn't remove the cached message instantly
+                await Task.Delay(1000);
             }
 
-            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
 
@@ -476,10 +484,14 @@ namespace Fergun.Modules
 
             await userInput.TryDeleteAsync();
 
+            // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
+            // For some reason the message cache doesn't remove the cached message instantly
+            await Task.Delay(1000);
+
             builder.Title = "AI Dungeon";
             builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";
 
-            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             // Get custom adventure ID
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting custom adventure ID... ({_modes.Values.ElementAt(modeIndex)})"));
@@ -864,6 +876,10 @@ namespace Fergun.Modules
             string newOutput = userInput.Content.Trim();
 
             await userInput.TryDeleteAsync();
+
+            // Wait 1 second before sending or modifying a message to avoid race conditions
+            // For some reason the message cache doesn't remove the cached message instantly
+            await Task.Delay(1000);
 
             string result = await SendAidCommandAsync(adventureId, "Loading", ActionType.Alter, newOutput, actionId);
 
