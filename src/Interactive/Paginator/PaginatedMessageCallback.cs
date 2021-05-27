@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 
 namespace Fergun.Interactive
@@ -11,7 +11,7 @@ namespace Fergun.Interactive
     /// <summary>
     /// The paginated message callback.
     /// </summary>
-    internal class PaginatedMessageCallback : IReactionCallback
+    internal class PaginatedMessageCallback : IInteractionCallback
     {
         /// <summary>
         /// The timeout.
@@ -33,7 +33,7 @@ namespace Fergun.Interactive
         /// </summary>
         private readonly PaginatedMessage _pager;
 
-        private readonly List<ulong> _showingInfo = new List<ulong>();
+        //private readonly List<ulong> _showingInfo = new List<ulong>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessageCallback"/> class.
@@ -53,11 +53,11 @@ namespace Fergun.Interactive
         public PaginatedMessageCallback(InteractiveService interactive,
             SocketCommandContext context,
             PaginatedMessage pager,
-            ICriterion<SocketReaction> criterion = null)
+            ICriterion<SocketInteraction> criterion = null)
         {
             Interactive = interactive;
             Context = context;
-            Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
+            Criterion = criterion ?? new EmptyCriterion<SocketInteraction>();
             _pager = pager;
             _pages = _pager.Pages?.Count() ?? default;
         }
@@ -75,7 +75,7 @@ namespace Fergun.Interactive
         /// <summary>
         /// Gets the criterion.
         /// </summary>
-        public ICriterion<SocketReaction> Criterion { get; }
+        public ICriterion<SocketInteraction> Criterion { get; }
 
         /// <summary>
         /// Gets the message.
@@ -97,139 +97,99 @@ namespace Fergun.Interactive
         internal async Task DisplayAsync(ReactionList reactionList, IUserMessage oldMessage)
         {
             var embed = BuildEmbed();
+            var component = _pages <= 1 ? null : BuildComponent(reactionList.First, reactionList.Backward, reactionList.Forward, reactionList.Last, reactionList.Stop);
+
             if (oldMessage == null)
             {
-                Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed).ConfigureAwait(false);
+                Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed, component: _pages <= 1 ? null : BuildComponent()).ConfigureAwait(false);
             }
             else
             {
                 // Remove the old message callback
-                Interactive.RemoveReactionCallback(oldMessage);
-                if (oldMessage.Reactions.Count > 0)
-                {
-                    // There's still reactions (that means the bot doesn't have ManageMessages perms)
-                    await oldMessage.DeleteAsync();
-                    Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed).ConfigureAwait(false);
-                }
-                else
-                {
-                    await oldMessage.ModifyAsync(x =>
-                    {
-                        x.Content = _pager.Text;
-                        x.Embed = embed;
-                    }).ConfigureAwait(false);
+                Interactive.RemoveInteractionCallback(oldMessage);
 
-                    Message = oldMessage;
-                }
-            }
-            if (_pages <= 1)
-            {
-                return;
-            }
-            Interactive.AddReactionCallback(Message, this);
+                // TODO: Use ModifyAsync() with message components when it's available
+                await oldMessage.DeleteAsync();
+                Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed, component: _pages <= 1 ? null : BuildComponent()).ConfigureAwait(false);
 
-            // reactionList take a while to add, don't wait for them
+                /*
+                await oldMessage.ModifyAsync(x =>
+                {
+                    x.Content = _pager.Text;
+                    x.Embed = embed;
+                }).ConfigureAwait(false);
+                
+
+                Message = oldMessage;
+                */
+            }
+
+            if (_pages <= 1) return;
+
+            Interactive.AddInteractionCallback(Context.Message, this);
+
             _ = Task.Run(async () =>
             {
-                if (reactionList.First) await Message.AddReactionAsync(_pager.Options.First).ConfigureAwait(false);
-                if (reactionList.Backward) await Message.AddReactionAsync(_pager.Options.Back).ConfigureAwait(false);
-                if (reactionList.Forward) await Message.AddReactionAsync(_pager.Options.Next).ConfigureAwait(false);
-                if (reactionList.Last) await Message.AddReactionAsync(_pager.Options.Last).ConfigureAwait(false);
-                if (reactionList.Jump) await Message.AddReactionAsync(_pager.Options.Jump).ConfigureAwait(false);
-                if (reactionList.Stop) await Message.AddReactionAsync(_pager.Options.Stop).ConfigureAwait(false);
-                if (reactionList.Info) await Message.AddReactionAsync(_pager.Options.Info).ConfigureAwait(false);
                 if (Timeout.HasValue)
                 {
                     await Task.Delay(Timeout.Value).ConfigureAwait(false);
-                    await OnStopAsync(Message, _pager.Options.ActionOnTimeout).ConfigureAwait(false);
+                    await OnStopAsync(Message).ConfigureAwait(false);
                 }
             });
         }
 
-        /// <summary>
-        /// Executes the action in <paramref name="actionOnStop"/>.
-        /// </summary>
-        /// <param name="message">
-        /// The message.
-        /// </param>
-        /// <param name="actionOnStop">
-        /// The action to do.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation.
-        /// </returns>
-        private async Task OnStopAsync(IMessage message, ActionOnTimeout actionOnStop)
+        private async Task OnStopAsync(IMessage message, SocketInteraction interaction = null)
         {
-            if (!Interactive.ContainsKey(message.Id)) return;
-            Interactive.RemoveReactionCallback(message);
-            switch (actionOnStop)
+            if (!Interactive.ContainsInteraction(Context.Message.Id)) return;
+            Interactive.RemoveInteractionCallback(Context.Message.Id);
+
+            if (interaction != null)
             {
-                case ActionOnTimeout.DeleteMessage:
-                    await message.DeleteAsync().ConfigureAwait(false);
-                    break;
-
-                case ActionOnTimeout.DeleteReactions:
-                    bool manageMessages = !Context.IsPrivate && Context.Guild.CurrentUser.GetPermissions((IGuildChannel)Context.Channel).ManageMessages;
-                    if (manageMessages)
-                    {
-                        await message.RemoveAllReactionsAsync().ConfigureAwait(false);
-                    }
-                    break;
-
-                case ActionOnTimeout.Nothing:
-                default:
-                    break;
+                await interaction.RespondAsync("", embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent(true, true, true, true, true));
+            }
+            else
+            {
+                // TODO: Use ModifyAsync() with message components when it's available
+                await message.DeleteAsync();
             }
         }
 
         /// <summary>
-        /// Handles the reaction callback.
+        /// Handles the interaction callback.
         /// </summary>
-        /// <param name="reaction">
-        /// The reaction.
-        /// </param>
         /// <returns>
         /// A task representing the asynchronous operation.
         /// </returns>
-        public async Task<bool> HandleCallbackAsync(SocketReaction reaction)
+        public async Task<bool> HandleCallbackAsync(SocketInteraction interaction, string button)
         {
-            var emote = reaction.Emote;
-            if (emote.Equals(_pager.Options.First))
+            if (button == _pager.Options.First.Name)
             {
-                if (_page == 1)
-                    return false;
                 _page = 1;
             }
-            else if (emote.Equals(_pager.Options.Next))
+            else if (button == _pager.Options.Back.Name)
             {
-                if (_page >= _pages)
-                    return false;
-                ++_page;
+                _page--;
             }
-            else if (emote.Equals(_pager.Options.Back))
+            else if (button == _pager.Options.Next.Name)
             {
-                if (_page <= 1)
-                    return false;
-                --_page;
+                _page++;
             }
-            else if (emote.Equals(_pager.Options.Last))
+            else if (button == _pager.Options.Last.Name)
             {
-                if (_page == _pages)
-                    return false;
                 _page = _pages;
             }
-            else if (emote.Equals(_pager.Options.Stop))
+            else if (button == _pager.Options.Stop.Name)
             {
-                _ = OnStopAsync(Message, _pager.Options.ActionOnStop).ConfigureAwait(false);
-                return false;
+                await OnStopAsync(Message, interaction).ConfigureAwait(false);
+                return true;
             }
-            else if (emote.Equals(_pager.Options.Jump))
+            else if (button == _pager.Options.Jump.Name)
             {
                 _ = Task.Run(async () =>
                 {
                     var criteria = new Criteria<SocketMessage>()
                         .AddCriterion(new EnsureSourceChannelCriterion())
-                        .AddCriterion(new EnsureFromUserCriterion(reaction.UserId))
+                        .AddCriterion(new EnsureFromUserCriterion(Context.User.Id))
                         .AddCriterion(new EnsureIsIntegerCriterion());
 
                     var response = await Interactive.NextMessageAsync(Context, criteria, TimeSpan.FromSeconds(15)).ConfigureAwait(false);
@@ -248,37 +208,8 @@ namespace Fergun.Interactive
 
                     _page = requestedPage;
 
-                    _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId).ConfigureAwait(false);
-
                     await RenderAsync().ConfigureAwait(false);
                 });
-                return false;
-            }
-            else if (emote.Equals(_pager.Options.Info))
-            {
-                lock (_showingInfo)
-                {
-                    if (_showingInfo.Contains(Message.Id))
-                    {
-                        return false;
-                    }
-                }
-
-                _ = Task.Run(async () =>
-                {
-                    var msg = await Context.Channel.SendMessageAsync(_pager.Options.InformationText).ConfigureAwait(false);
-                    lock (_showingInfo)
-                    {
-                        _showingInfo.Add(Message.Id);
-                    }
-                    await Task.Delay(_pager.Options.InfoTimeout).ConfigureAwait(false);
-                    await msg.DeleteAsync().ConfigureAwait(false);
-                    lock (_showingInfo)
-                    {
-                        _showingInfo.Remove(Message.Id);
-                    }
-                });
-
                 return false;
             }
             else
@@ -286,10 +217,8 @@ namespace Fergun.Interactive
                 return false;
             }
 
-            _ = Message.RemoveReactionAsync(reaction.Emote, reaction.UserId).ConfigureAwait(false);
-
-            await RenderAsync().ConfigureAwait(false);
-            return false;
+            await RenderAsync(interaction).ConfigureAwait(false);
+            return true;
         }
 
         /// <summary>
@@ -327,5 +256,23 @@ namespace Fergun.Interactive
         /// A task representing the asynchronous operation.
         /// </returns>
         private Task RenderAsync() => Message.ModifyAsync(m => m.Embed = BuildEmbed());
+
+        private MessageComponent BuildComponent() => BuildComponent(_page == 1, _page == 1, _page == _pages, _page == _pages, false);
+
+        private MessageComponent BuildComponent(bool first, bool back, bool next, bool last, bool stop)
+        {
+            return new ComponentBuilder()
+                .WithButton(_pager.Options.First.Name, ButtonStyle.Primary, null, $"{Context.Message.Id}_{_pager.Options.First}", null, first)
+                .WithButton(_pager.Options.Back.Name, ButtonStyle.Primary, null, $"{Context.Message.Id}_{_pager.Options.Back}", null, back)
+                .WithButton(_pager.Options.Next.Name, ButtonStyle.Primary, null, $"{Context.Message.Id}_{_pager.Options.Next}", null, next)
+                .WithButton(_pager.Options.Last.Name, ButtonStyle.Primary, null, $"{Context.Message.Id}_{_pager.Options.Last}", null, last)
+                .WithButton(_pager.Options.Stop.Name, ButtonStyle.Danger, null, $"{Context.Message.Id}_{_pager.Options.Stop}", null, stop)
+                .Build();
+        }
+
+        private async Task<RestUserMessage> RenderAsync(SocketInteraction interaction)
+        {
+            return await interaction.RespondAsync("", embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent());
+        }
     }
 }

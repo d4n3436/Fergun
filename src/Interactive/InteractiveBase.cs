@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -36,13 +36,13 @@ namespace Fergun.Interactive
 
         public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true)
         {
-            var criterion = new Criteria<SocketReaction>();
+            var criterion = new Criteria<SocketInteraction>();
             if (fromSourceUser)
-                criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
+                criterion.AddCriterion(new EnsureInteractionFromSourceUserCriterion());
             return PagedReplyAsync(pager, criterion, reactions);
         }
 
-        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketReaction> criterion, ReactionList reactions)
+        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketInteraction> criterion, ReactionList reactions)
             => Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion);
 
         public RuntimeResult Ok(string reason = null) => new OkResult(reason);

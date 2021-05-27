@@ -34,6 +34,7 @@ namespace Fergun
             LogLevel = LogSeverity.Verbose,
             ExclusiveBulkDelete = true,
             UseSystemClock = false,
+            AlwaysAcknowledgeInteractions = false,
             GatewayIntents =
             GatewayIntents.Guilds |
 

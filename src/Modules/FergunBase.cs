@@ -128,10 +128,10 @@ namespace Fergun.Modules
         /// </returns>
         public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true)
         {
-            var criterion = new Criteria<SocketReaction>();
+            var interaction = new Criteria<SocketInteraction>();
             if (fromSourceUser)
-                criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
-            return PagedReplyAsync(pager, reactions, criterion);
+                interaction.AddCriterion(new EnsureInteractionFromSourceUserCriterion());
+            return PagedReplyAsync(pager, reactions, interaction);
         }
 
         /// <summary>
@@ -143,24 +143,24 @@ namespace Fergun.Modules
         /// <param name="reactions">
         /// The reactions.
         /// </param>
-        /// <param name="criterion">
-        /// The criterion.
+        /// <param name="interaction">
+        /// The interaction.
         /// </param>
         /// <returns>
         /// A task representing the asynchronous operation. The result contains the message.
         /// </returns>
-        public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, ICriterion<SocketReaction> criterion)
+        public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, ICriterion<SocketInteraction> interaction)
         {
             IUserMessage response;
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion, response).ConfigureAwait(false);
+                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction, response).ConfigureAwait(false);
             }
             else
             {
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion).ConfigureAwait(false);
+                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction).ConfigureAwait(false);
 
                 if (!Cache.IsDisabled)
                 {

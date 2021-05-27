@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Discord;
 
 namespace Fergun.Interactive
@@ -11,27 +11,27 @@ namespace Fergun.Interactive
         /// <summary>
         /// Get or sets the emote that sends to the first page.
         /// </summary>
-        public IEmote First { get; set; } = new Emoji("⏮");
+        public IEmote First { get; set; } = new Emoji("⏮️");
 
         /// <summary>
         /// Get or sets the emote that sends to the previous page.
         /// </summary>
-        public IEmote Back { get; set; } = new Emoji("⬅");
+        public IEmote Back { get; set; } = new Emoji("⬅️");
 
         /// <summary>
         /// Get or sets the emote that sends to the next page.
         /// </summary>
-        public IEmote Next { get; set; } = new Emoji("➡");
+        public IEmote Next { get; set; } = new Emoji("➡️");
 
         /// <summary>
         /// Get or sets the emote that sends to the last page.
         /// </summary>
-        public IEmote Last { get; set; } = new Emoji("⏭");
+        public IEmote Last { get; set; } = new Emoji("⏭️");
 
         /// <summary>
         /// Get or sets the emote that stops the paginator.
         /// </summary>
-        public IEmote Stop { get; set; } = new Emoji("⏹");
+        public IEmote Stop { get; set; } = new Emoji("🛑");
 
         /// <summary>
         /// Get or sets the emote that jumps to a certain page.

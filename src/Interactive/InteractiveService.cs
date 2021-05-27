@@ -14,6 +14,7 @@ namespace Fergun.Interactive
     {
         private readonly IDiscordClient _client;
         private readonly ConcurrentDictionary<ulong, IReactionCallback> _callbacks = new ConcurrentDictionary<ulong, IReactionCallback>();
+        private readonly ConcurrentDictionary<ulong, IInteractionCallback> _interactionCallbacks = new ConcurrentDictionary<ulong, IInteractionCallback>();
         private readonly TimeSpan? _defaultTimeout = TimeSpan.FromSeconds(15);
         private bool _disposed;
 
@@ -30,6 +31,7 @@ namespace Fergun.Interactive
         {
             _client = client;
             client.ReactionAdded += HandleReactionAsync;
+            client.InteractionCreated += HandleInteractionAsync;
             if (defaultTimeout != null) _defaultTimeout = defaultTimeout;
         }
 
@@ -46,6 +48,7 @@ namespace Fergun.Interactive
         {
             _client = client;
             client.ReactionAdded += HandleReactionAsync;
+            client.InteractionCreated += HandleInteractionAsync;
             if (defaultTimeout != null) _defaultTimeout = defaultTimeout;
         }
 
@@ -209,7 +212,7 @@ namespace Fergun.Interactive
         /// <returns>
         /// A task representing the asynchronous operation. The result contains the message.
         /// </returns>
-        public async Task<IUserMessage> SendPaginatedMessageAsync(SocketCommandContext context, PaginatedMessage pager, ReactionList reactions, ICriterion<SocketReaction> criterion = null,
+        public async Task<IUserMessage> SendPaginatedMessageAsync(SocketCommandContext context, PaginatedMessage pager, ReactionList reactions, ICriterion<SocketInteraction> criterion = null,
             IUserMessage oldMessage = null)
         {
             var callback = new PaginatedMessageCallback(this, context, pager, criterion);
@@ -268,8 +271,21 @@ namespace Fergun.Interactive
         /// <returns>Whether or not the Id was found.</returns>
         public bool ContainsKey(ulong id) => _callbacks.ContainsKey(id);
 
+        public void AddInteractionCallback(IMessage message, IInteractionCallback callback)
+            => AddInteractionCallback(message.Id, callback);
+
+        public void AddInteractionCallback(ulong id, IInteractionCallback callback) => _interactionCallbacks[id] = callback;
+
+        public void RemoveInteractionCallback(IMessage message) => RemoveInteractionCallback(message.Id);
+
+        public bool RemoveInteractionCallback(ulong id) => _interactionCallbacks.TryRemove(id, out _);
+
+        public void ClearInteractionCallbacks() => _interactionCallbacks.Clear();
+
+        public bool ContainsInteraction(ulong id) => _interactionCallbacks.ContainsKey(id);
+
         /// <summary>
-        /// Unsubscribes from the <see cref="BaseSocketClient.ReactionAdded"/> event.
+        /// Unsubscribes from the <see cref="BaseSocketClient.InteractionCreated"/> event.
         /// </summary>
         public void Dispose()
         {
@@ -286,6 +302,7 @@ namespace Fergun.Interactive
 
             if (!disposing) return;
             ((BaseSocketClient)_client).ReactionAdded -= HandleReactionAsync;
+            ((BaseSocketClient)_client).InteractionCreated -= HandleInteractionAsync;
             _disposed = true;
         }
 
@@ -342,6 +359,38 @@ namespace Fergun.Interactive
                 if (!await callback.Criterion.JudgeAsync(callback.Context, reaction).ConfigureAwait(false)) return;
 
                 _ = callback.HandleCallbackAsync(reaction).ConfigureAwait(false);
+            });
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Handles an interaction.
+        /// </summary>
+        /// <param name="interaction">
+        /// The interaction.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/>.
+        /// </returns>
+        private Task HandleInteractionAsync(SocketInteraction interaction)
+        {
+            _ = Task.Run(async () =>
+            {
+                if (interaction.Type != InteractionType.MessageComponent || !(interaction is SocketMessageComponent component))
+                    return;
+
+                if (interaction.User?.Id == _client.CurrentUser.Id) return;
+
+                var split = component.Data.CustomId.Split('_');
+                if (split.Length != 2) return;
+                if (!ulong.TryParse(split[0], out ulong id)) return;
+
+                if (!_interactionCallbacks.TryGetValue(id, out var callback)) return;
+
+                if (!await callback.Criterion.JudgeAsync(callback.Context, interaction).ConfigureAwait(false)) return;
+
+                await callback.HandleCallbackAsync(interaction, split[1]).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
