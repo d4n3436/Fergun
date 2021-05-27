@@ -861,10 +861,10 @@ namespace Fergun.Services
             ?? _message.Reactions;
 
         /// <inheritdoc/>
-        public MessageFlags? Flags => _message.Flags;
+        //public MessageFlags? Flags => _message.Flags;
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
+        //public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
 
         /// <inheritdoc/>
         public Task DeleteAsync(RequestOptions options = null) => _message.DeleteAsync(options);
