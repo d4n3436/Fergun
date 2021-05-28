@@ -867,6 +867,9 @@ namespace Fergun.Services
         //public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
 
         /// <inheritdoc/>
+        public IReadOnlyCollection<IMessageComponent> Components => _message.Components;
+
+        /// <inheritdoc/>
         public Task DeleteAsync(RequestOptions options = null) => _message.DeleteAsync(options);
 
         /// <inheritdoc/>

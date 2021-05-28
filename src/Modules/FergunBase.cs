@@ -172,11 +172,14 @@ namespace Fergun.Modules
         }
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
+        protected new async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
+            MessageReference messageReference = null, MessageComponent component = null)
         {
+            component ??= new ComponentBuilder().Build(); // remove message components if null
+
             if (Cache.IsDisabled)
             {
-                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
             }
 
             IUserMessage response;
@@ -187,13 +190,14 @@ namespace Fergun.Modules
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.Components = component;
                 }).ConfigureAwait(false);
 
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
             }
             else
             {
-                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
+                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
                 Cache.Add(Context.Message, response);
             }
             return response;

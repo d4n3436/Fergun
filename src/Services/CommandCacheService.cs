@@ -327,12 +327,12 @@ namespace Fergun.Services
         /// </param>
         /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
-        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
-            RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
+        protected async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
+            RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null)
         {
             if (Cache.IsDisabled)
             {
-                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
+                return await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
             }
 
             IUserMessage response;
@@ -343,13 +343,14 @@ namespace Fergun.Services
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.Components = component;
                 }).ConfigureAwait(false);
 
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId).ConfigureAwait(false);
             }
             else
             {
-                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
+                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
                 Cache.Add(Context.Message, response);
             }
             return response;

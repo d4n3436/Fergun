@@ -13,6 +13,6 @@ namespace Fergun.Interactive
 
         SocketCommandContext Context { get; }
 
-        Task<bool> HandleCallbackAsync(SocketInteraction interaction, string button);
+        Task<bool> HandleCallbackAsync(SocketInteraction interaction, string button, bool isCommandUser);
     }
 }
