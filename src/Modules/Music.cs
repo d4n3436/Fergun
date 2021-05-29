@@ -151,7 +151,7 @@ namespace Fergun.Modules
                 }
             };
 
-            await PagedReplyAsync(pager, ReactionList.Default);
+            await PagedReplyAsync(pager, ReactionList.Default, notCommandUserText: Locate("CannotUseThisInteraction"));
 
             return FergunResult.FromSuccess();
         }
@@ -201,10 +201,21 @@ namespace Fergun.Modules
                 {
                     string list = "";
                     int count = Math.Min(Constants.MaxTracksToDisplay, tracks.Count);
+                    var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
 
                     for (int i = 0; i < count; i++)
                     {
                         list += $"{i + 1}. {tracks[i].ToTrackLink()}\n";
+
+                        var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
+                            .Build();
+
+                        int row = i / 5;
+
+                        if (component.ActionRows.Count == row)
+                            component.ActionRows.Add(new ActionRowBuilder());
+
+                        component.ActionRows[row].WithComponent(button);
                     }
 
                     var builder = new EmbedBuilder()
@@ -213,27 +224,30 @@ namespace Fergun.Modules
                         .WithDescription(list)
                         .WithColor(FergunClient.Config.EmbedColor);
 
-                    message = await ReplyAsync(embed: builder.Build());
+                    message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
 
-                    var response = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
+                    var interaction = await NextInteractionAsync(
+                        x => x is SocketMessageComponent messageComponent &&
+                             messageComponent.User?.Id == Context.User.Id &&
+                             messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
 
-                    if (response == null)
+                    if (interaction == null)
                     {
-                        return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("SearchCanceled")}");
+                        return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
                     }
-                    if (!int.TryParse(response.Content, out int option))
+
+                    await interaction.AcknowledgeAsync();
+
+                    string customId = ((SocketMessageComponent)interaction).Data.CustomId ?? "";
+                    if (!int.TryParse(customId, out int option))
                     {
-                        return FergunResult.FromError($"{Locate("InvalidOption")} {Locate("SearchCanceled")}");
+                        option = 0;
                     }
-                    if (option < 1 || option > count)
-                    {
-                        return FergunResult.FromError($"{Locate("OutOfIndex")} {Locate("SearchCanceled")}");
-                    }
-                    selectedTrack = tracks[option - 1];
+
+                    selectedTrack = tracks[option];
                 }
                 else
                 {
-                    // people don't know how to select a track...
                     selectedTrack = tracks[0];
                 }
                 var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, selectedTrack);

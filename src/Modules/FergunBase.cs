@@ -126,12 +126,12 @@ namespace Fergun.Modules
         /// <returns>
         /// A task representing the asynchronous operation. The result contains the message.
         /// </returns>
-        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true)
+        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true, string notCommandUserText = null)
         {
             var interaction = new Criteria<SocketInteraction>();
             if (fromSourceUser)
                 interaction.AddCriterion(new EnsureInteractionFromSourceUserCriterion());
-            return PagedReplyAsync(pager, reactions, interaction);
+            return PagedReplyAsync(pager, reactions, interaction, notCommandUserText);
         }
 
         /// <summary>
@@ -149,18 +149,18 @@ namespace Fergun.Modules
         /// <returns>
         /// A task representing the asynchronous operation. The result contains the message.
         /// </returns>
-        public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, ICriterion<SocketInteraction> interaction)
+        public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, ICriterion<SocketInteraction> interaction, string notCommandUserText)
         {
             IUserMessage response;
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction, response).ConfigureAwait(false);
+                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction, response, notCommandUserText).ConfigureAwait(false);
             }
             else
             {
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction).ConfigureAwait(false);
+                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, interaction, null, notCommandUserText).ConfigureAwait(false);
 
                 if (!Cache.IsDisabled)
                 {
@@ -175,7 +175,7 @@ namespace Fergun.Modules
             => Interactive.NextInteractionAsync(filter, timeout);
 
         /// <inheritdoc/>
-        protected new async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
             MessageReference messageReference = null, MessageComponent component = null)
         {
             component ??= new ComponentBuilder().Build(); // remove message components if null

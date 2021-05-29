@@ -659,7 +659,7 @@ Creando caché...</value>
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Opción fuera de índice.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>No has respondido antes del límite de tiempo!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1649,7 +1649,7 @@ Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</
     <value>Página del artista</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>Reacciona al emoji debajo para eliminar la aventura.</value>
+    <value>Presiona el botón debajo para eliminar la aventura.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>No reaccionaste antes del límite de tiempo!</value>
@@ -2379,5 +2379,11 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>¿No quieres que tu mensaje se muestre aquí? Vea `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>No puedes usar esta interacción.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Eliminando la aventura...</value>
 	</data>
 </root>

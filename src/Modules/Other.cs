@@ -164,7 +164,7 @@ namespace Fergun.Modules
                 }
             };
 
-            await PagedReplyAsync(pager, ReactionList.Default);
+            await PagedReplyAsync(pager, ReactionList.Default, notCommandUserText: Locate("CannotUseThisInteraction"));
             return FergunResult.FromSuccess();
         }
 
@@ -603,13 +603,14 @@ namespace Fergun.Modules
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("BotOwner"), owner, true);
 
+            MessageComponent component = null;
             if (!FergunClient.IsDebugMode)
             {
-                builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
+                component = CommandUtils.BuildLinks(Context.Channel);
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
-            await ReplyAsync(embed: builder.Build());
+            await ReplyAsync(embed: builder.Build(), component: component);
         }
 
         [Command("support")]

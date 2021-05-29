@@ -34,15 +34,15 @@ namespace Fergun.Interactive
         public Task<IUserMessage> InlineReactionReplyAsync(ReactionCallbackData data, bool fromSourceUser = true)
             => Interactive.SendMessageWithReactionCallbacksAsync(Context, data, fromSourceUser);
 
-        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true)
+        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true, string notCommandUserText = null)
         {
             var criterion = new Criteria<SocketInteraction>();
             if (fromSourceUser)
                 criterion.AddCriterion(new EnsureInteractionFromSourceUserCriterion());
-            return PagedReplyAsync(pager, criterion, reactions);
+            return PagedReplyAsync(pager, criterion, reactions, notCommandUserText);
         }
 
-        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketInteraction> criterion, ReactionList reactions)
+        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketInteraction> criterion, ReactionList reactions, string notCommandUserText)
             => Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion);
 
         public Task<SocketInteraction> NextInteractionAsync(Func<SocketInteraction, bool> filter = null, TimeSpan? timeout = null)

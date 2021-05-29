@@ -661,7 +661,7 @@
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Seçenek dizin dışında.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>Zaman aşımından önce cevap vermediniz!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1661,7 +1661,7 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
     <value>Sanatçı Sayfası</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>Macerayı silmek için aşağıdaki emojiye tepki verin.</value>
+    <value>Macerayı silmek için aşağıdaki düğmeye basın.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>Zaman aşımından önce tepki göstermediniz!</value>
@@ -2377,5 +2377,11 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Mesajınızın burada görüntülenmesini istemiyor musunuz? Bkz. `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>Bu etkileşimi kullanamazsınız.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Macera siliniyor...</value>
 	</data>
 </root>

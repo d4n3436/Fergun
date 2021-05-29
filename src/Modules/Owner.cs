@@ -257,7 +257,7 @@ namespace Fergun.Modules
                     }
                 };
 
-                await PagedReplyAsync(pager, ReactionList.Default);
+                await PagedReplyAsync(pager, ReactionList.Default, notCommandUserText: Locate("CannotUseThisInteraction"));
             }
             else
             {

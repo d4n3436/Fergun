@@ -327,12 +327,12 @@ namespace Fergun.Services
         /// </param>
         /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
-        protected async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
             RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null)
         {
             if (Cache.IsDisabled)
             {
-                return await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
             }
 
             IUserMessage response;

@@ -773,7 +773,7 @@ namespace Fergun.Modules
                 Info = false
             };
 
-            await PagedReplyAsync(pager, reactions);
+            await PagedReplyAsync(pager, reactions, notCommandUserText: Locate("CannotUseThisInteraction"));
 
             return FergunResult.FromSuccess();
         }
@@ -837,18 +837,20 @@ namespace Fergun.Modules
                 }
 
                 string version = $"v{Constants.Version}";
+                MessageComponent component = null;
+
                 if (FergunClient.IsDebugMode)
                 {
                     version += "-dev";
                 }
                 else
                 {
-                    builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
+                    component = CommandUtils.BuildLinks(Context.Channel);
                 }
                 builder.WithFooter(string.Format(Locate("HelpFooter"), version, _cachedVisibleCmdCount))
                     .WithColor(FergunClient.Config.EmbedColor);
 
-                await ReplyAsync(embed: builder.Build());
+                await ReplyAsync(embed: builder.Build(), component: component);
             }
             else
             {
@@ -1752,7 +1754,7 @@ namespace Fergun.Modules
                 Info = false
             };
 
-            await PagedReplyAsync(pager, reactions);
+            await PagedReplyAsync(pager, reactions, notCommandUserText: Locate("CannotUseThisInteraction"));
 
             return FergunResult.FromSuccess();
         }
@@ -2299,7 +2301,7 @@ namespace Fergun.Modules
                 Info = false
             };
 
-            await PagedReplyAsync(pager, reactions);
+            await PagedReplyAsync(pager, reactions, notCommandUserText: Locate("CannotUseThisInteraction"));
 
             return FergunResult.FromSuccess();
         }

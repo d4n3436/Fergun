@@ -664,7 +664,7 @@
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Вариант вне индекса.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>Вы не ответили до истечения времени ожидания!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1649,7 +1649,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Страница исполнителя</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>Реагируйте на смайлики ниже, чтобы удалить приключение.</value>
+    <value>Нажмите кнопку ниже, чтобы удалить приключение.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>Вы не реагировали до истечения времени ожидания!</value>
@@ -2377,5 +2377,11 @@ d. Когда сообщение удалено / отредактировано
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Не хотите, чтобы ваше сообщение отображалось здесь? См. `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>Вы не можете использовать это взаимодействие.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Удаление приключения...</value>
 	</data>
 </root>

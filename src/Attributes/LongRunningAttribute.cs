@@ -30,6 +30,7 @@ namespace Fergun.Attributes
                         .WithDescription($"{FergunClient.Config.LoadingEmote} {GuildUtils.Locate("Loading", context.Channel)}")
                         .WithColor(FergunClient.Config.EmbedColor)
                         .Build();
+                    x.Components = new ComponentBuilder().Build(); // Remove components
                 });
             }
             else

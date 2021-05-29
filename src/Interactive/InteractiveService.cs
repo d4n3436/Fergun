@@ -252,9 +252,9 @@ namespace Fergun.Interactive
         /// A task representing the asynchronous operation. The result contains the message.
         /// </returns>
         public async Task<IUserMessage> SendPaginatedMessageAsync(SocketCommandContext context, PaginatedMessage pager, ReactionList reactions, ICriterion<SocketInteraction> criterion = null,
-            IUserMessage oldMessage = null)
+            IUserMessage oldMessage = null, string notCommandUserText = null)
         {
-            var callback = new PaginatedMessageCallback(this, context, pager, criterion);
+            var callback = new PaginatedMessageCallback(this, context, pager, criterion, notCommandUserText);
             await callback.DisplayAsync(reactions, oldMessage).ConfigureAwait(false);
             return callback.Message;
         }
@@ -421,33 +421,14 @@ namespace Fergun.Interactive
 
                 if (interaction.User?.Id == _client.CurrentUser.Id) return;
 
-                if (!TryGetInteractionCallback(component, out var callback, out string emote)) return;
+                if (!_interactionCallbacks.TryGetValue(component.Message.Id, out var callback)) return;
 
                 bool isCommandUser = await callback.Criterion.JudgeAsync(callback.Context, interaction).ConfigureAwait(false);
 
-                await callback.HandleCallbackAsync(interaction, emote, isCommandUser).ConfigureAwait(false);
+                await callback.HandleCallbackAsync(interaction, component.Data.CustomId, isCommandUser).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
-        }
-
-        private bool TryGetInteractionCallback(SocketMessageComponent component, out IInteractionCallback callback, out string emote)
-        {
-            emote = null;
-            callback = null;
-
-            var span = component.Data.CustomId.AsSpan();
-            int index = span.IndexOf('_');
-            if (index == -1) return false;
-
-            var emoteSpan = span.Slice(index + 1, span.Length - index - 1);
-            if (emoteSpan.IsEmpty) return false;
-
-            if (!ulong.TryParse(component.Data.CustomId.AsSpan().Slice(0, index), out ulong id)) return false;
-            if (!_interactionCallbacks.TryGetValue(id, out callback)) return false;
-
-            emote = emoteSpan.ToString();
-            return true;
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Fergun.Interactive
         /// </summary>
         private readonly PaginatedMessage _pager;
 
-        //private readonly List<ulong> _showingInfo = new List<ulong>();
+        private readonly string _notCommandUserText;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessageCallback"/> class.
@@ -54,13 +54,14 @@ namespace Fergun.Interactive
         public PaginatedMessageCallback(InteractiveService interactive,
             SocketCommandContext context,
             PaginatedMessage pager,
-            ICriterion<SocketInteraction> criterion = null)
+            ICriterion<SocketInteraction> criterion = null, string notCommandUserText = null)
         {
             Interactive = interactive;
             Context = context;
             Criterion = criterion ?? new EmptyCriterion<SocketInteraction>();
             _pager = pager;
             _pages = _pager.Pages?.Count() ?? default;
+            _notCommandUserText = notCommandUserText;
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace Fergun.Interactive
 
             if (_pages <= 1) return;
 
-            Interactive.AddInteractionCallback(Context.Message, this);
+            Interactive.AddInteractionCallback(Message, this);
 
             _ = Task.Run(async () =>
             {
@@ -139,22 +140,22 @@ namespace Fergun.Interactive
 
         private async Task OnStopAsync(IUserMessage message, SocketInteraction interaction = null)
         {
-            if (!Interactive.ContainsInteraction(Context.Message.Id)) return;
-            Interactive.RemoveInteractionCallback(Context.Message.Id);
+            if (!Interactive.ContainsInteraction(Message.Id)) return;
+            Interactive.RemoveInteractionCallback(Message);
 
-            try
+            if (interaction != null)
             {
-                if (interaction != null)
-                {
-                    await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent(false, false, false, false, false))
-                        .ConfigureAwait(false);
-                }
-                else
+                await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent(false, false, false, false, false))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                try
                 {
                     await message.ModifyAsync(x => x.Components = BuildComponent(false, false, false, false, false)).ConfigureAwait(false);
                 }
+                catch (HttpException) { }
             }
-            catch (Exception) {}
         }
 
         /// <summary>
@@ -167,11 +168,7 @@ namespace Fergun.Interactive
         {
             if (!isCommandUser)
             {
-                try
-                {
-                    await interaction.RespondAsync("You can't use this interaction.", type: InteractionResponseType.ChannelMessageWithSource, ephemeral: true);
-                }
-                catch (Exception) {}
+                await interaction.RespondAsync(_notCommandUserText ?? "You can't use this interaction.", type: InteractionResponseType.ChannelMessageWithSource, ephemeral: true);
                 return false;
             }
 
@@ -281,24 +278,17 @@ namespace Fergun.Interactive
         private MessageComponent BuildComponent(bool first, bool back, bool next, bool last, bool stop)
         {
             return new ComponentBuilder()
-                .WithButton(null, ButtonStyle.Primary, new Emoji(_pager.Options.First.Name), $"{Context.Message.Id}_{_pager.Options.First}", null, !first)
-                .WithButton(null, ButtonStyle.Primary, new Emoji(_pager.Options.Back.Name), $"{Context.Message.Id}_{_pager.Options.Back}", null, !back)
-                .WithButton(null, ButtonStyle.Primary, new Emoji(_pager.Options.Next.Name), $"{Context.Message.Id}_{_pager.Options.Next}", null, !next)
-                .WithButton(null, ButtonStyle.Primary, new Emoji(_pager.Options.Last.Name), $"{Context.Message.Id}_{_pager.Options.Last}", null, !last)
-                .WithButton(null, ButtonStyle.Danger, new Emoji(_pager.Options.Stop.Name), $"{Context.Message.Id}_{_pager.Options.Stop}", null, !stop)
+                .WithButton(null, _pager.Options.First.Name, ButtonStyle.Primary, new Emoji(_pager.Options.First.Name), null, !first)
+                .WithButton(null, _pager.Options.Back.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Back.Name), null, !back)
+                .WithButton(null, _pager.Options.Next.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Next.Name), null, !next)
+                .WithButton(null, _pager.Options.Last.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Last.Name), null, !last)
+                .WithButton(null, _pager.Options.Stop.Name, ButtonStyle.Danger, new Emoji(_pager.Options.Stop.Name), null, !stop)
                 .Build();
         }
 
         private async Task<RestUserMessage> RenderAsync(SocketInteraction interaction)
         {
-            try
-            {
-                return await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent()).ConfigureAwait(false);
-            }
-            catch (Exception) // TODO: Remove this after the fix for ArgumentNullException gets implemented
-            {
-                return null;
-            }
+            return await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent()).ConfigureAwait(false);
         }
     }
 }

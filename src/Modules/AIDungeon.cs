@@ -19,7 +19,6 @@ using Fergun.APIs.GTranslate;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
-using Fergun.Interactive;
 using Fergun.Services;
 using Newtonsoft.Json;
 
@@ -152,28 +151,21 @@ namespace Fergun.Modules
             }
 
             var list = new StringBuilder($"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n");
-            var component = new ComponentBuilder();
+            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
 
             for (int i = 0; i < _modes.Count; i++)
             {
                 list.Append($"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n");
 
-                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), $"fergun_aid_{Context.Message.Id}_{i}")
+                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
                     .Build();
 
                 int row = i / 5;
 
-                if (component.ActionRows == null)
-                {
-                    component.ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponent(button) };
-                }
-                else
-                {
-                    if (component.ActionRows.Count == row)
-                        component.ActionRows.Add(new ActionRowBuilder().WithComponent(button));
-                    else
-                        component.ActionRows[row].WithComponent(button);
-                }
+                if (component.ActionRows.Count == row)
+                    component.ActionRows.Add(new ActionRowBuilder());
+
+                component.ActionRows[row].WithComponent(button);
             }
 
             var builder = new EmbedBuilder()
@@ -188,18 +180,17 @@ namespace Fergun.Modules
             var interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
                      messageComponent.User?.Id == Context.User.Id &&
-                     messageComponent.Message.Id == message.Id &&
-                     messageComponent.Data.CustomId.StartsWith($"fergun_aid_{Context.Message.Id}_"), TimeSpan.FromMinutes(1));
+                     messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
 
             if (interaction == null)
             {
-                return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("CreationCanceled")}");
+                return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
             }
 
             await interaction.AcknowledgeAsync();
 
-            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
-            if (!int.TryParse(customId[customId.Length - 1].ToString(), out int modeIndex))
+            string customId = ((SocketMessageComponent)interaction).Data.CustomId ?? "";
+            if (!int.TryParse(customId, out int modeIndex))
             {
                 modeIndex = 0;
             }
@@ -310,28 +301,21 @@ namespace Fergun.Modules
 
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
             var list = new StringBuilder();
-            var component = new ComponentBuilder();
+            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
 
             for (int i = 0; i < characters.Count; i++)
             {
 
                 list.Append($"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n");
-                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), $"fergun_aid_{Context.Message.Id}_{i}")
+                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
                     .Build();
 
                 int row = i / 5;
 
-                if (component.ActionRows == null)
-                {
-                    component.ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponent(button) };
-                }
-                else
-                {
-                    if (component.ActionRows.Count == row)
-                        component.ActionRows.Add(new ActionRowBuilder().WithComponent(button));
-                    else
-                        component.ActionRows[row].WithComponent(button);
-                }
+                if (component.ActionRows.Count == row)
+                    component.ActionRows.Add(new ActionRowBuilder());
+
+                component.ActionRows[row].WithComponent(button);
             }
 
             builder.Title = Locate("CharacterSelect");
@@ -342,17 +326,17 @@ namespace Fergun.Modules
             var interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
                      messageComponent.User?.Id == Context.User.Id &&
-                     messageComponent.Data.CustomId.StartsWith($"fergun_aid_{Context.Message.Id}_"), TimeSpan.FromMinutes(1));
+                     messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
 
             if (interaction == null)
             {
-                return new AdventureCreationData($"{Locate("SearchTimeout")} {Locate("CreationCanceled")}");
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
             }
 
             await interaction.AcknowledgeAsync();
 
-            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
-            if (!int.TryParse(customId[customId.Length - 1].ToString(), out int characterIndex))
+            string customId = ((SocketMessageComponent)interaction).Data.CustomId ?? "";
+            if (!int.TryParse(customId, out int characterIndex))
             {
                 characterIndex = 0;
             }
@@ -475,7 +459,7 @@ namespace Fergun.Modules
 
             if (userInput == null)
             {
-                return new AdventureCreationData($"{Locate("SearchTimeout")} {Locate("CreationCanceled")}");
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
             }
 
             string customText = userInput.Content;
@@ -864,7 +848,7 @@ namespace Fergun.Modules
 
             if (userInput == null)
             {
-                return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("EditCanceled")}");
+                return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("EditCanceled")}");
             }
 
             string newOutput = userInput.Content.Trim();
@@ -1068,63 +1052,69 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NotIDOwner"));
             }
 
-            bool hasReacted = false;
-            IUserMessage message = null;
-
             var builder = new EmbedBuilder()
                 .WithDescription(Locate("AdventureDeletionPrompt"))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(30), async context => await HandleReactionAsync(true))
-                .AddCallBack(new Emoji("✅"), async (context, reaction) => await HandleReactionAsync(false));
+            var component = new ComponentBuilder()
+                .WithButton(null, "foobar", ButtonStyle.Danger, new Emoji("🗑"))
+                .Build();
 
-            message = await InlineReactionReplyAsync(data);
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component);
+
+            var interaction = await NextInteractionAsync(
+                x => x is SocketMessageComponent messageComponent &&
+                     messageComponent.User?.Id == Context.User.Id &&
+                     messageComponent.Message.Id == message.Id, TimeSpan.FromSeconds(30));
+
+            if (interaction == null)
+            {
+                return FergunResult.FromError(Locate("ReplyTimeout"));
+            }
+
+            builder = new EmbedBuilder()
+                .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate("DeletingAdventure")}")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            component = new ComponentBuilder()
+                .WithButton(null, "foobar", ButtonStyle.Danger, new Emoji("🗑"), disabled: true)
+                .Build();
+
+            await interaction.RespondAsync(embed: builder.Build(), type: InteractionResponseType.UpdateMessage, component: component);
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
+            WebSocketResponse response;
+
+            try
+            {
+                response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
+            }
+            catch (IOException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (WebSocketException e)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
+                return FergunResult.FromError(e.Message);
+            }
+            catch (TimeoutException)
+            {
+                return FergunResult.FromError(Locate("ErrorInAPI"));
+            }
+
+            string error = CheckResponse(response);
+            if (error != null)
+            {
+                return FergunResult.FromError(error);
+            }
+
+            FergunClient.Database.DeleteDocument(Constants.AidAdventuresCollection, adventure);
+
+            await message.ModifyOrResendAsync(embed: builder.WithDescription(Locate("AdventureDeleted")).Build(), cache: _messageCache);
 
             return FergunResult.FromSuccess();
-
-            async Task HandleReactionAsync(bool timeout)
-            {
-                if (hasReacted) return;
-                hasReacted = true;
-                if (timeout)
-                {
-                    await message.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
-                    return;
-                }
-                string result;
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Delete: Deleting adventure (Id: {adventure.Id},  publicId: {adventure.PublicId})"));
-                try
-                {
-                    var response = await _api.SendWebSocketRequestAsync(new WebSocketRequest(adventure.PublicId, RequestType.DeleteAdventure));
-
-                    string error = CheckResponse(response);
-                    if (error != null)
-                    {
-                        result = error;
-                    }
-                    else
-                    {
-                        FergunClient.Database.DeleteDocument(Constants.AidAdventuresCollection, adventure);
-                        result = Locate("AdventureDeleted");
-                    }
-                }
-                catch (IOException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
-                    result = e.Message;
-                }
-                catch (WebSocketException e)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
-                    result = e.Message;
-                }
-                catch (TimeoutException)
-                {
-                    result = Locate("ErrorInAPI");
-                }
-
-                await message.ModifyOrResendAsync(embed: builder.WithDescription(result).Build(), cache: _messageCache);
-            }
         }
 
         [Command("dump", RunMode = RunMode.Async), Ratelimit(1, 20, Measure.Minutes)]
