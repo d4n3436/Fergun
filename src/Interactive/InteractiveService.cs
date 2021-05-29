@@ -125,6 +125,45 @@ namespace Fergun.Interactive
             return null;
         }
 
+        public async Task<SocketInteraction> NextInteractionAsync(Func<SocketInteraction, bool> filter = null, TimeSpan? timeout = null)
+        {
+            filter ??= _ => true;
+            timeout ??= _defaultTimeout;
+
+            var interactionSource = new TaskCompletionSource<SocketInteraction>();
+            var interactionTask = interactionSource.Task;
+            var timeoutTask = Task.Delay(timeout!.Value);
+
+            Task HandleInteractionInternalAsync(SocketInteraction interaction)
+            {
+                _ = Task.Run(() =>
+                {
+                    if (interaction.User?.Id == _client.CurrentUser.Id) return;
+
+                    if (filter(interaction))
+                    {
+                        interactionSource.SetResult(interaction);
+                    }
+                });
+
+                return Task.CompletedTask;
+            }
+
+            try
+            {
+                ((BaseSocketClient)_client).InteractionCreated += HandleInteractionInternalAsync;
+
+                var result = await Task.WhenAny(interactionTask, timeoutTask).ConfigureAwait(false);
+
+                return result == interactionTask ? await interactionTask.ConfigureAwait(false) : null;
+            }
+            finally
+            {
+                ((BaseSocketClient)_client).InteractionCreated -= HandleInteractionInternalAsync;
+            }
+
+        }
+
         /// <summary>
         /// Sends a message with reaction callbacks.
         /// </summary>

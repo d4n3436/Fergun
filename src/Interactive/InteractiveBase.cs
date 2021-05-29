@@ -45,6 +45,9 @@ namespace Fergun.Interactive
         public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ICriterion<SocketInteraction> criterion, ReactionList reactions)
             => Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion);
 
+        public Task<SocketInteraction> NextInteractionAsync(Func<SocketInteraction, bool> filter = null, TimeSpan? timeout = null)
+            => Interactive.NextInteractionAsync(filter, timeout);
+
         public RuntimeResult Ok(string reason = null) => new OkResult(reason);
     }
 }

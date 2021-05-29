@@ -359,10 +359,11 @@ namespace Fergun.Services
 
         private async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, string text = null)
         {
+            var component = new ComponentBuilder().Build(); // remove message components
             var cache = _services.GetService<CommandCacheService>();
             if (cache == null || cache.IsDisabled)
             {
-                return await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                return await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
             }
 
             IUserMessage response;
@@ -375,12 +376,13 @@ namespace Fergun.Services
                 {
                     x.Content = text;
                     x.Embed = embed;
+                    x.Components = component;
                 });
                 response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId);
             }
             else
             {
-                response = await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+                response = await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
                 cache.Add(userMessage, response);
             }
 

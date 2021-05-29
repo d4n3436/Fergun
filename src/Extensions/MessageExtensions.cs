@@ -73,18 +73,21 @@ namespace Fergun.Extensions
         /// </summary>
         /// <returns>A new message or a modified one.</returns>
         public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null,
-            AllowedMentions allowedMentions = null, MessageCacheService cache = null)
+            AllowedMentions allowedMentions = null, MessageComponent component = null, MessageCacheService cache = null)
         {
+            component ??= new ComponentBuilder().Build(); // remove message components if null
+
             bool isValid = await message.Channel.GetMessageAsync(cache, message.Id) != null;
             if (!isValid)
             {
-                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions);
+                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions, component: component);
             }
 
             await message.ModifyAsync(x =>
             {
                 x.Content = content;
                 x.Embed = embed;
+                x.Components = component;
                 //x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
             });
 

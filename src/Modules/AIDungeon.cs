@@ -151,46 +151,59 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "New: Using cached mode list..."));
             }
 
-            int modeIndex = -1;
-            var stopEvent = new AutoResetEvent(false);
-            bool hasReacted = false;
-            var builder = new EmbedBuilder();
-
-            async Task HandleAidReactionAsync(int index)
-            {
-                if (hasReacted) return;
-                hasReacted = true;
-                modeIndex = index;
-                stopEvent.Set();
-                await Task.CompletedTask;
-            }
-
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
             var list = new StringBuilder($"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n");
+            var component = new ComponentBuilder();
+
             for (int i = 0; i < _modes.Count; i++)
             {
-                int index = i;
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReactionAsync(index)));
                 list.Append($"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n");
+
+                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), $"fergun_aid_{Context.Message.Id}_{i}")
+                    .Build();
+
+                int row = i / 5;
+
+                if (component.ActionRows == null)
+                {
+                    component.ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponent(button) };
+                }
+                else
+                {
+                    if (component.ActionRows.Count == row)
+                        component.ActionRows.Add(new ActionRowBuilder().WithComponent(button));
+                    else
+                        component.ActionRows[row].WithComponent(button);
+                }
             }
 
-            builder.WithAuthor(Context.User)
+            var builder = new EmbedBuilder()
+                .WithAuthor(Context.User)
                 .WithTitle(Locate("AIDungeonWelcome"))
                 .WithDescription(list.ToString())
                 .WithThumbnailUrl(Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReactionAsync(-1));
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
 
-            data.AddCallbacks(callbacks);
-            var message = await InlineReactionReplyAsync(data);
-            stopEvent.WaitOne();
-            stopEvent.Dispose();
+            var interaction = await NextInteractionAsync(
+                x => x is SocketMessageComponent messageComponent &&
+                     messageComponent.User?.Id == Context.User.Id &&
+                     messageComponent.Message.Id == message.Id &&
+                     messageComponent.Data.CustomId.StartsWith($"fergun_aid_{Context.Message.Id}_"), TimeSpan.FromMinutes(1));
 
-            if (modeIndex == -1)
+            if (interaction == null)
             {
                 return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("CreationCanceled")}");
             }
+
+            await interaction.AcknowledgeAsync();
+
+            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
+            if (!int.TryParse(customId[customId.Length - 1].ToString(), out int modeIndex))
+            {
+                modeIndex = 0;
+            }
+
             builder.ThumbnailUrl = null;
 
             AdventureCreationData creationResponse;
@@ -256,7 +269,13 @@ namespace Fergun.Modules
 
         private async Task<AdventureCreationData> CreateAdventureAsync(int modeIndex, EmbedBuilder builder, IUserMessage message)
         {
-            await message.TryDeleteAsync();
+            var loadingEmbed = new EmbedBuilder()
+                .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate("Loading")}")
+                .WithColor(FergunClient.Config.EmbedColor)
+                .Build();
+
+            await message.ModifyOrResendAsync(embed: loadingEmbed);
+
             WebSocketResponse response;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Downloading the character list for mode: {_modes.Keys.ElementAt(modeIndex)} ({_modes.Values.ElementAt(modeIndex)})"));
             try
@@ -289,63 +308,57 @@ namespace Fergun.Modules
                 return new AdventureCreationData(Locate("ErrorInAPI"));
             }
 
-            int characterIndex = -1;
-            bool hasReacted = false;
-            var stopEvent = new AutoResetEvent(false);
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
-
-            async Task HandleAidReaction2Async(int index)
-            {
-                if (hasReacted) return;
-                hasReacted = true;
-                characterIndex = index;
-                stopEvent.Set();
-                await Task.CompletedTask;
-            }
-
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
             var list = new StringBuilder();
+            var component = new ComponentBuilder();
+
             for (int i = 0; i < characters.Count; i++)
             {
-                int index = i;
+
                 list.Append($"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n");
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleAidReaction2Async(index)));
+                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), $"fergun_aid_{Context.Message.Id}_{i}")
+                    .Build();
+
+                int row = i / 5;
+
+                if (component.ActionRows == null)
+                {
+                    component.ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponent(button) };
+                }
+                else
+                {
+                    if (component.ActionRows.Count == row)
+                        component.ActionRows.Add(new ActionRowBuilder().WithComponent(button));
+                    else
+                        component.ActionRows[row].WithComponent(button);
+                }
             }
 
             builder.Title = Locate("CharacterSelect");
             builder.Description = list.ToString();
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1), async context => await HandleAidReaction2Async(-1));
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), component: component.Build(), cache: _messageCache);
 
-            data.AddCallbacks(callbacks);
+            var interaction = await NextInteractionAsync(
+                x => x is SocketMessageComponent messageComponent &&
+                     messageComponent.User?.Id == Context.User.Id &&
+                     messageComponent.Data.CustomId.StartsWith($"fergun_aid_{Context.Message.Id}_"), TimeSpan.FromMinutes(1));
 
-            message = await InlineReactionReplyAsync(data);
-            stopEvent.WaitOne();
-            stopEvent.Dispose();
-
-            if (characterIndex == -1)
+            if (interaction == null)
             {
                 return new AdventureCreationData($"{Locate("SearchTimeout")} {Locate("CreationCanceled")}");
             }
-            //await message.DeleteAsync();
+
+            await interaction.AcknowledgeAsync();
+
+            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
+            if (!int.TryParse(customId[customId.Length - 1].ToString(), out int characterIndex))
+            {
+                characterIndex = 0;
+            }
 
             builder.Title = "AI Dungeon";
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
-
-            bool manageMessages = message.Channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages;
-
-            if (manageMessages)
-            {
-                await message.TryRemoveAllReactionsAsync(_messageCache);
-            }
-            else
-            {
-                await message.TryDeleteAsync(_messageCache);
-
-                // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
-                // For some reason the message cache doesn't remove the cached message instantly
-                await Task.Delay(1000);
-            }
 
             message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
@@ -456,21 +469,6 @@ namespace Fergun.Modules
             builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
-            bool manageMessages = message.Channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GetPermissions(guildChannel).ManageMessages;
-
-            if (manageMessages)
-            {
-                await message.TryRemoveAllReactionsAsync(_messageCache);
-            }
-            else
-            {
-                await message.TryDeleteAsync(_messageCache);
-
-                // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
-                // For some reason the message cache doesn't remove the cached message instantly
-                await Task.Delay(1000);
-            }
-
             message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
@@ -483,10 +481,6 @@ namespace Fergun.Modules
             string customText = userInput.Content;
 
             await userInput.TryDeleteAsync();
-
-            // Wait 1 second before ModifyOrResendAsync() to avoid race conditions
-            // For some reason the message cache doesn't remove the cached message instantly
-            await Task.Delay(1000);
 
             builder.Title = "AI Dungeon";
             builder.Description = $"{FergunClient.Config.LoadingEmote} {Locate("GeneratingNewCustomAdventure")}";

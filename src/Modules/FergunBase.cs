@@ -171,6 +171,9 @@ namespace Fergun.Modules
             return response;
         }
 
+        public Task<SocketInteraction> NextInteractionAsync(Func<SocketInteraction, bool> filter = null, TimeSpan? timeout = null)
+            => Interactive.NextInteractionAsync(filter, timeout);
+
         /// <inheritdoc/>
         protected new async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
             MessageReference messageReference = null, MessageComponent component = null)
