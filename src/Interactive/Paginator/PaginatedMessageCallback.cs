@@ -102,7 +102,7 @@ namespace Fergun.Interactive
             var embed = BuildEmbed();
             Buttons = reactionList;
 
-            var component = _pages <= 1 ? null : BuildComponent(Buttons.First, Buttons.Backward, Buttons.Forward, Buttons.Last, Buttons.Stop);
+            var component = _pages <= 1 ? null : BuildComponent();
 
             if (oldMessage == null)
             {
