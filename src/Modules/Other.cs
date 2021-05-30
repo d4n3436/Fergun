@@ -286,7 +286,7 @@ namespace Fergun.Modules
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
-        [Command("language")]
+        [Command("language", RunMode = RunMode.Async)]
         [Summary("languageSummary")]
         [Alias("lang")]
         public async Task<RuntimeResult> Language()
@@ -298,46 +298,60 @@ namespace Fergun.Modules
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
-            bool hasReacted = false;
-            IUserMessage message = null;
             string languages = "";
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
-            EmbedBuilder builder = null;
+            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
             int i = 0;
+
             foreach (var language in FergunClient.Languages)
             {
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleLanguageUpdateAsync(language.Key)));
+                if (guild.Language == language.Key)
+                    continue;
+
                 languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
+
+                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), language.Key)
+                    .Build();
+
+                int row = i / 5;
+
+                if (component.ActionRows.Count == row)
+                    component.ActionRows.Add(new ActionRowBuilder());
+
+                component.ActionRows[row].WithComponent(button);
+
                 i++;
             }
 
-            builder = new EmbedBuilder()
+            var builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
                 .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
-                async context => await HandleLanguageUpdateAsync(null)).AddCallbacks(callbacks);
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
 
-            message = await InlineReactionReplyAsync(data);
+            var interaction = await NextInteractionAsync(
+                x => x is SocketMessageComponent messageComponent &&
+                     messageComponent.User?.Id == Context.User.Id &&
+                     messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
+
+            if (interaction == null)
+            {
+                return FergunResult.FromError(Locate("ReplyTimeout"));
+            }
+
+            string newLanguage = ((SocketMessageComponent)interaction).Data.CustomId;
+
+            guild.Language = newLanguage;
+            FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
+
+            builder.WithTitle(Locate("LanguageSelection"))
+                .WithDescription($"✅ {Locate("NewLanguage")}");
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
+
+            await interaction.RespondAsync(embed: builder.Build(), type: InteractionResponseType.UpdateMessage, component: new ComponentBuilder().Build());
 
             return FergunResult.FromSuccess();
-
-            async Task HandleLanguageUpdateAsync(string newLanguage)
-            {
-                if (hasReacted || guild.Language == newLanguage) return;
-                hasReacted = true;
-                if (newLanguage == null)
-                {
-                    await message!.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
-                    return;
-                }
-                guild.Language = newLanguage;
-                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
-                await message!.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
-            }
         }
 
         [AlwaysEnabled]

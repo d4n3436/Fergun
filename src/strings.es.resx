@@ -1658,7 +1658,7 @@ Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</
     <value>Selección de idioma</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>Reacciona al idioma que quieres establecer.</value>
+    <value>Selecciona el idioma que quieres establecer.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Usa `-headers` al final del comando para mantener los tags (`[info]`).</value>

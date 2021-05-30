@@ -1625,7 +1625,7 @@ Döngüyü devre dışı bırakmak için bu komutu parametre kullanmadan kullan�
     <value>Geçerli parçayı birkaç kez tekrarlar.</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>Ayarlamak istediğiniz dile tepki verin.</value>
+    <value>Ayarlamak istediğiniz dili seçin.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Etiketleri korumak için komutun sonunda `-headers` kullanın (` [info] `).</value>

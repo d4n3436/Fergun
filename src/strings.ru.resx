@@ -1658,7 +1658,7 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Выбор языка</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>Реагируйте на язык, который вы хотите установить.</value>
+    <value>Выберите язык, который хотите установить.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Используйте `-headers` в конце команды, чтобы сохранить теги (` [info] `).</value>

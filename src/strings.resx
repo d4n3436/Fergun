@@ -1691,7 +1691,7 @@ To disable the loop, use this command without parameters.</value>
     <value>Language Selection</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>React to the language you want to set.</value>
+    <value>Select the language you want to set.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Use `-headers` at the end of the command to keep the tags (`[info]`).</value>

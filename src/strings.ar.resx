@@ -1667,7 +1667,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>اختيار اللغة</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>الرد على اللغة التي تريد تعيين.</value>
+    <value>حدد اللغة التي تريد تعيينها.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>استخدام -headers في نهاية الأمر للحفاظ على العلامات ( [المعلومات] ).</value>
