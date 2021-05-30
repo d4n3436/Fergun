@@ -172,28 +172,28 @@ namespace Fergun.Interactive
                 return false;
             }
 
-            if (button == _pager.Options.First.Name)
+            if (button == _pager.Options.First.ToString())
             {
                 _page = 1;
             }
-            else if (button == _pager.Options.Back.Name)
+            else if (button == _pager.Options.Back.ToString())
             {
                 _page--;
             }
-            else if (button == _pager.Options.Next.Name)
+            else if (button == _pager.Options.Next.ToString())
             {
                 _page++;
             }
-            else if (button == _pager.Options.Last.Name)
+            else if (button == _pager.Options.Last.ToString())
             {
                 _page = _pages;
             }
-            else if (button == _pager.Options.Stop.Name)
+            else if (button == _pager.Options.Stop.ToString())
             {
                 await OnStopAsync(Message, interaction).ConfigureAwait(false);
                 return true;
             }
-            else if (button == _pager.Options.Jump.Name)
+            else if (button == _pager.Options.Jump.ToString())
             {
                 _ = Task.Run(async () =>
                 {
@@ -278,11 +278,11 @@ namespace Fergun.Interactive
         private MessageComponent BuildComponent(bool first, bool back, bool next, bool last, bool stop)
         {
             return new ComponentBuilder()
-                .WithButton(null, _pager.Options.First.Name, ButtonStyle.Primary, new Emoji(_pager.Options.First.Name), null, !first)
-                .WithButton(null, _pager.Options.Back.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Back.Name), null, !back)
-                .WithButton(null, _pager.Options.Next.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Next.Name), null, !next)
-                .WithButton(null, _pager.Options.Last.Name, ButtonStyle.Primary, new Emoji(_pager.Options.Last.Name), null, !last)
-                .WithButton(null, _pager.Options.Stop.Name, ButtonStyle.Danger, new Emoji(_pager.Options.Stop.Name), null, !stop)
+                .WithButton(null, _pager.Options.First.ToString(), ButtonStyle.Primary, _pager.Options.First, null, !first)
+                .WithButton(null, _pager.Options.Back.ToString(), ButtonStyle.Primary, _pager.Options.Back, null, !back)
+                .WithButton(null, _pager.Options.Next.ToString(), ButtonStyle.Primary, _pager.Options.Next, null, !next)
+                .WithButton(null, _pager.Options.Last.ToString(), ButtonStyle.Primary, _pager.Options.Last, null, !last)
+                .WithButton(null, _pager.Options.Stop.ToString(), ButtonStyle.Danger, _pager.Options.Stop, null, !stop)
                 .Build();
         }
 
