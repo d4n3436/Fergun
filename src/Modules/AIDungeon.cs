@@ -151,21 +151,12 @@ namespace Fergun.Modules
             }
 
             var list = new StringBuilder($"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n");
-            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
+            var component = new ComponentBuilder();
 
             for (int i = 0; i < _modes.Count; i++)
             {
                 list.Append($"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n");
-
-                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
-                    .Build();
-
-                int row = i / 5;
-
-                if (component.ActionRows.Count == row)
-                    component.ActionRows.Add(new ActionRowBuilder());
-
-                component.ActionRows[row].WithComponent(button);
+                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
             }
 
             var builder = new EmbedBuilder()
@@ -301,21 +292,13 @@ namespace Fergun.Modules
 
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
             var list = new StringBuilder();
-            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
+            var component = new ComponentBuilder();
 
             for (int i = 0; i < characters.Count; i++)
             {
 
                 list.Append($"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n");
-                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
-                    .Build();
-
-                int row = i / 5;
-
-                if (component.ActionRows.Count == row)
-                    component.ActionRows.Add(new ActionRowBuilder());
-
-                component.ActionRows[row].WithComponent(button);
+                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
             }
 
             builder.Title = Locate("CharacterSelect");

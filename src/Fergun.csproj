@@ -12,10 +12,10 @@
 
   <ItemGroup>
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
-    <PackageReference Include="Discord.Net.Labs.Commands" Version="2.3.2" />
-    <PackageReference Include="Discord.Net.Labs.Core" Version="2.3.5" />
-    <PackageReference Include="Discord.Net.Labs.Rest" Version="2.3.6" />
-    <PackageReference Include="Discord.Net.Labs.WebSocket" Version="2.3.5" />
+    <PackageReference Include="Discord.Net.Labs.Commands" Version="2.3.4" />
+    <PackageReference Include="Discord.Net.Labs.Core" Version="2.3.8" />
+    <PackageReference Include="Discord.Net.Labs.Rest" Version="2.3.8" />
+    <PackageReference Include="Discord.Net.Labs.WebSocket" Version="2.3.8" />
     <PackageReference Include="DiscordBotsList.Api" Version="1.4.0" />
     <PackageReference Include="GScraper" Version="0.5.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.9.0" />

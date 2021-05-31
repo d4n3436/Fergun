@@ -326,6 +326,7 @@ namespace Fergun.Services
         /// Specifies if notifications are sent for mentioned users and roles in the message <paramref name="message"/>. If <c>null</c>, all mentioned roles and users will be notified.
         /// </param>
         /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
+        /// <param name="component">The message components to be included with this message. Used for interactions</param>
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
             RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null)

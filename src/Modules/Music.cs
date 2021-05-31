@@ -207,21 +207,12 @@ namespace Fergun.Modules
                 {
                     string list = "";
                     int count = Math.Min(Constants.MaxTracksToDisplay, tracks.Count);
-                    var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
+                    var component = new ComponentBuilder();
 
                     for (int i = 0; i < count; i++)
                     {
                         list += $"{i + 1}. {tracks[i].ToTrackLink()}\n";
-
-                        var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), i.ToString())
-                            .Build();
-
-                        int row = i / 5;
-
-                        if (component.ActionRows.Count == row)
-                            component.ActionRows.Add(new ActionRowBuilder());
-
-                        component.ActionRows[row].WithComponent(button);
+                        component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
                     }
 
                     var builder = new EmbedBuilder()

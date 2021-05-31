@@ -299,7 +299,7 @@ namespace Fergun.Modules
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
             string languages = "";
-            var component = new ComponentBuilder { ActionRows = new List<ActionRowBuilder>() };
+            var component = new ComponentBuilder();
             int i = 0;
 
             foreach (var language in FergunClient.Languages)
@@ -308,16 +308,7 @@ namespace Fergun.Modules
                     continue;
 
                 languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
-
-                var button = ButtonBuilder.CreatePrimaryButton($"{i + 1}".ToString(), language.Key)
-                    .Build();
-
-                int row = i / 5;
-
-                if (component.ActionRows.Count == row)
-                    component.ActionRows.Add(new ActionRowBuilder());
-
-                component.ActionRows[row].WithComponent(button);
+                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
 
                 i++;
             }
