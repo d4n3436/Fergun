@@ -308,7 +308,7 @@ namespace Fergun.Modules
                     continue;
 
                 languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
-                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
+                component.WithButton($"{i + 1}".ToString(), language.Key, row: i / 5);
 
                 i++;
             }
