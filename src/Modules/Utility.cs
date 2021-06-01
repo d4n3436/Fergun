@@ -1805,7 +1805,6 @@ namespace Fergun.Modules
             if (string.IsNullOrWhiteSpace(clients))
                 clients = "?";
 
-            /*
             var flags = user.PublicFlags ?? UserProperties.None;
 
             string badges = flags == UserProperties.None ? null
@@ -1815,9 +1814,6 @@ namespace Fergun.Modules
                     .Where(flags.HasFlag)
                     .Select(x => FergunClient.Config.UserFlagsEmotes.TryGetValue(x.ToString(), out string emote) ? emote : null)
                     .Distinct());
-            */
-
-            string badges = null;
 
             var guildUser = user as IGuildUser;
 

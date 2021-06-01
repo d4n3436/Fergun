@@ -32,7 +32,6 @@ namespace Fergun
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
             LogLevel = LogSeverity.Verbose,
-            ExclusiveBulkDelete = true,
             UseSystemClock = false,
             AlwaysAcknowledgeInteractions = false,
             GatewayIntents =

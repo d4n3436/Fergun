@@ -378,7 +378,7 @@ namespace Fergun.Interactive
         /// <param name="cacheable">
         /// The cached message.
         /// </param>
-        /// <param name="channel">
+        /// <param name="cachedChannel">
         /// The channel.
         /// </param>
         /// <param name="reaction">
@@ -387,7 +387,7 @@ namespace Fergun.Interactive
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        private Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, ISocketMessageChannel channel, SocketReaction reaction)
+        private Task HandleReactionAsync(Cacheable<IUserMessage, ulong> cacheable, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
             _ = Task.Run(async () =>
             {

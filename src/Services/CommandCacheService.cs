@@ -230,12 +230,13 @@ namespace Fergun.Services
             _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Cleaned {removed} item(s) from the cache."));
         }
 
-        private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)
+        private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
             _ = Task.Run(async () =>
             {
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
+                    var channel = await cachedChannel.GetOrDownloadAsync();
                     var message = await channel.GetMessageAsync(_messageCache, responseId);
                     if (message != null)
                     {
@@ -344,6 +345,7 @@ namespace Fergun.Services
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
                     x.Components = component;
                 }).ConfigureAwait(false);
 
