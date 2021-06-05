@@ -265,6 +265,12 @@
     <value>
 ...because you only gave me one choice</value>
   </data>
+	<data name="colorSummary" xml:space="preserve">
+    <value>Shows a random or specific color.</value>
+  </data>
+	<data name="colorParam1" xml:space="preserve">
+    <value>The specific color to use. Must be a hex value, raw value or a known color name.</value>
+  </data>
 	<data name="helpSummary" xml:space="preserve">
     <value>Shows the help menu or the info of a command, if passed.</value>
   </data>

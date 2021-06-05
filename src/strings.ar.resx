@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -264,7 +264,13 @@
 	<data name="OneChoice" xml:space="preserve">
     <value>... لأنك منحتني خيارًا واحدًا فقط</value>
   </data>
-	<data name="helpSummary" xml:space="preserve">
+	<data name="colorSummary" xml:space="preserve">
+	<value>يظهر لونًا عشوائيًا أو محددًا.</value>
+  </data>
+	<data name="colorParam1" xml:space="preserve">
+	<value>اللون المحدد للاستخدام. يجب أن تكون قيمة سداسية عشرية أو قيمة خام أو اسم لون معروف.</value>
+  </data>
+    <data name="helpSummary" xml:space="preserve">
     <value>إظهار قائمة التعليمات أو معلومات الأمر ، إذا تم تمريرها.</value>
   </data>
 	<data name="helpParam1" xml:space="preserve">

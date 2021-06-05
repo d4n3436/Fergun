@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -264,6 +264,12 @@
 	<data name="OneChoice" xml:space="preserve">
     <value>
 ...porque solo me distes una opción</value>
+  </data>
+    <data name="colorSummary" xml:space="preserve">
+	<value>Muestra un color aleatorio o uno específico.</value>
+  </data>
+    <data name="colorParam1" xml:space="preserve">
+	<value>El color específico a usar. Debe ser un valor en hex, un valor en bruto o el nombre de un color conocido.</value>
   </data>
 	<data name="helpSummary" xml:space="preserve">
     <value>Muestra el menú de ayuda o la información de un comando, si se pasa alguno.</value>

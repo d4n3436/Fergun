@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -263,6 +263,12 @@
   </data>
 	<data name="OneChoice" xml:space="preserve">
     <value>... потому что ты дал мне только один выбор</value>
+  </data>
+    <data name="colorSummary" xml:space="preserve">
+    <value>Показывает случайный или определенный цвет.</value>
+  </data>
+    <data name="colorParam1" xml:space="preserve">
+    <value>Определенный цвет для использования. Должно быть шестнадцатеричное значение, исходное значение или известное название цвета.</value>
   </data>
 	<data name="helpSummary" xml:space="preserve">
     <value>Показывает меню справки или информацию о команде, если она прошла.</value>
