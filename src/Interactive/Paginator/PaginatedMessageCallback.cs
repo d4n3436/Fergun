@@ -60,7 +60,7 @@ namespace Fergun.Interactive
             Context = context;
             Criterion = criterion ?? new EmptyCriterion<SocketInteraction>();
             _pager = pager;
-            _pages = _pager.Pages?.Count() ?? default;
+            _pages = _pager.Pages?.Count() ?? _pager.Texts?.Count() ?? default;
             _notCommandUserText = notCommandUserText;
         }
 
@@ -107,7 +107,7 @@ namespace Fergun.Interactive
 
             if (oldMessage == null)
             {
-                Message = await Context.Channel.SendMessageAsync(_pager.Text, embed: embed, component: component).ConfigureAwait(false);
+                Message = await Context.Channel.SendMessageAsync(_pager.Texts.FirstOrDefault(), embed: embed, component: component).ConfigureAwait(false);
             }
             else
             {
@@ -116,7 +116,7 @@ namespace Fergun.Interactive
 
                 await oldMessage.ModifyAsync(x =>
                 {
-                    x.Content = _pager.Text;
+                    x.Content = _pager.Texts.FirstOrDefault();
                     x.Embed = embed;
                     x.Components = component;
                 }).ConfigureAwait(false);
@@ -239,9 +239,10 @@ namespace Fergun.Interactive
         /// </returns>
         private Embed BuildEmbed()
         {
-            if (_pages == 0) return _pager.Build();
+            var current = _pager.Pages?.ElementAtOrDefault(_page - 1);
+            if (current == null)
+                return null;
 
-            var current = _pager.Pages.ElementAt(_page - 1);
             current.Title ??= _pager.Title;
             current.Description ??= _pager.Description;
             current.Url ??= _pager.Url;
@@ -288,7 +289,7 @@ namespace Fergun.Interactive
 
         private async Task<RestUserMessage> RenderAsync(SocketInteraction interaction)
         {
-            return await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent()).ConfigureAwait(false);
+            return await interaction.RespondAsync(_pager.Texts.ElementAtOrDefault(_page - 1), embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent()).ConfigureAwait(false);
         }
     }
 }

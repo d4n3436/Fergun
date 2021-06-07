@@ -2046,10 +2046,10 @@ namespace Fergun.Modules
         [Example("discord")]
         public async Task<RuntimeResult> YouTube([Remainder, Summary("youtubeParam1")] string query)
         {
-            VideoSearchResult video;
+            string[] urls;
             try
             {
-                video = await _ytClient.Search.GetVideosAsync(query).FirstOrDefaultAsync();
+                urls = await _ytClient.Search.GetVideosAsync(query).Take(10).Select(x => x.Url).ToArrayAsync();
             }
             catch (HttpRequestException e)
             {
@@ -2061,12 +2061,50 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
                 return FergunResult.FromError(Locate("ErrorInAPI"));
             }
-            if (video == null)
-            {
-                return FergunResult.FromError(Locate("NoResultsFound"));
-            }
 
-            await ReplyAsync(video.Url);
+            switch (urls.Length)
+            {
+                case 0:
+                    return FergunResult.FromError(Locate("NoResultsFound"));
+
+                case 1:
+                    await ReplyAsync(urls[0]);
+                    break;
+
+                default:
+                {
+                    var pager = new PaginatedMessage
+                    {
+                        Pages = null,
+                        Texts = urls.Select((x, i) => $"{x}\n{string.Format(Locate("PaginatorFooter"), $"{i + 1}", urls.Length)}").ToArray(),
+                        Color = new Discord.Color(FergunClient.Config.EmbedColor),
+                        Options = new PaginatorAppearanceOptions
+                        {
+                            Timeout = TimeSpan.FromMinutes(10),
+                            ActionOnTimeout = ActionOnTimeout.DeleteReactions,
+                            First = Emote.Parse("<:first:848439761814159381>"),
+                            Back = Emote.Parse("<:previous:848439776578502676>"),
+                            Next = Emote.Parse("<:next:848439790558248980>"),
+                            Last = Emote.Parse("<:last:848439802718322698>"),
+                            Stop = Emote.Parse("<:trash:848439812082892820>")
+                        }
+                    };
+
+                    var reactions = new ReactionList
+                    {
+                        First = urls.Length >= 3,
+                        Backward = true,
+                        Forward = true,
+                        Last = urls.Length >= 3,
+                        Stop = true,
+                        Jump = urls.Length >= 4,
+                        Info = false
+                    };
+
+                    await PagedReplyAsync(pager, reactions, notCommandUserText: Locate("CannotUseThisInteraction"));
+                    break;
+                }
+            }
 
             return FergunResult.FromSuccess();
         }

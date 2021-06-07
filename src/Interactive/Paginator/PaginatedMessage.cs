@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Linq;
 using Discord;
 
 namespace Fergun.Interactive
@@ -14,9 +15,9 @@ namespace Fergun.Interactive
         public IEnumerable<EmbedBuilder> Pages { get; set; } = new List<EmbedBuilder>();
 
         /// <summary>
-        /// Gets or sets the paginator message.
+        /// Gets or sets the paginator messages.
         /// </summary>
-        public string Text { get; set; }
+        public IEnumerable<string> Texts { get; set; } = Enumerable.Empty<string>();
 
         /// <summary>
         /// Gets or sets the paginator options.
