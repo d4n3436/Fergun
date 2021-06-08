@@ -2167,7 +2167,8 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var result = await BingTranslatorApi.TranslateAsync(text, target);
+                    using var translator = new BingTranslator();
+                    var result = await translator.TranslateAsync(text, target);
 
                     translation = result[0].Translations[0].Text;
                     source = result[0].DetectedLanguage.Language;
@@ -2184,7 +2185,9 @@ namespace Fergun.Modules
 
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Translator", $"Detected language: {source}"));
                 }
-                catch (Exception e) when (e is JsonSerializationException || e is HttpRequestException || e is TaskCanceledException || e is ArgumentException)
+                catch (Exception e) when (e is BingTokenNotFoundException || e is JsonSerializationException ||
+                                          e is HttpRequestException || e is TaskCanceledException ||
+                                          e is ArgumentException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Translator", "Error while translating", e));
                     error = "ErrorInTranslation";

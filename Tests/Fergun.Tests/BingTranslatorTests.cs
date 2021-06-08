@@ -11,12 +11,15 @@ namespace Fergun.Tests
         [InlineData("Hello World", "es")]
         [InlineData("Hola Mundo", "en")]
         [InlineData("The quick brown fox jumps over the lazy dog.", "it")]
-        [InlineData("El zorro marrÛn r·pido salta sobre el perro perezoso.", "pt")]
+        [InlineData("El zorro marr√≥n r√°pido salta sobre el perro perezoso.", "pt")]
         [InlineData("Discord is an American VoIP, instant messaging and digital distribution platform designed for creating communities.", "de", "en")]
         public async Task TranslationNotEmptyTest(string text, string toLanguage, string fromLanguage = "auto-detect")
         {
+            // Arrange
+            using var translator = new BingTranslator();
+
             // Act
-            var results = await BingTranslatorApi.TranslateAsync(text, toLanguage, fromLanguage);
+            var results = await translator.TranslateAsync(text, toLanguage, fromLanguage);
 
             // Assert
             Assert.NotEmpty(results);
@@ -29,8 +32,11 @@ namespace Fergun.Tests
         [InlineData("object", "it", "po")]
         public async Task TranslationInvalidParamsTest(string text, string toLanguage, string fromLanguage = "auto-detect")
         {
+            // Arrange
+            using var translator = new BingTranslator();
+
             // Act and Assert
-            await Assert.ThrowsAnyAsync<ArgumentException>(async () => await BingTranslatorApi.TranslateAsync(text, toLanguage, fromLanguage));
+            await Assert.ThrowsAnyAsync<ArgumentException>(async () => await translator.TranslateAsync(text, toLanguage, fromLanguage));
         }
     }
 }

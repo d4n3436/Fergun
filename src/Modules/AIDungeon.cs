@@ -1330,10 +1330,11 @@ namespace Fergun.Modules
             {
                 try
                 {
-                    var result = await BingTranslatorApi.TranslateAsync(text, to, from);
+                    using var translator = new BingTranslator();
+                    var result = await translator.TranslateAsync(text, to, from);
                     return result[0].Translations[0].Text;
                 }
-                catch (Exception e2) when (e2 is JsonSerializationException || e2 is HttpRequestException || e2 is TaskCanceledException)
+                catch (Exception e2) when (e2 is BingTokenNotFoundException || e2 is JsonSerializationException || e2 is HttpRequestException || e2 is TaskCanceledException)
                 {
                     return text;
                 }
