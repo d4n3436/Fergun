@@ -766,19 +766,16 @@ namespace Fergun.Modules
 
             options.Shuffle();
 
-            IUserMessage message = null;
-            bool hasReacted = false;
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
             string optionsText = "";
-            int i = 0;
-            foreach (string option in options)
+            var component = new ComponentBuilder();
+
+            for (int i = 0; i < options.Count; i++)
             {
                 optionsText += $"{i + 1}. {Uri.UnescapeDataString(options[i])}\n";
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleTriviaReactionAsync(option)));
-                i++;
+                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
             }
 
-            int time = (Array.IndexOf(_triviaDifficulties, question.Difficulty) * 5) + (question.Type == "multiple" ? 10 : 5);
+            int time = Array.IndexOf(_triviaDifficulties, question.Difficulty) * 5 + (question.Type == "multiple" ? 10 : 5);
 
             builder.WithAuthor(Context.User)
                 .WithTitle("Trivia")
@@ -790,45 +787,46 @@ namespace Fergun.Modules
                 .WithFooter(string.Format(Locate("TimeLeft"), time))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
-                async context => await HandleTriviaReactionAsync(null)).AddCallbacks(callbacks);
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
 
-            message = await InlineReactionReplyAsync(data);
+            var interaction = await NextInteractionAsync(
+                x => x is SocketMessageComponent messageComponent &&
+                     messageComponent.User?.Id == Context.User.Id &&
+                     messageComponent.Message.Id == message.Id, TimeSpan.FromSeconds(time));
+
+            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
+            if (!int.TryParse(customId, out int option))
+            {
+                option = -1;
+            }
+            else
+            {
+                await interaction.AcknowledgeAsync();
+            }
+
+            builder = new EmbedBuilder();
+
+            if (option == -1 || options[option] != question.CorrectAnswer)
+            {
+                userConfig.TriviaPoints--;
+                builder.Title = $"❌ {Locate(option == -1 ? "TimesUp" : "Incorrect")}";
+                builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
+            }
+            else
+            {
+                userConfig.TriviaPoints++;
+                builder.Title = $"✅ {Locate("CorrectAnswer")}";
+                builder.Description = Locate("Won1Point");
+            }
+
+            builder.WithFooter($"{Locate("Points")}: {userConfig.TriviaPoints}")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+            GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
+            await message.ModifyOrResendAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
-
-            async Task HandleTriviaReactionAsync(string option)
-            {
-                if (hasReacted) return;
-                hasReacted = true;
-
-                builder = new EmbedBuilder();
-                if (option == null)
-                {
-                    userConfig!.TriviaPoints--;
-                    builder.Title = $"❌ {Locate("TimesUp")}";
-                    builder.Description = Locate("Lost1Point");
-                }
-                else if (option == question.CorrectAnswer)
-                {
-                    userConfig!.TriviaPoints++;
-                    builder.Title = $"✅ {Locate("CorrectAnswer")}";
-                    builder.Description = Locate("Won1Point");
-                }
-                else
-                {
-                    userConfig!.TriviaPoints--;
-                    builder.Title = $"❌ {Locate("Incorrect")}";
-                    builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
-                }
-
-                builder.WithFooter($"{Locate("Points")}: {userConfig.TriviaPoints}")
-                    .WithColor(FergunClient.Config.EmbedColor);
-
-                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
-                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
-                await message!.ModifyAsync(x => x.Embed = builder.Build());
-            }
         }
 
         [Command("uptime")]
