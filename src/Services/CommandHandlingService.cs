@@ -259,7 +259,10 @@ namespace Fergun.Services
                     break;
 
                 case CommandError.Unsuccessful:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
+                    if (!(result is FergunResult fergunResult) || !fergunResult.IsSilent)
+                    {
+                        await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
+                    }
                     break;
 
                 case CommandError.Exception when result is ExecuteResult execResult:
