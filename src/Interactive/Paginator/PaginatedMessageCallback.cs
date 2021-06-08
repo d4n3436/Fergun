@@ -145,7 +145,8 @@ namespace Fergun.Interactive
 
             if (interaction != null)
             {
-                await interaction.RespondAsync(embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage, component: BuildComponent(false, false, false, false, false))
+                await interaction.RespondAsync(_pager.Texts.ElementAtOrDefault(_page - 1), embed: BuildEmbed(), type: InteractionResponseType.UpdateMessage,
+                        component: BuildComponent(false, false, false, false, false))
                     .ConfigureAwait(false);
             }
             else
