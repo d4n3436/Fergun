@@ -175,7 +175,13 @@ namespace Fergun.Modules
 
             if (interaction == null)
             {
-                return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+                var warningBuilder = new EmbedBuilder()
+                    .WithColor(FergunClient.Config.EmbedColor)
+                    .WithDescription($"\u26a0 {Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+
+                await message.ModifyOrResendAsync(embed: warningBuilder.Build());
+
+                return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", true);
             }
 
             await interaction.AcknowledgeAsync();
@@ -200,7 +206,7 @@ namespace Fergun.Modules
 
             if (creationResponse.ErrorMessage != null)
             {
-                return FergunResult.FromError(creationResponse.ErrorMessage);
+                return FergunResult.FromError(creationResponse.ErrorMessage, creationResponse.IsSilent);
             }
 
             var actionList = creationResponse.Adventure.Actions;
@@ -313,7 +319,13 @@ namespace Fergun.Modules
 
             if (interaction == null)
             {
-                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+                var warningBuilder = new EmbedBuilder()
+                    .WithColor(FergunClient.Config.EmbedColor)
+                    .WithDescription($"\u26a0 {Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+
+                await message.ModifyOrResendAsync(embed: warningBuilder.Build());
+
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", true);
             }
 
             await interaction.AcknowledgeAsync();
@@ -1052,7 +1064,13 @@ namespace Fergun.Modules
 
             if (interaction == null)
             {
-                return FergunResult.FromError(Locate("ReplyTimeout"));
+                var warningBuilder = new EmbedBuilder()
+                    .WithColor(FergunClient.Config.EmbedColor)
+                    .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
+
+                await message.ModifyOrResendAsync(embed: warningBuilder.Build());
+
+                return FergunResult.FromError(Locate("ReplyTimeout"), true);
             }
 
             builder = new EmbedBuilder()
@@ -1314,6 +1332,12 @@ namespace Fergun.Modules
                 ErrorMessage = errorMessage;
             }
 
+            public AdventureCreationData(string errorMessage, bool isSilent)
+            {
+                ErrorMessage = errorMessage;
+                IsSilent = isSilent;
+            }
+
             public AdventureCreationData(WebSocketAdventure adventure)
             {
                 Adventure = adventure;
@@ -1326,6 +1350,8 @@ namespace Fergun.Modules
             }
 
             public string ErrorMessage { get; }
+
+            public bool IsSilent { get; }
 
             public WebSocketAdventure Adventure { get; }
 

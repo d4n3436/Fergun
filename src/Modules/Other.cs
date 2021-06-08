@@ -327,7 +327,13 @@ namespace Fergun.Modules
 
             if (interaction == null)
             {
-                return FergunResult.FromError(Locate("ReplyTimeout"));
+                var warningBuilder = new EmbedBuilder()
+                    .WithColor(FergunClient.Config.EmbedColor)
+                    .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
+
+                await message.ModifyOrResendAsync(embed: warningBuilder.Build());
+
+                return FergunResult.FromError(Locate("ReplyTimeout"), true);
             }
 
             string newLanguage = ((SocketMessageComponent)interaction).Data.CustomId;

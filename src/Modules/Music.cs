@@ -230,7 +230,13 @@ namespace Fergun.Modules
 
                     if (interaction == null)
                     {
-                        return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+                        var warningBuilder = new EmbedBuilder()
+                            .WithColor(FergunClient.Config.EmbedColor)
+                            .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
+
+                        await message.ModifyOrResendAsync(embed: warningBuilder.Build());
+
+                        return FergunResult.FromError(Locate("ReplyTimeout"), true);
                     }
 
                     await interaction.AcknowledgeAsync();
