@@ -186,7 +186,7 @@ namespace Fergun.Modules
 
             await interaction.AcknowledgeAsync();
 
-            string customId = ((SocketMessageComponent)interaction).Data.CustomId ?? "";
+            string customId = ((SocketMessageComponent)interaction).Data.CustomId;
             if (!int.TryParse(customId, out int modeIndex))
             {
                 modeIndex = 0;
@@ -330,7 +330,7 @@ namespace Fergun.Modules
 
             await interaction.AcknowledgeAsync();
 
-            string customId = ((SocketMessageComponent)interaction).Data.CustomId ?? "";
+            string customId = ((SocketMessageComponent)interaction).Data.CustomId;
             if (!int.TryParse(customId, out int characterIndex))
             {
                 characterIndex = 0;

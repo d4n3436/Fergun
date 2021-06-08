@@ -794,7 +794,7 @@ namespace Fergun.Modules
                      messageComponent.User?.Id == Context.User.Id &&
                      messageComponent.Message.Id == message.Id, TimeSpan.FromSeconds(time));
 
-            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId ?? "";
+            string customId = (interaction as SocketMessageComponent)?.Data?.CustomId;
             if (!int.TryParse(customId, out int option))
             {
                 option = -1;
