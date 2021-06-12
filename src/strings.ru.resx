@@ -2384,4 +2384,7 @@ d. Когда сообщение удалено / отредактировано
 	<data name="DeletingAdventure" xml:space="preserve">
 		<value>Удаление приключения...</value>
 	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>Пожертвовать</value>
+	</data>
 </root>

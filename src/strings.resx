@@ -2387,4 +2387,7 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 	<data name="DeletingAdventure" xml:space="preserve">
 		<value>Deleting the adventure...</value>
 	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>Donate</value>
+	</data>
 </root>

@@ -2396,4 +2396,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	<data name="DeletingAdventure" xml:space="preserve">
 		<value>حذف المغامرة...</value>
 	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>يتبرع</value>
+	</data>
 </root>

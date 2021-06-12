@@ -2386,4 +2386,7 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	<data name="DeletingAdventure" xml:space="preserve">
 		<value>Eliminando la aventura...</value>
 	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>Donar</value>
+	</data>
 </root>

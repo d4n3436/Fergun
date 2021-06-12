@@ -2384,4 +2384,7 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	<data name="DeletingAdventure" xml:space="preserve">
 		<value>Macera siliniyor...</value>
 	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>bağış yap</value>
+	</data>
 </root>
