@@ -146,6 +146,12 @@ namespace Fergun
         public bool UseMessageCacheService { get; private set; } = true;
 
         /// <summary>
+        /// Gets the donation Url.
+        /// </summary>
+        [JsonProperty]
+        public string DonationUrl { get; private set; }
+
+        /// <summary>
         /// Gets the MongoDB server authentication info.
         /// </summary>
         [JsonProperty]
