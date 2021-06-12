@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -74,6 +74,10 @@ namespace Fergun.Utils
             if (!string.IsNullOrEmpty(FergunClient.Config.SupportServer))
             {
                 links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer)}";
+            }
+            if (!string.IsNullOrEmpty(FergunClient.Config.DonationUrl))
+            {
+                links += $" | {Format.Url(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl)}";
             }
 
             return links;

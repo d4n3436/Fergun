@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -264,10 +264,10 @@
 	<data name="OneChoice" xml:space="preserve">
     <value>... çünkü bana sadece bir seçim yaptın</value>
   </data>
-    <data name="colorSummary" xml:space="preserve">
+	<data name="colorSummary" xml:space="preserve">
 	<value>Rastgele veya belirli bir renk gösterir.</value>
   </data>
-    <data name="colorParam1" xml:space="preserve">
+	<data name="colorParam1" xml:space="preserve">
 	<value>Kullanılacak belirli renk. Onaltılık değer, ham değer veya bilinen bir renk adı olmalıdır.</value>
   </data>
 	<data name="helpSummary" xml:space="preserve">
@@ -2383,5 +2383,8 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Mesajınızın burada görüntülenmesini istemiyor musunuz? Bkz. `privacy`.</value>
+	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>bağış yap</value>
 	</data>
 </root>

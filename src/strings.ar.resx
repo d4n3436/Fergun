@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -270,7 +270,7 @@
 	<data name="colorParam1" xml:space="preserve">
 	<value>اللون المحدد للاستخدام. يجب أن تكون قيمة سداسية عشرية أو قيمة خام أو اسم لون معروف.</value>
   </data>
-    <data name="helpSummary" xml:space="preserve">
+	<data name="helpSummary" xml:space="preserve">
     <value>إظهار قائمة التعليمات أو معلومات الأمر ، إذا تم تمريرها.</value>
   </data>
 	<data name="helpParam1" xml:space="preserve">
@@ -2395,5 +2395,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>ألا تريد عرض رسالتك هنا؟ راجع `privacy`.</value>
+	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>يتبرع</value>
 	</data>
 </root>

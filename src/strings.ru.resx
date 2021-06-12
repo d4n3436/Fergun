@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -264,10 +264,10 @@
 	<data name="OneChoice" xml:space="preserve">
     <value>... потому что ты дал мне только один выбор</value>
   </data>
-    <data name="colorSummary" xml:space="preserve">
+	<data name="colorSummary" xml:space="preserve">
     <value>Показывает случайный или определенный цвет.</value>
   </data>
-    <data name="colorParam1" xml:space="preserve">
+	<data name="colorParam1" xml:space="preserve">
     <value>Определенный цвет для использования. Должно быть шестнадцатеричное значение, исходное значение или известное название цвета.</value>
   </data>
 	<data name="helpSummary" xml:space="preserve">
@@ -2383,5 +2383,8 @@ d. Когда сообщение удалено / отредактировано
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Не хотите, чтобы ваше сообщение отображалось здесь? См. `privacy`.</value>
+	</data>
+	<data name="Donate" xml:space="preserve">
+		<value>Пожертвовать</value>
 	</data>
 </root>
