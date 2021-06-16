@@ -63,26 +63,8 @@ namespace Fergun.Utils
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
 
-        public static string BuildLinks(IMessageChannel channel)
-        {
-            string links = $"{Format.Url(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink)}";
-            if (FergunClient.DblBotPage != null)
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage)}";
-                links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote")}";
-            }
-            if (!string.IsNullOrEmpty(FergunClient.Config.SupportServer))
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer)}";
-            }
-            if (!string.IsNullOrEmpty(FergunClient.Config.DonationUrl))
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl)}";
-            }
-
-            return links;
-        }
-
+        //que pides plata pedazo de pelotudo
+        
         public static string RunCommand(string command)
         {
             // TODO: Add support to the remaining platforms
