@@ -144,6 +144,4 @@ To shut down the bot use `logout`.
 * Click the first message. The token is the value of the `token` key.
 
 ## License
-Unless where otherwise stated, Fergun is licensed in the [MIT license](LICENSE).
-
-The AI Dungeon API wrapper code uses [a license](src/APIs/AIDungeon/LICENSE) similar to the MIT license but disallowing commercial use.
+Fergun is licensed in the [MIT license](LICENSE).
