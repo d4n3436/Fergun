@@ -394,13 +394,13 @@
     <value>يترجم النص.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>اللغة الهدف في رمز ISO (`en` ،` es` ، `br` ، إلخ) ، تتراجع إلى اللغة الإنجليزية إذا كان الهدف غير صالح.</value>
+    <value>اللغة الهدف في كود ISO (`en` ،` es` ، `br` ، إلخ.)</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>النص المراد ترجمته.</value>
   </data>
 	<data name="InvalidLanguage" xml:space="preserve">
-    <value>لغة الهدف غير صالحة. رموز اللغات الصالحة هي:</value>
+    <value>لغة الهدف غير صالحة. استخدم `{0}translate language codes` لمشاهدة قائمة اللغات.</value>
   </data>
 	<data name="GoogleIPBanned" xml:space="preserve">
     <value>لقد تم حظر IP من قبل Google :( لول</value>
@@ -2398,5 +2398,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>يتبرع</value>
+	</data>
+	<data name="LanguageList" xml:space="preserve">
+		<value>قائمة اللغات</value>
 	</data>
 </root>

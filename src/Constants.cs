@@ -160,6 +160,10 @@ namespace Fergun
 
         public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";
 
+        public const string BingTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/857011754667081759/BingTranslator.png";
+
+        public const string YandexTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/857013120358416394/YandexTranslate.png";
+
         public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834302049452062/badtranslator.png";
 
         public const string WikipediaLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png";

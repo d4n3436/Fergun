@@ -394,13 +394,13 @@
     <value>Bir metni çevirir.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>ISO kodundaki (`en`, `es`, `br`, vb.) Hedef dil, hedef geçersizse İngilizce'ye döner.</value>
+    <value>ISO kodundaki (`en`, `es`, `br`, vb.)</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>Çevrilecek metin.</value>
   </data>
 	<data name="InvalidLanguage" xml:space="preserve">
-    <value>Geçersiz hedef dil. Geçerli dil kodları:</value>
+    <value>Geçersiz hedef dil. Dil listesini görmek için `{0}translate language codes` kullanın.</value>
   </data>
 	<data name="GoogleIPBanned" xml:space="preserve">
     <value>Google tarafından IP yasaklandı :( lol</value>
@@ -2386,5 +2386,8 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>bağış yap</value>
+	</data>
+	<data name="LanguageList" xml:space="preserve">
+		<value>Dil Listesi</value>
 	</data>
 </root>

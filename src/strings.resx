@@ -401,7 +401,7 @@
     <value>The text to translate.</value>
   </data>
 	<data name="InvalidLanguage" xml:space="preserve">
-    <value>Invalid target language. The valid language codes are:</value>
+    <value>Invalid target language. Use `{0}translate language codes` to see the language list.</value>
   </data>
 	<data name="GoogleIPBanned" xml:space="preserve">
     <value>I got IP banned by Google :( lol</value>
@@ -2389,5 +2389,8 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>Donate</value>
+	</data>
+	<data name="LanguageList" xml:space="preserve">
+		<value>Language List</value>
 	</data>
 </root>

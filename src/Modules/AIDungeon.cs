@@ -14,13 +14,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.AIDungeon;
-using Fergun.APIs.BingTranslator;
-using Fergun.APIs.GTranslate;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
+using GTranslate.Translators;
 using Newtonsoft.Json;
 
 namespace Fergun.Modules
@@ -36,6 +35,7 @@ namespace Fergun.Modules
         private static readonly ConcurrentDictionary<uint, SemaphoreSlim> _queue = new ConcurrentDictionary<uint, SemaphoreSlim>();
         private static readonly Random _rng = new Random();
         private static IReadOnlyDictionary<string, string> _modes;
+        private static Translator _translator;
 
         private static CommandService _cmdService;
         private static LogService _logService;
@@ -239,7 +239,7 @@ namespace Fergun.Modules
             if (AutoTranslate() && !string.IsNullOrEmpty(initialPrompt))
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Translating text to \"{GetLanguage()}\"."));
-                initialPrompt = await TranslateSimplerAsync(initialPrompt, "en", GetLanguage());
+                initialPrompt = await TranslateWithFallbackAsync(initialPrompt, "en", GetLanguage());
             }
 
             long id = long.Parse(creationResponse.Adventure.Id, CultureInfo.InvariantCulture);
@@ -566,7 +566,7 @@ namespace Fergun.Modules
             if (AutoTranslate())
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Translating text from \"{GetLanguage()}\" to English."));
-                customText = await TranslateSimplerAsync(customText, GetLanguage(), "en");
+                customText = await TranslateWithFallbackAsync(customText, GetLanguage(), "en");
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Sending WebSocket request (publicId: {publicId}, actionType: {ActionType.Story})"));
@@ -666,7 +666,7 @@ namespace Fergun.Modules
             if (!string.IsNullOrEmpty(text) && AutoTranslate())
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text from \"{GetLanguage()}\" to English."));
-                text = await TranslateSimplerAsync(text, GetLanguage(), "en");
+                text = await TranslateWithFallbackAsync(text, GetLanguage(), "en");
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Sending WebSocket request (Id: {adventure.Id}, publicId: {adventure.PublicId}, actionType: {actionType})"));
@@ -724,7 +724,7 @@ namespace Fergun.Modules
                 if (!string.IsNullOrEmpty(textToShow) && AutoTranslate())
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"AID Action: Translating text to \"{GetLanguage()}\"."));
-                    textToShow = await TranslateSimplerAsync(textToShow, "en", GetLanguage());
+                    textToShow = await TranslateWithFallbackAsync(textToShow, "en", GetLanguage());
                 }
             }
             else
@@ -857,7 +857,7 @@ namespace Fergun.Modules
             if (AutoTranslate())
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Alter: Translating text to \"{GetLanguage()}\"."));
-                oldOutput = await TranslateSimplerAsync(oldOutput, "en", GetLanguage());
+                oldOutput = await TranslateWithFallbackAsync(oldOutput, "en", GetLanguage());
             }
 
             builder.WithAuthor(Context.User)
@@ -1318,26 +1318,19 @@ namespace Fergun.Modules
         }
 
         // Fallback to original text if fails
-        private static async Task<string> TranslateSimplerAsync(string text, string from, string to)
+        private async Task<string> TranslateWithFallbackAsync(string text, string fromLanguage, string toLanguage)
         {
+            _translator ??= new Translator();
+
             try
             {
-                using var translator = new GTranslator();
-                var result = await translator.TranslateAsync(text, to, from);
-                return result.Translation;
+                var translation = await _translator.TranslateAsync(text, toLanguage, fromLanguage);
+                return translation.Result;
             }
-            catch (Exception e) when (e is TranslationException || e is JsonSerializationException || e is HttpRequestException || e is ArgumentException)
+            catch (Exception e)
             {
-                try
-                {
-                    using var translator = new BingTranslator();
-                    var result = await translator.TranslateAsync(text, to, from);
-                    return result[0].Translations[0].Text;
-                }
-                catch (Exception e2) when (e2 is BingTokenNotFoundException || e2 is JsonSerializationException || e2 is HttpRequestException || e2 is TaskCanceledException)
-                {
-                    return text;
-                }
+                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Failed to translate text to \"{toLanguage}\"", e));
+                return text;
             }
         }
 

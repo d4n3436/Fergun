@@ -394,13 +394,13 @@
     <value>Переводит текст.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>Целевой язык в коде ISO (`en`, `es`, `br` и т. Д.), Отступает на английский, если цель неверна.</value>
+    <value>Целевой язык в коде ISO (`en`, `es`, `br` и т. Д.)</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>Текст для перевода.</value>
   </data>
 	<data name="InvalidLanguage" xml:space="preserve">
-    <value>Неверный целевой язык. Допустимые языковые коды:</value>
+    <value>Недействительный целевой язык. Используйте `{0}translate language codes` для просмотра списка языков.</value>
   </data>
 	<data name="GoogleIPBanned" xml:space="preserve">
     <value>Я получил IP, забаненный Google :( LOL</value>
@@ -2386,5 +2386,8 @@ d. Когда сообщение удалено / отредактировано
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>Пожертвовать</value>
+	</data>
+	<data name="LanguageList" xml:space="preserve">
+		<value>Список языков</value>
 	</data>
 </root>
