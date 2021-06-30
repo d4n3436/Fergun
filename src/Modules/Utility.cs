@@ -1130,7 +1130,7 @@ namespace Fergun.Modules
         {
             if (!_translator.IsLanguageSupported(target))
             {
-                return FergunResult.FromError($"{Locate("InvalidLanguage")}\n{string.Join(" ", Language.LanguageDictionary.Select(x => Format.Code(x.Key)))}");
+                return FergunResult.FromError(string.Format(Locate("InvalidLanguage"), GetPrefix()));
             }
 
             UrlFindResult result;
