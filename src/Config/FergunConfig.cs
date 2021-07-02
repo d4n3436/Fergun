@@ -230,6 +230,36 @@ namespace Fergun
         public string BoosterEmote { get; internal set; }
 
         /// <summary>
+        /// Gets the first page emote. Used in paginators.
+        /// </summary>
+        [JsonProperty]
+        public string FirstPageEmote { get; private set; }
+
+        /// <summary>
+        /// Gets the previous page emote. Used in paginators.
+        /// </summary>
+        [JsonProperty]
+        public string PreviousPageEmote { get; private set; }
+
+        /// <summary>
+        /// Gets the next page emote. Used in paginators.
+        /// </summary>
+        [JsonProperty]
+        public string NextPageEmote { get; private set; }
+
+        /// <summary>
+        /// Gets the last page emote. Used in paginators.
+        /// </summary>
+        [JsonProperty]
+        public string LastPageEmote { get; private set; }
+
+        /// <summary>
+        /// Gets the stop paginator emote. Used in paginators.
+        /// </summary>
+        [JsonProperty]
+        public string StopPaginatorEmote { get; private set; }
+
+        /// <summary>
         /// Gets user flags emotes.
         /// </summary>
         [JsonProperty]

@@ -90,6 +90,16 @@ namespace Fergun.Utils
             return builder.Build();
         }
 
+        public static IEmote ParseEmoteOrEmoji(string emote)
+        {
+            if (string.IsNullOrEmpty(emote))
+                return null;
+
+            return Emote.TryParse(emote, out var temp)
+                ? (IEmote)temp
+                : new Emoji(FergunClient.Config.FirstPageEmote);
+        }
+
         public static string RunCommand(string command)
         {
             // TODO: Add support to the remaining platforms

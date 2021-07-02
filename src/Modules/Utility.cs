@@ -766,14 +766,13 @@ namespace Fergun.Modules
                 {
                     FooterFormat = Locate("PaginatorFooter"),
                     Timeout = TimeSpan.FromMinutes(10),
-                    First = Emote.Parse("<:first:848439761814159381>"),
-                    Back = Emote.Parse("<:previous:848439776578502676>"),
-                    Next = Emote.Parse("<:next:848439790558248980>"),
-                    Last = Emote.Parse("<:last:848439802718322698>"),
-                    Stop = Emote.Parse("<:trash:848439812082892820>")
+                    First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
+                    Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
+                    Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
+                    Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
+                    Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
                 }
             };
-
             var reactions = new ReactionList
             {
                 First = definitions.Count >= 3,
@@ -1807,11 +1806,11 @@ namespace Fergun.Modules
                     FooterFormat = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")} - {Locate("PaginatorFooter")}",
                     Timeout = TimeSpan.FromMinutes(10),
                     ActionOnTimeout = ActionOnTimeout.DeleteReactions,
-                    First = Emote.Parse("<:first:848439761814159381>"),
-                    Back = Emote.Parse("<:previous:848439776578502676>"),
-                    Next = Emote.Parse("<:next:848439790558248980>"),
-                    Last = Emote.Parse("<:last:848439802718322698>"),
-                    Stop = Emote.Parse("<:trash:848439812082892820>")
+                    First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
+                    Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
+                    Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
+                    Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
+                    Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
                 }
             };
 
@@ -2144,11 +2143,11 @@ namespace Fergun.Modules
                         {
                             Timeout = TimeSpan.FromMinutes(10),
                             ActionOnTimeout = ActionOnTimeout.DeleteReactions,
-                            First = Emote.Parse("<:first:848439761814159381>"),
-                            Back = Emote.Parse("<:previous:848439776578502676>"),
-                            Next = Emote.Parse("<:next:848439790558248980>"),
-                            Last = Emote.Parse("<:last:848439802718322698>"),
-                            Stop = Emote.Parse("<:trash:848439812082892820>")
+                            First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
+                            Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
+                            Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
+                            Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
+                            Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
                         }
                     };
 
@@ -2330,11 +2329,11 @@ namespace Fergun.Modules
                     FooterFormat = Locate("PaginatorFooter"),
                     Timeout = TimeSpan.FromMinutes(10),
                     ActionOnTimeout = ActionOnTimeout.DeleteReactions,
-                    First = Emote.Parse("<:first:848439761814159381>"),
-                    Back = Emote.Parse("<:previous:848439776578502676>"),
-                    Next = Emote.Parse("<:next:848439790558248980>"),
-                    Last = Emote.Parse("<:last:848439802718322698>"),
-                    Stop = Emote.Parse("<:trash:848439812082892820>")
+                    First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
+                    Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
+                    Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
+                    Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
+                    Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
                 }
             };
 
