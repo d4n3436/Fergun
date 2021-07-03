@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -66,31 +65,29 @@ namespace Fergun.Utils
 
         public static MessageComponent BuildLinks(IMessageChannel channel)
         {
-            // TODO: Undo these changes after the nullref fix
-            var components = new List<IMessageComponent>();
-
+            var builder = new ComponentBuilder();
             if (FergunClient.InviteLink != null && Uri.IsWellFormedUriString(FergunClient.InviteLink, UriKind.Absolute))
             {
-                components.Add(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink).Build());
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink));
             }
 
             if (FergunClient.DblBotPage != null && Uri.IsWellFormedUriString(FergunClient.DblBotPage, UriKind.Absolute))
             {
-                components.Add(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage).Build());
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage));
                 //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote"));
             }
 
             if (FergunClient.Config.SupportServer != null && Uri.IsWellFormedUriString(FergunClient.Config.SupportServer, UriKind.Absolute))
             {
-                components.Add(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer).Build());
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer));
             }
 
             if (FergunClient.Config.DonationUrl != null && Uri.IsWellFormedUriString(FergunClient.Config.DonationUrl, UriKind.Absolute))
             {
-                components.Add(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl).Build());
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl));
             }
 
-            return new ComponentBuilder { ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponents(components) } }.Build();
+            return builder.Build();
         }
 
         public static IEmote ParseEmoteOrEmoji(string emote)
