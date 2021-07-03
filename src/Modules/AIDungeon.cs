@@ -184,8 +184,6 @@ namespace Fergun.Modules
                 return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", true);
             }
 
-            await interaction.AcknowledgeAsync();
-
             var component = (SocketMessageComponent)interaction;
             var menu = component
                 .Message
@@ -204,16 +202,14 @@ namespace Fergun.Modules
                 modeIndex = 0;
             }
 
-            builder.ThumbnailUrl = null;
-
             AdventureCreationData creationResponse;
             if (_modes.Keys.ElementAt(modeIndex) == "custom")
             {
-                creationResponse = await CreateCustomAdventureAsync(modeIndex, builder, message);
+                creationResponse = await CreateCustomAdventureAsync(modeIndex, interaction, builder, message);
             }
             else
             {
-                creationResponse = await CreateAdventureAsync(modeIndex, builder, message);
+                creationResponse = await CreateAdventureAsync(modeIndex, interaction, builder, message);
             }
 
             if (creationResponse.ErrorMessage != null)
@@ -267,14 +263,14 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        private async Task<AdventureCreationData> CreateAdventureAsync(int modeIndex, EmbedBuilder builder, IUserMessage message)
+        private async Task<AdventureCreationData> CreateAdventureAsync(int modeIndex, SocketInteraction interaction, EmbedBuilder builder, IUserMessage message)
         {
             var loadingEmbed = new EmbedBuilder()
                 .WithDescription($"{FergunClient.Config.LoadingEmote} {Locate("Loading")}")
                 .WithColor(FergunClient.Config.EmbedColor)
                 .Build();
 
-            await message.ModifyOrResendAsync(embed: loadingEmbed);
+            await interaction.RespondAsync(embed: loadingEmbed, type: InteractionResponseType.UpdateMessage, component: new ComponentBuilder().Build());
 
             WebSocketResponse response;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Downloading the character list for mode: {_modes.Keys.ElementAt(modeIndex)} ({_modes.Values.ElementAt(modeIndex)})"));
@@ -319,12 +315,12 @@ namespace Fergun.Modules
             var componentBuilder = new ComponentBuilder()
                 .WithSelectMenu(null, "foobar", options);
 
-            builder.Title = Locate("CharacterSelect");
-            builder.Description = null;
+            builder.Title = "AI Dungeon";
+            builder.Description = Locate("CharacterSelect");
 
             message = await message.ModifyOrResendAsync(embed: builder.Build(), component: componentBuilder.Build(), cache: _messageCache);
 
-            var interaction = await NextInteractionAsync(
+            interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
                      messageComponent.User?.Id == Context.User.Id &&
                      messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
@@ -339,8 +335,6 @@ namespace Fergun.Modules
 
                 return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", true);
             }
-
-            await interaction.AcknowledgeAsync();
 
             var component = (SocketMessageComponent)interaction;
             var menu = component
@@ -363,7 +357,7 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
-            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            await interaction.RespondAsync(embed: builder.Build(), type: InteractionResponseType.UpdateMessage, component: new ComponentBuilder().Build());
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting info for character: {characters.Keys.ElementAt(characterIndex)} ({characters.Values.ElementAt(characterIndex)})"));
             try
@@ -467,12 +461,12 @@ namespace Fergun.Modules
             return new AdventureCreationData(adventure, message);
         }
 
-        private async Task<AdventureCreationData> CreateCustomAdventureAsync(int modeIndex, EmbedBuilder builder, IUserMessage message)
+        private async Task<AdventureCreationData> CreateCustomAdventureAsync(int modeIndex, SocketInteraction interaction, EmbedBuilder builder, IUserMessage message)
         {
             builder.Title = Locate("CustomCharacterCreation");
             builder.Description = Locate("CustomCharacterPrompt");
 
-            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            await interaction.RespondAsync(embed: builder.Build(), type: InteractionResponseType.UpdateMessage, component: new ComponentBuilder().Build());
 
             var userInput = await NextMessageAsync(true, true, TimeSpan.FromMinutes(5));
 
