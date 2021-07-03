@@ -298,27 +298,28 @@ namespace Fergun.Modules
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
-            string languages = "";
-            var component = new ComponentBuilder();
-            int i = 0;
+            var options = new List<SelectMenuOptionBuilder>();
 
             foreach (var language in FergunClient.Languages)
             {
-                if (guild.Language == language.Key)
-                    continue;
-
-                languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
-                component.WithButton($"{i + 1}".ToString(), language.Key, row: i / 5);
-
-                i++;
+                options.Add(new SelectMenuOptionBuilder
+                {
+                    Label = language.Value.EnglishName,
+                    Value = language.Key,
+                    Description = language.Value.NativeName,
+                    Default = guild.Language == language.Key
+                });
             }
+
+            var componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(null, "foobar", options);
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
-                .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
+                .WithDescription(Locate("LanguagePrompt"))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: componentBuilder.Build());
 
             var interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
@@ -336,7 +337,18 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("ReplyTimeout"), true);
             }
 
-            string newLanguage = ((SocketMessageComponent)interaction).Data.CustomId;
+            var component = (SocketMessageComponent)interaction;
+            var menu = component
+                .Message
+                .Components
+                .FirstOrDefault()?
+                .Components
+                .FirstOrDefault() as SelectMenu;
+
+            string newLanguage = menu?
+                .Options
+                .FirstOrDefault(x => x.Value == component.Data.Values.FirstOrDefault())?
+                .Value;
 
             guild.Language = newLanguage;
             FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
