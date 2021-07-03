@@ -19,7 +19,6 @@ using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Services;
 using GTranslate.Translators;
-using Newtonsoft.Json;
 
 namespace Fergun.Modules
 {
@@ -150,23 +149,24 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "New: Using cached mode list..."));
             }
 
-            var list = new StringBuilder($"\u2139 {string.Format(Locate("ModeSelect"), GetPrefix())}\n");
-            var component = new ComponentBuilder();
+            var options = new List<SelectMenuOptionBuilder>();
 
             for (int i = 0; i < _modes.Count; i++)
             {
-                list.Append($"**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}\n");
-                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
+                options.Add(new SelectMenuOptionBuilder(_modes.ElementAt(i).Key.ToTitleCase(), i.ToString()));
             }
+
+            var componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(null, "foobar", options);
 
             var builder = new EmbedBuilder()
                 .WithAuthor(Context.User)
                 .WithTitle(Locate("AIDungeonWelcome"))
-                .WithDescription(list.ToString())
+                .WithDescription(string.Format(Locate("ModeSelect"), GetPrefix()))
                 .WithThumbnailUrl(Constants.AiDungeonLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
+            var message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: componentBuilder.Build());
 
             var interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
@@ -186,8 +186,20 @@ namespace Fergun.Modules
 
             await interaction.AcknowledgeAsync();
 
-            string customId = ((SocketMessageComponent)interaction).Data.CustomId;
-            if (!int.TryParse(customId, out int modeIndex))
+            var component = (SocketMessageComponent)interaction;
+            var menu = component
+                .Message
+                .Components
+                .FirstOrDefault()?
+                .Components
+                .FirstOrDefault() as SelectMenu;
+
+            var selected = menu?
+                .Options
+                .FirstOrDefault(x => x.Value == component.Data.Values.FirstOrDefault())?
+                .Value;
+
+            if (!int.TryParse(selected, out int modeIndex))
             {
                 modeIndex = 0;
             }
@@ -297,20 +309,20 @@ namespace Fergun.Modules
             }
 
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title, x => x.PublicId?.ToString()));
-            var list = new StringBuilder();
-            var component = new ComponentBuilder();
+            var options = new List<SelectMenuOptionBuilder>();
 
             for (int i = 0; i < characters.Count; i++)
             {
-
-                list.Append($"**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}\n");
-                component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
+                options.Add(new SelectMenuOptionBuilder(characters.ElementAt(i).Key.ToTitleCase(), i.ToString()));
             }
 
-            builder.Title = Locate("CharacterSelect");
-            builder.Description = list.ToString();
+            var componentBuilder = new ComponentBuilder()
+                .WithSelectMenu(null, "foobar", options);
 
-            message = await message.ModifyOrResendAsync(embed: builder.Build(), component: component.Build(), cache: _messageCache);
+            builder.Title = Locate("CharacterSelect");
+            builder.Description = null;
+
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), component: componentBuilder.Build(), cache: _messageCache);
 
             var interaction = await NextInteractionAsync(
                 x => x is SocketMessageComponent messageComponent &&
@@ -330,8 +342,20 @@ namespace Fergun.Modules
 
             await interaction.AcknowledgeAsync();
 
-            string customId = ((SocketMessageComponent)interaction).Data.CustomId;
-            if (!int.TryParse(customId, out int characterIndex))
+            var component = (SocketMessageComponent)interaction;
+            var menu = component
+                .Message
+                .Components
+                .FirstOrDefault()?
+                .Components
+                .FirstOrDefault() as SelectMenu;
+
+            var selected = menu?
+                .Options
+                .FirstOrDefault(x => x.Value == component.Data.Values.FirstOrDefault())?
+                .Value;
+
+            if (!int.TryParse(selected, out int characterIndex))
             {
                 characterIndex = 0;
             }
