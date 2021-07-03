@@ -279,27 +279,13 @@ namespace Fergun.Interactive
 
         private MessageComponent BuildComponent(bool first, bool back, bool next, bool last, bool stop)
         {
-            // TODO: Delete this after the nullref fix
-            var components = new List<IMessageComponent>
-            {
-                new ButtonBuilder { CustomId = _pager.Options.First.ToString(), Style = ButtonStyle.Primary, Emote = _pager.Options.First, Disabled = !first }.Build(),
-                new ButtonBuilder { CustomId = _pager.Options.Back.ToString(), Style = ButtonStyle.Primary, Emote = _pager.Options.Back, Disabled = !back }.Build(),
-                new ButtonBuilder { CustomId = _pager.Options.Next.ToString(), Style = ButtonStyle.Primary, Emote = _pager.Options.Next, Disabled = !next }.Build(),
-                new ButtonBuilder { CustomId = _pager.Options.Last.ToString(), Style = ButtonStyle.Primary, Emote = _pager.Options.Last, Disabled = !last }.Build(),
-                new ButtonBuilder { CustomId = _pager.Options.Stop.ToString(), Style = ButtonStyle.Danger, Emote = _pager.Options.Stop, Disabled = !stop }.Build()
-            };
-
-            return new ComponentBuilder { ActionRows = new List<ActionRowBuilder> { new ActionRowBuilder().WithComponents(components) } }.Build();
-
-            /*
             return new ComponentBuilder()
-                .WithButton(null, _pager.Options.First.ToString() ButtonStyle.Primary, _pager.Options.First, null, !first)
+                .WithButton(null, _pager.Options.First.ToString(), ButtonStyle.Primary, _pager.Options.First, null, !first)
                 .WithButton(null, _pager.Options.Back.ToString(), ButtonStyle.Primary, _pager.Options.Back, null, !back)
                 .WithButton(null, _pager.Options.Next.ToString(), ButtonStyle.Primary, _pager.Options.Next, null, !next)
                 .WithButton(null, _pager.Options.Last.ToString(), ButtonStyle.Primary, _pager.Options.Last, null, !last)
                 .WithButton(null, _pager.Options.Stop.ToString(), ButtonStyle.Danger, _pager.Options.Stop, null, !stop)
                 .Build();
-            */
         }
 
         private async Task RenderAsync(SocketInteraction interaction)
