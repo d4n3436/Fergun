@@ -901,7 +901,7 @@ namespace Fergun.Modules
             try
             {
                 using var content = new FormUrlEncodedContent(data);
-                var response = await _httpClient.PostAsync(new Uri("https://captionbot.azurewebsites.net/api/messages?language=en-US"), content);
+                var response = await _httpClient.PostAsync(new Uri("https://captionbot2.azurewebsites.net/api/messages?language=en-US"), content);
                 response.EnsureSuccessStatusCode();
                 text = await response.Content.ReadAsStringAsync();
             }

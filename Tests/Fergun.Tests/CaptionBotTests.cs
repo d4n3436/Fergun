@@ -26,7 +26,7 @@ namespace Fergun.Tests
             using var httpClient = new HttpClient();
 
             // Act
-            var response = await httpClient.PostAsync(new Uri("https://captionbot.azurewebsites.net/api/messages?language=en-US"), content);
+            var response = await httpClient.PostAsync(new Uri("https://captionbot2.azurewebsites.net/api/messages?language=en-US"), content);
             string text = await response.Content.ReadAsStringAsync();
 
             // Assert
