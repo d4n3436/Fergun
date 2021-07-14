@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,6 +10,8 @@ using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Services;
 using Fergun.Utils;
 using Victoria;
@@ -28,12 +29,14 @@ namespace Fergun.Modules
         private static LogService _logService;
         private static GeniusApi _geniusApi;
         private static MessageCacheService _messageCache;
+        private static InteractiveService _interactive;
 
-        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache)
+        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
             _musicService = musicService;
             _logService ??= logService;
             _messageCache ??= messageCache;
+            _interactive ??= interactive;
             _geniusApi ??= new GeniusApi(FergunClient.Config.GeniusApiToken);
         }
 
@@ -133,31 +136,35 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ErrorParsingLyrics"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
             }
 
-            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
+            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToArray();
             string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
             string title = genius.Response.Hits[0].Result.FullTitle;
-            var pager = new PaginatedMessage
+
+            Task<PageBuilder> GeneratePageAsync(int index)
             {
-                Color = new Color(FergunClient.Config.EmbedColor),
-                Title = title.Truncate(EmbedBuilder.MaxTitleLength),
-                Fields = new List<EmbedFieldBuilder> { new EmbedFieldBuilder { Name = "Links", Value = links } },
-                Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x.Truncate(EmbedBuilder.MaxDescriptionLength) }),
-                Options = new PaginatorAppearanceOptions
-                {
-                    FooterFormat = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}",
-                    Timeout = TimeSpan.FromMinutes(10),
-                    ActionOnTimeout = ActionOnTimeout.DeleteReactions,
-                    First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
-                    Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
-                    Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
-                    Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
-                    Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(title)
+                    .WithDescription(splitLyrics[index].Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .AddField("Links", links)
+                    .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, splitLyrics.Length)}");
 
-                }
-            };
+                return Task.FromResult(pageBuilder);
+            }
 
-            await PagedReplyAsync(pager, ReactionList.Default, notCommandUserText: Locate("CannotUseThisInteraction"));
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(splitLyrics.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
 
             return FergunResult.FromSuccess();
         }
@@ -193,10 +200,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = (SocketGuildUser)Context.User;
-            (string result, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            (string response, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
             if (tracks == null)
             {
-                await SendEmbedAsync(result);
+                await SendEmbedAsync(response);
             }
             else
             {
@@ -207,12 +214,10 @@ namespace Fergun.Modules
                 {
                     string list = "";
                     int count = Math.Min(Constants.MaxTracksToDisplay, tracks.Count);
-                    var component = new ComponentBuilder();
 
                     for (int i = 0; i < count; i++)
                     {
                         list += $"{i + 1}. {tracks[i].ToTrackLink()}\n";
-                        component.WithButton($"{i + 1}".ToString(), i.ToString(), row: i / 5);
                     }
 
                     var builder = new EmbedBuilder()
@@ -221,33 +226,28 @@ namespace Fergun.Modules
                         .WithDescription(list)
                         .WithColor(FergunClient.Config.EmbedColor);
 
-                    message = await Context.Channel.SendMessageAsync(embed: builder.Build(), component: component.Build());
+                    var warningBuilder = new EmbedBuilder()
+                        .WithColor(FergunClient.Config.EmbedColor)
+                        .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
 
-                    var interaction = await NextInteractionAsync(
-                        x => x is SocketMessageComponent messageComponent &&
-                             messageComponent.User?.Id == Context.User.Id &&
-                             messageComponent.Message.Id == message.Id, TimeSpan.FromMinutes(1));
+                    var selection = new SelectionBuilder<int>()
+                        .WithOptions(Enumerable.Range(0, count).ToList())
+                        .WithStringConverter(x => (x + 1).ToString())
+                        .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
+                        .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
+                        .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput)
+                        .AddUser(Context.User)
+                        .Build();
 
-                    if (interaction == null)
+                    var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromMinutes(1));
+
+                    if (!result.IsSuccess)
                     {
-                        var warningBuilder = new EmbedBuilder()
-                            .WithColor(FergunClient.Config.EmbedColor)
-                            .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
-
-                        await message.ModifyOrResendAsync(embed: warningBuilder.Build());
-
                         return FergunResult.FromError(Locate("ReplyTimeout"), true);
                     }
 
-                    await interaction.AcknowledgeAsync();
-
-                    string customId = ((SocketMessageComponent)interaction).Data.CustomId;
-                    if (!int.TryParse(customId, out int option))
-                    {
-                        option = 0;
-                    }
-
-                    selectedTrack = tracks[option];
+                    selectedTrack = tracks[result.Value];
+                    message = result.Message;
                 }
                 else
                 {

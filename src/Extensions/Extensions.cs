@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Services;
@@ -261,6 +262,9 @@ namespace Fergun.Extensions
         {
             return context.Channel.GetLastUrlAsync(messageCount, cache, onlyImage, context.Message, url, maxSize);
         }
+
+        public static bool IsSourceUserAndChannel(this ICommandContext context, SocketMessage message)
+            => message.Author.Id == context.User.Id && message.Channel.Id == context.Channel.Id;
 
         public static bool IsNsfw(this ICommandContext context)
         {

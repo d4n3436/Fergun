@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -7,11 +8,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
 using Discord;
+using Fergun.Interactive.Pagination;
 
 namespace Fergun.Utils
 {
     public static class CommandUtils
     {
+        private static Dictionary<IEmote, PaginatorAction> _fergunPaginatorEmotes;
+
         public static async Task<double> GetCpuUsageForProcessAsync()
         {
             var startTime = DateTimeOffset.UtcNow;
@@ -90,14 +94,31 @@ namespace Fergun.Utils
             return builder.Build();
         }
 
-        public static IEmote ParseEmoteOrEmoji(string emote)
+        public static Dictionary<IEmote, PaginatorAction> GetFergunPaginatorEmotes(FergunConfig config)
         {
-            if (string.IsNullOrEmpty(emote))
-                return null;
+            if (_fergunPaginatorEmotes != null)
+            {
+                return _fergunPaginatorEmotes;
+            }
 
-            return Emote.TryParse(emote, out var temp)
-                ? (IEmote)temp
-                : new Emoji(FergunClient.Config.FirstPageEmote);
+            _fergunPaginatorEmotes = new Dictionary<IEmote, PaginatorAction>();
+
+            AddEmote(config.FirstPageEmote, PaginatorAction.SkipToStart, "⏮");
+            AddEmote(config.PreviousPageEmote, PaginatorAction.Backward, "◀");
+            AddEmote(config.NextPageEmote, PaginatorAction.Forward, "▶");
+            AddEmote(config.LastPageEmote, PaginatorAction.SkipToEnd, "⏭");
+            AddEmote(config.StopPaginatorEmote, PaginatorAction.Exit, "🛑");
+
+            return _fergunPaginatorEmotes;
+
+            static void AddEmote(string emoteString, PaginatorAction action, string defaultEmoji)
+            {
+                var emote = string.IsNullOrEmpty(emoteString) || !Emote.TryParse(emoteString, out var parsedEmote)
+                    ? new Emoji(defaultEmoji) as IEmote
+                    : parsedEmote;
+
+                _fergunPaginatorEmotes.Add(emote, action);
+            }
         }
 
         public static string RunCommand(string command)

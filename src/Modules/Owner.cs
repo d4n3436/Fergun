@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Fergun.Attributes;
 using Fergun.Extensions;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using Fergun.Services;
 using Fergun.Utils;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -29,12 +30,14 @@ namespace Fergun.Modules
         private static CommandService _cmdService;
         private static LogService _logService;
         private readonly MusicService _musicService;
+        private static InteractiveService _interactive;
 
-        public Owner(CommandService commands, LogService logService, MusicService musicService)
+        public Owner(CommandService commands, LogService logService, MusicService musicService, InteractiveService interactive)
         {
             _cmdService ??= commands;
             _logService ??= logService;
             _musicService ??= musicService;
+            _interactive ??= interactive;
         }
 
         [LongRunning]
@@ -227,55 +230,35 @@ namespace Fergun.Modules
                 return;
             }
 
-            if (value.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
-            {
-                var pages = value
-                    .SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10)
-                    .Select(x => new EmbedBuilder { Description = Format.Code(x.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md") });
+            var splitOutput = value
+                .SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength - 10)
+                .Select(x => Format.Code(x.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md"))
+                .ToArray();
 
-                var pager = new PaginatedMessage
-                {
-                    Author = new EmbedAuthorBuilder
-                    {
-                        Name = Context.User.ToString(),
-                        IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-                    },
-                    Title = Locate("EvalResults"),
-                    Pages = pages,
-                    Fields = new List<EmbedFieldBuilder>
-                    {
-                        new EmbedFieldBuilder()
-                            .WithName(Locate("Type"))
-                            .WithValue(Format.Code(returnType, "md"))
-                    },
-                    Color = new Color(FergunClient.Config.EmbedColor),
-                    Options = new PaginatorAppearanceOptions
-                    {
-                        FooterFormat = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}",
-                        Timeout = TimeSpan.FromMinutes(10),
-                        ActionOnTimeout = ActionOnTimeout.DeleteReactions,
-                        First = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.FirstPageEmote) ?? new Emoji("⏮️"),
-                        Back = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.PreviousPageEmote) ?? new Emoji("⬅️"),
-                        Next = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.NextPageEmote) ?? new Emoji("➡️"),
-                        Last = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.LastPageEmote) ?? new Emoji("⏭️"),
-                        Stop = CommandUtils.ParseEmoteOrEmoji(FergunClient.Config.StopPaginatorEmote) ?? new Emoji("🛑")
-                    }
-                };
-
-                await PagedReplyAsync(pager, ReactionList.Default, notCommandUserText: Locate("CannotUseThisInteraction"));
-            }
-            else
+            Task<PageBuilder> GeneratePageAsync(int index)
             {
-                var builder = new EmbedBuilder()
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Color(FergunClient.Config.EmbedColor))
                     .WithTitle(Locate("EvalResults"))
-                    .AddField(Locate("Input"), Format.Code(code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                    .AddField(Locate("Output"), Format.Code(value.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md"))
+                    .WithDescription(splitOutput[index].Truncate(EmbedBuilder.MaxDescriptionLength))
                     .AddField(Locate("Type"), Format.Code(returnType, "md"))
-                    .WithFooter(string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds))
-                    .WithColor(FergunClient.Config.EmbedColor);
+                    .WithFooter($"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {string.Format(Locate("PaginatorFooter"), index + 1, splitOutput.Length)}");
 
-                await ReplyAsync(embed: builder.Build());
+                return Task.FromResult(pageBuilder);
             }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(splitOutput.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
         }
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
