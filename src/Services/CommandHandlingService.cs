@@ -259,7 +259,10 @@ namespace Fergun.Services
                     break;
 
                 case CommandError.Unsuccessful:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
+                    if (!(result is FergunResult fergunResult) || !fergunResult.IsSilent)
+                    {
+                        await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
+                    }
                     break;
 
                 case CommandError.Exception when result is ExecuteResult execResult:
@@ -359,10 +362,17 @@ namespace Fergun.Services
 
         private async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, string text = null)
         {
+#if DNETLABS
+            var component = new ComponentBuilder().Build(); // remove message components
+#endif
             var cache = _services.GetService<CommandCacheService>();
             if (cache == null || cache.IsDisabled)
             {
+#if DNETLABS
+                return await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
+#else
                 return await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+#endif
             }
 
             IUserMessage response;
@@ -375,12 +385,19 @@ namespace Fergun.Services
                 {
                     x.Content = text;
                     x.Embed = embed;
+#if DNETLABS
+                    x.Components = component;
+#endif
                 });
                 response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId);
             }
             else
             {
+#if DNETLABS
+                response = await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
+#else
                 response = await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
+#endif
                 cache.Add(userMessage, response);
             }
 

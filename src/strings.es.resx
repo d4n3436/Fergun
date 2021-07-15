@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -395,7 +395,7 @@
     <value>Traduce un texto.</value>
   </data>
 	<data name="translateParam1" xml:space="preserve">
-    <value>اللغة الهدف في رمز ISO (`en`, `es`, `br`, إلخ.)</value>
+    <value>El idioma de destino en el código ISO (en, es, br, etc.)</value>
   </data>
 	<data name="translateParam2" xml:space="preserve">
     <value>El texto a traducir.</value>
@@ -665,7 +665,7 @@ Creando caché...</value>
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Opción fuera de índice.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>No has respondido antes del límite de tiempo!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1655,7 +1655,7 @@ Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</
     <value>Página del artista</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>Reacciona al emoji debajo para eliminar la aventura.</value>
+    <value>Presiona el botón/emoji debajo para eliminar la aventura.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>No reaccionaste antes del límite de tiempo!</value>
@@ -1664,7 +1664,7 @@ Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</
     <value>Selección de idioma</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>Reacciona al idioma que quieres establecer.</value>
+    <value>Selecciona el idioma que quieres establecer.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Usa `-headers` al final del comando para mantener los tags (`[info]`).</value>
@@ -2385,6 +2385,12 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>¿No quieres que tu mensaje se muestre aquí? Vea `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>No puedes usar esta interacción.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Eliminando la aventura...</value>
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>Donar</value>

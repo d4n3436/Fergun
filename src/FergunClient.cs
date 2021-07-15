@@ -453,9 +453,10 @@ namespace Fergun
             }
         }
 
-        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, ISocketMessageChannel channel)
+        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted", $"{msgs.Count} messages deleted in {channel.Display()}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted",
+                $"{msgs.Count} messages deleted in {(cachedChannel.HasValue ? cachedChannel.Value.Display() : cachedChannel.Id.ToString())}"));
         }
 
         private async Task UserJoined(SocketGuildUser user)

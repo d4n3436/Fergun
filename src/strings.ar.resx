@@ -667,7 +667,7 @@
 	<data name="OutOfIndex" xml:space="preserve">
     <value>الخيار خارج الفهرس.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>لم ترد قبل انتهاء المهلة!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1664,7 +1664,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>صفحة الفنان</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>الرد على الرموز التعبيرية أدناه لحذف المغامرة.</value>
+    <value>اضغط على الزر / رمز تعبيري أدناه لحذف المغامرة.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>أنت لم تتفاعل قبل المهلة!</value>
@@ -1673,7 +1673,7 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>اختيار اللغة</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>الرد على اللغة التي تريد تعيين.</value>
+    <value>حدد اللغة التي تريد تعيينها.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>استخدام -headers في نهاية الأمر للحفاظ على العلامات ( [المعلومات] ).</value>
@@ -2395,6 +2395,12 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>ألا تريد عرض رسالتك هنا؟ راجع `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>لا يمكنك استخدام هذا التفاعل.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>حذف المغامرة...</value>
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>يتبرع</value>

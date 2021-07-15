@@ -230,12 +230,13 @@ namespace Fergun.Services
             _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Cleaned {removed} item(s) from the cache."));
         }
 
-        private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, ISocketMessageChannel channel)
+        private Task OnMessageDeleted(Cacheable<IMessage, ulong> cacheable, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
             _ = Task.Run(async () =>
             {
                 if (TryGetValue(cacheable.Id, out ulong responseId))
                 {
+                    var channel = await cachedChannel.GetOrDownloadAsync();
                     var message = await channel.GetMessageAsync(_messageCache, responseId);
                     if (message != null)
                     {
@@ -326,6 +327,17 @@ namespace Fergun.Services
         /// Specifies if notifications are sent for mentioned users and roles in the message <paramref name="message"/>. If <c>null</c>, all mentioned roles and users will be notified.
         /// </param>
         /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
+#if DNETLABS
+        /// <param name="component">The message components to be included with this message. Used for interactions</param>
+        /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
+            RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null)
+        {
+            if (Cache.IsDisabled)
+            {
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
+            }
+#else
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
             RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
@@ -334,7 +346,7 @@ namespace Fergun.Services
             {
                 return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
             }
-
+#endif
             IUserMessage response;
             bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
             if (found && (response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId)) != null)
@@ -343,13 +355,21 @@ namespace Fergun.Services
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
+#if DNETLABS
+                    x.Components = component;
+#endif
                 }).ConfigureAwait(false);
 
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(messageId).ConfigureAwait(false);
             }
             else
             {
+#if DNETLABS
+                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
+#else
                 response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
+#endif
                 Cache.Add(Context.Message, response);
             }
             return response;

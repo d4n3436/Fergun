@@ -8,6 +8,7 @@ using Discord.Net;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
+using Fergun.Interactive;
 using Fergun.Services;
 
 namespace Fergun.Modules
@@ -19,10 +20,12 @@ namespace Fergun.Modules
     public class Moderation : FergunBase
     {
         private static MessageCacheService _messageCache;
+        private static InteractiveService _interactive;
 
-        public Moderation(MessageCacheService messageCache)
+        public Moderation(MessageCacheService messageCache, InteractiveService interactive)
         {
             _messageCache ??= messageCache;
+            _interactive ??= interactive;
         }
 
         [RequireUserPermission(GuildPermission.BanMembers, ErrorMessage = "UserRequireBanMembers")]
@@ -117,7 +120,7 @@ namespace Fergun.Modules
                 Color = new Color(FergunClient.Config.EmbedColor)
             };
 
-            await ReplyAndDeleteAsync(null, false, builder.Build(), TimeSpan.FromSeconds(5));
+            _ = _interactive.DelayedSendMessageAndDeleteAsync(Context.Channel, null, TimeSpan.FromSeconds(5), embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }

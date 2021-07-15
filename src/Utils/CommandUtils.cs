@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -7,11 +8,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
 using Discord;
+using Fergun.Interactive.Pagination;
 
 namespace Fergun.Utils
 {
     public static class CommandUtils
     {
+        private static Dictionary<IEmote, PaginatorAction> _fergunPaginatorEmotes;
+
         public static async Task<double> GetCpuUsageForProcessAsync()
         {
             var startTime = DateTimeOffset.UtcNow;
@@ -63,6 +67,34 @@ namespace Fergun.Utils
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
 
+#if DNETLABS
+         public static MessageComponent BuildLinks(IMessageChannel channel)
+        {
+            var builder = new ComponentBuilder();
+            if (FergunClient.InviteLink != null && Uri.IsWellFormedUriString(FergunClient.InviteLink, UriKind.Absolute))
+            {
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink));
+            }
+
+            if (FergunClient.DblBotPage != null && Uri.IsWellFormedUriString(FergunClient.DblBotPage, UriKind.Absolute))
+            {
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage));
+                //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote"));
+            }
+
+            if (FergunClient.Config.SupportServer != null && Uri.IsWellFormedUriString(FergunClient.Config.SupportServer, UriKind.Absolute))
+            {
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer));
+            }
+
+            if (FergunClient.Config.DonationUrl != null && Uri.IsWellFormedUriString(FergunClient.Config.DonationUrl, UriKind.Absolute))
+            {
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl));
+            }
+
+            return builder.Build();
+        }
+#else
         public static string BuildLinks(IMessageChannel channel)
         {
             string links = $"{Format.Url(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink)}";
@@ -81,6 +113,34 @@ namespace Fergun.Utils
             }
 
             return links;
+        }
+#endif
+
+        public static Dictionary<IEmote, PaginatorAction> GetFergunPaginatorEmotes(FergunConfig config)
+        {
+            if (_fergunPaginatorEmotes != null)
+            {
+                return _fergunPaginatorEmotes;
+            }
+
+            _fergunPaginatorEmotes = new Dictionary<IEmote, PaginatorAction>();
+
+            AddEmote(config.FirstPageEmote, PaginatorAction.SkipToStart, "⏮");
+            AddEmote(config.PreviousPageEmote, PaginatorAction.Backward, "◀");
+            AddEmote(config.NextPageEmote, PaginatorAction.Forward, "▶");
+            AddEmote(config.LastPageEmote, PaginatorAction.SkipToEnd, "⏭");
+            AddEmote(config.StopPaginatorEmote, PaginatorAction.Exit, "🛑");
+
+            return _fergunPaginatorEmotes;
+
+            static void AddEmote(string emoteString, PaginatorAction action, string defaultEmoji)
+            {
+                var emote = string.IsNullOrEmpty(emoteString) || !Emote.TryParse(emoteString, out var parsedEmote)
+                    ? new Emoji(defaultEmoji) as IEmote
+                    : parsedEmote;
+
+                _fergunPaginatorEmotes.Add(emote, action);
+            }
         }
 
         public static string RunCommand(string command)

@@ -2,8 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using Fergun.Services;
 using Fergun.Utils;
 
@@ -30,141 +30,22 @@ namespace Fergun.Modules
         /// </summary>
         public MessageCacheService MessageCache { get; set; }
 
-        /// <summary>
-        /// Waits for the next message in the source channel.
-        /// </summary>
-        /// <param name="criterion">
-        /// The criterion.
-        /// </param>
-        /// <param name="timeout">
-        /// The timeout.
-        /// </param>
-        /// <returns>
-        /// A task representing the wait operation. The result contains the message, or <c>null</c> if no message was sent before the timeout.
-        /// </returns>
-        public Task<SocketMessage> NextMessageAsync(ICriterion<SocketMessage> criterion, TimeSpan? timeout = null)
-            => Interactive.NextMessageAsync(Context, criterion, timeout);
-
-        /// <summary>
-        /// Waits for the next message in the channel.
-        /// </summary>
-        /// <param name="fromSourceUser">
-        /// Determines whether the user have to be the source user or not.
-        /// </param>
-        /// <param name="inSourceChannel">
-        /// Determines whether the channel have to be the source channel or not.
-        /// </param>
-        /// <param name="timeout">
-        /// The timeout.
-        /// </param>
-        /// <returns>
-        /// A task representing the wait operation. The result contains the message, or null if no message was sent before the timeout.
-        /// </returns>
-        public Task<SocketMessage> NextMessageAsync(bool fromSourceUser = true, bool inSourceChannel = true, TimeSpan? timeout = null)
-            => Interactive.NextMessageAsync(Context, fromSourceUser, inSourceChannel, timeout);
-
-        /// <summary>
-        /// Sends a message to the source channel and then deletes the message after the provided timeout.
-        /// </summary>
-        /// <param name="text">
-        /// The message to be sent.
-        /// </param>
-        /// <param name="isTTS">
-        /// Determines whether the message should be read aloud by Discord or not.
-        /// </param>
-        /// <param name="embed">
-        /// The <see cref="EmbedType.Rich"/> <see cref="Embed"/> to be sent.
-        /// </param>
-        /// <param name="timeout">
-        /// The timeout.
-        /// </param>
-        /// <param name="options">
-        /// The options to be used when sending the request.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result contains the message.
-        /// </returns>
-        public Task<IUserMessage> ReplyAndDeleteAsync(string text, bool isTTS = false, Embed embed = null, TimeSpan? timeout = null, RequestOptions options = null)
-            => Interactive.ReplyAndDeleteAsync(Context, text, isTTS, embed, timeout, options);
-
-        /// <summary>
-        /// Sends a message with reaction callbacks to the source channel.
-        /// </summary>
-        /// <param name="callbackData">
-        /// The callback data.
-        /// </param>
-        /// <param name="fromSourceUser">
-        /// Determines whether the user have to be the source user or not.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result contains the message.
-        /// </returns>
-        public async Task<IUserMessage> InlineReactionReplyAsync(ReactionCallbackData callbackData, bool fromSourceUser = true)
+        public async Task<IUserMessage> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null)
         {
-            var response = await Interactive.SendMessageWithReactionCallbacksAsync(Context, callbackData, fromSourceUser);
-
-            if (!Cache.IsDisabled)
-            {
-                Cache.Add(Context.Message, response);
-            }
-
-            return response;
-        }
-
-        /// <summary>
-        /// Sends a paginated message to the source channel.
-        /// </summary>
-        /// <param name="pager">
-        /// The pager.
-        /// </param>
-        /// <param name="reactions">
-        /// The reactions.
-        /// </param>
-        /// <param name="fromSourceUser">
-        /// Determines whether the user have to be the source user or not.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result contains the message.
-        /// </returns>
-        public Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, bool fromSourceUser = true)
-        {
-            var criterion = new Criteria<SocketReaction>();
-            if (fromSourceUser)
-                criterion.AddCriterion(new EnsureReactionFromSourceUserCriterion());
-            return PagedReplyAsync(pager, reactions, criterion);
-        }
-
-        /// <summary>
-        /// Sends a paginated message to the source channel.
-        /// </summary>
-        /// <param name="pager">
-        /// The pager.
-        /// </param>
-        /// <param name="reactions">
-        /// The reactions.
-        /// </param>
-        /// <param name="criterion">
-        /// The criterion.
-        /// </param>
-        /// <returns>
-        /// A task representing the asynchronous operation. The result contains the message.
-        /// </returns>
-        public async Task<IUserMessage> PagedReplyAsync(PaginatedMessage pager, ReactionList reactions, ICriterion<SocketReaction> criterion)
-        {
-            IUserMessage response;
+            IUserMessage response = null;
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion, response).ConfigureAwait(false);
+                 await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, response, true).ConfigureAwait(false);
             }
             else
             {
-                response = await Interactive.SendPaginatedMessageAsync(Context, pager, reactions, criterion).ConfigureAwait(false);
+                var result = await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, null, true).ConfigureAwait(false);
 
                 if (!Cache.IsDisabled)
                 {
-                    Cache.Add(Context.Message, response);
+                    Cache.Add(Context.Message, result.Message);
                 }
             }
 
@@ -172,11 +53,23 @@ namespace Fergun.Modules
         }
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null)
+#if DNETLABS
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
+            MessageReference messageReference = null, MessageComponent component = null)
         {
+            component ??= new ComponentBuilder().Build(); // remove message components if null
+#else
+        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
+            MessageReference messageReference = null)
+        {
+#endif
             if (Cache.IsDisabled)
             {
+#if DNETLABS
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
+#else
                 return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
+#endif
             }
 
             IUserMessage response;
@@ -187,13 +80,21 @@ namespace Fergun.Modules
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
+#if DNETLABS
+                    x.Components = component;
+#endif
                 }).ConfigureAwait(false);
 
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
             }
             else
             {
+#if DNETLABS
+                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
+#else
                 response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
+#endif
                 Cache.Add(Context.Message, response);
             }
             return response;

@@ -72,19 +72,33 @@ namespace Fergun.Extensions
         /// Modifies this message or re-sends it if no longer exists.
         /// </summary>
         /// <returns>A new message or a modified one.</returns>
+#if DNETLABS
+        public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null,
+            AllowedMentions allowedMentions = null, MessageComponent component = null, MessageCacheService cache = null)
+        {
+            component ??= new ComponentBuilder().Build(); // remove message components if null
+#else
         public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null,
             AllowedMentions allowedMentions = null, MessageCacheService cache = null)
         {
+#endif
             bool isValid = await message.Channel.GetMessageAsync(cache, message.Id) != null;
             if (!isValid)
             {
+#if DNETLABS
+                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions, component: component);
+#else
                 return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions);
+#endif
             }
 
             await message.ModifyAsync(x =>
             {
                 x.Content = content;
                 x.Embed = embed;
+#if DNETLABS
+                x.Components = component;
+#endif
                 x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
             });
 

@@ -9,12 +9,13 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Fergun.APIs.OpenTriviaDB;
 using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Services;
 using Fergun.Utils;
 
@@ -31,12 +32,14 @@ namespace Fergun.Modules
         private static CommandService _cmdService;
         private static LogService _logService;
         private static MessageCacheService _messageCache;
+        private static InteractiveService _interactive;
 
-        public Other(CommandService commands, LogService logService, MessageCacheService messageCache)
+        public Other(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
             _cmdService ??= commands;
             _logService ??= logService;
             _messageCache ??= messageCache;
+            _interactive ??= interactive;
         }
 
         [Command("changelog")]
@@ -126,14 +129,14 @@ namespace Fergun.Modules
             var stats = DatabaseConfig.CommandStats.OrderByDescending(x => x.Value);
             int i = 1;
             string current = "";
-            var pages = new List<EmbedBuilder>();
+            var splitStats = new List<string>();
 
             foreach (var pair in stats)
             {
                 string command = $"{i}. {Format.Code(pair.Key)}: {pair.Value}\n";
                 if (command.Length + current.Length > EmbedFieldBuilder.MaxFieldValueLength / 2)
                 {
-                    pages.Add(new EmbedBuilder { Description = current });
+                    splitStats.Add(current);
                     current = command;
                 }
                 else
@@ -144,27 +147,39 @@ namespace Fergun.Modules
             }
             if (!string.IsNullOrEmpty(current))
             {
-                pages.Add(new EmbedBuilder { Description = current });
+                splitStats.Add(current);
             }
-            if (pages.Count == 0)
+
+            if (splitStats.Count == 0)
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
             string creationDate = Context.Client.CurrentUser.CreatedAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture);
 
-            var pager = new PaginatedMessage
+            Task<PageBuilder> GeneratePageAsync(int index)
             {
-                Title = string.Format(Locate("CommandStatsInfo"), creationDate),
-                Pages = pages,
-                Color = new Color(FergunClient.Config.EmbedColor),
-                Options = new PaginatorAppearanceOptions
-                {
-                    FooterFormat = Locate("PaginatorFooter"),
-                    Timeout = TimeSpan.FromMinutes(10)
-                }
-            };
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(string.Format(Locate("CommandStatsInfo"), creationDate))
+                    .WithDescription(splitStats[index])
+                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, splitStats.Count));
 
-            await PagedReplyAsync(pager, ReactionList.Default);
+                return Task.FromResult(pageBuilder);
+            }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(splitStats.Count - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+
             return FergunResult.FromSuccess();
         }
 
@@ -281,7 +296,7 @@ namespace Fergun.Modules
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
-        [Command("language")]
+        [Command("language", RunMode = RunMode.Async), Ratelimit(2, 0.5, Measure.Minutes)]
         [Summary("languageSummary")]
         [Alias("lang")]
         public async Task<RuntimeResult> Language()
@@ -293,46 +308,56 @@ namespace Fergun.Modules
 
             var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
 
-            bool hasReacted = false;
-            IUserMessage message = null;
-            string languages = "";
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
-            EmbedBuilder builder = null;
-            int i = 0;
-            foreach (var language in FergunClient.Languages)
-            {
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleLanguageUpdateAsync(language.Key)));
-                languages += $"{i + 1}. {Format.Bold(language.Value.EnglishName)} ({language.Value.NativeName})\n";
-                i++;
-            }
-
-            builder = new EmbedBuilder()
+            var builder = new EmbedBuilder()
                 .WithTitle(Locate("LanguageSelection"))
-                .WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}")
+                .WithDescription(Locate("LanguagePrompt"))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(1),
-                async context => await HandleLanguageUpdateAsync(null)).AddCallbacks(callbacks);
+            var warningBuilder = new EmbedBuilder()
+                .WithColor(FergunClient.Config.EmbedColor)
+                .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
 
-            message = await InlineReactionReplyAsync(data);
+            var selectionBuilder = new LanguageSelectionBuilder()
+                .WithOptions(FergunClient.Languages)
+                .AddUser(Context.User)
+                .WithGuildLanguage(GetLanguage())
+                .WithActionOnSuccess(ActionOnStop.DeleteInput)
+                .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DeleteInput)
+                .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
+                .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder));
+
+#if !DNETLABS
+            string[] codes = FergunClient.Languages.Keys.Where(x => x != GetLanguage()).ToArray();
+            string languages = "";
+            for (int i = 0; i < codes.Length; i++)
+            {
+                var culture = FergunClient.Languages[codes[i]];
+                languages += $"{i + 1}. {Format.Bold(culture.EnglishName)} ({culture.NativeName})\n";
+            }
+
+            builder.WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}");
+            selectionBuilder.WithOptions(FergunClient.Languages.Where(x => x.Key != GetLanguage()).ToDictionary(x => x.Key, x => x.Value));
+            selectionBuilder.EmoteConverter = x => new Emoji($"{Array.IndexOf(codes, x.Key) + 1}\ufe0f\u20e3");
+#endif
+
+            var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1));
+
+            if (!result.IsSuccess)
+            {
+                return FergunResult.FromError(Locate("ReplyTimeout"), true);
+            }
+
+            guild.Language = result.Value.Key;
+            FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
+
+            builder.WithTitle(Locate("LanguageSelection"))
+                .WithDescription($"✅ {Locate("NewLanguage")}");
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{guild.Language}\" in {Context.Guild.Name}"));
+
+            await result.Message.ModifyAsync(x => x.Embed = builder.Build());
 
             return FergunResult.FromSuccess();
-
-            async Task HandleLanguageUpdateAsync(string newLanguage)
-            {
-                if (hasReacted || guild.Language == newLanguage) return;
-                hasReacted = true;
-                if (newLanguage == null)
-                {
-                    await message!.ModifyAsync(x => x.Embed = builder.WithDescription($"❌ {Locate("ReactTimeout")}").Build());
-                    return;
-                }
-                guild.Language = newLanguage;
-                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Language: Updated language to: \"{newLanguage}\" in {Context.Guild.Name}"));
-                await message!.ModifyAsync(x => x.Embed = builder.WithTitle(Locate("LanguageSelection")).WithDescription($"✅ {Locate("NewLanguage")}").Build());
-            }
         }
 
         [AlwaysEnabled]
@@ -385,9 +410,7 @@ namespace Fergun.Modules
 
             var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id));
 
-            string valueList = Locate(userConfig!.IsOptedOutSnipe);
-
-            IUserMessage message = null;
+            string valueList = Locate(userConfig.IsOptedOutSnipe);
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("PrivacyPolicy"))
@@ -398,31 +421,33 @@ namespace Fergun.Modules
                 .AddField(Locate("Value"), valueList, true)
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(5))
-                .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
-                {
-                    userConfig.IsOptedOutSnipe = !userConfig.IsOptedOutSnipe;
-                    await HandleReactionAsync(reaction);
-                })
-                .AddCallBack(new Emoji("❌"), async (_, reaction) =>
-                {
-                    await message.TryDeleteAsync();
-                });
+            var selection = new EmoteSelectionBuilder<int>()
+                .AddUser(Context.User)
+                .AddOption(new Emoji("1\ufe0f\u20e3"), 1)
+                .AddOption(new Emoji("❌"), -1)
+                .WithAllowCancel(true)
+                .WithActionOnSuccess(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
+                .Build();
 
-            message = await InlineReactionReplyAsync(data);
+            var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromMinutes(2));
+
+            if (!result.IsSuccess) return FergunResult.FromSuccess();
+
+            userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id));
+            userConfig.IsOptedOutSnipe = !userConfig.IsOptedOutSnipe;
+            FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+            GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
+
+            valueList = Locate(userConfig.IsOptedOutSnipe);
+
+            builder.Fields[4] = new EmbedFieldBuilder { Name = Locate("Value"), Value = valueList, IsInline = true };
+
+            await result.Message.ModifyAsync(x => x.Embed = builder.Build());
 
             return FergunResult.FromSuccess();
-
-            async Task HandleReactionAsync(SocketReaction reaction)
-            {
-                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
-                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
-                valueList = Locate(userConfig.IsOptedOutSnipe);
-
-                builder.Fields[4] = new EmbedFieldBuilder { Name = Locate("Value"), Value = valueList, IsInline = true };
-                _ = message!.RemoveReactionAsync(reaction.Emote, reaction.UserId);
-                await message.ModifyAsync(x => x.Embed = builder.Build());
-            }
         }
 
         [Command("reaction")]
@@ -603,13 +628,25 @@ namespace Fergun.Modules
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("BotOwner"), owner, true);
 
+#if DNETLABS
+                MessageComponent component = null;
+#endif
+
             if (!FergunClient.IsDebugMode)
             {
+#if DNETLABS
+                component = CommandUtils.BuildLinks(Context.Channel);
+#else
                 builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
+#endif
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
+#if DNETLABS
+                await ReplyAsync(embed: builder.Build(), component: component);
+#else
             await ReplyAsync(embed: builder.Build());
+#endif
         }
 
         [Command("support")]
@@ -659,7 +696,7 @@ namespace Fergun.Modules
         }
 
         [LongRunning]
-        [Command("trivia", RunMode = RunMode.Async)]
+        [Command("trivia", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("triviaSummary")]
         [Example("computers")]
         public async Task<RuntimeResult> Trivia([Summary("triviaParam1")] string category = null)
@@ -749,19 +786,16 @@ namespace Fergun.Modules
 
             options.Shuffle();
 
-            IUserMessage message = null;
-            bool hasReacted = false;
-            var callbacks = new List<(IEmote, Func<SocketCommandContext, SocketReaction, Task>)>();
             string optionsText = "";
-            int i = 0;
-            foreach (string option in options)
+            var selections = new Dictionary<IEmote, int>();
+
+            for (int i = 0; i < options.Count; i++)
             {
                 optionsText += $"{i + 1}. {Uri.UnescapeDataString(options[i])}\n";
-                callbacks.Add((new Emoji($"{i + 1}\ufe0f\u20e3"), async (context, reaction) => await HandleTriviaReactionAsync(option)));
-                i++;
+                selections.Add(new Emoji($"{i + 1}\ufe0f\u20e3"), i);
             }
 
-            int time = (Array.IndexOf(_triviaDifficulties, question.Difficulty) * 5) + (question.Type == "multiple" ? 10 : 5);
+            int time = Array.IndexOf(_triviaDifficulties, question.Difficulty) * 5 + (question.Type == "multiple" ? 10 : 5);
 
             builder.WithAuthor(Context.User)
                 .WithTitle("Trivia")
@@ -773,45 +807,39 @@ namespace Fergun.Modules
                 .WithFooter(string.Format(Locate("TimeLeft"), time))
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            var data = new ReactionCallbackData(null, builder.Build(), true, true, TimeSpan.FromSeconds(time),
-                async context => await HandleTriviaReactionAsync(null)).AddCallbacks(callbacks);
+            var selection = new EmoteSelectionBuilder<int>()
+                .WithOptions(selections)
+                .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
+                .AddUser(Context.User)
+                .Build();
 
-            message = await InlineReactionReplyAsync(data);
+            var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromSeconds(time));
+
+            int option = result.IsSuccess ? result.Value.Value : -1;
+
+            builder = new EmbedBuilder();
+
+            if (option == -1 || options[option] != question.CorrectAnswer)
+            {
+                userConfig.TriviaPoints--;
+                builder.Title = $"❌ {Locate(option == -1 ? "TimesUp" : "Incorrect")}";
+                builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
+            }
+            else
+            {
+                userConfig.TriviaPoints++;
+                builder.Title = $"✅ {Locate("CorrectAnswer")}";
+                builder.Description = Locate("Won1Point");
+            }
+
+            builder.WithFooter($"{Locate("Points")}: {userConfig.TriviaPoints}")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+            GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
+            await result.Message.ModifyOrResendAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
-
-            async Task HandleTriviaReactionAsync(string option)
-            {
-                if (hasReacted) return;
-                hasReacted = true;
-
-                builder = new EmbedBuilder();
-                if (option == null)
-                {
-                    userConfig!.TriviaPoints--;
-                    builder.Title = $"❌ {Locate("TimesUp")}";
-                    builder.Description = Locate("Lost1Point");
-                }
-                else if (option == question.CorrectAnswer)
-                {
-                    userConfig!.TriviaPoints++;
-                    builder.Title = $"✅ {Locate("CorrectAnswer")}";
-                    builder.Description = Locate("Won1Point");
-                }
-                else
-                {
-                    userConfig!.TriviaPoints--;
-                    builder.Title = $"❌ {Locate("Incorrect")}";
-                    builder.Description = $"{Locate("Lost1Point")}\n{Locate("TheAnswerIs")} {Format.Code(Uri.UnescapeDataString(question.CorrectAnswer))}";
-                }
-
-                builder.WithFooter($"{Locate("Points")}: {userConfig.TriviaPoints}")
-                    .WithColor(FergunClient.Config.EmbedColor);
-
-                FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
-                GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
-                await message!.ModifyAsync(x => x.Embed = builder.Build());
-            }
         }
 
         [Command("uptime")]
@@ -853,5 +881,88 @@ namespace Fergun.Modules
 
             return FergunResult.FromSuccess();
         }
+    }
+
+    internal class LanguageSelectionBuilder : BaseSelectionBuilder<LanguageSelection, KeyValuePair<string, CultureInfo>, LanguageSelectionBuilder>
+    {
+        public new IReadOnlyDictionary<string, CultureInfo> Options { get; set; } = new Dictionary<string, CultureInfo>();
+
+#if DNETLABS
+        public override InputType InputType { get; set; } = InputType.SelectMenus;
+#endif
+
+        public override Func<KeyValuePair<string, CultureInfo>, string> StringConverter { get; set; } = x => x.Key;
+
+        public string GuildLanguage { get; set; }
+
+        public LanguageSelectionBuilder WithGuildLanguage(string guildLanguage)
+        {
+            GuildLanguage = guildLanguage;
+            return this;
+        }
+
+        public LanguageSelectionBuilder WithOptions(IReadOnlyDictionary<string, CultureInfo> options)
+        {
+            Options = options;
+            return this;
+        }
+
+        public LanguageSelectionBuilder WithOptions(Dictionary<string, CultureInfo> options)
+        {
+            Options = options;
+            return this;
+        }
+
+        public override LanguageSelection Build() => new LanguageSelection(EmoteConverter, StringConverter,
+            EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options,
+            CanceledPage?.Build(), TimedOutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
+            ActionOnCancellation, ActionOnTimeout, ActionOnSuccess)
+        {
+            GuildLanguage = GuildLanguage
+        };
+    }
+
+    /// <summary>
+    /// Custom selection for <see cref="Other.Language"/>
+    /// </summary>
+    internal class LanguageSelection : BaseSelection<KeyValuePair<string, CultureInfo>>
+    {
+        internal LanguageSelection(Func<KeyValuePair<string, CultureInfo>, IEmote> emoteConverter,
+            Func<KeyValuePair<string, CultureInfo>, string> stringConverter, IEqualityComparer<KeyValuePair<string, CultureInfo>> equalityComparer,
+            bool allowCancel, Page selectionPage, IReadOnlyCollection<IUser> users, IReadOnlyCollection<KeyValuePair<string, CultureInfo>> options,
+            Page canceledPage, Page timedOutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
+            ActionOnStop actionOnTimeout, ActionOnStop actionOnSuccess)
+            : base(emoteConverter, stringConverter, equalityComparer,
+            allowCancel, selectionPage, users, options, canceledPage, timedOutPage, successPage, deletion, inputType,
+            actionOnCancellation, actionOnTimeout, actionOnSuccess)
+        {
+        }
+
+        public string GuildLanguage { get; set; }
+
+#if DNETLABS
+        public override MessageComponent BuildComponents(bool disableAll)
+        {
+            var builder = new ComponentBuilder();
+            var options = new List<SelectMenuOptionBuilder>();
+
+            foreach (var selection in Options)
+            {
+                string id = StringConverter?.Invoke(selection);
+
+                var option = new SelectMenuOptionBuilder()
+                    .WithLabel(selection.Value.EnglishName)
+                    .WithDescription(selection.Value.NativeName)
+                    .WithDefault(id == GuildLanguage)
+                    .WithValue(id);
+
+                options.Add(option);
+            }
+
+            builder.WithSelectMenu(null, "foobar", options);
+
+            return builder.Build();
+        }
+#endif
     }
 }

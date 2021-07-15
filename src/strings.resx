@@ -668,7 +668,7 @@ Creating cache...</value>
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Option out of index.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>You did not reply before the timeout!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1688,7 +1688,7 @@ To disable the loop, use this command without parameters.</value>
     <value>Artist Page</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>React to the emoji below to delete the adventure.</value>
+    <value>Press the button/emoji below to delete the adventure.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>You did not react before the timeout!</value>
@@ -1697,7 +1697,7 @@ To disable the loop, use this command without parameters.</value>
     <value>Language Selection</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>React to the language you want to set.</value>
+    <value>Select the language you want to set.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Use `-headers` at the end of the command to keep the tags (`[info]`).</value>
@@ -2386,6 +2386,12 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Don't want your message to be displayed here? See `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>You can't use this interaction.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Deleting the adventure...</value>
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>Donate</value>

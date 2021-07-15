@@ -343,28 +343,28 @@ namespace Fergun.Services
             }
         }
 
-        private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
+        private Task MessageDeleted(Cacheable<IMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
-            HandleDeletedMessage(cache.Id, channel);
+            HandleDeletedMessage(cachedMessage.Id, cachedChannel.Id);
             return Task.CompletedTask;
         }
 
-        private void HandleDeletedMessage(ulong messageId, IMessageChannel channel)
+        private void HandleDeletedMessage(ulong messageId, ulong channelId)
         {
             // The default message cache removes deleted message from its cache, here we just move the message to the deleted messages
-            if (TryRemoveCachedMessage(channel, messageId, out var message)) // A message gets deleted
+            if (TryRemoveCachedMessage(channelId, messageId, out var message)) // A message gets deleted
             {
                 if (_onlyCacheUserDeletedEditedMessages && message.Source != MessageSource.User) return;
 
                 message.Update(DateTimeOffset.UtcNow, MessageSourceEvent.MessageDeleted);
 
                 // move cached message to the deleted messages cache
-                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                var cachedChannel = _deletedCache.GetOrAdd(channelId, new ConcurrentDictionary<ulong, ICachedMessage>());
                 cachedChannel[messageId] = message;
             }
-            if (TryRemoveCachedMessage(channel, messageId, out message, MessageSourceEvent.MessageUpdated)) // An updated message gets deleted
+            if (TryRemoveCachedMessage(channelId, messageId, out message, MessageSourceEvent.MessageUpdated)) // An updated message gets deleted
             {
-                var cachedChannel = _deletedCache.GetOrAdd(channel.Id, new ConcurrentDictionary<ulong, ICachedMessage>());
+                var cachedChannel = _deletedCache.GetOrAdd(channelId, new ConcurrentDictionary<ulong, ICachedMessage>());
 
                 // Avoid adding again the deleted message
                 if (cachedChannel.ContainsKey(messageId)) return;
@@ -376,7 +376,7 @@ namespace Fergun.Services
             }
         }
 
-        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedbefore, SocketMessage updatedMessage, ISocketMessageChannel channel)
+        private Task MessageUpdated(Cacheable<IMessage, ulong> cachedBefore, SocketMessage updatedMessage, ISocketMessageChannel channel)
         {
             HandleUpdatedMessage(updatedMessage, channel);
             return Task.CompletedTask;
@@ -447,9 +447,9 @@ namespace Fergun.Services
             }
         }
 
-        private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> cachedMessages, ISocketMessageChannel channel)
+        private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> cachedMessages, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
-            if (IsCachedChannelNotPresentOrEmpty(channel.Id) && IsCachedChannelNotPresentOrEmpty(channel.Id, MessageSourceEvent.MessageUpdated))
+            if (IsCachedChannelNotPresentOrEmpty(cachedChannel.Id) && IsCachedChannelNotPresentOrEmpty(cachedChannel.Id, MessageSourceEvent.MessageUpdated))
             {
                 return Task.CompletedTask;
             }
@@ -458,21 +458,21 @@ namespace Fergun.Services
             {
                 foreach (var cached in cachedMessages)
                 {
-                    HandleDeletedMessage(cached.Id, channel);
+                    HandleDeletedMessage(cached.Id, cachedChannel.Id);
                 }
             });
 
             return Task.CompletedTask;
         }
 
-        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, SocketReaction reaction)
+        private Task ReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
-            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out var message))
             {
                 message.AddReaction(reaction);
             }
 
-            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.AddReaction(reaction);
             }
@@ -480,14 +480,14 @@ namespace Fergun.Services
             return Task.CompletedTask;
         }
 
-        private Task ReactionRemoved(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, SocketReaction reaction)
+        private Task ReactionRemoved(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction reaction)
         {
-            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out var message))
             {
                 message.RemoveReaction(reaction);
             }
 
-            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.RemoveReaction(reaction);
             }
@@ -495,14 +495,14 @@ namespace Fergun.Services
             return Task.CompletedTask;
         }
 
-        private Task ReactionsCleared(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel)
+        private Task ReactionsCleared(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel)
         {
-            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out var message))
             {
                 message.RemoveAllReactions();
             }
 
-            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.RemoveAllReactions();
             }
@@ -510,14 +510,14 @@ namespace Fergun.Services
             return Task.CompletedTask;
         }
 
-        private Task ReactionsRemovedForEmote(Cacheable<IUserMessage, ulong> cached, ISocketMessageChannel channel, IEmote emote)
+        private Task ReactionsRemovedForEmote(Cacheable<IUserMessage, ulong> cachedMessage, Cacheable<IMessageChannel, ulong> cachedChannel, IEmote emote)
         {
-            if (TryGetCachedMessage(channel, cached.Id, out var message))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out var message))
             {
                 message.RemoveAllReactionsForEmote(emote);
             }
 
-            if (TryGetCachedMessage(channel, cached.Id, out message, MessageSourceEvent.MessageUpdated))
+            if (TryGetCachedMessage(cachedChannel.Id, cachedMessage.Id, out message, MessageSourceEvent.MessageUpdated))
             {
                 message.RemoveAllReactionsForEmote(emote);
             }
@@ -692,10 +692,6 @@ namespace Fergun.Services
             => ((IUserMessage)_message).ModifyAsync(func, options);
 
         /// <inheritdoc/>
-        public Task ModifySuppressionAsync(bool suppressEmbeds, RequestOptions options = null)
-            => ((IUserMessage)_message).ModifySuppressionAsync(suppressEmbeds, options);
-
-        /// <inheritdoc/>
         public Task PinAsync(RequestOptions options = null) => ((IUserMessage)_message).PinAsync(options);
 
         /// <inheritdoc/>
@@ -865,6 +861,11 @@ namespace Fergun.Services
 
         /// <inheritdoc/>
         public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
+
+#if DNETLABS
+        /// <inheritdoc/>
+        public IReadOnlyCollection<IMessageComponent> Components => _message.Components;
+#endif
 
         /// <inheritdoc/>
         public Task DeleteAsync(RequestOptions options = null) => _message.DeleteAsync(options);

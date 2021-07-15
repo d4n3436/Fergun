@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,6 +10,8 @@ using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Services;
 using Fergun.Utils;
 using Victoria;
@@ -28,12 +29,14 @@ namespace Fergun.Modules
         private static LogService _logService;
         private static GeniusApi _geniusApi;
         private static MessageCacheService _messageCache;
+        private static InteractiveService _interactive;
 
-        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache)
+        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
             _musicService = musicService;
             _logService ??= logService;
             _messageCache ??= messageCache;
+            _interactive ??= interactive;
             _geniusApi ??= new GeniusApi(FergunClient.Config.GeniusApiToken);
         }
 
@@ -133,25 +136,35 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ErrorParsingLyrics"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
             }
 
-            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength);
+            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToArray();
             string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
             string title = genius.Response.Hits[0].Result.FullTitle;
-            var pager = new PaginatedMessage
-            {
-                Color = new Color(FergunClient.Config.EmbedColor),
-                Title = title.Truncate(EmbedBuilder.MaxTitleLength),
-                Fields = new List<EmbedFieldBuilder> { new EmbedFieldBuilder { Name = "Links", Value = links } },
-                Pages = splitLyrics.Select(x => new EmbedBuilder { Description = x.Truncate(EmbedBuilder.MaxDescriptionLength) }),
-                Options = new PaginatorAppearanceOptions
-                {
-                    FooterFormat = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}",
-                    Timeout = TimeSpan.FromMinutes(10),
-                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
-                }
-            };
 
-            await PagedReplyAsync(pager, ReactionList.Default);
+            Task<PageBuilder> GeneratePageAsync(int index)
+            {
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(title)
+                    .WithDescription(splitLyrics[index].Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .AddField("Links", links)
+                    .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, splitLyrics.Length)}");
+
+                return Task.FromResult(pageBuilder);
+            }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(splitLyrics.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
 
             return FergunResult.FromSuccess();
         }
@@ -187,10 +200,10 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = (SocketGuildUser)Context.User;
-            (string result, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            (string response, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
             if (tracks == null)
             {
-                await SendEmbedAsync(result);
+                await SendEmbedAsync(response);
             }
             else
             {
@@ -213,27 +226,35 @@ namespace Fergun.Modules
                         .WithDescription(list)
                         .WithColor(FergunClient.Config.EmbedColor);
 
-                    message = await ReplyAsync(embed: builder.Build());
+                    var warningBuilder = new EmbedBuilder()
+                        .WithColor(FergunClient.Config.EmbedColor)
+                        .WithDescription($"\u26a0 {Locate("ReplyTimeout")}");
 
-                    var response = await NextMessageAsync(true, true, TimeSpan.FromMinutes(1));
+                    var selectionBuilder = new SelectionBuilder<int>()
+                        .WithOptions(Enumerable.Range(0, count).ToArray())
+                        .WithStringConverter(x => (x + 1).ToString())
+                        .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
+                        .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
+                        .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput)
+                        .AddUser(Context.User);
 
-                    if (response == null)
+#if !DNETLABS
+                    selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
+                    selectionBuilder.ActionOnSuccess = ActionOnStop.DeleteInput;
+#endif
+
+                    var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1));
+
+                    if (!result.IsSuccess)
                     {
-                        return FergunResult.FromError($"{Locate("SearchTimeout")} {Locate("SearchCanceled")}");
+                        return FergunResult.FromError(Locate("ReplyTimeout"), true);
                     }
-                    if (!int.TryParse(response.Content, out int option))
-                    {
-                        return FergunResult.FromError($"{Locate("InvalidOption")} {Locate("SearchCanceled")}");
-                    }
-                    if (option < 1 || option > count)
-                    {
-                        return FergunResult.FromError($"{Locate("OutOfIndex")} {Locate("SearchCanceled")}");
-                    }
-                    selectedTrack = tracks[option - 1];
+
+                    selectedTrack = tracks[result.Value];
+                    message = result.Message;
                 }
                 else
                 {
-                    // people don't know how to select a track...
                     selectedTrack = tracks[0];
                 }
                 var result2 = await _musicService.PlayTrack(Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel, selectedTrack);

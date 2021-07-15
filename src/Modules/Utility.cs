@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -24,6 +25,8 @@ using Fergun.Attributes;
 using Fergun.Attributes.Preconditions;
 using Fergun.Extensions;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
@@ -59,14 +62,16 @@ namespace Fergun.Modules
         private static CommandService _cmdService;
         private static LogService _logService;
         private static MessageCacheService _messageCache;
+        private static InteractiveService _interactive;
 
         private static Random RngInstance => _rng ??= new Random();
 
-        public Utility(CommandService commands, LogService logService, MessageCacheService messageCache)
+        public Utility(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
             _cmdService ??= commands;
             _logService ??= logService;
             _messageCache ??= messageCache;
+            _interactive ??= interactive;
         }
 
         [RequireNsfw(ErrorMessage = "NSFWOnly")]
@@ -593,71 +598,81 @@ namespace Fergun.Modules
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
         [RequireUserPermission(GuildPermission.ManageGuild, ErrorMessage = "UserRequireManageServer")]
         [LongRunning]
-        [Command("config", RunMode = RunMode.Async)]
+        [Command("config", RunMode = RunMode.Async), Ratelimit(1, 2, Measure.Minutes)]
         [Summary("configSummary")]
         [Alias("configuration", "settings")]
         public async Task<RuntimeResult> Config()
         {
-            var guild = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-
-            string listToShow = "";
             string[] configList = Locate("ConfigList").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
+            string menuOptions = "";
             for (int i = 0; i < configList.Length; i++)
             {
-                listToShow += $"**{i + 1}.** {configList[i]}\n";
+                menuOptions += $"**{i + 1}.** {configList[i]}\n";
             }
 
+            var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+
+            var guildConfig = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
+            var options = Enumerable.Range(1, 3).ToDictionary(x => new Emoji($"{x}\ufe0f\u20e3") as IEmote, y => y);
+            options.Add(new Emoji("❌"), -1);
+
+            InteractiveMessageResult<KeyValuePair<IEmote, int>> result = null;
             IUserMessage message = null;
 
-            string valueList =
-                $"{Locate(guild.CaptionbotAutoTranslate)}\n" +
-                $"{Locate(guild.AidAutoTranslate)}\n" +
-                $"{Locate(guild.TrackSelection)}";
+            while (result == null || result.Status == InteractiveStatus.Success)
+            {
+                var selection = new EmoteSelectionBuilder<int>()
+                    .WithActionOnCancellation(ActionOnStop.DisableInput)
+                    .WithActionOnTimeout(ActionOnStop.DisableInput)
+                    .WithSelectionPage(CreateMenuPage())
+                    .AddUser(Context.User)
+                    .WithOptions(options)
+                    .WithAllowCancel(true)
+                    .Build();
 
-            var builder = new EmbedBuilder()
-                .WithAuthor(Context.User)
-                .WithTitle(Locate("FergunConfig"))
-                .WithDescription(Locate("ConfigPrompt"))
-                .AddField(Locate("Option"), listToShow, true)
-                .AddField(Locate("Value"), valueList, true)
-                .WithColor(FergunClient.Config.EmbedColor);
+                result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromMinutes(5), message, cts.Token);
+                message = result.Message;
 
-            var data = new ReactionCallbackData(null, builder.Build(), false, false, TimeSpan.FromMinutes(2))
-                .AddCallBack(new Emoji("1️⃣"), async (_, reaction) =>
-                {
-                    guild.CaptionbotAutoTranslate = !guild.CaptionbotAutoTranslate;
-                    await HandleReactionAsync(reaction);
-                })
-                .AddCallBack(new Emoji("2️⃣"), async (_, reaction) =>
-                {
-                    guild.AidAutoTranslate = !guild.AidAutoTranslate;
-                    await HandleReactionAsync(reaction);
-                })
-                .AddCallBack(new Emoji("3️⃣"), async (_, reaction) =>
-                {
-                    guild.TrackSelection = !guild.TrackSelection;
-                    await HandleReactionAsync(reaction);
-                })
-                .AddCallBack(new Emoji("❌"), async (_, reaction) =>
-                {
-                    await message.TryDeleteAsync();
-                });
+                if (!result.IsSuccess) break;
 
-            message = await InlineReactionReplyAsync(data);
+                guildConfig = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
+
+                switch (result.Value.Value)
+                {
+                    case 1:
+                        guildConfig.CaptionbotAutoTranslate = !guildConfig.CaptionbotAutoTranslate;
+                        break;
+
+                    case 2:
+                        guildConfig.AidAutoTranslate = !guildConfig.AidAutoTranslate;
+                        break;
+
+                    case 3:
+                        guildConfig.TrackSelection = !guildConfig.TrackSelection;
+                        break;
+                }
+
+                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guildConfig);
+            }
 
             return FergunResult.FromSuccess();
 
-            async Task HandleReactionAsync(SocketReaction reaction)
+            PageBuilder CreateMenuPage()
             {
-                FergunClient.Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
-                valueList =
-                    $"{Locate(guild.CaptionbotAutoTranslate)}\n" +
-                    $"{Locate(guild.AidAutoTranslate)}\n" +
-                    $"{Locate(guild.TrackSelection)}";
+                string valueList =
+                    $"{Locate(guildConfig.CaptionbotAutoTranslate)}\n" +
+                    $"{Locate(guildConfig.AidAutoTranslate)}\n" +
+                    $"{Locate(guildConfig.TrackSelection)}";
 
-                builder.Fields[1] = new EmbedFieldBuilder { Name = Locate("Value"), Value = valueList, IsInline = true };
-                _ = message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-                await message.ModifyAsync(x => x.Embed = builder.Build());
+                var builder = new EmbedBuilder()
+                    .WithAuthor(Context.User)
+                    .WithTitle(Locate("FergunConfig"))
+                    .WithDescription(Locate("ConfigPrompt"))
+                    .AddField(Locate("Option"), menuOptions, true)
+                    .AddField(Locate("Value"), valueList, true)
+                    .WithColor(FergunClient.Config.EmbedColor);
+
+                return PageBuilder.FromEmbedBuilder(builder);
             }
         }
 
@@ -714,73 +729,44 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
-            var pages = definitions.Select(x =>
+            Task<PageBuilder> GeneratePageAsync(int index)
             {
-                var fields = new List<EmbedFieldBuilder>
+                var info = definitions[index];
+
+                var pageBuilder = new PageBuilder()
+                    .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                    .WithTitle("Define")
+                    .AddField(Locate("Word"), info.PartOfSpeech == null || info.PartOfSpeech == "undefined" ? info.Word : $"{info.Word} ({info.PartOfSpeech})")
+                    .AddField(Locate("Definition"), info.Definition)
+                    .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, definitions.Count)}");
+
+                if (!string.IsNullOrEmpty(info.Example))
                 {
-                    new EmbedFieldBuilder
-                    {
-                        Name = Locate("Word"),
-                        Value = x.PartOfSpeech == null || x.PartOfSpeech == "undefined" ? x.Word : $"{x.Word} ({x.PartOfSpeech})"
-                    },
-                    new EmbedFieldBuilder
-                    {
-                        Name = Locate("Definition"),
-                        Value = x.Definition
-                    }
-                };
-                if (!string.IsNullOrEmpty(x.Example))
-                {
-                    fields.Add(new EmbedFieldBuilder
-                    {
-                        Name = Locate("Example"),
-                        Value = x.Example
-                    });
+                    pageBuilder.AddField(Locate("Example"), info.Example);
                 }
-                if (x.Synonyms.Count > 0)
+                if (info.Synonyms.Count > 0)
                 {
-                    fields.Add(new EmbedFieldBuilder
-                    {
-                        Name = Locate("Synonyms"),
-                        Value = string.Join(", ", x.Synonyms)
-                    });
+                    pageBuilder.AddField(Locate("Synonyms"), string.Join(", ", info.Synonyms));
                 }
-                if (x.Antonyms.Count > 0)
+                if (info.Antonyms.Count > 0)
                 {
-                    fields.Add(new EmbedFieldBuilder
-                    {
-                        Name = Locate("Antonyms"),
-                        Value = string.Join(", ", x.Antonyms)
-                    });
+                    pageBuilder.AddField(Locate("Antonyms"), string.Join(", ", info.Antonyms));
                 }
 
-                return new EmbedBuilder { Fields = fields };
-            });
+                return Task.FromResult(pageBuilder);
+            }
 
-            var pager = new PaginatedMessage
-            {
-                Title = "Define",
-                Pages = pages,
-                Color = new Discord.Color(FergunClient.Config.EmbedColor),
-                Options = new PaginatorAppearanceOptions
-                {
-                    FooterFormat = Locate("PaginatorFooter"),
-                    Timeout = TimeSpan.FromMinutes(10)
-                }
-            };
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(definitions.Count - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
 
-            var reactions = new ReactionList
-            {
-                First = definitions.Count >= 3,
-                Backward = true,
-                Forward = true,
-                Last = definitions.Count >= 3,
-                Stop = true,
-                Jump = definitions.Count >= 4,
-                Info = false
-            };
-
-            await PagedReplyAsync(pager, reactions);
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
 
             return FergunResult.FromSuccess();
         }
@@ -844,18 +830,30 @@ namespace Fergun.Modules
                 }
 
                 string version = $"v{Constants.Version}";
+#if DNETLABS
+                MessageComponent component = null;
+#endif
+
                 if (FergunClient.IsDebugMode)
                 {
                     version += "-dev";
                 }
                 else
                 {
+#if DNETLABS
+                    component = CommandUtils.BuildLinks(Context.Channel);
+#else
                     builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
+#endif
                 }
                 builder.WithFooter(string.Format(Locate("HelpFooter"), version, _cachedVisibleCmdCount))
                     .WithColor(FergunClient.Config.EmbedColor);
 
+#if DNETLABS
+                await ReplyAsync(embed: builder.Build(), component: component);
+#else
                 await ReplyAsync(embed: builder.Build());
+#endif
             }
             else
             {
@@ -955,7 +953,48 @@ namespace Fergun.Modules
                 return await Img2(query);
             }
 
-            return await SendPaginatedImagesAsync(images);
+            var filteredImages = images
+                .Where(x =>
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)), UriKind.Absolute) &&
+                    x.Link.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute) &&
+                    x.ContextLink.StartsWith("http", StringComparison.Ordinal))
+                .ToArray();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {images.Count} (filtered: {images.Count - filteredImages.Length})"));
+
+            if (filteredImages.Length == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+
+            Task<PageBuilder> GeneratePageAsync(int index)
+            {
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
+                    .WithUrl(filteredImages[index].ContextLink)
+                    .WithDescription(Locate("ImageSearch"))
+                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Link)))
+                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, filteredImages.Length));
+
+                return Task.FromResult(pageBuilder);
+            }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(filteredImages.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+
+            return FergunResult.FromSuccess();
         }
 
         [LongRunning]
@@ -978,10 +1017,11 @@ namespace Fergun.Modules
             bool isNsfwChannel = Context.IsNsfw();
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img2: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
 
-            DdgResponse search;
+            List<Result> images;
             try
             {
-                search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
+                var search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
+                images = search.Results;
             }
             catch (HttpRequestException e)
             {
@@ -999,7 +1039,48 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
-            return await SendPaginatedImagesAsync(search);
+            var filteredImages = images
+                .Where(x =>
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
+                    x.Image.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
+                    x.Url.StartsWith("http", StringComparison.Ordinal))
+                .ToArray();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {images.Count} (filtered: {images.Count - filteredImages.Length})"));
+
+            if (filteredImages.Length == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+
+            Task<PageBuilder> GeneratePageAsync(int index)
+            {
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
+                    .WithUrl(filteredImages[index].Url)
+                    .WithDescription(Locate("ImageSearch"))
+                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Image)))
+                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, filteredImages.Length));
+
+                return Task.FromResult(pageBuilder);
+            }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(filteredImages.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+
+            return FergunResult.FromSuccess();
         }
 
         [LongRunning]
@@ -1739,82 +1820,56 @@ namespace Fergun.Modules
                 }
             }
 
-            var pages = search.Definitions.Select(x =>
+            Task<PageBuilder> GeneratePageAsync(int index)
             {
+                var info = search.Definitions[index];
+
                 // Replace all occurrences of a term in brackets with a hyperlink directing to the definition of that term.
-                string definition = _bracketRegex.Replace(x.Definition,
+                string definition = _bracketRegex.Replace(info.Definition,
                         m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"))
                     .Truncate(EmbedBuilder.MaxDescriptionLength);
 
                 string example;
-                if (string.IsNullOrEmpty(x.Example))
+                if (string.IsNullOrEmpty(info.Example))
                 {
                     example = Locate("NoExample");
                 }
                 else
                 {
-                    example = _bracketRegex.Replace(x.Example,
+                    example = _bracketRegex.Replace(info.Example,
                             m => Format.Url(m.Groups[1].Value, $"https://urbandictionary.com/define.php?term={Uri.EscapeDataString(m.Groups[1].Value)}"))
                         .Truncate(EmbedFieldBuilder.MaxFieldValueLength);
                 }
 
-                var fields = new List<EmbedFieldBuilder>
-                {
-                    new EmbedFieldBuilder
-                    {
-                        Name = Locate("Example"),
-                        Value = example,
-                        IsInline = false
-                    },
-                    new EmbedFieldBuilder
-                    {
-                        Name = "👍",
-                        Value = x.ThumbsUp,
-                        IsInline = true
-                    },
-                    new EmbedFieldBuilder
-                    {
-                        Name = "👎",
-                        Value = x.ThumbsDown,
-                        IsInline = true
-                    }
-                };
+                string footer = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")}" +
+                                $" - {string.Format(Locate("PaginatorFooter"), index + 1, search.Definitions.Count)}";
 
-                return new EmbedBuilder
-                {
-                    Author = new EmbedAuthorBuilder { Name = $"{Locate("By")} {x.Author}" },
-                    Title = x.Word.Truncate(EmbedBuilder.MaxTitleLength),
-                    Description = definition,
-                    Url = x.Permalink,
-                    Fields = fields,
-                    Timestamp = x.WrittenOn
-                };
-            });
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor($"{Locate("By")} {info.Author}")
+                    .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(info.Word.Truncate(EmbedBuilder.MaxTitleLength))
+                    .WithUrl(info.Permalink)
+                    .WithDescription(definition)
+                    .AddField(Locate("Example"), example)
+                    .AddField("👍", info.ThumbsUp, true)
+                    .AddField("👎", info.ThumbsDown, true)
+                    .WithFooter(footer)
+                    .WithTimestamp(info.WrittenOn);
 
-            var pager = new PaginatedMessage
-            {
-                Pages = pages,
-                Color = new Discord.Color(FergunClient.Config.EmbedColor),
-                Options = new PaginatorAppearanceOptions
-                {
-                    FooterFormat = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")} - {Locate("PaginatorFooter")}",
-                    Timeout = TimeSpan.FromMinutes(10),
-                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
-                }
-            };
+                return Task.FromResult(pageBuilder);
+            }
 
-            var reactions = new ReactionList
-            {
-                First = search.Definitions.Count >= 3,
-                Backward = true,
-                Forward = true,
-                Last = search.Definitions.Count >= 3,
-                Stop = true,
-                Jump = search.Definitions.Count >= 4,
-                Info = false
-            };
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(search.Definitions.Count - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
 
-            await PagedReplyAsync(pager, reactions);
+            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
 
             return FergunResult.FromSuccess();
         }
@@ -2096,10 +2151,10 @@ namespace Fergun.Modules
         [Example("discord")]
         public async Task<RuntimeResult> YouTube([Remainder, Summary("youtubeParam1")] string query)
         {
-            VideoSearchResult video;
+            string[] urls;
             try
             {
-                video = await _ytClient.Search.GetVideosAsync(query).FirstOrDefaultAsync();
+                urls = await _ytClient.Search.GetVideosAsync(query).Take(10).Select(x => x.Url).ToArrayAsync();
             }
             catch (HttpRequestException e)
             {
@@ -2111,12 +2166,40 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Youtube: Error obtaining videos (query: {query})", e));
                 return FergunResult.FromError(Locate("ErrorInAPI"));
             }
-            if (video == null)
-            {
-                return FergunResult.FromError(Locate("NoResultsFound"));
-            }
 
-            await ReplyAsync(video.Url);
+            switch (urls.Length)
+            {
+                case 0:
+                    return FergunResult.FromError(Locate("NoResultsFound"));
+
+                case 1:
+                    await ReplyAsync(urls[0]);
+                    break;
+
+                default:
+                {
+                    Task<PageBuilder> GeneratePageAsync(int index)
+                    {
+                        var pageBuilder = new PageBuilder()
+                            .WithText($"{urls[index]}\n{string.Format(Locate("PaginatorFooter"), index + 1, urls.Length)}");
+
+                        return Task.FromResult(pageBuilder);
+                    }
+
+                    var paginator = new LazyPaginatorBuilder()
+                        .AddUser(Context.User)
+                        .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                        .WithMaxPageIndex(urls.Length - 1)
+                        .WithPageFactory(GeneratePageAsync)
+                        .WithFooter(PaginatorFooter.None)
+                        .WithActionOnCancellation(ActionOnStop.DisableInput)
+                        .WithActionOnTimeout(ActionOnStop.DisableInput)
+                        .Build();
+
+                    await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+                        break;
+                }
+            }
 
             return FergunResult.FromSuccess();
         }
@@ -2213,90 +2296,6 @@ namespace Fergun.Modules
 
             _lastComic = JsonConvert.DeserializeObject<XkcdComic>(response);
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
-        }
-
-        private async Task<FergunResult> SendPaginatedImagesAsync(IReadOnlyCollection<ImageResult> images)
-        {
-            var pages = images
-                .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)), UriKind.Absolute) &&
-                    x.Link.StartsWith("http", StringComparison.Ordinal) &&
-                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute) &&
-                    x.ContextLink.StartsWith("http", StringComparison.Ordinal))
-                .Select(x => new EmbedBuilder
-                {
-                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)),
-                    Url = x.ContextLink
-                })
-                .ToList();
-
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {images.Count} (filtered: {images.Count - pages.Count})"));
-
-            return await SendPaginatedImagesAsync(pages);
-        }
-
-        private async Task<FergunResult> SendPaginatedImagesAsync(DdgResponse search)
-        {
-            var pages = search.Results
-                .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
-                    x.Image.StartsWith("http", StringComparison.Ordinal) &&
-                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
-                    x.Url.StartsWith("http", StringComparison.Ordinal))
-                .Select(x => new EmbedBuilder
-                {
-                    Title = x.Title.Truncate(EmbedBuilder.MaxTitleLength),
-                    ImageUrl = Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)),
-                    Url = x.Url
-                })
-                .ToList();
-
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {search.Results.Count} (filtered: {search.Results.Count - pages.Count})"));
-
-            return await SendPaginatedImagesAsync(pages);
-        }
-
-        private async Task<FergunResult> SendPaginatedImagesAsync(IReadOnlyCollection<EmbedBuilder> pages)
-        {
-            if (pages.Count == 0)
-            {
-                return FergunResult.FromError(Locate("NoResultsFound"));
-            }
-
-            var pager = new PaginatedMessage
-            {
-                Author = new EmbedAuthorBuilder
-                {
-                    Name = Context.User.ToString(),
-                    IconUrl = Context.User.GetAvatarUrl() ?? Context.User.GetDefaultAvatarUrl()
-                },
-                Description = Locate("ImageSearch"),
-                Pages = pages,
-                Color = new Discord.Color(FergunClient.Config.EmbedColor),
-                Options = new PaginatorAppearanceOptions
-                {
-                    InformationText = Locate("PaginatorHelp"),
-                    FooterFormat = Locate("PaginatorFooter"),
-                    Timeout = TimeSpan.FromMinutes(10),
-                    ActionOnTimeout = ActionOnTimeout.DeleteReactions
-                }
-            };
-
-            var reactions = new ReactionList
-            {
-                First = pages.Count >= 3,
-                Backward = true,
-                Forward = true,
-                Last = pages.Count >= 3,
-                Stop = true,
-                Jump = pages.Count >= 4,
-                Info = false
-            };
-
-            await PagedReplyAsync(pager, reactions);
-
-            return FergunResult.FromSuccess();
         }
 
         private static void InitializeCmdListCache()

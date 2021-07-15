@@ -667,7 +667,7 @@
 	<data name="OutOfIndex" xml:space="preserve">
     <value>Seçenek dizin dışında.</value>
   </data>
-	<data name="SearchTimeout" xml:space="preserve">
+	<data name="ReplyTimeout" xml:space="preserve">
     <value>Zaman aşımından önce cevap vermediniz!</value>
   </data>
 	<data name="replaySummary" xml:space="preserve">
@@ -1631,7 +1631,7 @@ Döngüyü devre dışı bırakmak için bu komutu parametre kullanmadan kullan�
     <value>Geçerli parçayı birkaç kez tekrarlar.</value>
   </data>
 	<data name="LanguagePrompt" xml:space="preserve">
-    <value>Ayarlamak istediğiniz dile tepki verin.</value>
+    <value>Ayarlamak istediğiniz dili seçin.</value>
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Etiketleri korumak için komutun sonunda `-headers` kullanın (` [info] `).</value>
@@ -1667,7 +1667,7 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
     <value>Sanatçı Sayfası</value>
   </data>
 	<data name="AdventureDeletionPrompt" xml:space="preserve">
-    <value>Macerayı silmek için aşağıdaki emojiye tepki verin.</value>
+    <value>Macerayı silmek için aşağıdaki düğmeye/emojiye basın.</value>
   </data>
 	<data name="ReactTimeout" xml:space="preserve">
     <value>Zaman aşımından önce tepki göstermediniz!</value>
@@ -2383,6 +2383,12 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	</data>
 	<data name="SnipePrivacy" xml:space="preserve">
 		<value>Mesajınızın burada görüntülenmesini istemiyor musunuz? Bkz. `privacy`.</value>
+	</data>
+	<data name="CannotUseThisInteraction" xml:space="preserve">
+		<value>Bu etkileşimi kullanamazsınız.</value>
+	</data>
+	<data name="DeletingAdventure" xml:space="preserve">
+		<value>Macera siliniyor...</value>
 	</data>
 	<data name="Donate" xml:space="preserve">
 		<value>bağış yap</value>
