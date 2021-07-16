@@ -516,7 +516,7 @@ namespace Fergun.Interactive
 
             if (!doNotWait) return await paginatorTask;
 
-            if (paginator.MaxPageIndex > 1)
+            if (paginator.MaxPageIndex > 0)
             {
                 _ = paginatorTask;
             }
@@ -767,7 +767,7 @@ namespace Fergun.Interactive
 
 #if DNETLABS
             MessageComponent component = null;
-            bool moreThanOnePage = !(element is Paginator pag) || pag.MaxPageIndex > 1;
+            bool moreThanOnePage = !(element is Paginator pag) || pag.MaxPageIndex > 0;
             if ((element.InputType == InputType.Buttons || element.InputType == InputType.SelectMenus) && moreThanOnePage)
             {
                 component = element.BuildComponents(false);
