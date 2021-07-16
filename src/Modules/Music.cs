@@ -128,8 +128,8 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("LyricsNotFound"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
             }
 
-            string url = genius.Response.Hits[0].Result.Url;
-            string lyrics = await CommandUtils.ParseGeniusLyricsAsync(url, keepHeaders);
+            var result = genius.Response.Hits[0].Result;
+            string lyrics = await CommandUtils.ParseGeniusLyricsAsync(result.Url, keepHeaders);
 
             if (string.IsNullOrWhiteSpace(lyrics))
             {
@@ -137,16 +137,14 @@ namespace Fergun.Modules
             }
 
             var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToArray();
-            string links = $"{Format.Url("Genius", url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
-
-            string title = genius.Response.Hits[0].Result.FullTitle;
+            string links = $"{Format.Url("Genius", result.Url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var pageBuilder = new PageBuilder()
                     .WithAuthor(Context.User)
                     .WithColor(new Color(FergunClient.Config.EmbedColor))
-                    .WithTitle(title)
+                    .WithTitle(result.FullTitle)
                     .WithDescription(splitLyrics[index].Truncate(EmbedBuilder.MaxDescriptionLength))
                     .AddField("Links", links)
                     .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, splitLyrics.Length)}");

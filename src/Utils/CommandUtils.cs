@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AngleSharp;
+using AngleSharp.Dom;
 using Discord;
 using Fergun.Interactive.Pagination;
 
@@ -30,41 +31,62 @@ namespace Fergun.Utils
             return cpuUsageTotal * 100;
         }
 
-        public static async Task<string> ParseGeniusLyricsAsync(string url, bool keepHeaders)
+        public static async Task<string> ParseGeniusLyricsAsync(string url, bool keepHeaders = false)
         {
             var context = BrowsingContext.New(Configuration.Default.WithDefaultLoader());
             var document = await context.OpenAsync(url);
-            var element = document?.GetElementsByClassName("lyrics")?.FirstOrDefault()
-                       ?? document?.GetElementsByClassName("SongPageGrid-sc-1vi6xda-0 DGVcp Lyrics__Root-sc-1ynbvzw-0 kkHBOZ")?.FirstOrDefault();
+
+            var element = document
+                .All
+                .FirstOrDefault(x =>
+                x?.ClassName != null
+                && x.NodeType == NodeType.Element
+                && x.NodeName == "DIV"
+                && (x.ClassName.Contains("Lyrics__Root", StringComparison.Ordinal) || x.ClassName.Contains("lyrics", StringComparison.Ordinal)));
 
             if (element == null)
             {
                 return null;
             }
 
+            string innerHtml = element.GetElementsByClassName("lyrics")?.FirstOrDefault()?.InnerHtml
+                ?? string.Concat(element
+                .Children
+                .Where(x =>
+                x?.ClassName != null
+                && x.NodeType == NodeType.Element
+                && x.NodeName == "DIV"
+                && x.ClassName.Contains("Lyrics__Container", StringComparison.Ordinal))
+                .Select(x => x.InnerHtml));
+
+            if (string.IsNullOrEmpty(innerHtml))
+            {
+                return null;
+            }
+
             // Remove newlines, tabs and empty HTML tags.
-            string lyrics = Regex.Replace(element.InnerHtml, @"\t|\n|\r|<[^/>][^>]*>\s*<\/[^>]+>", string.Empty);
+            string lyrics = Regex.Replace(innerHtml, @"\t|\n|\r|<[^/>][^>]*>\s*<\/[^>]+>", string.Empty);
 
             lyrics = WebUtility.HtmlDecode(lyrics)
-                .Replace("<b>", "**", StringComparison.OrdinalIgnoreCase)
-                .Replace("</b>", "**", StringComparison.OrdinalIgnoreCase)
-                .Replace("<i>", "*", StringComparison.OrdinalIgnoreCase)
-                .Replace("</i>", "*", StringComparison.OrdinalIgnoreCase)
-                .Replace("<br>", "\n", StringComparison.OrdinalIgnoreCase)
-                .Replace("</div>", "\n", StringComparison.OrdinalIgnoreCase);
+                .Replace("<b>", "**", StringComparison.Ordinal)
+                .Replace("</b>", "**", StringComparison.Ordinal)
+                .Replace("<i>", "*", StringComparison.Ordinal)
+                .Replace("</i>", "*", StringComparison.Ordinal)
+                .Replace("<br>", "\n", StringComparison.Ordinal)
+                .Replace("</div>", "\n", StringComparison.Ordinal);
 
             // Remove remaining HTML tags.
             lyrics = Regex.Replace(lyrics, @"(\<.*?\>)", string.Empty);
 
             // Prevent bold text overlapping.
-            lyrics = lyrics.Replace("****", "** **", StringComparison.OrdinalIgnoreCase)
-                .Replace("******", "*** ****", StringComparison.OrdinalIgnoreCase);
+            lyrics = lyrics.Replace("****", "** **", StringComparison.Ordinal)
+                .Replace("******", "*** ****", StringComparison.Ordinal);
 
             if (!keepHeaders)
             {
                 lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty);
             }
-            return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
+            return Regex.Replace(lyrics, @"\n{2}", "\n").Trim();
         }
 
 #if DNETLABS
