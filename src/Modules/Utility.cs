@@ -738,7 +738,7 @@ namespace Fergun.Modules
                     .WithTitle("Define")
                     .AddField(Locate("Word"), info.PartOfSpeech == null || info.PartOfSpeech == "undefined" ? info.Word : $"{info.Word} ({info.PartOfSpeech})")
                     .AddField(Locate("Definition"), info.Definition)
-                    .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, definitions.Count)}");
+                    .WithFooter($"{string.Format(Locate("PaginatorFooter"), index + 1, definitions.Count)}");
 
                 if (!string.IsNullOrEmpty(info.Example))
                 {
