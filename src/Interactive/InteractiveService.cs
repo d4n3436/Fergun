@@ -561,7 +561,7 @@ namespace Fergun.Interactive
 
                 var result = taskResult == cancelTask
                     ? await cancelTask.ConfigureAwait(false)
-                    : new InteractiveMessageResult(timeout ?? DefaultTimeout, InteractiveStatus.TimedOut);
+                    : new InteractiveMessageResult(timeout ?? DefaultTimeout, InteractiveStatus.TimedOut, message);
 
                 await ApplyActionOnStopAsync(paginator, result).ConfigureAwait(false);
 
