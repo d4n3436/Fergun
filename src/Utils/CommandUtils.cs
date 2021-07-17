@@ -86,7 +86,7 @@ namespace Fergun.Utils
             {
                 lyrics = Regex.Replace(lyrics, @"(\[.*?\])*", string.Empty);
             }
-            return Regex.Replace(lyrics, @"\n{2}", "\n").Trim();
+            return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
 
 #if DNETLABS
