@@ -206,7 +206,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(creationResponse.ErrorMessage, creationResponse.IsSilent);
             }
 
-            var actionList = creationResponse.Adventure.Actions;
+            var actionList = creationResponse.Adventure?.Actions;
 
             // This should prevent any errors
             if (actionList == null)
