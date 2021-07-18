@@ -1561,7 +1561,7 @@ You can use the `new` command to create a new adventure.</value>
 ...and more bug fixes.</value>
   </data>
 	<data name="ErrorHelp" xml:space="preserve">
-    <value>If this keep happening please report this error in the [support server]({0}) or open an issue in the [GitHub repository]({1}) describing the error and the steps to reproduce it.</value>
+    <value>If this keeps happening please report this error in the [support server]({0}) or open an issue in the [GitHub repository]({1}) describing the error and the steps to reproduce it.</value>
   </data>
 	<data name="bashSummary" xml:space="preserve">
     <value>Runs a bash command.</value>
