@@ -27,10 +27,10 @@ namespace Fergun.Modules
         private static IEnumerable<Assembly> _scriptAssemblies;
         private static IEnumerable<string> _scriptNamespaces;
         private static ScriptOptions _scriptOptions;
-        private static CommandService _cmdService;
-        private static LogService _logService;
+        private readonly CommandService _cmdService;
+        private readonly LogService _logService;
         private readonly MusicService _musicService;
-        private static InteractiveService _interactive;
+        private readonly InteractiveService _interactive;
 
         public Owner(CommandService commands, LogService logService, MusicService musicService, InteractiveService interactive)
         {

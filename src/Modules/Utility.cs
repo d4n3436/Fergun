@@ -59,10 +59,10 @@ namespace Fergun.Modules
         private static int _cachedVisibleCmdCount = -1;
         private static XkcdComic _lastComic;
         private static DateTimeOffset _timeToCheckComic = DateTimeOffset.UtcNow;
-        private static CommandService _cmdService;
-        private static LogService _logService;
-        private static MessageCacheService _messageCache;
-        private static InteractiveService _interactive;
+        private readonly CommandService _cmdService;
+        private readonly LogService _logService;
+        private readonly MessageCacheService _messageCache;
+        private readonly InteractiveService _interactive;
 
         private static Random RngInstance => _rng ??= new Random();
 
@@ -2245,7 +2245,7 @@ namespace Fergun.Modules
         }
 
         // TODO Use Engine 1 if the image is too small (30x30)
-        private static async Task<(string, string)> OcrSimpleAsync(string url)
+        private async Task<(string, string)> OcrSimpleAsync(string url)
         {
             if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url))?.Substring(6), true, out FileType fileType))
             {
@@ -2298,7 +2298,7 @@ namespace Fergun.Modules
             _timeToCheckComic = DateTimeOffset.UtcNow.AddDays(1);
         }
 
-        private static void InitializeCmdListCache()
+        private void InitializeCmdListCache()
         {
             if (_commandListCache == null)
             {

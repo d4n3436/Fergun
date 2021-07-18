@@ -19,8 +19,8 @@ namespace Fergun.Modules
     [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
     public class Moderation : FergunBase
     {
-        private static MessageCacheService _messageCache;
-        private static InteractiveService _interactive;
+        private readonly MessageCacheService _messageCache;
+        private readonly InteractiveService _interactive;
 
         public Moderation(MessageCacheService messageCache, InteractiveService interactive)
         {

@@ -25,11 +25,11 @@ namespace Fergun.Modules
     [UserMustBeInVoice("lyrics", "spotify")]
     public class Music : FergunBase
     {
-        private readonly MusicService _musicService;
-        private static LogService _logService;
         private static GeniusApi _geniusApi;
-        private static MessageCacheService _messageCache;
-        private static InteractiveService _interactive;
+        private readonly MusicService _musicService;
+        private readonly LogService _logService;
+        private readonly MessageCacheService _messageCache;
+        private readonly InteractiveService _interactive;
 
         public Music(MusicService musicService, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {

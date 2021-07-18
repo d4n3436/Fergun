@@ -36,10 +36,10 @@ namespace Fergun.Modules
         private static IReadOnlyDictionary<string, string> _modes;
         private static Translator _translator;
 
-        private static CommandService _cmdService;
-        private static LogService _logService;
-        private static MessageCacheService _messageCache;
-        private static InteractiveService _interactive;
+        private readonly CommandService _cmdService;
+        private readonly LogService _logService;
+        private readonly MessageCacheService _messageCache;
+        private readonly InteractiveService _interactive;
 
         public AIDungeon(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
@@ -1295,7 +1295,7 @@ namespace Fergun.Modules
         }
 
         // Fallback to original text if fails
-        private static async Task<string> TranslateWithFallbackAsync(string text, string fromLanguage, string toLanguage)
+        private async Task<string> TranslateWithFallbackAsync(string text, string fromLanguage, string toLanguage)
         {
             _translator ??= new Translator();
 

@@ -29,10 +29,10 @@ namespace Fergun.Modules
         private static readonly string[] _triviaCategories = Enum.GetNames(typeof(QuestionCategory)).Select(x => x.ToLowerInvariant()).Skip(1).ToArray();
         private static readonly string[] _triviaDifficulties = Enum.GetNames(typeof(QuestionDifficulty)).Select(x => x.ToLowerInvariant()).ToArray();
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
-        private static CommandService _cmdService;
-        private static LogService _logService;
-        private static MessageCacheService _messageCache;
-        private static InteractiveService _interactive;
+        private readonly CommandService _cmdService;
+        private readonly LogService _logService;
+        private readonly MessageCacheService _messageCache;
+        private readonly InteractiveService _interactive;
 
         public Other(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
