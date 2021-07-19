@@ -189,8 +189,7 @@ namespace Fergun.Services
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess) return;
 
-            // Update the last time anyone in the guild has used a command
-
+            var responseMessage = (result as FergunResult)?.ResponseMessage;
             double ignoreTime = Constants.DefaultIgnoreTime;
             switch (result.Error)
             {
@@ -201,7 +200,7 @@ namespace Fergun.Services
                 case CommandError.ParseFailed:
                     string language = GuildUtils.GetLanguage(context.Channel);
                     string prefix = GuildUtils.GetPrefix(context.Channel);
-                    await SendEmbedAsync(context.Message, command.ToHelpEmbed(language, prefix));
+                    await SendEmbedAsync(context.Message, command.ToHelpEmbed(language, prefix), null, responseMessage);
                     break;
 
                 case CommandError.UnmetPrecondition when command.Module.Name != Constants.DevelopmentModuleName:
@@ -236,7 +235,7 @@ namespace Fergun.Services
                         {
                             ignoreTime = Constants.CooldownIgnoreTime;
                         }
-                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(result.ErrorReason, context.Channel)}");
+                        await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate(result.ErrorReason, context.Channel)}", null, responseMessage);
                     }
                     break;
 
@@ -251,17 +250,17 @@ namespace Fergun.Services
                     reason = reason.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase);
                     // Locate the string to the current language of the guild
                     reason = GuildUtils.Locate(reason, context.Channel);
-                    await SendEmbedAsync(context.Message, $"\u26a0 {reason}");
+                    await SendEmbedAsync(context.Message, $"\u26a0 {reason}", null, responseMessage);
                     break;
 
                 case CommandError.MultipleMatches:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}");
+                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}", null, responseMessage);
                     break;
 
                 case CommandError.Unsuccessful:
                     if (!(result is FergunResult fergunResult) || !fergunResult.IsSilent)
                     {
-                        await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength));
+                        await SendEmbedAsync(context.Message, $"\u26a0 {result.ErrorReason}".Truncate(EmbedBuilder.MaxDescriptionLength), null, responseMessage);
                     }
                     break;
 
@@ -350,58 +349,59 @@ namespace Fergun.Services
             }
         }
 
-        private Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, string embedText, string text = null)
+        private Task SendEmbedAsync(IUserMessage userMessage, string embedText, string text = null, IUserMessage responseMessage = null)
         {
             var embed = new EmbedBuilder()
                 .WithColor(FergunClient.Config.EmbedColor)
                 .WithDescription(embedText)
                 .Build();
 
-            return SendEmbedAsync(userMessage, embed, text);
+            return SendEmbedAsync(userMessage, embed, text, responseMessage);
         }
 
-        private async Task<IUserMessage> SendEmbedAsync(IUserMessage userMessage, Embed embed, string text = null)
+        private async Task SendEmbedAsync(IUserMessage userMessage, Embed embed, string text = null, IUserMessage responseMessage = null)
         {
-#if DNETLABS
-            var component = new ComponentBuilder().Build(); // remove message components
-#endif
-            var cache = _services.GetService<CommandCacheService>();
-            if (cache == null || cache.IsDisabled)
-            {
-#if DNETLABS
-                return await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
-#else
-                return await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-#endif
-            }
-
-            IUserMessage response;
-            bool found = cache.TryGetValue(userMessage.Id, out ulong messageId);
             var messageCache = _services.GetService<MessageCacheService>();
-
-            if (found && (response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId)) != null)
+            if (responseMessage == null)
             {
-                await response.ModifyAsync(x =>
-                {
-                    x.Content = text;
-                    x.Embed = embed;
 #if DNETLABS
-                    x.Components = component;
+                var component = new ComponentBuilder().Build(); // remove message components
 #endif
-                });
-                response = (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId);
+                var cache = _services.GetService<CommandCacheService>();
+
+                ulong messageId = 0;
+                bool found = cache?.TryGetValue(userMessage.Id, out messageId) ?? false;
+
+                var response = found ? (IUserMessage)await userMessage.Channel.GetMessageAsync(messageCache, messageId) : null;
+
+                if (response == null)
+                {
+#if DNETLABS
+                    response = await userMessage.Channel.SendMessageAsync(text, embed: embed, component: component).ConfigureAwait(false);
+#else
+                    response = await userMessage.Channel.SendMessageAsync(text, embed: embed).ConfigureAwait(false);
+#endif
+                    if (cache != null && !cache.IsDisabled)
+                    {
+                        cache.Add(userMessage, response);
+                    }
+                }
+                else
+                {
+                    await userMessage.ModifyAsync(x =>
+                    {
+                        x.Content = text;
+                        x.Embed = embed;
+#if DNETLABS
+                        x.Components = component;
+#endif
+                    });
+                }
             }
             else
             {
-#if DNETLABS
-                response = await userMessage.Channel.SendMessageAsync(embed: embed, component: component).ConfigureAwait(false);
-#else
-                response = await userMessage.Channel.SendMessageAsync(embed: embed).ConfigureAwait(false);
-#endif
-                cache.Add(userMessage, response);
+                await responseMessage.ModifyOrResendAsync(text, embed, cache: messageCache).ConfigureAwait(false);
             }
-
-            return response;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Discord;
 using Discord.Commands;
 
 namespace Fergun
@@ -9,13 +10,23 @@ namespace Fergun
         /// </summary>
         public bool IsSilent { get; }
 
-        public FergunResult(CommandError? error, string reason, bool isSilent) : base(error, reason)
+        /// <summary>
+        /// Gets a response message associated to this result.
+        /// Currently used for detached response messages
+        /// (messages that don't have an explicit user command message) in commands that use interactive messages.
+        /// </summary>
+        public IUserMessage ResponseMessage { get; }
+
+        public FergunResult(CommandError? error, string reason, bool isSilent, IUserMessage responseMessage) : base(error, reason)
         {
             IsSilent = isSilent;
+            ResponseMessage = responseMessage;
         }
 
-        public static FergunResult FromError(string reason, bool isSilent = false) => new FergunResult(CommandError.Unsuccessful, reason, isSilent);
+        public static FergunResult FromError(string reason, bool isSilent = false, IUserMessage responseMessage = null)
+            => new FergunResult(CommandError.Unsuccessful, reason, isSilent, responseMessage);
 
-        public static FergunResult FromSuccess(string reason = null, bool isSilent = false) => new FergunResult(null, reason, isSilent);
+        public static FergunResult FromSuccess(string reason = null, bool isSilent = false, IUserMessage responseMessage = null)
+            => new FergunResult(null, reason, isSilent, responseMessage);
     }
 }

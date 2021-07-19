@@ -177,7 +177,7 @@ namespace Fergun.Modules
             {
                 builder.Description += $"\n**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}";
             }
-            
+
             selectionBuilder.InputType = InputType.Reactions;
             selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
 #endif
@@ -203,7 +203,8 @@ namespace Fergun.Modules
 
             if (creationResponse.ErrorMessage != null)
             {
-                return FergunResult.FromError(creationResponse.ErrorMessage, creationResponse.IsSilent);
+                return FergunResult.FromError(creationResponse.ErrorMessage, creationResponse.IsSilent,
+                    creationResponse.IsSilent ? null : creationResponse.Message);
             }
 
             var actionList = creationResponse.Adventure?.Actions;
@@ -212,7 +213,7 @@ namespace Fergun.Modules
             if (actionList == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The action list is null."));
-                return FergunResult.FromError(Locate("ErrorInAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"), false, creationResponse.Message);
             }
 
             int removed = actionList.RemoveAll(x => string.IsNullOrEmpty(x.Text));
@@ -224,7 +225,7 @@ namespace Fergun.Modules
             if (actionList.Count == 0)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The action list is empty."));
-                return FergunResult.FromError(Locate("ErrorInAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"), false, creationResponse.Message);
             }
 
             string initialPrompt = actionList[^1].Text;
@@ -1085,22 +1086,22 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: IO exception", e));
-                return FergunResult.FromError(e.Message);
+                return FergunResult.FromError(e.Message, false, result.Message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "Delete: Websocket exception", e));
-                return FergunResult.FromError(e.Message);
+                return FergunResult.FromError(e.Message, false, result.Message);
             }
             catch (TimeoutException)
             {
-                return FergunResult.FromError(Locate("ErrorInAPI"));
+                return FergunResult.FromError(Locate("ErrorInAPI"), false, result.Message);
             }
 
             string error = CheckResponse(response);
             if (error != null)
             {
-                return FergunResult.FromError(error);
+                return FergunResult.FromError(error, false, result.Message);
             }
 
             FergunClient.Database.DeleteDocument(Constants.AidAdventuresCollection, adventure);

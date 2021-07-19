@@ -837,7 +837,7 @@ namespace Fergun.Modules
 
             FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
             GuildUtils.UserConfigCache[Context.User.Id] = userConfig;
-            await result.Message.ModifyOrResendAsync(embed: builder.Build());
+            await result.Message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             return FergunResult.FromSuccess();
         }
