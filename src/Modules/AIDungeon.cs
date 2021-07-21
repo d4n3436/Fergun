@@ -260,7 +260,7 @@ namespace Fergun.Modules
                 .WithColor(FergunClient.Config.EmbedColor)
                 .Build();
 
-            await message.ModifyOrResendAsync(embed: loadingEmbed, cache: _messageCache);
+            message = await message.ModifyOrResendAsync(embed: loadingEmbed, cache: _messageCache);
 
             WebSocketResponse response;
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Downloading the character list for mode: {_modes.Keys.ElementAt(modeIndex)} ({_modes.Values.ElementAt(modeIndex)})"));
@@ -271,27 +271,27 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             string error = CheckResponse(response);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
             var content = response.Payload.Data.Scenario;
             if (content?.Options == null || content.Options.Count == 0)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The scenario list is null or empty."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title.Truncate(25), x => x.PublicId?.ToString()));
@@ -346,28 +346,28 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             error = CheckResponse(response);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
 
             content = response.Payload.Data.Scenario;
             if (content == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The scenario is null."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Creating new adventure with character Id: {content.Id}"));
@@ -379,28 +379,28 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             error = CheckResponse(response);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
 
             string publicId = response.Payload.Data.AddAdventure?.PublicId?.ToString();
             if (publicId == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: publicId is null."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting adventure with publicId: {publicId}"));
@@ -411,28 +411,28 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             error = CheckResponse(response);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
 
             var adventure = response.Payload.Data.Adventure;
             if (adventure == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The adventure is null."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Created adventure ({_modes.Keys.ElementAt(modeIndex)}, {characters.Keys.ElementAt(characterIndex)})" +
                 $" (Id: {adventure.Id}, playPublicId: {adventure.PublicId})"));
@@ -451,7 +451,7 @@ namespace Fergun.Modules
 
             if (!result.IsSuccess)
             {
-                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", message);
             }
 
             string customText = result.Value.Content;
@@ -473,29 +473,29 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             string error = CheckResponse(adventure);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
 
             string adventureId = adventure?.Payload?.Data?.Scenario?.Id;
             if (adventureId == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: The adventure ID is null."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             // Create new adventure with that ID
@@ -508,29 +508,29 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             error = CheckResponse(creationResponse);
             if (error != null)
             {
-                return new AdventureCreationData(error);
+                return new AdventureCreationData(error, message);
             }
 
             string publicId = creationResponse.Payload.Data.AddAdventure.PublicId?.ToString();
             if (publicId == null)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "New: publicId is null."));
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
             if (AutoTranslate())
@@ -548,20 +548,20 @@ namespace Fergun.Modules
             catch (IOException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: IO exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (WebSocketException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Error, "Command", "New: Websocket exception", e));
-                return new AdventureCreationData(e.Message);
+                return new AdventureCreationData(e.Message, message);
             }
             catch (TimeoutException)
             {
-                return new AdventureCreationData(Locate("ErrorInAPI"));
+                return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
             error = CheckResponse(response);
             return error != null
-                ? new AdventureCreationData(error)
+                ? new AdventureCreationData(error, message)
                 : new AdventureCreationData(response.Payload.Data.Adventure, message);
         }
 
@@ -1317,6 +1317,12 @@ namespace Fergun.Modules
             public AdventureCreationData(string errorMessage)
             {
                 ErrorMessage = errorMessage;
+            }
+
+            public AdventureCreationData(string errorMessage, IUserMessage message)
+            {
+                ErrorMessage = errorMessage;
+                Message = message;
             }
 
             public AdventureCreationData(string errorMessage, bool isSilent)
