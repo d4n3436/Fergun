@@ -380,15 +380,11 @@ namespace Fergun.Services
                     response = await userMessage.Channel.SendMessageAsync(text, embed: embed, component: component).ConfigureAwait(false);
 #else
                     response = await userMessage.Channel.SendMessageAsync(text, embed: embed).ConfigureAwait(false);
-#endif
-                    if (cache != null && !cache.IsDisabled)
-                    {
-                        cache.Add(userMessage, response);
-                    }
+#endif 
                 }
                 else
                 {
-                    await userMessage.ModifyAsync(x =>
+                    await response.ModifyAsync(x =>
                     {
                         x.Content = text;
                         x.Embed = embed;
@@ -396,6 +392,11 @@ namespace Fergun.Services
                         x.Components = component;
 #endif
                     });
+                }
+
+                if (cache != null && !cache.IsDisabled)
+                {
+                    cache.Add(userMessage, response);
                 }
             }
             else
