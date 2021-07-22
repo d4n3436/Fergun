@@ -136,7 +136,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("ErrorParsingLyrics"), Format.Code(query.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase))));
             }
 
-            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToArray();
+            var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength).ToArray();
             string links = $"{Format.Url("Genius", result.Url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
 
             Task<PageBuilder> GeneratePageAsync(int index)
