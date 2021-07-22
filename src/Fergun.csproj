@@ -23,9 +23,9 @@
     <When Condition="$(DefineConstants.Contains('DNETLABS'))">
       <ItemGroup>
         <PackageReference Include="Discord.Net.Labs.Commands" Version="2.3.5" />
-        <PackageReference Include="Discord.Net.Labs.Core" Version="2.4.5" />
-        <PackageReference Include="Discord.Net.Labs.Rest" Version="2.4.5" />
-        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="2.4.6" />
+        <PackageReference Include="Discord.Net.Labs.Core" Version="2.4.6" />
+        <PackageReference Include="Discord.Net.Labs.Rest" Version="2.4.6" />
+        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="2.4.9" />
       </ItemGroup>
     </When>
     <Otherwise>
