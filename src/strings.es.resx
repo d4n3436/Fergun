@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -452,7 +452,8 @@
     <value>Dia de ingreso al servidor</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>El usuario no fue encontrado. Intenta usar una mención o una ID.</value>
+    <value>Usuario no encontrado.
+Intenta usar un tag ({0}), una mención ({1}) o una ID ({2}).</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Busca un artículo en Wikipedia.</value>
@@ -1472,7 +1473,8 @@ Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
     <value>El objeto no fue encontrado.</value>
   </data>
 	<data name="MultipleMatches" xml:space="preserve">
-    <value>Se encontraron múltiples coincidencias.</value>
+    <value>Se encontraron múltiples coincidencias.
+Intenta usar un tag ({0}), una mención ({1}) o una ID ({2}).</value>
   </data>
 	<data name="Roles" xml:space="preserve">
     <value>Roles</value>

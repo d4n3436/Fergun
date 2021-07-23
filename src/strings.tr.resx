@@ -451,7 +451,8 @@
     <value>Lonca katılma tarihi</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>Kullanıcı bulunamadı Bir söz veya kimlik kullanmayı deneyin.</value>
+    <value>Kullanıcı bulunamadı.
+Bir etiket ({0}), bir söz ({1}) veya bir kimlik ({2}) kullanmayı deneyin.</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Wikipedia'da bir makale arar.</value>
@@ -1479,7 +1480,8 @@ Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," se
     <value>Nesne bulunamadı.</value>
   </data>
 	<data name="MultipleMatches" xml:space="preserve">
-    <value>Birden fazla eşleşme bulundu.</value>
+    <value>Birden fazla eşleşme bulundu.
+Bir etiket ({0}), bir söz ({1}) veya bir kimlik ({2}) kullanmayı deneyin.</value>
   </data>
 	<data name="AlreadyConnected" xml:space="preserve">
     <value>Bot zaten bir ses kanalına bağlı.</value>

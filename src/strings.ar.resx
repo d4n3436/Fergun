@@ -451,7 +451,8 @@
     <value>تاريخ انضمام النقابة</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>المستخدم غير موجود حاول استخدام إشارة أو معرّف.</value>
+    <value>المستخدم ليس موجود.
+حاول استخدام علامة ({0}) أو إشارة ({1}) أو معرّف ({2}).</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>يبحث عن مقال في ويكيبيديا.</value>
@@ -1480,7 +1481,8 @@ AI Dungeon: `info`،` new`، `Continue`،` revert`، `تذكر`،` alter`، `mak
     <value>المفعول به غير موجود.</value>
   </data>
 	<data name="MultipleMatches" xml:space="preserve">
-    <value>تم العثور على تطابقات متعددة.</value>
+    <value>تم العثور على تطابقات متعددة.
+حاول استخدام علامة ({0}) أو إشارة ({1}) أو معرّف ({2}).</value>
   </data>
 	<data name="Roles" xml:space="preserve">
     <value>الأدوار</value>

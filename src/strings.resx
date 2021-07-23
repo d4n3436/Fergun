@@ -452,7 +452,8 @@
     <value>Guild join date</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>User not found. Try using a mention or an ID.</value>
+    <value>User not found.
+Try using a tag ({0}), a mention ({1}) or an ID ({2}).</value>
   </data>
 	<data name="wikipediaSummary" xml:space="preserve">
     <value>Searches for an article on Wikipedia.</value>
@@ -1491,7 +1492,8 @@ Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `
     <value>Object not found.</value>
   </data>
 	<data name="MultipleMatches" xml:space="preserve">
-    <value>Multiple matches found.</value>
+    <value>Multiple matches found.
+Try using a tag ({0}), a mention ({1}) or an ID ({2}).</value>
   </data>
 	<data name="Roles" xml:space="preserve">
     <value>Roles</value>

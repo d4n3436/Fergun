@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -539,7 +539,8 @@
     <value>Дата вступления в гильдию</value>
   </data>
 	<data name="UserNotFound" xml:space="preserve">
-    <value>Пользователь не найден. Попробуйте использовать упоминание или идентификатор.</value>
+    <value>Пользователь не найден.
+Попробуйте использовать тег ({0}), упоминание ({1}) или идентификатор ({2}).</value>
   </data>
 	<data name="BanSameUser" xml:space="preserve">
     <value>Какая? Вы хотите забанить себя?</value>
@@ -1476,7 +1477,8 @@ AI Dungeon: `info`,` new`, `continue`,` revert`, `Remember`,` alter`, `makepubli
     <value>Объект не найден.</value>
   </data>
 	<data name="MultipleMatches" xml:space="preserve">
-    <value>Найдено несколько совпадений.</value>
+    <value>Найдено несколько совпадений.
+Попробуйте использовать тег ({0}), упоминание ({1}) или идентификатор ({2}).</value>
   </data>
 	<data name="Roles" xml:space="preserve">
     <value>Роли</value>

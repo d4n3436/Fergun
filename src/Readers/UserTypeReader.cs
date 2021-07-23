@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,89 +11,77 @@ namespace Fergun.Readers
 {
     /// <summary>
     ///     A <see cref="TypeReader"/> for parsing objects implementing <see cref="IUser"/>.
-    ///     Edited by d4n to get user by mention/id by REST.
+    ///     Modified from the original to get user by mention/id from REST and use the "Search Guild Members" endpoint.
     /// </summary>
     /// <typeparam name="T">The type to be checked; must implement <see cref="IUser"/>.</typeparam>
     public class UserTypeReader<T> : TypeReader
         where T : class, IUser
     {
+        private static readonly UserEqualityComparer _defaultComparer = new UserEqualityComparer();
+
         /// <inheritdoc />
         public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            var results = new Dictionary<ulong, TypeReaderValue>();
-
             //By Mention or Id (1.0)
             if (MentionUtils.TryParseUser(input, out ulong id) ||
                 ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out id))
             {
-                var user = await GetUserFromIdAsync(context, id);
+                var user = await GetUserFromIdAsync(context, id).ConfigureAwait(false);
                 if (user != null)
                 {
                     return TypeReaderResult.FromSuccess(user as T);
                 }
             }
 
-            var channelUsers = context.Channel.GetUsersAsync(CacheMode.CacheOnly).Flatten(); // it's better
+            var results = new Dictionary<ulong, TypeReaderValue>();
 
-            IReadOnlyCollection<IGuildUser> guildUsers = ImmutableArray.Create<IGuildUser>();
+            var usersFromGuildSearch = context.Guild != null
+                ? await context.Guild.SearchUsersAsync(input.Substring(0, Math.Min(input.Length, 100)), 10).ConfigureAwait(false)
+                : Array.Empty<IGuildUser>();
 
-            if (context.Guild != null)
-            {
-                // If the application has guild members intent, use the search endpoint
-                // Ideally, the application flags should be used here, but it returns 0 for some reason
-                if ((Constants.ClientConfig.GatewayIntents & GatewayIntents.GuildMembers) == GatewayIntents.GuildMembers)
-                {
-                    guildUsers = await context.Guild.SearchUsersAsync(input, 10).ConfigureAwait(false);
-                    foreach (var guildUser in guildUsers)
-                    {
-                        AddResult(results, guildUser as T, 0.60f);
-                    }
-                }
+            var guildUsers = context.Guild != null
+                ? await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false)
+                : Array.Empty<IGuildUser>();
 
-                guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
-            }
+            var channelUsers = await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync().ConfigureAwait(false);
+
+            var users = usersFromGuildSearch
+                .Union(guildUsers, _defaultComparer)
+                .Union(channelUsers, _defaultComparer)
+                .ToArray();
 
             //By Username + Discriminator (0.7-0.8)
             int index = input.LastIndexOf('#');
-            if (index >= 0)
+            if (index >= 0 && ushort.TryParse(input.AsSpan().Slice(index + 1), out ushort discriminator))
             {
-                string username = input.Substring(0, index);
-                if (ushort.TryParse(input.Substring(index + 1), out ushort discriminator))
+                var username = input.Substring(0, index);
+                var user = users.FirstOrDefault(x => x.DiscriminatorValue == discriminator && string.Equals(username, x.Username, StringComparison.OrdinalIgnoreCase));
+                if (user != null)
                 {
-                    var channelUser = await channelUsers.FirstOrDefaultAsync(x => x.DiscriminatorValue == discriminator &&
-                        string.Equals(username, x.Username, StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
-                    AddResult(results, channelUser as T, channelUser?.Username == username ? 0.80f : 0.70f);
-
-                    var guildUser = guildUsers.FirstOrDefault(x => x.DiscriminatorValue == discriminator &&
-                        string.Equals(username, x.Username, StringComparison.OrdinalIgnoreCase));
-                    AddResult(results, guildUser as T, guildUser?.Username == username ? 0.80f : 0.70f);
+                    AddResult(results, user as T, user.Username == username ? 0.80f : 0.70f);
                 }
             }
 
             //By Username (0.5-0.6)
+            foreach (var user in users)
             {
-                await channelUsers
-                    .Where(x => string.Equals(input, x.Username, StringComparison.OrdinalIgnoreCase))
-                    .ForEachAsync(channelUser => AddResult(results, channelUser as T, channelUser.Username == input ? 0.60f : 0.50f))
-                    .ConfigureAwait(false);
-
-                foreach (var guildUser in guildUsers.Where(x => string.Equals(input, x.Username, StringComparison.OrdinalIgnoreCase)))
-                    AddResult(results, guildUser as T, guildUser.Username == input ? 0.60f : 0.50f);
+                if (string.Equals(input, user.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    AddResult(results, user as T, user.Username == input ? 0.60f : 0.50f);
+                }
             }
 
             //By Nickname (0.5-0.6)
+            foreach (var user in users)
             {
-                await channelUsers
-                    .Where(x => string.Equals(input, (x as IGuildUser)?.Nickname, StringComparison.OrdinalIgnoreCase))
-                    .ForEachAsync(channelUser => AddResult(results, channelUser as T, (channelUser as IGuildUser).Nickname == input ? 0.60f : 0.50f))
-                    .ConfigureAwait(false);
-
-                foreach (var guildUser in guildUsers.Where(x => string.Equals(input, x.Nickname, StringComparison.OrdinalIgnoreCase)))
+                if (user is IGuildUser guildUser && string.Equals(input, guildUser.Nickname, StringComparison.OrdinalIgnoreCase))
+                {
                     AddResult(results, guildUser as T, guildUser.Nickname == input ? 0.60f : 0.50f);
+                }
             }
 
             return results.Count > 0
-                ? TypeReaderResult.FromSuccess(results.Values.ToImmutableArray())
+                ? TypeReaderResult.FromSuccess(results.Values.ToArray())
                 : TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
         }
 
@@ -103,7 +90,7 @@ namespace Fergun.Readers
             IUser user;
             if (context.Guild != null)
             {
-                user = await context.Guild.GetUserAsync(id)
+                user = await context.Guild.GetUserAsync(id).ConfigureAwait(false)
                        ?? await (context.Client as DiscordSocketClient).Rest.GetGuildUserAsync(context.Guild.Id, id).ConfigureAwait(false);
             }
             else
@@ -116,8 +103,17 @@ namespace Fergun.Readers
 
         private static void AddResult(IDictionary<ulong, TypeReaderValue> results, T user, float score)
         {
-            if (user != null && !results.ContainsKey(user.Id))
+            if (!results.ContainsKey(user.Id))
+            {
                 results.Add(user.Id, new TypeReaderValue(user, score));
+            }
+        }
+
+        private class UserEqualityComparer : IEqualityComparer<IUser>
+        {
+            public bool Equals(IUser x, IUser y) => x.Id == y.Id;
+
+            public int GetHashCode(IUser obj) => obj.Id.GetHashCode();
         }
     }
 }

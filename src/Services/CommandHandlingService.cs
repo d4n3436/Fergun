@@ -249,12 +249,21 @@ namespace Fergun.Services
                     // Remove spaces (UserNotFound)
                     reason = reason.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase);
                     // Locate the string to the current language of the guild
-                    reason = GuildUtils.Locate(reason, context.Channel);
+                    reason = string.Format(GuildUtils.Locate(reason, context.Channel),
+                        Format.Code(context.Client.CurrentUser.ToString()),
+                        context.Client.CurrentUser.Mention,
+                        Format.Code(context.Client.CurrentUser.Id.ToString()));
+
                     await SendEmbedAsync(context.Message, $"\u26a0 {reason}", null, responseMessage);
                     break;
 
                 case CommandError.MultipleMatches:
-                    await SendEmbedAsync(context.Message, $"\u26a0 {GuildUtils.Locate("MultipleMatches", context.Channel)}", null, responseMessage);
+                    string message = string.Format(GuildUtils.Locate("MultipleMatches", context.Channel),
+                        Format.Code(context.Client.CurrentUser.ToString()),
+                        context.Client.CurrentUser.Mention,
+                        Format.Code(context.Client.CurrentUser.Id.ToString()));
+
+                    await SendEmbedAsync(context.Message, $"\u26a0 {message}", null, responseMessage);
                     break;
 
                 case CommandError.Unsuccessful:
