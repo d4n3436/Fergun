@@ -55,6 +55,7 @@ namespace Fergun.Modules
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
         private static readonly GoogleScraper _gscraper = new GoogleScraper();
         private static readonly Translator _translator = new Translator();
+        private static Language[] _filteredLanguages;
         private static Dictionary<string, string> _commandListCache;
         private static int _cachedVisibleCmdCount = -1;
         private static XkcdComic _lastComic;
@@ -242,6 +243,12 @@ namespace Fergun.Modules
         [Example("i don't know what to say lol")]
         public async Task<RuntimeResult> BadTranslator([Remainder, Summary("badtranslatorParam1")] string text)
         {
+            // Get languages that all 3 services supports
+            _filteredLanguages ??= Language.LanguageDictionary
+                .Values
+                .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex))
+                .ToArray();
+
             var languageChain = new List<Language>();
             const int chainCount = 7;
             Language sourceLanguage = null;
@@ -257,7 +264,7 @@ namespace Fergun.Modules
                     // Get unique and random languages.
                     do
                     {
-                        targetLanguage = Language.LanguageDictionary.Values.ElementAt(RngInstance.Next(Language.LanguageDictionary.Count));
+                        targetLanguage = _filteredLanguages[RngInstance.Next(_filteredLanguages.Length)];
                     } while (languageChain.Contains(targetLanguage));
                 }
 
