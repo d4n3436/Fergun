@@ -596,10 +596,18 @@ namespace Fergun.Modules
                 totalUsers += guild.MemberCount;
             }
             string version = $"v{Constants.Version}";
-            if (FergunClient.IsDebugMode)
+
+            if (Constants.GitHash != null && Constants.GitHash.Length == 7)
             {
-                version += "-dev";
+                version += $" ({Format.Url(Constants.GitHash, $"{Constants.GitHubRepository}/commit/{Constants.GitHash}")})";
             }
+
+            string libraryName = "Discord.Net";
+
+#if DNETLABS
+            libraryName += " Labs";
+#endif
+
             var elapsed = DateTimeOffset.UtcNow - FergunClient.Uptime;
 
             var builder = new EmbedBuilder()
@@ -616,7 +624,7 @@ namespace Fergun.Modules
                     $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
                     $"/ {totalRam?.ToString() ?? "?"}MB", true)
 
-                .AddField(Locate("Library"), $"Discord.Net\nv{DiscordConfig.Version}", true)
+                .AddField(Locate("Library"), $"{libraryName}\nv{DiscordConfig.Version}", true)
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("BotVersion"), version, true)
 

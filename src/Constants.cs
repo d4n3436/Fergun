@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Fergun.Attributes;
 
 namespace Fergun
 {
     public static class Constants
     {
-        public static string Version { get; } = "1.6";
+        public static string Version { get; } = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            .InformationalVersion;
 
         public static IReadOnlyList<string> PreviousVersions { get; } = new[]
         {
@@ -28,6 +32,10 @@ namespace Fergun
             "1.4",
             "1.4.8"
         };
+
+        public static string GitHash { get; } = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<GitHashInfoAttribute>()?
+            .GitHash;
 
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {

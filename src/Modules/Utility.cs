@@ -837,16 +837,11 @@ namespace Fergun.Modules
                     builder.AddField(name, module.Value);
                 }
 
-                string version = $"v{Constants.Version}";
 #if DNETLABS
                 MessageComponent component = null;
 #endif
 
-                if (FergunClient.IsDebugMode)
-                {
-                    version += "-dev";
-                }
-                else
+                if (!FergunClient.IsDebugMode)
                 {
 #if DNETLABS
                     component = CommandUtils.BuildLinks(Context.Channel);
@@ -854,7 +849,7 @@ namespace Fergun.Modules
                     builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
 #endif
                 }
-                builder.WithFooter(string.Format(Locate("HelpFooter"), version, _cachedVisibleCmdCount))
+                builder.WithFooter(string.Format(Locate("HelpFooter"), $"v{Constants.Version}", _cachedVisibleCmdCount))
                     .WithColor(FergunClient.Config.EmbedColor);
 
 #if DNETLABS
