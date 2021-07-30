@@ -527,8 +527,26 @@ namespace Fergun.Modules
                 // CPU Name
                 if (File.Exists("/proc/cpuinfo"))
                 {
-                    var cpuinfo = File.ReadAllLines("/proc/cpuinfo");
-                    cpu = cpuinfo.ElementAtOrDefault(4)?.Split(':').ElementAtOrDefault(1);
+                    cpu = File.ReadAllLines("/proc/cpuinfo")
+                        .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
+                        .Split(':')?
+                        .ElementAtOrDefault(1)?
+                        .Trim();
+                }
+
+                if (string.IsNullOrWhiteSpace(cpu))
+                {
+                    cpu = CommandUtils.RunCommand("lscpu")?
+                        .Split('\n')?
+                        .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
+                        .Split(':')?
+                        .ElementAtOrDefault(1)?
+                        .Trim();
+
+                    if (string.IsNullOrWhiteSpace(cpu))
+                    {
+                        cpu = "?";
+                    }
                 }
 
                 // OS Name
@@ -615,7 +633,7 @@ namespace Fergun.Modules
 
                 .AddField(Locate("OperatingSystem"), os, true)
                 .AddField("\u200b", "\u200b", true)
-                .AddField("CPU", cpu ?? "?", true)
+                .AddField("CPU", cpu, true)
 
                 .AddField(Locate("CPUUsage"), cpuUsage + "%", true)
                 .AddField("\u200b", "\u200b", true)
