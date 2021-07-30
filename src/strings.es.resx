@@ -1299,26 +1299,6 @@ Selección de pista para `play`</value>
 	<data name="BlacklistedWithReason" xml:space="preserve">
     <value>Estás en la lista negra con la razón: {0}</value>
   </data>
-	<data name="Changelog0.9" xml:space="preserve">
-    <value>- Agregado soporte a nuevos idiomas.
-- Nuevo idioma (español)
-- Nuevos comandos (`language`, `xkcd`, `nowplaying`, `snipe`, `changelog`)
-- `ytrandom` ahora funciona mucho mejor.
-- Ahora la lista de comandos y el comando de ayuda son dinámicos.
-- Se corrigieron algunos errores.</value>
-  </data>
-	<data name="Changelog1.0" xml:space="preserve">
-    <value>- Sistema y comandos de AI Dungeon, incluyendo un sistema de ID de historias y traducción automática.
-- Sistema de configuración para algunos comandos a nivel de servidor.
-
-- Nuevos comandos:
-AI Dungeon: `info`, `new`, `continue`, `revert`, `remember`, `alter`, `makepublic`, `makeprivate`, `idlist`, `idinfo`, `delete`
-Otros: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `seek`, `stats`, `blacklist`, `ocrtranslate`, `roleinfo`
-
-- Soporte a canales de MD.
-- Ahora el bot usa una base de datos adecuada.
-- Más correcciones de errores.</value>
-  </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>Necesitas el permiso `Banear miembros` para usar este comando.</value>
   </data>
@@ -1516,19 +1496,6 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
 	<data name="QueueExcess" xml:space="preserve">
     <value>..y {0} pistas mas!</value>
   </data>
-	<data name="Changelog1.1" xml:space="preserve">
-    <value>- Se rehizo el módulo AI Dungeon y el wrapper de la API 2 veces debido a los constantes cambios en la API.
-- Nuevos comandos (`vote`, `report`, `bash`, `channelinfo`)
-- Los comandos del dueño ahora tienen su propio módulo.
-- Ahora se muestra el tiempo de cooldown de los comandos.
-- Ahora el bot esta alojado en un VPS.
-- Actualizado Discord.Net a la rama de desarrollo.
-- Se limitó la cola de música a 10 pistas.
-- `seek` ahora permite un tiempo con el formato` mm: ss` o `hh: mm: ss` como 30:45 o 6:23:12.
-- Se corrigió un error que causaba que el bot se desconectara de un canal de voz cuando Discord solicita una reconexión.
-- Se corrigió un error en `wikipedia` que devolvía el error 404 cuando no se encontraba un artículo en el idioma actual del bot.
-...y más correcciones de errores.</value>
-  </data>
 	<data name="ErrorHelp" xml:space="preserve">
     <value>Si esto sigue sucediendo, reporte este error en el [servidor de soporte]({0}) o abra un issue (propuesta) en el [repositorio de GitHub]({1}) describiendo el error y los pasos para reproducirlo.</value>
   </data>
@@ -1585,23 +1552,6 @@ Puedes usar el comando `new` para crear una nueva aventura.</value>
   </data>
 	<data name="OtherVersions" xml:space="preserve">
     <value>Otras versiones: {0}</value>
-  </data>
-	<data name="Changelog1.1.5" xml:space="preserve">
-    <value>- Nuevo comando: `badtranslator`
-- Se ha añadido la opción de seleccionar una pista antes de reproducir en `play` (desactivado por defecto, puedes activarlo en `config`).
-
-- `img` está de vuelta y ahora utiliza DuckDuckGo para la búsqueda de imágenes.
-- `changelog` ahora te permite pasar una versión específica por lo que no muestra todos los cambios de versión a la vez.
-- `serverinfo` ahora muestra el icono del servidor animado, si hay uno.
-
-- Editado los requisitos de permisos para `config`, `prefix` y `language`.
-- Limpieza en las clases de configuración y servidor.</value>
-  </data>
-	<data name="changelogParam1" xml:space="preserve">
-    <value>Una versión específica a ver.</value>
-  </data>
-	<data name="Changelog0.8" xml:space="preserve">
-    <value>- ...</value>
   </data>
 	<data name="DeletedMessages" xml:space="preserve">
     <value>Eliminado {0} mensajes.</value>
@@ -1671,21 +1621,6 @@ Para desactivar la repetición, usa este comando sin pasar ningún parámetro.</
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Usa `-headers` al final del comando para mantener los tags (`[info]`).</value>
   </data>
-	<data name="Changelog1.2" xml:space="preserve">
-    <value>- Nuevos comandos: `calc` y `loop` (en comando número 100!).
-- Rehecho `lyrics` desde el comienzo. Hize mi propio parser que funciona mucho mejor que la integrada en Victoria.
-El nuevo parser también permite pasar el nombre una canción específica en vez de tener que reproducir una pista primero.
-
-- `help` ahora muestra los tipos de los parámetros del comando actual.
-- `stats` ahora muestra el uso de la memoria bot junto a todo el proceso de uso de la memoria.
-- `urban` ahora muestra los enlaces a las palabras.
-- Añadido mejor interactividad a `language`, `config`, `trivia` y `aid delete`, ahora manejando las respuestas con reacciones.
-- Mejor sistema de paginación para `img`, `urban` y `lyrics`.
-- Ahora Lavalink se actualiza automáticamente a las builds de desarrollo.
-
-- Limpieza en la funcionalidad de localización, ahora todos los módulos utilizan una base de comandos personalizado que incluye los métodos necesarios para la localización.
-- Arreglos de errores pequeños y optimizaciones.</value>
-  </data>
 	<data name="HelpFooter2" xml:space="preserve">
     <value>&lt;&gt; = Requerido | [] = Opcional | No escribas estos símbolos con el comando.</value>
   </data>
@@ -1695,37 +1630,11 @@ El nuevo parser también permite pasar el nombre una canción específica en vez
 	<data name="invertParam1" xml:space="preserve">
     <value>La url de una imagen a usar.</value>
   </data>
-	<data name="Changelog1.2.3" xml:space="preserve">
-    <value>Esta actualización contiene arreglos de errores que dejaron la 1.2 y algunos cambios que fueron retrasados de la 1.2 para ser mejorados.
-
-- Nuevo comando: `invert`
-- Agregado los idiomas Ruso y Turco (he usado Google Translate por lo que puede haber muchos errores).
-- Agregado información sobre los parámetros obligatorios y opcionales en `help`.
-- Agregado un sistema simple de caché para `img`, `tts` y `urban`.
-
-- Ahora `urban` y `badtranslator` pueden buscar / traducir palabras aleatorias por ti (usa los comandos sin pasar nada).
-- Ahora el bot sólo entrara al estado de escribiendo para los comandos largos.
-
-- Arreglado un bug en `img` que ocurria cuando el embed intentaba usar una imágen "inválida".
-- Arreglado un bug en `ocr` que ocurria cuando la imagen era muy grande.
-- Arreglado un bug en `badtranslator` que hacía que el comando fallaso sin razón alguna.
-- Arreglado un bug con el paginador que parpadeaba en ciertas circunstancias.
-- Arreglado algunos errores con el parser de `lyrics`.</value>
-  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
     <value>Los mensajes deben tener menos de dos semanas de antigüedad.</value>
   </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
     <value>No se pudieron eliminar {0} mensajes porque tienen mas de dos semanas de antigüedad.</value>
-  </data>
-	<data name="Changelog1.2.4" xml:space="preserve">
-    <value>- Agregado un servicio de reliabilidad para prevenir puntos muertos (deadlocks) y un script de auto-reinicio que se ejecuta cuando el bot tiene un error el cual no se puede recuperar (crash).
-
-- Limitado la longitud máxima del texto en `lyrics`.
-
-- Arreglado un bug en `invert` que fallaba con algunas imágenes.
-- Arreglado un bug en `clear` que mostraba una advertencia sobre mensajes que no se pudieron eliminar aún si los mensajes eliminados tienen una antigüedad menor a dos semanas.
-- Arreglado un bug en `trivia` que mostraba un mensaje que se acabó el tiempo sin importar de la entrada.</value>
   </data>
 	<data name="GuildNotFound" xml:space="preserve">
     <value>Servidor no encontrado.</value>
@@ -1767,22 +1676,6 @@ Say: Puedes usar esto para hablar, ej. "Déjalos solos!".
 
 Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
   </data>
-	<data name="Changelog1.2.7" xml:space="preserve">
-    <value>- Nuevos comandos: `color` y `retry`.
-
-- Agregado un servicio de caché de comandos, ahora puedes editar un mensaje a un nuevo comando y Fergun actualizará su respuesta o enviará una nueva.
-
-- Actualizado el módulo y wrapper de API de AI Dungeon, arreglado algunos bugs con las respuestas y actualizado los comandos `idinfo` y `alter`.
-
-- Ahora `userinfo` y `avatar` mostrarán la info/avatar del usuario que no esta en el servidor pasando su ID.
-- Ahora `userinfo` y `avatar` mostrarán el avatar por defecto si el usuario no tiene un avatar.
-- Ahora `lyrics` mostrará la letra de la canción que está reproduciendo en tu actividad de Spotify.
-- Ahora `lyrics` muestra correctamente el nombre de la canción cuando ocurre un error.
-- Ahora es posible usar `softban` con una ID de usuario.
-- Ahora algunos comandos subirán sus resultados a Hastebin cuando el contenido es demasiado largo.
-
-- Arreglado algunos bugs en `tpdne`, `tcdne`, `repeat`, el servicio de comandos y el sistema de paginación.</value>
-  </data>
 	<data name="Members" xml:space="preserve">
     <value>Miembros</value>
   </data>
@@ -1813,52 +1706,11 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="CategoryCount" xml:space="preserve">
     <value>Número de categorías</value>
   </data>
-	<data name="Changelog1.2.9" xml:space="preserve">
-    <value>- Agregado un traductor de reserva que será usado automáticamente cuando el principal falle.
-- Aumentado el intervalo de limpieza del caché de comandos.
-
-- Arreglado un bug en `new` que prevenía que se muestre el texto inicial.
-- Arreglado un bug en el embed del paginador que prevenía que se muestre el avatar del usuario si el usuaio no tenía uno puesto.
-- Arreglado otros bugs menores.
-
-- Ahora Fergun responderá a los mensajes de comandos si antes el mensaje no contenia comandos.
-- Ahora `ping` muestra la latencia de la base de datos.
-
-- Reducido el uso de memoria.</value>
-  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
     <value>Volcando la aventura...</value>
   </data>
 	<data name="EditCanceled" xml:space="preserve">
     <value>Edición cancelada.</value>
-  </data>
-	<data name="Changelog1.3" xml:space="preserve">
-    <value>- Nuevo comando: `dump`.
-
-- Actualizado la API de AI Dungeon para usar WebSocketss. Ahora los tiempos de respuestas son mucho más rápidos.
-- Actualizado el comando `new` para usar reacciones en vez de tener que enviar números o nombres.
-- Agregado soporte adecuado de colas para el módulo de AI Dungeon.
-
-- Eliminado `ocr2`.
-
-- Arreglado un bug en la caché de comandos que hacía que el bot respondiera 2 veces en algunos comandos porque el mensaje del comando se "actualizaba" para incluir una imagen o un embed.
-- Arreglado un bug en la inicialización de la caché de los comandos `img`, `urban` and `ytrandom` que prevenía que los resultados sean guardados.
-- Arreglado un bug en `new` que causaba que la opción seleccionada no fuera la correcta.
-- Arreglado un bug en `avatar` y `user` que causaba que los comandos fallasen porque el avatar no era encontrado (Discord retornaba el avatar de la caché).
-- Arreglado un bug en `img` que ocurría cuando el embed intentaba usar una imágen "inválida" (esta vez las imágenes "inválidas" serán simplemente descartadas).
-- Arreglado un bug en `ban` y `hackban` que causaba que los comandos fallasen cuando se pasaba una ID de un usuario que está en el servidor y que no puede ser baneado, retornando error 403.
-- Arreglado un bug en `badtranslator` que causaba que el comando fallase porque el idioma objetivo no era encontrado.
-- Arreglado un bug en `badtranslator` que causaba que el comando entrara en un bucle infinito en raras ocasiones.
-- Arreglado un bug en `ytrandom` que causaba que el comando se bloqueara a si mismo si ocurría un error mientras se creaba la caché de videos.
-- Arreglado un bug en `snipe` y `editsnipe` que ocurría cuando el texto era mayor a 1024 carácteres.
-- Arreglado un bug en `wikipedia` que ocurría cuando se intentaba usar la imagen del artículo.
-- Arreglado un bug en `changelog` que evitabar ver el changelog debido a la manera en que las versiones eran guardadas.
-- Arreglado un bug en `skip` y `seek` que ocurría cuando el estado del reproductor era inválido.
-- Arreglado un bug en `trivia` que causaba que el texto fuera codificado en vez de decodificado.
-
-- Ahora `badtranslator` no tendrá idiomas duplicados.
-
-- Reducido *mas* el uso de memoria.</value>
   </data>
 	<data name="NothingToDelete" xml:space="preserve">
     <value>Nada que eliminar.</value>
@@ -1947,17 +1799,6 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="dumpParam1" xml:space="preserve">
     <value>La ID de aventura.</value>
   </data>
-	<data name="Changelog1.3.3" xml:space="preserve">
-    <value>- Eliminado `someone`.
-
-- Ahora Fergun mostrará la ayuda de un comando cuando éste se use de manera incorrecta
-- Agregado un ejemplo para cada comando con parámetros en la ayuda de comando.
-- Agregado la info del sistema operativo en `stats`.
-
-- Arreglado un bug en `ban`, `kick`, `nick` y `clear` que evitaba que funcionase correctamente, diciendo el usuario especificado no ha sido encontrado. Esto pasaba porque la caché de usuarios fue deshabilitada hace un tiempo.
-- Arreglado un bug en `clear` que hacia de diciese que habia mensajes anteriores a 2 semanas cuando no había mensajes a eliminar.
-- Arreglado un bug en `resize` y `invert` que causaba el comando fallase porque Discord mostraba en la prevista de algunas urls una imágen inválida.</value>
-  </data>
 	<data name="RatelimitUses" xml:space="preserve">
     <value>{0} uso(s) cada {1}</value>
   </data>
@@ -1966,18 +1807,6 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
   </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
     <value>Muestra las estadísticas de los comandos.</value>
-  </data>
-	<data name="Changelog1.3.6" xml:space="preserve">
-    <value>- Nuevo comando: `cmdstats`.
-
-- Ahora los botones del paginador `primero` y `último` en `img` y` urban` solo aparecerán cuando haya 3 o más páginas, y el botón `saltar` cuando haya 4 o más páginas.
-- Ahora Fergun enviará un mensaje directo para advertir a un usuario cuando el bot no tiene los permisos mínimos requeridos en el canal actual (`SendMessages` y `EmbedLinks`).
-- Ahora Fergun soporta múltiples actividades de usuario, esto es útil en `userinfo` y `lyrics` (cuando la actividad de Spotify está oculta por el estado personalizado).
-- Agregado información de los permisos requeridos y de ratelimit en la ayuda de los comandos.
-
-- Arreglado un error en `wikipedia` que causaba que el comando fallase porque el texto a buscar no estaba codificado en algunos casos.
-- Arreglad un error en `screenshot` que causaba que el comando fallase porque la url estaba codificada por error.
-- Arreglado  un error en el módulo AI Dungeon que causaba que los comandos fallasen cuando se usaban diferentes IDs al mismo tiempo.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
     <value>Command stats (desde {0})</value>
@@ -2105,24 +1934,6 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	<data name="PublicIdNull" xml:space="preserve">
 		<value>La ID pública de esta aventura es nula. Por favor crea una nueva aventura.</value>
 	</data>
-	<data name="Changelog1.4" xml:space="preserve">
-		<value>- Nuevos comandos: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` y `globaldisable`.
-
-- Ahora cuando Fergun ingresa a un servidor y éste servidor tiene un lenguaje preferido, éste lenguaje será guardado en la configuración de Fergun en ese servidor.
-- Ahora cuando Fergun deja un servidor, la configuración de ese servidor será eliminada de la base de datos.
-- Ahora Fergun saldrá de un canal de voz si todos los usuarios dejan ese canal.
-- Ahora Fergun enviará una advertencia a todos los servidores que tengan un reproductor de música antes de reiniciarse/apagarse.
-- Ahora los comandos que usen Hastebin y la subida de texto falle, su contenido se mostrará en el mensaje, pero cortado.
-
-- Añadido soporte a deshabilitación de comandos a nivel de servidor. 
-- Añadido soporte a canales de voz, canales de categorías y canales de MD en `channelinfo`.
-- Añadido soporte a archivos eliminados en `snipe` (`bigsnipe` ya viene con esta caracerística).
-
-- Actualizado el scraper de `lyrics` y arreglado el bug del texto cortado.
-- Actualizado el módulo de AI Dungeon y el wrapper de API.
-
-- Arreglado un bug que causaba que algunos comandos de moderación fallaran porque la jerarquía de calculaba incorrectamente.</value>
-	</data>
 	<data name="giveSummary" xml:space="preserve">
 		<value>Regala (transfiere) la ID especificada a un usuario.</value>
 	</data>
@@ -2137,26 +1948,6 @@ Story: Previene que la IA pongo "Tú" en frente de tu entrada.</value>
 	</data>
 	<data name="GaveId" xml:space="preserve">
 		<value>Se transfirió correctamente la ID a {0}.</value>
-	</data>
-	<data name="Changelog1.4.8" xml:space="preserve">
-		<value>- Nuevo comando: `give`.
-
-- Actualizado el módulo de AI Dungeon y el wrapper de API (otra vez), arreglado el bug de la aventura personalizada y arreglado `alter`.
-- Actualizado la librería de Google TTS, ahora usando preprocesadores y tokenizadores porteados de la librería de Python gTTS. Esto provee entonaciones y pronunciaciones correctas, y permite hacer TTS con textos más largos.
-- Mejorado el scraper de letras.
-
-- Ahora Fergun dejará un canal de voz cuando solo haya bots en ese canal.
-- Ahora `roleinfo` mostrará '?' y '~x' en los usuarios totales cuando la caché de servidor no está completa.
-
-- Arreglado Fixed activities and active clients not showing in `userinfo`.
-- Arreglado un bug `lyrics` que causaba que la opción "-headers" sea ignorado cuando sólo eso era pasado.
-- Arreglado un bug en `wikipedia` que ocurría con algunos artículos.
-- Arreglado un bug en `img` que ocurría cuando un !Bang era activado.
-- Arreglado un bug en `img` que ocurría cuando un texto largo era pasado.
-- Arreglado un bug raro en el paginador que ocurría cuando el usuario que añadía una reacción no estaba en la caché.
-- Arreglado un bug in `trivia` que ocurría cuando el comando era usado simultáneamente.
-- Arreglado un bug raro in `ocr` y `ocrtranslate` que ocurría cuando una imagen corrupta era usada.
-- Muchos bugs fixes menores.</value>
 	</data>
 	<data name="Invite" xml:space="preserve">
 		<value>Invitación</value>
@@ -2305,39 +2096,6 @@ Por favor inténtelo de nuevo más tarde.</value>
 	</data>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>La Url a acortar.</value>
-	</data>
-	<data name="Changelog1.6" xml:space="preserve">
-		<value>- ¡Fergun ahora es de código abierto!
-- Nuevos comandos: `wolframalpha`, `spotify`, `define`, `archive`, `shorten` y `blacklistserver`.
-- Añadido de nuevo `youtube`.
-- Muchos cambios internos para facilitar el self-hosting del bot.
-
-- Se agregó un sistema de caché de prefijo. Ahora los tiempos de respuesta deberían ser más rápidos.
-- [help] Se agregó la caché de lista de comandos.
-- [cmdstats] Se mejoraron los métodos para obtener el uso de la memoria del bot.
-- [repeat] Se mejoró el rendimiento, limitando la máxima longitud posible de texto para evitar asignar memoria innecesariamente.
-- Se mejoró el rendimiento del servicio de registro e interactivo.
-- [cmdstats] Se redujo el número de comandos mostrados por página.
-- [calc] Ahora usa una biblioteca matemática diferente.
-- [urban] Ahora se puede utilizar en canales que no son NSFW.
-- [code] Reescrito para obtener un enlace que apunta a la línea del método de comando especificado desde el repositorio.
-
-- [userinfo] Se corrigió un error que causaba que el campo de actividad estuviera vacío si el usuario tenía un emote en su estado.
-- [lyrics] Se corrigió un error en el analizador que causaba que el texto en negrita se superpusiera.
-- [give] Se corrigió un error que permitía dar ID a bots.
-- Se corrigieron algunos errores en el contenedor de Bing Translator.
-
-- [new] Se eliminó el límite de caracteres en la creación del modo personalizado.
-- [alter] Eliminado el límite de caracteres.
-- Se eliminó el paginador / caché de video.
-- Se eliminó la lista de palabras que usaba `badtranslator`.
-- Eliminado `nothing` y `botcolor`.
-
-- Ahora Fergun enviará un mensaje de advertencia cuando un comando falle debido a un error 5xx.
-- Ahora Fergun enviará un mensaje de advertencia cuando se use un comando de música cuando no haya conexión a un servidor de Lavalink.
-- Ahora al editar un mensaje de comando con un paginador, el mensaje de respuesta se eliminará si las reacciones no se pueden eliminar.
-- Ahora al editar un mensaje de comando a un comando que adjunta archivos, el mensaje "Cargando" se eliminará correctamente.
-- Muchas correcciones de errores menores.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Insignias</value>

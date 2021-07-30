@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Discord;
 using Discord.Commands;
@@ -14,24 +13,38 @@ namespace Fergun
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             .InformationalVersion;
 
-        public static IReadOnlyList<string> PreviousVersions { get; } = new[]
-        {
-            "0.8",
-            "0.9",
-            "1.0",
-            "1.1",
-            "1.1.5",
-            "1.2",
-            "1.2.3",
-            "1.2.4",
-            "1.2.7",
-            "1.2.9",
-            "1.3",
-            "1.3.3",
-            "1.3.6",
-            "1.4",
-            "1.4.8"
-        };
+        public const string Changelog = @"**v1.6**
+- Fergun is now open source!
+- New commands: `wolframalpha`, `spotify`, `define`, `archive`, `shorten`, and `blacklistserver`.
+- Added back `youtube`.
+- Lots of internal changes to make the bot easy to self-host.
+
+- Added a prefix cache system. Now the response times should be faster.
+- [help] Added a command list cache.
+- [stats] Improved the methods to get the bot memory usage.
+- [repeat] Improved the performance, limiting the maximum possible length of text to avoid allocating memory unnecessarily.
+- Improved the performance of the logging and interactive service.
+- [cmdstats] Reduced the number of commands displayed per page.
+- [calc] Now using a different math library.
+- [urban] Now can be used in non-NSFW channels.
+- [code] Rewrote to get a link pointing to the specified command method line from the repository.
+
+- [userinfo] Fixed a bug that caused the activity field to be empty if the user had an emote in their status.
+- [lyrics] Fixed a bug in the parser that caused bold text to be overlapped.
+- [give] Fixed a bug that allowed to give IDs to bots.
+- Fixed some bugs in the Bing Translator wrapper.
+
+- [new] Removed the character limit in the custom mode creation.
+- [alter] Removed the character limit.
+- Removed the paginator/video cache.
+- Removed the word list that `badtranslator` used.
+- Removed `nothing` and `botcolor`.
+
+- Now Fergun will send a warning message when a command fails due to a 5xx error.
+- Now Fergun will send a warning message when a music command is used when there's no connection to a Lavalink server.
+- Now when editing a command message with a paginator, the response message will be deleted if the reactions cannot be removed.
+- Now when editing a command message to a command that attaches files, the ""Loading"" message will be correctly deleted.
+- Lots of minor bug fixes.";
 
         public static string GitHash { get; } = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<GitHashInfoAttribute>()?

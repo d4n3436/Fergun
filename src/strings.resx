@@ -1318,26 +1318,6 @@ Track selection for `play`</value>
 	<data name="BlacklistedWithReason" xml:space="preserve">
     <value>You are in the blacklist with the reason: {0}</value>
   </data>
-	<data name="Changelog0.9" xml:space="preserve">
-    <value>- Added support to new languages.
-- New language (Spanish)
-- New commands (`language`, `xkcd`, `nowplaying`, `snipe`, `changelog`)
-- `ytrandom` now works much better.
-- The command list and the help command are now dynamic.
-- Fixed some bugs.</value>
-  </data>
-	<data name="Changelog1.0" xml:space="preserve">
-    <value>- AI Dungeon system and commands, including a story ID system and auto translation.
-- Configuration system for some commands at guild level.
-
-- New commands:
-AI Dungeon: `info`, `new`, `continue`, `revert`, `remember`, `alter`, `makepublic`, `makeprivate`, `idlist`, `idinfo`, `delete`
-Other: `eval`, `config`, `softban`, `tcdne`, `tpdne`, `editsnipe`, `reaction`, `seek`, `stats`, `blacklist`, `ocrtranslate`, `roleinfo`
-
-- Support to DM channels.
-- Now the bot uses a proper database.
-- More bug fixes.</value>
-  </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>You need the `Ban Members` permission to use this command.</value>
   </data>
@@ -1550,18 +1530,6 @@ You can use the `new` command to create a new adventure.</value>
 	<data name="QueueExcess" xml:space="preserve">
     <value>..and {0} more tracks!</value>
   </data>
-	<data name="Changelog1.1" xml:space="preserve">
-    <value>- Remade the AI Dungeon module and API wrapper 2 times because of constant changes in the API.
-- New commands (`vote`, `report`, `bash`, `channelinfo`)
-- The owner commands now has its own module.
-- Now the commands' cooldown time is displayed.
-- Now the bot is hosted on a VPS.
-- Limited the music queue to 10 tracks.
-- `seek` now allows a time with the format `mm:ss` or `hh:mm:ss` like 30:45 or 6:23:12.
-- Fixed a bug that caused the bot to disconnect from a voice channel when Discord requested a reconnection.
-- Fixed a bug in `wikipedia` that returned error 404 when an article was not found in the current language of the bot.
-...and more bug fixes.</value>
-  </data>
 	<data name="ErrorHelp" xml:space="preserve">
     <value>If this keeps happening please report this error in the [support server]({0}) or open an issue in the [GitHub repository]({1}) describing the error and the steps to reproduce it.</value>
   </data>
@@ -1618,23 +1586,6 @@ You can use the `new` command to create a new adventure.</value>
   </data>
 	<data name="OtherVersions" xml:space="preserve">
     <value>Other versions: {0}</value>
-  </data>
-	<data name="Changelog1.1.5" xml:space="preserve">
-    <value>- New command: `badtranslator`
-- Added the option to select a track before playing in `play` (disabled by default, you can enable it in `config`).
-
-- `img` is back and it now uses DuckDuckGo image search.
-- `changelog` now lets you pass a specific version so it doesn't display all the version changes at once.
-- `serverinfo` now shows the server animated icon, if there's one.
-
-- Edited the permission requirements for `config`, `prefix` and `language`.
-- Cleanup in the config and server classes.</value>
-  </data>
-	<data name="changelogParam1" xml:space="preserve">
-    <value>A specific version to view.</value>
-  </data>
-	<data name="Changelog0.8" xml:space="preserve">
-    <value>- ...</value>
   </data>
 	<data name="DeletedMessages" xml:space="preserve">
     <value>Deleted {0} messages.</value>
@@ -1704,22 +1655,6 @@ To disable the loop, use this command without parameters.</value>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Use `-headers` at the end of the command to keep the tags (`[info]`).</value>
   </data>
-	<data name="Changelog1.2" xml:space="preserve">
-    <value>- New commands: `calc` and `loop` (the 100th command!).
-- Remade `lyrics` from scratch, I've made my own parser that works a lot better than the integrated one from Victoria.
-The new parser also allows you to pass a specific song name instead of having to play a song before.
-
-- `help` now shows the current command parameters types.
-- `stats` now shows the bot memory usage next to all the process memory usage.
-- `urban` now shows the links to the words.
-- Added more interactivity to `language`, `config`, `trivia` and `aid delete`, now handling the responses with reactions.
-- Better pagination system for `img`, `urban` and `lyrics`.
-- Now Lavalink is updated automatically to the dev builds.
-
-- Cleanup on the localization functionality, now all the modules uses a custom command base that includes the methods needed for localization.
-This prevents duplicating the localization methods for each module, and the response times *should* be faster.
-- Small bug fixes and optimizations.</value>
-  </data>
 	<data name="HelpFooter2" xml:space="preserve">
     <value>&lt;&gt; = Required | [] = Optional | Do not type these symbols when writing the command.</value>
   </data>
@@ -1729,37 +1664,11 @@ This prevents duplicating the localization methods for each module, and the resp
 	<data name="invertParam1" xml:space="preserve">
     <value>The url of an image to use.</value>
   </data>
-	<data name="Changelog1.2.3" xml:space="preserve">
-    <value>This update contains fixes for bugs that left 1.2 and some changes / new things that were delayed from 1.2 to improve them.
-
-- New command: `invert`
-- Added Russian and Turkish languages (I've used Google Translate so the translations may have lots of errors).
-- Added some info about the obligatory and optional arguments in `help`.
-- Added a simple cache system to `img`, `tts` and `urban`.
-
-- Now `urban` and `badtranslator` can search / translate random words for you (use the commands without passing anything).
-- Now the bot will only enter the typing state for long-running commands.
-
-- Fixed a bug in `img` that occurred when the embed tried to use an "invalid" url image.
-- Fixed a bug in `ocr` that occurred when the image was too large.
-- Fixed a bug in `badtranslator` that made the command fail randomly for no reason.
-- Fixed a bug with the paginator that flickered in certain circumstances.
-- Fixed some bugs with the `lyrics` parser.</value>
-  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
     <value>Messages must be younger than two weeks.</value>
   </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
     <value>{0} messages could not be deleted because they are older than two weeks.</value>
-  </data>
-	<data name="Changelog1.2.4" xml:space="preserve">
-    <value>- Added a reliability service to prevent deadlocks and an auto-restart script that executes if the bot crashes.
-
-- Limited the max. text length in `lyrics`.
-
-- Fixed a bug in `invert` that failed in some images.
-- Fixed a bug in `clear` that showed a warning about messages could not be deleted even if the all the deleted messages are younger than two weeks.
-- Fixed a bug in `trivia` that would timeout regardless of the input.</value>
   </data>
 	<data name="GuildNotFound" xml:space="preserve">
     <value>Server not found.</value>
@@ -1801,22 +1710,6 @@ Say: You can use this to speak, ex. "Leave them alone!"
 
 Story: This input stops the AI from putting "You" in front of your input.</value>
   </data>
-	<data name="Changelog1.2.7" xml:space="preserve">
-    <value>- New commands: `color` and `retry`.
-
-- Added a command cache service, now you can edit a message to a new command and Fergun will update it's response or send a new one.
-
-- Updated the AI Dungeon module and API wrapper, fixed some bugs with the responses and updated the `idinfo` and `alter` commands. Now all the commands are supported.
-
-- Now `userinfo` and `avatar` will show the info/avatar of a user that isn't in the server by passing its ID.
-- Now `userinfo` and `avatar` will show the default avatar if the user doesn't have an avatar.
-- Now `lyrics` will show the lyrics of the current track playing in your Spotify activity, if there's one.
-- Now `lyrics` shows correctly the track name when an error happens.
-- Now it's possible to use `softban` with a user ID.
-- Now some commands will upload its results to Hastebin when the content is too long.
-
-- Fixed some bugs in `tpdne`, `tcdne`, `repeat`, the command service and the paginator system.</value>
-  </data>
 	<data name="Members" xml:space="preserve">
     <value>Members</value>
   </data>
@@ -1847,52 +1740,11 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="CategoryCount" xml:space="preserve">
     <value>Category count</value>
   </data>
-	<data name="Changelog1.2.9" xml:space="preserve">
-    <value>- Added a backup translator that will be automatically used when the first one fails.
-- Increased the command cache cleaning interval.
-
-- Fixed a bug in `new` that prevented showing the initial prompt.
-- Fixed a bug in the paginator embed that prevented showing the author avatar if the user didn't have one set.
-- Fixed other small bugs.
-
-- Now Fergun will respond to the command messages if before the message didn't contain any command.
-- Now `ping` shows the database latency.
-
-- Reduced the memory usage.</value>
-  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
     <value>Dumping the adventure...</value>
   </data>
 	<data name="EditCanceled" xml:space="preserve">
     <value>Edit canceled.</value>
-  </data>
-	<data name="Changelog1.3" xml:space="preserve">
-    <value>- New command: `dump`.
-
-- Updated the AI Dungeon API to use WebSockets. Now the response times are a lot faster.
-- Updated the `new` command to use reactions instead of having to send numbers or names.
-- Added proper ID queue support for the AI Dungeon module.
-
-- Removed `ocr2`.
-
-- Fixed a bug in the command cache that made the bot reply 2 times in some commands because the command message was "updated" to include an embed or a image/video preview.
-- Fixed a bug in the initialization of the cache for the commands `img`, `urban` and `ytrandom` that prevented the cached results being saved.
-- Fixed a bug in `new` that caused the selected option to not be correct.
-- Fixed a bug in `avatar` and `user` that caused the commands to fail because the avatar was not found (Discord returned the cached avatar).
-- Fixed a bug in `img` that occurred when the embed tried to use an "invalid" url image (this time the "invalid" images will simply be discarded).
-- Fixed a bug in `ban` and `hackban` that caused the commands to fail when passed a guild user Id that can't be banned, returning error 403.
-- Fixed a bug in `badtranslator` that caused the command to fail because the target language was not found.
-- Fixed a bug in `badtranslator` that caused the command to enter in a infinite loop in rare cases.
-- Fixed a bug in `ytrandom` that caused the command to lock itself if an error occurs when creating the video cache.
-- Fixed a bug in `snipe` and `editsnipe` that occurred when the text was larger that 1024 characters.
-- Fixed a bug in `wikipedia` that occurred when trying to use the article image.
-- Fixed a bug in `changelog` that prevented viewing the changelog because of the way the version numbers were saved.
-- Fixed a bug in `skip` and `seek` that occurred when the player state was invalid.
-- Fixed a bug in `trivia` that caused the text to be encoded instead of decoded.
-
-- Now `badtranslator` won't have duplicated languages.
-
-- Reduced *more* the memory usage.</value>
   </data>
 	<data name="NothingToDelete" xml:space="preserve">
     <value>Nothing to delete.</value>
@@ -1981,17 +1833,6 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="dumpParam1" xml:space="preserve">
     <value>The adventure ID.</value>
   </data>
-	<data name="Changelog1.3.3" xml:space="preserve">
-    <value>- Removed `someone`.
-
-- Now Fergun will show the command help when using a command incorrectly.
-- Added a example to every command with parameters in the command help.
-- Added operating system info in `stats`.
-
-- Fixed a bug in `ban`, `kick`, `nick` and `clear` that prevented working properly, saying that the specified user was not found. This happened because the user cache was disabled some time ago.
-- Fixed a bug in `clear` that would incorrectly say that there are messages older that 2 weeks when there are no messages to delete.
-- Fixed a bug in `resize` and `invert` that caused the commands to fail because Discord shows an invalid image preview to some urls.</value>
-  </data>
 	<data name="RatelimitUses" xml:space="preserve">
     <value>{0} use(s) every {1}</value>
   </data>
@@ -2000,18 +1841,6 @@ Story: This input stops the AI from putting "You" in front of your input.</value
   </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
     <value>Shows the command stats.</value>
-  </data>
-	<data name="Changelog1.3.6" xml:space="preserve">
-    <value>- New command: `cmdstats`.
-
-- Now the `first` and `last` paginator buttons in `img` and `urban` will only appear when there are 3 or more pages, and the `jump` button when there are 4 or more pages.
-- Now Fergun will send a direct message to warn a user when the bot doesn't have the minimum required permissions in the current channel (`SendMessages` and `EmbedLinks`).
-- Now Fergun supports multiple user activities, this is useful in `userinfo` and `lyrics` (when the Spotify activity is hidden by the custom status).
-- Added ratelimit and required permissions info in the command help.
-
-- Fixed a bug in `wikipedia` that caused the command to fail because the query was not encoded in some cases.
-- Fixed a bug in `screenshot` that caused the command to fail because the url was encoded by error.
-- Fixed a bug in the AI Dungeon module that caused the commands to fail when different IDs were used at the same time.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
     <value>Command stats (since {0})</value>
@@ -2139,24 +1968,6 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	<data name="PublicIdNull" xml:space="preserve">
 		<value>The public ID of this adventure is null. Please create a new adventure.</value>
 	</data>
-	<data name="Changelog1.4" xml:space="preserve">
-		<value>- New commands: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` and `globaldisable`.
-
-- Now when Fergun joins a server and that server has a preferred locale, that locale will be saved to the Fergun configuration for that server.
-- Now when Fergun leaves a server, that server config will be deleted from the database.
-- Now Fergun will leave a voice channel when all the users leave that channel.
-- Now Fergun will send a warning to all servers that has a music player before restarting/shutting down.
-- Now the commands that uses Hastebin and the upload fails its content will be showed in the message, but cut down.
-
-- Added support to disable commands at guild level.
-- Added support to voice channels, category channels and DM channels in `channelinfo`.
-- Added support to deleted attachments in `snipe` (`bigsnipe` comes with this feature on release).
-
-- Updated the `lyrics` scraper and fixed the cut text bug.
-- Updated the AI Dungeon module and API wrapper.
-
-- Fixed a bug that caused some moderation commands to fail because the user hierarchy was calculated incorrectly.</value>
-	</data>
 	<data name="giveSummary" xml:space="preserve">
 		<value>Gives (transfers) the specified ID to a user.</value>
 	</data>
@@ -2174,26 +1985,6 @@ Story: This input stops the AI from putting "You" in front of your input.</value
 	</data>
 	<data name="GaveId" xml:space="preserve">
 		<value>The ID was successfully transferred to {0}.</value>
-	</data>
-	<data name="Changelog1.4.8" xml:space="preserve">
-		<value>- New command: `give`.
-
-- Updated the AI Dungeon module and API wrapper (again), fixed the custom adventure bug, and fixed `alter`.
-- Updated the Google TTS library, now using preprocessors and tokenizers ported from gTTS Python library. This provides correct intonation and pronunciation, and also allows making TTS with larger texts.
-- Improved the lyrics scraper.
-
-- Now Fergun will leave a voice channel if there are only bots in that channel.
-- Now `roleinfo` will show '?' and '~x' total users when the guild cache isn't complete. 
-
-- Fixed activities and active clients not showing in `userinfo`.
-- Fixed a bug in `lyrics` that caused the "-headers" option from being ignored when only that was passed.
-- Fixed a bug in `wikipedia` that occurred with some articles.
-- Fixed a bug in `img` that occurred when a !Bang was triggered.
-- Fixed a bug in `img` that occurred when a large text was passed.
-- Fixed a rare bug in the paginator that occurred when the user that added a reaction wasn't cached.
-- Fixed a bug in `trivia` that occurred when the command was used simultaneously.
-- Fixed a rare bug in `ocr` and `ocrtranslate` that occurred when a corrupted image was used.
-- Lots of other bug fixes.</value>
 	</data>
 	<data name="ValueNotSetInConfig" xml:space="preserve">
 		<value>The value of `{0}` has not been established in the config. If this problem persists, contact the developers.</value>
@@ -2306,39 +2097,6 @@ Please try again later.</value>
 	</data>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>The Url to shorten.</value>
-	</data>
-	<data name="Changelog1.6" xml:space="preserve">
-		<value>- Fergun is now open source!
-- New commands: `wolframalpha`, `spotify`, `define`, `archive`, `shorten`, and `blacklistserver`.
-- Added back `youtube`.
-- Lots of internal changes to make the bot easy to self-host.
-
-- Added a prefix cache system. Now the response times should be faster.
-- [help] Added a command list cache.
-- [stats] Improved the methods to get the bot memory usage.
-- [repeat] Improved the performance, limiting the maximum possible length of text to avoid allocating memory unnecessarily.
-- Improved the performance of the logging and interactive service.
-- [cmdstats] Reduced the number of commands displayed per page.
-- [calc] Now using a different math library.
-- [urban] Now can be used in non-NSFW channels.
-- [code] Rewrote to get a link pointing to the specified command method line from the repository.
-
-- [userinfo] Fixed a bug that caused the activity field to be empty if the user had an emote in their status.
-- [lyrics] Fixed a bug in the parser that caused bold text to be overlapped.
-- [give] Fixed a bug that allowed to give IDs to bots.
-- Fixed some bugs in the Bing Translator wrapper.
-
-- [new] Removed the character limit in the custom mode creation.
-- [alter] Removed the character limit.
-- Removed the paginator/video cache.
-- Removed the word list that `badtranslator` used.
-- Removed `nothing` and `botcolor`.
-
-- Now Fergun will send a warning message when a command fails due to a 5xx error.
-- Now Fergun will send a warning message when a music command is used when there's no connection to a Lavalink server.
-- Now when editing a command message with a paginator, the response message will be deleted if the reactions cannot be removed.
-- Now when editing a command message to a command that attaches files, the "Loading" message will be correctly deleted.
-- Lots of minor bug fixes.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Badges</value>

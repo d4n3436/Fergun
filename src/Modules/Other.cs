@@ -45,26 +45,12 @@ namespace Fergun.Modules
         [Command("changelog")]
         [Summary("changelogSummary")]
         [Alias("update")]
-        [Example("1.2")]
-        public async Task<RuntimeResult> Changelog([Summary("changelogParam1")] string version = null)
+        public async Task<RuntimeResult> Changelog()
         {
-            version ??= Constants.Version;
-            if (version != Constants.Version && Constants.PreviousVersions.FirstOrDefault(x => x == version) == null)
-            {
-                return FergunResult.FromError(string.Format(Locate("VersionNotFound"), string.Join(", ", Constants.PreviousVersions.Append(Constants.Version))));
-            }
-
             var builder = new EmbedBuilder()
                 .WithTitle("Fergun Changelog")
-                //.AddField($"v{version}", Locate($"Changelog{version}"))
-                .WithFooter(string.Format(Locate("OtherVersions"), string.Join(", ", Constants.PreviousVersions.Append(Constants.Version).Where(x => x != version))))
+                .WithDescription(Constants.Changelog)
                 .WithColor(FergunClient.Config.EmbedColor);
-
-            var split = Locate($"Changelog{version}").SplitBySeparatorWithLimit('\n', EmbedFieldBuilder.MaxFieldValueLength).ToList();
-            for (int i = 0; i < split.Count; i++)
-            {
-                builder.AddField(i == 0 ? $"v{version}" : "\u200b", split[i]);
-            }
 
             await ReplyAsync(embed: builder.Build());
 

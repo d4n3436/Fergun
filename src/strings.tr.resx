@@ -1408,26 +1408,6 @@ Komut hakkında daha fazla bilgi almak için {{0} yardım {1} `kullanın.</value
 	<data name="BlacklistedWithReason" xml:space="preserve">
     <value>{0}</value>
   </data>
-	<data name="Changelog0.9" xml:space="preserve">
-    <value>- Yeni diller için destek eklendi.
-- Yeni dil (İspanyolca)
-- Yeni komutlar (`dil`,` xkcd`, `şimdi oynatılıyor`,` snipe`, `changelog`)
-- `` ytrandom` artık çok daha iyi çalışıyor.
-- Komut listesi ve yardım kodu artık dinamik.
-- Bazı hatalar düzeltildi.</value>
-  </data>
-	<data name="Changelog1.0" xml:space="preserve">
-    <value>- AI Dungeon sistemi ve hikaye kimliği sistemi ve otomatik çeviri dahil komutlar.
-- Lonca seviyesindeki bazı komutlar için konfigürasyon sistemi.
-
-- Yeni komutlar:
-AI Dungeon: "bilgi", "yeni", "devam", "geri dön", "hatırla", "değiştir", "makepublic", "makeprivate`," idlist`, "idinfo`," sil`
-Diğer: "eval`," config`, "softban`," tcdne`, "tpdne`," editsnipe`, "tepki`," seek`, "istatistik`," kara liste`, "oktranslate`," roleinfo`
-
-- DM kanallarına destek.
-- Şimdi bot uygun bir veritabanı kullanıyor.
-- Daha fazla hata düzeltmesi.</value>
-  </data>
 	<data name="UserRequireBanMembers" xml:space="preserve">
     <value>Bu komutu kullanmak için `Üyeleri Yasakla 'iznine ihtiyacınız var.</value>
   </data>
@@ -1517,18 +1497,6 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
 	<data name="QueueExcess" xml:space="preserve">
     <value>..ve {0} parça daha!</value>
   </data>
-	<data name="Changelog1.1" xml:space="preserve">
-    <value>- API'daki sürekli değişiklikler nedeniyle AI Dungeon modülünü ve API sarıcısını 2 kez yeniden yapın.
-- Yeni komutlar ("oy", "rapor", "bash", "kanal bilgisi")
-- Sahip komutlarının artık kendi modülü var.
-- Şimdi komutların bekleme süresi görüntülenir.
-- Şimdi bot bir VPS'de barındırılıyor.
-- Müzik sırasını 10 parça ile sınırlandırın.
-- "seek" artık "mm: ss" veya "ss: dd: ss" biçiminde 30:45 veya 6:23:12 biçiminde bir zaman tanır.
-- Discord yeniden bağlantı istediğinde botun bir ses kanalıyla bağlantısının kesilmesine neden olan bir hata düzeltildi.
-- Wikipedia'da botun geçerli dilinde bir makale bulunmadığında 404 hatasını döndüren bir hata düzeltildi.
-... ve daha fazla hata düzeltmesi.</value>
-  </data>
 	<data name="ErrorHelp" xml:space="preserve">
     <value>Bu devam ederse lütfen bu hatayı [destek sunucusunda]({0}) bildirin veya [GitHub deposunda]({1}) hatayı ve hatayı yeniden oluşturma adımlarını açıklayan bir sorunu açın.</value>
   </data>
@@ -1580,23 +1548,6 @@ Yeni bir macera oluşturmak için `new` komutunu kullanabilirsiniz.</value>
 	<data name="OtherVersions" xml:space="preserve">
     <value>Diğer sürümler: {0}</value>
   </data>
-	<data name="Changelog1.1.5" xml:space="preserve">
-    <value>- Yeni komut: `badtranslator`
-- `` play`` içinde çalmadan önce bir parça seçme seçeneği eklendi (varsayılan olarak devre dışı, `config 'içinde etkinleştirebilirsiniz).
-
-- `img` geri döndü ve şimdi DuckDuckGo resim aramasını kullanıyor.
-- `changelog` artık belirli bir sürümü geçirmenize izin veriyor, böylece tüm sürüm değişikliklerini aynı anda göstermiyor.
-- `serverinfo` artık sunucu animasyonlu simgesini gösteriyorsa.
-
-- "config", "önek" ve "dil" izin izinlerini düzenledi.
-- Yapılandırma ve sunucu sınıflarında temizleme.</value>
-  </data>
-	<data name="changelogParam1" xml:space="preserve">
-    <value>Görüntülemek için belirli bir sürüm.</value>
-  </data>
-	<data name="Changelog0.8" xml:space="preserve">
-    <value>- ...</value>
-  </data>
 	<data name="DeletedMessages" xml:space="preserve">
     <value>{0} mesaj silindi.</value>
   </data>
@@ -1637,21 +1588,6 @@ Döngüyü devre dışı bırakmak için bu komutu parametre kullanmadan kullan�
   </data>
 	<data name="lyricsRemarks" xml:space="preserve">
     <value>Etiketleri korumak için komutun sonunda `-headers` kullanın (` [info] `).</value>
-  </data>
-	<data name="Changelog1.2" xml:space="preserve">
-    <value>- Yeni komutlar: `calc` ve `loop` (100. komut!).
-- Sıfırdan `lyrics` yeniden, Victoria ayrıştırılmış olandan çok daha iyi çalışan kendi ayrıştırıcı yaptı.
-Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şarkı adını geçirmenize de izin verir.
-
-- `help` şimdi geçerli komut parametresi türlerini göstermektedir.
-- `stats` artık artık işlem belleği kullanımının yanında bot bellek kullanımını gösteriyor.
-- `urban` artık kelimelerin bağlantılarını gösteriyor.
-- `language`, `config`, `trivia` ve `aid delete` bölümlerine daha fazla etkileşim eklendi ve şimdi yanıtlarla tepkiler ele alındı.
-- `img`, `urban` ve `lyrics` için daha iyi sayfalama sistemi.
-- Şimdi Lavalink otomatik olarak geliştiricilere güncellenir.
-
-- Yerelleştirme işlevselliğini temizleme, şimdi tüm modüller yerelleştirme için gerekli yöntemleri içeren özel bir komut tabanı kullanıyor.
-- Küçük hata düzeltmeleri ve optimizasyonlar.</value>
   </data>
 	<data name="HelpFooter2" xml:space="preserve">
     <value>&lt;&gt; = gereklidir | [] = İsteğe bağlı | Komutu yazarken bu sembolleri yazmayın.</value>
@@ -1695,35 +1631,11 @@ Yeni ayrıştırıcı, daha önce bir şarkıyı çalmak yerine belirli bir şar
 	<data name="LanguageSelection" xml:space="preserve">
     <value>Dil seçimi</value>
   </data>
-	<data name="Changelog1.2.3" xml:space="preserve">
-    <value>- Yeni komut: `invert`
-- Rusça ve Türkçe diller eklendi (Google Çeviri'yi kullandım, böylece çevirilerde çok fazla hata olabilir).
-- `help` da zorunlu ve isteğe bağlı argümanlar hakkında bilgi eklendi.
-- `img`, `tts` ve `urban` e basit bir önbellek sistemi eklendi.
-
-- Şimdi `urban` ve `badtranslator` sizin için rastgele kelimeleri arayabilir / çevirebilir (hiçbir şey iletmeden komutu kullanın).
-- Şimdi bot sadece uzun süren komutlar için yazma durumuna girecektir.
-
-- Gömme `geçersiz` bir url resmi kullanmaya çalıştığında oluşan `img` deki bir hata düzeltildi.
-- Görüntü çok büyük olduğunda oluşan `ocr` hatası düzeltildi.
-- `Badtranslator` da komutun hiçbir nedenle rastgele başarısız olmasını sağlayan bir hata düzeltildi.
-- Sayfa zaten ilk / sonuncuyken ilk / son düğmeye tepki verirken yanıp sönen gömme sayfalayıcıdaki bir hata düzeltildi.
-- Bazı sözler ayrıştırıcı ile bazı hatalar düzeltildi.</value>
-  </data>
 	<data name="MessagesOlderThan2Weeks" xml:space="preserve">
     <value>Mesajlar iki hafta yaşından küçük olması gerekmektedir.</value>
   </data>
 	<data name="SomeMessagesNotDeleted" xml:space="preserve">
     <value>iki hafta daha eski olduğu için {0} mesajlar silinemedi.</value>
-  </data>
-	<data name="Changelog1.2.4" xml:space="preserve">
-    <value>- Kilitlenmeleri önlemek için bir güvenilirlik hizmeti ve bot çöktüğünde çalışan otomatik yeniden başlatma komut dosyası eklendi.
-
-- Maks. `lyrics` içindeki metin uzunluğu.
-
-- `invert` içindeki bazı resimlerde başarısız olan bir hata düzeltildi.
-- `clear` içindeki, silinen iletilerin tümü iki haftadan küçük olsa bile iletilerin silinemediğini gösteren bir hata düzeltildi.
-- `trivia`  içindeki girişten bağımsız olarak zaman aşımına uğrayan bir hata düzeltildi.</value>
   </data>
 	<data name="GuildNotFound" xml:space="preserve">
     <value>Sunucu bulunamadı.</value>
@@ -1765,22 +1677,6 @@ De ki: Bunu konuşmak için kullanabilirsiniz, ör. "Onları yalnız bırak!"
 
 Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller.</value>
   </data>
-	<data name="Changelog1.2.7" xml:space="preserve">
-    <value>- Yeni komutlar: "renk" ve "yeniden dene".
-
-- Bir komut önbellek servisi eklendi, şimdi yeni bir komuta mesaj düzenleyebilirsiniz ve Fergun yanıtını güncelleyecek veya yeni bir komut gönderecektir.
-
-- AI Dungeon modülü ve API sarıcı güncellendi, bazı hataları yanıtlarla düzeltti ve `idinfo` ve` alter 'komutlarını güncelledi. Artık tüm komutlar destekleniyor.
-
-- Şimdi `userinfo` ve` avatar`, sunucuda olmayan bir kullanıcının kimliğini ileterek bilgilerini / avatarını gösterecektir.
-- Artık kullanıcının bir avatarı yoksa `userinfo` ve` avatar` varsayılan avatarı gösterecektir.
-- Şimdi `şarkı sözleri`, varsa Spotify etkinliğinizde çalmakta olan parçanın sözlerini gösterecektir.
-- Şimdi `şarkı sözleri` bir hata oluştuğunda parça adını doğru gösteriyor.
-- Artık bir kullanıcı kimliğiyle “softban” kullanmak mümkün.
-- Artık bazı komutlar, içerik çok uzun olduğunda sonuçlarını Hastebin'e yükleyecek.
-
-- "tpdne", "tcdne", "tekrar", komut hizmeti ve sayfa sistemindeki bazı hatalar düzeltildi.</value>
-  </data>
 	<data name="ChannelCount" xml:space="preserve">
     <value>Kanal sayısı</value>
   </data>
@@ -1796,52 +1692,11 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="CategoryCount" xml:space="preserve">
     <value>Kategori sayımı</value>
   </data>
-	<data name="Changelog1.2.9" xml:space="preserve">
-    <value>- Birincisi başarısız olduğunda otomatik olarak kullanılacak bir yedek çevirmen eklendi.
-- Komut önbellek temizleme aralığını arttırdı.
-
-- İlk istemin gösterilmesini engelleyen "yeni" bir hata düzeltildi.
-- Sayfa yerleştirme işleminde, kullanıcının bir grubu yoksa yazar avatarının gösterilmesini engelleyen bir hata düzeltildi.
-- Diğer küçük hatalar düzeltildi.
-
-- Mesaj daha önce herhangi bir komut içermiyorsa artık Fergun komut mesajlarına cevap verecektir.
-- Şimdi "ping" veritabanı gecikmesini gösteriyor.
-
-- Bellek kullanımını azalttı.</value>
-  </data>
 	<data name="DumpingAdventure" xml:space="preserve">
     <value>macera Damping...</value>
   </data>
 	<data name="EditCanceled" xml:space="preserve">
     <value>Düzenleme iptal edildi.</value>
-  </data>
-	<data name="Changelog1.3" xml:space="preserve">
-    <value>- Yeni komut: `dump`.
-
-- AI Dungeon API'sini WebSockets'i kullanacak şekilde güncellendi. Şimdi tepki süreleri çok daha hızlı.
-- Sayı veya ad göndermek yerine reaksiyonları kullanmak için `yeni` komutu güncellendi.
-- AI Dungeon modülü için uygun kimlik kuyruğu desteği eklendi.
-
-- "ocr2" kaldırıldı.
-
-- Komut önbelleğindeki bazı komutlarda 2 kez yanıt veren bir hata düzeltildi çünkü komut mesajı bir gömme veya bir görüntü / video önizlemesi içerecek şekilde "güncellendi".
-- Önbellek sonuçlarının kaydedilmesini engelleyen "img`," urban "ve" ytrandom` komutları için önbelleğin başlatılmasındaki bir hata düzeltildi.
-- Karakter seçeneğinin rastgele seçilmesine neden olmayan yeni bir hata düzeltildi.
-- Avatar bulunamadığı için komutların başarısız olmasına neden olan `` avatar`` ve `kullanıcı`daki bir hata düzeltildi (Discord önbelleğe alınan avatarı döndürdü).
-- Gömme "geçersiz" bir URL görüntüsü kullanmaya çalıştığında oluşan "img" deki bir hata düzeltildi (bu sefer "geçersiz" URL'ler basitçe silinecektir).
-- "hackban" ve "hackban" daki, yasaklanamayan bir guild kullanıcı kimliğini geçtiğinde komutların başarısız olmasına neden olan ve 403 hatası döndüren bir hata düzeltildi.
-- Hedef dil bulunamadığı için komutun başarısız olmasına neden olan "badtranslator" daki bir hata düzeltildi.
-- Komutun nadir durumlarda sonsuz bir döngüye girmesine neden olan "badtranslator" daki bir hata düzeltildi.
-- Video önbelleği oluşturulurken bir hata oluşursa, komutun kendisini kilitlemesine neden olan `ytrandom`daki bir hata düzeltildi.
-- Metin 1024 karakterden daha büyük olduğunda ortaya çıkan `snipe` ve` editsnipe`daki bir hata düzeltildi.
-- Makale resmini kullanmaya çalışırken oluşan "wikipedia" daki bir hata düzeltildi.
-- Değişiklik günlüğünde sürüm numaralarının kaydedilme biçimi nedeniyle görüntülenmesini engelleyen bir hata düzeltildi.
-- Oyuncu durumu geçersiz olduğunda oluşan "atlama" ve "arama" hatalarını düzeltti.
-- `` Trivia '' da kod çözme yerine metnin kodlanmasına neden olan bir hata düzeltildi.
-
-- Şimdi "badtranslator" ın yinelenen dilleri olmayacak.
-
-- Bellek kullanımını azaltır *.</value>
   </data>
 	<data name="NothingToDelete" xml:space="preserve">
     <value>Silinecek bir şey yok.</value>
@@ -1945,17 +1800,6 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="dumpParam1" xml:space="preserve">
     <value>macera kimliği.</value>
   </data>
-	<data name="Changelog1.3.3" xml:space="preserve">
-    <value>- kaldırıldı `someone`.
-
-- Yanlış bir komut kullanırken Şimdi Fergun komut yardımı gösterecektir.
-- Komut yardım parametrelerle her komuta bir örnek eklendi.
-- stats` `in işletim sistemi bilgisi eklendi.
-
-- `ban`,` kick`, `nick` ve belirtilen kullanıcı bulunamadı söyleyerek düzgün çalıştığından engellediğini` clear` bir hata düzeltildi. kullanıcı önbellek bir süre önce devre dışı olduğu için oldu.
-- yanlış Silinecek mesaj varken 2 hafta o eski iletiler olduğunu söyleyebilirim clear` `de bir hata düzeltildi.
-- Bir resize` `hatasından ve ikilik var bazı URL'ler geçersiz bir görüntü önizlemesini gösterir çünkü neden komutlar başarısız olduğunu` invert` düzeltildi.</value>
-  </data>
 	<data name="RatelimitUses" xml:space="preserve">
     <value>Her {1} için {0} kullanım</value>
   </data>
@@ -1964,18 +1808,6 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
   </data>
 	<data name="cmdstatsSummary" xml:space="preserve">
     <value>Komut istatistikleri gösterir.</value>
-  </data>
-	<data name="Changelog1.3.6" xml:space="preserve">
-    <value>- Yeni komut: `cmdstats`.
-
-- Şimdi {0} ve {0} içindeki {0} ve {0} sayfalayıcı düğmeleri yalnızca 3 veya daha fazla sayfa olduğunda ve {0} düğmesi 4 veya daha fazla sayfa olduğunda görünecektir.
-- Artık Fergun, bot geçerli kanalda (`SendMessages` ve` EmbedLinks`) gerekli minimum izinlere sahip olmadığında kullanıcıyı uyarmak için doğrudan bir mesaj gönderecek.
-- Artık Fergun birden fazla kullanıcı etkinliğini destekliyor, bu `userinfo` ve` şarkı sözleri`nde (Spotify etkinliği özel durum tarafından gizlendiğinde) kullanışlıdır.
-- Komut yardımına ratelimit ve gerekli izin bilgileri eklendi.
-
-- Bazı durumlarda sorgu kodlanmadığı için komutun başarısız olmasına neden olan wikipedia'daki bir hata düzeltildi.
-- Url yanlışlıkla kodlandığı için komutun başarısız olmasına neden olan ekran görüntüsünde bir hata düzeltildi.
-- AI Dungeon modülünde, aynı anda farklı kimlikler kullanıldığında komutların başarısız olmasına neden olan bir hata düzeltildi.</value>
   </data>
 	<data name="CommandStatsInfo" xml:space="preserve">
     <value>Komut İstatistikler ({0} beri)</value>
@@ -2103,24 +1935,6 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="PublicIdNull" xml:space="preserve">
 		<value>Bu maceranın kamu kimliği boş. Yeni bir macera oluşturun.</value>
 	</data>
-	<data name="Changelog1.4" xml:space="preserve">
-		<value>- Yeni komutlar: `bigsnipe`, `bigeditsnipe`, `lmgtfy`, `paste`, `enable`, `disable`, `globalenable` ve `globaldisable`.
-
-- Şimdi, Fergun bir sunucuya katıldığında ve bu sunucunun tercih edilen bir yerel ayarı olduğunda, bu yerel ayar, o sunucu için Fergun yapılandırmasına kaydedilecektir.
-- Artık Fergun bir sunucudan ayrıldığında, bu sunucu yapılandırması veritabanından silinecek.
-- Şimdi Fergun, tüm kullanıcılar o kanaldan ayrıldığında bir ses kanalından ayrılacak.
-- Şimdi Fergun, yeniden başlatmadan / kapatmadan önce müzik çalar bulunan tüm sunuculara bir uyarı gönderecek.
-- Artık Hastebin'i kullanan ve yükleme başarısız olan komutlar mesajda gösterilecek, ancak kesilecektir.
-
-- Klan seviyesinde komutları devre dışı bırakmak için destek eklendi.
-- `channelinfo` için ses kanalları, kategori kanalları ve DM kanallarına destek eklendi.
-- `snipe` 'de silinen ekler için destek eklendi (`bigsnipe`, yayınlandığında bu özellikle birlikte gelir).
-
-- `lyrics` kazıyıcı güncellendi ve metin kesme hatası düzeltildi.
-- AI Dungeon modülü ve API sarmalayıcı güncellendi.
-
-- Kullanıcı hiyerarşisi yanlış hesaplandığı için bazı moderasyon komutlarının başarısız olmasına neden olan bir hata düzeltildi.</value>
-	</data>
 	<data name="giveSummary" xml:space="preserve">
 		<value>Belirtilen kimliği bir kullanıcıya verir (aktarır).</value>
 	</data>
@@ -2135,26 +1949,6 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	</data>
 	<data name="GaveId" xml:space="preserve">
 		<value>Kimlik başarıyla {0} 'a aktarıldı.</value>
-	</data>
-	<data name="Changelog1.4.8" xml:space="preserve">
-		<value>- Yeni komut: `give`.
-
-- AI Dungeon modülü ve API sarmalayıcı (tekrar) güncellendi, özel macera hatası düzeltildi ve `alter` düzeltildi.
-- Google TTS kitaplığı, artık gTTS Python kitaplığından taşınan ön işlemciler ve belirteçler kullanılarak güncellendi. Bu, doğru tonlama ve telaffuz sağlar ve ayrıca TTS'nin daha büyük metinlerle yapılmasına izin verir.
-- Şarkı sözü sıyırıcı geliştirildi.
-
-- Şimdi Fergun, o kanalda yalnızca botlar varsa bir ses kanalından ayrılacak.
-- Artık "roleinfo", guild önbelleği tamamlanmadığında '?' ve '~x' toplam kullanıcıyı gösterecek.
-
-- Sabit etkinlikler ve aktif istemciler `userinfo` içinde gösterilmiyor.
-- Yalnızca bu geçildiğinde "-headers" seçeneğinin yok sayılmasına neden olan `lyrics` hata düzeltildi.
-- Bazı makalelerde meydana gelen `wikipedia` hata düzeltildi.
-- `img` tetiklendiğinde meydana gelen !Bang hatası düzeltildi.
-- Büyük bir metin iletildiğinde meydana gelen `img` hatası düzeltildi.
-- Bir reaksiyon ekleyen kullanıcı önbelleğe alınmadığında ortaya çıkan sayfalayıcıda nadir görülen bir hata düzeltildi.
-- `trivia` içinde komut aynı anda kullanıldığında oluşan bir hata düzeltildi.
-- Bozuk bir görüntü kullanıldığında meydana gelen nadir bir `ocr` ve `ocrtranslate` hata düzeltildi.
-- Diğer birçok hata düzeltmesi.</value>
 	</data>
 	<data name="Invite" xml:space="preserve">
 		<value>Davet et</value>
@@ -2303,39 +2097,6 @@ Lütfen daha sonra tekrar deneyiniz.</value>
 	</data>
 	<data name="shortenParam1" xml:space="preserve">
 		<value>Kısaltılacak URL.</value>
-	</data>
-	<data name="Changelog1.6" xml:space="preserve">
-		<value>- Fergun artık açık kaynak!
-- Yeni komutlar: `wolframalpha`, `spotify`, `define`, `archive`, `shorten` ve `blacklistserver`.
-- `youtube` geri eklendi.
-- Botun kendi kendine barındırılmasını kolaylaştırmak için birçok dahili değişiklik.
-
-- Bir önek önbellek sistemi eklendi. Şimdi yanıt süreleri daha hızlı olmalı.
-- [help] Bir komut listesi önbelleği eklendi.
-- [stats] Bot bellek kullanımını alma yöntemleri iyileştirildi.
-- [repeat] Gereksiz bellek ayırmayı önlemek için mümkün olan maksimum metin uzunluğunu sınırlayarak performansı iyileştirdi.
-- Günlük kaydı ve etkileşimli hizmetin performansı iyileştirildi.
-- [cmdstats] Sayfa başına görüntülenen komut sayısı azaltıldı.
-- [calc] Şimdi farklı bir matematik kitaplığı kullanılıyor.
-- [urban] Artık NSFW olmayan kanallarda kullanılabilir.
-- [code] Depodan belirtilen komut yöntemi satırına işaret eden bir bağlantı almak için yeniden yaz.
-
-- [userinfo] Kullanıcının durumunda bir ifade varsa etkinlik alanının boş olmasına neden olan bir hata düzeltildi.
-- [lyrics] Ayrıştırıcıda kalın metnin üst üste binmesine neden olan bir hata düzeltildi.
-- [give] Botlara kimlik verilmesine izin veren bir hata düzeltildi.
-- Bing Translator sarmalayıcısındaki bazı hatalar düzeltildi.
-
-- [new] Özel mod oluşturmada karakter sınırı kaldırıldı.
-- [alter] Karakter sınırı kaldırıldı.
-- Sayfalayıcı / video önbelleği kaldırıldı.
-- `badtranslator` tarafından kullanılan kelime listesi kaldırıldı.
-- `nothing` ve `botcolor` kaldırıldı.
-
-- Şimdi Fergun, bir 5xx hatası nedeniyle bir komut başarısız olduğunda bir uyarı mesajı gönderecek.
-- Şimdi Fergun, bir Lavalink sunucusuna bağlantı olmadığında bir müzik komutu kullanıldığında bir uyarı mesajı gönderecek.
-- Şimdi bir sayfalayıcı ile bir komut mesajını düzenlerken, reaksiyonlar kaldırılamazsa, yanıt mesajı silinecektir.
-- Artık dosyaları ekleyen bir komuta yönelik bir komut mesajını düzenlerken, "Yükleniyor" mesajı doğru şekilde silinecek.
-- Çok sayıda küçük hata düzeltmesi.</value>
 	</data>
 	<data name="Badges" xml:space="preserve">
 		<value>Rozet</value>
