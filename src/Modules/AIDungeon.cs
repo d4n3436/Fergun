@@ -169,7 +169,7 @@ namespace Fergun.Modules
                 .WithOptions(Enumerable.Range(0, _modes.Count).ToArray())
                 .WithStringConverter(x => _modes.ElementAt(x).Key.ToTitleCase())
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
-                .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
+                .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput);
 
 #if !DNETLABS
@@ -309,7 +309,7 @@ namespace Fergun.Modules
                 .WithOptions(Enumerable.Range(0, characters.Count).ToArray())
                 .WithStringConverter(x => characters.ElementAt(x).Key.ToTitleCase())
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
-                .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
+                .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput);
 
 #if !DNETLABS
@@ -1057,7 +1057,7 @@ namespace Fergun.Modules
                 .AddOption(new Emoji("❌"))
                 .AddUser(Context.User)
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
-                .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
+                .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
                 .WithAllowCancel(true)
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)

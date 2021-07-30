@@ -15,7 +15,7 @@ namespace Fergun.Interactive
         /// </summary>
         None = 0,
         /// <summary>
-        /// Modify the message using <see cref="Paginator.TimedOutPage"/> or <see cref="Paginator.CanceledPage"/>.
+        /// Modify the message using <see cref="Paginator.TimeoutPage"/> or <see cref="Paginator.CanceledPage"/>.
         /// </summary>
         /// <remarks>This action is mutually exclusive with <see cref="DeleteMessage"/>.</remarks>
         ModifyMessage = 1 << 0,

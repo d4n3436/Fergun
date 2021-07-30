@@ -14,7 +14,7 @@ namespace Fergun.Interactive.Selection
         /// <returns>A <see cref="Selection{TOption}"/>.</returns>
         public override Selection<TOption> Build() => new Selection<TOption>(EmoteConverter, StringConverter,
             EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options?.ToArray(),
-            CanceledPage?.Build(), TimedOutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
+            CanceledPage?.Build(), TimeoutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
             ActionOnCancellation, ActionOnTimeout, ActionOnSuccess);
     }
 }

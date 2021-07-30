@@ -26,7 +26,7 @@ namespace Fergun.Interactive.Selection
         /// <remarks>
         /// Requirements for each input type:<br/><br/>
         /// Reactions: Required.<br/>
-        /// Messages: Unused (<see cref="StringConverter"/> is used instead).<br/>
+        /// Messages: Unused.<br/>
         /// Buttons: Required (for emotes) unless a <see cref="StringConverter"/> is provided (for labels).<br/>
         /// Select menus: Optional.
         /// </remarks>
@@ -38,9 +38,9 @@ namespace Fergun.Interactive.Selection
         /// <remarks>
         /// Requirements for each input type:<br/><br/>
         /// Reactions: Unused.<br/>
-        /// Messages: Required.<br/>
-        /// Buttons: Required (for labels) unless a <see cref="EmoteConverter"/> is provided (for emotes).<br/>
-        /// Select menus: Required.
+        /// Messages: Required. If not set, defaults to <see cref="object.ToString()"/>.<br/>
+        /// Buttons: Required (for labels) unless a <see cref="EmoteConverter"/> is provided (for emotes). Defaults to <see cref="object.ToString()"/> if neither are set.<br/>
+        /// Select menus: Required. If not set, defaults to <see cref="object.ToString()"/>.
         /// </remarks>
         public virtual Func<TOption, string> StringConverter { get; set; }
 
@@ -75,7 +75,7 @@ namespace Fergun.Interactive.Selection
         public virtual PageBuilder CanceledPage { get; set; }
 
         /// <inheritdoc />
-        public virtual PageBuilder TimedOutPage { get; set; }
+        public virtual PageBuilder TimeoutPage { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Page"/> which the <see cref="BaseSelection{TOption}"/>
@@ -121,11 +121,10 @@ namespace Fergun.Interactive.Selection
         /// <remarks>
         /// Requirements for each input type:<br/><br/>
         /// Reactions: Required.<br/>
-        /// Messages: Unused (<see cref="StringConverter"/> is used instead).<br/>
+        /// Messages: Unused.<br/>
         /// Buttons: Required (for emotes) unless a <see cref="StringConverter"/> is provided (for labels).<br/>
         /// Select menus: Optional.
         /// </remarks>
-        /// <returns>This builder.</returns>
         public virtual TBuilder WithEmoteConverter(Func<TOption, IEmote> emoteConverter)
         {
             EmoteConverter = emoteConverter;
@@ -138,11 +137,10 @@ namespace Fergun.Interactive.Selection
         /// <remarks>
         /// Requirements for each input type:<br/><br/>
         /// Reactions: Unused.<br/>
-        /// Messages: Required.<br/>
-        /// Buttons: Required (for labels) unless a <see cref="EmoteConverter"/> is provided (for emotes).<br/>
-        /// Select menus: Required.
+        /// Messages: Required. If not set, defaults to <see cref="object.ToString()"/>.<br/>
+        /// Buttons: Required (for labels) unless a <see cref="EmoteConverter"/> is provided (for emotes). Defaults to <see cref="object.ToString()"/> if neither are set.<br/>
+        /// Select menus: Required. If not set, defaults to <see cref="object.ToString()"/>.
         /// </remarks>
-        /// <returns>This builder.</returns>
         public virtual TBuilder WithStringConverter(Func<TOption, string> stringConverter)
         {
             StringConverter = stringConverter;
@@ -245,9 +243,9 @@ namespace Fergun.Interactive.Selection
         /// </summary>
         /// <param name="page">The page.</param>
         /// <returns>This builder.</returns>
-        public virtual TBuilder WithTimedOutPage(PageBuilder page)
+        public virtual TBuilder WithTimeoutPage(PageBuilder page)
         {
-            TimedOutPage = page;
+            TimeoutPage = page;
             return (TBuilder)this;
         }
 

@@ -22,9 +22,9 @@ namespace Fergun.Interactive.Pagination
         public override int MaxPageIndex => Pages.Count - 1;
 
         internal StaticPaginator(IReadOnlyCollection<IUser> users, IReadOnlyDictionary<IEmote, PaginatorAction> emotes,
-            Page canceledPage, Page timedOutPage, DeletionOptions deletion, InputType inputType,
+            Page canceledPage, Page timeoutPage, DeletionOptions deletion, InputType inputType,
             ActionOnStop actionOnCancellation, ActionOnStop actionOnTimeout, IReadOnlyCollection<Page> pages, int startPageIndex)
-            : base(users, emotes, canceledPage, timedOutPage, deletion, inputType, actionOnCancellation, actionOnTimeout, startPageIndex)
+            : base(users, emotes, canceledPage, timeoutPage, deletion, inputType, actionOnCancellation, actionOnTimeout, startPageIndex)
         {
             if (pages == null)
             {

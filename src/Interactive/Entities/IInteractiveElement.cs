@@ -27,7 +27,7 @@ namespace Fergun.Interactive
         /// <summary>
         /// Gets the <see cref="Page"/> which this element gets modified to after a timeout.
         /// </summary>
-        Page TimedOutPage { get; }
+        Page TimeoutPage { get; }
 
         /// <summary>
         /// Gets what type of inputs this element should delete.
@@ -35,7 +35,7 @@ namespace Fergun.Interactive
         DeletionOptions Deletion { get; }
 
         /// <summary>
-        /// Gets input type, that is, what is used to interact with this element.
+        /// Gets the input type, that is, what is used to interact with this element.
         /// </summary>
         InputType InputType { get; }
 

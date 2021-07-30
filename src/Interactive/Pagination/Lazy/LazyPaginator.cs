@@ -26,10 +26,10 @@ namespace Fergun.Interactive.Pagination
         public bool CacheLoadedPages { get; }
 
         internal LazyPaginator(IReadOnlyCollection<IUser> users, IReadOnlyDictionary<IEmote, PaginatorAction> emotes,
-            Page canceledPage, Page timedOutPage, DeletionOptions deletion, InputType inputType,
+            Page canceledPage, Page timeoutPage, DeletionOptions deletion, InputType inputType,
             ActionOnStop actionOnCancellation, ActionOnStop actionOnTimeout, Func<int, Task<Page>> pageFactory,
             int startPage, int maxPageIndex, bool cacheLoadedPages)
-            : base(users, emotes, canceledPage, timedOutPage, deletion, inputType, actionOnCancellation, actionOnTimeout, startPage)
+            : base(users, emotes, canceledPage, timeoutPage, deletion, inputType, actionOnCancellation, actionOnTimeout, startPage)
         {
             PageFactory = pageFactory;
             MaxPageIndex = maxPageIndex;

@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 
@@ -44,7 +44,7 @@ namespace Fergun.Interactive.Pagination
         /// <summary>
         /// Gets the <see cref="Embed"/> which this paginator gets modified to after a timeout.
         /// </summary>
-        public Page TimedOutPage { get; }
+        public Page TimeoutPage { get; }
 
         /// <summary>
         /// Gets or sets what type of inputs this paginator should delete.
@@ -71,13 +71,13 @@ namespace Fergun.Interactive.Pagination
         IReadOnlyCollection<KeyValuePair<IEmote, PaginatorAction>> IInteractiveElement<KeyValuePair<IEmote, PaginatorAction>>.Options => Emotes;
 
         protected Paginator(IReadOnlyCollection<IUser> users, IReadOnlyDictionary<IEmote, PaginatorAction> emotes,
-            Page canceledPage, Page timedOutPage, DeletionOptions deletion, InputType inputType,
+            Page canceledPage, Page timeoutPage, DeletionOptions deletion, InputType inputType,
             ActionOnStop actionOnCancellation, ActionOnStop actionOnTimeout, int startPageIndex)
         {
             Users = users;
             Emotes = emotes ?? throw new ArgumentNullException(nameof(emotes));
             CanceledPage = canceledPage;
-            TimedOutPage = timedOutPage;
+            TimeoutPage = timeoutPage;
             Deletion = deletion;
             InputType = inputType;
             ActionOnCancellation = actionOnCancellation;
@@ -90,11 +90,20 @@ namespace Fergun.Interactive.Pagination
         /// </summary>
         /// <remarks>By default this method adds the reactions to a message when <see cref="InputType"/> is <see cref="InputType.Reactions"/>.</remarks>
         /// <param name="message">The message to initialize.</param>
-        internal virtual Task InitializeMessageAsync(IUserMessage message)
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel this request.</param>
+        internal virtual async Task InitializeMessageAsync(IUserMessage message, CancellationToken cancellationToken = default)
         {
-            return InputType == InputType.Reactions
-                ? message.AddReactionsAsync(Emotes.Keys.ToArray())
-                : Task.CompletedTask;
+            if (InputType != InputType.Reactions) return;
+
+            foreach (var emote in Emotes.Keys)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                await message.AddReactionAsync(emote).ConfigureAwait(false);
+            }
         }
 
         /// <summary>

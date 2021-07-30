@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 
@@ -58,7 +59,7 @@ namespace Fergun.Interactive.Selection
         public Page CanceledPage { get; }
 
         /// <inheritdoc/>
-        public Page TimedOutPage { get; }
+        public Page TimeoutPage { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="Page"/> which this selection gets modified to after a valid input is received
@@ -85,7 +86,7 @@ namespace Fergun.Interactive.Selection
 
         protected BaseSelection(Func<TOption, IEmote> emoteConverter, Func<TOption, string> stringConverter, IEqualityComparer<TOption> equalityComparer,
             bool allowCancel, Page selectionPage, IReadOnlyCollection<IUser> users, IReadOnlyCollection<TOption> options, Page canceledPage,
-            Page timedOutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
+            Page timeoutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
             ActionOnStop actionOnTimeout, ActionOnStop actionOnSuccess)
         {
             if (inputType == InputType.Reactions && emoteConverter == null)
@@ -93,15 +94,12 @@ namespace Fergun.Interactive.Selection
                 throw new ArgumentNullException(nameof(emoteConverter), $"{nameof(emoteConverter)} is required when {nameof(inputType)} is Reactions.");
             }
 
-            if ((inputType == InputType.Messages || inputType == InputType.SelectMenus) && stringConverter == null)
+            stringConverter ??= inputType switch
             {
-                throw new ArgumentNullException(nameof(stringConverter), $"{nameof(stringConverter)} is required when {nameof(inputType)} is Messages or SelectMenus.");
-            }
-
-            if (emoteConverter == null && stringConverter == null)
-            {
-                throw new ArgumentException($"An {nameof(emoteConverter)} or a {nameof(stringConverter)} is required.");
-            }
+                InputType.Reactions => null,
+                InputType.Buttons when emoteConverter == null => x => x.ToString(),
+                _ => x => x.ToString()
+            };
 
             EmoteConverter = emoteConverter;
             StringConverter = stringConverter;
@@ -109,20 +107,26 @@ namespace Fergun.Interactive.Selection
             SelectionPage = selectionPage ?? throw new ArgumentNullException(nameof(selectionPage));
 
             if (options == null)
+            {
                 throw new ArgumentNullException(nameof(options));
+            }
 
             if (options.Count == 0)
+            {
                 throw new ArgumentException($"{nameof(options)} must contain at least one element.", nameof(options));
+            }
 
             if (options.Distinct(EqualityComparer).Count() != options.Count)
+            {
                 throw new ArgumentException($"{nameof(options)} must not contain duplicate elements.", nameof(options));
+            }
 
             AllowCancel = allowCancel && options.Count > 1;
             CancelOption = AllowCancel ? options.Last() : default;
             Users = users;
             Options = options;
             CanceledPage = canceledPage;
-            TimedOutPage = timedOutPage;
+            TimeoutPage = timeoutPage;
             SuccessPage = successPage;
             Deletion = deletion;
             InputType = inputType;
@@ -136,7 +140,8 @@ namespace Fergun.Interactive.Selection
         /// </summary>
         /// <remarks>By default this method adds the reactions to a message when <see cref="InputType"/> is <see cref="InputType.Reactions"/>.</remarks>
         /// <param name="message">The message to initialize.</param>
-        internal virtual async Task InitializeMessageAsync(IUserMessage message)
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel this request.</param>
+        internal virtual async Task InitializeMessageAsync(IUserMessage message, CancellationToken cancellationToken = default)
         {
             if (InputType != InputType.Reactions) return;
             if (EmoteConverter == null)
@@ -146,6 +151,11 @@ namespace Fergun.Interactive.Selection
 
             foreach (var selection in Options)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 var emote = EmoteConverter(selection);
 
                 // Only add missing reactions

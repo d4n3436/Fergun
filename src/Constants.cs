@@ -65,6 +65,8 @@ namespace Fergun
 
         public static TimeSpan HttpClientTimeout => TimeSpan.FromSeconds(60);
 
+        public static TimeSpan PaginatorTimeout => TimeSpan.FromMinutes(10);
+
         public const GuildPermission InvitePermissions =
 
             GuildPermission.ViewChannel |

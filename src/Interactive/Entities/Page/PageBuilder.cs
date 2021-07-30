@@ -5,6 +5,9 @@ using Fergun.Interactive.Pagination;
 
 namespace Fergun.Interactive
 {
+    /// <summary>
+    /// Represents a <see cref="Page"/> builder.
+    /// </summary>
     public class PageBuilder
     {
         private readonly EmbedBuilder _builder = new EmbedBuilder();

@@ -37,7 +37,7 @@ namespace Fergun.Interactive.Pagination
         public virtual PageBuilder CanceledPage { get; set; }
 
         /// <inheritdoc/>
-        public virtual PageBuilder TimedOutPage { get; set; }
+        public virtual PageBuilder TimeoutPage { get; set; }
 
         /// <inheritdoc/>
         /// <remarks>This property is ignored in button-based paginators.</remarks>
@@ -166,9 +166,9 @@ namespace Fergun.Interactive.Pagination
         /// </summary>
         /// <param name="page">The page.</param>
         /// <returns>This builder.</returns>
-        public virtual TBuilder WithTimedOutPage(PageBuilder page)
+        public virtual TBuilder WithTimeoutPage(PageBuilder page)
         {
-            TimedOutPage = page;
+            TimeoutPage = page;
             return (TBuilder)this;
         }
 
@@ -231,10 +231,10 @@ namespace Fergun.Interactive.Pagination
             => WithCanceledPage(new PageBuilder().WithColor(Color.Orange).WithTitle("Canceled! 👍"));
 
         /// <summary>
-        /// Sets the default timed-out page.
+        /// Sets the default timeout page.
         /// </summary>
-        public virtual TBuilder WithDefaultTimedOutPage()
-            => WithTimedOutPage(new PageBuilder().WithColor(Color.Red).WithTitle("Timed out! ⏰"));
+        public virtual TBuilder WithDefaultTimeoutPage()
+            => WithTimeoutPage(new PageBuilder().WithColor(Color.Red).WithTitle("Timed out! ⏰"));
 
         /// <inheritdoc/>
         TPaginator IInteractiveBuilder<TPaginator, KeyValuePair<IEmote, PaginatorAction>, TBuilder>.Build() => Build();

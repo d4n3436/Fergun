@@ -1,9 +1,11 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Services;
 using Fergun.Utils;
 
@@ -30,18 +32,24 @@ namespace Fergun.Modules
         /// </summary>
         public MessageCacheService MessageCache { get; set; }
 
-        public async Task<IUserMessage> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null)
+        /// <inheritdoc cref="InteractiveService.SendPaginatorAsync(Paginator, IMessageChannel, TimeSpan?, IUserMessage, bool, bool, CancellationToken)"/>
+        public async Task<IUserMessage> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null, bool doNotWait = true, CancellationToken cancellationToken = default)
         {
             IUserMessage response = null;
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
+                if (Interactive.TryRemoveCallback(messageId, out var callback))
+                {
+                    callback.Dispose();
+                }
+
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
-                 await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, response, true).ConfigureAwait(false);
+                await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, response, doNotWait, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                var result = await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, null, true).ConfigureAwait(false);
+                var result = await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, null, doNotWait, cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (!Cache.IsDisabled)
                 {
@@ -50,6 +58,32 @@ namespace Fergun.Modules
             }
 
             return response;
+        }
+
+        /// <inheritdoc cref="InteractiveService.SendSelectionAsync{TOption}(BaseSelection{TOption}, IMessageChannel, TimeSpan?, IUserMessage, CancellationToken)"/>
+        public async Task<InteractiveMessageResult<TOption>> SendSelectionAsync<TOption>(BaseSelection<TOption> selection,
+            TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+        {
+            if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
+            {
+                if (Interactive.TryRemoveCallback(messageId, out var callback))
+                {
+                    callback.Dispose();
+                }
+
+                var response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
+
+                return await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, response, cancellationToken).ConfigureAwait(false);
+            }
+
+            var result = await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, null, cancellationToken).ConfigureAwait(false);
+
+            if (!Cache.IsDisabled)
+            {
+                Cache.Add(Context.Message, result.Message);
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>
@@ -76,6 +110,11 @@ namespace Fergun.Modules
             bool found = Cache.TryGetValue(Context.Message.Id, out ulong messageId);
             if (found && (response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId)) != null)
             {
+                if (Interactive.TryRemoveCallback(messageId, out var callback))
+                {
+                    callback.Dispose();
+                }
+
                 await response.ModifyAsync(x =>
                 {
                     x.Content = message;

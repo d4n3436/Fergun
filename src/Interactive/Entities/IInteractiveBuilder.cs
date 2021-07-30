@@ -32,7 +32,7 @@ namespace Fergun.Interactive
         /// <summary>
         /// Gets or sets the <see cref="Page"/> which the <typeparamref name="TElement"/> gets modified to after a timeout.
         /// </summary>
-        PageBuilder TimedOutPage { get; set; }
+        PageBuilder TimeoutPage { get; set; }
 
         /// <summary>
         /// Gets or sets what type of inputs the <typeparamref name="TElement"/> should delete.
@@ -107,7 +107,7 @@ namespace Fergun.Interactive
         /// </summary>
         /// <param name="page">The page.</param>
         /// <returns>This builder.</returns>
-        TBuilder WithTimedOutPage(PageBuilder page);
+        TBuilder WithTimeoutPage(PageBuilder page);
 
         /// <summary>
         /// Sets what type of inputs the <typeparamref name="TElement"/> should delete.

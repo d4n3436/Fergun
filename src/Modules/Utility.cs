@@ -764,9 +764,10 @@ namespace Fergun.Modules
                 .WithFooter(PaginatorFooter.None)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -990,9 +991,10 @@ namespace Fergun.Modules
                 .WithFooter(PaginatorFooter.None)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -1076,9 +1078,10 @@ namespace Fergun.Modules
                 .WithFooter(PaginatorFooter.None)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -1867,9 +1870,10 @@ namespace Fergun.Modules
                 .WithFooter(PaginatorFooter.None)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -2194,9 +2198,10 @@ namespace Fergun.Modules
                         .WithFooter(PaginatorFooter.None)
                         .WithActionOnCancellation(ActionOnStop.DisableInput)
                         .WithActionOnTimeout(ActionOnStop.DisableInput)
+                        .WithDeletion(DeletionOptions.Valid)
                         .Build();
 
-                    await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+                    await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
                         break;
                 }
             }

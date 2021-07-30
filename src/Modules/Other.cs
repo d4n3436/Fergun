@@ -176,9 +176,10 @@ namespace Fergun.Modules
                 .WithFooter(PaginatorFooter.None)
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await _interactive.SendPaginatorAsync(paginator, Context.Channel, TimeSpan.FromMinutes(10), doNotWait: true);
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -324,7 +325,7 @@ namespace Fergun.Modules
                 .WithActionOnSuccess(ActionOnStop.DeleteInput)
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DeleteInput)
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
-                .WithTimedOutPage(PageBuilder.FromEmbedBuilder(warningBuilder));
+                .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder));
 
 #if !DNETLABS
             string[] codes = FergunClient.Languages.Keys.Where(x => x != GetLanguage()).ToArray();
@@ -915,7 +916,7 @@ namespace Fergun.Modules
 
         public override LanguageSelection Build() => new LanguageSelection(EmoteConverter, StringConverter,
             EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options,
-            CanceledPage?.Build(), TimedOutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
+            CanceledPage?.Build(), TimeoutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
             ActionOnCancellation, ActionOnTimeout, ActionOnSuccess)
         {
             GuildLanguage = GuildLanguage
@@ -930,10 +931,10 @@ namespace Fergun.Modules
         internal LanguageSelection(Func<KeyValuePair<string, CultureInfo>, IEmote> emoteConverter,
             Func<KeyValuePair<string, CultureInfo>, string> stringConverter, IEqualityComparer<KeyValuePair<string, CultureInfo>> equalityComparer,
             bool allowCancel, Page selectionPage, IReadOnlyCollection<IUser> users, IReadOnlyCollection<KeyValuePair<string, CultureInfo>> options,
-            Page canceledPage, Page timedOutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
+            Page canceledPage, Page timeoutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
             ActionOnStop actionOnTimeout, ActionOnStop actionOnSuccess)
             : base(emoteConverter, stringConverter, equalityComparer,
-            allowCancel, selectionPage, users, options, canceledPage, timedOutPage, successPage, deletion, inputType,
+            allowCancel, selectionPage, users, options, canceledPage, timeoutPage, successPage, deletion, inputType,
             actionOnCancellation, actionOnTimeout, actionOnSuccess)
         {
         }

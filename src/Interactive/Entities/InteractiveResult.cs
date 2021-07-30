@@ -44,7 +44,7 @@ namespace Fergun.Interactive
         /// <summary>
         /// Gets whether the interactive action timed out.
         /// </summary>
-        public bool IsTimedOut => Status == InteractiveStatus.TimedOut;
+        public bool IsTimeout => Status == InteractiveStatus.Timeout;
 
         /// <summary>
         /// Gets whether the interactive action was canceled.

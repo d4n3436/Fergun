@@ -28,7 +28,7 @@ namespace Fergun.Interactive.Selection
         public override Selection<KeyValuePair<IEmote, TValue>> Build()
             => new Selection<KeyValuePair<IEmote, TValue>>(EmoteConverter, StringConverter,
                 EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options?.ToArray(),
-                CanceledPage?.Build(), TimedOutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
+                CanceledPage?.Build(), TimeoutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
                 ActionOnCancellation, ActionOnTimeout, ActionOnSuccess);
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Fergun.Interactive.Selection
         public override Selection<IEmote> Build()
             => new Selection<IEmote>(EmoteConverter, StringConverter,
                 EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options?.ToArray(),
-                CanceledPage?.Build(), TimedOutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
+                CanceledPage?.Build(), TimeoutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
                 ActionOnCancellation, ActionOnTimeout, ActionOnSuccess);
     }
 
@@ -77,24 +77,19 @@ namespace Fergun.Interactive.Selection
     {
         public bool Equals(KeyValuePair<IEmote, TValue> x, KeyValuePair<IEmote, TValue> y)
         {
-            return Equals(x.Key.Name, y.Key.Name) && Equals(x.Value, y.Value);
+            return x.Key.ToString() == y.Key.ToString() && Equals(x.Value, y.Value);
         }
 
         public int GetHashCode(KeyValuePair<IEmote, TValue> pair)
         {
-            return HashCode.Combine(pair.Key.Name, pair.Value);
+            return HashCode.Combine(pair.Key.ToString(), pair.Value);
         }
     }
 
     internal class EmoteComparer : IEqualityComparer<IEmote>
     {
-        public bool Equals(IEmote x, IEmote y)
-        {
-            if (x is null) return false;
-            if (y is null) return false;
-            return x.Name == y.Name;
-        }
+        public bool Equals(IEmote x, IEmote y) => x?.ToString() == y?.ToString();
 
-        public int GetHashCode(IEmote obj) => obj.Name != null ? obj.Name.GetHashCode() : 0;
+        public int GetHashCode(IEmote obj) => obj.ToString()?.GetHashCode() ?? 0;
     }
 }

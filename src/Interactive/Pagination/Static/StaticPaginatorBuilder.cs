@@ -35,7 +35,7 @@ namespace Fergun.Interactive.Pagination
                 Users?.ToArray() ?? Array.Empty<IUser>(),
                 new ReadOnlyDictionary<IEmote, PaginatorAction>(Options), // TODO: Find a way to create an ImmutableDictionary without getting the contents reordered.
                 CanceledPage?.Build(),
-                TimedOutPage?.Build(),
+                TimeoutPage?.Build(),
                 Deletion,
                 InputType,
                 ActionOnCancellation,

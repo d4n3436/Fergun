@@ -16,7 +16,7 @@ namespace Fergun.Interactive
         /// <summary>
         /// The interactive action timed out.
         /// </summary>
-        TimedOut,
+        Timeout,
         /// <summary>
         /// The interactive action was canceled.
         /// </summary>
