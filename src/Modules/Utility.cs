@@ -2084,7 +2084,7 @@ namespace Fergun.Modules
                         .WithTitle(articles[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                         .WithUrl($"https://{language}.{(isMobile ? "m." : "")}wikipedia.org?curid={articles[index].Id}")
                         .WithDescription(articles[index].Extract?.Truncate(EmbedBuilder.MaxDescriptionLength) ?? "?")
-                        .WithThumbnailUrl(Constants.WikipediaLogoUrl)
+                        .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{language}.png")
                         .WithFooter($"{wikipediaSearch} - {string.Format(paginatorFooter, index + 1, articles.Length)}");
 
                 if (Context.IsNsfw() && !string.IsNullOrEmpty(articles[index].ImageUrl))

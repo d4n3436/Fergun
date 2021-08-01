@@ -191,8 +191,6 @@ namespace Fergun
 
         public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834302049452062/badtranslator.png";
 
-        public const string WikipediaLogoUrl = "https://upload.wikimedia.org/wikipedia/commons/6/63/Wikipedia-logo.png";
-
         public const string WolframAlphaLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834461638131722/wolframalpha.png";
     }
 }
