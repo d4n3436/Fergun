@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +41,7 @@ using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Exceptions;
 using YoutubeExplode.Search;
+using JsonException = Newtonsoft.Json.JsonException;
 
 namespace Fergun.Modules
 {
@@ -1991,88 +1993,111 @@ namespace Fergun.Modules
         [Example("Discord")]
         public async Task<RuntimeResult> Wikipedia([Remainder, Summary("wikipediaParam1")] string query)
         {
-            // I would want to know who did the awful json response structure.
-            string response = await _httpClient.GetStringAsync($"https://{GetLanguage()}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
-
-            var search = JsonConvert.DeserializeObject<List<dynamic>>(response);
-            string langToUse = GetLanguage();
-            if (search[1].Count == 0)
-            {
-                if (langToUse == "en")
-                {
-                    return FergunResult.FromError(Locate("NoResults"));
-                }
-
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "Wikipedia: No results found on non-English Wikipedia. Searching on English Wikipedia."));
-                langToUse = "en";
-
-                response = await _httpClient.GetStringAsync($"https://{langToUse}.wikipedia.org/w/api.php?action=opensearch&search={Uri.EscapeDataString(query)}&format=json");
-                search = JsonConvert.DeserializeObject<List<dynamic>>(response);
-
-                if (search[1].Count == 0)
-                {
-                    return FergunResult.FromError(Locate("NoResults"));
-                }
-            }
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Results count: {search[1].Count}"));
-
+            string language = GetLanguage();
+            (string Title, string Extract, string ImageUrl, int Id)[] articles = null;
             try
             {
-                string articleUrl = search[^1][0];
-                string apiUrl = $"https://{langToUse}.wikipedia.org/api/rest_v1/page/summary/{Uri.EscapeDataString(Uri.UnescapeDataString(articleUrl.Substring(30)))}";
-                await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Downloading article from url: {apiUrl}"));
-
-                response = await _httpClient.GetStringAsync(apiUrl);
+                articles = await GetArticlesAsync(query, language);
             }
             catch (HttpRequestException e)
             {
                 return FergunResult.FromError(e.Message);
             }
 
-            var article = JsonConvert.DeserializeObject<WikiArticle>(response);
-
-            var builder = new EmbedBuilder()
-                .WithAuthor(Context.User)
-                .WithTitle(article.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
-                .WithFooter(Locate("WikipediaSearch"))
-                .WithThumbnailUrl(Constants.WikipediaLogoUrl)
-                .WithColor(FergunClient.Config.EmbedColor);
-
-            string url = Context.User.ActiveClients.Any(x => x == ClientType.Mobile) ? article.ContentUrls.Mobile.Page : article.ContentUrls.Desktop.Page;
-            if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            if (articles.Length == 0)
             {
-                builder.WithUrl(url);
-            }
-            else
-            {
-                url = WebUtility.UrlDecode(url);
-                if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
-                {
-                    builder.WithUrl(url);
-                }
-                else
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Wikipedia: Invalid url to article: {url}"));
-                }
+                return FergunResult.FromError(Locate("NoResults"));
             }
 
-            if (Context.IsNsfw() && article.OriginalImage?.Source != null)
-            {
-                string decodedUrl = Uri.UnescapeDataString(article.OriginalImage.Source);
-                if (Uri.IsWellFormedUriString(decodedUrl, UriKind.Absolute))
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Using image Url: {decodedUrl}"));
-                    builder.ThumbnailUrl = decodedUrl;
-                }
-                else
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Wikipedia: Invalid image url: {decodedUrl}"));
-                }
-            }
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Wikipedia: Results count: {articles.Length}"));
 
-            await ReplyAsync(embed: builder.Build());
+            // Cache localized strings
+            string wikipediaSearch = Locate("WikipediaSearch");
+            string paginatorFooter = Locate("PaginatorFooter");
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(articles.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
+                .Build();
+
+            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+
             return FergunResult.FromSuccess();
+
+            static async Task<(string Title, string Extract, string ImageUrl, int Id)[]> GetArticlesAsync(string query, string language)
+            {
+                string url = $"https://{language}.wikipedia.org/w/api.php?" +
+                    "action=query" +
+                    "&generator=prefixsearch" + // https://www.mediawiki.org/wiki/API:Prefixsearch
+                    "&format=json" +
+                    "&formatversion=2" +
+                    "&prop=extracts|pageimages|description" + // Get article extract, page images and short description
+                    //"&exchars=1200" + // Return max 1200 characters
+                    "&exintro" + // Return only content before the first section
+                    "&explaintext" + // Return extracts as plain text
+                    "&redirects" + // Automatically resolve redirects 
+                    $"&gpssearch={Uri.EscapeDataString(query)}" + // Search string
+                    "&pilicense=any" + // Get images with any license
+                    "&piprop=original"; // Get original images
+
+                byte[] bytes = await _httpClient.GetByteArrayAsync(url);
+
+                using var document = JsonDocument.Parse(bytes);
+
+                var pages = document
+                    .RootElement
+                    .GetPropertyOrDefault("query")
+                    .GetPropertyOrDefault("pages");
+
+                if (pages.ValueKind != JsonValueKind.Array)
+                {
+                    // When there are no results, the API returns {"batchcomplete":true} instead of an empty array
+                    return Array.Empty<(string, string, string, int)>();
+                }
+
+                var articles = pages.EnumerateArray()
+                    .Select(x => (
+                    Title: x.GetProperty("title").GetString(),
+                    Extract: x.GetPropertyOrDefault("extract").GetStringOrDefault(),
+                    ImageUrl: x.GetPropertyOrDefault("original").GetPropertyOrDefault("source").GetStringOrDefault(),
+                    Id: x.GetPropertyOrDefault("pageid").GetInt32OrDefault()))
+                    .ToArray();
+
+                return articles.Length == 0 && language != "en"
+                    ? await GetArticlesAsync(query, "en")
+                    : articles;
+            }
+
+            Task<PageBuilder> GeneratePageAsync(int index)
+            {
+                bool isMobile = Context.User.ActiveClients.Contains(ClientType.Mobile);
+
+                var builder = new PageBuilder()
+                        .WithAuthor(Context.User)
+                        .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                        .WithTitle(articles[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
+                        .WithUrl($"https://{language}.{(isMobile ? "m." : "")}wikipedia.org?curid={articles[index].Id}")
+                        .WithDescription(articles[index].Extract?.Truncate(EmbedBuilder.MaxDescriptionLength) ?? "?")
+                        .WithThumbnailUrl(Constants.WikipediaLogoUrl)
+                        .WithFooter($"{wikipediaSearch} - {string.Format(paginatorFooter, index + 1, articles.Length)}");
+
+                if (Context.IsNsfw() && !string.IsNullOrEmpty(articles[index].ImageUrl))
+                {
+                    string decodedUrl = Uri.UnescapeDataString(articles[index].ImageUrl);
+                    if (Uri.IsWellFormedUriString(decodedUrl, UriKind.Absolute))
+                    {
+                        builder.ThumbnailUrl = decodedUrl;
+                    }
+                }
+
+                return Task.FromResult(builder);
+            }
         }
 
         [LongRunning]
