@@ -94,12 +94,10 @@ namespace Fergun.Interactive.Selection
                 throw new ArgumentNullException(nameof(emoteConverter), $"{nameof(emoteConverter)} is required when {nameof(inputType)} is Reactions.");
             }
 
-            stringConverter ??= inputType switch
+            if (stringConverter == null && (inputType != InputType.Buttons || emoteConverter == null))
             {
-                InputType.Reactions => null,
-                InputType.Buttons when emoteConverter == null => x => x.ToString(),
-                _ => x => x.ToString()
-            };
+                stringConverter = x => x.ToString();
+            }
 
             EmoteConverter = emoteConverter;
             StringConverter = stringConverter;
