@@ -10,6 +10,7 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using Fergun.Extensions;
+using Fergun.Interactive;
 using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -393,6 +394,11 @@ namespace Fergun.Services
                 }
                 else
                 {
+                    if (_services.GetService<InteractiveService>()?.TryRemoveCallback(messageId, out var callback) ?? false)
+                    {
+                        callback.Dispose();
+                    }
+
                     await response.ModifyAsync(x =>
                     {
                         x.Content = text;
