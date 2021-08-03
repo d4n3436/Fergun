@@ -144,7 +144,10 @@ To shut down the bot use `logout`.
 
 ### 7. Interactions support
 <b id="f1"></b>
-Fergun now supports interactions with Discord.Net Labs. It is used to replace reactions with buttons/select menus in paginators and selections. To be able to use interactions you will need to build the bot using either the `ReleaseLabs` or the `DebugLabs` configuration.
+Fergun now supports interactions with Discord.Net Labs. It is currently used to replace reactions with buttons/select menus in paginators and selections. To be able to use interactions you will need to build the bot using either the `ReleaseLabs` or the `DebugLabs` configuration.
+
+## Contributing
+Feel free to report bugs or request new features via issues or pull requests. Requesting new commands may or may not be accepted depending on the utility and usability of that command.
 
 ## License
 Fergun is licensed under the [MIT license](LICENSE).
