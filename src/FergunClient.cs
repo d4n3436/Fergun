@@ -428,7 +428,7 @@ namespace Fergun
 
             if (!IsDebugMode)
             {
-                InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=bot&permissions={(ulong)Constants.InvitePermissions}";
+                InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&permissions={(ulong)Constants.InvitePermissions}&scope=bot%20applications.commands";
 
                 if (string.IsNullOrEmpty(Config.DblApiToken))
                 {
