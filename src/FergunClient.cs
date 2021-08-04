@@ -449,7 +449,7 @@ namespace Fergun
                     _discordBots = new DiscordBotsApi(Config.DiscordBotsApiToken);
                 }
 
-                await UpdateBotListStatsAsync();
+                _ = Task.Run(async () => await UpdateBotListStatsAsync());
             }
         }
 
@@ -503,7 +503,7 @@ namespace Fergun
                 }
                 if (!IsDebugMode)
                 {
-                    await UpdateBotListStatsAsync();
+                    _ = Task.Run(async () => await UpdateBotListStatsAsync());
                 }
             }
         }
@@ -520,7 +520,7 @@ namespace Fergun
 
                 if (!IsDebugMode)
                 {
-                    await UpdateBotListStatsAsync();
+                    _ = Task.Run(async () => await UpdateBotListStatsAsync());
                 }
             }
         }
