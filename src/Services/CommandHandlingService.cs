@@ -394,7 +394,8 @@ namespace Fergun.Services
                 }
                 else
                 {
-                    if (_services.GetService<InteractiveService>()?.TryRemoveCallback(messageId, out var callback) ?? false)
+                    var interactive = _services.GetService<InteractiveService>();
+                    if (interactive != null && interactive.TryRemoveCallback(messageId, out var callback))
                     {
                         callback.Dispose();
                     }
