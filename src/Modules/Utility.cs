@@ -128,12 +128,12 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoSnapshots"));
             }
 
-            bool success = DateTime.TryParseExact(snapshot.Timestamp, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var datetime);
+            bool success = DateTimeOffset.TryParseExact(snapshot.Timestamp, "yyyyMMddHHmmss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var datetime);
 
             var builder = new EmbedBuilder()
                 .WithTitle("Wayback Machine")
                 .AddField("Url", Format.Url(Locate("ClickHere"), snapshot.Url))
-                .AddField(Locate("Timestamp"), success ? datetime.ToString(CultureInfo.InvariantCulture) : "?")
+                .AddField(Locate("Timestamp"), success ? $"{datetime.ToDiscordTimestamp()} ({datetime.ToDiscordTimestamp('R')})" : "?")
                 .WithColor(FergunClient.Config.EmbedColor);
 
             if (string.IsNullOrEmpty(FergunClient.Config.ApiFlashAccessKey))
@@ -1568,7 +1568,7 @@ namespace Fergun.Modules
                 builder.AddField(Locate("Members"), server.HasAllMembers ? "~" : "" + server.MemberCount, true);
             }
 
-            builder.AddField(Locate("CreatedAt"), server.CreatedAt, true)
+            builder.AddField(Locate("CreatedAt"), $"{server.CreatedAt.ToDiscordTimestamp()} ({server.CreatedAt.ToDiscordTimestamp('R')})", true)
                 .WithThumbnailUrl($"https://cdn.discordapp.com/icons/{server.Id}/{server.IconId}")
                 .WithImageUrl(server.BannerUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
@@ -1991,15 +1991,18 @@ namespace Fergun.Modules
                 .AddField(Locate("ActiveClients"), clients, true)
                 .AddField(Locate("Badges"), badges)
                 .AddField(Locate("IsBot"), Locate(user.IsBot))
-                .AddField(Locate("CreatedAt"), user.CreatedAt)
-                .AddField(Locate("GuildJoinDate"), guildUser?.JoinedAt?.ToString() ?? "N/A")
-                .AddField(Locate("BoostingSince"), guildUser?.PremiumSince?.ToString() ?? "N/A")
+                .AddField(Locate("CreatedAt"), GetTimestamp(user.CreatedAt))
+                .AddField(Locate("GuildJoinDate"), GetTimestamp(guildUser?.JoinedAt))
+                .AddField(Locate("BoostingSince"), GetTimestamp(guildUser?.PremiumSince))
                 .WithThumbnailUrl(avatarUrl)
                 .WithColor(new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B));
 
             await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
+
+            static string GetTimestamp(DateTimeOffset? dateTime)
+                => dateTime == null ? "N/A" : $"{dateTime.ToDiscordTimestamp()} ({dateTime.ToDiscordTimestamp('R')})";
         }
 
         [LongRunning]

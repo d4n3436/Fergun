@@ -287,6 +287,26 @@ namespace Fergun.Extensions
             return message.Channel.Display() + $"/{message.Author}";
         }
 
+        public static string ToDiscordTimestamp(this DateTimeOffset dateTime, char style = 'f')
+        {
+            return dateTime.ToUnixTimeSeconds().ToDiscordTimestamp(style);
+        }
+
+        public static string ToDiscordTimestamp(this DateTimeOffset? dateTime, char style = 'f')
+        {
+            return dateTime.GetValueOrDefault().ToDiscordTimestamp(style);
+        }
+
+        public static string ToDiscordTimestamp(this ulong timestamp, char style = 'f')
+        {
+            return ((long)timestamp).ToDiscordTimestamp(style);
+        }
+
+        public static string ToDiscordTimestamp(this long timestamp, char style = 'f')
+        {
+            return $"<t:{timestamp}:{style}>";
+        }
+
         public static IServiceCollection AddSingletonIf<TService>(this IServiceCollection services, bool condition, TService implementationInstance) where TService : class
         {
             return condition ? services.AddSingleton(implementationInstance) : services;

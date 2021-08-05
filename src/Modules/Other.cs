@@ -141,7 +141,7 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
 
-            string creationDate = Context.Client.CurrentUser.CreatedAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture);
+            string creationDate = Context.Client.CurrentUser.CreatedAt.ToDiscordTimestamp('D');
             string commandStatsInfo = string.Format(Locate("CommandStatsInfo"), creationDate);
             string paginatorFooter = Locate("PaginatorFooter");
 
