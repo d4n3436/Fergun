@@ -612,7 +612,8 @@ namespace Fergun.Modules
         [Alias("configuration", "settings")]
         public async Task<RuntimeResult> Config()
         {
-            string[] configList = Locate("ConfigList").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
+            string language = GetLanguage();
+            string[] configList = Locate("ConfigList", language).Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
             string menuOptions = "";
             for (int i = 0; i < configList.Length; i++)
             {
@@ -639,7 +640,7 @@ namespace Fergun.Modules
                     .WithAllowCancel(true)
                     .Build();
 
-                result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromMinutes(5), message, cts.Token);
+                result = await SendSelectionAsync(selection, TimeSpan.FromMinutes(5), message, cts.Token);
                 message = result.Message;
 
                 if (!result.IsSuccess) break;
@@ -669,16 +670,16 @@ namespace Fergun.Modules
             PageBuilder CreateMenuPage()
             {
                 string valueList =
-                    $"{Locate(guildConfig.CaptionbotAutoTranslate)}\n" +
-                    $"{Locate(guildConfig.AidAutoTranslate)}\n" +
-                    $"{Locate(guildConfig.TrackSelection)}";
+                    $"{Locate(guildConfig.CaptionbotAutoTranslate ? "Yes" : "No", language)}\n" +
+                    $"{Locate(guildConfig.AidAutoTranslate ? "Yes" : "No", language)}\n" +
+                    $"{Locate(guildConfig.TrackSelection ? "Yes" : "No", language)}";
 
                 var builder = new EmbedBuilder()
                     .WithAuthor(Context.User)
-                    .WithTitle(Locate("FergunConfig"))
-                    .WithDescription(Locate("ConfigPrompt"))
-                    .AddField(Locate("Option"), menuOptions, true)
-                    .AddField(Locate("Value"), valueList, true)
+                    .WithTitle(Locate("FergunConfig", language))
+                    .WithDescription(Locate("ConfigPrompt", language))
+                    .AddField(Locate("Option", language), menuOptions, true)
+                    .AddField(Locate("Value", language), valueList, true)
                     .WithColor(FergunClient.Config.EmbedColor);
 
                 return PageBuilder.FromEmbedBuilder(builder);
@@ -738,6 +739,13 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
+            string wordText = Locate("Word");
+            string definitionText = Locate("Definition");
+            string paginatorFooter = Locate("PaginatorFooter");
+            string exampleText = Locate("Example");
+            string synonymsText = Locate("Synonyms");
+            string antonymsText = Locate("Antonyms");
+
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var info = definitions[index];
@@ -745,21 +753,21 @@ namespace Fergun.Modules
                 var pageBuilder = new PageBuilder()
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle("Define")
-                    .AddField(Locate("Word"), info.PartOfSpeech == null || info.PartOfSpeech == "undefined" ? info.Word : $"{info.Word} ({info.PartOfSpeech})")
-                    .AddField(Locate("Definition"), info.Definition)
-                    .WithFooter($"{string.Format(Locate("PaginatorFooter"), index + 1, definitions.Count)}");
+                    .AddField(wordText, info.PartOfSpeech == null || info.PartOfSpeech == "undefined" ? info.Word : $"{info.Word} ({info.PartOfSpeech})")
+                    .AddField(definitionText, info.Definition)
+                    .WithFooter(string.Format(paginatorFooter, index + 1, definitions.Count));
 
                 if (!string.IsNullOrEmpty(info.Example))
                 {
-                    pageBuilder.AddField(Locate("Example"), info.Example);
+                    pageBuilder.AddField(exampleText, info.Example);
                 }
                 if (info.Synonyms.Count > 0)
                 {
-                    pageBuilder.AddField(Locate("Synonyms"), string.Join(", ", info.Synonyms));
+                    pageBuilder.AddField(synonymsText, string.Join(", ", info.Synonyms));
                 }
                 if (info.Antonyms.Count > 0)
                 {
-                    pageBuilder.AddField(Locate("Antonyms"), string.Join(", ", info.Antonyms));
+                    pageBuilder.AddField(antonymsText, string.Join(", ", info.Antonyms));
                 }
 
                 return Task.FromResult(pageBuilder);
@@ -776,7 +784,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -973,6 +981,9 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
+            string imageSearch = Locate("ImageSearch");
+            string paginatorFooter = Locate("PaginatorFooter");
+
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var pageBuilder = new PageBuilder()
@@ -980,9 +991,9 @@ namespace Fergun.Modules
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(filteredImages[index].ContextLink)
-                    .WithDescription(Locate("ImageSearch"))
+                    .WithDescription(imageSearch)
                     .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Link)))
-                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, filteredImages.Length));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
 
                 return Task.FromResult(pageBuilder);
             }
@@ -998,7 +1009,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -1060,6 +1071,9 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
 
+            string imageSearch = Locate("ImageSearch");
+            string paginatorFooter = Locate("PaginatorFooter");
+
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var pageBuilder = new PageBuilder()
@@ -1067,9 +1081,9 @@ namespace Fergun.Modules
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(filteredImages[index].Url)
-                    .WithDescription(Locate("ImageSearch"))
+                    .WithDescription(imageSearch)
                     .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Image)))
-                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, filteredImages.Length));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
 
                 return Task.FromResult(pageBuilder);
             }
@@ -1085,7 +1099,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -1827,6 +1841,11 @@ namespace Fergun.Modules
                 }
             }
 
+            string by = Locate("By");
+            string noExampleText = Locate("NoExample");
+            string exampleText = Locate("Example");
+            string paginatorFooter = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")} - {Locate("PaginatorFooter")}";
+
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var info = search.Definitions[index];
@@ -1839,7 +1858,7 @@ namespace Fergun.Modules
                 string example;
                 if (string.IsNullOrEmpty(info.Example))
                 {
-                    example = Locate("NoExample");
+                    example = noExampleText;
                 }
                 else
                 {
@@ -1848,19 +1867,16 @@ namespace Fergun.Modules
                         .Truncate(EmbedFieldBuilder.MaxFieldValueLength);
                 }
 
-                string footer = $"Urban Dictionary {(string.IsNullOrWhiteSpace(query) ? "(Random words)" : "")}" +
-                                $" - {string.Format(Locate("PaginatorFooter"), index + 1, search.Definitions.Count)}";
-
                 var pageBuilder = new PageBuilder()
-                    .WithAuthor($"{Locate("By")} {info.Author}")
+                    .WithAuthor($"{by} {info.Author}")
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle(info.Word.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(info.Permalink)
                     .WithDescription(definition)
-                    .AddField(Locate("Example"), example)
+                    .AddField(exampleText, example)
                     .AddField("👍", info.ThumbsUp, true)
                     .AddField("👎", info.ThumbsDown, true)
-                    .WithFooter(footer)
+                    .WithFooter(paginatorFooter)
                     .WithTimestamp(info.WrittenOn);
 
                 return Task.FromResult(pageBuilder);
@@ -1877,7 +1893,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -2026,7 +2042,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
 
@@ -2209,10 +2225,12 @@ namespace Fergun.Modules
 
                 default:
                 {
+                    string paginatorFooter = Locate("PaginatorFooter");
+
                     Task<PageBuilder> GeneratePageAsync(int index)
                     {
                         var pageBuilder = new PageBuilder()
-                            .WithText($"{urls[index]}\n{string.Format(Locate("PaginatorFooter"), index + 1, urls.Length)}");
+                            .WithText($"{urls[index]}\n{string.Format(paginatorFooter, index + 1, urls.Length)}");
 
                         return Task.FromResult(pageBuilder);
                     }
@@ -2228,7 +2246,7 @@ namespace Fergun.Modules
                         .WithDeletion(DeletionOptions.Valid)
                         .Build();
 
-                    await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+                    _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
                         break;
                 }
             }

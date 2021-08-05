@@ -311,21 +311,18 @@ namespace Fergun.Interactive
         /// <param name="channel">The channel to send the <see cref="Paginator"/> to.</param>
         /// <param name="timeout">The time until the <see cref="Paginator"/> times out.</param>
         /// <param name="message">An existing message to modify to display the <see cref="Paginator"/>.</param>
-        /// <param name="doNotWait">
-        /// Whether to not wait for a timeout or a cancellation and instead return when the message has been sent.
-        /// The paginator will still receive inputs.
-        /// </param>
+        /// <param name="messageAction">A method that gets executed once when a message containing the paginator is sent or modified.</param>
         /// <param name="resetTimeoutOnInput">Whether to reset the internal timeout timer when a valid input is received.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the paginator.</param>
         /// <returns>
         /// A task that represents the asynchronous operation for sending the paginator and waiting for a timeout or cancellation.<br/>
         /// The task result contains an <see cref="InteractiveMessageResult{T}"/> with the message used for pagination
         /// (which may not be valid if the message has been deleted), the elapsed time and the status.<br/>
-        /// If <paramref name="doNotWait"/> is <see langword="true"/> or the paginator only contains one page,
-        /// the task will return when the message has been sent and the result will contain the sent message and a <see cref="InteractiveStatus.Success"/> status.
+        /// If the paginator only contains one page, the task will return when the message has been sent and the result
+        /// will contain the sent message and a <see cref="InteractiveStatus.Success"/> status.
         /// </returns>
         public async Task<InteractiveMessageResult> SendPaginatorAsync(Paginator paginator, IMessageChannel channel, TimeSpan? timeout = null,
-            IUserMessage message = null, bool doNotWait = false, bool resetTimeoutOnInput = false, CancellationToken cancellationToken = default)
+            IUserMessage message = null, Action<IUserMessage> messageAction = null, bool resetTimeoutOnInput = false, CancellationToken cancellationToken = default)
         {
             InteractiveGuards.NotNull(paginator, nameof(paginator));
             InteractiveGuards.NotNull(channel, nameof(channel));
@@ -346,6 +343,7 @@ namespace Fergun.Interactive
             }
 
             message = await SendOrModifyMessageAsync(paginator, message, channel).ConfigureAwait(false);
+            messageAction?.Invoke(message);
 
             if (paginator.MaxPageIndex == 0)
             {
@@ -356,18 +354,9 @@ namespace Fergun.Interactive
                 resetTimeoutOnInput, InteractiveStatus.Timeout, InteractiveStatus.Canceled, cancellationToken);
 
             var callback = new PaginatorCallback(paginator, message, timeoutTaskSource, DateTimeOffset.UtcNow);
+
             _callbacks[message.Id] = callback;
 
-            var paginatorTask = WaitForPaginatorTimeoutOrCancellationAsync(callback).ConfigureAwait(false);
-
-            if (!doNotWait) return await paginatorTask;
-
-            _ = paginatorTask;
-            return new InteractiveMessageResult(TimeSpan.Zero, InteractiveStatus.Success, message);
-        }
-
-        private async Task<InteractiveMessageResult> WaitForPaginatorTimeoutOrCancellationAsync(PaginatorCallback callback)
-        {
             // A CancellationTokenSource is used here to cancel InitializeMessageAsync() to avoid adding reactions after TimeoutTaskSource.Task has returned.
             var cts = callback.Paginator.InputType == InputType.Reactions ? new CancellationTokenSource() : null;
 
@@ -399,6 +388,7 @@ namespace Fergun.Interactive
         /// <param name="channel">The channel to send the selection to.</param>
         /// <param name="timeout">The time until the selection times out.</param>
         /// <param name="message">A message to be used for the selection instead of a new one.</param>
+        /// <param name="messageAction">A method that gets executed once when a message containing the selection is sent or modified.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to cancel the selection.</param>
         /// <returns>
         /// A task that represents the asynchronous operation for sending the selection and waiting for a valid input, a timeout or a cancellation.<br/>
@@ -406,7 +396,7 @@ namespace Fergun.Interactive
         /// (which may not be valid if the message has been deleted), the elapsed time and the status.<br/>
         /// </returns>
         public async Task<InteractiveMessageResult<TOption>> SendSelectionAsync<TOption>(BaseSelection<TOption> selection, IMessageChannel channel,
-            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
+            TimeSpan? timeout = null, IUserMessage message = null, Action<IUserMessage> messageAction = null, CancellationToken cancellationToken = default)
         {
             InteractiveGuards.NotNull(selection, nameof(selection));
             InteractiveGuards.NotNull(channel, nameof(channel));
@@ -419,6 +409,7 @@ namespace Fergun.Interactive
 #endif
 
             message = await SendOrModifyMessageAsync(selection, message, channel).ConfigureAwait(false);
+            messageAction?.Invoke(message);
 
             var timeoutTaskSource = new TimeoutTaskCompletionSource<(TOption, InteractiveStatus)>(timeout ?? DefaultTimeout,
                 false, (default, InteractiveStatus.Timeout), (default, InteractiveStatus.Canceled), cancellationToken);

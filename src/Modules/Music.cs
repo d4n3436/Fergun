@@ -138,6 +138,7 @@ namespace Fergun.Modules
 
             var splitLyrics = lyrics.SplitBySeparatorWithLimit('\n', EmbedBuilder.MaxDescriptionLength).ToArray();
             string links = $"{Format.Url("Genius", result.Url)} - {Format.Url(Locate("ArtistPage"), genius.Response.Hits[0].Result.PrimaryArtist.Url)}";
+            string paginatorFooter = $"{Locate("LyricsByGenius")} - {Locate("PaginatorFooter")}";
 
             Task<PageBuilder> GeneratePageAsync(int index)
             {
@@ -147,7 +148,7 @@ namespace Fergun.Modules
                     .WithTitle(result.FullTitle)
                     .WithDescription(splitLyrics[index].Truncate(EmbedBuilder.MaxDescriptionLength))
                     .AddField("Links", links)
-                    .WithFooter($"{Locate("LyricsByGenius")} - {string.Format(Locate("PaginatorFooter"), index + 1, splitLyrics.Length)}");
+                    .WithFooter(string.Format(paginatorFooter, index + 1, splitLyrics.Length));
 
                 return Task.FromResult(pageBuilder);
             }
@@ -163,7 +164,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
             return FergunResult.FromSuccess();
         }
@@ -242,7 +243,7 @@ namespace Fergun.Modules
                     selectionBuilder.ActionOnSuccess = ActionOnStop.DeleteInput;
 #endif
 
-                    var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1));
+                    var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
                     if (!result.IsSuccess)
                     {

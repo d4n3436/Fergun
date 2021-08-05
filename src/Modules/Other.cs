@@ -140,16 +140,19 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
             }
+
             string creationDate = Context.Client.CurrentUser.CreatedAt.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture);
+            string commandStatsInfo = string.Format(Locate("CommandStatsInfo"), creationDate);
+            string paginatorFooter = Locate("PaginatorFooter");
 
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var pageBuilder = new PageBuilder()
                     .WithAuthor(Context.User)
                     .WithColor(new Color(FergunClient.Config.EmbedColor))
-                    .WithTitle(string.Format(Locate("CommandStatsInfo"), creationDate))
+                    .WithTitle(commandStatsInfo)
                     .WithDescription(splitStats[index])
-                    .WithFooter(string.Format(Locate("PaginatorFooter"), index + 1, splitStats.Count));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, splitStats.Count));
 
                 return Task.FromResult(pageBuilder);
             }
@@ -165,8 +168,9 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
 
+            await Task.CompletedTask;
             return FergunResult.FromSuccess();
         }
 
@@ -327,7 +331,7 @@ namespace Fergun.Modules
             selectionBuilder.EmoteConverter = x => new Emoji($"{Array.IndexOf(codes, x.Key) + 1}\ufe0f\u20e3");
 #endif
 
-            var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1));
+            var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
             if (!result.IsSuccess)
             {
@@ -419,7 +423,7 @@ namespace Fergun.Modules
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
                 .Build();
 
-            var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromMinutes(2));
+            var result = await SendSelectionAsync(selection, TimeSpan.FromMinutes(2));
 
             if (!result.IsSuccess) return FergunResult.FromSuccess();
 
@@ -826,7 +830,8 @@ namespace Fergun.Modules
                 .AddUser(Context.User)
                 .Build();
 
-            var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromSeconds(time));
+            var result = await SendSelectionAsync(selection, TimeSpan.FromSeconds(time));
+            if (result.IsCanceled) return FergunResult.FromSuccess();
 
             int option = result.IsSuccess ? result.Value.Value : -1;
 

@@ -32,37 +32,8 @@ namespace Fergun.Modules
         /// </summary>
         public MessageCacheService MessageCache { get; set; }
 
-        /// <inheritdoc cref="InteractiveService.SendPaginatorAsync(Paginator, IMessageChannel, TimeSpan?, IUserMessage, bool, bool, CancellationToken)"/>
-        public async Task<IUserMessage> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null, bool doNotWait = true, CancellationToken cancellationToken = default)
-        {
-            IUserMessage response = null;
-            if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
-            {
-                if (Interactive.TryRemoveCallback(messageId, out var callback))
-                {
-                    callback.Dispose();
-                }
-
-                response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
-
-                await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, response, doNotWait, cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                var result = await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, null, doNotWait, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-                if (!Cache.IsDisabled)
-                {
-                    Cache.Add(Context.Message, result.Message);
-                }
-            }
-
-            return response;
-        }
-
-        /// <inheritdoc cref="InteractiveService.SendSelectionAsync{TOption}(BaseSelection{TOption}, IMessageChannel, TimeSpan?, IUserMessage, CancellationToken)"/>
-        public async Task<InteractiveMessageResult<TOption>> SendSelectionAsync<TOption>(BaseSelection<TOption> selection,
-            TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+        /// <inheritdoc cref="InteractiveService.SendPaginatorAsync(Paginator, IMessageChannel, TimeSpan?, IUserMessage, Action{IUserMessage}, bool, CancellationToken)"/>
+        public async Task<InteractiveMessageResult> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
         {
             if (Cache.TryGetValue(Context.Message.Id, out ulong messageId))
             {
@@ -73,17 +44,46 @@ namespace Fergun.Modules
 
                 var response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
 
-                return await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, response, cancellationToken).ConfigureAwait(false);
+                return await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, response, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
-            var result = await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, null, cancellationToken).ConfigureAwait(false);
+            return await Interactive.SendPaginatorAsync(paginator, Context.Channel, timeout, null, AddMessageToCache, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            if (!Cache.IsDisabled)
+            void AddMessageToCache(IUserMessage message)
             {
-                Cache.Add(Context.Message, result.Message);
+                if (!Cache.IsDisabled && paginator.MaxPageIndex > 0)
+                {
+                    Cache.Add(Context.Message, message);
+                }
+            }
+        }
+
+        /// <inheritdoc cref="InteractiveService.SendSelectionAsync{TOption}(BaseSelection{TOption}, IMessageChannel, TimeSpan?, IUserMessage, Action{IUserMessage}, CancellationToken)"/>
+        public async Task<InteractiveMessageResult<TOption>> SendSelectionAsync<TOption>(BaseSelection<TOption> selection,
+            TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
+        {
+            ulong messageId = message != null ? message.Id : Cache.TryGetValue(Context.Message.Id, out ulong temp) ? temp : 0;
+            if (messageId != 0)
+            {
+                if (Interactive.TryRemoveCallback(messageId, out var callback))
+                {
+                    callback.Dispose();
+                }
+
+                var response = message ?? (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
+
+                return await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, response, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
 
-            return result;
+            return await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, message, AddMessageToCache, cancellationToken).ConfigureAwait(false);
+
+            void AddMessageToCache(IUserMessage message)
+            {
+                if (!Cache.IsDisabled)
+                {
+                    Cache.Add(Context.Message, message);
+                }
+            }
         }
 
         /// <inheritdoc/>

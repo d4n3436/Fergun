@@ -182,7 +182,7 @@ namespace Fergun.Modules
             selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
 #endif
 
-            var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1));
+            var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
             if (!result.IsSuccess)
             {
@@ -324,7 +324,7 @@ namespace Fergun.Modules
 #endif
 
             message = await message.Channel.GetMessageAsync(_messageCache, message.Id) as IUserMessage;
-            var result = await _interactive.SendSelectionAsync(selectionBuilder.Build(), Context.Channel, TimeSpan.FromMinutes(1), message);
+            var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1), message);
 
             if (!result.IsSuccess)
             {
@@ -1063,7 +1063,7 @@ namespace Fergun.Modules
                 .WithActionOnCancellation(ActionOnStop.DisableInput)
                 .Build();
 
-            var result = await _interactive.SendSelectionAsync(selection, Context.Channel, TimeSpan.FromSeconds(30));
+            var result = await SendSelectionAsync(selection, TimeSpan.FromSeconds(30));
 
             if (!result.IsSuccess)
             {

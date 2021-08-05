@@ -235,15 +235,19 @@ namespace Fergun.Modules
                 .Select(x => Format.Code(x.Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase), "md"))
                 .ToArray();
 
+            string evalResults = Locate("EvalResults");
+            string type = Locate("Type");
+            string paginatorFooter = $"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {Locate("PaginatorFooter")}";
+
             Task<PageBuilder> GeneratePageAsync(int index)
             {
                 var pageBuilder = new PageBuilder()
                     .WithAuthor(Context.User)
                     .WithColor(new Color(FergunClient.Config.EmbedColor))
-                    .WithTitle(Locate("EvalResults"))
+                    .WithTitle(evalResults)
                     .WithDescription(splitOutput[index].Truncate(EmbedBuilder.MaxDescriptionLength))
-                    .AddField(Locate("Type"), Format.Code(returnType, "md"))
-                    .WithFooter($"{string.Format(Locate("EvalFooter"), sw.ElapsedMilliseconds)} - {string.Format(Locate("PaginatorFooter"), index + 1, splitOutput.Length)}");
+                    .AddField(type, Format.Code(returnType, "md"))
+                    .WithFooter(string.Format(paginatorFooter, index + 1, splitOutput.Length));
 
                 return Task.FromResult(pageBuilder);
             }
@@ -259,7 +263,7 @@ namespace Fergun.Modules
                 .WithDeletion(DeletionOptions.Valid)
                 .Build();
 
-            await SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
         }
 
         [RequireContext(ContextType.Guild, ErrorMessage = "NotSupportedInDM")]
