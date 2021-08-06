@@ -312,6 +312,12 @@ namespace Fergun.Extensions
             return condition ? services.AddSingleton(implementationInstance) : services;
         }
 
+        public static IServiceCollection AddSingletonIf<TService>(this IServiceCollection services, bool condition,
+            Func<IServiceProvider, TService> implementationFactory) where TService : class
+        {
+            return condition ? services.AddSingleton(implementationFactory) : services;
+        }
+
         public static string Dump<T>(this T obj, int maxDepth = 2)
         {
             try

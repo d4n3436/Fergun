@@ -37,8 +37,6 @@ namespace Fergun
 
         private DiscordSocketClient _client;
         private LogService _logService;
-        private MessageCacheService _messageCacheService;
-        private CommandHandlingService _cmdHandlingService;
         private static AuthDiscordBotListApi _dblApi;
         private static IDblSelfBot _dblBot;
         private static DiscordBotsApi _discordBots;
@@ -175,16 +173,10 @@ namespace Fergun
 
             _logService.Dispose();
 
-            _messageCacheService = Config.UseMessageCacheService && Config.MessageCacheSize > 0
-                ? new MessageCacheService(_client, Config.MessageCacheSize,
-                    log => _ = _logService.LogAsync(log), Constants.MessageCacheClearInterval, Constants.MaxMessageCacheLongevity)
-                : MessageCacheService.Disabled;
-
             var services = SetupServices();
             _logService = services.GetRequiredService<LogService>();
 
-            _cmdHandlingService = new CommandHandlingService(_client, services.GetRequiredService<CommandService>(), _logService, services);
-            await _cmdHandlingService.InitializeAsync();
+            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
             await _client.LoginAsync(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token, false);
             await _client.StartAsync();
@@ -387,14 +379,21 @@ namespace Fergun
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>()
-                .AddSingleton(_messageCacheService)
-                .AddSingleton(Config.UseCommandCacheService
-                    ? new CommandCacheService(_client, Constants.MessageCacheCapacity,
-                    message => _ = _cmdHandlingService.HandleCommandAsync(message),
-                    log => _ = _logService.LogAsync(log), Constants.CommandCacheClearInterval,
-                    Constants.MaxCommandCacheLongevity, _messageCacheService)
-                    : CommandCacheService.Disabled)
-                .AddSingletonIf(Config.UseReliabilityService, new ReliabilityService(_client, message => _ = _logService.LogAsync(message)))
+                .AddSingleton<CommandHandlingService>()
+                .AddSingleton(s => Config.UseMessageCacheService && Config.MessageCacheSize > 0
+                ? new MessageCacheService(s.GetRequiredService<DiscordSocketClient>(), Config.MessageCacheSize,
+                s.GetRequiredService<LogService>().LogAsync,
+                Constants.MessageCacheClearInterval,
+                Constants.MaxMessageCacheLongevity)
+                : MessageCacheService.Disabled)
+                .AddSingleton(s => Config.UseCommandCacheService
+                ? new CommandCacheService(s.GetRequiredService<DiscordSocketClient>(), Constants.MessageCacheCapacity,
+                s.GetRequiredService<CommandHandlingService>().HandleCommandAsync,
+                s.GetRequiredService<LogService>().LogAsync, Constants.CommandCacheClearInterval,
+                Constants.MaxCommandCacheLongevity, s.GetRequiredService<MessageCacheService>())
+                : CommandCacheService.Disabled)
+                .AddSingletonIf(Config.UseReliabilityService,
+                s => new ReliabilityService(s.GetRequiredService<DiscordSocketClient>(), s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
         }
 
