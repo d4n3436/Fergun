@@ -597,7 +597,15 @@ namespace Fergun.Modules
                 await using Stream stream = new MemoryStream();
                 bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 stream.Position = 0;
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{argbColor}.png");
+                string hex = $"{argbColor.R:X2}{argbColor.G:X2}{argbColor.B:X2}";
+
+                var builder = new EmbedBuilder()
+                    .WithTitle($"#{hex}")
+                    .WithImageUrl($"attachment://{hex}.png")
+                    .WithFooter($"R: {argbColor.R}, G: {argbColor.G}, B: {argbColor.B}")
+                    .WithColor(new Discord.Color(argbColor.R, argbColor.G, argbColor.B));
+
+                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{hex}.png", embed: builder.Build());
             }
 
             return FergunResult.FromSuccess();
@@ -1152,7 +1160,15 @@ namespace Fergun.Modules
                     return FergunResult.FromError("The file is too large.");
                 }
                 invertedFile.Position = 0;
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, invertedFile, $"invert{format.FileExtensionFromEncoder()}");
+
+                string fileName = $"invert{format.FileExtensionFromEncoder()}";
+
+                var builder = new EmbedBuilder()
+                    .WithTitle("Invert")
+                    .WithImageUrl($"attachment://{fileName}")
+                    .WithColor(FergunClient.Config.EmbedColor);
+
+                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, invertedFile, fileName, embed: builder.Build());
             }
 
             return FergunResult.FromSuccess();
@@ -1494,8 +1510,14 @@ namespace Fergun.Modules
 
             try
             {
+                var builder = new EmbedBuilder()
+                    .WithTitle("Screenshot")
+                    .WithDescription($"Url: {uri}".Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .WithImageUrl("attachment://screenshot.png")
+                    .WithColor(FergunClient.Config.EmbedColor);
+
                 await using var image = await _httpClient.GetStreamAsync(new Uri(response.Url));
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png");
+                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, image, "screenshot.png", embed: builder.Build());
             }
             catch (HttpRequestException e)
             {
