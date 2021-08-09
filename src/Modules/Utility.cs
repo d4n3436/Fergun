@@ -1898,7 +1898,7 @@ namespace Fergun.Modules
                     .AddField(exampleText, example)
                     .AddField("👍", info.ThumbsUp, true)
                     .AddField("👎", info.ThumbsDown, true)
-                    .WithFooter(paginatorFooter)
+                    .WithFooter(string.Format(paginatorFooter, index + 1, search.Definitions.Count))
                     .WithTimestamp(info.WrittenOn);
 
                 return Task.FromResult(pageBuilder);
