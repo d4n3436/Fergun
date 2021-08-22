@@ -29,10 +29,10 @@ namespace Fergun
         public string DevToken { get; private set; }
 
         /// <summary>
-        /// Gets the Discord Bot List API token.
+        /// Gets the Top.gg API token.
         /// </summary>
         [JsonProperty]
-        public string DblApiToken { get; private set; }
+        public string TopGgApiToken { get; private set; }
 
         /// <summary>
         /// Gets the Discord Bots API token.

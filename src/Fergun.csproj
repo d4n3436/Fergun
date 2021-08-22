@@ -67,7 +67,6 @@
     
   <ItemGroup>
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
-    <PackageReference Include="DiscordBotsList.Api" Version="1.4.0" />
     <PackageReference Include="GScraper" Version="0.5.3" />
     <PackageReference Include="GTranslate" Version="1.0.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0" />

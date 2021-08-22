@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -1962,8 +1962,8 @@
 	<data name="Invite" xml:space="preserve">
 		<value>يدعو</value>
 	</data>
-	<data name="DBLBotPage" xml:space="preserve">
-		<value>صفحة DBL Bot</value>
+	<data name="TopGGBotPage" xml:space="preserve">
+		<value>صفحة Top.GG Bot</value>
 	</data>
 	<data name="VoteLink" xml:space="preserve">
 		<value>رابط التصويت</value>

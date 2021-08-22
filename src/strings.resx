@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -1505,8 +1505,8 @@ Try using a tag ({0}), a mention ({1}) or an ID ({2}).</value>
 	<data name="Invite" xml:space="preserve">
     <value>Invite</value>
   </data>
-	<data name="DBLBotPage" xml:space="preserve">
-    <value>DBL Bot Page</value>
+	<data name="TopGGBotPage" xml:space="preserve">
+    <value>Top.GG Bot Page</value>
   </data>
 	<data name="VoteLink" xml:space="preserve">
     <value>Vote Link</value>

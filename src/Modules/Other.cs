@@ -884,14 +884,14 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError("No");
             }
-            if (FergunClient.DblBotPage == null)
+            if (FergunClient.TopGgBotPage == null)
             {
                 return FergunResult.FromError(Locate("NowhereToVote"));
             }
 
             var builder = new EmbedBuilder
             {
-                Description = string.Format(Locate("Vote"), $"{FergunClient.DblBotPage}/vote"),
+                Description = string.Format(Locate("Vote"), $"{FergunClient.TopGgBotPage}/vote"),
                 Color = new Color(FergunClient.Config.EmbedColor)
             };
 

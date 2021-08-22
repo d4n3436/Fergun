@@ -98,10 +98,10 @@ namespace Fergun.Utils
                 builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink));
             }
 
-            if (FergunClient.DblBotPage != null && Uri.IsWellFormedUriString(FergunClient.DblBotPage, UriKind.Absolute))
+            if (FergunClient.TopGgBotPage != null && Uri.IsWellFormedUriString(FergunClient.TopGgBotPage, UriKind.Absolute))
             {
-                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage));
-                //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote"));
+                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("TopGGBotPage", channel), FergunClient.TopGgBotPage));
+                //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.TopGgBotPage}/vote"));
             }
 
             if (FergunClient.Config.SupportServer != null && Uri.IsWellFormedUriString(FergunClient.Config.SupportServer, UriKind.Absolute))
@@ -120,10 +120,10 @@ namespace Fergun.Utils
         public static string BuildLinks(IMessageChannel channel)
         {
             string links = $"{Format.Url(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink)}";
-            if (FergunClient.DblBotPage != null)
+            if (FergunClient.TopGgBotPage != null)
             {
-                links += $" | {Format.Url(GuildUtils.Locate("DBLBotPage", channel), FergunClient.DblBotPage)}";
-                links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.DblBotPage}/vote")}";
+                links += $" | {Format.Url(GuildUtils.Locate("TopGGBotPage", channel), FergunClient.TopGgBotPage)}";
+                links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.TopGgBotPage}/vote")}";
             }
             if (!string.IsNullOrEmpty(FergunClient.Config.SupportServer))
             {

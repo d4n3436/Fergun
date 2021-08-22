@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -1953,8 +1953,8 @@ Hikaye: Bu giriş yapay zekanın girişinizin önüne "Siz" koymasını engeller
 	<data name="Invite" xml:space="preserve">
 		<value>Davet et</value>
 	</data>
-	<data name="DBLBotPage" xml:space="preserve">
-		<value>DBL Bot Sayfası</value>
+	<data name="TopGGBotPage" xml:space="preserve">
+		<value>Top.GG Bot Sayfası</value>
 	</data>
 	<data name="VoteLink" xml:space="preserve">
 		<value>Oylama Bağlantısı</value>

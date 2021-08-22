@@ -12,9 +12,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordBotsList.Api;
-using DiscordBotsList.Api.Objects;
-using Fergun.APIs.DiscordBots;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
@@ -31,15 +28,12 @@ namespace Fergun
         public static FergunConfig Config { get; private set; }
         public static DateTimeOffset Uptime { get; private set; }
         public static bool IsDebugMode { get; private set; }
-        public static string DblBotPage { get; private set; }
+        public static string TopGgBotPage { get; private set; }
         public static string InviteLink { get; private set; }
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordSocketClient _client;
         private LogService _logService;
-        private static AuthDiscordBotListApi _dblApi;
-        private static IDblSelfBot _dblBot;
-        private static DiscordBotsApi _discordBots;
 
         public FergunClient()
         {
@@ -394,6 +388,9 @@ namespace Fergun
                 : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService,
                 s => new ReliabilityService(s.GetRequiredService<DiscordSocketClient>(), s.GetRequiredService<LogService>().LogAsync))
+                .AddSingletonIf(!IsDebugMode,
+                s => new BotListService(s.GetRequiredService<DiscordSocketClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
+                logger: s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
         }
 
@@ -429,26 +426,10 @@ namespace Fergun
             {
                 InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&permissions={(ulong)Constants.InvitePermissions}&scope=bot%20applications.commands";
 
-                if (string.IsNullOrEmpty(Config.DblApiToken))
+                if (!string.IsNullOrEmpty(Config.TopGgApiToken))
                 {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Top.gg API token is empty or not set. Bot server count will not be sent to the API."));
+                    TopGgBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
                 }
-                else
-                {
-                    _dblApi = new AuthDiscordBotListApi(_client.CurrentUser.Id, Config.DblApiToken);
-                    DblBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
-                }
-
-                if (string.IsNullOrEmpty(Config.DiscordBotsApiToken))
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "DiscordBots API token is empty or not set. Bot server count will not be sent to the API."));
-                }
-                else
-                {
-                    _discordBots = new DiscordBotsApi(Config.DiscordBotsApiToken);
-                }
-
-                _ = Task.Run(async () => await UpdateBotListStatsAsync());
             }
         }
 
@@ -500,10 +481,6 @@ namespace Fergun
                         Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, config);
                     }
                 }
-                if (!IsDebugMode)
-                {
-                    _ = Task.Run(async () => await UpdateBotListStatsAsync());
-                }
             }
         }
 
@@ -516,44 +493,6 @@ namespace Fergun
                 Database.DeleteDocument(Constants.GuildConfigCollection, config);
                 GuildUtils.PrefixCache.TryRemove(guild.Id, out _);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Deleted config of guild {guild.Id}"));
-
-                if (!IsDebugMode)
-                {
-                    _ = Task.Run(async () => await UpdateBotListStatsAsync());
-                }
-            }
-        }
-
-        private async Task UpdateBotListStatsAsync()
-        {
-            try
-            {
-                if (_dblApi != null && _dblBot == null)
-                {
-                    try
-                    {
-                        _dblBot = await _dblApi.GetMeAsync();
-                    }
-                    catch (NullReferenceException)
-                    {
-                        _dblApi = null;
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not get the bot info from DBL API, make sure the bot is listed in DBL and the token is valid"));
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Stats", "Bot server count will not be sent to DBL API."));
-                    }
-                }
-
-                if (_dblBot != null)
-                {
-                    await _dblBot.UpdateStatsAsync(_client.Guilds.Count);
-                }
-                if (_discordBots != null)
-                {
-                    await _discordBots.UpdateStatsAsync(_client.CurrentUser.Id, _client.Guilds.Count);
-                }
-            }
-            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Stats", "Could not update the DBL/DiscordBots bot stats", e));
             }
         }
     }

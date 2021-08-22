@@ -108,7 +108,7 @@ To shut down the bot use `logout`.
 |--|--|--|
 | `Token` | The bot token. | [Create a Discord application](https://discord.com/developers/applications).
 | `DevToken` | The development bot token, used in Debug builds. | ^
-| `DblApiToken` | The Discord Bot List API token, used to update the bot server count in top.gg. | [Add a bot in top.gg](https://top.gg/bot/new), then [here](https://top.gg/api/docs).
+| `TopGgApiToken` | The top.gg API token, used to update the bot server count in top.gg. | [Add a bot in top.gg](https://top.gg/bot/new), then [here](https://top.gg/api/docs).
 | `DiscordBotsApiToken` | The Discord Bots API token, used to update the bot server count in discord.bots.gg. | [Add a bot in discord.bots.gg](https://discord.bots.gg/bots/add), then [here](https://discord.bots.gg/docs).
 | `GeniusApiToken` | The Genius API token, used in the commands `lyrics` and `spotify`. | https://docs.genius.com
 | `AiDungeonToken` | The AI Dungeon user token, used in the AI Dungeon module. | See [below](#6-obtaining-the-ai-dungeon-token).
