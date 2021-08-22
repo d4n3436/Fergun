@@ -2035,7 +2035,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Wikipedia([Remainder, Summary("wikipediaParam1")] string query)
         {
             string language = GetLanguage();
-            (string Title, string Extract, string ImageUrl, int Id)[] articles = null;
+            (string Title, string Extract, string ImageUrl, int Id)[] articles;
             try
             {
                 articles = await GetArticlesAsync(query, language);
@@ -2096,13 +2096,10 @@ namespace Fergun.Modules
                     .GetPropertyOrDefault("query")
                     .GetPropertyOrDefault("pages");
 
-                if (pages.ValueKind != JsonValueKind.Array)
-                {
-                    // When there are no results, the API returns {"batchcomplete":true} instead of an empty array
-                    return Array.Empty<(string, string, string, int)>();
-                }
-
-                var articles = pages.EnumerateArray()
+                // When there are no results, the API returns {"batchcomplete":true} instead of an empty array
+                var articles = pages.ValueKind != JsonValueKind.Array
+                    ? Array.Empty<(string, string, string, int)>()
+                    : pages.EnumerateArray()
                     .Select(x => (
                     Title: x.GetProperty("title").GetString(),
                     Extract: x.GetPropertyOrDefault("extract").GetStringOrDefault(),
