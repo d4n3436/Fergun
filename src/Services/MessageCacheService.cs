@@ -859,12 +859,15 @@ namespace Fergun.Services
         /// <inheritdoc/>
         public MessageFlags? Flags => _message.Flags;
 
-        /// <inheritdoc/>
-        public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
-
 #if DNETLABS
         /// <inheritdoc/>
         public IReadOnlyCollection<IMessageComponent> Components => _message.Components;
+
+        /// <inheritdoc/>
+        public IReadOnlyCollection<IStickerItem> Stickers => _message.Stickers;
+#else
+        /// <inheritdoc/>
+        public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
 #endif
 
         /// <inheritdoc/>
