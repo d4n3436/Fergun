@@ -74,7 +74,7 @@ namespace Fergun.Services
         /// Manually updates the bot lists' server count using the client's guild count.
         /// </summary>
 
-        public Task UpdateStatsAsync() => UpdateStatsAsync(_client.Guilds.Count);
+        public async Task UpdateStatsAsync() => await UpdateStatsAsync(_client.Guilds.Count);
 
         /// <summary>
         /// Manually updates the bot lists' server count using the specified server count.

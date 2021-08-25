@@ -170,6 +170,10 @@ namespace Fergun
             var services = SetupServices();
             _logService = services.GetRequiredService<LogService>();
 
+            // Resolve dependencies
+            services.GetService<ReliabilityService>();
+            services.GetService<BotListService>();
+
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
             await _client.LoginAsync(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token, false);
@@ -388,7 +392,7 @@ namespace Fergun
                 : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService,
                 s => new ReliabilityService(s.GetRequiredService<DiscordSocketClient>(), s.GetRequiredService<LogService>().LogAsync))
-                .AddSingletonIf(!IsDebugMode,
+                .AddSingletonIf(IsDebugMode,
                 s => new BotListService(s.GetRequiredService<DiscordSocketClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
                 logger: s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
