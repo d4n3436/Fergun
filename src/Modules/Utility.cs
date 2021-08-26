@@ -199,38 +199,49 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Avatar([Remainder, Summary("avatarParam1")] IUser user = null)
         {
             user ??= Context.User;
-            if (!(user is RestUser))
-            {
-                // Prevent getting error 404 while downloading the avatar getting the user from REST.
-                user = await Context.Client.Rest.GetUserAsync(user.Id);
-            }
-
+            Discord.Color avatarColor = default;
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
-            string thumbnail = user.GetAvatarUrl(ImageFormat.Png) ?? user.GetDefaultAvatarUrl();
 
-            System.Drawing.Color avatarColor;
-            try
+#if DNETLABS
+            if (user.AccentColor != null)
             {
-                await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                using var img = new Bitmap(response);
-                avatarColor = img.GetAverageColor();
+                avatarColor = user.AccentColor.Value;
             }
-            catch (HttpRequestException e)
+#endif
+            if (avatarColor == default)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
-                return FergunResult.FromError(e.Message);
-            }
-            catch (TaskCanceledException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
-                return FergunResult.FromError(Locate("RequestTimedOut"));
+                if (!(user is RestUser))
+                {
+                    // Prevent getting error 404 while downloading the avatar getting the user from REST.
+                    user = await Context.Client.Rest.GetUserAsync(user.Id);
+                    avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+                }
+
+                string thumbnail = user.GetAvatarUrl(ImageFormat.Png) ?? user.GetDefaultAvatarUrl();
+
+                try
+                {
+                    await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
+                    using var img = new Bitmap(response);
+                    avatarColor = (Discord.Color)img.GetAverageColor();
+                }
+                catch (HttpRequestException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                    return FergunResult.FromError(e.Message);
+                }
+                catch (TaskCanceledException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                    return FergunResult.FromError(Locate("RequestTimedOut"));
+                }
             }
 
             var builder = new EmbedBuilder
             {
                 Title = user.ToString(),
                 ImageUrl = avatarUrl,
-                Color = new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B)
+                Color = avatarColor
             };
 
             await ReplyAsync(embed: builder.Build());
@@ -1977,31 +1988,42 @@ namespace Fergun.Modules
                 badges = Locate("None");
             }
 
-            if (!(user is RestUser))
-            {
-                // Prevent getting error 404 while downloading the avatar getting the user from REST.
-                user = await Context.Client.Rest.GetUserAsync(user.Id);
-            }
-
+            Discord.Color avatarColor = default;
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
-            string thumbnail = user.GetAvatarUrl(ImageFormat.Png) ?? user.GetDefaultAvatarUrl();
 
-            System.Drawing.Color avatarColor;
-            try
+#if DNETLABS
+            if (user.AccentColor != null)
             {
-                await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                using var img = new Bitmap(response);
-                avatarColor = img.GetAverageColor();
+                avatarColor = user.AccentColor.Value;
             }
-            catch (HttpRequestException e)
+#endif
+            if (avatarColor == default)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
-                return FergunResult.FromError(e.Message);
-            }
-            catch (TaskCanceledException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
-                return FergunResult.FromError(Locate("RequestTimedOut"));
+                if (!(user is RestUser))
+                {
+                    // Prevent getting error 404 while downloading the avatar getting the user from REST.
+                    user = await Context.Client.Rest.GetUserAsync(user.Id);
+                    avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+                }
+
+                string thumbnail = user.GetAvatarUrl(ImageFormat.Png) ?? user.GetDefaultAvatarUrl();
+
+                try
+                {
+                    await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
+                    using var img = new Bitmap(response);
+                    avatarColor = (Discord.Color)img.GetAverageColor();
+                }
+                catch (HttpRequestException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                    return FergunResult.FromError(e.Message);
+                }
+                catch (TaskCanceledException e)
+                {
+                    await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", $"Error getting the avatar from user {user}", e));
+                    return FergunResult.FromError(Locate("RequestTimedOut"));
+                }
             }
 
             var builder = new EmbedBuilder()
@@ -2017,7 +2039,7 @@ namespace Fergun.Modules
                 .AddField(Locate("GuildJoinDate"), GetTimestamp(guildUser?.JoinedAt))
                 .AddField(Locate("BoostingSince"), GetTimestamp(guildUser?.PremiumSince))
                 .WithThumbnailUrl(avatarUrl)
-                .WithColor(new Discord.Color(avatarColor.R, avatarColor.G, avatarColor.B));
+                .WithColor(avatarColor);
 
             await ReplyAsync(embed: builder.Build());
 
