@@ -392,7 +392,7 @@ namespace Fergun
                 : CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService,
                 s => new ReliabilityService(s.GetRequiredService<DiscordSocketClient>(), s.GetRequiredService<LogService>().LogAsync))
-                .AddSingletonIf(IsDebugMode,
+                .AddSingletonIf(!IsDebugMode,
                 s => new BotListService(s.GetRequiredService<DiscordSocketClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
                 logger: s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
