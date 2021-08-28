@@ -32,6 +32,7 @@ namespace Fergun.Services
 
             if (string.IsNullOrEmpty(topGgToken))
             {
+                _topGgClientDisposed = true;
                 _ = _logger(new LogMessage(LogSeverity.Info, "BotList", "Top.gg API token is empty or not set. Bot server count will not be sent to the API."));
             }
             else
@@ -45,6 +46,7 @@ namespace Fergun.Services
 
             if (string.IsNullOrEmpty(discordBotsToken))
             {
+                _discordBotsClientDisposed = true;
                 _ = _logger(new LogMessage(LogSeverity.Info, "BotList", "DiscordBots API token is empty or not set. Bot server count will not be sent to the API."));
             }
             else
@@ -55,7 +57,7 @@ namespace Fergun.Services
                 };
                 _discordBotsClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(discordBotsToken);
             }
-            if (string.IsNullOrEmpty(topGgToken) && string.IsNullOrEmpty(discordBotsToken))
+            if (_topGgClientDisposed && _discordBotsClientDisposed)
             {
                 return;
             }
@@ -71,13 +73,13 @@ namespace Fergun.Services
         }
 
         /// <summary>
-        /// Manually updates the bot lists' server count using the client's guild count.
+        /// Manually updates the bot list server count using the client's guild count.
         /// </summary>
 
         public async Task UpdateStatsAsync() => await UpdateStatsAsync(_client.Guilds.Count);
 
         /// <summary>
-        /// Manually updates the bot lists' server count using the specified server count.
+        /// Manually updates the bot list server count using the specified server count.
         /// </summary>
         /// <param name="serverCount">The server count.</param>
         public async Task UpdateStatsAsync(int serverCount)
@@ -95,7 +97,7 @@ namespace Fergun.Services
         }
 
         /// <summary>
-        /// Manually updates a specific bot list's server count using the specified server count.
+        /// Manually updates a specific bot list server count using the specified server count.
         /// </summary>
         /// <param name="serverCount">The server count.</param>
         /// <param name="botList">The bot list.</param>
@@ -119,10 +121,11 @@ namespace Fergun.Services
 
                 response = await httpClient.PostAsync(new Uri($"bots/{_client.CurrentUser.Id}/stats", UriKind.Relative), content);
                 response.EnsureSuccessStatusCode();
+                await _logger(new LogMessage(LogSeverity.Warning, "BotList", $"Successfully updated {botListString} bot server count to {serverCount}."));
             }
             catch (Exception e)
             {
-                await _logger(new LogMessage(LogSeverity.Warning, "BotList", $"Failed to update {botListString} bot server count.", e));
+                await _logger(new LogMessage(LogSeverity.Warning, "BotList", $"Failed to update {botListString} bot server count to {serverCount}.", e));
                 if (response != null)
                 {
                     int code = (int)response.StatusCode;
