@@ -1,9 +1,9 @@
 # Fergun
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/5w5GEKE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/V3TgaZRUPX)
 
 Fergun is a multipurpose and multilanguage bot with lots of useful commands (Utility, Music, Moderation, and AI Dungeon).
 
-You can invite Fergun to your Discord server clicking [here](https://discord.com/oauth2/authorize?client_id=680507783359365121&scope=bot&permissions=204860486).
+You can invite Fergun to your Discord server clicking [here](https://discord.com/oauth2/authorize?client_id=680507783359365121&permissions=204860486&scope=bot%20applications.commands).
 
 Have any questions or need help with the bot? Join the [support server](https://discord.gg/5w5GEKE).
 
