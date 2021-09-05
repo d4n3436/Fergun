@@ -145,7 +145,11 @@ namespace Fergun.Modules
                     }
                     return FergunResult.FromError(Locate("ErrorInAPI"));
                 }
-                _modes = content.Options.ToDictionary(x => x.Title.Truncate(100), x => x.PublicId?.ToString());
+                _modes = content
+                    .Options
+                    .GroupBy(x => x.Title.Truncate(100), StringComparer.OrdinalIgnoreCase)
+                    .Select(x => x.First())
+                    .ToDictionary(x => x.Title.Truncate(100), x => x.PublicId?.ToString());
             }
             else
             {
@@ -294,7 +298,11 @@ namespace Fergun.Modules
                 return new AdventureCreationData(Locate("ErrorInAPI"), message);
             }
 
-            var characters = new Dictionary<string, string>(content.Options.ToDictionary(x => x.Title.Truncate(100), x => x.PublicId?.ToString()));
+            var characters = content
+                .Options
+                .GroupBy(x => x.Title.Truncate(100), StringComparer.OrdinalIgnoreCase)
+                .Select(x => x.First())
+                .ToDictionary(x => x.Title.Truncate(100), x => x.PublicId?.ToString());
 
             builder.Title = "AI Dungeon";
             builder.Description = Locate("CharacterSelect");
