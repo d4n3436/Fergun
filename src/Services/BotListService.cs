@@ -112,7 +112,7 @@ namespace Fergun.Services
 
             var httpClient = botList == BotList.TopGg ? _topGgClient : _discordBotsClient;
             string botListString = botList == BotList.TopGg ? "Top.gg" : "DiscordBots";
-            await _logger(new LogMessage(LogSeverity.Info, "BotList", $"Updating {botListString} bot server count..."));
+            await _logger(new LogMessage(LogSeverity.Verbose, "BotList", $"Updating {botListString} bot server count..."));
             HttpResponseMessage response = null;
             try
             {
@@ -121,7 +121,7 @@ namespace Fergun.Services
 
                 response = await httpClient.PostAsync(new Uri($"bots/{_client.CurrentUser.Id}/stats", UriKind.Relative), content);
                 response.EnsureSuccessStatusCode();
-                await _logger(new LogMessage(LogSeverity.Warning, "BotList", $"Successfully updated {botListString} bot server count to {serverCount}."));
+                await _logger(new LogMessage(LogSeverity.Verbose, "BotList", $"Successfully updated {botListString} bot server count to {serverCount}."));
             }
             catch (Exception e)
             {
