@@ -905,7 +905,7 @@ namespace Fergun.Modules
         }
 
         [LongRunning]
-        [Command("identify", RunMode = RunMode.Async)]
+        //[Command("identify", RunMode = RunMode.Async)] // Disabled until Microsoft fixes the CaptionBot API
         [Summary("identifySummary")]
         [Alias("captionbot")]
         [Remarks("NoUrlPassed")]

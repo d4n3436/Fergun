@@ -8,7 +8,7 @@ namespace Fergun.Tests
 {
     public class CaptionBotTests
     {
-        [Theory]
+        [Theory(Skip = "Disabled until Microsoft fixes the CaptionBot API")]
         [InlineData("https://cdn.discordapp.com/attachments/680588007333560404/815078027599413268/unknown.png")]
         [InlineData("https://cdn.discordapp.com/attachments/680588007333560404/815077929037856818/unknown.png")]
         [InlineData("https://cdn.discordapp.com/attachments/680588007333560404/815078216975777802/unknown.png")]
