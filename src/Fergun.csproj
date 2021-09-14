@@ -48,14 +48,14 @@
     <When Condition="$(DefineConstants.Contains('DNETLABS'))">
       <ItemGroup>
         <PackageReference Include="Discord.Net.Labs.Commands" Version="3.0.0" />
-        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.0.2" />
+        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.0.3" />
         <PackageReference Include="Fergun.Interactive.Labs" Version="1.1.0" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="Discord.Net.Commands" Version="3.0.0-dev-20210710.3" />
-        <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210710.3" />
+        <PackageReference Include="Discord.Net.Commands" Version="3.0.0-dev-20210822.1" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210822.1" />
         <PackageReference Include="Fergun.Interactive" Version="1.1.0" />
       </ItemGroup>
     </Otherwise>
@@ -65,12 +65,12 @@
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="GScraper" Version="0.5.3" />
     <PackageReference Include="GTranslate" Version="1.0.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.11.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.13.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="Victoria" Version="5.1.11" />
-    <PackageReference Include="YoutubeExplode" Version="6.0.4" />
+    <PackageReference Include="YoutubeExplode" Version="6.0.5" />
   </ItemGroup>
 
 </Project>
