@@ -1213,7 +1213,7 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Ocr: url to use: {url}"));
 
-            (string error, string text) = await OcrSimpleAsync(url);
+            (string error, string text) = await SimpleOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
                 return FergunResult.FromError(Locate(error));
@@ -1271,7 +1271,7 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Orctranslate: url to use: {url}"));
 
-            (string error, string text) = await OcrSimpleAsync(url);
+            (string error, string text) = await SimpleOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
                 return FergunResult.FromError(Locate(error));
@@ -2338,9 +2338,66 @@ namespace Fergun.Modules
             return FergunResult.FromError(Locate("AnErrorOccurred"));
         }
 
-        // TODO Use Engine 1 if the image is too small (30x30)
-        private async Task<(string, string)> OcrSimpleAsync(string url)
+        private async Task<(string, string)> SimpleOcrAsync(string url)
         {
+            string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"OCR\"]}}}}";
+            using var content = new MultipartFormDataContent
+            {
+                { new StringContent(jsonRequest), "knowledgeRequest" }
+            };
+
+            using var request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = new Uri("https://www.bing.com/images/api/custom/knowledge?skey=ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug");
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
+            request.Headers.Referrer = new Uri($"https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:{url}");
+            request.Content = content;
+
+            var sw = Stopwatch.StartNew();
+            var response = await _httpClient.SendAsync(request);
+            sw.Stop();
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+            using var document = JsonDocument.Parse(bytes);
+            
+            string imageCategory = document
+                .RootElement
+                .GetPropertyOrDefault("imageQualityHints")
+                .FirstOrDefault()
+                .GetPropertyOrDefault("category")
+                .GetStringOrDefault();
+
+            // UnknownFormat (Only JPEG, PNG o BMP allowed)
+            // ImageDimensionsExceedLimit (Max. 4000px)
+            // ImageByteSizeExceedsLimit (Max. 20MB)
+            // ImageDownloadFailed
+            // JunkImage
+            if (!string.IsNullOrEmpty(imageCategory))
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "SimpleOcr", $"Bing Visual Search returned image category \"{imageCategory}\" for url: {url}."));
+            }
+
+            var textRegions = document
+                .RootElement
+                .GetPropertyOrDefault("tags")
+                .FirstOrDefault(x => x.GetPropertyOrDefault("displayName").GetStringOrDefault() == "##TextRecognition")
+                .GetPropertyOrDefault("actions")
+                .FirstOrDefault()
+                .GetPropertyOrDefault("data")
+                .GetPropertyOrDefault("regions")
+                .EnumerateArrayOrEmpty()
+                .Select(x => string.Join('\n',
+                    x.GetPropertyOrDefault("lines")
+                    .EnumerateArrayOrEmpty()
+                    .Select(y => y.GetPropertyOrDefault("text").GetStringOrDefault())));
+
+            string joinedText = string.Join("\n\n", textRegions);
+            if (!string.IsNullOrEmpty(joinedText))
+            {
+                return (sw.ElapsedMilliseconds.ToString(), joinedText);
+            }
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "SimpleOcr", $"Bing Visual Search didn't return text for url: {url}."));
+
             if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url))?.Substring(6), true, out FileType fileType))
             {
                 return ("InvalidFileType", null);
@@ -2355,7 +2412,7 @@ namespace Fergun.Modules
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "OcrSimple", "Error in OCR", e));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "SimpleOcr", "Error in OCR", e));
                 return ("OcrApiError", null);
             }
 
