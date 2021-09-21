@@ -32,6 +32,7 @@ using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
 using GScraper;
+using GScraper.Google;
 using GTranslate;
 using GTranslate.Results;
 using GTranslate.Translators;
@@ -974,10 +975,10 @@ namespace Fergun.Modules
             bool isNsfwChannel = Context.IsNsfw();
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
 
-            IReadOnlyList<ImageResult> images;
+            IEnumerable<GoogleImageResult> images;
             try
             {
-                images = await _gscraper.GetImagesAsync(query, safeSearch: !isNsfwChannel);
+                images = await _gscraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate, language: GetLanguage());
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is GScraperException)
             {
@@ -987,13 +988,13 @@ namespace Fergun.Modules
 
             var filteredImages = images
                 .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Link)), UriKind.Absolute) &&
-                    x.Link.StartsWith("http", StringComparison.Ordinal) &&
-                    Uri.IsWellFormedUriString(x.ContextLink, UriKind.Absolute) &&
-                    x.ContextLink.StartsWith("http", StringComparison.Ordinal))
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    x.Url.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
+                    x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
                 .ToArray();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {images.Count} (filtered: {images.Count - filteredImages.Length})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {filteredImages.Length})"));
 
             if (filteredImages.Length == 0)
             {
@@ -1009,9 +1010,9 @@ namespace Fergun.Modules
                     .WithAuthor(Context.User)
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
-                    .WithUrl(filteredImages[index].ContextLink)
+                    .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
-                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Link)))
+                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
                     .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
 
                 return Task.FromResult(pageBuilder);
