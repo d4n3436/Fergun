@@ -97,7 +97,8 @@ namespace Fergun.Utils
             {
                 var button = new ButtonBuilder()
                     .WithLabel(GuildUtils.Locate("Invite", channel))
-                    .WithUrl(FergunClient.InviteLink);
+                    .WithUrl(FergunClient.InviteLink)
+                    .WithStyle(ButtonStyle.Link);
 
                 builder.WithButton(button);
             }
@@ -106,7 +107,8 @@ namespace Fergun.Utils
             {
                 var button = new ButtonBuilder()
                     .WithLabel(GuildUtils.Locate("TopGGBotPage", channel))
-                    .WithUrl(FergunClient.TopGgBotPage);
+                    .WithUrl(FergunClient.TopGgBotPage)
+                    .WithStyle(ButtonStyle.Link);
 
                 builder.WithButton(button);
                 //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.TopGgBotPage}/vote"));
@@ -116,7 +118,8 @@ namespace Fergun.Utils
             {
                 var button = new ButtonBuilder()
                     .WithLabel(GuildUtils.Locate("SupportServer", channel))
-                    .WithUrl(FergunClient.Config.SupportServer);
+                    .WithUrl(FergunClient.Config.SupportServer)
+                    .WithStyle(ButtonStyle.Link);
 
                 builder.WithButton(button);
             }
@@ -125,7 +128,8 @@ namespace Fergun.Utils
             {
                 var button = new ButtonBuilder()
                     .WithLabel(GuildUtils.Locate("Donate", channel))
-                    .WithUrl(FergunClient.Config.DonationUrl);
+                    .WithUrl(FergunClient.Config.DonationUrl)
+                    .WithStyle(ButtonStyle.Link);
 
                 builder.WithButton(button);
             }
