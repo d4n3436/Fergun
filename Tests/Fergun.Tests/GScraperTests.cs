@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 using GScraper;
 using GScraper.Brave;
@@ -18,7 +19,11 @@ namespace Fergun.Tests
         {
             // Arrange
             var googleScraper = new GoogleScraper();
-            var ddgScraper = new DuckDuckGoScraper();
+
+            var ddgClient = new HttpClient();
+            ddgClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0");
+            var ddgScraper = new DuckDuckGoScraper(ddgClient);
+
             var braveScraper = new BraveScraper();
 
             // Act
