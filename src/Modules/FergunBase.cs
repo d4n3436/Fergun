@@ -89,7 +89,7 @@ namespace Fergun.Modules
         /// <inheritdoc/>
 #if DNETLABS
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
-            MessageReference messageReference = null, MessageComponent component = null)
+            MessageReference messageReference = null, MessageComponent component = null, ISticker[] stickers = null)
         {
             component ??= new ComponentBuilder().Build(); // remove message components if null
 #else
@@ -100,7 +100,7 @@ namespace Fergun.Modules
             if (Cache.IsDisabled)
             {
 #if DNETLABS
-                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component, stickers);
 #else
                 return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
 #endif

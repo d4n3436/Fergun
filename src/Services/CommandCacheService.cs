@@ -329,13 +329,14 @@ namespace Fergun.Services
         /// </param>
         /// <param name="messageReference">The message references to be included. Used to reply to specific messages.</param>
         /// <param name="component">The message components to be included with this message. Used for interactions</param>
+        /// <param name="stickers">A collection of stickers to send.</param>
         /// <returns>A task that represents an asynchronous operation for sending or editing the message. The task contains the sent or edited message.</returns>
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null,
-            RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null)
+            RequestOptions options = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null, MessageComponent component = null, ISticker[] stickers = null)
         {
             if (Cache.IsDisabled)
             {
-                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component);
+                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component, stickers);
             }
 #else
         /// <summary>

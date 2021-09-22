@@ -54,9 +54,6 @@ namespace Fergun
         {
             LogLevel = LogSeverity.Verbose,
             UseSystemClock = false,
-#if DNETLABS
-            AlwaysAcknowledgeInteractions = false,
-#endif
             GatewayIntents =
             GatewayIntents.Guilds |
 

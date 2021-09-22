@@ -47,16 +47,16 @@
   <Choose>
     <When Condition="$(DefineConstants.Contains('DNETLABS'))">
       <ItemGroup>
-        <PackageReference Include="Discord.Net.Labs.Commands" Version="3.0.0" />
-        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.0.3" />
-        <PackageReference Include="Fergun.Interactive.Labs" Version="1.1.0" />
+        <PackageReference Include="Discord.Net.Labs.Commands" Version="3.0.1" />
+        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.1.0" />
+        <PackageReference Include="Fergun.Interactive.Labs" Version="1.2.2" />
       </ItemGroup>
     </When>
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="Discord.Net.Commands" Version="3.0.0-dev-20210822.1" />
         <PackageReference Include="Discord.Net.WebSocket" Version="3.0.0-dev-20210822.1" />
-        <PackageReference Include="Fergun.Interactive" Version="1.1.0" />
+        <PackageReference Include="Fergun.Interactive" Version="1.2.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>
