@@ -31,6 +31,7 @@ using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
 using GScraper;
+using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using GTranslate;
@@ -58,6 +59,7 @@ namespace Fergun.Modules
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
         private static readonly GoogleScraper _googleScraper = new GoogleScraper();
         private static readonly DuckDuckGoScraper _ddgScraper = new DuckDuckGoScraper();
+        private static readonly BraveScraper _braveScraper = new BraveScraper();
         private static readonly Translator _translator = new Translator();
         private static Language[] _filteredLanguages;
         private static Dictionary<string, string> _commandListCache;
@@ -1125,6 +1127,76 @@ namespace Fergun.Modules
         }
 
         [LongRunning]
+        [Command("img3", RunMode = RunMode.Async), Ratelimit(1, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
+        [Summary("img3Summary")]
+        [Alias("im3", "image3", "brave")]
+        [Example("discord")]
+        public async Task<RuntimeResult> Img3([Remainder, Summary("img3Param1")] string query)
+        {
+            query = query.Trim();
+            bool isNsfwChannel = Context.IsNsfw();
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img3: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
+
+            IEnumerable<BraveImageResult> images;
+            try
+            {
+                images = await _braveScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
+            }
+            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is GScraperException)
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images. Using Google", e));
+                return await Img(query);
+            }
+
+            var filteredImages = images
+                .Where(x =>
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    x.Url.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
+                    x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
+                .ToArray();
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Brave Search: Results count: {filteredImages.Length}"));
+
+            if (filteredImages.Length == 0)
+            {
+                return FergunResult.FromError(Locate("NoResultsFound"));
+            }
+
+            string imageSearch = Locate("ImageSearch");
+            string paginatorFooter = Locate("PaginatorFooter");
+
+            Task<PageBuilder> GeneratePageAsync(int index)
+            {
+                var pageBuilder = new PageBuilder()
+                    .WithAuthor(Context.User)
+                    .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
+                    .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
+                    .WithUrl(filteredImages[index].SourceUrl)
+                    .WithDescription(imageSearch)
+                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
+
+                return Task.FromResult(pageBuilder);
+            }
+
+            var paginator = new LazyPaginatorBuilder()
+                .AddUser(Context.User)
+                .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
+                .WithMaxPageIndex(filteredImages.Length - 1)
+                .WithPageFactory(GeneratePageAsync)
+                .WithFooter(PaginatorFooter.None)
+                .WithActionOnCancellation(ActionOnStop.DisableInput)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .WithDeletion(DeletionOptions.Valid)
+                .Build();
+
+            _ = SendPaginatorAsync(paginator, Constants.PaginatorTimeout);
+
+            return FergunResult.FromSuccess();
+        }
+
+        [LongRunning]
         [RequireBotPermission(ChannelPermission.AttachFiles, ErrorMessage = "BotRequireAttachFiles")]
         [Command("invert", RunMode = RunMode.Async), Ratelimit(2, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
         [Summary("invertSummary")]
@@ -2105,7 +2177,7 @@ namespace Fergun.Modules
                     //"&exchars=1200" + // Return max 1200 characters
                     "&exintro" + // Return only content before the first section
                     "&explaintext" + // Return extracts as plain text
-                    "&redirects" + // Automatically resolve redirects 
+                    "&redirects" + // Automatically resolve redirects
                     $"&gpssearch={Uri.EscapeDataString(query)}" + // Search string
                     "&pilicense=any" + // Get images with any license
                     "&piprop=original"; // Get original images
@@ -2359,7 +2431,7 @@ namespace Fergun.Modules
             sw.Stop();
             byte[] bytes = await response.Content.ReadAsByteArrayAsync();
             using var document = JsonDocument.Parse(bytes);
-            
+
             string imageCategory = document
                 .RootElement
                 .GetPropertyOrDefault("imageQualityHints")

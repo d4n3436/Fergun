@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2157,5 +2157,11 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	</data>
 	<data name="LanguageList" xml:space="preserve">
 		<value>Lista de Idiomas</value>
+	</data>
+	<data name="img3Summary" xml:space="preserve">
+		<value>Busca imágenes con Brave.</value>
+	</data>
+	<data name="img3Param1" xml:space="preserve">
+		<value>Las palabras clave a buscar.</value>
 	</data>
 </root>

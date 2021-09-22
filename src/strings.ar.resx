@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2167,5 +2167,11 @@
 	</data>
 	<data name="LanguageList" xml:space="preserve">
 		<value>قائمة اللغات</value>
+	</data>
+	<data name="img3Summary" xml:space="preserve">
+		<value>يبحث عن الصور مع Brave.</value>
+	</data>
+	<data name="img3Param1" xml:space="preserve">
+		<value>الكلمة (الكلمات) للبحث.</value>
 	</data>
 </root>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2158,5 +2158,11 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 	</data>
 	<data name="LanguageList" xml:space="preserve">
 		<value>Language List</value>
+	</data>
+	<data name="img3Summary" xml:space="preserve">
+		<value>Searches for images with Brave.</value>
+	</data>
+	<data name="img3Param1" xml:space="preserve">
+		<value>The keyword(s) to search.</value>
 	</data>
 </root>

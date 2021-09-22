@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2158,5 +2158,12 @@ d. Когда сообщение удалено / отредактировано
 	</data>
 	<data name="LanguageList" xml:space="preserve">
 		<value>Список языков</value>
+	</data>
+	<data name="img3Summary" xml:space="preserve">
+		<value>Ищет изображения с Brave.
+</value>
+	</data>
+	<data name="img3Param1" xml:space="preserve">
+		<value>Ключевые слова для поиска.</value>
 	</data>
 </root>
