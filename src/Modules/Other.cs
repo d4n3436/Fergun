@@ -977,7 +977,11 @@ namespace Fergun.Modules
                 options.Add(option);
             }
 
-            builder.WithSelectMenu(null, "foobar", options);
+            var selectMenu = new SelectMenuBuilder()
+                .WithCustomId("foobar")
+                .WithOptions(options);
+
+            builder.WithSelectMenu(selectMenu);
 
             return builder.Build();
         }

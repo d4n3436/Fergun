@@ -95,23 +95,39 @@ namespace Fergun.Utils
             var builder = new ComponentBuilder();
             if (FergunClient.InviteLink != null && Uri.IsWellFormedUriString(FergunClient.InviteLink, UriKind.Absolute))
             {
-                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink));
+                var button = new ButtonBuilder()
+                    .WithLabel(GuildUtils.Locate("Invite", channel))
+                    .WithUrl(FergunClient.InviteLink);
+
+                builder.WithButton(button);
             }
 
             if (FergunClient.TopGgBotPage != null && Uri.IsWellFormedUriString(FergunClient.TopGgBotPage, UriKind.Absolute))
             {
-                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("TopGGBotPage", channel), FergunClient.TopGgBotPage));
+                var button = new ButtonBuilder()
+                    .WithLabel(GuildUtils.Locate("TopGGBotPage", channel))
+                    .WithUrl(FergunClient.TopGgBotPage);
+
+                builder.WithButton(button);
                 //.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.TopGgBotPage}/vote"));
             }
 
             if (FergunClient.Config.SupportServer != null && Uri.IsWellFormedUriString(FergunClient.Config.SupportServer, UriKind.Absolute))
             {
-                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer));
+                var button = new ButtonBuilder()
+                    .WithLabel(GuildUtils.Locate("SupportServer", channel))
+                    .WithUrl(FergunClient.Config.SupportServer);
+
+                builder.WithButton(button);
             }
 
             if (FergunClient.Config.DonationUrl != null && Uri.IsWellFormedUriString(FergunClient.Config.DonationUrl, UriKind.Absolute))
             {
-                builder.WithButton(ButtonBuilder.CreateLinkButton(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl));
+                var button = new ButtonBuilder()
+                    .WithLabel(GuildUtils.Locate("Donate", channel))
+                    .WithUrl(FergunClient.Config.DonationUrl);
+
+                builder.WithButton(button);
             }
 
             return builder.Build();
