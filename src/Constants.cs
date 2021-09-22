@@ -180,11 +180,17 @@ namespace Fergun
 
         public const string SpotifyLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833381298143334/spotify.png";
 
+        public const string GoogleLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890326437268168704/unknown.png";
+
         public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";
 
         public const string BingTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/857011754667081759/BingTranslator.png";
 
         public const string YandexTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/857013120358416394/YandexTranslate.png";
+
+        public const string DuckDuckGoLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890323046286651402/unknown.png";
+
+        public const string BraveLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890323194504937522/unknown.png";
 
         public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834302049452062/badtranslator.png";
 

@@ -1016,7 +1016,7 @@ namespace Fergun.Modules
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
                     .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
-                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.GoogleLogoUrl);
 
                 return Task.FromResult(pageBuilder);
             }
@@ -1105,7 +1105,7 @@ namespace Fergun.Modules
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
                     .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
-                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.DuckDuckGoLogoUrl);
 
                 return Task.FromResult(pageBuilder);
             }
@@ -1175,7 +1175,7 @@ namespace Fergun.Modules
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
                     .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
-                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
+                    .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.BraveLogoUrl);
 
                 return Task.FromResult(pageBuilder);
             }
