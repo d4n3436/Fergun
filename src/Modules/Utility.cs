@@ -18,7 +18,6 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.Dictionary;
-using Fergun.APIs.DuckDuckGo;
 using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
 using Fergun.APIs.WaybackMachine;
@@ -32,6 +31,7 @@ using Fergun.Responses;
 using Fergun.Services;
 using Fergun.Utils;
 using GScraper;
+using GScraper.DuckDuckGo;
 using GScraper.Google;
 using GTranslate;
 using GTranslate.Results;
@@ -56,7 +56,8 @@ namespace Fergun.Modules
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
-        private static readonly GoogleScraper _gscraper = new GoogleScraper();
+        private static readonly GoogleScraper _googleScraper = new GoogleScraper();
+        private static readonly DuckDuckGoScraper _ddgScraper = new DuckDuckGoScraper();
         private static readonly Translator _translator = new Translator();
         private static Language[] _filteredLanguages;
         private static Dictionary<string, string> _commandListCache;
@@ -978,7 +979,7 @@ namespace Fergun.Modules
             IEnumerable<GoogleImageResult> images;
             try
             {
-                images = await _gscraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate, language: GetLanguage());
+                images = await _googleScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate, language: GetLanguage());
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is GScraperException)
             {
@@ -1046,19 +1047,18 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("NoResultsFound"));
             }
-            if (query.Length > DdgApi.MaxLength)
+            if (query.Length > DuckDuckGoScraper.MaxQueryLength)
             {
-                return FergunResult.FromError(string.Format(Locate("MustBeLowerThan"), nameof(query), DdgApi.MaxLength));
+                return FergunResult.FromError(string.Format(Locate("MustBeLowerThan"), nameof(query), DuckDuckGoScraper.MaxQueryLength));
             }
 
             bool isNsfwChannel = Context.IsNsfw();
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Img2: Query \"{query}\", NSFW channel: {isNsfwChannel}"));
 
-            List<Result> images;
+            IEnumerable<DuckDuckGoImageResult> images;
             try
             {
-                var search = await DdgApi.SearchImagesAsync(query, !isNsfwChannel ? SafeSearch.Strict : SafeSearch.Off);
-                images = search.Results;
+                images = await _ddgScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate);
             }
             catch (HttpRequestException e)
             {
@@ -1070,7 +1070,7 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
-            catch (TokenNotFoundException e)
+            catch (GScraperException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error searching images", e));
                 return FergunResult.FromError(Locate("NoResultsFound"));
@@ -1078,13 +1078,13 @@ namespace Fergun.Modules
 
             var filteredImages = images
                 .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Image)), UriKind.Absolute) &&
-                    x.Image.StartsWith("http", StringComparison.Ordinal) &&
-                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
-                    x.Url.StartsWith("http", StringComparison.Ordinal))
+                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    x.Url.StartsWith("http", StringComparison.Ordinal) &&
+                    Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
+                    x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
                 .ToArray();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {images.Count} (filtered: {images.Count - filteredImages.Length})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {filteredImages.Length})"));
 
             if (filteredImages.Length == 0)
             {
@@ -1100,9 +1100,9 @@ namespace Fergun.Modules
                     .WithAuthor(Context.User)
                     .WithColor(new Discord.Color(FergunClient.Config.EmbedColor))
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
-                    .WithUrl(filteredImages[index].Url)
+                    .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
-                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Image)))
+                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
                     .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length));
 
                 return Task.FromResult(pageBuilder);

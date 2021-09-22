@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using GScraper;
+using GScraper.Brave;
+using GScraper.DuckDuckGo;
+using GScraper.Google;
 using Xunit;
 
 namespace Fergun.Tests
@@ -7,20 +10,26 @@ namespace Fergun.Tests
     public class GScraperTests
     {
         [Theory]
-        [InlineData("Hello world", 100, true)]
-        [InlineData("Discord", 50, false)]
-        [InlineData("Dogs", 200, true)]
-        [InlineData("Cats", 1, true)]
-        public async Task GScraperAvailableTest(string query, int limit, bool safeSearch)
+        [InlineData("Hello world", SafeSearchLevel.Off)]
+        [InlineData("Discord", SafeSearchLevel.Moderate)]
+        [InlineData("Dogs", SafeSearchLevel.Strict)]
+        [InlineData("Cats", SafeSearchLevel.Off)]
+        public async Task GScraperAvailableTest(string query, SafeSearchLevel safeSearch)
         {
             // Arrange
-            var scraper = new GoogleScraper();
+            var googleScraper = new GoogleScraper();
+            var ddgScraper = new DuckDuckGoScraper();
+            var braveScraper = new BraveScraper();
 
             // Act
-            var results = await scraper.GetImagesAsync(query, limit, safeSearch);
+            var googleImages = await googleScraper.GetImagesAsync(query, safeSearch);
+            var ddgImages = await ddgScraper.GetImagesAsync(query, safeSearch);
+            var braveImages = await braveScraper.GetImagesAsync(query, safeSearch);
 
             // Assert
-            Assert.NotEmpty(results);
+            Assert.NotEmpty(googleImages);
+            Assert.NotEmpty(ddgImages);
+            Assert.NotEmpty(braveImages);
         }
     }
 }
