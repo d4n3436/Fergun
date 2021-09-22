@@ -979,7 +979,7 @@ namespace Fergun.Modules
             IEnumerable<GoogleImageResult> images;
             try
             {
-                images = await _googleScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate, language: GetLanguage());
+                images = await _googleScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: GetLanguage());
             }
             catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException || e is GScraperException)
             {
@@ -995,7 +995,7 @@ namespace Fergun.Modules
                     x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
                 .ToArray();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {filteredImages.Length})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Google Images: Results count: {filteredImages.Length}"));
 
             if (filteredImages.Length == 0)
             {
@@ -1058,7 +1058,7 @@ namespace Fergun.Modules
             IEnumerable<DuckDuckGoImageResult> images;
             try
             {
-                images = await _ddgScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Moderate);
+                images = await _ddgScraper.GetImagesAsync(query, isNsfwChannel ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
             }
             catch (HttpRequestException e)
             {
@@ -1084,7 +1084,7 @@ namespace Fergun.Modules
                     x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
                 .ToArray();
 
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {filteredImages.Length})"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"DuckDuckGo Images: Results count: {filteredImages.Length}"));
 
             if (filteredImages.Length == 0)
             {
