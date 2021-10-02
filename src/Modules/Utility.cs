@@ -395,7 +395,7 @@ namespace Fergun.Modules
             else
             {
                 var text = messages.Select(x =>
-                    $"{Format.Bold(x.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - (x.OriginalMessage?.CreatedAt ?? x.CreatedAt)).Minutes)})" +
+                    $"{Format.Bold(x.Author.ToString())} ({(x.OriginalMessage?.CreatedAt ?? x.CreatedAt).ToDiscordTimestamp('R')})" +
                     $"\n{(x.OriginalMessage?.Content ?? x.Content).Truncate(200)}\n\n");
 
                 builder.WithTitle("Big edit snipe")
@@ -437,7 +437,7 @@ namespace Fergun.Modules
                 string text = "";
                 foreach (var msg in messages)
                 {
-                    text += $"{Format.Bold(msg.Author.ToString())} ({string.Format(Locate("MinutesAgo"), (DateTimeOffset.UtcNow - msg.CreatedAt).Minutes)})\n";
+                    text += $"{Format.Bold(msg.Author.ToString())} ({msg.CreatedAt.ToDiscordTimestamp('R')})\n";
                     text += !string.IsNullOrEmpty(msg.Content) ? msg.Content.Truncate(200) : msg.Attachments.Count > 0 ? $"({Locate("Attachment")})" : "?";
                     text += "\n\n";
                 }
