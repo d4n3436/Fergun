@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using Fergun.Extensions;
 using Fergun.Utils;
@@ -564,7 +565,13 @@ namespace Fergun.Services
                         .WithDescription(GuildUtils.Locate("MusicPlayerShutdownWarning", player.TextChannel))
                         .WithColor(FergunClient.Config.EmbedColor);
 
-                    await player.TextChannel.SendMessageAsync(embed: embed.Build());
+                    try
+                    {
+                        await player.TextChannel.SendMessageAsync(embed: embed.Build());
+                    }
+                    catch (HttpException)
+                    {
+                    }
                 }
 
                 await Task.Delay(5000);
