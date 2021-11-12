@@ -991,7 +991,7 @@ namespace Fergun.Modules
 
             var filteredImages = images
                 .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
                     x.Url.StartsWith("http", StringComparison.Ordinal) &&
                     Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
                     x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
@@ -1015,7 +1015,7 @@ namespace Fergun.Modules
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
-                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
+                    .WithImageUrl(filteredImages[index].Url)
                     .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.GoogleLogoUrl);
 
                 return Task.FromResult(pageBuilder);
@@ -1080,7 +1080,7 @@ namespace Fergun.Modules
 
             var filteredImages = images
                 .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
                     x.Url.StartsWith("http", StringComparison.Ordinal) &&
                     Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
                     x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
@@ -1104,7 +1104,7 @@ namespace Fergun.Modules
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
-                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
+                    .WithImageUrl(filteredImages[index].Url)
                     .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.DuckDuckGoLogoUrl);
 
                 return Task.FromResult(pageBuilder);
@@ -1150,7 +1150,7 @@ namespace Fergun.Modules
 
             var filteredImages = images
                 .Where(x =>
-                    Uri.IsWellFormedUriString(Uri.EscapeUriString(Uri.UnescapeDataString(x.Url)), UriKind.Absolute) &&
+                    Uri.IsWellFormedUriString(x.Url, UriKind.Absolute) &&
                     x.Url.StartsWith("http", StringComparison.Ordinal) &&
                     Uri.IsWellFormedUriString(x.SourceUrl, UriKind.Absolute) &&
                     x.SourceUrl.StartsWith("http", StringComparison.Ordinal))
@@ -1174,7 +1174,7 @@ namespace Fergun.Modules
                     .WithTitle(filteredImages[index].Title.Truncate(EmbedBuilder.MaxTitleLength))
                     .WithUrl(filteredImages[index].SourceUrl)
                     .WithDescription(imageSearch)
-                    .WithImageUrl(Uri.EscapeUriString(Uri.UnescapeDataString(filteredImages[index].Url)))
+                    .WithImageUrl(filteredImages[index].Url)
                     .WithFooter(string.Format(paginatorFooter, index + 1, filteredImages.Length), Constants.BraveLogoUrl);
 
                 return Task.FromResult(pageBuilder);
