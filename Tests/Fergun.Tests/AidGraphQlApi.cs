@@ -9,17 +9,18 @@ namespace Fergun.Tests
     // AID GraphQL API wrapper with some extra methods and classes
     internal static class AidGraphQlApi
     {
+        private static readonly HttpClient _httpClient = new();
+
         public static async Task<string> SendApiRequestAsync<T>(T jsonRequest, string accessToken = null) where T : class
         {
             string jsonString = JsonConvert.SerializeObject(jsonRequest);
             using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.aidungeon.io/graphql");
             using var requestContent = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            using var httpClient = new HttpClient();
             if (!string.IsNullOrEmpty(accessToken))
                 request.Headers.Add("X-Access-Token", accessToken);
 
             request.Content = requestContent;
-            var response = await httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -118,7 +119,7 @@ namespace Fergun.Tests
             public AccountGameSettingsVariables Variables { get; set; }
 
             [JsonProperty("query")]
-            public string Query { get; set; } = "mutation ($input: GameSettingsInput) {\n  saveGameSettings(input: $input) {\n    id\n    gameSettings {\n      id\n      ...GameSettingsGameSettings\n      ...DisplayGameSettings\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment GameSettingsGameSettings on GameSettings {\n  temperature\n  bannedWords\n  modelType\n  showCommands\n  showModes\n  defaultMode\n  showTips\n  showFeedback\n  textLength\n  playMusic\n  musicVolume\n  playNarration\n  narrationVolume\n  voiceGender\n  voiceAccent\n  voiceId\n  commandList\n  alignCommands\n  nsfwGeneration\n  unrestrictedInput\n  actionScoreOptIn\n  showIconText\n  trainTheAi\n  enableAlpha\n  enableBeta\n  outputWeights\n  __typename\n}\n\nfragment DisplayGameSettings on GameSettings {\n  safeMode\n  textSpeed\n  textFont\n  textSize\n  displayTheme\n  displayColors\n  displayScreen\n  webActionWindowSize\n  mobileActionWindowSize\n  adventureDisplayMode\n  energyBarDisplayMode\n  energyBarAppearance\n  __typename\n}\n";
+            public string Query { get; set; } = "mutation ($input: GameSettingsInput) {\n  saveGameSettings(input: $input) {\n    id\n    gameSettings {\n      id\n      ...GameSettingsGameSettings\n      ...DisplayGameSettings\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment GameSettingsGameSettings on GameSettings {\n  temperature\n  bannedWords\n  modelType\n  memoryLength\n  showCommands\n  showModes\n  defaultMode\n  showTips\n  showFeedback\n  textLength\n  playMusic\n  musicVolume\n  playNarration\n  narrationVolume\n  voiceGender\n  voiceAccent\n  voiceId\n  commandList\n  alignCommands\n  nsfwGeneration\n  unrestrictedInput\n  showIconText\n  trainTheAi\n  enableAlpha\n  enableBeta\n  outputWeights\n  __typename\n}\n\nfragment DisplayGameSettings on GameSettings {\n  safeMode\n  textSpeed\n  textFont\n  textSize\n  displayTheme\n  displayColors\n  displayScreen\n  webActionWindowSize\n  mobileActionWindowSize\n  adventureDisplayMode\n  energyBarDisplayMode\n  energyBarAppearance\n  __typename\n}\n";
         }
 
         public class AccountGameSettingsVariables
