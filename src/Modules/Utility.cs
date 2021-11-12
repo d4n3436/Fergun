@@ -52,8 +52,6 @@ namespace Fergun.Modules
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Utility : FergunBase
     {
-        [ThreadStatic]
-        private static Random _rng;
         private static readonly Regex _bracketRegex = new Regex(@"\[(.+?)\]", RegexOptions.IgnoreCase | RegexOptions.Compiled); // \[(\[*.+?]*)\]
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = Constants.HttpClientTimeout };
         private static readonly YoutubeClient _ytClient = new YoutubeClient();
@@ -70,8 +68,6 @@ namespace Fergun.Modules
         private readonly LogService _logService;
         private readonly MessageCacheService _messageCache;
         private readonly InteractiveService _interactive;
-
-        private static Random RngInstance => _rng ??= new Random();
 
         public Utility(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
         {
@@ -281,7 +277,7 @@ namespace Fergun.Modules
                     // Get unique and random languages.
                     do
                     {
-                        targetLanguage = _filteredLanguages[RngInstance.Next(_filteredLanguages.Length)];
+                        targetLanguage = _filteredLanguages[Random.Shared.Next(_filteredLanguages.Length)];
                     } while (languageChain.Contains(targetLanguage));
                 }
 
@@ -402,7 +398,7 @@ namespace Fergun.Modules
                     .WithDescription(string.Concat(text).Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
 
-                if (RngInstance.Next(5) == 4)
+                if (Random.Shared.Next(5) == 4)
                 {
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
@@ -445,7 +441,7 @@ namespace Fergun.Modules
                     .WithDescription(text.Truncate(EmbedBuilder.MaxDescriptionLength))
                     .WithFooter($"{Locate("In")} #{channel.Name}");
 
-                if (RngInstance.Next(5) == 4)
+                if (Random.Shared.Next(5) == 4)
                 {
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
@@ -568,7 +564,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError(Locate("NoChoices"));
             }
-            await ReplyAsync($"{Locate("IChoose")} **{choices[RngInstance.Next(0, choices.Length)]}**{(choices.Length == 1 ? Locate("OneChoice") : "")}", allowedMentions: AllowedMentions.None);
+            await ReplyAsync($"{Locate("IChoose")} **{choices[Random.Shared.Next(0, choices.Length)]}**{(choices.Length == 1 ? Locate("OneChoice") : "")}", allowedMentions: AllowedMentions.None);
             return FergunResult.FromSuccess();
         }
 
@@ -580,7 +576,7 @@ namespace Fergun.Modules
             System.Drawing.Color argbColor;
             if (string.IsNullOrWhiteSpace(color))
             {
-                argbColor = System.Drawing.Color.FromArgb(RngInstance.Next(0, 256), RngInstance.Next(0, 256), RngInstance.Next(0, 256));
+                argbColor = System.Drawing.Color.FromArgb(Random.Shared.Next(0, 256), Random.Shared.Next(0, 256), Random.Shared.Next(0, 256));
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Color: Generated random color: {argbColor}"));
             }
             else
@@ -837,7 +833,7 @@ namespace Fergun.Modules
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
 
-                if (RngInstance.Next(5) == 4)
+                if (Random.Shared.Next(5) == 4)
                 {
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
@@ -1759,7 +1755,7 @@ namespace Fergun.Modules
                     .WithFooter($"{Locate("In")} #{message.Channel.Name}")
                     .WithTimestamp(message.CreatedAt);
 
-                if (RngInstance.Next(5) == 4)
+                if (Random.Shared.Next(5) == 4)
                 {
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
@@ -2293,7 +2289,7 @@ namespace Fergun.Modules
             {
                 return FergunResult.FromError("404 Not Found");
             }
-            string response = await _httpClient.GetStringAsync($"https://xkcd.com/{number ?? RngInstance.Next(1, _lastComic.Num)}/info.0.json");
+            string response = await _httpClient.GetStringAsync($"https://xkcd.com/{number ?? Random.Shared.Next(1, _lastComic.Num)}/info.0.json");
 
             var comic = JsonConvert.DeserializeObject<XkcdComic>(response);
 
@@ -2379,7 +2375,7 @@ namespace Fergun.Modules
         {
             for (int i = 0; i < 10; i++)
             {
-                string randStr = StringUtils.RandomString(RngInstance.Next(5, 7), RngInstance);
+                string randStr = StringUtils.RandomString(Random.Shared.Next(5, 7));
                 IReadOnlyList<VideoSearchResult> videos;
                 try
                 {
@@ -2398,7 +2394,7 @@ namespace Fergun.Modules
 
                 if (videos.Count != 0)
                 {
-                    string id = videos[RngInstance.Next(videos.Count)].Id;
+                    string id = videos[Random.Shared.Next(videos.Count)].Id;
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Ytrandom", $"Using id: {id} (random string: {randStr}, search count: {videos.Count})"));
 
                     await ReplyAsync($"https://www.youtube.com/watch?v={id}");

@@ -43,7 +43,7 @@ namespace Fergun.Extensions
 
         public static string ToRandomCase(this string text, Random rng = null)
         {
-            rng ??= new Random();
+            rng ??= Random.Shared;
 
             return string.Create(text.Length, (input: text, rng), (chars, state) =>
             {

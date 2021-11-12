@@ -45,7 +45,7 @@ namespace Fergun.Extensions
 
         public static void Shuffle<T>(this IList<T> list, Random rng = null)
         {
-            rng ??= new Random();
+            rng ??= Random.Shared;
 
             int n = list.Count;
             while (n > 1)

@@ -15,11 +15,6 @@ namespace Fergun.Modules
     [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod, Measure.Minutes)]
     public class Text : FergunBase
     {
-        [ThreadStatic]
-        private static Random _rngInstance;
-
-        private static Random RngInstance => _rngInstance ??= new Random();
-
         [Command("normalize")]
         [Summary("normalizeSummary")]
         [Alias("decancer")]
@@ -44,7 +39,7 @@ namespace Fergun.Modules
         [Example("hello")]
         public async Task Randomize([Remainder, Summary("randomizeParam1")] string text)
         {
-            await ReplyAsync(text.Randomize(RngInstance), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.Randomize(), allowedMentions: AllowedMentions.None);
         }
 
         [Command("repeat")]
@@ -94,7 +89,7 @@ namespace Fergun.Modules
         [Example("you can't do that!")]
         public async Task Sarcasm([Remainder, Summary("sarcasmParam1")] string text)
         {
-            await ReplyAsync(text.ToRandomCase(RngInstance), allowedMentions: AllowedMentions.None);
+            await ReplyAsync(text.ToRandomCase(), allowedMentions: AllowedMentions.None);
         }
 
         [Command("vaporwave")]

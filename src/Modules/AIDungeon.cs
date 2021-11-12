@@ -32,7 +32,6 @@ namespace Fergun.Modules
     {
         private static AidAPI _api;
         private static readonly ConcurrentDictionary<uint, SemaphoreSlim> _queue = new ConcurrentDictionary<uint, SemaphoreSlim>();
-        private static readonly Random _rng = new Random();
         private static IReadOnlyDictionary<string, string> _modes;
         private static Translator _translator;
 
@@ -1287,7 +1286,7 @@ namespace Fergun.Modules
         private string GetTip()
         {
             var tips = Locate("AIDTips").Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
-            return tips[_rng.Next(tips.Length)];
+            return tips[Random.Shared.Next(tips.Length)];
         }
 
         private bool AutoTranslate()

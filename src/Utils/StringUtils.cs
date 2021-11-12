@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -39,9 +39,10 @@ namespace Fergun.Utils
             return mediaType != null && mediaType.ToLowerInvariant().StartsWith("image/", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static string RandomString(int length, Random rng)
+        public static string RandomString(int length, Random rng = null)
         {
             const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            rng ??= Random.Shared;
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[rng.Next(s.Length)]).ToArray());
         }
