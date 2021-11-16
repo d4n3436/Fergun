@@ -132,11 +132,6 @@ namespace Fergun
             _client.Ready += ClientReady;
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
-            _client.MessagesBulkDeleted += MessagesBulkDeleted;
-            _client.UserJoined += UserJoined;
-            _client.UserLeft += UserLeft;
-            _client.UserBanned += UserBanned;
-            _client.UserUnbanned += UserUnbanned;
 
             // LogSeverity.Debug is too verbose
             if (Config.LavaConfig.LogSeverity == LogSeverity.Debug)
@@ -435,32 +430,6 @@ namespace Fergun
                     TopGgBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
                 }
             }
-        }
-
-        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> msgs, Cacheable<IMessageChannel, ulong> cachedChannel)
-        {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "MsgDeleted",
-                $"{msgs.Count} messages deleted in {(cachedChannel.HasValue ? cachedChannel.Value.Display() : cachedChannel.Id.ToString())}"));
-        }
-
-        private async Task UserJoined(SocketGuildUser user)
-        {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserJoined", $"User \"{user}\" joined the guild \"{user.Guild.Name}\""));
-        }
-
-        private async Task UserLeft(SocketGuildUser user)
-        {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserLeft", $"User \"{user}\" left the guild \"{user.Guild.Name}\""));
-        }
-
-        private async Task UserBanned(SocketUser user, SocketGuild guild)
-        {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserBan", $"User \"{user}\" was banned from guild \"{guild.Name}\""));
-        }
-
-        private async Task UserUnbanned(SocketUser user, SocketGuild guild)
-        {
-            await _logService.LogAsync(new LogMessage(LogSeverity.Debug, "UserUnban", $"User \"{user}\" was unbanned from guild \"{guild.Name}\""));
         }
 
         private async Task JoinedGuild(SocketGuild guild)
