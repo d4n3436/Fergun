@@ -65,12 +65,6 @@ namespace Fergun
         public string ApiFlashAccessKey { get; private set; }
 
         /// <summary>
-        /// Gets the OCR.Space API key.
-        /// </summary>
-        [JsonProperty]
-        public string OCRSpaceApiKey { get; private set; }
-
-        /// <summary>
         /// Gets the WolframAlpha App ID.
         /// </summary>
         [JsonProperty]

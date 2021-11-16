@@ -317,7 +317,7 @@
     <value>Image search cap reached :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>Performs OCR to an image with OCR.SPACE.</value>
+    <value>Performs OCR to an image.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>The url of an image to use.</value>

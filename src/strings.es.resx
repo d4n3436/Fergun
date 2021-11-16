@@ -317,7 +317,7 @@
     <value>Límite de búsqueda de imágenes alcanzada :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>Realiza OCR  a una imagen con OCR.SPACE.</value>
+    <value>Realiza OCR a una imagen.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>La url de una imagen a usar.</value>

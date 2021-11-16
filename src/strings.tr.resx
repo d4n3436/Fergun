@@ -316,7 +316,7 @@
     <value>Görsel arama sınırına ulaşıldı :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>OCR ile bir görüntüye OCR işlemi gerçekleştirir.</value>
+    <value>Bir görüntüye OCR uygular.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>Kullanılacak bir resmin URL'si.</value>

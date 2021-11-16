@@ -316,7 +316,7 @@
     <value>تم الوصول إلى الحد الأقصى لبحث الصور :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>ينفذ OCR على صورة مع OCR.SPACE</value>
+    <value>ينفذ OCR على الصورة.</value>
   </data>
 	<data name="ocrParam1" xml:space="preserve">
     <value>عنوان URL للصورة المراد استخدامها.</value>

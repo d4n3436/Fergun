@@ -301,7 +301,7 @@
     <value>Достигнут предел поиска изображений :(</value>
   </data>
 	<data name="ocrSummary" xml:space="preserve">
-    <value>Выполняет OCR для изображения с OCR.SPACE</value>
+    <value>Выполняет распознавание текста для изображения.</value>
   </data>
 	<data name="OcrEmpty" xml:space="preserve">
     <value>OCR не дал результатов.</value>

@@ -18,7 +18,6 @@ using Discord.Rest;
 using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.Dictionary;
-using Fergun.APIs.OCRSpace;
 using Fergun.APIs.UrbanDictionary;
 using Fergun.APIs.WaybackMachine;
 using Fergun.Attributes;
@@ -1268,11 +1267,6 @@ namespace Fergun.Modules
         [Example("https://www.fergun.com/image.png")]
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
-            if (string.IsNullOrEmpty(FergunClient.Config.OCRSpaceApiKey))
-            {
-                return FergunResult.FromError(string.Format(Locate("ValueNotSetInConfig"), nameof(FergunConfig.OCRSpaceApiKey)));
-            }
-
             UrlFindResult result;
             (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
             if (result != UrlFindResult.UrlFound)
@@ -1282,10 +1276,14 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Ocr: url to use: {url}"));
 
-            (string error, string text) = await SimpleOcrAsync(url);
+            (string error, string text) = await BingOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
-                return FergunResult.FromError(Locate(error));
+                string message = Locate(error);
+                if (!string.IsNullOrEmpty(text))
+                    message += $"\n{Locate("ErrorMessage")}: {text}";
+
+                return FergunResult.FromError(message);
             }
 
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
@@ -1340,10 +1338,14 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Orctranslate: url to use: {url}"));
 
-            (string error, string text) = await SimpleOcrAsync(url);
+            (string error, string text) = await BingOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
-                return FergunResult.FromError(Locate(error));
+                string message = Locate(error);
+                if (!string.IsNullOrEmpty(text))
+                    message += $"\n{Locate("ErrorMessage")}: {text}";
+
+                return FergunResult.FromError(message);
             }
 
             var sw = Stopwatch.StartNew();
@@ -2407,7 +2409,7 @@ namespace Fergun.Modules
             return FergunResult.FromError(Locate("AnErrorOccurred"));
         }
 
-        private async Task<(string, string)> SimpleOcrAsync(string url)
+        private async Task<(string, string)> BingOcrAsync(string url)
         {
             string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"OCR\"]}}}}";
             using var content = new MultipartFormDataContent
@@ -2467,39 +2469,7 @@ namespace Fergun.Modules
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "SimpleOcr", $"Bing Visual Search didn't return text for url: {url}."));
 
-            if (!Enum.TryParse((await StringUtils.GetUrlMediaTypeAsync(url))?.Substring(6), true, out FileType fileType))
-            {
-                return ("InvalidFileType", null);
-            }
-
-            var engine = fileType == FileType.Gif ? OcrEngine.Engine1 : OcrEngine.Engine2;
-
-            OCRSpaceResponse ocr;
-            try
-            {
-                ocr = await OCRSpaceApi.PerformOcrFromUrlAsync(FergunClient.Config.OCRSpaceApiKey, url, fileType: fileType, ocrEngine: engine);
-            }
-            catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "SimpleOcr", "Error in OCR", e));
-                return ("OcrApiError", null);
-            }
-
-            if (ocr.IsErroredOnProcessing || ocr.OcrExitCode != 1)
-            {
-                return (ocr.ParsedResults?.FirstOrDefault()?.ErrorMessage ?? ocr.ErrorMessage[0], null);
-            }
-
-            if (string.IsNullOrWhiteSpace(ocr.ParsedResults?.FirstOrDefault()?.ParsedText))
-            {
-                return ("OcrEmpty", null);
-            }
-
-            string text = ocr.ParsedResults[0].ParsedText
-                .Replace("`", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Trim();
-
-            return (ocr.ProcessingTimeInMilliseconds, text);
+            return (string.IsNullOrEmpty(imageCategory) ? "OcrEmpty" : "OcrApiError", imageCategory);
         }
 
         private static async Task UpdateLastComicAsync()
@@ -2510,7 +2480,6 @@ namespace Fergun.Modules
             try
             {
                 response = await _httpClient.GetStringAsync("https://xkcd.com/info.0.json");
-
             }
             catch (HttpRequestException) { return; }
 
