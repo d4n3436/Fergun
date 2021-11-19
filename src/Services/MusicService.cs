@@ -12,6 +12,7 @@ using Fergun.Utils;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
+using Victoria.Responses.Search;
 
 namespace Fergun.Services
 {
@@ -105,7 +106,7 @@ namespace Fergun.Services
 
         private async Task OnTrackEndedAsync(TrackEndedEventArgs args)
         {
-            if (!args.Reason.ShouldPlayNext())
+            if (!(args.Reason == TrackEndReason.Finished || args.Reason == TrackEndReason.LoadFailed))
                 return;
 
             var builder = new EmbedBuilder();
@@ -149,7 +150,7 @@ namespace Fergun.Services
         private async Task OnTrackExceptionAsync(TrackExceptionEventArgs args)
         {
             var builder = new EmbedBuilder()
-                .WithDescription($"\u26a0 {GuildUtils.Locate("PlayerError", args.Player.TextChannel)}:```{args.ErrorMessage}```")
+                .WithDescription($"\u26a0 {GuildUtils.Locate("PlayerError", args.Player.TextChannel)}:```{args.Exception.Message}```")
                 .WithColor(FergunClient.Config.EmbedColor);
             await args.Player.TextChannel.SendMessageAsync(embed: builder.Build());
             // The current track is auto-skipped
@@ -203,15 +204,11 @@ namespace Fergun.Services
             if (voiceChannel == null)
                 return (GuildUtils.Locate("PlayerError", textChannel), null);
 
-            var search = await LavaNode.SearchYouTubeAsync(query);
+            var search = await LavaNode.SearchAsync(query);
 
-            if (search.LoadStatus == LoadStatus.NoMatches || search.LoadStatus == LoadStatus.LoadFailed)
+            if (search.Status == SearchStatus.NoMatches || search.Status == SearchStatus.LoadFailed)
             {
-                search = await LavaNode.SearchAsync(query);
-                if (search.LoadStatus == LoadStatus.NoMatches || search.LoadStatus == LoadStatus.LoadFailed)
-                {
-                    return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
-                }
+                return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
             }
 
             LavaPlayer player;
@@ -244,8 +241,8 @@ namespace Fergun.Services
                         time += track.Duration;
                     }
                     // if player wasn't playing anything
-                    await player.PlayAsync(search.Tracks[0]);
-                    return (string.Format(GuildUtils.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks[0].ToTrackLink()), null);
+                    await player.PlayAsync(search.Tracks.First());
+                    return (string.Format(GuildUtils.Locate("PlayerEmptyPlaylistAdded", textChannel), trackCount, time.ToShortForm(), search.Tracks.First().ToTrackLink()), null);
                 }
             }
 
@@ -256,11 +253,11 @@ namespace Fergun.Services
                     return (GuildUtils.Locate("PlayerNoMatches", textChannel), null);
 
                 case 1:
-                    firstTrack = search.Tracks[0];
+                    firstTrack = search.Tracks.First();
                     break;
 
                 default:
-                    return (null, search.Tracks);
+                    return (null, search.Tracks.ToArray());
             }
 
             if (!LavaNode.TryGetPlayer(guild, out player))

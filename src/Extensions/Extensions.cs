@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Victoria;
+using Victoria.Responses.Search;
 
 namespace Fergun.Extensions
 {
@@ -116,6 +117,29 @@ namespace Fergun.Extensions
         public static string ToTrackLink(this LavaTrack track, bool withTime = true)
         {
             return Format.Url(track.Title, track.Url) + (withTime ? $" ({track.Duration.ToShortForm()})" : "");
+        }
+
+        public static async Task<SearchResponse> SearchAsync(this LavaNode<LavaPlayer> player, string query, SearchType searchType = SearchType.YouTube)
+        {
+            var search = await player.SearchAsync(searchType, query);
+            if (search.Tracks.Count != 0 && search.Status != SearchStatus.NoMatches && search.Status != SearchStatus.LoadFailed)
+            {
+                return search;
+            }
+
+            searchType = searchType switch
+            {
+                SearchType.YouTube => SearchType.YouTubeMusic,
+                SearchType.YouTubeMusic => SearchType.SoundCloud,
+                SearchType.SoundCloud => SearchType.Direct,
+                SearchType.Direct => SearchType.YouTube,
+                _ => SearchType.YouTube
+            };
+
+            if (searchType != SearchType.YouTube)
+                return await player.SearchAsync(query, searchType);
+
+            return default;
         }
 
         public static Embed ToHelpEmbed(this CommandInfo command, string language, string prefix)

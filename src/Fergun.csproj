@@ -21,7 +21,7 @@
     <PropertyGroup>
       <GitHashInfoFile>$(IntermediateOutputPath)GitHashInfo.cs</GitHashInfoFile>
     </PropertyGroup>
-      
+
     <ItemGroup>
       <Compile Include="$(GitHashInfoFile)" />
     </ItemGroup>
@@ -47,9 +47,9 @@
   <Choose>
     <When Condition="$(DefineConstants.Contains('DNETLABS'))">
       <ItemGroup>
-        <PackageReference Include="Discord.Net.Labs.Commands" Version="3.0.1" />
-        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.1.0" />
-        <PackageReference Include="Fergun.Interactive.Labs" Version="1.2.2" />
+        <PackageReference Include="Discord.Net.Labs.Commands" Version="3.3.0" />
+        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.3.0" />
+        <PackageReference Include="Fergun.Interactive.Labs" Version="1.2.4" />
       </ItemGroup>
     </When>
     <Otherwise>
@@ -60,16 +60,16 @@
       </ItemGroup>
     </Otherwise>
   </Choose>
-    
+
   <ItemGroup>
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="GScraper" Version="1.0.1" />
     <PackageReference Include="GTranslate" Version="1.0.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.11.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
-    <PackageReference Include="Victoria" Version="5.1.11" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="Victoria" Version="5.2.4" />
     <PackageReference Include="YoutubeExplode" Version="6.0.5" />
   </ItemGroup>
 

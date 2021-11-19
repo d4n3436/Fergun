@@ -865,6 +865,10 @@ namespace Fergun.Services
 
         /// <inheritdoc/>
         public IReadOnlyCollection<IStickerItem> Stickers => _message.Stickers;
+
+        public string CleanContent => _message.CleanContent;
+
+        public IMessageInteraction Interaction => _message.Interaction;
 #else
         /// <inheritdoc/>
         public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;

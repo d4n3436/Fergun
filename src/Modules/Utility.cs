@@ -202,9 +202,9 @@ namespace Fergun.Modules
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
 #if DNETLABS
-            if (user.AccentColor != null)
+            if (user is RestUser restUser && restUser.AccentColor != null)
             {
-                avatarColor = user.AccentColor.Value;
+                avatarColor = restUser.AccentColor.Value;
             }
 #endif
             if (avatarColor == default)
@@ -1635,6 +1635,11 @@ namespace Fergun.Modules
                 server = Context.Guild;
             }
 
+#if DNETLABS
+            string features = server.Features.Value == GuildFeature.None ? Locate("None") : string.Join(", ", server.Features.Value);
+#else
+            string features = server.Features.Count == 0 ? Locate("None") : string.Join(", ", server.Features);
+#endif
             string channelCountInfo = $"{server.TextChannels.Count + server.VoiceChannels.Count} " +
                                       $"({FergunClient.Config.TextEmote} {server.TextChannels.Count} **|** " +
                                       $"{FergunClient.Config.VoiceEmote} {server.VoiceChannels.Count})";
@@ -1656,7 +1661,7 @@ namespace Fergun.Modules
 
                 .AddField(Locate("BoostTier"), (int)server.PremiumTier, true)
                 .AddField(Locate("BoostCount"), server.PremiumSubscriptionCount, true)
-                .AddField(Locate("ServerFeatures"), server.Features.Count == 0 ? Locate("None") : string.Join(", ", server.Features), true);
+                .AddField(Locate("ServerFeatures"), features, true);
 
             if (server.HasAllMembers && FergunClient.Config.PresenceIntent)
             {
@@ -2063,9 +2068,9 @@ namespace Fergun.Modules
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
 #if DNETLABS
-            if (user.AccentColor != null)
+            if (user is RestUser restUser && restUser.AccentColor != null)
             {
-                avatarColor = user.AccentColor.Value;
+                avatarColor = restUser.AccentColor.Value;
             }
 #endif
             if (avatarColor == default)
