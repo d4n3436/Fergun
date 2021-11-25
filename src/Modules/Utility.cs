@@ -42,7 +42,6 @@ using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Exceptions;
 using YoutubeExplode.Search;
-using JsonException = Newtonsoft.Json.JsonException;
 
 namespace Fergun.Modules
 {
@@ -726,7 +725,7 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling Dictionary API", e));
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
-            catch (JsonException e)
+            catch (Newtonsoft.Json.JsonException e)
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error deserializing Dictionary API response", e));
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
@@ -1488,8 +1487,13 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
-            dynamic obj = JsonConvert.DeserializeObject(json);
-            string resultUrl = (string)obj?.output_url;
+            using var document = JsonDocument.Parse(json);
+
+            string resultUrl = document
+                .RootElement
+                .GetPropertyOrDefault("output_url")
+                .GetStringOrDefault();
+
             if (string.IsNullOrWhiteSpace(resultUrl))
             {
                 return FergunResult.FromError(Locate("AnErrorOccurred"));
