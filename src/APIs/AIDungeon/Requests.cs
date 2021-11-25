@@ -1,29 +1,39 @@
-using Newtonsoft.Json;
+#nullable enable
+using System;
 
 namespace Fergun.APIs.AIDungeon
 {
-    public class WebSocketRequest
+    public class AiDungeonRequest : IAiDungeonRequest<AiDungeonPayloadVariables>
     {
-        public WebSocketRequest(string id, RequestType requestType, string prompt = null)
+        public AiDungeonRequest(string id, RequestType requestType, string? prompt = null)
         {
-            Payload = new WebSocketPayload();
-            Payload.Query = requestType switch
+            if (string.IsNullOrEmpty(id))
             {
-                RequestType.CreateAdventure => "mutation ($scenarioId: String, $prompt: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n",
-                RequestType.GetScenario => "query ($publicId: String) {\n  scenario(publicId: $publicId) {\n    ...SelectOptionScenarioFragment\n    __typename\n  }\n}\n\nfragment SelectOptionScenarioFragment on Scenario {\n  id\n  prompt\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n",
-                RequestType.GetAdventure => "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    userId\n    userJoined\n    publicId\n    actions {\n      id\n      text\n      __typename\n    }\n    ...ContentHeadingFragment\n    __typename\n  }\n}\n\nfragment ContentHeadingFragment on Searchable {\n  id\n  title\n  description\n  tags\n  published\n  publicId\n  actionCount\n  createdAt\n  updatedAt\n  deletedAt\n  user {\n    id\n    username\n    hasPremium\n    avatar\n    isDeveloper\n    __typename\n  }\n  ...VoteButtonFragment\n  ...CommentButtonFragment\n  __typename\n}\n\nfragment VoteButtonFragment on Votable {\n  id\n  userVote\n  totalUpvotes\n  __typename\n}\n\nfragment CommentButtonFragment on Commentable {\n  id\n  publicId\n  allowComments\n  totalComments\n  __typename\n}\n",
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            Query = requestType switch
+            {
+                RequestType.CreateAdventure => "mutation ($scenarioId: String, $prompt: String, $memory: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt, memory: $memory) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n",
+                RequestType.GetScenario => "query ($publicId: String) {\n  scenario(publicId: $publicId) {\n    memory\n    ...SelectOptionScenario\n    __typename\n  }\n}\n\nfragment SelectOptionScenario on Scenario {\n  id\n  prompt\n  publicId\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n",
+                RequestType.GetAdventure => "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    publicId\n    title\n    description\n    nsfw\n    published\n    actions {\n      id\n      text\n      undoneAt\n      deletedAt\n    }\n    undoneWindow {\n      id\n      text\n      undoneAt\n      deletedAt\n    }\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}",
                 RequestType.DeleteAdventure => "mutation ($publicId: String) {\n  deleteAdventure(publicId: $publicId) {\n    id\n    publicId\n    deletedAt\n    __typename\n  }\n}\n",
-                _ => Payload.Query
+                _ => throw new ArgumentException("Unknown request type.")
             };
 
-            Payload.Variables = requestType == RequestType.CreateAdventure ?
-                new PayloadVariables { ScenarioId = id, Prompt = prompt } :
-                new PayloadVariables { PublicId = id };
+            Variables = requestType == RequestType.CreateAdventure
+                ? new AiDungeonPayloadVariables { ScenarioId = id, Prompt = prompt }
+                : new AiDungeonPayloadVariables { PublicId = id };
         }
 
-        public WebSocketRequest(string publicId, ActionType action, string text = "", long actionId = 0)
+        public AiDungeonRequest(string publicId, ActionType action, string? text = null, long actionId = 0)
         {
-            var inputData = new InputData
+            if (string.IsNullOrEmpty(publicId))
+            {
+                throw new ArgumentNullException(nameof(publicId));
+            }
+
+            var inputData = new AiDungeonInputData
             {
                 PublicId = publicId
             };
@@ -48,90 +58,92 @@ namespace Fergun.APIs.AIDungeon
             {
                 inputData.Type = action.ToString().ToLowerInvariant();
                 inputData.ChoicesMode = false;
-                query = "mutation ($input: ActionInput) {\n  addAction(input: $input) {\n    message\n    time\n    __typename\n  }\n}\n";
+                query = "mutation ($input: ActionInput) {\n  addAction(input: $input) {\n    message\n    time\n    hasBannedWord\n    returnedInput\n    __typename\n  }\n}\n";
             }
 
-            Payload = new WebSocketPayload
+            Variables = new AiDungeonPayloadVariables { Input = inputData };
+            Query = query;
+        }
+
+        public AiDungeonPayloadVariables Variables { get; set; }
+
+        public string Query { get; set; }
+    }
+
+    public class AiDungeonAnonymousAccountRequest : IAiDungeonRequest<EmptyPayloadVariables>
+    {
+        public EmptyPayloadVariables Variables { get; set; } = new EmptyPayloadVariables();
+
+        public string Query { get; set; } = "mutation {\n  createAnonymousAccount {\n    id\n    accessToken\n  }\n}\n";
+    }
+
+    public class AiDungeonAccountInfoRequest : IAiDungeonRequest<EmptyPayloadVariables>
+    {
+        public EmptyPayloadVariables Variables { get; set; } = new EmptyPayloadVariables();
+
+        public string Query { get; set; } = "{\n  user {\n    id\n    username\n    ...ContentListUser\n  }\n}\n\nfragment ContentListUser on User {\n  ...ContentCardUser\n}\n\nfragment ContentCardUser on User {\n  id\n  username\n  gameSettings {\n    id\n    nsfwGeneration\n    unrestrictedInput\n  }\n}\n";
+    }
+
+    public class AiDungeonAccountGameSettingsRequest : IAiDungeonRequest<AccountGameSettingsPayloadVariables>
+    {
+        public AiDungeonAccountGameSettingsRequest(string id, bool nsfwGeneration)
+        {
+            Variables = new AccountGameSettingsPayloadVariables
             {
-                Variables = new PayloadVariables
+                Input = new AccountGameSettingsInput
                 {
-                    Input = inputData
-                },
-                Query = query
+                    Id = id,
+                    NsfwGeneration = nsfwGeneration
+                }
             };
         }
 
-        [JsonProperty("id")]
-        public string Id { get; set; } = "2";
+        public AccountGameSettingsPayloadVariables Variables { get; set; }
 
-        [JsonProperty("type")]
-        public string Type { get; set; } = "start";
-
-        [JsonProperty("payload")]
-        public WebSocketPayload Payload { get; set; }
+        public string Query { get; set; } = "mutation ($input: GameSettingsInput) {\n  saveGameSettings(input: $input) {\n    id\n    gameSettings {\n      id\n      ...GameSettingsGameSettings\n    }\n  }\n}\n\nfragment GameSettingsGameSettings on GameSettings {\n  modelType\n  nsfwGeneration\n}\n";
     }
 
-    public class WebSocketPayload
+    public class AccountGameSettingsPayloadVariables
     {
-        [JsonProperty("variables")]
-        public PayloadVariables Variables { get; set; }
-
-        [JsonProperty("extensions")]
-        public ActionExtensions Extensions { get; set; } = new ActionExtensions();
-
-        [JsonProperty("query")]
-        public string Query { get; set; }
-
-        [JsonProperty("auth")]
-        public ActionAuth Auth { get; set; } = new ActionAuth();
+        public AccountGameSettingsInput Input { get; set; } = new AccountGameSettingsInput();
     }
 
-    public class PayloadVariables
+    public class AccountGameSettingsInput
     {
-        [JsonProperty("publicId", NullValueHandling = NullValueHandling.Ignore)]
-        public string PublicId { get; set; }
+        public string Id { get; set; } = "";
 
-        [JsonProperty("scenarioId", NullValueHandling = NullValueHandling.Ignore)]
-        public string ScenarioId { get; set; }
-
-        [JsonProperty("input", NullValueHandling = NullValueHandling.Ignore)]
-        public InputData Input { get; set; }
-
-        [JsonProperty("prompt", NullValueHandling = NullValueHandling.Ignore)]
-        public string Prompt { get; set; }
+        public bool NsfwGeneration { get; set; }
     }
 
-    public class InputData
+    public class EmptyPayloadVariables
     {
-        [JsonProperty("publicId")]
-        public string PublicId { get; set; }
+    }
 
-        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
-        public string Type { get; set; }
+    public class AiDungeonPayloadVariables
+    {
+        public string? PublicId { get; set; }
 
-        [JsonProperty("text", NullValueHandling = NullValueHandling.Ignore)]
-        public string Text { get; set; }
+        public string? ScenarioId { get; set; }
 
-        [JsonProperty("characterName", NullValueHandling = NullValueHandling.Ignore)]
-        public string CharacterName { get; set; }
+        public AiDungeonInputData? Input { get; set; }
 
-        [JsonProperty("choicesMode", NullValueHandling = NullValueHandling.Ignore)]
+        public string? Prompt { get; set; }
+    }
+
+    public class AiDungeonInputData
+    {
+        public string? PublicId { get; set; }
+
+        public string? Type { get; set; }
+
+        public string? Text { get; set; }
+
+        public string? CharacterName { get; set; }
+
         public bool? ChoicesMode { get; set; }
 
-        [JsonProperty("memory", NullValueHandling = NullValueHandling.Ignore)]
-        public string Memory { get; set; }
+        public string? Memory { get; set; }
 
-        [JsonProperty("actionId", NullValueHandling = NullValueHandling.Ignore)]
-        public string ActionId { get; set; }
-    }
-
-    public class ActionAuth
-    {
-        [JsonProperty("token")]
-        public string Token { get; set; } = "hello";
-    }
-
-    public class ActionExtensions
-    {
+        public string? ActionId { get; set; }
     }
 }
