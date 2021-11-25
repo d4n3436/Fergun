@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -38,6 +37,10 @@ using GTranslate.Results;
 using GTranslate.Translators;
 using NCalc;
 using Newtonsoft.Json;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Exceptions;
@@ -220,8 +223,9 @@ namespace Fergun.Modules
                 try
                 {
                     await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                    using var img = new Bitmap(response);
-                    avatarColor = (Discord.Color)img.GetAverageColor();
+                    using var img = SixLabors.ImageSharp.Image.Load<Rgba32>(response);
+                    var average = img.GetAverageColor().ToPixel<Rgba32>();
+                    avatarColor = new Discord.Color(average.R, average.G, average.B);
                 }
                 catch (HttpRequestException e)
                 {
@@ -596,26 +600,28 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Color: {color.Truncate(30)} -> {rawColor} -> {argbColor}"));
             }
 
-            using (var bmp = new Bitmap(500, 500))
+            using var image = new Image<Rgba32>(500, 500);
+
+            var graphicsOptions = new GraphicsOptions
             {
-                using (var g = Graphics.FromImage(bmp))
-                {
-                    g.Clear(System.Drawing.Color.FromArgb(argbColor.R, argbColor.G, argbColor.B));
-                }
+                AlphaCompositionMode = PixelAlphaCompositionMode.Src,
+                ColorBlendingMode = PixelColorBlendingMode.Normal
+            };
 
-                await using Stream stream = new MemoryStream();
-                bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                stream.Position = 0;
-                string hex = $"{argbColor.R:X2}{argbColor.G:X2}{argbColor.B:X2}";
+            image.Mutate(x => x.Fill(graphicsOptions, SixLabors.ImageSharp.Color.FromRgb(argbColor.R, argbColor.G, argbColor.B)));
+            await using var stream = new MemoryStream();
+            await image.SaveAsPngAsync(stream);
+            stream.Seek(0, SeekOrigin.Begin);
 
-                var builder = new EmbedBuilder()
-                    .WithTitle($"#{hex}")
-                    .WithImageUrl($"attachment://{hex}.png")
-                    .WithFooter($"R: {argbColor.R}, G: {argbColor.G}, B: {argbColor.B}")
-                    .WithColor(new Discord.Color(argbColor.R, argbColor.G, argbColor.B));
+            string hex = $"{argbColor.R:X2}{argbColor.G:X2}{argbColor.B:X2}";
 
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{hex}.png", embed: builder.Build());
-            }
+            var builder = new EmbedBuilder()
+                .WithTitle($"#{hex}")
+                .WithImageUrl($"attachment://{hex}.png")
+                .WithFooter($"R: {argbColor.R}, G: {argbColor.G}, B: {argbColor.B}")
+                .WithColor(new Discord.Color(argbColor.R, argbColor.G, argbColor.B));
+
+            await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, $"{hex}.png", embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -1223,31 +1229,26 @@ namespace Fergun.Modules
                 return FergunResult.FromError(Locate("RequestTimedOut"));
             }
 
-            using (var img = new Bitmap(response))
-            using (var inverted = img.InvertColor())
-            await using (Stream invertedFile = new MemoryStream())
+            var (img, format) = await SixLabors.ImageSharp.Image.LoadWithFormatAsync(response);
+            img.Mutate(x => x.Invert());
+
+            await using var stream = new MemoryStream();
+            await img.SaveAsync(stream, format);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            if (stream.Length > Constants.AttachmentSizeLimit)
             {
-                var format = inverted.RawFormat;
-                if (inverted.RawFormat.Guid == System.Drawing.Imaging.ImageFormat.MemoryBmp.Guid)
-                {
-                    format = System.Drawing.Imaging.ImageFormat.Jpeg;
-                }
-                inverted.Save(invertedFile, format);
-                if (invertedFile.Length > Constants.AttachmentSizeLimit)
-                {
-                    return FergunResult.FromError("The file is too large.");
-                }
-                invertedFile.Position = 0;
-
-                string fileName = $"invert{format.FileExtensionFromEncoder()}";
-
-                var builder = new EmbedBuilder()
-                    .WithTitle("Invert")
-                    .WithImageUrl($"attachment://{fileName}")
-                    .WithColor(FergunClient.Config.EmbedColor);
-
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, invertedFile, fileName, embed: builder.Build());
+                return FergunResult.FromError("The file is too large.");
             }
+
+            string fileName = $"invert.{format.FileExtensions.FirstOrDefault() ?? "dat"}";
+
+            var builder = new EmbedBuilder()
+                .WithTitle("Invert")
+                .WithImageUrl($"attachment://{fileName}")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, fileName, embed: builder.Build());
 
             return FergunResult.FromSuccess();
         }
@@ -2091,8 +2092,9 @@ namespace Fergun.Modules
                 try
                 {
                     await using var response = await _httpClient.GetStreamAsync(new Uri(thumbnail));
-                    using var img = new Bitmap(response);
-                    avatarColor = (Discord.Color)img.GetAverageColor();
+                    using var img = SixLabors.ImageSharp.Image.Load<Rgba32>(response);
+                    var average = img.GetAverageColor().ToPixel<Rgba32>();
+                    avatarColor = new Discord.Color(average.R, average.G, average.B);
                 }
                 catch (HttpRequestException e)
                 {

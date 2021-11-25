@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -101,17 +100,6 @@ namespace Fergun.Extensions
             }
 
             return $"{type.Name.Split('`')[0]}<{arguments}>";
-        }
-
-        public static string FileExtensionFromEncoder(this System.Drawing.Imaging.ImageFormat format)
-        {
-            return ImageCodecInfo.GetImageEncoders()
-                .FirstOrDefault(x => x.FormatID == format.Guid)
-                ?.FilenameExtension
-                ?.Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .FirstOrDefault()
-                ?.Trim('*')
-                .ToLowerInvariant() ?? ".jpg";
         }
 
         public static string ToTrackLink(this LavaTrack track, bool withTime = true)
