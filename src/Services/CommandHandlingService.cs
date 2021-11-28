@@ -225,7 +225,7 @@ namespace Fergun.Services
                         {
                             await context.User.SendMessageAsync(embed: builder.Build());
                         }
-                        catch (HttpException e) when (e.DiscordCode == 50007)
+                        catch (HttpException e) when ((int?)e.DiscordCode == 50007)
                         {
                             await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Unable to send a DM about the minimum required permissions to the user."));
                         }
@@ -390,7 +390,7 @@ namespace Fergun.Services
                     response = await userMessage.Channel.SendMessageAsync(text, embed: embed, component: component).ConfigureAwait(false);
 #else
                     response = await userMessage.Channel.SendMessageAsync(text, embed: embed).ConfigureAwait(false);
-#endif 
+#endif
                 }
                 else
                 {
