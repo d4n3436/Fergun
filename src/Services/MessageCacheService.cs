@@ -859,7 +859,6 @@ namespace Fergun.Services
         /// <inheritdoc/>
         public MessageFlags? Flags => _message.Flags;
 
-#if DNETLABS
         /// <inheritdoc/>
         public IReadOnlyCollection<IMessageComponent> Components => _message.Components;
 
@@ -869,10 +868,6 @@ namespace Fergun.Services
         public string CleanContent => _message.CleanContent;
 
         public IMessageInteraction Interaction => _message.Interaction;
-#else
-        /// <inheritdoc/>
-        public IReadOnlyCollection<ISticker> Stickers => _message.Stickers;
-#endif
 
         /// <inheritdoc/>
         public Task DeleteAsync(RequestOptions options = null) => _message.DeleteAsync(options);

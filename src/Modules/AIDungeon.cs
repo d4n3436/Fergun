@@ -155,16 +155,6 @@ namespace Fergun.Modules
                 .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput);
 
-#if !DNETLABS
-            for (int i = 0; i < _modes.Count; i++)
-            {
-                builder.Description += $"\n**{i + 1}.** {_modes.ElementAt(i).Key.ToTitleCase()}";
-            }
-
-            selectionBuilder.InputType = InputType.Reactions;
-            selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
-#endif
-
             var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
             if (!result.IsSuccess)
@@ -271,17 +261,6 @@ namespace Fergun.Modules
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
                 .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
                 .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput);
-
-#if !DNETLABS
-            for (int i = 0; i < characters.Count; i++)
-            {
-                builder.Description += $"\n**{i + 1}.** {characters.ElementAt(i).Key.ToTitleCase()}";
-            }
-
-            selectionBuilder.InputType = InputType.Reactions;
-            selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
-            selectionBuilder.ActionOnSuccess = ActionOnStop.DeleteInput;
-#endif
 
             message = await message.Channel.GetMessageAsync(_messageCache, message.Id) as IUserMessage;
             var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1), message);

@@ -89,7 +89,6 @@ namespace Fergun.Utils
             return Regex.Replace(lyrics, @"\n{3,}", "\n\n").Trim();
         }
 
-#if DNETLABS
          public static MessageComponent BuildLinks(IMessageChannel channel)
         {
             var builder = new ComponentBuilder();
@@ -136,29 +135,8 @@ namespace Fergun.Utils
 
             return builder.Build();
         }
-#else
-        public static string BuildLinks(IMessageChannel channel)
-        {
-            string links = $"{Format.Url(GuildUtils.Locate("Invite", channel), FergunClient.InviteLink)}";
-            if (FergunClient.TopGgBotPage != null)
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("TopGGBotPage", channel), FergunClient.TopGgBotPage)}";
-                links += $" | {Format.Url(GuildUtils.Locate("VoteLink", channel), $"{FergunClient.TopGgBotPage}/vote")}";
-            }
-            if (!string.IsNullOrEmpty(FergunClient.Config.SupportServer))
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("SupportServer", channel), FergunClient.Config.SupportServer)}";
-            }
-            if (!string.IsNullOrEmpty(FergunClient.Config.DonationUrl))
-            {
-                links += $" | {Format.Url(GuildUtils.Locate("Donate", channel), FergunClient.Config.DonationUrl)}";
-            }
 
-            return links;
-        }
-#endif
-
-        public static Dictionary<IEmote, PaginatorAction> GetFergunPaginatorEmotes(FergunConfig config)
+         public static Dictionary<IEmote, PaginatorAction> GetFergunPaginatorEmotes(FergunConfig config)
         {
             if (_fergunPaginatorEmotes != null)
             {

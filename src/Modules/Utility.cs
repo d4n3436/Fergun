@@ -203,12 +203,11 @@ namespace Fergun.Modules
             Discord.Color avatarColor = default;
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
-#if DNETLABS
             if (user is RestUser restUser && restUser.AccentColor != null)
             {
                 avatarColor = restUser.AccentColor.Value;
             }
-#endif
+
             if (avatarColor == default)
             {
                 if (!(user is RestUser))
@@ -870,26 +869,16 @@ namespace Fergun.Modules
                     builder.AddField(name, module.Value);
                 }
 
-#if DNETLABS
                 MessageComponent component = null;
-#endif
 
                 if (!FergunClient.IsDebugMode)
                 {
-#if DNETLABS
                     component = CommandUtils.BuildLinks(Context.Channel);
-#else
-                    builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
-#endif
                 }
                 builder.WithFooter(string.Format(Locate("HelpFooter"), $"v{Constants.Version}", _cachedVisibleCmdCount))
                     .WithColor(FergunClient.Config.EmbedColor);
 
-#if DNETLABS
                 await ReplyAsync(embed: builder.Build(), component: component);
-#else
-                await ReplyAsync(embed: builder.Build());
-#endif
             }
             else
             {
@@ -1640,11 +1629,8 @@ namespace Fergun.Modules
                 server = Context.Guild;
             }
 
-#if DNETLABS
             string features = server.Features.Value == GuildFeature.None ? Locate("None") : string.Join(", ", server.Features.Value);
-#else
-            string features = server.Features.Count == 0 ? Locate("None") : string.Join(", ", server.Features);
-#endif
+
             string channelCountInfo = $"{server.TextChannels.Count + server.VoiceChannels.Count} " +
                                       $"({FergunClient.Config.TextEmote} {server.TextChannels.Count} **|** " +
                                       $"{FergunClient.Config.VoiceEmote} {server.VoiceChannels.Count})";
@@ -2072,12 +2058,11 @@ namespace Fergun.Modules
             Discord.Color avatarColor = default;
             string avatarUrl = user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
-#if DNETLABS
             if (user is RestUser restUser && restUser.AccentColor != null)
             {
                 avatarColor = restUser.AccentColor.Value;
             }
-#endif
+
             if (avatarColor == default)
             {
                 if (!(user is RestUser))

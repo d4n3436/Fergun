@@ -374,9 +374,7 @@ namespace Fergun.Services
             var messageCache = _services.GetService<MessageCacheService>();
             if (responseMessage == null)
             {
-#if DNETLABS
                 var component = new ComponentBuilder().Build(); // remove message components
-#endif
                 var cache = _services.GetService<CommandCacheService>();
 
                 ulong messageId = 0;
@@ -386,11 +384,7 @@ namespace Fergun.Services
 
                 if (response == null)
                 {
-#if DNETLABS
                     response = await userMessage.Channel.SendMessageAsync(text, embed: embed, component: component).ConfigureAwait(false);
-#else
-                    response = await userMessage.Channel.SendMessageAsync(text, embed: embed).ConfigureAwait(false);
-#endif
                 }
                 else
                 {
@@ -404,9 +398,7 @@ namespace Fergun.Services
                     {
                         x.Content = text;
                         x.Embed = embed;
-#if DNETLABS
                         x.Components = component;
-#endif
                     });
                 }
 

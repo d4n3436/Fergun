@@ -238,11 +238,6 @@ namespace Fergun.Modules
                         .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput)
                         .AddUser(Context.User);
 
-#if !DNETLABS
-                    selectionBuilder.EmoteConverter = x => new Emoji($"{x + 1}\ufe0f\u20e3");
-                    selectionBuilder.ActionOnSuccess = ActionOnStop.DeleteInput;
-#endif
-
                     var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
                     if (!result.IsSuccess)

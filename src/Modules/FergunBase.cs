@@ -62,7 +62,7 @@ namespace Fergun.Modules
         public async Task<InteractiveMessageResult<TOption>> SendSelectionAsync<TOption>(BaseSelection<TOption> selection,
             TimeSpan? timeout = null, IUserMessage message = null, CancellationToken cancellationToken = default)
         {
-            ulong messageId = message != null ? message.Id : Cache.TryGetValue(Context.Message.Id, out ulong temp) ? temp : 0;
+            ulong messageId = message?.Id ?? (Cache.TryGetValue(Context.Message.Id, out ulong temp) ? temp : 0);
             if (messageId != 0)
             {
                 if (Interactive.TryRemoveCallback(messageId, out var callback))
@@ -77,33 +77,24 @@ namespace Fergun.Modules
 
             return await Interactive.SendSelectionAsync(selection, Context.Channel, timeout, message, AddMessageToCache, cancellationToken).ConfigureAwait(false);
 
-            void AddMessageToCache(IUserMessage message)
+            void AddMessageToCache(IUserMessage msg)
             {
                 if (!Cache.IsDisabled)
                 {
-                    Cache.Add(Context.Message, message);
+                    Cache.Add(Context.Message, msg);
                 }
             }
         }
 
         /// <inheritdoc/>
-#if DNETLABS
         protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
             MessageReference messageReference = null, MessageComponent component = null, ISticker[] stickers = null, Embed[] embeds = null)
         {
             component ??= new ComponentBuilder().Build(); // remove message components if null
-#else
-        protected override async Task<IUserMessage> ReplyAsync(string message = null, bool isTTS = false, Embed embed = null, RequestOptions options = null, AllowedMentions allowedMentions = null,
-            MessageReference messageReference = null)
-        {
-#endif
+
             if (Cache.IsDisabled)
             {
-#if DNETLABS
                 return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference, component, stickers, embeds);
-#else
-                return await base.ReplyAsync(message, isTTS, embed, options, allowedMentions, messageReference);
-#endif
             }
 
             IUserMessage response;
@@ -120,20 +111,14 @@ namespace Fergun.Modules
                     x.Content = message;
                     x.Embed = embed;
                     x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
-#if DNETLABS
                     x.Components = component;
-#endif
                 }).ConfigureAwait(false);
 
                 response = (IUserMessage)await Context.Channel.GetMessageAsync(MessageCache, messageId).ConfigureAwait(false);
             }
             else
             {
-#if DNETLABS
                 response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
-#else
-                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference).ConfigureAwait(false);
-#endif
                 Cache.Add(Context.Message, response);
             }
             return response;

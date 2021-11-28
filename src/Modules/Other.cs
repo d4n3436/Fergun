@@ -317,20 +317,6 @@ namespace Fergun.Modules
                 .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
                 .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder));
 
-#if !DNETLABS
-            string[] codes = FergunClient.Languages.Keys.Where(x => x != GetLanguage()).ToArray();
-            string languages = "";
-            for (int i = 0; i < codes.Length; i++)
-            {
-                var culture = FergunClient.Languages[codes[i]];
-                languages += $"{i + 1}. {Format.Bold(culture.EnglishName)} ({culture.NativeName})\n";
-            }
-
-            builder.WithDescription($"{Locate("LanguagePrompt")}\n\n{languages}");
-            selectionBuilder.WithOptions(FergunClient.Languages.Where(x => x.Key != GetLanguage()).ToDictionary(x => x.Key, x => x.Value));
-            selectionBuilder.EmoteConverter = x => new Emoji($"{Array.IndexOf(codes, x.Key) + 1}\ufe0f\u20e3");
-#endif
-
             var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1));
 
             if (!result.IsSuccess)
@@ -645,25 +631,15 @@ namespace Fergun.Modules
                 .AddField("\u200b", "\u200b", true)
                 .AddField(Locate("BotOwner"), owner, true);
 
-#if DNETLABS
-                MessageComponent component = null;
-#endif
+            MessageComponent component = null;
 
             if (!FergunClient.IsDebugMode)
             {
-#if DNETLABS
                 component = CommandUtils.BuildLinks(Context.Channel);
-#else
-                builder.AddField("Links", CommandUtils.BuildLinks(Context.Channel));
-#endif
             }
             builder.WithColor(FergunClient.Config.EmbedColor);
 
-#if DNETLABS
-                await ReplyAsync(embed: builder.Build(), component: component);
-#else
-            await ReplyAsync(embed: builder.Build());
-#endif
+            await ReplyAsync(embed: builder.Build(), component: component);
         }
 
         [Command("support")]
@@ -905,9 +881,7 @@ namespace Fergun.Modules
     {
         public new IReadOnlyDictionary<string, CultureInfo> Options { get; set; } = new Dictionary<string, CultureInfo>();
 
-#if DNETLABS
         public override InputType InputType { get; set; } = InputType.SelectMenus;
-#endif
 
         public override Func<KeyValuePair<string, CultureInfo>, string> StringConverter { get; set; } = x => x.Key;
 
@@ -958,7 +932,6 @@ namespace Fergun.Modules
 
         public string GuildLanguage { get; set; }
 
-#if DNETLABS
         public override MessageComponent BuildComponents(bool disableAll)
         {
             var builder = new ComponentBuilder();
@@ -985,6 +958,5 @@ namespace Fergun.Modules
 
             return builder.Build();
         }
-#endif
     }
 }
