@@ -152,6 +152,12 @@ namespace Fergun
         public int? TotalShards { get; private set; }
 
         /// <summary>
+        /// Gets the minimum log level.
+        /// </summary>
+        [JsonProperty]
+        public LogSeverity LogLevel { get; private set; } = LogSeverity.Verbose;
+
+        /// <summary>
         /// Gets the MongoDB server authentication info.
         /// </summary>
         [JsonProperty]

@@ -15,6 +15,7 @@ namespace Fergun.Services
         private readonly string _logDirectoryPath;
         private static TextWriter _writer;
         private readonly object _writerLock = new object();
+        private readonly LogSeverity _logSeverity;
         private int _currentDay;
         private bool _disposed;
 
@@ -33,14 +34,18 @@ namespace Fergun.Services
             CompressYesterdayLogs();
         }
 
-        public LogService(DiscordShardedClient client, CommandService cmdService) : this()
+        public LogService(DiscordShardedClient client, CommandService cmdService, LogSeverity logSeverity) : this()
         {
             client.Log += LogAsync;
             cmdService.Log += LogAsync;
+            _logSeverity = logSeverity;
         }
 
         public async Task LogAsync(LogMessage message)
         {
+            if (_logSeverity < message.Severity)
+                return;
+
             string logText = GetText(message);
 
             lock (_writerLock)

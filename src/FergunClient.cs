@@ -137,12 +137,6 @@ namespace Fergun
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
 
-            // LogSeverity.Debug is too verbose
-            if (Config.LavaConfig.LogSeverity == LogSeverity.Debug)
-            {
-                Config.LavaConfig.LogSeverity = LogSeverity.Verbose;
-            }
-
             if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
             {
                 bool hasLavalink = File.Exists(Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar"));
@@ -372,7 +366,7 @@ namespace Fergun
                 .AddSingleton(Config.LavaConfig)
                 .AddSingleton(_client)
                 .AddSingleton<CommandService>()
-                .AddSingleton<LogService>()
+                .AddSingleton(s => new LogService(_client, s.GetRequiredService<CommandService>(), Config.LogLevel))
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>()
