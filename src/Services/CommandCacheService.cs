@@ -311,7 +311,11 @@ namespace Fergun.Services
                         }
                     }
                 }
-                _ = _cmdHandler(after);
+
+                if ((DateTimeOffset.UtcNow - after.CreatedAt).TotalHours <= _maxMessageTime)
+                {
+                    _ = _cmdHandler(after);
+                }
             });
 
             return Task.CompletedTask;
