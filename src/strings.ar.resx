@@ -1264,8 +1264,7 @@
     <value>خاطئة</value>
   </data>
 	<data name="ConfigList" xml:space="preserve">
-    <value>ترجمة السيارات Captionbot (`identify`) النتائج
-السيارات ترجمة AI الأبراج المدخلات والمخرجات
+    <value>السيارات ترجمة AI الأبراج المدخلات والمخرجات
 تتبع اختيار `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">

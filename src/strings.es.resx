@@ -1256,8 +1256,7 @@ Usa `{0}help {1}` para obtener mas información del comando.</value>
     <value>Falso</value>
   </data>
 	<data name="ConfigList" xml:space="preserve">
-    <value>Auto traducir resultados de Captionbot (`identify`)
-Auto traducir resultados de entrada y salida de AI Dungeon
+    <value>Auto traducir resultados de entrada y salida de AI Dungeon
 Selección de pista para `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">

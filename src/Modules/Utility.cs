@@ -635,7 +635,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Config()
         {
             string language = GetLanguage();
-            string[] configList = Locate("ConfigList", language).Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
+            string[] configList = Locate("ConfigList", language).Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             string menuOptions = "";
             for (int i = 0; i < configList.Length; i++)
             {
@@ -645,7 +645,7 @@ namespace Fergun.Modules
             var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
             var guildConfig = GetGuildConfig() ?? new GuildConfig(Context.Guild.Id);
-            var options = Enumerable.Range(1, 3).ToDictionary(x => new Emoji($"{x}\ufe0f\u20e3") as IEmote, y => y);
+            var options = Enumerable.Range(1, 2).ToDictionary(x => new Emoji($"{x}\ufe0f\u20e3") as IEmote, y => y);
             options.Add(new Emoji("❌"), -1);
 
             InteractiveMessageResult<KeyValuePair<IEmote, int>> result = null;
@@ -672,14 +672,10 @@ namespace Fergun.Modules
                 switch (result.Value.Value)
                 {
                     case 1:
-                        guildConfig.CaptionbotAutoTranslate = !guildConfig.CaptionbotAutoTranslate;
-                        break;
-
-                    case 2:
                         guildConfig.AidAutoTranslate = !guildConfig.AidAutoTranslate;
                         break;
 
-                    case 3:
+                    case 2:
                         guildConfig.TrackSelection = !guildConfig.TrackSelection;
                         break;
                 }
@@ -692,7 +688,6 @@ namespace Fergun.Modules
             PageBuilder CreateMenuPage()
             {
                 string valueList =
-                    $"{Locate(guildConfig.CaptionbotAutoTranslate ? "Yes" : "No", language)}\n" +
                     $"{Locate(guildConfig.AidAutoTranslate ? "Yes" : "No", language)}\n" +
                     $"{Locate(guildConfig.TrackSelection ? "Yes" : "No", language)}";
 
@@ -894,65 +889,6 @@ namespace Fergun.Modules
                 var embed = command.ToHelpEmbed(GetLanguage(), GetPrefix());
                 await ReplyAsync(embed: embed);
             }
-            return FergunResult.FromSuccess();
-        }
-
-        [LongRunning]
-        //[Command("identify", RunMode = RunMode.Async)] // Disabled until Microsoft fixes the CaptionBot API
-        [Summary("identifySummary")]
-        [Alias("captionbot")]
-        [Remarks("NoUrlPassed")]
-        [Example("https://www.fergun.com/image.png")]
-        public async Task<RuntimeResult> Identify([Summary("identifyParam1")] string url = null)
-        {
-            UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
-            if (result != UrlFindResult.UrlFound)
-            {
-                return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
-            }
-
-            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Identify: url to use: {url}"));
-
-            var data = new Dictionary<string, string>
-            {
-                { "Content", url },
-                { "Type", "CaptionRequest" }
-            };
-
-            string text;
-            try
-            {
-                using var content = new FormUrlEncodedContent(data);
-                var response = await _httpClient.PostAsync(new Uri("https://captionbot2.azurewebsites.net/api/messages?language=en-US"), content);
-                response.EnsureSuccessStatusCode();
-                text = await response.Content.ReadAsStringAsync();
-            }
-            catch (HttpRequestException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling CaptionBot API", e));
-                return FergunResult.FromError(e.Message);
-            }
-            catch (TaskCanceledException e)
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error calling CaptionBot API", e));
-                return FergunResult.FromError(Locate("RequestTimedOut"));
-            }
-
-            text = text.Trim('\"');
-
-            bool autoTranslate = GetGuildConfig()?.CaptionbotAutoTranslate ?? Constants.CaptionbotAutoTranslateDefault;
-            if (autoTranslate && GetLanguage() != "en")
-            {
-                try
-                {
-                    var translation = await _translator.TranslateAsync(text, GetLanguage(), "en");
-                    text = translation.Result;
-                }
-                catch { }
-            }
-
-            await ReplyAsync(text);
             return FergunResult.FromSuccess();
         }
 

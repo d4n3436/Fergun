@@ -1260,8 +1260,7 @@
     <value>Ложь</value>
   </data>
 	<data name="ConfigList" xml:space="preserve">
-    <value>Авто перевод Captionbot (`определить`) результаты
-Автоматический перевод ввода и вывода AI Dungeon
+    <value>Автоматический перевод ввода и вывода AI Dungeon
 Выбор трека для `play`</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">

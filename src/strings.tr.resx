@@ -1223,8 +1223,7 @@ Bot'un mesajları arayabileceği gün sınırı 14'tür.</value>
     <value>Yanlış</value>
   </data>
 	<data name="ConfigList" xml:space="preserve">
-    <value>Captionbot (`tanımla ') sonuçlarını otomatik çevir
-AI Dungeon giriş ve çıkışını otomatik çevir
+    <value>AI Dungeon giriş ve çıkışını otomatik çevir
 "Oynat" için parça seçimi</value>
   </data>
 	<data name="ConfigPrompt" xml:space="preserve">

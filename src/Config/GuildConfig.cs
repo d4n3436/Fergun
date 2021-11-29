@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -28,12 +28,11 @@ namespace Fergun
         /// <param name="prefix">The prefix of the server.</param>
         /// <param name="language">The language of the server.</param>
         /// <param name="disabledCommands">A list of disabled commands for the server.</param>
-        /// <param name="captionbotAutoTranslate">Whether the CaptionBot result should be translated to the server's language.</param>
         /// <param name="aidAutoTranslate">Whether the response of the AI Dungeon API should be translated to the server's language.</param>
         /// <param name="trackSelection">Whether the track selection message should be sent instead of playing the first result automatically in the server.</param>
         public GuildConfig(ulong id, bool isBlacklisted = false, string blacklistReason = null,
             string prefix = null, string language = null, ICollection<string> disabledCommands = null,
-            bool captionbotAutoTranslate = false, bool aidAutoTranslate = false, bool trackSelection = false)
+            bool aidAutoTranslate = false, bool trackSelection = false)
             : this(id)
         {
             IsBlacklisted = isBlacklisted;
@@ -41,7 +40,6 @@ namespace Fergun
             Prefix = prefix;
             Language = language;
             DisabledCommands = disabledCommands;
-            CaptionbotAutoTranslate = captionbotAutoTranslate;
             AidAutoTranslate = aidAutoTranslate;
             TrackSelection = trackSelection;
         }
@@ -79,11 +77,6 @@ namespace Fergun
             get => _disabledCommands ??= new List<string>();
             set => _disabledCommands = value;
         }
-
-        /// <summary>
-        /// Gets or sets whether the CaptionBot result should be translated to this server's language.
-        /// </summary>
-        public bool CaptionbotAutoTranslate { get; set; } = Constants.CaptionbotAutoTranslateDefault;
 
         /// <summary>
         /// Gets or sets whether the response of the AI Dungeon API should be translated to this server's language.

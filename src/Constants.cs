@@ -169,8 +169,6 @@ namespace Fergun
         public const int MaxTracksToDisplay = 10;
 
         // Command config defaults
-        public const bool CaptionbotAutoTranslateDefault = true;
-
         public const bool AidAutoTranslateDefault = false;
 
         public const bool TrackSelectionDefault = false;
