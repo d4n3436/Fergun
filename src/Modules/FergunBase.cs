@@ -51,7 +51,7 @@ namespace Fergun.Modules
 
             void AddMessageToCache(IUserMessage message)
             {
-                if (!Cache.IsDisabled && paginator.MaxPageIndex > 0)
+                if (!Cache.IsDisabled)
                 {
                     Cache.Add(Context.Message, message);
                 }
