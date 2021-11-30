@@ -158,9 +158,9 @@ namespace Fergun.Services
         /// <returns>Whether the channel has been removed from at least one cache.</returns>
         public bool TryClear(ulong channelId)
             => _cache.TryRemove(channelId, out _)
-               || _orderedCache.TryRemove(channelId, out _)
-               || _editedCache.TryRemove(channelId, out _)
-               || _deletedCache.TryRemove(channelId, out _);
+               | _orderedCache.TryRemove(channelId, out _)
+               | _editedCache.TryRemove(channelId, out _)
+               | _deletedCache.TryRemove(channelId, out _);
 
         /// <summary>
         /// Attempts to get a cached message from the provided channel and message id.
