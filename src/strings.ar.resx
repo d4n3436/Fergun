@@ -2173,4 +2173,19 @@
 	<data name="img3Param1" xml:space="preserve">
 		<value>الكلمة (الكلمات) للبحث.</value>
 	</data>
+	<data name="Thread" xml:space="preserve">
+		<value>خيط</value>
+	</data>
+	<data name="AutoArchive" xml:space="preserve">
+		<value>الأرشفة التلقائية</value>
+	</data>
+	<data name="StageChannel" xml:space="preserve">
+		<value>قناة المرحلة</value>
+	</data>
+	<data name="IsLive" xml:space="preserve">
+		<value>قناة المرحلة</value>
+	</data>
+	<data name="Archived" xml:space="preserve">
+		<value>مؤرشف</value>
+	</data>
 </root>

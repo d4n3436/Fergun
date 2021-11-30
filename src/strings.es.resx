@@ -2163,4 +2163,19 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	<data name="img3Param1" xml:space="preserve">
 		<value>Las palabras clave a buscar.</value>
 	</data>
+	<data name="Thread" xml:space="preserve">
+		<value>Hilo</value>
+	</data>
+	<data name="AutoArchive" xml:space="preserve">
+		<value>Auto Archivado</value>
+	</data>
+	<data name="StageChannel" xml:space="preserve">
+		<value>Canal de escenario</value>
+	</data>
+	<data name="IsLive" xml:space="preserve">
+		<value>Iniciado</value>
+	</data>
+	<data name="Archived" xml:space="preserve">
+		<value>Archivado</value>
+	</data>
 </root>

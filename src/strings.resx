@@ -2164,4 +2164,19 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 	<data name="img3Param1" xml:space="preserve">
 		<value>The keyword(s) to search.</value>
 	</data>
+	<data name="Thread" xml:space="preserve">
+		<value>Thread</value>
+	</data>
+	<data name="AutoArchive" xml:space="preserve">
+		<value>Auto Archive</value>
+	</data>
+	<data name="StageChannel" xml:space="preserve">
+		<value>Stage Channel</value>
+	</data>
+	<data name="IsLive" xml:space="preserve">
+		<value>Is Live</value>
+	</data>
+	<data name="Archived" xml:space="preserve">
+		<value>Archived</value>
+	</data>
 </root>

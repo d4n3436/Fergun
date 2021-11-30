@@ -2165,4 +2165,19 @@ d. Когда сообщение удалено / отредактировано
 	<data name="img3Param1" xml:space="preserve">
 		<value>Ключевые слова для поиска.</value>
 	</data>
+	<data name="Thread" xml:space="preserve">
+		<value>Нить</value>
+	</data>
+	<data name="AutoArchive" xml:space="preserve">
+		<value>Автоархив</value>
+	</data>
+	<data name="StageChannel" xml:space="preserve">
+		<value>Сценический канал</value>
+	</data>
+	<data name="IsLive" xml:space="preserve">
+		<value>Сценический канал</value>
+	</data>
+	<data name="Archived" xml:space="preserve">
+		<value>Архивировано</value>
+	</data>
 </root>

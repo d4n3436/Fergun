@@ -2164,4 +2164,19 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	<data name="img3Param1" xml:space="preserve">
 		<value>Aranacak anahtar kelime(ler).</value>
 	</data>
+	<data name="Thread" xml:space="preserve">
+		<value>Konu</value>
+	</data>
+	<data name="AutoArchive" xml:space="preserve">
+		<value>Oto Arşiv</value>
+	</data>
+	<data name="StageChannel" xml:space="preserve">
+		<value>Sahne Kanalı</value>
+	</data>
+	<data name="IsLive" xml:space="preserve">
+		<value>Sahne Kanalı</value>
+	</data>
+	<data name="Archived" xml:space="preserve">
+		<value>Arşivlendi</value>
+	</data>
 </root>

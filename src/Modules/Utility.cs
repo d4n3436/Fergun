@@ -515,11 +515,27 @@ namespace Fergun.Modules
 
             switch (channel)
             {
+                case IThreadChannel threadChannel:
+                    builder.AddField(Locate("Type"), $"{Locate("Thread")} ({threadChannel.Type})", true)
+                        .AddField(Locate("Archived"), Locate(threadChannel.IsArchived), true)
+                        .AddField(Locate("IsNSFW"), Locate(threadChannel.IsNsfw), true)
+                        .AddField(Locate("SlowMode"), TimeSpan.FromSeconds(threadChannel.SlowModeInterval).ToShortForm2(), true)
+                        .AddField(Locate("AutoArchive"), TimeSpan.FromMinutes((int)threadChannel.AutoArchiveDuration).ToShortForm2(), true);
+                    break;
+
+                case IStageChannel stageChannel:
+                    builder.AddField(Locate("Type"), Locate("StageChannel"), true)
+                        .AddField(Locate("Topic"), string.IsNullOrEmpty(stageChannel.Topic) ? Locate("None") : stageChannel.Topic, true)
+                        .AddField(Locate("IsLive"), Locate(stageChannel.IsLive), true)
+                        .AddField(Locate("Bitrate"), $"{stageChannel.Bitrate / 1000}kbps", true)
+                        .AddField(Locate("UserLimit"), stageChannel.UserLimit?.ToString() ?? Locate("NoLimit"), true);
+                    break;
+
                 case ITextChannel textChannel:
-                    builder.AddField(Locate("Type"), Locate(channel is SocketNewsChannel ? "AnnouncementChannel" : "TextChannel"), true)
+                    builder.AddField(Locate("Type"), Locate(channel is INewsChannel ? "AnnouncementChannel" : "TextChannel"), true)
                         .AddField(Locate("Topic"), string.IsNullOrEmpty(textChannel.Topic) ? Locate("None") : textChannel.Topic, true)
                         .AddField(Locate("IsNSFW"), Locate(textChannel.IsNsfw), true)
-                        .AddField(Locate("SlowMode"), TimeSpan.FromSeconds(channel is SocketNewsChannel ? 0 : textChannel.SlowModeInterval).ToShortForm2(), true)
+                        .AddField(Locate("SlowMode"), TimeSpan.FromSeconds(channel is INewsChannel ? 0 : textChannel.SlowModeInterval).ToShortForm2(), true)
                         .AddField(Locate("Category"), textChannel.CategoryId.HasValue ? Context.Guild.GetCategoryChannel(textChannel.CategoryId.Value).Name : Locate("None"), true);
                     break;
 
