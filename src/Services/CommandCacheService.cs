@@ -290,16 +290,6 @@ namespace Fergun.Services
                     else
                     {
                         await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message ({cacheable.Id}) in cache."));
-                        if (response.Reactions.Count > 0)
-                        {
-                            bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
-
-                            if (manageMessages)
-                            {
-                                await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Removing all reactions from response ({responseId})..."));
-                                await response.RemoveAllReactionsAsync();
-                            }
-                        }
                     }
                 }
 

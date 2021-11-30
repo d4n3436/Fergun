@@ -63,15 +63,11 @@ namespace Fergun
             // General + Moderation commands
             GatewayIntents.GuildMessages |
 
-            // Paginator commands
-            GatewayIntents.GuildMessageReactions |
-
             // Music commands
             GatewayIntents.GuildVoiceStates |
 
             // DM support
-            GatewayIntents.DirectMessages |
-            GatewayIntents.DirectMessageReactions
+            GatewayIntents.DirectMessages
         };
 
         public static CommandServiceConfig CommandServiceConfig { get; } = new CommandServiceConfig
@@ -86,7 +82,6 @@ namespace Fergun
         public static TimeSpan PaginatorTimeout => TimeSpan.FromMinutes(10);
 
         public const GuildPermission InvitePermissions =
-
             GuildPermission.ViewChannel |
             GuildPermission.SendMessages |
             GuildPermission.EmbedLinks |
