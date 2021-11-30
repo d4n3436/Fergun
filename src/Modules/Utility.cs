@@ -562,7 +562,7 @@ namespace Fergun.Modules
             {
                 builder.AddField(Locate("Position"), guildChannel.Position, true);
             }
-            builder.AddField(Locate("CreatedAt"), channel.CreatedAt, true)
+            builder.AddField(Locate("CreatedAt"), channel.CreatedAt.ToDiscordTimestamp(), true)
                 .AddField(Locate("Mention"), MentionUtils.MentionChannel(channel.Id), true)
                 .WithColor(FergunClient.Config.EmbedColor);
 
@@ -1473,7 +1473,7 @@ namespace Fergun.Modules
                 .AddField(Locate("Permissions"), role.Permissions.RawValue == 0 ? Locate("None") : Format.Code(string.Join("`, `", role.Permissions.ToList())))
 
                 .AddField(Locate("MemberCount"), Context.Guild.HasAllMembers ? memberCount.ToString() : memberCount == 0 ? "?" : "~" + memberCount, true)
-                .AddField(Locate("CreatedAt"), role.CreatedAt, true)
+                .AddField(Locate("CreatedAt"), role.CreatedAt.ToDiscordTimestamp(), true)
                 .AddField(Locate("Mention"), role.Mention, true)
 
                 .WithColor(role.Color);
