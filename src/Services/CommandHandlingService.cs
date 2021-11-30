@@ -148,11 +148,9 @@ namespace Fergun.Services
             }
         }
 
-        private async Task OnCommandExecutedAsync(Optional<CommandInfo> optionalCommand, ICommandContext context, IResult result)
+        private async Task OnCommandExecutedAsync(Optional<CommandInfo> optionalCommand, ICommandContext commandContext, IResult result)
         {
-            // We have access to the information of the command executed,
-            // the context of the command, and the result returned from the
-            // execution in this event.
+            var context = (ShardedCommandContext)commandContext;
 
             // command is unspecified when there was a search failure (command not found)
             if (!optionalCommand.IsSpecified)
@@ -212,8 +210,8 @@ namespace Fergun.Services
                     }
                     else
                     {
-                        var guildUser = await context.Guild.GetCurrentUserAsync().ConfigureAwait(false);
-                        permissions = guildUser.GetPermissions((IGuildChannel)context.Channel);
+                        var currentUser = await commandContext.Guild.GetCurrentUserAsync();
+                        permissions = currentUser.GetPermissions((IGuildChannel)context.Channel);
                     }
 
                     if (!permissions.Has(Constants.MinimumRequiredPermissions))
@@ -315,7 +313,7 @@ namespace Fergun.Services
                     if (context.User.Id == owner.Id || !_isValidLogChannel || FergunClient.Config.LogChannel == 0) break;
                     // if the user that executed the command isn't the bot owner, send the full stack trace to the errors channel
 
-                    var channel = await context.Client.GetChannelAsync(FergunClient.Config.LogChannel);
+                    var channel = await commandContext.Client.GetChannelAsync(FergunClient.Config.LogChannel);
                     if (!(channel is IMessageChannel messageChannel))
                     {
                         _isValidLogChannel = false;
