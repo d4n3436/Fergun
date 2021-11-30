@@ -1461,22 +1461,18 @@ namespace Fergun.Modules
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("RoleInfo"))
-
                 .AddField(Locate("Name"), role.Name, true)
                 .AddField(Locate("Color"), $"{role.Color} ({role.Color.R}, {role.Color.G}, {role.Color.B})", true)
                 .AddField(Locate("IsMentionable"), Locate(role.IsMentionable), true)
-
                 .AddField("ID", role.Id, true)
                 .AddField(Locate("IsHoisted"), Locate(role.IsHoisted), true)
                 .AddField(Locate("Position"), role.Position, true)
-
                 .AddField(Locate("Permissions"), role.Permissions.RawValue == 0 ? Locate("None") : Format.Code(string.Join("`, `", role.Permissions.ToList())))
-
                 .AddField(Locate("MemberCount"), Context.Guild.HasAllMembers ? memberCount.ToString() : memberCount == 0 ? "?" : "~" + memberCount, true)
                 .AddField(Locate("CreatedAt"), role.CreatedAt.ToDiscordTimestamp(), true)
                 .AddField(Locate("Mention"), role.Mention, true)
-
-                .WithColor(role.Color);
+                .WithColor(role.Color)
+                .WithThumbnailUrl(role.GetIconUrl());
 
             await ReplyAsync(embed: builder.Build());
 
