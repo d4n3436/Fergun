@@ -126,6 +126,7 @@ To shut down the bot use `logout`.
 | `UseReliabilityService` | Whether the reliability service should be used. | The reliability service is a service that shutdowns the bot in case of a deadlock.<br/>The service requires that the bot is being run by a daemon that handles Exit Code 1 as a restart.<br/>Daemon for [Powershell](https://gitlab.com/snippets/21444) and [Bash](https://stackoverflow.com/a/697064).
 | `UseCommandCacheService` | Whether the command cache service should be used. | The command cache service is a service that tracks command (user) messages and the bot response messages.<br/>When a command message is modified or deleted, the bot will also modify or delete the corresponding response message automatically.
 | `UseMessageCacheService` | Whether the message cache service should be used. | The command message service is a service that stores deleted and modified messages temporarily.<br/>This service is used in the "snipe" commands.
+| `MinimumCommandTime` | The minimum hours since a command has to be used in a server for the messages to be cached there. | This is used in the optimized message cache.<br/> Setting this to 0 disables this requirement.
 | `DonationUrl` | The donation Url. | ...
 | `TotalShards` | The total number of shards to use. | If this is set to null, the bot will get the recommended shard count from Discord.
 | `LogLevel` | The minimum log level. | The default value is 4 (Verbose).

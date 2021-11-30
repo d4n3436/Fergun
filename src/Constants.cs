@@ -151,6 +151,8 @@ namespace Fergun
 
         public const int MaxMessageCacheLongevity = 6;
 
+        public const int MinCommandTime = 12;
+
         public const int MaxPrefixLength = 10;
 
         public const string DefaultLanguage = "en";

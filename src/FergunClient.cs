@@ -375,7 +375,7 @@ namespace Fergun
                 ? new MessageCacheService(s.GetRequiredService<DiscordShardedClient>(), Config.MessageCacheSize,
                 s.GetRequiredService<LogService>().LogAsync,
                 Constants.MessageCacheClearInterval,
-                Constants.MaxMessageCacheLongevity)
+                Constants.MaxMessageCacheLongevity, Config.MinimumCommandTime)
                 : MessageCacheService.Disabled)
                 .AddSingleton(s => Config.UseCommandCacheService
                 ? new CommandCacheService(s.GetRequiredService<DiscordShardedClient>(), Constants.MessageCacheCapacity,

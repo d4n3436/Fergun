@@ -140,6 +140,15 @@ namespace Fergun
         public bool UseMessageCacheService { get; private set; } = true;
 
         /// <summary>
+        /// Gets the minimum hours since a command has to be used in a guild for the messages to be cached there. Setting this to 0 disables this requirement.
+        /// </summary>
+        /// <remarks>
+        /// This is used in the optimized message cache.
+        /// </remarks>
+        [JsonProperty]
+        public int MinimumCommandTime { get; private set; } = Constants.MinCommandTime;
+
+        /// <summary>
         /// Gets the donation Url.
         /// </summary>
         [JsonProperty]

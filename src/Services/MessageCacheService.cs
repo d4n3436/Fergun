@@ -335,13 +335,19 @@ namespace Fergun.Services
 
         private void HandleReceivedMessage(IMessage message)
         {
-            if (!(message.Channel is IGuildChannel guildChannel) || !_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
+            if (!(message.Channel is IGuildChannel guildChannel))
                 return;
 
-            var now = DateTimeOffset.Now;
+            if (_minCommandTime != 0)
+            {
+                if (!_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
+                    return;
 
-            if (_minCommandTime != 0 && (lastUsageTime <= now.AddHours(-_minCommandTime) || lastUsageTime > now))
-                return;
+                var now = DateTimeOffset.UtcNow;
+
+                if (lastUsageTime <= now.AddHours(-_minCommandTime) || lastUsageTime > now)
+                    return;
+            }
 
             var cachedChannel = _cache.GetOrAdd(message.Channel.Id,
                 new ConcurrentDictionary<ulong, ICachedMessage>(Environment.ProcessorCount, (int)(_messageCacheSize * 1.05)));
