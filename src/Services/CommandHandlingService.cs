@@ -77,7 +77,7 @@ namespace Fergun.Services
 
                 _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
                 await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} mentioned me."));
+                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} ({message.Author.Id}) mentioned me."));
                 return;
             }
 
@@ -322,7 +322,7 @@ namespace Fergun.Services
                     }
 
                     var builder3 = new EmbedBuilder()
-                        .WithTitle($"\u274c Failed to execute {Format.Code(command.Name)} in {context.Display()}".Truncate(EmbedBuilder.MaxTitleLength))
+                        .WithTitle($"\u274c Failed to execute {Format.Code(command.Name)} for {context.User} in {context.Display()}".Truncate(EmbedBuilder.MaxTitleLength))
                         .AddField(GuildUtils.Locate("ErrorType", messageChannel), Format.Code(exception.GetType().Name, "cs"))
                         .AddField(GuildUtils.Locate("ErrorMessage", messageChannel), Format.Code(exception.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "cs"))
                         .AddField("Jump url", context.Message.GetJumpUrl())
@@ -341,7 +341,7 @@ namespace Fergun.Services
             }
 
             _ = IgnoreUserAsync(context.User.Id, TimeSpan.FromSeconds(ignoreTime));
-            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Name}\" for {context.User} in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"Failed to execute \"{command.Name}\" for {context.User} ({context.User.Id}) in {context.Display()}, with error type: {result.Error} and reason: {result.ErrorReason}"));
         }
 
         private static async Task IgnoreUserAsync(ulong id, TimeSpan time)
