@@ -110,6 +110,7 @@ namespace Fergun.Modules
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.Attachments = Array.Empty<FileAttachment>();
                     x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
                     x.Components = component;
                 }).ConfigureAwait(false);

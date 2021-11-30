@@ -289,24 +289,15 @@ namespace Fergun.Services
                     }
                     else
                     {
-                        if (response.Attachments.Count > 0)
+                        await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message ({cacheable.Id}) in cache."));
+                        if (response.Reactions.Count > 0)
                         {
-                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Attachment found on response ({responseId}). Deleting the response..."));
-                            _ = response.DeleteAsync();
-                            TryRemove(cacheable.Id);
-                        }
-                        else
-                        {
-                            await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Found a response associated to command message ({cacheable.Id}) in cache."));
-                            if (response.Reactions.Count > 0)
-                            {
-                                bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
+                            bool manageMessages = response.Author is IGuildUser guildUser && guildUser.GetPermissions((IGuildChannel)response.Channel).ManageMessages;
 
-                                if (manageMessages)
-                                {
-                                    await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Removing all reactions from response ({responseId})..."));
-                                    await response.RemoveAllReactionsAsync();
-                                }
+                            if (manageMessages)
+                            {
+                                await _logger(new LogMessage(LogSeverity.Verbose, "CmdCache", $"Removing all reactions from response ({responseId})..."));
+                                await response.RemoveAllReactionsAsync();
                             }
                         }
                     }
@@ -365,6 +356,7 @@ namespace Fergun.Services
                 {
                     x.Content = message;
                     x.Embed = embed;
+                    x.Attachments = Array.Empty<FileAttachment>();
                     x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
                     x.Components = component;
                 }).ConfigureAwait(false);
@@ -408,10 +400,20 @@ namespace Fergun.Services
             bool found = cache.TryGetValue(commandId, out ulong responseId);
             if (found && (response = (IUserMessage)await channel.GetMessageAsync(responseId)) != null)
             {
-                await response.DeleteAsync();
-            }
+                await response.ModifyAsync(x =>
+                {
+                    x.Content = text;
+                    x.Embed = embed;
+                    x.Attachments = new[] { new FileAttachment(stream, filename) };
+                    x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
+                }).ConfigureAwait(false);
 
-            response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions, messageReference);
+                response = (IUserMessage)await channel.GetMessageAsync(responseId).ConfigureAwait(false);
+            }
+            else
+            {
+                response = await channel.SendFileAsync(stream, filename, text, isTTS, embed, options, isSpoiler, allowedMentions, messageReference);
+            }
 
             if (!cache.IsDisabled)
             {
