@@ -397,6 +397,7 @@ namespace Fergun.Services
                         x.Content = text;
                         x.Embed = embed;
                         x.Components = component;
+                        x.Attachments = Array.Empty<FileAttachment>();
                     });
                 }
 
