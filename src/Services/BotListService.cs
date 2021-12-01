@@ -22,7 +22,7 @@ namespace Fergun.Services
         private bool _topGgClientDisposed;
         private bool _discordBotsClientDisposed;
         private bool _disposed;
-        private int _lastServerCount;
+        private int _lastServerCount = -1;
 
         public BotListService(DiscordSocketClient client, string topGgToken = null, string discordBotsToken = null,
             TimeSpan? updatePeriod = null, Func<LogMessage, Task> logger = null)
@@ -76,7 +76,6 @@ namespace Fergun.Services
 
             updatePeriod ??= TimeSpan.FromMinutes(30);
             _updateTimer = new Timer(OnTimerFired, null, updatePeriod.Value, updatePeriod.Value);
-            _lastServerCount = _client.Guilds.Count;
         }
 
         private void OnTimerFired(object state)
@@ -95,7 +94,8 @@ namespace Fergun.Services
         /// <param name="serverCount">The server count.</param>
         public async Task UpdateStatsAsync(int serverCount)
         {
-            if (_lastServerCount == serverCount) return;
+            if (_lastServerCount == -1) _lastServerCount = serverCount;
+            else if (_lastServerCount == serverCount) return;
 
             await UpdateStatsAsync(serverCount, BotList.TopGg);
             await UpdateStatsAsync(serverCount, BotList.DiscordBots);
