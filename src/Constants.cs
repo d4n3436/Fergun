@@ -13,38 +13,50 @@ namespace Fergun
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             .InformationalVersion;
 
-        public const string Changelog = @"**v1.6**
-- Fergun is now open source!
-- New commands: `wolframalpha`, `spotify`, `define`, `archive`, `shorten`, and `blacklistserver`.
-- Added back `youtube`.
-- Lots of internal changes to make the bot easy to self-host.
+        public const string Changelog = @"**v1.8**
+Additions:
+- Added GScraper, a scraping library for Google Images, DuckDuckGo and Brave.
+- [img2] Added new command (DuckDuckGo image search).
+- [img3] Added new command (Brave image search).
+- [privacy] Added new command (privacy policy and opt out options)
+- [userinfo] Added user badges.
+- [youtube] Added pagination support.
+- [wikipedia] Added pagination support.
+- [channelinfo] Added support for thread and stage channels.
+- [roleinfo] Added role icon as thumbnail.
+- Added icons to image search commands.
+- Added Discord timestamps to multiple commands.
+- Added embeds to messages with attachments (`color`, `invert`, `screenshot`).
+- Added fallback pastebin to Hastebin (Hatebin).
+- Added multiple configuration options.
+- Added an optimized message cache.
+- Added sharding support.
 
-- Added a prefix cache system. Now the response times should be faster.
-- [help] Added a command list cache.
-- [stats] Improved the methods to get the bot memory usage.
-- [repeat] Improved the performance, limiting the maximum possible length of text to avoid allocating memory unnecessarily.
-- Improved the performance of the logging and interactive service.
-- [cmdstats] Reduced the number of commands displayed per page.
-- [calc] Now using a different math library.
-- [urban] Now can be used in non-NSFW channels.
-- [code] Rewrote to get a link pointing to the specified command method line from the repository.
+Changes:
+- Updated the runtime to .NET 6, with lots of performance and memory improvements.
+- Replaced the included translators with GTranslate, which includes new languages and a new translator (Yandex.Translate).
+- Replaced System.Drawing.Commom with ImageSharp.
+- Replaced the old interactive service with Fergun.Interactive.
+- Replaced OCR.Space API with Bing Visual Search internal API, which is free and doesn't require an API key.
+- Rewritten the AI Dungeon API wrapper, improving the response time of AI Dungeon commands.
+- [img] Use images from Google Images.
+- Snipe commands can now be opt out with `privacy`.
+- [wikipedia] Use the localized logo.
+- [stats] Display the git commit hash and sharding info.
+- [help] Ignore the command group when searching for a command.
+- [avatar, userinfo] Try to use the user's banner color instead of downloading the avatar and getting the average color whenever possible.
+- Improved the reusage of interactive messages.
+- Improved the way the bot resolves the users from the command messages.
+- Improved the handling of edited command messages with attachments.
+- Updated multiple comands to benefit from interactions (buttons, select menus).
+- Now image search commands use the highest safe search level on non-NSFW channels.
+- Now possible edited command messages won't be processed if they are 4 hours older.
+- Lots of bug fixes.
+- Other minor changes.
 
-- [userinfo] Fixed a bug that caused the activity field to be empty if the user had an emote in their status.
-- [lyrics] Fixed a bug in the parser that caused bold text to be overlapped.
-- [give] Fixed a bug that allowed to give IDs to bots.
-- Fixed some bugs in the Bing Translator wrapper.
-
-- [new] Removed the character limit in the custom mode creation.
-- [alter] Removed the character limit.
-- Removed the paginator/video cache.
-- Removed the word list that `badtranslator` used.
-- Removed `nothing` and `botcolor`.
-
-- Now Fergun will send a warning message when a command fails due to a 5xx error.
-- Now Fergun will send a warning message when a music command is used when there's no connection to a Lavalink server.
-- Now when editing a command message with a paginator, the response message will be deleted if the reactions cannot be removed.
-- Now when editing a command message to a command that attaches files, the ""Loading"" message will be correctly deleted.
-- Lots of minor bug fixes.";
+Removals:
+- Removed the command `identify`, it stopped working a long time ago.
+- [config] Removed CaptionBot autotranslate option.";
 
         public static string GitHash { get; } = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<GitHashInfoAttribute>()?
