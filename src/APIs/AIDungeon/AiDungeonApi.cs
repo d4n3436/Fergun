@@ -131,8 +131,8 @@ namespace Fergun.APIs.AIDungeon
 
             if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Array)
             {
-                var first = errors.EnumerateArray().Current;
-                if (first.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String)
+                using var enumerator = errors.EnumerateArray();
+                if (enumerator.MoveNext() && enumerator.Current.TryGetProperty("message", out var message) && message.ValueKind == JsonValueKind.String)
                 {
                     throw new AiDungeonException(message.GetString());
                 }
