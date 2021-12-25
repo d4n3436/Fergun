@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Fergun.Services;
 using Fergun.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Victoria;
 
 namespace Fergun.Attributes.Preconditions
 {
@@ -45,8 +45,8 @@ namespace Fergun.Attributes.Preconditions
             if (Array.Exists(_exceptions, x => x == command.Name))
                 return PreconditionResult.FromSuccess();
 
-            var musicService = services.GetService<MusicService>();
-            if (musicService == null || !musicService.LavaNode.IsConnected)
+            var lavaNode = services.GetService<LavaNode>();
+            if (lavaNode == null || !lavaNode.IsConnected)
                 return PreconditionResult.FromError(ErrorMessage ?? GuildUtils.Locate("LavalinkNotConnected", context.Channel));
 
             var current = (context.User as IVoiceState)?.VoiceChannel?.Id;

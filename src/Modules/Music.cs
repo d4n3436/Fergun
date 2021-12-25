@@ -29,14 +29,14 @@ namespace Fergun.Modules
         private readonly MusicService _musicService;
         private readonly LogService _logService;
         private readonly MessageCacheService _messageCache;
-        private readonly InteractiveService _interactive;
+        private readonly LavaNode _lavaNode;
 
-        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
+        public Music(MusicService musicService, LogService logService, MessageCacheService messageCache, LavaNode lavaNode)
         {
             _musicService = musicService;
-            _logService ??= logService;
-            _messageCache ??= messageCache;
-            _interactive ??= interactive;
+            _logService = logService;
+            _messageCache = messageCache;
+            _lavaNode = lavaNode;
             _geniusApi ??= new GeniusApi(FergunClient.Config.GeniusApiToken);
         }
 
@@ -82,7 +82,7 @@ namespace Fergun.Modules
             bool keepHeaders = false;
             if (string.IsNullOrWhiteSpace(query))
             {
-                bool hasPlayer = _musicService.LavaNode.TryGetPlayer(Context.Guild, out var player);
+                bool hasPlayer = _lavaNode.TryGetPlayer(Context.Guild, out var player);
                 if (hasPlayer && player.PlayerState == PlayerState.Playing)
                 {
                     query = player.Track.Title.Contains(player.Track.Author, StringComparison.OrdinalIgnoreCase)

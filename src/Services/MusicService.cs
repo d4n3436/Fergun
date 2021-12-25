@@ -18,34 +18,31 @@ namespace Fergun.Services
 {
     public class MusicService
     {
-        public LavaNode LavaNode { get; }
-
+        private readonly LavaNode _lavaNode;
         private readonly DiscordShardedClient _client;
         private readonly LogService _logService;
         private static readonly ConcurrentDictionary<ulong, uint> _loopDict = new ConcurrentDictionary<ulong, uint>();
         private static readonly string[] _timeFormats = { @"m\:ss", @"mm\:ss", @"h\:mm\:ss", @"hh\:mm\:ss" };
 
-        public MusicService(DiscordShardedClient client, LogService logService, LavaConfig lavaConfig)
+        public MusicService(DiscordShardedClient client, LogService logService, LavaNode lavaNode)
         {
             _client = client;
             _logService = logService;
-
-            LavaNode = new LavaNode(_client, lavaConfig);
-
+            _lavaNode = lavaNode;
             _client.ShardReady += ShardReadyAsync;
             _client.UserVoiceStateUpdated += UserVoiceStateUpdatedAsync;
-            LavaNode.OnLog += LogAsync;
-            LavaNode.OnTrackEnded += OnTrackEndedAsync;
-            LavaNode.OnTrackStuck += OnTrackStuckAsync;
-            LavaNode.OnTrackException += OnTrackExceptionAsync;
-            LavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
+            _lavaNode.OnLog += LogAsync;
+            _lavaNode.OnTrackEnded += OnTrackEndedAsync;
+            _lavaNode.OnTrackStuck += OnTrackStuckAsync;
+            _lavaNode.OnTrackException += OnTrackExceptionAsync;
+            _lavaNode.OnWebSocketClosed += OnWebSocketClosedAsync;
         }
 
         private Task ShardReadyAsync(DiscordSocketClient client)
         {
-            if (!LavaNode.IsConnected)
+            if (!_lavaNode.IsConnected)
             {
-                _ = LavaNode.ConnectAsync();
+                _ = _lavaNode.ConnectAsync();
             }
 
             return Task.CompletedTask;
@@ -55,7 +52,7 @@ namespace Fergun.Services
         {
             // Someone left a voice channel
             if (user is SocketGuildUser guildUser
-                && LavaNode.TryGetPlayer(guildUser.Guild, out var player)
+                && _lavaNode.TryGetPlayer(guildUser.Guild, out var player)
                 && player.VoiceChannel != null
                 && afterState.VoiceChannel == null)
             {
@@ -68,7 +65,7 @@ namespace Fergun.Services
                     }
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because I got kicked out."));
 
-                    await LavaNode.LeaveAsync(player.VoiceChannel);
+                    await _lavaNode.LeaveAsync(player.VoiceChannel);
                 }
                 // There are no users (or only bots) in the voice channel
                 else if (((SocketVoiceChannel)player.VoiceChannel).Users.All(x => x.IsBot))
@@ -85,7 +82,7 @@ namespace Fergun.Services
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Victoria", $"Left the voice channel \"{player.VoiceChannel.Name}\" in guild \"{player.VoiceChannel.Guild.Name}\" because there are no users."));
                     await player.TextChannel.SendMessageAsync(embed: builder.Build());
 
-                    await LavaNode.LeaveAsync(player.VoiceChannel);
+                    await _lavaNode.LeaveAsync(player.VoiceChannel);
                 }
             }
         }
@@ -167,35 +164,35 @@ namespace Fergun.Services
 
         public async Task<string> JoinAsync(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
         {
-            if (LavaNode.HasPlayer(guild))
+            if (_lavaNode.HasPlayer(guild))
                 return GuildUtils.Locate("AlreadyConnected", textChannel);
-            await LavaNode.JoinAsync(voiceChannel, textChannel);
+            await _lavaNode.JoinAsync(voiceChannel, textChannel);
             return string.Format(GuildUtils.Locate("NowConnected", textChannel), Format.Bold(voiceChannel.Name));
         }
 
         public async Task<bool> LeaveAsync(IGuild guild, SocketVoiceChannel voiceChannel)
         {
-            bool hasPlayer = LavaNode.HasPlayer(guild);
+            bool hasPlayer = _lavaNode.HasPlayer(guild);
             if (!hasPlayer) return false;
 
             if (_loopDict.ContainsKey(guild.Id))
             {
                 _loopDict.TryRemove(guild.Id, out _);
             }
-            await LavaNode.LeaveAsync(voiceChannel);
+            await _lavaNode.LeaveAsync(voiceChannel);
 
             return true;
         }
 
         public async Task<string> MoveAsync(IGuild guild, SocketVoiceChannel voiceChannel, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             var oldChannel = player.VoiceChannel;
             if (voiceChannel.Id == oldChannel.Id)
                 return GuildUtils.Locate("MoveSameChannel", textChannel);
-            await LavaNode.MoveChannelAsync(voiceChannel);
+            await _lavaNode.MoveChannelAsync(voiceChannel);
             return string.Format(GuildUtils.Locate("PlayerMoved", textChannel), oldChannel, voiceChannel);
         }
 
@@ -204,7 +201,7 @@ namespace Fergun.Services
             if (voiceChannel == null)
                 return (GuildUtils.Locate("PlayerError", textChannel), null);
 
-            var search = await LavaNode.SearchAsync(query);
+            var search = await _lavaNode.SearchAsync(query);
 
             if (search.Status == SearchStatus.NoMatches || search.Status == SearchStatus.LoadFailed)
             {
@@ -215,10 +212,10 @@ namespace Fergun.Services
 
             if (search.Playlist.Name != null)
             {
-                if (!LavaNode.TryGetPlayer(guild, out player))
+                if (!_lavaNode.TryGetPlayer(guild, out player))
                 {
-                    await LavaNode.JoinAsync(voiceChannel, textChannel);
-                    player = LavaNode.GetPlayer(guild);
+                    await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                    player = _lavaNode.GetPlayer(guild);
                 }
 
                 var time = TimeSpan.Zero;
@@ -260,10 +257,10 @@ namespace Fergun.Services
                     return (null, search.Tracks.ToArray());
             }
 
-            if (!LavaNode.TryGetPlayer(guild, out player))
+            if (!_lavaNode.TryGetPlayer(guild, out player))
             {
-                await LavaNode.JoinAsync(voiceChannel, textChannel);
-                player = LavaNode.GetPlayer(guild);
+                await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                player = _lavaNode.GetPlayer(guild);
             }
             if (player.PlayerState == PlayerState.Playing)
             {
@@ -280,10 +277,10 @@ namespace Fergun.Services
             if (voiceChannel == null)
                 return GuildUtils.Locate("PlayerError", textChannel);
 
-            if (!LavaNode.TryGetPlayer(guild, out var player) || player == null)
+            if (!_lavaNode.TryGetPlayer(guild, out var player) || player == null)
             {
-                await LavaNode.JoinAsync(voiceChannel, textChannel);
-                player = LavaNode.GetPlayer(guild);
+                await _lavaNode.JoinAsync(voiceChannel, textChannel);
+                player = _lavaNode.GetPlayer(guild);
             }
             if (track == null)
                 return GuildUtils.Locate("InvalidTrack", textChannel);
@@ -301,7 +298,7 @@ namespace Fergun.Services
 
         public async Task<string> ReplayAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (player == null)
                 return GuildUtils.Locate("EmptyQueue", textChannel);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
@@ -312,7 +309,7 @@ namespace Fergun.Services
 
         public async Task<string> SeekAsync(IGuild guild, ITextChannel textChannel, string time)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player?.Track?.Duration == null || !player.Track.CanSeek)
@@ -348,7 +345,7 @@ namespace Fergun.Services
 
         public async Task<string> StopAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player == null)
@@ -363,7 +360,7 @@ namespace Fergun.Services
 
         public async Task<string> SkipAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player == null)
@@ -380,7 +377,7 @@ namespace Fergun.Services
 
         public async Task<string> SetVolumeAsync(int volume, IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -396,7 +393,7 @@ namespace Fergun.Services
 
         public async Task<string> PauseOrResumeAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -415,7 +412,7 @@ namespace Fergun.Services
 
         public async Task<string> ResumeAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -428,7 +425,7 @@ namespace Fergun.Services
 
         public string GetCurrentTrack(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -437,7 +434,7 @@ namespace Fergun.Services
 
         public string GetQueue(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -466,7 +463,7 @@ namespace Fergun.Services
 
         public string Shuffle(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -486,7 +483,7 @@ namespace Fergun.Services
 
         public string RemoveAt(IGuild guild, ITextChannel textChannel, int index)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
             if (player.Queue.Count == 0)
@@ -505,7 +502,7 @@ namespace Fergun.Services
 
         public async Task<(bool, string)> GetArtworkAsync(IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return (false, GuildUtils.Locate("PlayerNotPlaying", textChannel));
 
@@ -518,7 +515,7 @@ namespace Fergun.Services
 
         public string Loop(uint? count, IGuild guild, ITextChannel textChannel)
         {
-            bool hasPlayer = LavaNode.TryGetPlayer(guild, out var player);
+            bool hasPlayer = _lavaNode.TryGetPlayer(guild, out var player);
             if (!hasPlayer || player.PlayerState != PlayerState.Playing)
                 return GuildUtils.Locate("PlayerNotPlaying", textChannel);
 
@@ -549,7 +546,7 @@ namespace Fergun.Services
 
         public async Task<int> ShutdownAllPlayersAsync(bool simulate)
         {
-            var players = LavaNode.Players.Where(x => x != null).ToArray();
+            var players = _lavaNode.Players.Where(x => x != null).ToArray();
 
             if (!simulate && players.Length > 0)
             {
@@ -577,7 +574,7 @@ namespace Fergun.Services
                 {
                     try
                     {
-                        await LavaNode.LeaveAsync(player.VoiceChannel);
+                        await _lavaNode.LeaveAsync(player.VoiceChannel);
                     }
                     catch (NullReferenceException) { }
                 }
