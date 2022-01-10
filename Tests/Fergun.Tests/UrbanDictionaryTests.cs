@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Threading.Tasks;
 using Fergun.APIs.UrbanDictionary;
 using Xunit;
@@ -20,15 +19,6 @@ namespace Fergun.Tests
 
             // Assert
             Assert.NotEmpty(response.Definitions);
-        }
-
-        [Theory]
-        [InlineData("a")]
-        [InlineData("!")]
-        public async Task InvalidSearchTest(string word)
-        {
-            // Act and Assert
-            await Assert.ThrowsAsync<HttpRequestException>(async () => await UrbanApi.SearchWordAsync(word));
         }
 
         [Fact]
