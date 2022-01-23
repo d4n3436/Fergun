@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -200,7 +201,18 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Play([Remainder, Summary("playParam1")] string query)
         {
             var user = (SocketGuildUser)Context.User;
-            (string response, var tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            string response;
+            IReadOnlyList<LavaTrack> tracks;
+            try
+            {
+                (response, tracks) = await _musicService.PlayAsync(query, Context.Guild, user.VoiceChannel, Context.Channel as ITextChannel);
+            }
+            catch (NullReferenceException e) // Catch nullref caused by bug in Victoria
+            {
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Error playing music", e));
+                return FergunResult.FromError(Locate("AnErrorOccurred"));
+            }
+
             if (tracks == null)
             {
                 await SendEmbedAsync(response);
