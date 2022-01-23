@@ -43,14 +43,6 @@ namespace Fergun.Services
         {
             _cmdService.AddTypeReader(typeof(IUser), new Readers.UserTypeReader<IUser>());
 
-            // Here we discover all of the command modules in the entry
-            // assembly and load them. Starting from Discord.NET 2.0, a
-            // service provider is required to be passed into the
-            // module registration method to inject the
-            // required dependencies.
-            //
-            // If you do not use Dependency Injection, pass null.
-            // See Dependency Injection guide for more information.
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
@@ -382,7 +374,7 @@ namespace Fergun.Services
 
                 if (response == null)
                 {
-                    response = await userMessage.Channel.SendMessageAsync(text, embed: embed, component: component).ConfigureAwait(false);
+                    response = await userMessage.Channel.SendMessageAsync(text, embed: embed, components: component).ConfigureAwait(false);
                 }
                 else
                 {

@@ -79,7 +79,7 @@ namespace Fergun.Extensions
             bool isValid = await message.Channel.GetMessageAsync(cache, message.Id) != null;
             if (!isValid)
             {
-                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions, component: component);
+                return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions, components: component);
             }
 
             await message.ModifyAsync(x =>
