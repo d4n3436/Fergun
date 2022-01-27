@@ -890,7 +890,7 @@ namespace Fergun.Modules
 
     internal class LanguageSelectionBuilder : BaseSelectionBuilder<LanguageSelection, KeyValuePair<string, CultureInfo>, LanguageSelectionBuilder>
     {
-        public new IReadOnlyDictionary<string, CultureInfo> Options { get; set; } = new Dictionary<string, CultureInfo>();
+        public new IDictionary<string, CultureInfo> Options { get; set; } = new Dictionary<string, CultureInfo>();
 
         public override InputType InputType { get; set; } = InputType.SelectMenus;
 
@@ -904,25 +904,21 @@ namespace Fergun.Modules
             return this;
         }
 
+        public LanguageSelectionBuilder WithOptions(IDictionary<string, CultureInfo> options)
+        {
+            Options = options;
+            base.Options = Options;
+            return this;
+        }
+
         public LanguageSelectionBuilder WithOptions(IReadOnlyDictionary<string, CultureInfo> options)
         {
-            Options = options;
+            Options = new Dictionary<string, CultureInfo>(options);
+            base.Options = Options;
             return this;
         }
 
-        public LanguageSelectionBuilder WithOptions(Dictionary<string, CultureInfo> options)
-        {
-            Options = options;
-            return this;
-        }
-
-        public override LanguageSelection Build() => new LanguageSelection(EmoteConverter, StringConverter,
-            EqualityComparer, AllowCancel, SelectionPage?.Build(), Users?.ToArray(), Options,
-            CanceledPage?.Build(), TimeoutPage?.Build(), SuccessPage?.Build(), Deletion, InputType,
-            ActionOnCancellation, ActionOnTimeout, ActionOnSuccess)
-        {
-            GuildLanguage = GuildLanguage
-        };
+        public override LanguageSelection Build() => new(this);
     }
 
     /// <summary>
@@ -930,22 +926,16 @@ namespace Fergun.Modules
     /// </summary>
     internal class LanguageSelection : BaseSelection<KeyValuePair<string, CultureInfo>>
     {
-        internal LanguageSelection(Func<KeyValuePair<string, CultureInfo>, IEmote> emoteConverter,
-            Func<KeyValuePair<string, CultureInfo>, string> stringConverter, IEqualityComparer<KeyValuePair<string, CultureInfo>> equalityComparer,
-            bool allowCancel, Page selectionPage, IReadOnlyCollection<IUser> users, IReadOnlyCollection<KeyValuePair<string, CultureInfo>> options,
-            Page canceledPage, Page timeoutPage, Page successPage, DeletionOptions deletion, InputType inputType, ActionOnStop actionOnCancellation,
-            ActionOnStop actionOnTimeout, ActionOnStop actionOnSuccess)
-            : base(emoteConverter, stringConverter, equalityComparer,
-            allowCancel, selectionPage, users, options, canceledPage, timeoutPage, successPage, deletion, inputType,
-            actionOnCancellation, actionOnTimeout, actionOnSuccess)
+        internal LanguageSelection(LanguageSelectionBuilder builder) : base(builder)
         {
+            GuildLanguage = builder.GuildLanguage;
         }
 
         public string GuildLanguage { get; set; }
 
-        public override MessageComponent BuildComponents(bool disableAll)
+        public override ComponentBuilder GetOrAddComponents(bool disableAll, ComponentBuilder builder = null)
         {
-            var builder = new ComponentBuilder();
+            builder ??= new ComponentBuilder();
             var options = new List<SelectMenuOptionBuilder>();
 
             foreach (var selection in Options)
@@ -967,7 +957,7 @@ namespace Fergun.Modules
 
             builder.WithSelectMenu(selectMenu);
 
-            return builder.Build();
+            return builder;
         }
     }
 }
