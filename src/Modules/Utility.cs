@@ -1209,7 +1209,7 @@ namespace Fergun.Modules
         public async Task<RuntimeResult> Ocr([Summary("ocrParam1")] string url = null)
         {
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url, long.MaxValue);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1220,11 +1220,17 @@ namespace Fergun.Modules
             (string error, string text) = await BingOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
-                string message = Locate(error);
-                if (!string.IsNullOrEmpty(text))
-                    message += $"\n{Locate("ErrorMessage")}: {text}";
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocr: Failed to get OCR from Bing, using Yandex..."));
 
-                return FergunResult.FromError(message);
+                (error, text) = await YandexOcrAsync(url);
+                if (!int.TryParse(error, out processTime))
+                {
+                    string message = Locate(error);
+                    if (!string.IsNullOrEmpty(text))
+                        message += $"\n{Locate("ErrorMessage")}: {text}";
+
+                    return FergunResult.FromError(message);
+                }
             }
 
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
@@ -1271,7 +1277,7 @@ namespace Fergun.Modules
             }
 
             UrlFindResult result;
-            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url);
+            (url, result) = await Context.GetLastUrlAsync(FergunClient.Config.MessagesToSearchLimit, _messageCache, true, url, long.MaxValue);
             if (result != UrlFindResult.UrlFound)
             {
                 return FergunResult.FromError(string.Format(Locate(result.ToString()), FergunClient.Config.MessagesToSearchLimit));
@@ -1282,11 +1288,17 @@ namespace Fergun.Modules
             (string error, string text) = await BingOcrAsync(url);
             if (!int.TryParse(error, out int processTime))
             {
-                string message = Locate(error);
-                if (!string.IsNullOrEmpty(text))
-                    message += $"\n{Locate("ErrorMessage")}: {text}";
+                await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocrtranslate: Failed to get OCR from Bing, using Yandex..."));
 
-                return FergunResult.FromError(message);
+                (error, text) = await YandexOcrAsync(url);
+                if (!int.TryParse(error, out processTime))
+                {
+                    string message = Locate(error);
+                    if (!string.IsNullOrEmpty(text))
+                        message += $"\n{Locate("ErrorMessage")}: {text}";
+
+                    return FergunResult.FromError(message);
+                }
             }
 
             var sw = Stopwatch.StartNew();
@@ -2414,6 +2426,75 @@ namespace Fergun.Modules
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "SimpleOcr", $"Bing Visual Search didn't return text for url: {url}."));
 
             return (string.IsNullOrEmpty(imageCategory) ? "OcrEmpty" : "OcrApiError", imageCategory);
+        }
+
+        private static async Task<(string, string)> YandexOcrAsync(string url)
+        {
+            // Get CBIR ID
+            const string cbirJsonRequest = @"{""blocks"":[{""block"":""content_type_search-by-image"",""params"":{},""version"":2}]}";
+            string requestUrl = $"https://yandex.com/images/search?rpt=imageview&url={Uri.EscapeDataString(url)}&format=json&request={cbirJsonRequest}&yu=0";
+            using var searchRequest = new HttpRequestMessage();
+            searchRequest.Method = HttpMethod.Get;
+            searchRequest.RequestUri = new Uri(requestUrl);
+            searchRequest.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
+
+            var sw = Stopwatch.StartNew();
+            var response = await _httpClient.SendAsync(searchRequest);
+            sw.Stop();
+            byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+            using var document = JsonDocument.Parse(bytes);
+
+            var html = document
+                .RootElement
+                .GetProperty("blocks")[0]
+                .GetProperty("html")
+                .GetString() ?? "";
+
+            int startIndex = html.IndexOf("\"cbirId\":\"", StringComparison.Ordinal);
+
+            if (startIndex == -1)
+            {
+                return ("OcrApiError", null);
+            }
+
+            startIndex += 10;
+            int endIndex = html.IndexOf("\"", startIndex + 10, StringComparison.Ordinal);
+
+            if (startIndex == -1)
+            {
+                return ("OcrApiError", null);
+            }
+
+            string cbirId = html[startIndex..endIndex];
+
+            // Get OCR text
+            const string ocrJsonRequest = @"{""blocks"":[{""block"":{""block"":""i-react-ajax-adapter:ajax""},""params"":{""type"":""CbirOcr""},""version"":2}]}";
+            requestUrl = $"https://yandex.com/images/search?format=json&request={ocrJsonRequest}&rpt=ocr&cbir_id={cbirId}";
+            using var ocrRequest = new HttpRequestMessage();
+            ocrRequest.Method = HttpMethod.Get;
+            ocrRequest.RequestUri = new Uri(requestUrl);
+            ocrRequest.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36");
+
+            sw.Start();
+            response = await _httpClient.SendAsync(ocrRequest);
+            sw.Stop();
+            bytes = await response.Content.ReadAsByteArrayAsync();
+            using var ocrDocument = JsonDocument.Parse(bytes);
+
+            string ocrText = ocrDocument
+                .RootElement
+                .GetProperty("blocks")[0]
+                .GetProperty("params")
+                .GetPropertyOrDefault("adapterData")
+                .GetPropertyOrDefault("plainText")
+                .GetStringOrDefault();
+
+            if (!string.IsNullOrEmpty(ocrText))
+            {
+                return (sw.ElapsedMilliseconds.ToString(), ocrText);
+            }
+
+            return ("OcrEmpty", ocrText);
         }
 
         private static async Task UpdateLastComicAsync()
