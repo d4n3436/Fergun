@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Fergun.APIs;
 using Fergun.APIs.AIDungeon;
 using Fergun.Attributes;
@@ -249,33 +250,51 @@ namespace Fergun.Modules
             builder.Title = "AI Dungeon";
             builder.Description = Locate("CharacterSelect");
 
-            var warningBuilder = new EmbedBuilder()
-                .WithColor(FergunClient.Config.EmbedColor)
-                .WithDescription($"\u26a0 {Locate("ReplyTimeout")} {Locate("CreationCanceled")}");
+            var options = Enumerable.Range(0, characters.Count)
+                .Select(x => new SelectMenuOptionBuilder().WithValue(x.ToString()).WithLabel(characters.ElementAt(x).Key.ToTitleCase()))
+                .ToList();
 
-            var selectionBuilder = new SelectionBuilder<int>()
-                .AddUser(Context.User)
-                .WithInputType(InputType.SelectMenus)
-                .WithOptions(Enumerable.Range(0, characters.Count).ToArray())
-                .WithStringConverter(x => characters.ElementAt(x).Key.ToTitleCase())
-                .WithSelectionPage(PageBuilder.FromEmbedBuilder(builder))
-                .WithTimeoutPage(PageBuilder.FromEmbedBuilder(warningBuilder))
-                .WithActionOnTimeout(ActionOnStop.ModifyMessage | ActionOnStop.DisableInput);
+            var components = new ComponentBuilder()
+                .WithSelectMenu("foobar", options)
+                .Build();
 
-            message = await message.Channel.GetMessageAsync(_messageCache, message.Id) as IUserMessage;
-            var result = await SendSelectionAsync(selectionBuilder.Build(), TimeSpan.FromMinutes(1), message);
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), component: components, cache: _messageCache);
+            var result = await _interactive.NextMessageComponentAsync(x => x.User.Id == Context.User.Id && x.Message.Id == message.Id, timeout: TimeSpan.FromMinutes(1));
 
             if (!result.IsSuccess)
             {
-                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", true);
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", message);
             }
 
-            int characterIndex = result.Value;
+            int characterIndex = int.Parse(result.Value!.Data.Values.First());
+
+            var modal = new ModalBuilder()
+                .WithTitle("AI Dungeon")
+                .AddTextInput("Enter your character's name", "output", TextInputStyle.Short, Context.User.Username, 1, 100, true, Context.User.Username)
+                .WithCustomId($"modal{message.Id}")
+                .Build();
+
+            await result.Value!.RespondWithModalAsync(modal);
+
+            components = new ComponentBuilder()
+                .WithSelectMenu("foobar", options, disabled: true)
+                .Build();
+
+            await message.ModifyAsync(x => x.Components = components);
+            var result2 = await _interactive.NextInteractionAsync(x => x is SocketModal m && x.User.Id == Context.User.Id && m.Data.CustomId == $"modal{message.Id}", null, TimeSpan.FromMinutes(2));
+
+            if (!result2.IsSuccess)
+            {
+                return new AdventureCreationData($"{Locate("ReplyTimeout")} {Locate("CreationCanceled")}", message);
+            }
+
+            string name = (result2.Value as SocketModal)!.Data.Components.First(x => x.CustomId == "output").Value;
 
             builder.Title = "AI Dungeon";
             builder.Description = FergunClient.Config.LoadingEmote + " " + string.Format(Locate("GeneratingNewAdventure"), _modes.Keys.ElementAt(modeIndex), characters.Keys.ElementAt(characterIndex));
 
-            message = await result.Message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            await result2.Value!.DeferAsync();
+            message = await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"New: Getting info for character: {characters.Keys.ElementAt(characterIndex)} ({characters.Values.ElementAt(characterIndex)})"));
 
@@ -295,7 +314,7 @@ namespace Fergun.Modules
             try
             {
                 adventure = await _api.CreateAdventureAsync(scenario.Id.ToString(),
-                    scenario.Prompt?.Replace("${character.name}", Context.User.Username, StringComparison.OrdinalIgnoreCase));
+                    scenario.Prompt?.Replace("${character.name}", name, StringComparison.OrdinalIgnoreCase));
             }
             catch (Exception e)
             {
@@ -636,26 +655,45 @@ namespace Fergun.Modules
                 oldOutput = await TranslateWithFallbackAsync(oldOutput, "en", GetLanguage());
             }
 
-            builder.WithAuthor(Context.User)
+            builder = new EmbedBuilder()
+                .WithDescription("Press the button below to start.")
+                .WithColor(FergunClient.Config.EmbedColor);
+
+            var button = new ComponentBuilder()
+                .WithButton("Start", "foobar")
+                .Build();
+
+            await message.ModifyOrResendAsync(embed: builder.Build(), component: button, cache: _messageCache);
+
+            var res = await _interactive.NextMessageComponentAsync(x => x.User.Id == Context.User.Id && x.Message.Id == message.Id, timeout: TimeSpan.FromSeconds(30));
+            if (!res.IsSuccess)
+            {
+                return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("EditCanceled")}");
+            }
+
+            var modal = new ModalBuilder()
                 .WithTitle("AI Dungeon")
-                .WithDescription(string.Format(Locate("NewOutputPrompt"), $"```{oldOutput.Truncate(EmbedBuilder.MaxDescriptionLength - 50)}```"));
+                .AddTextInput(Locate("NewOutputPrompt"), "output", TextInputStyle.Paragraph, oldOutput.Truncate(100), 1, 1000, true)
+                .WithCustomId($"modal{message.Id}")
+                .Build();
 
-            await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
+            await res.Value!.RespondWithModalAsync(modal);
 
-            var result = await _interactive.NextMessageAsync(Context.IsSourceUserAndChannel, null, TimeSpan.FromMinutes(5));
+            button = new ComponentBuilder()
+                .WithButton("Start", "foobar", disabled: true)
+                .Build();
+
+            await message.ModifyAsync(x => x.Components = button);
+
+            var result = await _interactive.NextInteractionAsync(x => x is SocketModal m && x.User.Id == Context.User.Id && m.Data.CustomId == $"modal{message.Id}", null, TimeSpan.FromMinutes(5));
 
             if (!result.IsSuccess)
             {
                 return FergunResult.FromError($"{Locate("ReplyTimeout")} {Locate("EditCanceled")}");
             }
 
-            string newOutput = result.Value!.Content.Trim();
-
-            await result.Value.TryDeleteAsync();
-
-            // Wait 1 second before sending or modifying a message to avoid race conditions
-            // For some reason the message cache doesn't remove the cached message instantly
-            await Task.Delay(1000);
+            await result.Value!.DeferAsync();
+            string newOutput = (result.Value as SocketModal)!.Data.Components.First(x => x.CustomId == "output").Value;
 
             string commandResult = await SendAidCommandAsync(adventureId, "Loading", ActionType.Alter, newOutput, lastAction.Id);
 

@@ -1658,9 +1658,7 @@ Tal vez es un instrumental?</value>
     <value>Esperando que la cola se vacíe...</value>
   </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-    <value>La salida antigua es:
-{0}
-Ingresa la nueva salida (**no** el comando).</value>
+    <value>Ingresa el texto nuevo</value>
   </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
     <value>Generando una nueva respuesta...</value>

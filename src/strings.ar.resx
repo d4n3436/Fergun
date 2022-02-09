@@ -1668,9 +1668,7 @@
     <value>في انتظار تفريغ قائمة الانتظار ...</value>
   </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-    <value>إخراج القديم هو:
-{0}
-الرجاء إدخال الانتاج الجديد (**لا** الأمر).</value>
+    <value>أدخل النص الجديد</value>
   </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
     <value>جارٍ إنشاء رد جديد ...</value>

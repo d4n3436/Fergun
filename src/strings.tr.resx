@@ -1659,9 +1659,7 @@ Belki bu bir vesile değil mi?</value>
     <value>Sıranın boşalması bekleniyor ...</value>
   </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-    <value>Eski çıktı şöyledir:
-{0}
-yeni çıktının (**değil** komutu) girin.</value>
+    <value>Yeni metni girin</value>
   </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
     <value>Yeni bir yanıt oluşturuluyor ...</value>

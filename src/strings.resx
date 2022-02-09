@@ -1692,9 +1692,7 @@ Maybe it's an instrumental?</value>
     <value>Waiting for the queue to empty...</value>
   </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-    <value>The old output is:
-{0}
-Please enter the new output (**not** the command).</value>
+    <value>Enter the new text</value>
   </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
     <value>Generating a new response...</value>

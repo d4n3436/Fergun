@@ -1659,9 +1659,7 @@
     <value>Ожидание, пока очередь опустеет ...</value>
   </data>
 	<data name="NewOutputPrompt" xml:space="preserve">
-    <value>Старый выход:
-{0}
-Пожалуйста, введите новый выход (**не** командной).</value>
+    <value>Введите новый текст</value>
   </data>
 	<data name="GeneratingNewResponse" xml:space="preserve">
     <value>Генерация нового ответа ...</value>
