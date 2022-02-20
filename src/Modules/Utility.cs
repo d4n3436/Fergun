@@ -59,7 +59,6 @@ namespace Fergun.Modules
         private static readonly GoogleScraper _googleScraper = new GoogleScraper();
         private static readonly DuckDuckGoScraper _ddgScraper = new DuckDuckGoScraper();
         private static readonly BraveScraper _braveScraper = new BraveScraper();
-        private static readonly Translator _translator = new Translator();
         private static Language[] _filteredLanguages;
         private static Dictionary<string, string> _commandListCache;
         private static int _cachedVisibleCmdCount = -1;
@@ -67,15 +66,30 @@ namespace Fergun.Modules
         private static DateTimeOffset _timeToCheckComic = DateTimeOffset.UtcNow;
         private readonly CommandService _cmdService;
         private readonly LogService _logService;
+        private readonly AggregateTranslator _translator;
+        private readonly GoogleTranslator _googleTranslator;
+        private readonly GoogleTranslator2 _googleTranslator2;
+        private readonly BingTranslator _bingTranslator;
+        private readonly MicrosoftTranslator _microsoftTranslator;
+        private readonly YandexTranslator _yandexTranslator;
         private readonly MessageCacheService _messageCache;
         private readonly InteractiveService _interactive;
 
-        public Utility(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
+        public Utility(CommandService commands, LogService logService, MessageCacheService messageCache,
+            InteractiveService interactive, AggregateTranslator translator, GoogleTranslator googleTranslator,
+            GoogleTranslator2 googleTranslator2, BingTranslator bingTranslator, MicrosoftTranslator microsoftTranslator,
+            YandexTranslator yandexTranslator)
         {
             _cmdService ??= commands;
             _logService ??= logService;
             _messageCache ??= messageCache;
             _interactive ??= interactive;
+            _translator = translator;
+            _googleTranslator = googleTranslator;
+            _googleTranslator2 = googleTranslator2;
+            _bingTranslator = bingTranslator;
+            _microsoftTranslator = microsoftTranslator;
+            _yandexTranslator = yandexTranslator;
         }
 
         [RequireNsfw(ErrorMessage = "NSFWOnly")]
@@ -257,18 +271,24 @@ namespace Fergun.Modules
         [Example("i don't know what to say lol")]
         public async Task<RuntimeResult> BadTranslator([Remainder, Summary("badtranslatorParam1")] string text)
         {
-            // Get languages that all 3 services supports
+            // Get languages that all services support
             _filteredLanguages ??= Language.LanguageDictionary
                 .Values
-                .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex))
+                .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
                 .ToArray();
 
-            var languageChain = new List<Language>();
-            const int chainCount = 7;
-            Language sourceLanguage = null;
+            // Create an aggregated translator manually so we can randomize the initial order of the translators and shift them.
+            // Bing Translator is not included because it only allows max. 1000 chars per translation
+            var translators = new ITranslator[] { _googleTranslator, _googleTranslator2, _microsoftTranslator, _yandexTranslator };
+            translators.Shuffle();
+
+            var badTranslator = new AggregateTranslator(translators);
+            var languageChain = new List<ILanguage>();
+            const int chainCount = 8;
+            ILanguage sourceLanguage = null;
             for (int i = 0; i < chainCount; i++)
             {
-                Language targetLanguage;
+                ILanguage targetLanguage;
                 if (i == chainCount - 1)
                 {
                     targetLanguage = sourceLanguage;
@@ -282,11 +302,16 @@ namespace Fergun.Modules
                     } while (languageChain.Contains(targetLanguage));
                 }
 
-                ITranslationResult translation;
+                // Shift the translators to avoid spamming them and get more variety
+                var last = translators[^1];
+                Array.Copy(translators, 0, translators, 1, translators.Length - 1);
+                translators[0] = last;
+
+                ITranslationResult result;
                 try
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Info, "BadTranslator", $"Translating to: {targetLanguage!.ISO6391}"));
-                    translation = await _translator.TranslateAsync(text.Truncate(1000), targetLanguage);
+                    result = await badTranslator.TranslateAsync(text, targetLanguage);
                 }
                 catch (Exception e) when (e is TranslatorException || e is HttpRequestException)
                 {
@@ -299,15 +324,19 @@ namespace Fergun.Modules
 
                 if (i == 0)
                 {
-                    sourceLanguage = translation.SourceLanguage;
+                    sourceLanguage = result.SourceLanguage;
                     await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"Badtranslator: Original language: {sourceLanguage.ISO6391}"));
                     languageChain.Add(sourceLanguage);
                 }
-                text = translation.Result;
+                text = result.Translation;
                 languageChain.Add(targetLanguage);
             }
 
-            if (text.Length > EmbedFieldBuilder.MaxFieldValueLength)
+            string description = $"**{Locate("LanguageChain")}**\n" +
+                                 $"{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n" +
+                                 $"**{Locate("Result")}**\n";
+
+            if (description.Length + text.Length > EmbedBuilder.MaxDescriptionLength)
             {
                 try
                 {
@@ -317,14 +346,12 @@ namespace Fergun.Modules
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Paste: Error while uploading text to Hastebin", e));
-                    text = text.Truncate(EmbedFieldBuilder.MaxFieldValueLength);
                 }
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle("Bad translator")
-                .AddField(Locate("LanguageChain"), string.Join(" -> ", languageChain.Select(x => x.ISO6391)))
-                .AddField(Locate("Result"), text)
+                .WithDescription($"{description}{text.Truncate(EmbedBuilder.MaxDescriptionLength - description.Length)}")
                 .WithThumbnailUrl(Constants.BadTranslatorLogoUrl)
                 .WithColor(FergunClient.Config.EmbedColor);
 
@@ -1302,10 +1329,10 @@ namespace Fergun.Modules
             }
 
             var sw = Stopwatch.StartNew();
-            ITranslationResult translation;
+            ITranslationResult translationResult;
             try
             {
-                translation = await _translator.TranslateAsync(text, target);
+                translationResult = await _translator.TranslateAsync(text, target);
             }
             catch (Exception e) when (e is TranslatorException || e is HttpRequestException)
             {
@@ -1320,31 +1347,31 @@ namespace Fergun.Modules
                 sw.Stop();
             }
 
-            string translationResult = translation.Result;
+            string translation = translationResult.Translation;
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
                 try
                 {
-                    var hastebinUrl = await Hastebin.UploadAsync(translationResult);
-                    translationResult = Format.Url(Locate("HastebinLink"), hastebinUrl);
+                    var hastebinUrl = await Hastebin.UploadAsync(translation);
+                    translation = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Ocrtranslate: Error while uploading text to Hastebin", e));
-                    translationResult = Format.Code(translationResult.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                    translation = Format.Code(translation.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
             else
             {
-                translationResult = Format.Code(translationResult.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                translation = Format.Code(translation.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
             }
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("OcrtrResults"))
                 .AddField(Locate("Input"), Format.Code(text.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md"))
-                .AddField(Locate("SourceLanguage"), translation.SourceLanguage.Name)
-                .AddField(Locate("TargetLanguage"), translation.TargetLanguage.Name)
-                .AddField(Locate("Result"), translationResult)
+                .AddField(Locate("SourceLanguage"), translationResult.SourceLanguage.Name)
+                .AddField(Locate("TargetLanguage"), translationResult.TargetLanguage.Name)
+                .AddField(Locate("Result"), translation)
                 .WithFooter(string.Format(Locate("ProcessingTime"), processTime + sw.ElapsedMilliseconds))
                 .WithColor(FergunClient.Config.EmbedColor);
 
@@ -1762,10 +1789,10 @@ namespace Fergun.Modules
                 return FergunResult.FromError(string.Format(Locate("InvalidLanguage"), GetPrefix()));
             }
 
-            ITranslationResult translation;
+            ITranslationResult result;
             try
             {
-                translation = await _translator.TranslateAsync(text, target);
+                result = await _translator.TranslateAsync(text, target);
             }
             catch (Exception e) when (e is TranslatorException || e is HttpRequestException)
             {
@@ -1776,37 +1803,38 @@ namespace Fergun.Modules
                 return FergunResult.FromError(e.InnerExceptions.FirstOrDefault()?.Message ?? e.Message);
             }
 
-            string translationResult = translation.Result;
+            string translation = result.Translation;
             if (text.Length > EmbedFieldBuilder.MaxFieldValueLength - 10)
             {
                 try
                 {
-                    var hastebinUrl = await Hastebin.UploadAsync(translationResult);
-                    translationResult = Format.Url(Locate("HastebinLink"), hastebinUrl);
+                    var hastebinUrl = await Hastebin.UploadAsync(translation);
+                    translation = Format.Url(Locate("HastebinLink"), hastebinUrl);
                 }
                 catch (Exception e) when (e is HttpRequestException || e is TaskCanceledException)
                 {
                     await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "Translate: Error while uploading text to Hastebin", e));
-                    translationResult = Format.Code(translationResult.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                    translation = Format.Code(translation.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
                 }
             }
             else
             {
-                translationResult = Format.Code(translationResult.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
+                translation = Format.Code(translation.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 10), "md");
             }
 
-            string thumbnail = translation.Service switch
+            string thumbnail = result.Service switch
             {
                 "BingTranslator" => Constants.BingTranslatorLogoUrl,
                 "YandexTranslator" => Constants.YandexTranslateLogoUrl,
+                "MicrosoftTranslator" => Constants.MicrosoftAzureLogoUrl,
                 _ => Constants.GoogleTranslateLogoUrl
             };
 
             var builder = new EmbedBuilder()
                 .WithTitle(Locate("TranslationResults"))
-                .AddField(Locate("SourceLanguage"), translation.SourceLanguage.Name)
-                .AddField(Locate("TargetLanguage"), translation.TargetLanguage.Name)
-                .AddField(Locate("Result"), translationResult)
+                .AddField(Locate("SourceLanguage"), result.SourceLanguage.Name)
+                .AddField(Locate("TargetLanguage"), result.TargetLanguage.Name)
+                .AddField(Locate("Result"), translation)
                 .WithThumbnailUrl(thumbnail)
                 .WithColor(FergunClient.Config.EmbedColor);
 
@@ -1827,7 +1855,7 @@ namespace Fergun.Modules
             target = target.ToLowerInvariant();
             text = text.ToLowerInvariant();
 
-            if (!Language.TryGetLanguage(target, out var lang) || !lang.IsServiceSupported(TranslationServices.Google))
+            if (!Language.TryGetLanguage(target, out var lang) || !GoogleTranslator2.TextToSpeechLanguages.Contains(lang))
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", $"TTS: Target language not supported ({target})"));
                 //return CustomResult.FromError(GetValue("InvalidLanguage"));
@@ -1835,10 +1863,10 @@ namespace Fergun.Modules
                 target = "en";
             }
 
-            byte[] bytes;
             try
             {
-                bytes = await GoogleTTS.GetTtsAsync(text, target);
+                var stream = await _googleTranslator2.TextToSpeechAsync(text, target);
+                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
             }
             catch (HttpRequestException e)
             {
@@ -1849,11 +1877,6 @@ namespace Fergun.Modules
             {
                 await _logService.LogAsync(new LogMessage(LogSeverity.Warning, "Command", "TTS: Error while getting TTS", e));
                 return FergunResult.FromError(Locate("RequestTimedOut"));
-            }
-
-            await using (var stream = new MemoryStream(bytes))
-            {
-                await Context.Channel.SendCachedFileAsync(Cache, Context.Message.Id, stream, "tts.mp3");
             }
 
             return FergunResult.FromSuccess();

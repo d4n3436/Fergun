@@ -16,6 +16,7 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Services;
 using Fergun.Utils;
+using GTranslate.Translators;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Victoria;
@@ -370,6 +371,12 @@ namespace Fergun
                 .AddSingleton<LavaNode>()
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<MusicService>()
+                .AddSingleton<GoogleTranslator>()
+                .AddSingleton<GoogleTranslator2>()
+                .AddSingleton<BingTranslator>()
+                .AddSingleton<MicrosoftTranslator>()
+                .AddSingleton<YandexTranslator>()
+                .AddSingleton<AggregateTranslator>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton(s => Config.UseMessageCacheService && Config.MessageCacheSize > 0
                 ? new MessageCacheService(s.GetRequiredService<DiscordShardedClient>(), Config.MessageCacheSize,

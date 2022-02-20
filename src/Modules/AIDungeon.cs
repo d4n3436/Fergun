@@ -33,20 +33,21 @@ namespace Fergun.Modules
         private static AiDungeonApi _api;
         private static readonly ConcurrentDictionary<uint, SemaphoreSlim> _queue = new ConcurrentDictionary<uint, SemaphoreSlim>();
         private static IReadOnlyDictionary<string, string> _modes;
-        private static readonly Translator _translator = new Translator();
 
+        private readonly AggregateTranslator _translator;
         private readonly CommandService _cmdService;
         private readonly LogService _logService;
         private readonly MessageCacheService _messageCache;
         private readonly InteractiveService _interactive;
 
-        public AIDungeon(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive)
+        public AIDungeon(CommandService commands, LogService logService, MessageCacheService messageCache, InteractiveService interactive, AggregateTranslator translator)
         {
             _api ??= new AiDungeonApi(new HttpClient { Timeout = TimeSpan.FromMinutes(1) }, FergunClient.Config.AiDungeonToken ?? "");
             _cmdService = commands;
             _logService = logService;
             _messageCache = messageCache;
             _interactive = interactive;
+            _translator = translator;
         }
 
         [Command("info")]
@@ -1069,8 +1070,8 @@ namespace Fergun.Modules
         {
             try
             {
-                var translation = await _translator.TranslateAsync(text, toLanguage, fromLanguage);
-                return translation.Result;
+                var result = await _translator.TranslateAsync(text, toLanguage, fromLanguage);
+                return result.Translation;
             }
             catch (Exception e)
             {

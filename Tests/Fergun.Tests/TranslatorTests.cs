@@ -16,23 +16,23 @@ namespace Fergun.Tests
         public async Task TranslationNotEmptyTest(string text, string toLanguage, string fromLanguage = null)
         {
             // Arrange
-            using var translator = new Translator();
+            using var translator = new AggregateTranslator();
 
             // Act
-            var translation = await translator.TranslateAsync(text, toLanguage, fromLanguage);
+            var result = await translator.TranslateAsync(text, toLanguage, fromLanguage);
 
             // Assert
-            Assert.NotEmpty(translation.Result);
+            Assert.NotEmpty(result.Translation);
         }
 
         [Theory]
-        [InlineData("", "en")]
+        [InlineData(null, "en")]
         [InlineData("Hello world", null)]
         [InlineData("object", "", "po")]
         public async Task TranslationInvalidParamsTest(string text, string toLanguage, string fromLanguage = null)
         {
             // Arrange
-            using var translator = new Translator();
+            using var translator = new AggregateTranslator();
 
             // Act and Assert
             await Assert.ThrowsAnyAsync<ArgumentException>(async () => await translator.TranslateAsync(text, toLanguage, fromLanguage));
