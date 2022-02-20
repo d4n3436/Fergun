@@ -1,6 +1,8 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Fergun.APIs;
+using GTranslate.Translators;
 using Xunit;
 
 namespace Fergun.Tests
@@ -17,19 +19,24 @@ namespace Fergun.Tests
         public async Task TtsAvailableTest(string text, string language, bool slow)
         {
             // Act
-            var results = await GoogleTTS.GetTtsAsync(text, language, slow);
+            var translator = new GoogleTranslator2();
+            var stream = await translator.TextToSpeechAsync(text, language, slow);
 
+            await using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
             // Assert
-            Assert.NotEmpty(results);
+            Assert.NotEmpty(ms.ToArray());
         }
 
         [Theory]
-        [InlineData("", "es")]
-        [InlineData("Hello world", "")]
+        [InlineData(null, "es")]
+        [InlineData("Hello world", null)]
         public async Task TtsInvalidArgumentTest(string text, string language)
         {
+            var translator = new GoogleTranslator2();
+
             // Act and Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await GoogleTTS.GetTtsAsync(text, language));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await translator.TextToSpeechAsync(text, language));
         }
     }
 }
