@@ -27,22 +27,125 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     private readonly ILogger<UtilityModule> _logger;
     private readonly InteractiveService _interactive;
     private readonly AggregateTranslator _translator;
+    private readonly GoogleTranslator _googleTranslator;
+    private readonly GoogleTranslator2 _googleTranslator2;
+    private readonly BingTranslator _bingTranslator;
+    private readonly MicrosoftTranslator _microsoftTranslator;
+    private readonly YandexTranslator _yandexTranslator;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
     private readonly BraveScraper _braveScraper;
     private readonly SearchClient _searchClient;
+    private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
+        .Values
+        .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
+        .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, InteractiveService interactive, AggregateTranslator translator, GoogleScraper googleScraper,
-        DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, SearchClient searchClient)
+    public UtilityModule(ILogger<UtilityModule> logger, InteractiveService interactive, AggregateTranslator translator, GoogleTranslator googleTranslator,
+        GoogleTranslator2 googleTranslator2, BingTranslator bingTranslator, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator,
+        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, SearchClient searchClient)
     {
         _logger = logger;
         _interactive = interactive;
         _translator = translator;
+        _googleTranslator = googleTranslator;
+        _googleTranslator2 = googleTranslator2;
+        _bingTranslator = bingTranslator;
+        _microsoftTranslator = microsoftTranslator;
+        _yandexTranslator = yandexTranslator;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
         _braveScraper = braveScraper;
         _searchClient = searchClient;
     }
+
+    [SlashCommand("badtranslator", "Passes a text through multiple, different translators.")]
+    public async Task BadTranslator([Summary(description: "The text to use.")] string text,
+        [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
+            return;
+        }
+
+        if (chainCount is < 2 or > 10)
+        {
+            await Context.Interaction.RespondWarningAsync("The chain count must be between 2 and 10 (inclusive).", true);
+            return;
+        }
+
+        await DeferAsync();
+
+        // Create an aggregated translator manually so we can randomize the initial order of the translators and shift them.
+        // Bing Translator is not included because it only allows max. 1000 chars per translation
+        var translators = new ITranslator[] { _googleTranslator, _googleTranslator2, _microsoftTranslator, _yandexTranslator };
+        translators.Shuffle();
+        var badTranslator = new AggregateTranslator(translators);
+
+        var languageChain = new List<ILanguage>(chainCount + 1);
+        ILanguage? source = null;
+        for (int i = 0; i < chainCount; i++)
+        {
+            ILanguage target;
+            if (i == chainCount - 1)
+            {
+                target = source!;
+            }
+            else
+            {
+                // Get unique and random languages.
+                do
+                {
+                    target = _lazyFilteredLanguages.Value[Random.Shared.Next(_lazyFilteredLanguages.Value.Length)];
+                } while (languageChain.Contains(target));
+            }
+
+            // Shift the translators to avoid spamming them and get more variety
+            var last = translators[^1];
+            Array.Copy(translators, 0, translators, 1, translators.Length - 1);
+            translators[0] = last;
+
+            ITranslationResult result;
+            try
+            {
+                _logger.LogInformation("Translating to: {target}", target.ISO6391);
+                result = await badTranslator.TranslateAsync(text, target);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
+                await Context.Interaction.FollowupWarning(e.Message);
+                return;
+            }
+
+            if (i == 0)
+            {
+                source = result.SourceLanguage;
+                _logger.LogDebug("Badtranslator: Original language: {source}", source.ISO6391);
+                languageChain.Add(source);
+            }
+
+            _logger.LogDebug("Badtranslator: Translated from {source} to {target}, Service: {service}", result.SourceLanguage.ISO6391, result.TargetLanguage.ISO6391, result.Service);
+
+            text = result.Translation;
+            languageChain.Add(target);
+        }
+
+        string embedText = $"**Language Chain**\n{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n**Result**\n";
+
+        var embed = new EmbedBuilder()
+            .WithTitle("Bad translator")
+            .WithDescription($"{embedText}{text.Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length)}")
+            .WithThumbnailUrl(Constants.BadTranslatorLogoUrl)
+            .WithColor(Color.Orange)
+            .Build();
+
+        await FollowupAsync(embed: embed);
+    }
+
+    [MessageCommand("Bad Translator")]
+    public async Task BadTranslator(IUserMessage message) => await BadTranslator(message.GetText());
 
     [RequireOwner]
     [SlashCommand("cmd", "(Owner only) Executes a command.")]
