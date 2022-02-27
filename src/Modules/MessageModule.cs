@@ -70,7 +70,7 @@ public class MessageModule : InteractionModuleBase<ShardedInteractionContext>
             return;
         }
 
-        string target = Context.Interaction.GetTwoLetterLanguageCode();
+        string target = Context.Interaction.GetLanguageCode();
 
         if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
         {

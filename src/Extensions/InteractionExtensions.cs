@@ -26,7 +26,7 @@ public static class InteractionExtensions
         await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral);
     }
 
-    public static string GetTwoLetterLanguageCode(this IDiscordInteraction interaction, string defaultLanguage = "en")
+    public static string GetLanguageCode(this IDiscordInteraction interaction, string defaultLanguage = "en")
     {
         string language = interaction.UserLocale ?? interaction.GuildLocale;
         if (string.IsNullOrEmpty(language))
@@ -43,8 +43,8 @@ public static class InteractionExtensions
 
     public static bool TryGetLanguage(this IDiscordInteraction interaction, [MaybeNullWhen(false)] out Language language)
     {
-        string lang = interaction.GetTwoLetterLanguageCode();
-        return Language.TryGetLanguage(lang, out language);
+        return Language.TryGetLanguage(interaction.GetLocale(), out language) ||
+               Language.TryGetLanguage(interaction.GetLanguageCode(), out language);
     }
 
     public static string GetLocale(this IDiscordInteraction interaction, string defaultLocale = "en-US")

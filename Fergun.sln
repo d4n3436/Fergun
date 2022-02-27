@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fergun", "src\Fergun.csproj", "{2084CFF0-83BC-46FA-A969-479DE6282984}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fergun", "src\Fergun.csproj", "{2084CFF0-83BC-46FA-A969-479DE6282984}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fergun.Tests", "tests\Fergun.Tests\Fergun.Tests.csproj", "{A80CD8CE-6020-47B7-B01D-827FB90C2F1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{2084CFF0-83BC-46FA-A969-479DE6282984}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2084CFF0-83BC-46FA-A969-479DE6282984}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2084CFF0-83BC-46FA-A969-479DE6282984}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A80CD8CE-6020-47B7-B01D-827FB90C2F1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A80CD8CE-6020-47B7-B01D-827FB90C2F1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A80CD8CE-6020-47B7-B01D-827FB90C2F1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A80CD8CE-6020-47B7-B01D-827FB90C2F1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

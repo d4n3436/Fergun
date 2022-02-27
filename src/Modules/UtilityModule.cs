@@ -232,7 +232,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         bool isNsfw = Context.Channel.IsNsfw();
         _logger.LogInformation(new EventId(0, "img"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
-        var images = await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetTwoLetterLanguageCode());
+        var images = await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode());
 
         var filteredImages = images
             .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
@@ -581,7 +581,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 
     [MessageCommand("Translate")]
     public async Task Translate(IUserMessage message)
-        => await Translate(message.GetText(), Context.Interaction.GetTwoLetterLanguageCode());
+        => await Translate(message.GetText(), Context.Interaction.GetLanguageCode());
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)

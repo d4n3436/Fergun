@@ -28,7 +28,7 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
-        string language = autocompleteInteraction.GetTwoLetterLanguageCode();
+        string language = autocompleteInteraction.GetLanguageCode();
 
         string url = $"https://www.google.com/complete/search?q={Uri.EscapeDataString(value)}&client=chrome&hl={language}&xhr=t";
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));

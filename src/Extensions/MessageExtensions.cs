@@ -7,11 +7,11 @@ public static class MessageExtensions
 {
     public static string GetText(this IMessage message)
     {
-        var builder = new StringBuilder(message.Content.Length + 1);
-        builder.Append(message.Content);
-        builder.Append('\n');
+        var builder = new StringBuilder(message.Content, message.Content.Length);
+
         if (message.Embeds.Count > 0)
         {
+            builder.Append('\n');
             var embed = message.Embeds.First();
             builder.Append(embed.Author?.Name);
             builder.Append('\n');

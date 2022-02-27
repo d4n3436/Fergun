@@ -28,7 +28,7 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
-        string language = autocompleteInteraction.GetTwoLetterLanguageCode();
+        string language = autocompleteInteraction.GetLanguageCode();
         string url = $"https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl={language}&gs_ri=youtube&ds=yt&q={Uri.EscapeDataString(value)}&xhr=t";
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));

@@ -72,6 +72,6 @@ public class UserModule : InteractionModuleBase<ShardedInteractionContext>
         await RespondAsync(embed: builder.Build());
 
         static string GetTimestamp(DateTimeOffset? dateTime)
-            => dateTime == null ? "N/A" : $"{dateTime.ToDiscordTimestamp()} ({dateTime.ToDiscordTimestamp('R')})";
+            => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";
     }
 }
