@@ -14,11 +14,25 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var value = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
 
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
+        string locale = autocompleteInteraction.GetLocale("wt-wt").ToLowerInvariant();
+        bool isNsfw = context.Channel.IsNsfw();
+
+        var suggestions = await GetDuckDuckGoSuggestionsAsync(text, services, locale, isNsfw);
+
+        var results = suggestions
+            .Select(x => new AutocompleteResult(x, x))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
+    }
+
+    public static async Task<string?[]> GetDuckDuckGoSuggestionsAsync(string text, IServiceProvider services, string locale = "wt-wt", bool isNsfw = false)
+    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -27,23 +41,19 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
-        bool isNsfw = context.Channel.IsNsfw();
         client.DefaultRequestHeaders.TryAddWithoutValidation("cookie", $"p={(isNsfw ? -2 : 1)}");
 
-        string locale = autocompleteInteraction.GetLocale("wt-wt").ToLowerInvariant();
-        string url = $"https://duckduckgo.com/ac/?q={Uri.EscapeDataString(value)}&kl={locale}";
+        string url = $"https://duckduckgo.com/ac/?q={Uri.EscapeDataString(text)}&kl={locale}";
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context($"{url}-nsfw:{isNsfw}"));
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 
-        var results = document
+        return document
             .RootElement
             .EnumerateArray()
-            .Select(x => new AutocompleteResult(x.GetProperty("phrase").GetString(), x.GetProperty("phrase").GetString()))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
+            .Select(x => x.GetProperty("phrase").GetString())
+            .ToArray();
     }
 }

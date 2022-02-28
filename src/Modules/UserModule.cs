@@ -4,10 +4,10 @@ using Fergun.Extensions;
 
 namespace Fergun.Modules;
 
-public class UserModule : InteractionModuleBase<ShardedInteractionContext>
+public class UserModule : InteractionModuleBase<IInteractionContext>
 {
     [UserCommand("Avatar")]
-    public async Task GetAvatar(IUser user)
+    public async Task Avatar(IUser user)
     {
         string url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
 
@@ -62,7 +62,7 @@ public class UserModule : InteractionModuleBase<ShardedInteractionContext>
             .AddField("ID", user.Id)
             .AddField("Activity", activities, true)
             .AddField("Active Clients", clients, true)
-            .AddField("IsBot", user.IsBot)
+            .AddField("Is Bot", user.IsBot)
             .AddField("Created At", GetTimestamp(user.CreatedAt))
             .AddField("Guild Join Date", GetTimestamp(guildUser?.JoinedAt))
             .AddField("Boosting Since", GetTimestamp(guildUser?.PremiumSince))

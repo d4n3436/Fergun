@@ -3,7 +3,10 @@ using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Polly;
+using Polly.Caching;
+using Polly.Caching.Memory;
 using Polly.Extensions.Http;
+using Polly.Registry;
 
 namespace Fergun.Extensions;
 
@@ -12,6 +15,29 @@ public static class Extensions
     public static IHttpClientBuilder AddRetryPolicy(this IHttpClientBuilder builder)
         => builder.AddTransientHttpErrorPolicy(policyBuilder
             => policyBuilder.OrTransientHttpStatusCode().WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
+    public static IServiceCollection AddFergunPolicies(this IServiceCollection services)
+    {
+        return services.AddMemoryCache()
+            .AddSingleton<IAsyncCacheProvider, MemoryCacheProvider>()
+            .AddSingleton<IReadOnlyPolicyRegistry<string>, PolicyRegistry>(provider =>
+            {
+                var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<HttpResponseMessage>();
+                var cachePolicy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
+
+                var retryPolicy = HttpPolicyExtensions.HandleTransientHttpError()
+                    .OrTransientHttpStatusCode()
+                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+                var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(3));
+
+                return new PolicyRegistry
+                {
+                    { "GeneralPolicy", Policy.WrapAsync(cachePolicy, retryPolicy) },
+                    { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, retryPolicy, timeoutPolicy) }
+                };
+            });
+    }
 
     public static LogLevel ToLogLevel(this LogSeverity logSeverity)
         => logSeverity switch

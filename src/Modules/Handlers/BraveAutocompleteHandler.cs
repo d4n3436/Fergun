@@ -13,11 +13,22 @@ public class BraveAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var value = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
 
-        if (string.IsNullOrEmpty(value))
+        if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
+        var suggestions = await GetBraveSuggestionsAsync(text, services);
+
+        var results = suggestions
+            .Select(x => new AutocompleteResult(x, x))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
+    }
+
+    public static async Task<string?[]> GetBraveSuggestionsAsync(string text, IServiceProvider services)
+    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -26,19 +37,18 @@ public class BraveAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
-        string url = $"https://search.brave.com/api/suggest?q={Uri.EscapeDataString(value)}&source=web";
+        string url = $"https://search.brave.com/api/suggest?q={Uri.EscapeDataString(text)}&source=web";
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
+
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 
-        var results = document
+        return document
             .RootElement[1]
             .EnumerateArray()
-            .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
+            .Select(x => x.GetString())
+            .ToArray();
     }
 }

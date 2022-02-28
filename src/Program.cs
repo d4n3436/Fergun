@@ -14,11 +14,6 @@ using GTranslate.Translators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Caching;
-using Polly.Caching.Memory;
-using Polly.Extensions.Http;
-using Polly.Registry;
 using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
@@ -58,26 +53,7 @@ await Host.CreateDefaultBuilder()
     {
         services.AddHostedService<InteractionHandlingService>();
         services.AddSingleton<InteractiveService>();
-
-        services.AddMemoryCache();
-        services.AddSingleton<IAsyncCacheProvider, MemoryCacheProvider>();
-        services.AddSingleton<IReadOnlyPolicyRegistry<string>, PolicyRegistry>(provider =>
-        {
-            var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<HttpResponseMessage>();
-            var cachePolicy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
-
-            var retryPolicy = HttpPolicyExtensions.HandleTransientHttpError()
-                .OrTransientHttpStatusCode()
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-
-            var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(3));
-
-            return new PolicyRegistry
-            {
-                { "GeneralPolicy", Policy.WrapAsync(cachePolicy, retryPolicy) },
-                { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, retryPolicy, timeoutPolicy) }
-            };
-        });
+        services.AddFergunPolicies();
 
         services.AddHttpClient<GoogleTranslator>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))

@@ -11,14 +11,14 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var value = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
 
         IEnumerable<Language> languages = Language
             .LanguageDictionary
             .Values
-            .Where(x => x.Name.StartsWith(value, StringComparison.OrdinalIgnoreCase) ||
-                        x.ISO6391.StartsWith(value, StringComparison.OrdinalIgnoreCase) ||
-                        x.ISO6393.StartsWith(value, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.Name.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
+                        x.ISO6391.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
+                        x.ISO6393.StartsWith(text, StringComparison.OrdinalIgnoreCase))
             .OrderBy(x => x.Name);
 
         if (parameter.Name == "source")
