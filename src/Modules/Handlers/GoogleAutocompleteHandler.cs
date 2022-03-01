@@ -20,19 +20,6 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        string language = autocompleteInteraction.GetLanguageCode();
-
-        var suggestions = await GetGoogleSuggestionsAsync(text, services, language);
-
-        var results = suggestions
-            .Select(x => new AutocompleteResult(x, x))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
-    }
-
-    public static async Task<string?[]> GetGoogleSuggestionsAsync(string text, IServiceProvider services, string language = "en")
-    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -41,16 +28,20 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
-        string url = $"https://www.google.com/complete/search?q={Uri.EscapeDataString(text)}&client=chrome&hl={language}&xhr=t";
+        string locale = autocompleteInteraction.GetLocale();
+
+        string url = $"https://www.google.com/complete/search?q={Uri.EscapeDataString(text)}&client=chrome&hl={locale}&xhr=t";
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
         var bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 
-        return document
+        var results = document
             .RootElement[1]
             .EnumerateArray()
-            .Select(x => x.GetString())
-            .ToArray();
+            .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
     }
 }

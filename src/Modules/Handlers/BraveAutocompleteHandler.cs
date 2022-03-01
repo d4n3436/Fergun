@@ -18,17 +18,6 @@ public class BraveAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        var suggestions = await GetBraveSuggestionsAsync(text, services);
-
-        var results = suggestions
-            .Select(x => new AutocompleteResult(x, x))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
-    }
-
-    public static async Task<string?[]> GetBraveSuggestionsAsync(string text, IServiceProvider services)
-    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -45,10 +34,12 @@ public class BraveAutocompleteHandler : AutocompleteHandler
 
         using var document = JsonDocument.Parse(bytes);
 
-        return document
+        var results = document
             .RootElement[1]
             .EnumerateArray()
-            .Select(x => x.GetString())
-            .ToArray();
+            .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
     }
 }

@@ -19,20 +19,6 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        string locale = autocompleteInteraction.GetLocale("wt-wt").ToLowerInvariant();
-        bool isNsfw = context.Channel.IsNsfw();
-
-        var suggestions = await GetDuckDuckGoSuggestionsAsync(text, services, locale, isNsfw);
-
-        var results = suggestions
-            .Select(x => new AutocompleteResult(x, x))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
-    }
-
-    public static async Task<string?[]> GetDuckDuckGoSuggestionsAsync(string text, IServiceProvider services, string locale = "wt-wt", bool isNsfw = false)
-    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -40,6 +26,15 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
         var policy = services
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
+
+        string locale = autocompleteInteraction.GetLocale("wt-wt").ToLowerInvariant();
+        var temp = locale.Split('-');
+        if (temp.Length == 2)
+        {
+            locale = $"{temp[1]}-{temp[0]}";
+        }
+
+        bool isNsfw = context.Channel.IsNsfw();
 
         client.DefaultRequestHeaders.TryAddWithoutValidation("cookie", $"p={(isNsfw ? -2 : 1)}");
 
@@ -50,10 +45,12 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
 
         using var document = JsonDocument.Parse(bytes);
 
-        return document
+        var results = document
             .RootElement
             .EnumerateArray()
-            .Select(x => x.GetProperty("phrase").GetString())
-            .ToArray();
+            .Select(x => new AutocompleteResult(x.GetProperty("phrase").GetString(), x.GetProperty("phrase").GetString()))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
     }
 }

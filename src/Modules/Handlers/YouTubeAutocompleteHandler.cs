@@ -20,19 +20,6 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        string language = autocompleteInteraction.GetLanguageCode();
-
-        var suggestions = await GetYouTubeSuggestionsAsync(text, services, language);
-
-        var results = suggestions
-            .Select(x => new AutocompleteResult(x, x))
-            .Take(25);
-
-        return AutocompletionResult.FromSuccess(results);
-    }
-
-    public static async Task<string?[]> GetYouTubeSuggestionsAsync(string text, IServiceProvider services, string language = "en")
-    {
         var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
@@ -41,6 +28,8 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
+        string language = autocompleteInteraction.GetLanguageCode();
+
         string url = $"https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl={language}&gs_ri=youtube&ds=yt&q={Uri.EscapeDataString(text)}&xhr=t";
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
@@ -48,10 +37,12 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
 
         using var document = JsonDocument.Parse(bytes);
 
-        return document
+        var results = document
             .RootElement[1]
             .EnumerateArray()
-            .Select(x => x[0].GetString())
-            .ToArray();
+            .Select(x => new AutocompleteResult(x[0].GetString(), x[0].GetString()))
+            .Take(25);
+
+        return AutocompletionResult.FromSuccess(results);
     }
 }
