@@ -518,9 +518,9 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     }
 
     [SlashCommand("translate", "Translates a text.")]
-    public async Task Translate([Summary(description: "The text to translate")] string text,
-        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias)")] string target,
-        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias)")] string? source = null)
+    public async Task Translate([Summary(description: "The text to translate.")] string text,
+        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
+        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias).")] string? source = null)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -582,6 +582,42 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     [MessageCommand("Translate")]
     public async Task Translate(IUserMessage message)
         => await Translate(message.GetText(), Context.Interaction.GetLanguageCode());
+
+    [SlashCommand("tts", "Converts text into synthesized speech.")]
+    public async Task TTS([Summary(description: "The text to convert.")] string text,
+        [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
+            return;
+        }
+
+        target ??= Context.Interaction.GetLanguageCode();
+
+        if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
+        {
+            await Context.Interaction.RespondWarningAsync($"Language \"{target}\" not supported.", true);
+            return;
+        }
+
+        await DeferAsync();
+
+        try
+        {
+            await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
+            await Context.Interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"));
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "TTS: Error obtaining TTS from text {text} ({language})", text, language);
+            await Context.Interaction.FollowupWarning(e.Message);
+        }
+    }
+
+    [MessageCommand("TTS")]
+    public async Task TTS(IUserMessage message)
+        => await TTS(message.GetText(), Context.Interaction.GetLanguageCode());
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)

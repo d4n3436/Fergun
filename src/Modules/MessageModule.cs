@@ -58,44 +58,4 @@ public class MessageModule : InteractionModuleBase<ShardedInteractionContext>
 
         await RespondAsync("\u200b", ephemeral: true, components: button);
     }
-
-    [MessageCommand("TTS")]
-    public async Task TTS(IUserMessage message)
-    {
-        string text = message.GetText();
-
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
-            return;
-        }
-
-        string target = Context.Interaction.GetLanguageCode();
-
-        if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
-        {
-            await Context.Interaction.RespondWarningAsync($"Language \"{target}\" not supported.", true);
-            return;
-        }
-
-        await DeferAsync();
-
-        try
-        {
-            await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
-            await Context.Interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"));
-        }
-        catch (HttpRequestException e)
-        {
-            _logger.LogWarning(e, "TTS: Error while getting TTS");
-            await Context.Interaction.FollowupWarning("An error occurred.");
-        }
-        catch (TaskCanceledException e)
-        {
-            _logger.LogWarning(e, "TTS: Error while getting TTS");
-            await Context.Interaction.FollowupWarning("Request timed out.");
-        }
-    }
-
-    
 }
