@@ -36,7 +36,7 @@ public class MessageModule : InteractionModuleBase<ShardedInteractionContext>
     }
 
     [MessageCommand("Get Reference")]
-    public async Task GetReferencedMessage(IUserMessage message)
+    public async Task GetReferencedMessage(IMessage message)
     {
         if (message.Type != MessageType.Reply)
         {

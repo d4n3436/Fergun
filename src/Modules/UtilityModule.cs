@@ -59,6 +59,10 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         _searchClient = searchClient;
     }
 
+    [MessageCommand("Bad Translator")]
+    public async Task BadTranslator(IMessage message)
+        => await BadTranslator(message.GetText());
+
     [SlashCommand("badtranslator", "Passes a text through multiple, different translators.")]
     public async Task BadTranslator([Summary(description: "The text to use.")] string text,
         [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
@@ -143,9 +147,6 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 
         await FollowupAsync(embed: embed);
     }
-
-    [MessageCommand("Bad Translator")]
-    public async Task BadTranslator(IUserMessage message) => await BadTranslator(message.GetText());
 
     [RequireOwner]
     [SlashCommand("cmd", "(Owner only) Executes a command.")]
@@ -517,6 +518,10 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         await FollowupAsync(embed: builder.Build());
     }
 
+    [MessageCommand("Translate")]
+    public async Task Translate(IMessage message)
+        => await Translate(message.GetText(), Context.Interaction.GetLanguageCode());
+
     [SlashCommand("translate", "Translates a text.")]
     public async Task Translate([Summary(description: "The text to translate.")] string text,
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
@@ -579,9 +584,9 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         await FollowupAsync(embed: builder.Build());
     }
 
-    [MessageCommand("Translate")]
-    public async Task Translate(IUserMessage message)
-        => await Translate(message.GetText(), Context.Interaction.GetLanguageCode());
+    [MessageCommand("TTS")]
+    public async Task TTS(IMessage message)
+        => await TTS(message.GetText());
 
     [SlashCommand("tts", "Converts text into synthesized speech.")]
     public async Task TTS([Summary(description: "The text to convert.")] string text,
@@ -614,10 +619,6 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             await Context.Interaction.FollowupWarning(e.Message);
         }
     }
-
-    [MessageCommand("TTS")]
-    public async Task TTS(IUserMessage message)
-        => await TTS(message.GetText(), Context.Interaction.GetLanguageCode());
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)
