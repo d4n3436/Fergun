@@ -7,29 +7,34 @@ namespace Fergun.Extensions
     {
         public static Color GetAverageColor(this Image<Rgba32> image)
         {
-            int r = 0;
-            int g = 0;
-            int b = 0;
+            var average = new Rgba32();
 
-            for (int y = 0; y < image.Height; y++)
+            image.ProcessPixelRows(accessor =>
             {
-                var rowSpan = image.GetPixelRowSpan(y);
-                for (int x = 0; x < rowSpan.Length; x++)
+                int r = 0;
+                int g = 0;
+                int b = 0;
+
+                for (int y = 0; y < accessor.Height; y++)
                 {
-                    var pixel = rowSpan[x];
-                    r += pixel.R;
-                    g += pixel.G;
-                    b += pixel.B;
+                    var pixelRow = accessor.GetRowSpan(y);
+                    for (int x = 0; x < pixelRow.Length; x++)
+                    {
+                        ref var pixel = ref pixelRow[x];
+                        r += pixel.R;
+                        g += pixel.G;
+                        b += pixel.B;
+                    }
                 }
-            }
 
-            int total = image.Width * image.Height;
+                int total = image.Width * image.Height;
 
-            r /= total;
-            g /= total;
-            b /= total;
+                average.R = (byte)(r / total);
+                average.G = (byte)(g / total);
+                average.B = (byte)(b / total);
+            });
 
-            return Color.FromRgb((byte)r, (byte)g, (byte)b);
+            return Color.FromPixel(average);
         }
     }
 }
