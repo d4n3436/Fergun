@@ -32,7 +32,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 
   Or [download from GitHub](https://github.com/d4n3436/Fergun/archive/master.zip).
 
-* Build the bot (change `Release`/`ReleaseLabs` to `Debug`/`DebugLabs`<sup id="7-interactions-support">[note](#f1)</sup> in a debug build):
+* Build the bot (change `Release` to `Debug` in a debug build):
   ```
   cd Fergun
   dotnet build -c Release
@@ -42,7 +42,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 If you want to use the music module with a local Lavalink server, follow these steps:
 *  [Install JDK 11+](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
 
-* Create a folder in the build folder called "Lavalink" (change `Release`/`ReleaseLabs` to `Debug`/`DebugLabs`<sup id="7-interactions-support">[note](#f1)</sup> in a debug build):
+* Create a folder in the build folder called "Lavalink" (change `Release` to `Debug` in a debug build):
   ```
   cd src/bin/Release/net6.0
   mkdir Lavalink
@@ -64,7 +64,7 @@ If you want to use the music module with a local Lavalink server, follow these s
 
 
 ### 3. Running the bot
-* Go to the build folder if you haven't done it before (change `Release`/`ReleaseLabs` to `Debug`/`DebugLabs`<sup id="7-interactions-support">[note](#f1)</sup> in a debug build):
+* Go to the build folder if you haven't done it before (change `Release` to `Debug` in a debug build):
  
   `cd src/bin/Release/net6.0`
  
@@ -144,12 +144,6 @@ To shut down the bot use `logout`.
 * Press F5. A `subscriptions` connection should appear.
 * Click it, go to the `Messages` tab and scroll up to the first message.
 * Click the first message. The token is the value of the `token` key.
-
-### 7. Interactions support
-<b id="f1"></b>
-Fergun now supports interactions with Discord.Net Labs. It is currently used to replace reactions with buttons/select menus in paginators and selections. To be able to use interactions you will need to build the bot using either the `ReleaseLabs` or the `DebugLabs` configuration.
-
-Update: Now that Fergun is using Discord.Net 3.0, it is no longer necessary to use the `ReleaseLabs`/`DebugLabs` configurations. These configurations will be kept if someone wants to use Discord.Net Labs instead of Discord.Net.
 
 ## Contributing
 Feel free to report bugs or request new features via issues or pull requests. Requesting new commands may or may not be accepted depending on the utility and usability of that command.

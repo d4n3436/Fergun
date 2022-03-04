@@ -8,7 +8,6 @@
     <NeutralLanguage>en</NeutralLanguage>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Authors>d4n3436</Authors>
-    <Configurations>Debug;Release;DebugLabs;ReleaseLabs</Configurations>
     <PackageProjectUrl>https://github.com/d4n3436/Fergun</PackageProjectUrl>
     <RepositoryUrl>https://github.com/d4n3436/Fergun</RepositoryUrl>
   </PropertyGroup>
@@ -35,35 +34,12 @@
     <WriteCodeFragment Language="C#" OutputFile="$(GitHashInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLabs|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;DEBUG;DNETLABS</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLabs|AnyCPU'">
-    <DefineConstants>$(DefineConstants)TRACE;RELEASE;DNETLABS</DefineConstants>
-    <Optimize>True</Optimize>
-  </PropertyGroup>
-
-  <Choose>
-    <When Condition="$(DefineConstants.Contains('DNETLABS'))">
-      <ItemGroup>
-        <PackageReference Include="Discord.Net.Labs.Commands" Version="3.6.1" />
-        <PackageReference Include="Discord.Net.Labs.WebSocket" Version="3.6.1" />
-        <PackageReference Include="Fergun.Interactive.Labs" Version="1.4.1" />
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <PackageReference Include="Discord.Net.Commands" Version="3.3.2" />
-        <PackageReference Include="Discord.Net.WebSocket" Version="3.3.2" />
-        <PackageReference Include="Fergun.Interactive" Version="1.4.1" />
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-
   <ItemGroup>
+    <PackageReference Include="Discord.Net.Commands" Version="3.3.2" />
+    <PackageReference Include="Discord.Net.WebSocket" Version="3.3.2" />
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="GScraper" Version="1.0.2" />
+    <PackageReference Include="Fergun.Interactive" Version="1.4.1" />
     <PackageReference Include="GTranslate" Version="2.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
