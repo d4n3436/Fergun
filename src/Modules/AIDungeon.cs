@@ -926,7 +926,7 @@ namespace Fergun.Modules
             return FergunResult.FromSuccess();
         }
 
-        [Command("dump", RunMode = RunMode.Async), Ratelimit(1, 2, Measure.Minutes)]
+        [Command("dump", RunMode = RunMode.Async), Ratelimit(3, 1, Measure.Minutes)]
         [Summary("dumpSummary")]
         [Alias("export")]
         [Example("2582734")]
