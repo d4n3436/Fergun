@@ -3,6 +3,8 @@ using Discord.Addons.Hosting;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun;
+using Fergun.Apis.Bing;
+using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Modules;
@@ -54,6 +56,14 @@ await Host.CreateDefaultBuilder()
         services.AddHostedService<InteractionHandlingService>();
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
+
+        services.AddHttpClient<BingVisualSearch>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<YandexImageSearch>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
 
         services.AddHttpClient<GoogleTranslator>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
