@@ -13,50 +13,18 @@ namespace Fergun
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             .InformationalVersion;
 
-        public const string Changelog = @"**v1.8**
+        public const string Changelog = @"**v1.9**
 Additions:
-- Added GScraper, a scraping library for Google Images, DuckDuckGo and Brave.
-- [img2] Added new command (DuckDuckGo image search).
-- [img3] Added new command (Brave image search).
-- [privacy] Added new command (privacy policy and opt out options)
-- [userinfo] Added user badges.
-- [youtube] Added pagination support.
-- [wikipedia] Added pagination support.
-- [channelinfo] Added support for thread and stage channels.
-- [roleinfo] Added role icon as thumbnail.
-- Added icons to image search commands.
-- Added Discord timestamps to multiple commands.
-- Added embeds to messages with attachments (`color`, `invert`, `screenshot`).
-- Added fallback pastebin to Hastebin (Hatebin).
-- Added multiple configuration options.
-- Added an optimized message cache.
-- Added sharding support.
+- Added Yandex OCR as a fallback OCR API.
 
 Changes:
-- Updated the runtime to .NET 6, with lots of performance and memory improvements.
-- Replaced the included translators with GTranslate, which includes new languages and a new translator (Yandex.Translate).
-- Replaced System.Drawing.Commom with ImageSharp.
-- Replaced the old interactive service with Fergun.Interactive.
-- Replaced OCR.Space API with Bing Visual Search internal API, which is free and doesn't require an API key.
-- Rewritten the AI Dungeon API wrapper, improving the response time of AI Dungeon commands.
-- [img] Use images from Google Images.
-- Snipe commands can now be opt out with `privacy`.
-- [wikipedia] Use the localized logo.
-- [stats] Display the git commit hash and sharding info.
-- [help] Ignore the command group when searching for a command.
-- [avatar, userinfo] Try to use the user's banner color instead of downloading the avatar and getting the average color whenever possible.
-- Improved the reusage of interactive messages.
-- Improved the way the bot resolves the users from the command messages.
-- Improved the handling of edited command messages with attachments.
-- Updated multiple comands to benefit from interactions (buttons, select menus).
-- Now image search commands use the highest safe search level on non-NSFW channels.
-- Now possible edited command messages won't be processed if they are 4 hours older.
-- Lots of bug fixes.
-- Other minor changes.
-
-Removals:
-- Removed the command `identify`, it stopped working a long time ago.
-- [config] Removed CaptionBot autotranslate option.";
+- Fixed a bug in AI Dungeon module that caused an exception when attempting to get the error message.
+- Fixed a bug that caused an exception when modifying a command message in some cases.
+- Fixed a bug in play that caused an exception due to a bug in the music library.
+- Fixed a bug in `translate`, `badtranslator` and `ocrtranslate` that caused the translated text to not be complete in some cases.
+- Updated `badtranslator` to be more diverse and use all 4 available translation services.
+- Updated `new` and `alter` to use modals (forms).
+- Reduced the cooldown of `dump`.";
 
         public static string GitHash { get; } = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<GitHashInfoAttribute>()?
