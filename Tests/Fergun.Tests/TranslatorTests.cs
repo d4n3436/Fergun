@@ -28,7 +28,7 @@ namespace Fergun.Tests
         [Theory]
         [InlineData(null, "en")]
         [InlineData("Hello world", null)]
-        [InlineData("object", "", "po")]
+        [InlineData("object", null, "po")]
         public async Task TranslationInvalidParamsTest(string text, string toLanguage, string fromLanguage = null)
         {
             // Arrange
