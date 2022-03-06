@@ -380,9 +380,10 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     [MessageCommand("OCR")]
     public async Task Ocr(IMessage message)
     {
+        var attachment = message.Attachments.FirstOrDefault();
         var embed = message.Embeds.FirstOrDefault(x => x.Image is not null || x.Thumbnail is not null);
 
-        string? url = embed?.Image?.Url ?? embed?.Thumbnail?.Url;
+        string? url = attachment?.Url ?? embed?.Image?.Url ?? embed?.Thumbnail?.Url;
 
         if (url is null)
         {
