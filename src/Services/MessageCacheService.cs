@@ -335,12 +335,9 @@ namespace Fergun.Services
 
         private void HandleReceivedMessage(IMessage message)
         {
-            if (!(message.Channel is IGuildChannel guildChannel))
-                return;
-
             if (_minCommandTime != 0)
             {
-                if (!_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
+                if (message.Channel is not IGuildChannel guildChannel || !_lastCommandUsageTimes.TryGetValue(guildChannel.GuildId, out var lastUsageTime))
                     return;
 
                 var now = DateTimeOffset.UtcNow;

@@ -46,7 +46,7 @@ namespace Fergun.Modules
         [Summary("joinSummary")]
         public async Task<RuntimeResult> Join()
         {
-            await SendEmbedAsync(await _musicService.JoinAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.JoinAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel), DisplayRewriteWarning);
             return FergunResult.FromSuccess();
         }
 
@@ -57,7 +57,7 @@ namespace Fergun.Modules
         {
             var user = (SocketGuildUser)Context.User;
             bool connected = await _musicService.LeaveAsync(Context.Guild, user.VoiceChannel);
-            await SendEmbedAsync(!connected ? Locate("BotNotConnected") : string.Format(Locate("LeftVC"), Format.Bold(user.VoiceChannel.Name)));
+            await SendEmbedAsync(!connected ? Locate("BotNotConnected") : string.Format(Locate("LeftVC"), Format.Bold(user.VoiceChannel.Name)), DisplayRewriteWarning);
         }
 
         [Command("loop")]
@@ -65,7 +65,7 @@ namespace Fergun.Modules
         [Example("10")]
         public async Task Loop([Summary("loopParam1")] uint? count = null)
         {
-            await SendEmbedAsync(_musicService.Loop(count, Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(_musicService.Loop(count, Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [LongRunning]
@@ -174,7 +174,7 @@ namespace Fergun.Modules
         [Summary("moveSummary")]
         public async Task Move()
         {
-            await SendEmbedAsync(await _musicService.MoveAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.MoveAsync(Context.Guild, ((SocketGuildUser)Context.User).VoiceChannel, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("nowplaying")]
@@ -182,14 +182,14 @@ namespace Fergun.Modules
         [Alias("np")]
         public async Task NowPlaying()
         {
-            await SendEmbedAsync(_musicService.GetCurrentTrack(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(_musicService.GetCurrentTrack(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("pause")]
         [Summary("pauseSummary")]
         public async Task Pause()
         {
-            await SendEmbedAsync(await _musicService.PauseOrResumeAsync(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.PauseOrResumeAsync(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [RequireBotPermission(GuildPermission.Speak, ErrorMessage = "BotRequireSpeak")]
@@ -215,7 +215,7 @@ namespace Fergun.Modules
 
             if (tracks == null)
             {
-                await SendEmbedAsync(response);
+                await SendEmbedAsync(response, DisplayRewriteWarning);
             }
             else
             {
@@ -268,6 +268,11 @@ namespace Fergun.Modules
                 var builder2 = new EmbedBuilder()
                     .WithDescription(result2)
                     .WithColor(FergunClient.Config.EmbedColor);
+
+                if (DisplayRewriteWarning)
+                {
+                    builder2.AddField(Locate("CommandRemovalWarning"), Locate("MusicRemovalWarning"));
+                }
 
                 if (message == null)
                 {
@@ -332,6 +337,11 @@ namespace Fergun.Modules
                 .AddField(Locate("TrackUrl"), Format.Url(Locate("ClickHere"), spotify.TrackUrl), true)
                 .WithColor(FergunClient.Config.EmbedColor);
 
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("MusicRemovalWarning"));
+            }
+
             await ReplyAsync(embed: builder.Build());
 
             return FergunResult.FromSuccess();
@@ -342,7 +352,7 @@ namespace Fergun.Modules
         [Alias("q")]
         public async Task Queue()
         {
-            await SendEmbedAsync(_musicService.GetQueue(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(_musicService.GetQueue(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("remove")]
@@ -351,21 +361,21 @@ namespace Fergun.Modules
         [Example("2")]
         public async Task Remove([Summary("removeParam1")] int index)
         {
-            await SendEmbedAsync(_musicService.RemoveAt(Context.Guild, Context.Channel as ITextChannel, index));
+            await SendEmbedAsync(_musicService.RemoveAt(Context.Guild, Context.Channel as ITextChannel, index), DisplayRewriteWarning);
         }
 
         [Command("replay")]
         [Summary("replaySummary")]
         public async Task Replay()
         {
-            await SendEmbedAsync(await _musicService.ReplayAsync(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.ReplayAsync(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("resume")]
         [Summary("resumeSummary")]
         public async Task Resume()
         {
-            await SendEmbedAsync(await _musicService.ResumeAsync(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.ResumeAsync(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("seek")]
@@ -374,14 +384,14 @@ namespace Fergun.Modules
         [Example("3:14")]
         public async Task Seek([Summary("seekParam1")] string time)
         {
-            await SendEmbedAsync(await _musicService.SeekAsync(Context.Guild, Context.Channel as ITextChannel, time));
+            await SendEmbedAsync(await _musicService.SeekAsync(Context.Guild, Context.Channel as ITextChannel, time), DisplayRewriteWarning);
         }
 
         [Command("shuffle")]
         [Summary("shuffleSummary")]
         public async Task Shuffle()
         {
-            await SendEmbedAsync(_musicService.Shuffle(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(_musicService.Shuffle(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("skip")]
@@ -389,14 +399,14 @@ namespace Fergun.Modules
         [Alias("s")]
         public async Task Skip()
         {
-            await SendEmbedAsync(await _musicService.SkipAsync(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.SkipAsync(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("stop")]
         [Summary("stopSummary")]
         public async Task Stop()
         {
-            await SendEmbedAsync(await _musicService.StopAsync(Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.StopAsync(Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
 
         [Command("volume")]
@@ -404,7 +414,7 @@ namespace Fergun.Modules
         [Example("70")]
         public async Task Volume([Summary("volumeParam1")] int volume)
         {
-            await SendEmbedAsync(await _musicService.SetVolumeAsync(volume, Context.Guild, Context.Channel as ITextChannel));
+            await SendEmbedAsync(await _musicService.SetVolumeAsync(volume, Context.Guild, Context.Channel as ITextChannel), DisplayRewriteWarning);
         }
     }
 }

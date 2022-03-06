@@ -935,9 +935,7 @@
     <value>Добро пожаловать в AI Dungeon</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>Обязательно прочитайте информацию и команды с `{0}aid info`, прежде чем продолжить.
-
-Выберите режим:</value>
+    <value>Выберите режим:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
     <value>Выберите символ</value>
@@ -2177,5 +2175,40 @@ d. Когда сообщение удалено / отредактировано
 	</data>
 	<data name="Archived" xml:space="preserve">
 		<value>Архивировано</value>
+	</data>
+	<data name="RewriteWarning" xml:space="preserve">
+		<value>Fergun теперь имеет слеш-команды! Эти команды уже включены на этом сервере/канале, введите `/`, чтобы попробовать их.
+Из-за изменений в ботах, внесенных Discord, в конце апреля 2022 года потребуются команды с косой чертой, а текстовые команды (например, та, которую вы использовали) перестанут работать.</value>
+	</data>
+	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
+		<value>Fergun теперь имеет слеш-команды, но они еще не включены на этом сервере!
+Из-за изменений в ботах, внесенных Discord, в конце апреля 2022 года потребуются команды с косой чертой, а текстовые команды (например, та, которую вы использовали) перестанут работать.</value>
+	</data>
+	<data name="SwitchToSlashCommands" xml:space="preserve">
+		<value>Переключиться на слеш-команды</value>
+	</data>
+	<data name="EnableSlashCommands" xml:space="preserve">
+		<value>Включить слэш-команды (требуется Управлять сервером)</value>
+	</data>
+	<data name="TempDisableWarning" xml:space="preserve">
+		<value>Временно отключить это предупреждение</value>
+	</data>
+	<data name="RewriteWarningDisabled" xml:space="preserve">
+		<value>Предупреждение отключено на 1 неделю.</value>
+	</data>
+	<data name="CommandRemovalWarning" xml:space="preserve">
+		<value>⚠️ Предупреждение об удалении команды</value>
+	</data>
+	<data name="SnipeRemovalWarning" xml:space="preserve">
+		<value>Команды Snipe будут удалены в апреле 2022 года из-за изменений, внесенных Discord. Подробнее [здесь](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-early-2022)</value>
+	</data>
+	<data name="MusicRemovalWarning" xml:space="preserve">
+		<value>Музыкальный модуль будет удален в апреле 2022 года. Подробнее [здесь](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-april-2022)</value>
+	</data>
+	<data name="AIDUsageNote" xml:space="preserve">
+		<value>Обязательно прочитайте информацию и команды с `{0}aid info`, прежде чем продолжить.</value>
+	</data>
+	<data name="AIDRemovalWarning" xml:space="preserve">
+		<value>Модуль AI Dungeon будет удален в апреле 2022 года. Подробнее [здесь](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-april-2022).</value>
 	</data>
 </root>

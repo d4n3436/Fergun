@@ -1,4 +1,4 @@
-﻿using MongoDB.Bson;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Fergun
@@ -54,5 +54,7 @@ namespace Fergun
         /// Gets or sets whether the user has opted out the temporary collection of deleted/edited messages in the "snipe" commands.
         /// </summary>
         public bool IsOptedOutSnipe { get; set; }
+
+        public long RewriteWarningExpirationTime { get; set; }
     }
 }

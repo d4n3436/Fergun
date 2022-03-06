@@ -431,6 +431,12 @@ namespace Fergun.Modules
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
             }
+
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
+            }
+
             builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
@@ -474,6 +480,12 @@ namespace Fergun.Modules
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
             }
+
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
+            }
+
             builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
@@ -879,13 +891,18 @@ namespace Fergun.Modules
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
             }
+
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
+            }
+
             builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());
         }
 
         [AlwaysEnabled]
-        [LongRunning]
         [Command("help", RunMode = RunMode.Async)]
         [Summary("helpSummary")]
         [Example("help")]
@@ -1422,7 +1439,11 @@ namespace Fergun.Modules
                                  $"{FergunClient.Config.MongoDbEmote}{Format.Bold("Database")}: {Math.Round(sw2.Elapsed.TotalMilliseconds, 2)}ms")
                 .WithColor(FergunClient.Config.EmbedColor);
 
-            await message.ModifyAsync(x => x.Embed = builder.Build());
+            await message.ModifyAsync(x =>
+            {
+                x.Embeds = message.Embeds.Count == 1 ? new[] { builder.Build() } : new[] { builder.Build(), message.Embeds.ElementAt(1).ToEmbedBuilder().Build() };
+                x.Components = ComponentBuilder.FromComponents(message.Components).Build();
+            });
         }
 
         [LongRunning]
@@ -1745,6 +1766,12 @@ namespace Fergun.Modules
                     builder.AddField(Locate("Privacy"), Locate("SnipePrivacy"));
                 }
             }
+
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
+            }
+
             builder.WithColor(FergunClient.Config.EmbedColor);
 
             await ReplyAsync(embed: builder.Build());

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -30,6 +30,8 @@ namespace Fergun
         /// </summary>
         public static IDictionary<string, string> GloballyDisabledCommands => GetConfig().GloballyDisabledCommands ?? new Dictionary<string, string>();
 
+        public static int RewriteWarnPercentage => GetConfig().RewriteWarnPercentage;
+
         /// <summary>
         /// Modifies the database config with the specified properties.
         /// </summary>
@@ -57,5 +59,6 @@ namespace Fergun
         public string Language { get; set; }
         public IDictionary<string, int> CommandStats { get; set; } = new Dictionary<string, int>();
         public IDictionary<string, string> GloballyDisabledCommands { get; set; } = new Dictionary<string, string>();
+        public int RewriteWarnPercentage { get; set; }
     }
 }

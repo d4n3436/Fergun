@@ -426,5 +426,16 @@ namespace Fergun.Modules
 
             return FergunResult.FromError("Wait. This line was not supposed to be reached.");
         }
+
+        [Command("setwarnpercentage", RunMode = RunMode.Async)]
+        public async Task<RuntimeResult> SetWarnPercentage(int percentage)
+        {
+            DatabaseConfig.Update(x => x.RewriteWarnPercentage = percentage);
+
+            GuildUtils.CachedRewriteWarnPercentage = percentage;
+            await SendEmbedAsync($"Updated the warn percentage to {percentage}%");
+
+            return FergunResult.FromSuccess();
+        }
     }
 }

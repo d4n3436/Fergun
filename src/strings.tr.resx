@@ -932,9 +932,7 @@ Bir etiket ({0}), bir söz ({1}) veya bir kimlik ({2}) kullanmayı deneyin.</val
     <value>AI Dungeon'a Hoşgeldiniz</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>Devam etmeden önce `{0}aid info` ile bilgi ve komutları okuduğunuzdan emin olun.
-
-Bir mod seçin:</value>
+    <value>Bir mod seçin:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
     <value>Bir karakter seçin</value>
@@ -2176,5 +2174,40 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 	</data>
 	<data name="Archived" xml:space="preserve">
 		<value>Arşivlendi</value>
+	</data>
+	<data name="RewriteWarning" xml:space="preserve">
+		<value>Fergun'un artık eğik çizgi komutları var! Bu komutlar bu sunucuda/kanalda zaten etkin, denemek için `/` yazın.
+Discord tarafından botlarda yapılan değişiklikler nedeniyle, Nisan 2022'nin sonlarında eğik çizgi komutları gerekecek ve metin komutları (kullandığınız gibi) çalışmayı durduracak.</value>
+	</data>
+	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
+		<value>Fergun'un artık eğik çizgi komutları var, ancak bunlar henüz bu sunucuda etkinleştirilmedi!
+Discord tarafından botlarda yapılan değişiklikler nedeniyle, Nisan 2022'nin sonlarında eğik çizgi komutları gerekecek ve metin komutları (kullandığınız gibi) çalışmayı durduracak.</value>
+	</data>
+	<data name="SwitchToSlashCommands" xml:space="preserve">
+		<value>Eğik çizgi komutlarına geç</value>
+	</data>
+	<data name="EnableSlashCommands" xml:space="preserve">
+		<value>Eğik çizgi komutlarını etkinleştir (gerektirir Sunucuyu Yönet)</value>
+	</data>
+	<data name="TempDisableWarning" xml:space="preserve">
+		<value>Bu uyarıyı geçici olarak devre dışı bırakın</value>
+	</data>
+	<data name="RewriteWarningDisabled" xml:space="preserve">
+		<value>Uyarı 1 haftalığına devre dışı bırakıldı.</value>
+	</data>
+	<data name="CommandRemovalWarning" xml:space="preserve">
+		<value>⚠️ Komut kaldırma uyarısı</value>
+	</data>
+	<data name="SnipeRemovalWarning" xml:space="preserve">
+		<value>Snipe komutları, Discord tarafından yapılan değişiklikler nedeniyle Nisan 2022'de kaldırılacaktır. Daha fazla bilgi [burada](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-early-2022)</value>
+	</data>
+	<data name="MusicRemovalWarning" xml:space="preserve">
+		<value>Müzik modülü Nisan 2022'de kaldırılacak. Daha fazla bilgi [buradan](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-april-2022)</value>
+	</data>
+	<data name="AIDUsageNote" xml:space="preserve">
+		<value>Devam etmeden önce `{0}aid info` ile bilgi ve komutları okuduğunuzdan emin olun.</value>
+	</data>
+	<data name="AIDRemovalWarning" xml:space="preserve">
+		<value>AI Dungeon modülü Nisan 2022'de kaldırılacak. Daha fazla bilgi [buradan](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-april-2022).</value>
 	</data>
 </root>

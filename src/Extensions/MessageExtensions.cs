@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
@@ -74,19 +75,34 @@ namespace Fergun.Extensions
         public static async Task<IUserMessage> ModifyOrResendAsync(this IUserMessage message, string content = null, Embed embed = null,
             AllowedMentions allowedMentions = null, MessageComponent component = null, MessageCacheService cache = null)
         {
-            component ??= new ComponentBuilder().Build(); // remove message components if null
-
             bool isValid = await message.Channel.GetMessageAsync(cache, message.Id) != null;
             if (!isValid)
             {
+                component ??= new ComponentBuilder().Build(); // remove message components if null
                 return await message.Channel.SendMessageAsync(content, embed: embed, allowedMentions: allowedMentions, components: component);
+            }
+
+            if (message.Embeds.Count == 2)
+            {
+                var componentBuilder = ComponentBuilder.FromMessage(message);
+                var row = new ActionRowBuilder();
+                foreach (var comp in component?.Components?.FirstOrDefault()?.Components ?? Enumerable.Empty<IMessageComponent>())
+                {
+                    row.AddComponent(comp);
+                }
+
+                component = componentBuilder
+                    .AddRow(row)
+                    .Build();
             }
 
             await message.ModifyAsync(x =>
             {
                 x.Content = content;
-                x.Embed = embed;
                 x.Components = component;
+                x.Embeds = message.Embeds.Count == 2 // if rewrite warning embed is present, keep it
+                    ? new[] { embed, message.Embeds.ElementAt(1).ToEmbedBuilder().Build() }
+                    : new[] { embed };
                 x.AllowedMentions = allowedMentions ?? Optional.Create<AllowedMentions>();
             });
 

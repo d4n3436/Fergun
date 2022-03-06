@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Discord;
@@ -14,6 +14,8 @@ namespace Fergun.Utils
         /// <remarks>This prefix may not be up-to-date if its value is modified externally.</remarks>
         public static string CachedGlobalPrefix { get; set; }
 
+        public static int CachedRewriteWarnPercentage { get; set; }
+
         /// <summary>
         /// Gets or sets the guild prefix cache.
         /// </summary>
@@ -27,16 +29,23 @@ namespace Fergun.Utils
         public static ConcurrentDictionary<ulong, UserConfig> UserConfigCache { get; private set; }
 
         /// <summary>
+        /// Gets or sets the cache of guilds where slash commands are known to be enabled or not.
+        /// </summary>
+        public static ConcurrentDictionary<ulong, bool> SlashCommandScopeCache { get; private set; }
+
+        /// <summary>
         /// Initializes the prefix cache.
         /// </summary>
         public static void Initialize()
         {
             CachedGlobalPrefix = DatabaseConfig.GlobalPrefix;
+            CachedRewriteWarnPercentage = DatabaseConfig.RewriteWarnPercentage;
             var guilds = FergunClient.Database.GetAllDocuments<GuildConfig>(Constants.GuildConfigCollection);
             PrefixCache = new ConcurrentDictionary<ulong, string>(guilds?.ToDictionary(x => x.Id, x => x.Prefix) ?? new Dictionary<ulong, string>());
             var users = FergunClient.Database.GetAllDocuments<UserConfig>(Constants.UserConfigCollection);
             UserConfigCache = new ConcurrentDictionary<ulong, UserConfig>(
                 users?.Where(x => x != null).ToDictionary(x => x.Id, x => x) ?? new Dictionary<ulong, UserConfig>());
+            SlashCommandScopeCache = new ConcurrentDictionary<ulong, bool>();
         }
 
         /// <summary>

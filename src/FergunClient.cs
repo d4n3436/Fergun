@@ -31,9 +31,11 @@ namespace Fergun
         public static bool IsDebugMode { get; private set; }
         public static string TopGgBotPage { get; private set; }
         public static string InviteLink { get; private set; }
+        public static string AppCommandsAuthLink { get; private set; }
         public static IReadOnlyDictionary<string, CultureInfo> Languages { get; private set; }
 
         private DiscordShardedClient _client;
+        private IServiceProvider _services;
         private LogService _logService;
         private bool _firstConnect = true;
 
@@ -137,6 +139,7 @@ namespace Fergun
             _client.ShardReady += ShardReady;
             _client.JoinedGuild += JoinedGuild;
             _client.LeftGuild += LeftGuild;
+            _client.InteractionCreated += InteractionCreated;
 
             if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
             {
@@ -161,14 +164,14 @@ namespace Fergun
 
             _logService.Dispose();
 
-            var services = SetupServices();
-            _logService = services.GetRequiredService<LogService>();
+            _services = SetupServices();
+            _logService = _services.GetRequiredService<LogService>();
 
             // Resolve dependencies
-            services.GetService<ReliabilityService>();
-            services.GetService<BotListService>();
+            _services.GetService<ReliabilityService>();
+            _services.GetService<BotListService>();
 
-            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
             await _client.LoginAsync(TokenType.Bot, IsDebugMode ? Config.DevToken : Config.Token, false);
             await _client.StartAsync();
@@ -432,6 +435,7 @@ namespace Fergun
             if (!IsDebugMode)
             {
                 InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&permissions={(ulong)Constants.InvitePermissions}&scope=bot%20applications.commands";
+                AppCommandsAuthLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=applications.commands";
 
                 if (!string.IsNullOrEmpty(Config.TopGgApiToken))
                 {
@@ -475,6 +479,64 @@ namespace Fergun
                 GuildUtils.PrefixCache.TryRemove(guild.Id, out _);
                 await _logService.LogAsync(new LogMessage(LogSeverity.Info, "LeftGuild", $"Deleted config of guild {guild.Id}"));
             }
+
+            GuildUtils.SlashCommandScopeCache.TryRemove(guild.Id, out _);
+        }
+
+        private Task InteractionCreated(SocketInteraction interaction)
+        {
+            if (interaction is not SocketMessageComponent componentInteraction)
+                return Task.CompletedTask;
+
+            if (componentInteraction.Data.Type == ComponentType.Button && componentInteraction.Data.CustomId == "disable_warning")
+            {
+                var cmdCache = _services.GetRequiredService<CommandCacheService>();
+                ulong userMsgId = 0;
+
+                foreach ((ulong key, ulong value) in cmdCache)
+                {
+                    if (value == componentInteraction.Message.Id)
+                    {
+                        userMsgId = key;
+                        break;
+                    }
+                }
+
+                if (userMsgId == 0)
+                    return Task.CompletedTask;
+
+                var cache = _services.GetRequiredService<MessageCacheService>();
+
+                bool success = cache.TryGetCachedMessage(componentInteraction.Channel, userMsgId, out var userMessage) ||
+                               cache.TryGetCachedMessage(componentInteraction.Channel, userMsgId, out userMessage, MessageSourceEvent.MessageUpdated);
+
+                if (!success || userMessage.Author.Id != interaction.User.Id)
+                    return Task.CompletedTask;
+
+                _ = Task.Run(async () =>
+                {
+                    ulong userId = interaction.User.Id;
+                    var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(userId, new UserConfig(userId));
+                    var expirationDate = DateTimeOffset.FromUnixTimeSeconds(userConfig.RewriteWarningExpirationTime);
+
+                    if (expirationDate < DateTimeOffset.UtcNow)
+                    {
+                        userConfig.RewriteWarningExpirationTime = DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds();
+                        Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+                        GuildUtils.UserConfigCache[userId] = userConfig;
+
+                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "RewriteWarning", $"Disabled rewrite warning temporarily for user {componentInteraction.User} ({userId})."));
+                        await componentInteraction.RespondAsync(GuildUtils.Locate("RewriteWarningDisabled", componentInteraction.Channel), ephemeral: true);
+                    }
+                    else
+                    {
+                        // Got expiration date in the future, this means the user pressed the warning button and the warning is already disabled
+                        await componentInteraction.DeferAsync();
+                    }
+                });
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

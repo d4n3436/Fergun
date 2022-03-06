@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -31,6 +32,8 @@ namespace Fergun.Modules
         /// Gets or sets the message cache service.
         /// </summary>
         public MessageCacheService MessageCache { get; set; }
+
+        public bool DisplayRewriteWarning { get; } = Random.Shared.Next(100 + 1) <= GuildUtils.CachedRewriteWarnPercentage;
 
         /// <inheritdoc cref="InteractiveService.SendPaginatorAsync(Paginator, IMessageChannel, TimeSpan?, Action{IUserMessage}, bool, CancellationToken)"/>
         public async Task<InteractiveMessageResult> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
@@ -119,7 +122,56 @@ namespace Fergun.Modules
             }
             else
             {
-                response = await Context.Channel.SendMessageAsync(message, isTTS, embed, options, allowedMentions, messageReference, component).ConfigureAwait(false);
+                if (DisplayRewriteWarning && GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id)).RewriteWarningExpirationTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                {
+                    bool slashCommandEnabled = true;
+                    bool slashCommandsScopeTested = Context.IsPrivate || GuildUtils.SlashCommandScopeCache.TryGetValue(Context.Guild.Id, out slashCommandEnabled);
+
+                    if (!slashCommandsScopeTested)
+                    {
+                        try
+                        {
+                            await Context.Guild.GetApplicationCommandsAsync();
+                            GuildUtils.SlashCommandScopeCache[Context.Guild.Id] = true;
+                            slashCommandEnabled = true;
+                        }
+                        catch
+                        {
+                            // If it's not possible to get the guild slash commands, then slash commands are not enabled in that server
+                            GuildUtils.SlashCommandScopeCache[Context.Guild.Id] = false;
+                            slashCommandEnabled = false;
+                        }
+                    }
+
+                    var warningEmbed = new EmbedBuilder()
+                        .WithTitle(Locate("SwitchToSlashCommands"))
+                        .WithDescription(slashCommandEnabled ? Locate("RewriteWarning") : Locate("RewriteWarningSlashCommandsNotEnabled"))
+                        .WithColor(FergunClient.Config.EmbedColor)
+                        .Build();
+
+                    var componentBuilder = component.Components.Count == 0 ? new ComponentBuilder() : ComponentBuilder.FromComponents(component.Components);
+                    int row = component.Components.Count == 0 ? 0 : 1;
+                    if (!slashCommandEnabled)
+                    {
+                        componentBuilder.WithButton(Locate("EnableSlashCommands"), style: ButtonStyle.Link, url: FergunClient.AppCommandsAuthLink, row: row);
+                    }
+
+                    componentBuilder.WithButton(Locate("TempDisableWarning"), "disable_warning", ButtonStyle.Secondary, row: row);
+                    if (component.Components.Count == 0)
+                    {
+                        componentBuilder.WithButton(Locate("SupportServer"), style: ButtonStyle.Link, url: FergunClient.Config.SupportServer, row: row);
+                    }
+
+                    component = componentBuilder.Build();
+
+                    embeds = embed is null ? new[] { warningEmbed } : new[] { embed, warningEmbed };
+                }
+                else
+                {
+                    embeds = embed is null ? null : new[] { embed };
+                }
+
+                response = await Context.Channel.SendMessageAsync(message, isTTS, null, options, allowedMentions, messageReference, component, stickers, embeds).ConfigureAwait(false);
                 Cache.Add(Context.Message, response);
             }
             return response;
@@ -170,11 +222,16 @@ namespace Fergun.Modules
         /// </summary>
         /// <param name="text">The embed description.</param>
         /// <returns>A task that represents the send or edit operation. The task contains the sent or edited message.</returns>
-        public async Task<IUserMessage> SendEmbedAsync(string text)
+        public async Task<IUserMessage> SendEmbedAsync(string text, bool displayRewriteWarning = false)
         {
             var builder = new EmbedBuilder()
                 .WithDescription(text)
                 .WithColor(FergunClient.Config.EmbedColor);
+
+            if (displayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("MusicRemovalWarning"));
+            }
 
             return await ReplyAsync(embed: builder.Build());
         }

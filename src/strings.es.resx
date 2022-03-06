@@ -932,9 +932,7 @@ Reproduciendo ahora: {1}</value>
     <value>Bienvenido a AI Dungeon</value>
   </data>
 	<data name="ModeSelect" xml:space="preserve">
-    <value>Asegúrate de leer la información y los comandos con `{0}aid info` antes de continuar.
-
-Selecciona un modo:</value>
+    <value>Selecciona un modo:</value>
   </data>
 	<data name="CharacterSelect" xml:space="preserve">
     <value>Selecciona un personaje</value>
@@ -2175,5 +2173,40 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 	</data>
 	<data name="Archived" xml:space="preserve">
 		<value>Archivado</value>
+	</data>
+	<data name="RewriteWarning" xml:space="preserve">
+		<value>Fergun ahora tiene **slash commands**! Éstos comandos ya están habilitados en este servidor, escribe `/` para probarlos.
+Debido a cambios a bots por Discord, los **slash commands** (comandos de barra diagonal) serán obligatorios a finales de Abril 2022, y los comandos de texto (como el que acabas de usar) dejarán de funcionar.</value>
+	</data>
+	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
+		<value>Fergun ahora tiene **slash commands**, pero éstos aún no han sido habilitados en este servidor!
+Debido a cambios a bots por Discord, los **slash commands** (comandos de barra diagonal) serán obligatorios a finales de Abril 2022, y los comandos de texto (como el que acabas de usar) dejarán de funcionar.</value>
+	</data>
+	<data name="SwitchToSlashCommands" xml:space="preserve">
+		<value>Cambia a slash commands</value>
+	</data>
+	<data name="EnableSlashCommands" xml:space="preserve">
+		<value>Habilitar slash commands (requiere Gestionar servidor)</value>
+	</data>
+	<data name="TempDisableWarning" xml:space="preserve">
+		<value>Deshabilitar esta advertencia temporalmente</value>
+	</data>
+	<data name="RewriteWarningDisabled" xml:space="preserve">
+		<value>La advertencia ha sido deshabilitada por 1 semana.</value>
+	</data>
+	<data name="CommandRemovalWarning" xml:space="preserve">
+		<value>⚠️ Advertencia de eliminación de comando</value>
+	</data>
+	<data name="SnipeRemovalWarning" xml:space="preserve">
+		<value>Los comandos de snipe serán eliminados en Abril 2022 debido a cambios por Discord. Más información [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-early-2022).</value>
+	</data>
+	<data name="MusicRemovalWarning" xml:space="preserve">
+		<value>El módulo de música será eliminado en Abril 2022. Más información [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-april-2022).</value>
+	</data>
+	<data name="AIDUsageNote" xml:space="preserve">
+		<value>Asegúrate de leer la información y los comandos con `{0}aid info` antes de continuar.</value>
+	</data>
+	<data name="AIDRemovalWarning" xml:space="preserve">
+		<value>El módulo de AI Dungeon será eliminado en Abril 2022. Más información [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-april-2022).</value>
 	</data>
 </root>
