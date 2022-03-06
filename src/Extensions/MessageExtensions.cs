@@ -84,16 +84,7 @@ namespace Fergun.Extensions
 
             if (message.Embeds.Count == 2)
             {
-                var componentBuilder = ComponentBuilder.FromMessage(message);
-                var row = new ActionRowBuilder();
-                foreach (var comp in component?.Components?.FirstOrDefault()?.Components ?? Enumerable.Empty<IMessageComponent>())
-                {
-                    row.AddComponent(comp);
-                }
-
-                component = componentBuilder
-                    .AddRow(row)
-                    .Build();
+                component = ComponentBuilder.FromMessage(message).Build();
             }
 
             await message.ModifyAsync(x =>
