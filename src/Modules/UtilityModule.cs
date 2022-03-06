@@ -399,6 +399,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
             await Context.Interaction.RespondWarningAsync("The URL is not well formed.", true);
+            return;
         }
 
         await DeferAsync();
