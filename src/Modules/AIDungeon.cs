@@ -557,6 +557,11 @@ namespace Fergun.Modules
             builder.WithDescription(textToShow.Truncate(EmbedBuilder.MaxDescriptionLength))
                 .WithFooter($"ID: {adventureId} - Tip: {GetTip()}", Constants.AiDungeonLogoUrl);
 
+            if (DisplayRewriteWarning)
+            {
+                builder.AddField(Locate("CommandRemovalWarning"), Locate("AIDRemovalWarning"));
+            }
+
             await message.ModifyOrResendAsync(embed: builder.Build(), cache: _messageCache);
 
             return null;
