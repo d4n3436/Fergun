@@ -35,7 +35,14 @@ namespace Fergun.Attributes
             }
             else
             {
-                await context.Channel.TriggerTypingAsync();
+                try
+                {
+                    await context.Channel.TriggerTypingAsync();
+                }
+                catch
+                {
+                    // Ignored
+                }
             }
             return PreconditionResult.FromSuccess();
         }

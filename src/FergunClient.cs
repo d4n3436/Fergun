@@ -178,7 +178,7 @@ namespace Fergun
 
             if (!IsDebugMode)
             {
-                await _client.SetActivityAsync(new Game($"{DatabaseConfig.GlobalPrefix}help"));
+                await _client.SetActivityAsync(new Game($"{DatabaseConfig.GlobalPrefix}help, /help"));
             }
 
             // Block this task until the program is closed.
