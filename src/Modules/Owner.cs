@@ -437,5 +437,18 @@ namespace Fergun.Modules
 
             return FergunResult.FromSuccess();
         }
+
+        [Command("setwarnexpirationtime", RunMode = RunMode.Async)]
+        public async Task<RuntimeResult> SetWarnExpirationTime(ulong userId, long expirationTime)
+        {
+            var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(userId, new UserConfig(userId));
+            userConfig.RewriteWarningExpirationTime = expirationTime;
+            FergunClient.Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
+            GuildUtils.UserConfigCache[userId] = userConfig;
+
+            await SendEmbedAsync($"Updated the warn expiration time of user {userId} to {expirationTime} ({DateTimeOffset.FromUnixTimeSeconds(expirationTime)})");
+
+            return FergunResult.FromSuccess();
+        }
     }
 }

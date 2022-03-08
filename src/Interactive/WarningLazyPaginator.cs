@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,12 +31,12 @@ public class WarningLazyPaginator : BaseLazyPaginator
 
         if (DisplayRewriteWarning)
         {
-            builder.WithButton(GuildUtils.Locate("TempDisableWarning", Language), "disable_warning_int", ButtonStyle.Secondary, disabled: disableAll || !DisplayRewriteWarning, row: 1);
-
             if (!SlashCommandsEnabled)
             {
                 builder.WithButton(GuildUtils.Locate("EnableSlashCommands", Language), style: ButtonStyle.Link, url: FergunClient.AppCommandsAuthLink, row: 1);
             }
+
+            builder.WithButton(GuildUtils.Locate("TempDisableWarning", Language), "disable_warning_int", ButtonStyle.Secondary, disabled: disableAll || !DisplayRewriteWarning, row: 1);
 
             builder.WithButton(GuildUtils.Locate("SupportServer", Language), style: ButtonStyle.Link, url: FergunClient.Config.SupportServer, row: 1);
         }
