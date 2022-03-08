@@ -50,4 +50,8 @@
     <PackageReference Include="YoutubeExplode" Version="6.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interactive\" />
+  </ItemGroup>
+
 </Project>

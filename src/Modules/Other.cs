@@ -157,7 +157,12 @@ namespace Fergun.Modules
                 return Task.FromResult(pageBuilder);
             }
 
-            var paginator = new LazyPaginatorBuilder()
+            bool slashCommandEnabled = await Context.SlashCommandsEnabledAsync();
+
+            var paginator = new WarningLazyPaginatorBuilder()
+                .WithSlashCommandsEnabled(slashCommandEnabled)
+                .WithDisplayRewriteWarning(DisplayRewriteWarningIfExpired)
+                .WithLanguage(GetLanguage())
                 .AddUser(Context.User)
                 .WithOptions(CommandUtils.GetFergunPaginatorEmotes(FergunClient.Config))
                 .WithMaxPageIndex(splitStats.Count - 1)

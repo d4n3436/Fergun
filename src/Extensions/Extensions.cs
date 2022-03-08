@@ -278,6 +278,30 @@ namespace Fergun.Extensions
         public static bool IsSourceUserAndChannel(this ICommandContext context, SocketMessage message)
             => message.Author.Id == context.User.Id && message.Channel.Id == context.Channel.Id;
 
+        public static async ValueTask<bool> SlashCommandsEnabledAsync(this ShardedCommandContext context)
+        {
+            bool slashCommandEnabled = true;
+            bool slashCommandsScopeTested = context.IsPrivate || GuildUtils.SlashCommandScopeCache.TryGetValue(context.Guild.Id, out slashCommandEnabled);
+
+            if (!slashCommandsScopeTested)
+            {
+                try
+                {
+                    await context.Guild.GetApplicationCommandsAsync();
+                    GuildUtils.SlashCommandScopeCache[context.Guild.Id] = true;
+                    slashCommandEnabled = true;
+                }
+                catch
+                {
+                    // If it's not possible to get the guild slash commands, then slash commands are not enabled in that server
+                    GuildUtils.SlashCommandScopeCache[context.Guild.Id] = false;
+                    slashCommandEnabled = false;
+                }
+            }
+
+            return slashCommandEnabled;
+        }
+
         public static bool IsNsfw(this ICommandContext context)
         {
             // Considering a DM channel a SFW channel.

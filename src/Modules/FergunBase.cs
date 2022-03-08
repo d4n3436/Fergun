@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Interactive.Selection;
@@ -34,6 +35,8 @@ namespace Fergun.Modules
         public MessageCacheService MessageCache { get; set; }
 
         public bool DisplayRewriteWarning { get; } = Random.Shared.Next(100 + 1) <= GuildUtils.CachedRewriteWarnPercentage;
+
+        public bool DisplayRewriteWarningIfExpired => DisplayRewriteWarning && GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id)).RewriteWarningExpirationTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         /// <inheritdoc cref="InteractiveService.SendPaginatorAsync(Paginator, IMessageChannel, TimeSpan?, Action{IUserMessage}, bool, CancellationToken)"/>
         public async Task<InteractiveMessageResult> SendPaginatorAsync(Paginator paginator, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
@@ -122,36 +125,19 @@ namespace Fergun.Modules
             }
             else
             {
-                if (DisplayRewriteWarning && GuildUtils.UserConfigCache.GetValueOrDefault(Context.User.Id, new UserConfig(Context.User.Id)).RewriteWarningExpirationTime < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                if (DisplayRewriteWarningIfExpired)
                 {
-                    bool slashCommandEnabled = true;
-                    bool slashCommandsScopeTested = Context.IsPrivate || GuildUtils.SlashCommandScopeCache.TryGetValue(Context.Guild.Id, out slashCommandEnabled);
-
-                    if (!slashCommandsScopeTested)
-                    {
-                        try
-                        {
-                            await Context.Guild.GetApplicationCommandsAsync();
-                            GuildUtils.SlashCommandScopeCache[Context.Guild.Id] = true;
-                            slashCommandEnabled = true;
-                        }
-                        catch
-                        {
-                            // If it's not possible to get the guild slash commands, then slash commands are not enabled in that server
-                            GuildUtils.SlashCommandScopeCache[Context.Guild.Id] = false;
-                            slashCommandEnabled = false;
-                        }
-                    }
+                    bool slashCommandsEnabled = await Context.SlashCommandsEnabledAsync();
 
                     var warningEmbed = new EmbedBuilder()
                         .WithTitle(Locate("SwitchToSlashCommands"))
-                        .WithDescription(slashCommandEnabled ? Locate("RewriteWarning") : Locate("RewriteWarningSlashCommandsNotEnabled"))
+                        .WithDescription(slashCommandsEnabled ? Locate("RewriteWarning") : Locate("RewriteWarningSlashCommandsNotEnabled"))
                         .WithColor(FergunClient.Config.EmbedColor)
                         .Build();
 
                     var componentBuilder = component.Components.Count == 0 ? new ComponentBuilder() : ComponentBuilder.FromComponents(component.Components);
                     int row = component.Components.Count == 0 ? 0 : 1;
-                    if (!slashCommandEnabled)
+                    if (!slashCommandsEnabled)
                     {
                         componentBuilder.WithButton(Locate("EnableSlashCommands"), style: ButtonStyle.Link, url: FergunClient.AppCommandsAuthLink, row: row);
                     }
