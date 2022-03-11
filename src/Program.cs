@@ -3,6 +3,7 @@ using Discord.Addons.Hosting;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun;
+using Fergun.Apis;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
@@ -62,6 +63,10 @@ await Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient<YandexImageSearch>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<UrbanDictionary>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
