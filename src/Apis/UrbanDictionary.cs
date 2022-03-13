@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -46,6 +47,7 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
     public async Task<IReadOnlyList<UrbanDefinition>> GetDefinitionsAsync(string term)
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
         return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
@@ -57,6 +59,7 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of random definitions.</returns>
     public async Task<IReadOnlyList<UrbanDefinition>> GetRandomDefinitionsAsync()
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri("random", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
         return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
@@ -69,6 +72,7 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains the definition, or <c>null</c> if not found.</returns>
     public async Task<UrbanDefinition?> GetDefinitionAsync(int id)
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?defid={id}", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
         var list = document.RootElement.GetProperty("list");
@@ -82,6 +86,7 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
     public async Task<IReadOnlyList<UrbanDefinition>> GetWordsOfTheDayAsync()
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri("words_of_the_day", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
         return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
@@ -94,6 +99,7 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of suggested terms.</returns>
     public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string term)
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
         return (await JsonSerializer.DeserializeAsync<IReadOnlyList<string>>(stream).ConfigureAwait(false))!;
     }
@@ -105,24 +111,30 @@ public sealed class UrbanDictionary : IDisposable
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of suggested terms.</returns>
     public async Task<IReadOnlyList<UrbanAutocompleteResult>> GetAutocompleteResultsExtraAsync(string term)
     {
+        EnsureNotDisposed();
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete-extra?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
         return document.RootElement.GetProperty("results").Deserialize<IReadOnlyList<UrbanAutocompleteResult>>()!;
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
-
-    /// <inheritdoc cref="Dispose()"/>
-    private void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (!disposing || _disposed)
+        if (_disposed)
         {
             return;
         }
 
         _httpClient.Dispose();
         _disposed = true;
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(UrbanDictionary));
+        }
     }
 }
 
@@ -152,8 +164,9 @@ public class UrbanAutocompleteResult
     public string Preview { get; }
 
     /// <inheritdoc/>
-    public override string ToString() => $"Term = {Term}, Preview = {Preview}";
+    public override string ToString() => $"{nameof(Term)} = {Term}, {nameof(Preview)} = {Preview}";
 
+    [ExcludeFromCodeCoverage]
     private string DebuggerDisplay => ToString();
 }
 
@@ -247,7 +260,8 @@ public class UrbanDefinition
     public int ThumbsDown { get; }
 
     /// <inheritdoc/>
-    public override string ToString() => $"Word = {Word}, Definition = {Definition}";
+    public override string ToString() => $"{nameof(Word)} = {Word}, {nameof(Definition)} = {Definition}";
 
+    [ExcludeFromCodeCoverage]
     private string DebuggerDisplay => ToString();
 }
