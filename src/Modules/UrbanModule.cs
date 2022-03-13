@@ -37,13 +37,13 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
 
         var definitions = searchType switch
         {
-            UrbanSearchType.Search => (await _urbanDictionary.GetDefinitionsAsync(term!)).ToArray(),
-            UrbanSearchType.Random => (await _urbanDictionary.GetRandomDefinitionsAsync()).ToArray(),
-            UrbanSearchType.WordsOfTheDay => (await _urbanDictionary.GetWordsOfTheDayAsync()).ToArray(),
+            UrbanSearchType.Search => await _urbanDictionary.GetDefinitionsAsync(term!),
+            UrbanSearchType.Random => await _urbanDictionary.GetRandomDefinitionsAsync(),
+            UrbanSearchType.WordsOfTheDay => await _urbanDictionary.GetWordsOfTheDayAsync(),
             _ => throw new InvalidOperationException(),
         };
 
-        if (definitions.Length == 0)
+        if (definitions.Count == 0)
         {
             await Context.Interaction.FollowupWarning("No results.");
             return;
@@ -54,7 +54,7 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
             .WithFergunEmotes()
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(definitions.Length - 1)
+            .WithMaxPageIndex(definitions.Count - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .Build();
@@ -82,7 +82,7 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
                     break;
             }
 
-            footer.Append($"- Page {i + 1} of {definitions.Length}");
+            footer.Append($"- Page {i + 1} of {definitions.Count}");
 
             return new PageBuilder()
                 .WithTitle(definitions[i].Word)

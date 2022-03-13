@@ -44,22 +44,22 @@ public sealed class UrbanDictionary : IDisposable
     /// </summary>
     /// <param name="term">The term to search.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
-    public async Task<IEnumerable<UrbanDefinition>> GetDefinitionsAsync(string term)
+    public async Task<IReadOnlyList<UrbanDefinition>> GetDefinitionsAsync(string term)
     {
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IEnumerable<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <summary>
     /// Gets random definitions.
     /// </summary>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of random definitions.</returns>
-    public async Task<IEnumerable<UrbanDefinition>> GetRandomDefinitionsAsync()
+    public async Task<IReadOnlyList<UrbanDefinition>> GetRandomDefinitionsAsync()
     {
         await using var stream = await _httpClient.GetStreamAsync(new Uri("random", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IEnumerable<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <summary>
@@ -80,11 +80,11 @@ public sealed class UrbanDictionary : IDisposable
     /// Gets the words of the day.
     /// </summary>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
-    public async Task<IEnumerable<UrbanDefinition>> GetWordsOfTheDayAsync()
+    public async Task<IReadOnlyList<UrbanDefinition>> GetWordsOfTheDayAsync()
     {
         await using var stream = await _httpClient.GetStreamAsync(new Uri("words_of_the_day", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IEnumerable<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <summary>
@@ -92,11 +92,10 @@ public sealed class UrbanDictionary : IDisposable
     /// </summary>
     /// <param name="term">The term to search.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of suggested terms.</returns>
-    public async Task<IEnumerable<string>> GetAutocompleteResultsAsync(string term)
+    public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string term)
     {
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        return document.RootElement.Deserialize<IEnumerable<string>>()!;
+        return (await JsonSerializer.DeserializeAsync<IReadOnlyList<string>>(stream).ConfigureAwait(false))!;
     }
 
     /// <summary>
@@ -104,11 +103,11 @@ public sealed class UrbanDictionary : IDisposable
     /// </summary>
     /// <param name="term">The term to search.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of suggested terms.</returns>
-    public async Task<IEnumerable<UrbanAutocompleteResult>> GetAutocompleteResultsExtraAsync(string term)
+    public async Task<IReadOnlyList<UrbanAutocompleteResult>> GetAutocompleteResultsExtraAsync(string term)
     {
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete-extra?term={Uri.EscapeDataString(term)}", UriKind.Relative)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-        return document.RootElement.GetProperty("results").Deserialize<IEnumerable<UrbanAutocompleteResult>>()!;
+        return document.RootElement.GetProperty("results").Deserialize<IReadOnlyList<UrbanAutocompleteResult>>()!;
     }
 
     /// <inheritdoc/>
