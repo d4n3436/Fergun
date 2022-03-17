@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Fergun;
 using Fergun.Apis;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -66,7 +67,7 @@ await Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<UrbanDictionary>()
+        services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

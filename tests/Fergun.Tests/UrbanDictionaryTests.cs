@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Fergun.Apis;
+using Fergun.Apis.Urban;
 using Moq;
 using Xunit;
 

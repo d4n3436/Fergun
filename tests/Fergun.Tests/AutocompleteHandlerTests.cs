@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Bogus;
 using Discord;
 using Discord.Interactions;
+using Fergun.Apis.Urban;
 using Fergun.Extensions;
 using Fergun.Modules.Handlers;
 using Microsoft.Extensions.DependencyInjection;
@@ -123,6 +124,30 @@ public class AutocompleteHandlerTests
         }
     }
 
+    [Theory]
+    [MemberData(nameof(GetUrbanTestData))]
+    public async Task UrbanAutocomplete_Should_Return_Valid_Suggestions(string text)
+    {
+        var handler = new UrbanAutocompleteHandler();
+        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+
+        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
+        _dataMock.SetupGet(x => x.Current).Returns(option);
+
+        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
+
+        Assert.True(results.IsSuccess);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            Assert.NotNull(results.Suggestions);
+            Assert.NotEmpty(results.Suggestions);
+            Assert.All(results.Suggestions, Assert.NotNull);
+            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
+            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
+        }
+    }
+
     private static IServiceProvider GetServiceProvider()
     {
         var services = new ServiceCollection()
@@ -130,6 +155,10 @@ public class AutocompleteHandlerTests
 
         services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
+
+        services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
 
         return services.BuildServiceProvider();
     }
@@ -157,5 +186,13 @@ public class AutocompleteHandlerTests
             .Append(string.Empty).Append(null)
             .Zip(faker.MakeLazy(12, () => faker.Random.RandomLocale().Replace('_', '-')))
             .Select(x => new object?[] { x.First, x.Second });
+    }
+
+    private static IEnumerable<object?[]> GetUrbanTestData()
+    {
+        var faker = new Faker();
+        return faker.MakeLazy(10, () => faker.Hacker.Noun())
+            .Append(string.Empty).Append(null)
+            .Select(x => new object?[] { x });
     }
 }

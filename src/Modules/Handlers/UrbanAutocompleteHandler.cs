@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Fergun.Apis;
+using Fergun.Apis.Urban;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,7 +18,7 @@ public class UrbanAutocompleteHandler : AutocompleteHandler
             return AutocompletionResult.FromSuccess();
 
         var urbanDictionary = services
-            .GetRequiredService<UrbanDictionary>();
+            .GetRequiredService<IUrbanDictionary>();
 
         var results = (await urbanDictionary.GetAutocompleteResultsAsync(text))
             .Select(x => new AutocompleteResult(x, x))

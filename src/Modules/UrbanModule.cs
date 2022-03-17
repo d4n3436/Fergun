@@ -1,7 +1,9 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using Discord;
 using Discord.Interactions;
-using Fergun.Apis;
+using Discord.WebSocket;
+using Fergun.Apis.Urban;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
@@ -10,12 +12,12 @@ using Fergun.Modules.Handlers;
 namespace Fergun.Modules;
 
 [Group("urban", "Urban Dictionary commands")]
-public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
+public class UrbanModule : InteractionModuleBase
 {
-    private readonly UrbanDictionary _urbanDictionary;
+    private readonly IUrbanDictionary _urbanDictionary;
     private readonly InteractiveService _interactive;
 
-    public UrbanModule(UrbanDictionary urbanDictionary, InteractiveService interactive)
+    public UrbanModule(IUrbanDictionary urbanDictionary, InteractiveService interactive)
     {
         _urbanDictionary = urbanDictionary;
         _interactive = interactive;
@@ -23,15 +25,15 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
 
     [SlashCommand("search", "Searches for definitions for a term in Urban Dictionary.")]
     public async Task Search([Autocomplete(typeof(UrbanAutocompleteHandler))] [Summary(description: "The term to search.")] string term)
-        => await SearchInternalAsync(UrbanSearchType.Search, term);
+        => await SearchAndSendAsync(UrbanSearchType.Search, term);
 
     [SlashCommand("random", "Gets random definitions from Urban Dictionary.")]
-    public async Task Random() => await SearchInternalAsync(UrbanSearchType.Random);
+    public async Task Random() => await SearchAndSendAsync(UrbanSearchType.Random);
 
     [SlashCommand("words-of-the-day", "Gets the words of the day in Urban Dictionary.")]
-    public async Task WordsOfTheDay() => await SearchInternalAsync(UrbanSearchType.WordsOfTheDay);
+    public async Task WordsOfTheDay() => await SearchAndSendAsync(UrbanSearchType.WordsOfTheDay);
 
-    private async Task SearchInternalAsync(UrbanSearchType searchType, string? term = null)
+    public async Task SearchAndSendAsync(UrbanSearchType searchType, string? term = null)
     {
         await DeferAsync();
 
@@ -40,7 +42,7 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
             UrbanSearchType.Search => await _urbanDictionary.GetDefinitionsAsync(term!),
             UrbanSearchType.Random => await _urbanDictionary.GetRandomDefinitionsAsync(),
             UrbanSearchType.WordsOfTheDay => await _urbanDictionary.GetWordsOfTheDayAsync(),
-            _ => throw new InvalidOperationException(),
+            _ => throw new ArgumentException("Invalid search type.", nameof(searchType))
         };
 
         if (definitions.Count == 0)
@@ -59,7 +61,10 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
             .AddUser(Context.User)
             .Build();
 
-        _ = _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        if (Context.Interaction is SocketInteraction socketInteraction)
+        {
+            _ = _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        }
 
         PageBuilder GeneratePage(int i)
         {
@@ -97,7 +102,7 @@ public class UrbanModule : InteractionModuleBase<ShardedInteractionContext>
         }
     }
 
-    private enum UrbanSearchType
+    public enum UrbanSearchType
     {
         Search,
         Random,
