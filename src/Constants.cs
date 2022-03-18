@@ -22,6 +22,8 @@ public static class Constants
 
     public const string BingIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/949767220232339507/Bing_Icon.png";
 
+    public const string YandexIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/954428306533523476/Yandex_Icon.png";
+
     public const string UrbanDictionaryIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/951936600273715300/UrbanDictionary.png";
 
     public const string ChromeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";

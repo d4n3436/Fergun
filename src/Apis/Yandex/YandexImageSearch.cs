@@ -77,8 +77,9 @@ public sealed class YandexImageSearch : IDisposable
         using var ocrResponse = await _httpClient.SendAsync(ocrRequest, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
         ocrResponse.EnsureSuccessStatusCode();
 
-        await using var ocrStream = await ocrResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
-        using var ocrDocument = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        // Using an stream here causes Parse(Async) to throw a JsonReaderException for some reason
+        var bytes = await ocrResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+        using var ocrDocument = JsonDocument.Parse(bytes);
 
         return ocrDocument
             .RootElement

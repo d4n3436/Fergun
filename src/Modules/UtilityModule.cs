@@ -3,8 +3,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
-using Fergun.Apis.Bing;
-using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
@@ -27,43 +25,36 @@ namespace Fergun.Modules;
 public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 {
     private readonly ILogger<UtilityModule> _logger;
+    private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
-    private readonly AggregateTranslator _translator;
     private readonly GoogleTranslator _googleTranslator;
     private readonly GoogleTranslator2 _googleTranslator2;
-    private readonly BingTranslator _bingTranslator;
     private readonly MicrosoftTranslator _microsoftTranslator;
     private readonly YandexTranslator _yandexTranslator;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
     private readonly BraveScraper _braveScraper;
     private readonly SearchClient _searchClient;
-    private readonly BingVisualSearch _bingVisualSearch;
-    private readonly YandexImageSearch _yandexImageSearch;
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, InteractiveService interactive, AggregateTranslator translator, GoogleTranslator googleTranslator,
-        GoogleTranslator2 googleTranslator2, BingTranslator bingTranslator, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator,
-        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, SearchClient searchClient, BingVisualSearch bingVisualSearch,
-        YandexImageSearch yandexImageSearch)
+    public UtilityModule(ILogger<UtilityModule> logger, SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator,
+        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator,
+        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, SearchClient searchClient)
     {
         _logger = logger;
+        _shared = shared;
         _interactive = interactive;
-        _translator = translator;
         _googleTranslator = googleTranslator;
         _googleTranslator2 = googleTranslator2;
-        _bingTranslator = bingTranslator;
         _microsoftTranslator = microsoftTranslator;
         _yandexTranslator = yandexTranslator;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
         _braveScraper = braveScraper;
         _searchClient = searchClient;
-        _bingVisualSearch = bingVisualSearch;
-        _yandexImageSearch = yandexImageSearch;
     }
 
     [MessageCommand("Bad Translator")]
@@ -377,95 +368,6 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         }
     }
 
-    [MessageCommand("OCR")]
-    public async Task Ocr(IMessage message)
-    {
-        var attachment = message.Attachments.FirstOrDefault();
-        var embed = message.Embeds.FirstOrDefault(x => x.Image is not null || x.Thumbnail is not null);
-
-        string? url = attachment?.Url ?? embed?.Image?.Url ?? embed?.Thumbnail?.Url;
-
-        if (url is null)
-        {
-            await Context.Interaction.RespondWarningAsync("Unable to get an image URL from the message.", true);
-            return;
-        }
-
-        await Ocr(url);
-    }
-
-    [SlashCommand("ocr", "Performs ocr to an image.")]
-    public async Task Ocr([Summary(description: "An image URL.")] string url)
-    {
-        if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
-        {
-            await Context.Interaction.RespondWarningAsync("The URL is not well formed.", true);
-            return;
-        }
-
-        await DeferAsync();
-
-        var stopwatch = Stopwatch.StartNew();
-        string text;
-
-        try
-        {
-            text = await _bingVisualSearch.OcrAsync(url);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Failed to perform OCR to url {url}", url);
-            await Context.Interaction.FollowupWarning(e.Message);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            await Context.Interaction.FollowupWarning("The OCR did not give results.");
-            return;
-        }
-
-        stopwatch.Stop();
-
-        Context.Interaction.TryGetLanguage(out var language);
-
-        string embedText = "**Output**\n";
-
-        var builder = new EmbedBuilder()
-            .WithTitle("OCR Results")
-            .WithDescription($"{embedText}```{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6)}```")
-            .WithThumbnailUrl(url)
-            .WithFooter($"Bing Visual Search | Processing time: {stopwatch.ElapsedMilliseconds}ms", Constants.BingIconUrl)
-            .WithColor(Color.Orange);
-
-        var components = new ComponentBuilder()
-            .WithButton($"Translate{(language is null ? "" : $" to {language.Name}")}", "ocrtranslate", ButtonStyle.Secondary)
-            .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
-            .Build();
-
-        await FollowupAsync(embed: builder.Build(), components: components);
-    }
-
-    [ComponentInteraction("ocrtranslate")]
-    public async Task OcrTranslate()
-    {
-        string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
-        text = text[startIndex..^3];
-
-        await Translate(text, Context.Interaction.GetLanguageCode(), ephemeral: true);
-    }
-
-    [ComponentInteraction("ocrtts")]
-    public async Task OcrTts()
-    {
-        string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
-        text = text[startIndex..^3];
-
-        await TTS(text, ephemeral: true);
-    }
-
     [SlashCommand("say", "Says something.")]
     public async Task Say([Summary(description: "The text to send.")] string text)
     {
@@ -623,63 +525,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias).")] string? source = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
-            return;
-        }
-
-        if (!Language.TryGetLanguage(target, out _))
-        {
-            await Context.Interaction.RespondWarningAsync($"Invalid target language \"{target}\".", true);
-            return;
-        }
-
-        if (source != null && !Language.TryGetLanguage(source, out _))
-        {
-            await Context.Interaction.RespondWarningAsync($"Invalid source language \"{source}\".", true);
-            return;
-        }
-
-        await DeferAsync(ephemeral);
-        ITranslationResult result;
-
-        try
-        {
-            result = await _translator.TranslateAsync(text, target, source);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(new(0, "Translate"), e, "Error translating text {text} ({source} -> {target})", text, source ?? "auto", target);
-            await Context.Interaction.FollowupWarning(e.Message, ephemeral);
-            return;
-        }
-
-        string thumbnailUrl = result.Service switch
-        {
-            "BingTranslator" => Constants.BingTranslatorLogoUrl,
-            "MicrosoftTranslator" => Constants.MicrosoftAzureLogoUrl,
-            "YandexTranslator" => Constants.YandexTranslateLogoUrl,
-            _ => Constants.GoogleTranslateLogoUrl
-        };
-
-        string embedText = $"**Source language** {(source == null ? "**(Detected)**" : "")}\n" +
-                           $"{result.SourceLanguage.Name}\n\n" +
-                           "**Target language**\n" +
-                           $"{result.TargetLanguage.Name}" +
-                           "\n\n**Result**\n";
-
-        string translation = result.Translation.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6);
-
-        var builder = new EmbedBuilder()
-            .WithTitle("Translation result")
-            .WithDescription($"{embedText}```{translation}```")
-            .WithThumbnailUrl(thumbnailUrl)
-            .WithColor(Color.Orange);
-
-        await FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
-    }
+        => await _shared.TranslateAsync(Context.Interaction, text, target, source, ephemeral);
 
     [MessageCommand("TTS")]
     public async Task TTS(IMessage message)
@@ -689,34 +535,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     public async Task TTS([Summary(description: "The text to convert.")] string text,
         [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
-            return;
-        }
-
-        target ??= Context.Interaction.GetLanguageCode();
-
-        if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
-        {
-            await Context.Interaction.RespondWarningAsync($"Language \"{target}\" not supported.", true);
-            return;
-        }
-
-        await DeferAsync(ephemeral);
-
-        try
-        {
-            await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
-            await Context.Interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"), ephemeral: ephemeral);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "TTS: Error obtaining TTS from text {text} ({language})", text, language);
-            await Context.Interaction.FollowupWarning(e.Message, ephemeral);
-        }
-    }
+        => await _shared.TtsAsync(Context.Interaction, text, target, ephemeral);
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)

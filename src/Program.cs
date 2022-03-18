@@ -3,7 +3,6 @@ using Discord.Addons.Hosting;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun;
-using Fergun.Apis;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
@@ -125,4 +124,5 @@ await Host.CreateDefaultBuilder()
         services.AddSingleton(x => new GoogleScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
         services.AddSingleton(x => new DuckDuckGoScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
         services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
+        services.AddTransient<SharedModule>();
     }).RunConsoleAsync();
