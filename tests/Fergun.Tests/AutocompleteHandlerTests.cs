@@ -166,7 +166,7 @@ public class AutocompleteHandlerTests
     private static IEnumerable<object?[]> GetBraveTestData()
     {
         var faker = new Faker();
-        return faker.MakeLazy(10, () => faker.Music.Genre())
+        return faker.MakeLazy(10, () => faker.Random.String2(1))
             .Append(string.Empty).Append(null).Select(x => new object?[] { x });
     }
 
