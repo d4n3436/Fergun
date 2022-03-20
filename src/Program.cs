@@ -58,11 +58,11 @@ await Host.CreateDefaultBuilder()
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
 
-        services.AddHttpClient<BingVisualSearch>()
+        services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<YandexImageSearch>()
+        services.AddHttpClient<IYandexImageSearch, YandexImageSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

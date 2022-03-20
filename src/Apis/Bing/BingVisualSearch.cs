@@ -6,7 +6,7 @@ namespace Fergun.Apis.Bing;
 /// <summary>
 /// Represents a wrapper over Bing Visual Search internal API.
 /// </summary>
-public sealed class BingVisualSearch : IDisposable
+public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 {
     private static readonly Uri _apiEndpoint = new("https://www.bing.com/images/api/custom/knowledge/");
 
@@ -48,13 +48,10 @@ public sealed class BingVisualSearch : IDisposable
         }
     }
 
-    /// <summary>
-    /// Performs OCR to the specified image URL.
-    /// </summary>
-    /// <param name="url">The URL of an image.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
-    public async Task<string> OcrAsync(string url)
+    /// <inheritdoc/>
+    public async Task<string?> OcrAsync(string url)
     {
+        EnsureNotDisposed();
         using var request = BuildRequest(url, "OCR");
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
@@ -113,17 +110,22 @@ public sealed class BingVisualSearch : IDisposable
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
-
-    /// <inheritdoc cref="Dispose()"/>
-    private void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (!disposing || _disposed)
+        if (_disposed)
         {
             return;
         }
 
         _httpClient.Dispose();
         _disposed = true;
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(BingVisualSearch));
+        }
     }
 }

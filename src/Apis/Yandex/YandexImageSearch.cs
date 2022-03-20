@@ -6,7 +6,7 @@ namespace Fergun.Apis.Yandex;
 /// <summary>
 /// Represents a wrapper over Yandex Image Search internal API.
 /// </summary>
-public sealed class YandexImageSearch : IDisposable
+public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 {
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
     private readonly HttpClient _httpClient;
@@ -34,15 +34,12 @@ public sealed class YandexImageSearch : IDisposable
         }
     }
 
-    /// <summary>
-    /// Performs OCR to the specified image URL.
-    /// </summary>
-    /// <param name="url">The URL of an image.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
-    public async Task<string> OcrAsync(string url)
+    /// <inheritdoc/>
+    public async Task<string?> OcrAsync(string url)
     {
-        // Get CBIR ID
+        EnsureNotDisposed();
 
+        // Get CBIR ID
         using var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
@@ -50,15 +47,20 @@ public sealed class YandexImageSearch : IDisposable
         };
 
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            throw new YandexException(message);
+        }
 
         await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
-        string imageId = document
+        string? imageId = document
             .RootElement
             .GetProperty("image_id")
-            .GetString() ?? throw new YandexException("Unable to get the ID of the image.");
+            .GetString();
 
         int imageShard = document
             .RootElement
@@ -81,27 +83,37 @@ public sealed class YandexImageSearch : IDisposable
         var bytes = await ocrResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
         using var ocrDocument = JsonDocument.Parse(bytes);
 
+        if (ocrDocument.RootElement.TryGetProperty("type", out var typeProp) && typeProp.GetString() == "captcha")
+        {
+            throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
+        }
+
         return ocrDocument
             .RootElement
             .GetProperty("blocks")[0]
             .GetProperty("params")
             .GetPropertyOrDefault("adapterData")
             .GetPropertyOrDefault("plainText")
-            .GetStringOrDefault() ?? "";
+            .GetStringOrDefault();
     }
 
     /// <inheritdoc/>
-    public void Dispose() => Dispose(true);
-
-    /// <inheritdoc cref="Dispose()"/>
-    private void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (!disposing || _disposed)
+        if (_disposed)
         {
             return;
         }
 
         _httpClient.Dispose();
         _disposed = true;
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(YandexImageSearch));
+        }
     }
 }

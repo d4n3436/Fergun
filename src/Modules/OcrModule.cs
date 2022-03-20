@@ -14,10 +14,10 @@ public class OcrModule : InteractionModuleBase
 {
     private readonly ILogger<OcrModule> _logger;
     private readonly SharedModule _shared;
-    private readonly BingVisualSearch _bingVisualSearch;
-    private readonly YandexImageSearch _yandexImageSearch;
+    private readonly IBingVisualSearch _bingVisualSearch;
+    private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, SharedModule shared, BingVisualSearch bingVisualSearch, YandexImageSearch yandexImageSearch)
+    public OcrModule(ILogger<OcrModule> logger, SharedModule shared, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _shared = shared;
@@ -58,19 +58,21 @@ public class OcrModule : InteractionModuleBase
             return;
         }
 
+        var ocrTask = ocrEngine switch
+        {
+            OcrEngine.Bing => _bingVisualSearch.OcrAsync(url),
+            OcrEngine.Yandex => _yandexImageSearch.OcrAsync(url),
+            _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
+        };
+
         await DeferAsync(ephemeral);
 
         var stopwatch = Stopwatch.StartNew();
-        string text;
+        string? text;
 
         try
         {
-            text = ocrEngine switch
-            {
-                OcrEngine.Bing => await _bingVisualSearch.OcrAsync(url),
-                OcrEngine.Yandex => await _yandexImageSearch.OcrAsync(url),
-                _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
-            };
+            text = await ocrTask;
         }
         catch (Exception e)
         {
@@ -89,17 +91,10 @@ public class OcrModule : InteractionModuleBase
 
         Context.Interaction.TryGetLanguage(out var language);
 
-        string name = ocrEngine switch
+        var (name, iconUrl) = ocrEngine switch
         {
-            OcrEngine.Bing => "Bing Visual Search",
-            OcrEngine.Yandex => "Yandex OCR",
-            _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
-        };
-
-        string iconUrl = ocrEngine switch
-        {
-            OcrEngine.Bing => Constants.BingIconUrl,
-            OcrEngine.Yandex => Constants.YandexIconUrl,
+            OcrEngine.Bing => ("Bing Visual Search", Constants.BingIconUrl),
+            OcrEngine.Yandex => ("Yandex OCR", Constants.YandexIconUrl),
             _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
         };
 
@@ -117,7 +112,7 @@ public class OcrModule : InteractionModuleBase
             .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
             .Build();
 
-        await FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
+        await Context.Interaction.FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
     }
 
     [ComponentInteraction("ocrtranslate", true)]
