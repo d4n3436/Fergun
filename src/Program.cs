@@ -55,6 +55,7 @@ await Host.CreateDefaultBuilder()
     .ConfigureServices(services =>
     {
         services.AddHostedService<InteractionHandlingService>();
+        services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
 

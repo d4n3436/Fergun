@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
+using Fergun.Interactive;
 using Fergun.Modules;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,6 +21,8 @@ public class OcrModuleTests
     private readonly Mock<IBingVisualSearch> _bingVisualSearchMock = new();
     private readonly Mock<IYandexImageSearch> _yandexImageSearchMock = new();
     private readonly Mock<ILogger<OcrModule>> _loggerMock = new();
+    private readonly DiscordSocketClient _client = new();
+    private readonly InteractiveService _interactive;
     private readonly Mock<OcrModule> _ocrModuleMock;
     private const string _textImageUrl = "https://example.com/image.png";
     private const string _emptyImageUrl = "https://example.com/empty.png";
@@ -36,7 +40,8 @@ public class OcrModuleTests
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var shared = new SharedModule(sharedLogger, new(), new());
 
-        _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, shared, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
+        _interactive = new InteractiveService(_client);
+        _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, shared, _interactive, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_ocrModuleMock.Object).SetContext(_contextMock.Object);
     }
@@ -51,10 +56,7 @@ public class OcrModuleTests
 
         await module.Bing(url);
 
-        _ocrModuleMock
-            .Protected()
-            .As<IDiscordInteraction>()
-            .Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
 
         _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
 
@@ -72,10 +74,7 @@ public class OcrModuleTests
 
         await module.Yandex(url);
 
-        _ocrModuleMock
-            .Protected()
-            .As<IDiscordInteraction>()
-            .Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
 
         _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
 
@@ -89,7 +88,7 @@ public class OcrModuleTests
         var module = _ocrModuleMock.Object;
         const bool isEphemeral = true;
 
-        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, isEphemeral);
+        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, isEphemeral);
 
         _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
                 It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());
@@ -101,7 +100,7 @@ public class OcrModuleTests
         var module = _ocrModuleMock.Object;
         const bool isEphemeral = true;
 
-        var task = module.OcrAsync((OcrModule.OcrEngine)2, _textImageUrl, isEphemeral);
+        var task = module.OcrAsync((OcrModule.OcrEngine)2, _textImageUrl, _interactionMock.Object, isEphemeral);
 
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }
@@ -112,12 +111,9 @@ public class OcrModuleTests
         var module = _ocrModuleMock.Object;
         const bool isEphemeral = true;
 
-        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), _invalidImageUrl, isEphemeral);
+        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), _invalidImageUrl, _interactionMock.Object, isEphemeral);
 
-        _ocrModuleMock
-            .Protected()
-            .As<IDiscordInteraction>()
-            .Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
                 It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());

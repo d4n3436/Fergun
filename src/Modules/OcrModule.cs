@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
+using Fergun.Interactive;
+using Fergun.Interactive.Selection;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 
@@ -14,13 +17,15 @@ public class OcrModule : InteractionModuleBase
 {
     private readonly ILogger<OcrModule> _logger;
     private readonly SharedModule _shared;
+    private readonly InteractiveService _interactive;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, SharedModule shared, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+    public OcrModule(ILogger<OcrModule> logger, SharedModule shared, InteractiveService interactive, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _shared = shared;
+        _interactive = interactive;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
@@ -39,22 +44,40 @@ public class OcrModule : InteractionModuleBase
             return;
         }
 
-        await OcrAsync(OcrEngine.Bing, url, true);
+        var page = new PageBuilder()
+            .WithTitle("Select an OCR engine")
+            .WithColor(Color.Orange);
+
+        var selection = new SelectionBuilder<OcrEngine>()
+            .AddUser(Context.User)
+            .WithOptions(Enum.GetValues<OcrEngine>())
+            .WithSelectionPage(page)
+            .Build();
+
+        var result = await _interactive.SendSelectionAsync(selection, (SocketInteraction)Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
+
+        // Attempt to disable the components
+        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
+
+        if (result.IsSuccess)
+        {
+            await OcrAsync(result.Value, url, result.StopInteraction!, true);
+        }
     }
 
     [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
     public async Task Bing([Summary(description: "An image URL.")] string url)
-        => await OcrAsync(OcrEngine.Bing, url);
+        => await OcrAsync(OcrEngine.Bing, url, Context.Interaction);
 
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
     public async Task Yandex([Summary(description: "An image URL.")] string url)
-        => await OcrAsync(OcrEngine.Yandex, url);
+        => await OcrAsync(OcrEngine.Yandex, url, Context.Interaction);
 
-    public async Task OcrAsync(OcrEngine ocrEngine, string url, bool ephemeral = false)
+    public async Task OcrAsync(OcrEngine ocrEngine, string url, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
-            await Context.Interaction.RespondWarningAsync("The URL is not well formed.", true);
+            await interaction.RespondWarningAsync("The URL is not well formed.", true);
             return;
         }
 
@@ -65,7 +88,14 @@ public class OcrModule : InteractionModuleBase
             _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
         };
 
-        await DeferAsync(ephemeral);
+        if (interaction is SocketMessageComponent componentInteraction)
+        {
+            await componentInteraction.DeferLoadingAsync(ephemeral);
+        }
+        else
+        {
+            await interaction.DeferAsync(ephemeral);
+        }
 
         var stopwatch = Stopwatch.StartNew();
         string? text;
@@ -77,19 +107,19 @@ public class OcrModule : InteractionModuleBase
         catch (Exception e)
         {
             _logger.LogWarning(e, "Failed to perform OCR to url {url}", url);
-            await Context.Interaction.FollowupWarning(e.Message, ephemeral);
+            await interaction.FollowupWarning(e.Message, ephemeral);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await Context.Interaction.FollowupWarning("The OCR did not give results.", ephemeral);
+            await interaction.FollowupWarning("The OCR did not give results.", ephemeral);
             return;
         }
 
         stopwatch.Stop();
 
-        Context.Interaction.TryGetLanguage(out var language);
+        interaction.TryGetLanguage(out var language);
 
         var (name, iconUrl) = ocrEngine switch
         {
@@ -112,7 +142,7 @@ public class OcrModule : InteractionModuleBase
             .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
             .Build();
 
-        await Context.Interaction.FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
+        await interaction.FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
     }
 
     [ComponentInteraction("ocrtranslate", true)]

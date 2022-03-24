@@ -256,7 +256,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .AddUser(Context.User)
             .Build();
 
-        _ = _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -304,7 +304,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .AddUser(Context.User)
             .Build();
 
-        _ = _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         Task<PageBuilder> GeneratePageAsync(int index)
         {
@@ -352,7 +352,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .AddUser(Context.User)
             .Build();
 
-        _ = _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         Task<PageBuilder> GeneratePageAsync(int index)
         {
@@ -564,7 +564,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
                     .WithFergunEmotes()
                     .Build();
 
-                _ = _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+                await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
                 break;
         }
     }

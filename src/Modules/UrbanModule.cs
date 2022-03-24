@@ -63,7 +63,7 @@ public class UrbanModule : InteractionModuleBase
 
         if (Context.Interaction is SocketInteraction socketInteraction)
         {
-            _ = _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+           await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
         }
 
         PageBuilder GeneratePage(int i)
