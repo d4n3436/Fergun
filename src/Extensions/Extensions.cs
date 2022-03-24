@@ -72,10 +72,9 @@ public static class Extensions
     {
         builder.Options.Clear();
 
-        builder.AddOption(Emoji.Parse("⏮️"), PaginatorAction.SkipToStart);
         builder.AddOption(Emoji.Parse("◀️"), PaginatorAction.Backward);
         builder.AddOption(Emoji.Parse("▶️"), PaginatorAction.Forward);
-        builder.AddOption(Emoji.Parse("⏭️"), PaginatorAction.SkipToEnd);
+        builder.AddOption(Emoji.Parse("🔢"), PaginatorAction.Jump);
         builder.AddOption(Emoji.Parse("🛑"), PaginatorAction.Exit);
 
         return (TBuilder)builder;
