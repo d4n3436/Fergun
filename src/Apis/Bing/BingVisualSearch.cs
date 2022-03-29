@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Drawing;
+using System.Globalization;
+using System.Text.Json;
 using Fergun.Extensions;
 
 namespace Fergun.Apis.Bing;
@@ -74,7 +76,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         var textRegions = document
             .RootElement
-            .GetPropertyOrDefault("tags")
+            .GetProperty("tags")
             .FirstOrDefault(x => x.GetPropertyOrDefault("displayName").GetStringOrDefault() == "##TextRecognition")
             .GetPropertyOrDefault("actions")
             .FirstOrDefault()
@@ -87,6 +89,56 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
                     .Select(y => y.GetPropertyOrDefault("text").GetStringOrDefault())));
 
         return string.Join("\n\n", textRegions);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
+    {
+        EnsureNotDisposed();
+        using var request = BuildRequest(url, "SimilarImages");
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        var root = document.RootElement.Clone();
+
+        var rawItems = root
+            .GetProperty("tags")
+            .EnumerateArray()
+            .Select(x => x.GetPropertyOrDefault("actions"))
+            .SelectMany(x => x.EnumerateArrayOrEmpty())
+            .FirstOrDefault(x => x.GetPropertyOrDefault("actionType").GetStringOrDefault() == "VisualSearch")
+            .GetPropertyOrDefault("data")
+            .GetPropertyOrDefault("value")
+            .EnumerateArrayOrEmpty();
+
+        return EnumerateResults(rawItems, onlyFamilyFriendly);
+    }
+
+    private static IEnumerable<BingReverseImageSearchResult> EnumerateResults(IEnumerable<JsonElement> rawItems, bool onlyFamilyFriendly)
+    {
+        foreach (var item in rawItems)
+        {
+            if (onlyFamilyFriendly && item.GetPropertyOrDefault("isFamilyFriendly").ValueKind == JsonValueKind.False)
+                continue;
+
+            var url = item.GetPropertyOrDefault("contentUrl").GetStringOrDefault();
+            var sourceUrl = item.GetPropertyOrDefault("hostPageUrl").GetStringOrDefault();
+            var text = item.GetPropertyOrDefault("name").GetStringOrDefault();
+            var rawColor = item.GetPropertyOrDefault("accentColor").GetStringOrDefault();
+
+            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(sourceUrl) || string.IsNullOrEmpty(text))
+            {
+                continue;
+            }
+
+            bool success = int.TryParse(rawColor, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int color);
+
+            yield return new BingReverseImageSearchResult(url, sourceUrl, text, success ? Color.FromArgb(color) : default);
+        }
     }
 
     private static HttpRequestMessage BuildRequest(string url, string invokedSkill)

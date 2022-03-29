@@ -8,10 +8,6 @@ using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Utils;
-using GScraper;
-using GScraper.Brave;
-using GScraper.DuckDuckGo;
-using GScraper.Google;
 using GTranslate;
 using GTranslate.Results;
 using GTranslate.Translators;
@@ -31,18 +27,15 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     private readonly GoogleTranslator2 _googleTranslator2;
     private readonly MicrosoftTranslator _microsoftTranslator;
     private readonly YandexTranslator _yandexTranslator;
-    private readonly GoogleScraper _googleScraper;
-    private readonly DuckDuckGoScraper _duckDuckGoScraper;
-    private readonly BraveScraper _braveScraper;
     private readonly SearchClient _searchClient;
+
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator,
-        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator,
-        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, SearchClient searchClient)
+        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient)
     {
         _logger = logger;
         _shared = shared;
@@ -51,9 +44,6 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         _googleTranslator2 = googleTranslator2;
         _microsoftTranslator = microsoftTranslator;
         _yandexTranslator = yandexTranslator;
-        _googleScraper = googleScraper;
-        _duckDuckGoScraper = duckDuckGoScraper;
-        _braveScraper = braveScraper;
         _searchClient = searchClient;
     }
 
@@ -220,152 +210,6 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .Build();
 
         await Context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
-    }
-
-    [SlashCommand("img", "Searches for images from Google Images and displays them in a paginator.")]
-    public async Task Img([Autocomplete(typeof(GoogleAutocompleteHandler))] [Summary(description: "The query to search.")] string query,
-        [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
-    {
-        await DeferAsync();
-
-        bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
-
-        var images = await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode());
-
-        var filteredImages = images
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
-            .Chunk(multiImages ? 4 : 1)
-            .ToArray();
-
-        _logger.LogInformation(new EventId(0, "img"), "Image results: {count}", filteredImages.Length);
-
-        if (filteredImages.Length == 0)
-        {
-            await Context.Interaction.FollowupWarning("No results.");
-            return;
-        }
-
-        var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePage)
-            .WithFergunEmotes()
-            .WithActionOnCancellation(ActionOnStop.DisableInput)
-            .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
-            .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
-            .Build();
-
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-
-        MultiEmbedPageBuilder GeneratePage(int index)
-        {
-            var builders = filteredImages[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Title)
-                .WithDescription("Google Images results")
-                .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
-                .WithImageUrl(result.Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.GoogleLogoUrl)
-                .WithColor(Color.Orange));
-
-            return new MultiEmbedPageBuilder().WithBuilders(builders);
-        }
-    }
-
-    [SlashCommand("img2", "Searches for images from DuckDuckGo and displays them in a paginator.")]
-    public async Task Img2([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))] [Summary(description: "The query to search.")] string query)
-    {
-        await DeferAsync();
-
-        bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img2"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
-
-        var images = await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
-
-        var filteredImages = images
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
-            .ToArray();
-
-        _logger.LogInformation(new EventId(0, "img2"), "Image results: {count}", filteredImages.Length);
-
-        if (filteredImages.Length == 0)
-        {
-            await Context.Interaction.FollowupWarning("No results.");
-            return;
-        }
-
-        var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePageAsync)
-            .WithFergunEmotes()
-            .WithActionOnCancellation(ActionOnStop.DisableInput)
-            .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
-            .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
-            .Build();
-
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-
-        Task<PageBuilder> GeneratePageAsync(int index)
-        {
-            var pageBuilder = new PageBuilder()
-                .WithTitle(filteredImages[index].Title)
-                .WithDescription("DuckDuckGo image search")
-                .WithUrl(filteredImages[index].SourceUrl)
-                .WithImageUrl(filteredImages[index].Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.DuckDuckGoLogoUrl)
-                .WithColor(Color.Orange);
-
-            return Task.FromResult(pageBuilder);
-        }
-    }
-
-    [SlashCommand("img3", "Searches for images from Brave and displays them in a paginator.")]
-    public async Task Img3([Autocomplete(typeof(BraveAutocompleteHandler))] [Summary(description: "The query to search.")] string query)
-    {
-        await DeferAsync();
-
-        bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img3"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
-
-        var images = await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
-
-        var filteredImages = images
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
-            .ToArray();
-
-        _logger.LogInformation(new EventId(0, "img3"), "Image results: {count}", filteredImages.Length);
-
-        if (filteredImages.Length == 0)
-        {
-            await Context.Interaction.FollowupWarning("No results.");
-            return;
-        }
-
-        var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePageAsync)
-            .WithFergunEmotes()
-            .WithActionOnCancellation(ActionOnStop.DisableInput)
-            .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
-            .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
-            .Build();
-
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-
-        Task<PageBuilder> GeneratePageAsync(int index)
-        {
-            var pageBuilder = new PageBuilder()
-                .WithTitle(filteredImages[index].Title)
-                .WithDescription("Brave image search")
-                .WithUrl(filteredImages[index].SourceUrl)
-                .WithImageUrl(filteredImages[index].Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.BraveLogoUrl)
-                .WithColor(Color.Orange);
-
-            return Task.FromResult(pageBuilder);
-        }
     }
 
     [SlashCommand("say", "Says something.")]

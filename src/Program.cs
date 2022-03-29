@@ -64,6 +64,7 @@ await Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient<IYandexImageSearch, YandexImageSearch>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
@@ -111,6 +112,7 @@ await Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient(nameof(DuckDuckGoScraper))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

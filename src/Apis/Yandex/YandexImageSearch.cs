@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
+using AngleSharp.Html.Parser;
 using Fergun.Extensions;
 
 namespace Fergun.Apis.Yandex;
@@ -9,6 +11,7 @@ namespace Fergun.Apis.Yandex;
 public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 {
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+    private static readonly HtmlParser _parser = new();
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -16,7 +19,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     /// Initializes a new instance of the <see cref="YandexImageSearch"/> class.
     /// </summary>
     public YandexImageSearch()
-        : this(new HttpClient())
+        : this(new HttpClient(new HttpClientHandler { UseCookies = false }))
     {
     }
 
@@ -98,6 +101,59 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     }
 
     /// <inheritdoc/>
+    public async Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url, YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate)
+    {
+        const string imageSearchRequest = @"{""blocks"":[{""block"":""content_type_similar"",""params"":{},""version"":2}]}";
+
+        using var request = new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = new Uri($"https://yandex.com/images/search?rpt=imageview&url={Uri.EscapeDataString(url)}&cbir_page=similar&format=json&request={imageSearchRequest}")
+        };
+
+        var now = DateTimeOffset.UtcNow;
+
+        string? yp = mode switch
+        {
+            YandexSearchFilterMode.None => $"{now.AddYears(10).AddDays(7).ToUnixTimeSeconds()}.sp.aflt%3A{now.ToUnixTimeSeconds()}#{now.AddDays(7).ToUnixTimeSeconds()}.szm.1%3A1920x1080%3A1272x969",
+            YandexSearchFilterMode.Family => $"{now.AddYears(10).AddDays(7).ToUnixTimeSeconds()}.sp.family%3A2#{now.AddDays(7).ToUnixTimeSeconds()}.szm.1%3A1920x1080%3A1272x969",
+            _ => null
+        };
+
+        if (yp is not null)
+        {
+            request.Headers.Add("Cookie", $"yp={yp}");
+        }
+
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        if (document.RootElement.TryGetProperty("type", out var typeProp) && typeProp.GetString() == "captcha")
+        {
+            throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
+        }
+
+        string html = document
+            .RootElement
+            .GetProperty("blocks")[0]
+            .GetProperty("html")
+            .GetString() ?? string.Empty;
+
+        var htmlDocument = _parser.ParseDocument(html);
+
+        var rawItems = htmlDocument
+            .GetElementsByClassName("serp-list")
+            .FirstOrDefault()?
+            .GetElementsByClassName("serp-item")
+            .Select(x => x.GetAttribute("data-bem")) ?? Enumerable.Empty<string?>();
+
+        return EnumerateResults(rawItems);
+    }
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         if (_disposed)
@@ -107,6 +163,47 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
+    }
+
+    private static IEnumerable<YandexReverseImageSearchResult> EnumerateResults(IEnumerable<string?> rawItems)
+    {
+        foreach (string? rawItem in rawItems)
+        {
+            if (string.IsNullOrEmpty(rawItem))
+                continue;
+
+            JsonDocument document;
+            try
+            {
+                document = JsonDocument.Parse(rawItem);
+            }
+            catch
+            {
+                continue;
+            }
+
+            var item = document.RootElement.GetPropertyOrDefault("serp-item");
+            var snippet = item.GetPropertyOrDefault("snippet");
+
+            var url = item
+                //.GetPropertyOrDefault("dups")
+                //.LastOrDefault()
+                //.GetPropertyOrDefault("url")
+                //.GetStringOrDefault() ?? item
+                .GetPropertyOrDefault("img_href")
+                .GetStringOrDefault();
+
+            var sourceUrl = snippet.GetPropertyOrDefault("url").GetStringOrDefault();
+            var title = snippet.GetPropertyOrDefault("title").GetStringOrDefault();
+            var text = snippet.GetPropertyOrDefault("text").GetStringOrDefault();
+
+            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(sourceUrl) || string.IsNullOrEmpty(text))
+            {
+                continue;
+            }
+
+            yield return new YandexReverseImageSearchResult(url, sourceUrl, WebUtility.HtmlDecode(title), text);
+        }
     }
 
     private void EnsureNotDisposed()
