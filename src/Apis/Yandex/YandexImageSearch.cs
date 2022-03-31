@@ -100,9 +100,11 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetStringOrDefault();
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url, YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate)
+    /// <inheritdoc cref="IYandexImageSearch.ReverseImageSearchAsync(string, YandexSearchFilterMode)"/>
+    public async Task<IEnumerable<YandexReverseImageSearchResult>> ReverseImageSearchAsync(string url, YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate)
     {
+        EnsureNotDisposed();
+
         const string imageSearchRequest = @"{""blocks"":[{""block"":""content_type_similar"",""params"":{},""version"":2}]}";
 
         using var request = new HttpRequestMessage
@@ -186,10 +188,6 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             var snippet = item.GetPropertyOrDefault("snippet");
 
             var url = item
-                //.GetPropertyOrDefault("dups")
-                //.LastOrDefault()
-                //.GetPropertyOrDefault("url")
-                //.GetStringOrDefault() ?? item
                 .GetPropertyOrDefault("img_href")
                 .GetStringOrDefault();
 
@@ -213,4 +211,8 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             throw new ObjectDisposedException(nameof(YandexImageSearch));
         }
     }
+
+    /// <inheritdoc/>
+    async Task<IEnumerable<IYandexReverseImageSearchResult>> IYandexImageSearch.ReverseImageSearchAsync(string url, YandexSearchFilterMode mode)
+        => await ReverseImageSearchAsync(url, mode).ConfigureAwait(false);
 }

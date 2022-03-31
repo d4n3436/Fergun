@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Fergun.Extensions;
 
 namespace Fergun.Apis.Bing;
@@ -91,8 +89,8 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         return string.Join("\n\n", textRegions);
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
+    /// <inheritdoc cref="IBingVisualSearch.ReverseImageSearchAsync(string, bool)"/>
+    public async Task<IEnumerable<BingReverseImageSearchResult>> ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
     {
         EnsureNotDisposed();
         using var request = BuildRequest(url, "SimilarImages");
@@ -125,19 +123,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             if (onlyFamilyFriendly && item.GetPropertyOrDefault("isFamilyFriendly").ValueKind == JsonValueKind.False)
                 continue;
 
-            var url = item.GetPropertyOrDefault("contentUrl").GetStringOrDefault();
-            var sourceUrl = item.GetPropertyOrDefault("hostPageUrl").GetStringOrDefault();
-            var text = item.GetPropertyOrDefault("name").GetStringOrDefault();
-            var rawColor = item.GetPropertyOrDefault("accentColor").GetStringOrDefault();
-
-            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(sourceUrl) || string.IsNullOrEmpty(text))
-            {
-                continue;
-            }
-
-            bool success = int.TryParse(rawColor, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int color);
-
-            yield return new BingReverseImageSearchResult(url, sourceUrl, text, success ? Color.FromArgb(color) : default);
+            yield return item.Deserialize<BingReverseImageSearchResult>()!;
         }
     }
 
@@ -180,4 +166,8 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             throw new ObjectDisposedException(nameof(BingVisualSearch));
         }
     }
+
+    /// <inheritdoc/>
+    async Task<IEnumerable<IBingReverseImageSearchResult>> IBingVisualSearch.ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
+        => await ReverseImageSearchAsync(url, onlyFamilyFriendly).ConfigureAwait(false);
 }

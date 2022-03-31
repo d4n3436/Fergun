@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Bing;
 
@@ -19,15 +20,20 @@ public class BingReverseImageSearchResult : IBingReverseImageSearchResult
     }
 
     /// <inheritdoc/>
+    [JsonPropertyName("contentUrl")]
     public string Url { get; }
 
     /// <inheritdoc/>
+    [JsonPropertyName("hostPageUrl")]
     public string SourceUrl { get; }
 
     /// <inheritdoc/>
+    [JsonPropertyName("name")]
     public string Text { get; }
 
     /// <inheritdoc/>
+    [JsonPropertyName("accentColor")]
+    [JsonConverter(typeof(ColorJsonConverter))]
     public Color AccentColor { get; }
 
     /// <inheritdoc/>

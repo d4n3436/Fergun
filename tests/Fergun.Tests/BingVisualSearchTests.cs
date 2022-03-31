@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Fergun.Apis.Bing;
 using Moq;
@@ -32,6 +33,21 @@ public class BingVisualSearchTests
         await Assert.ThrowsAsync<BingException>(() => task);
     }
 
+    [Theory]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg", true)]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg", false)]
+    public async Task ReverseImageSearchAsync_Returns_Results(string url, bool onlyFamilyFriendly)
+    {
+        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, onlyFamilyFriendly)).ToArray();
+
+        Assert.NotNull(results);
+        Assert.NotEmpty(results);
+        Assert.All(results, x => Assert.NotNull(x.Url));
+        Assert.All(results, x => Assert.NotNull(x.SourceUrl));
+        Assert.All(results, x => Assert.NotNull(x.Text));
+        Assert.All(results, x => Assert.NotNull(x.ToString()));
+    }
+
     [Fact]
     public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
     {
@@ -39,5 +55,6 @@ public class BingVisualSearchTests
         _bingVisualSearch.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<bool>()));
     }
 }
