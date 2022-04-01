@@ -200,7 +200,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
                 continue;
             }
 
-            yield return new YandexReverseImageSearchResult(url, sourceUrl, WebUtility.HtmlDecode(title), text);
+            yield return new YandexReverseImageSearchResult(url, sourceUrl, WebUtility.HtmlDecode(title), WebUtility.HtmlDecode(text));
         }
     }
 
