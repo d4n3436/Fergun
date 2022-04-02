@@ -6,6 +6,7 @@ using Bogus;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Urban;
+using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Fergun.Modules.Handlers;
 using Microsoft.Extensions.DependencyInjection;
@@ -148,6 +149,34 @@ public class AutocompleteHandlerTests
         }
     }
 
+    [Theory]
+    [InlineData("", "pt")]
+    [InlineData("a", "en")]
+    [InlineData("b", "es")]
+    [InlineData("c", "fr")]
+    public async Task WikipediaAutocomplete_Should_Return_Valid_Suggestions(string text, string locale)
+    {
+        var handler = new WikipediaAutocompleteHandler();
+        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+
+        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
+        _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
+        _dataMock.SetupGet(x => x.Current).Returns(option);
+
+        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
+
+        Assert.True(results.IsSuccess);
+
+        if (!string.IsNullOrEmpty(text))
+        {
+            Assert.NotNull(results.Suggestions);
+            Assert.NotEmpty(results.Suggestions);
+            Assert.All(results.Suggestions, Assert.NotNull);
+            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
+            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
+        }
+    }
+
     private static IServiceProvider GetServiceProvider()
     {
         var services = new ServiceCollection()
@@ -157,6 +186,10 @@ public class AutocompleteHandlerTests
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
         services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<IWikipediaClient, WikipediaClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

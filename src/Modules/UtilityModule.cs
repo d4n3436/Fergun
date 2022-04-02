@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
+using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
@@ -28,6 +29,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     private readonly MicrosoftTranslator _microsoftTranslator;
     private readonly YandexTranslator _yandexTranslator;
     private readonly SearchClient _searchClient;
+    private readonly IWikipediaClient _wikipediaClient;
 
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
@@ -35,7 +37,8 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator,
-        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient)
+        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient,
+        IWikipediaClient wikipediaClient)
     {
         _logger = logger;
         _shared = shared;
@@ -45,6 +48,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         _microsoftTranslator = microsoftTranslator;
         _yandexTranslator = yandexTranslator;
         _searchClient = searchClient;
+        _wikipediaClient = wikipediaClient;
     }
 
     [MessageCommand("Bad Translator")]
@@ -380,6 +384,58 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TtsAsync(Context.Interaction, text, target, ephemeral);
+
+    [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
+    public async Task Wikipedia([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)
+    {
+        await DeferAsync();
+
+        var articles = (await _wikipediaClient.GetArticlesAsync(query, Context.Interaction.GetLanguageCode())).ToArray();
+
+        if (articles.Length == 0)
+        {
+            await Context.Interaction.FollowupWarning("No results.");
+        }
+
+        var paginator = new LazyPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithMaxPageIndex(articles.Length - 1)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes()
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        PageBuilder GeneratePage(int index)
+        {
+            var article = articles[index];
+
+            var page = new PageBuilder()
+                .WithTitle(article.Title.Truncate(EmbedBuilder.MaxTitleLength))
+                .WithUrl($"https://{Context.Interaction.GetLanguageCode()}.wikipedia.org/?curid={article.Id}")
+                .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
+                .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
+                .WithFooter($"Wikipedia Search | Page {index + 1} of {articles.Length}")
+                .WithColor(Color.Orange);
+
+            if (Context.Channel.IsNsfw() && article.Image is not null)
+            {
+                if (article.Image.Width >= 500 && article.Image.Height >= 500)
+                {
+                    page.WithImageUrl(article.Image.Url);
+                }
+                else
+                {
+                    page.WithThumbnailUrl(article.Image.Url);
+                }
+            }
+
+            return page;
+        }
+    }
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)
