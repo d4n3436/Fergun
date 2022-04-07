@@ -395,6 +395,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         if (articles.Length == 0)
         {
             await Context.Interaction.FollowupWarning("No results.");
+            return;
         }
 
         var paginator = new LazyPaginatorBuilder()
