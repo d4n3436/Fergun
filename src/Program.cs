@@ -32,7 +32,8 @@ await Host.CreateDefaultBuilder()
             LogLevel = LogSeverity.Verbose,
             GatewayIntents = GatewayIntents.Guilds,
             UseInteractionSnowflakeDate = false,
-            LogGatewayIntentWarnings = false
+            LogGatewayIntentWarnings = false,
+            SuppressUnknownDispatchWarnings = true
         };
 
         config.Token = context.Configuration["Token"];
@@ -48,7 +49,6 @@ await Host.CreateDefaultBuilder()
     {
         config.MinimumLevel.Debug()
             .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
-            .Filter.ByExcluding(e => e.Level == LogEventLevel.Warning && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).Contains("Unknown Dispatch"))
             .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && Matching.FromSource("Microsoft.Extensions.Http").Invoke(e))
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File("logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
