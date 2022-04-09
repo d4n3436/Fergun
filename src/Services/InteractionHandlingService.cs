@@ -24,7 +24,7 @@ public class InteractionHandlingService : IHostedService
         _interactionService = interactionService;
         _logger = logger;
         _services = services;
-        _ = ulong.TryParse(configuration["TargetGuildId"], out _targetGuildId);
+        _targetGuildId = configuration.Get<FergunConfig>().TargetGuildId;
     }
 
     /// <inheritdoc />

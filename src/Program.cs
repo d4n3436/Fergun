@@ -15,6 +15,7 @@ using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using GTranslate.Translators;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -36,7 +37,7 @@ await Host.CreateDefaultBuilder()
             SuppressUnknownDispatchWarnings = true
         };
 
-        config.Token = context.Configuration["Token"];
+        config.Token = context.Configuration.Get<FergunConfig>().Token;
     })
     .UseInteractionService((_, config) =>
     {
