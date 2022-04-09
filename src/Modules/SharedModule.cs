@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.WebSocket;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
@@ -45,7 +44,7 @@ public class SharedModule
             return;
         }
 
-        if (deferLoad && interaction is SocketMessageComponent componentInteraction)
+        if (deferLoad && interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
         }
@@ -108,7 +107,7 @@ public class SharedModule
             return;
         }
 
-        if (deferLoad && interaction is SocketMessageComponent componentInteraction)
+        if (deferLoad && interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
         }

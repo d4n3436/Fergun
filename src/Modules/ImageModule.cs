@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
@@ -74,10 +73,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-            await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -125,10 +121,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-            await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         Task<PageBuilder> GeneratePageAsync(int index)
         {
@@ -176,10 +169,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-            await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         Task<PageBuilder> GeneratePageAsync(int index)
         {
@@ -233,10 +223,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-            await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -278,10 +265,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-            await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {

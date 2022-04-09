@@ -85,6 +85,9 @@ public class InteractionHandlingService : IHostedService
         _logger.LogInformation("Executed slash command \"{name}\" for {username}#{discriminator} ({id}) in {context}",
             slashCommand.Name, context.User.Username, context.User.Discriminator, context.User.Id, context.Display());
 
+        if (result.IsSuccess)
+            return;
+
         await HandleInteractionErrorAsync(context, result);
     }
 
@@ -93,31 +96,33 @@ public class InteractionHandlingService : IHostedService
         _logger.LogInformation("Executed context menu command \"{name}\" for {username}#{discriminator} ({id}) in {context}",
             contextCommand.Name, context.User.Username, context.User.Discriminator, context.User.Id, context.Display());
 
-        await HandleInteractionErrorAsync(context, result);
-    }
-
-    private static async ValueTask HandleInteractionErrorAsync(IInteractionContext context, IResult result)
-    {
         if (result.IsSuccess)
             return;
 
+        await HandleInteractionErrorAsync(context, result);
+    }
+
+    private static async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
+    {
         string message = result.Error == InteractionCommandError.Exception
             ? $"An error occurred.\n\nError message: ```{((ExecuteResult)result).Exception.Message}```"
             : result.ErrorReason;
 
         if (context.Interaction.HasResponded)
         {
-            await context.Interaction.FollowupWarning(message, ephemeral: true);
+            await context.Interaction.FollowupWarning(message, true);
         }
         else
         {
-            await context.Interaction.RespondWarningAsync(message, ephemeral: true);
+            await context.Interaction.RespondWarningAsync(message, true);
         }
     }
 
     private Task LogInteraction(LogMessage log)
     {
+#pragma warning disable CA2254 // Template should be a static expression
         _logger.Log(log.Severity.ToLogLevel(), new EventId(0, log.Source), log.Exception, log.Message);
+#pragma warning restore CA2254 // Template should be a static expression
         return Task.CompletedTask;
     }
 }

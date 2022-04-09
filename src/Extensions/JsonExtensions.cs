@@ -18,7 +18,4 @@ public static class JsonExtensions
 
     public static string? GetStringOrDefault(this JsonElement element)
         => element.ValueKind == JsonValueKind.String ? element.GetString() : default;
-
-    public static int GetInt32OrDefault(this JsonElement element)
-        => element.ValueKind == JsonValueKind.Number && element.TryGetInt32(out int value) ? value : default;
 }

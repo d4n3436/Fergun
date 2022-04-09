@@ -4,7 +4,7 @@ using Fergun.Extensions;
 
 namespace Fergun.Modules;
 
-public class UserModule : InteractionModuleBase<IInteractionContext>
+public class UserModule : InteractionModuleBase
 {
     [UserCommand("Avatar")]
     public async Task Avatar(IUser user)

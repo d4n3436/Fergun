@@ -181,11 +181,10 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     {
         var embed = new EmbedBuilder()
             .WithTitle("Fergun 2")
-            .WithDescription("Hey, it seems that you found some slash commands in Fergun.\n\n" +
-                             "This is Fergun 2, a complete rewrite of Fergun 1.x, using only slash commands.\n" +
-                             "Fergun 2 is still in very alpha stages and only some commands are present, but more commands will be added soon.\n" +
-                             "Fergun 2 will be finished in early 2022 and it will include new features and commands.\n\n" +
-                             "Some modules and commands are currently in maintenance mode in Fergun 1.x and they won't be migrated to Fergun 2. These modules are:\n" +
+            .WithDescription("This is Fergun 2. Fergun 2 is a complete rewrite of Fergun 1 and it will only have slash commands.\n" +
+                             "Fergun 2 is in alpha stages and only the most used commands are present, but more commands will be added soon.\n" +
+                             "Fergun 2 will be finished in May 2022 and it will include new features and commands.\n\n" +
+                             "Some modules and commands are currently in maintenance mode in Fergun 1 and they won't be migrated to Fergun 2. These modules are:\n" +
                              "- **AI Dungeon** module\n" +
                              "- **Music** module\n" +
                              "- **Snipe** commands\n\n" +
@@ -348,7 +347,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
                 $"/ {totalRam?.ToString() ?? "?"}MB", true)
             .AddField("Library", $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("BotVersion", version, true)
+            .AddField("Bot Version", version, true)
             .AddField("Total Servers", $"{Context.Client.Guilds.Count} (Shard: {Context.Client.GetShard(shardId).Guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Total Users", $"{totalUsers} (Shard: {totalUsersInShard})", true)
@@ -357,7 +356,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .AddField("Shards", Context.Client.Shards.Count, true)
             .AddField("Uptime", elapsed.Humanize(), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("BotOwner", owner, true);
+            .AddField("Bot Owner", owner, true);
 
         builder.WithColor(Color.Orange);
 
@@ -458,7 +457,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             default:
                 var paginator = new StaticPaginatorBuilder()
                     .AddUser(Context.User)
-                    .WithPages(videos.Select((x, i) => new PageBuilder { Text = $"{x.Url}\nPage {i + 1} of {videos.Count}" }).ToArray())
+                    .WithPages(videos.Select((x, i) => new PageBuilder { Text = $"{x.Url}\nPage {i + 1} of {videos.Count}" } as IPageBuilder).ToArray())
                     .WithActionOnCancellation(ActionOnStop.DisableInput)
                     .WithActionOnTimeout(ActionOnStop.DisableInput)
                     .WithFooter(PaginatorFooter.None)

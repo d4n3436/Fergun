@@ -24,12 +24,12 @@ public class UrbanModuleTests
     private readonly Mock<IUrbanDictionary> _urbanDictionaryMock = CreateMockedUrbanDictionary();
     private readonly Mock<UrbanModule> _urbanModuleMock;
     private readonly DiscordSocketClient _client = new();
-    private readonly InteractiveService _interactive;
+    private readonly InteractiveConfig _interactiveConfig = new() { ReturnAfterSendingPaginator = true };
 
     public UrbanModuleTests()
     {
-        _interactive = new InteractiveService(_client);
-        _urbanModuleMock = new Mock<UrbanModule>(() => new UrbanModule(_urbanDictionaryMock.Object, _interactive));
+        var interactive = new InteractiveService(_client, _interactiveConfig);
+        _urbanModuleMock = new Mock<UrbanModule>(() => new UrbanModule(_urbanDictionaryMock.Object, interactive));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         _contextMock.SetupGet(x => x.User).Returns(() => AutoFaker.Generate<IUser>(b => b.WithBinder(new MoqBinder())));
         ((IInteractionModuleBase)_urbanModuleMock.Object).SetContext(_contextMock.Object);
@@ -93,10 +93,22 @@ public class UrbanModuleTests
         var faker = new Faker();
         var mock = new Mock<IUrbanDictionary>();
 
-        mock.Setup(u => u.GetDefinitionsAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<UrbanDefinition>(10).OrDefault(faker, defaultValue: new()));
-        mock.Setup(u => u.GetRandomDefinitionsAsync()).ReturnsAsync(AutoFaker.Generate<UrbanDefinition>(10));
-        mock.Setup(u => u.GetDefinitionAsync(It.IsAny<int>())).ReturnsAsync(AutoFaker.Generate<UrbanDefinition>());
-        mock.Setup(u => u.GetWordsOfTheDayAsync()).ReturnsAsync(AutoFaker.Generate<UrbanDefinition>(10));
+        var definitionFaker = new AutoFaker<UrbanDefinition>()
+            .RuleFor(x => x.Definition, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Date, f => f.Date.Weekday().OrNull(f))
+            .RuleFor(x => x.Permalink, f => f.Internet.Url())
+            .RuleFor(x => x.ThumbsUp, f => f.Random.Int())
+            .RuleFor(x => x.SoundUrls, Array.Empty<string>())
+            .RuleFor(x => x.Author, f => f.Internet.UserName())
+            .RuleFor(x => x.Word, f => f.Lorem.Word())
+            .RuleFor(x => x.Id, f => f.Random.Int())
+            .RuleFor(x => x.WrittenOn, f => f.Date.PastOffset())
+            .RuleFor(x => x.Example, f => f.Lorem.Sentence());
+
+        mock.Setup(u => u.GetDefinitionsAsync(It.IsAny<string>())).ReturnsAsync(definitionFaker.Generate(10).OrDefault(faker, defaultValue: new()));
+        mock.Setup(u => u.GetRandomDefinitionsAsync()).ReturnsAsync(definitionFaker.Generate(10));
+        mock.Setup(u => u.GetDefinitionAsync(It.IsAny<int>())).ReturnsAsync(definitionFaker.Generate());
+        mock.Setup(u => u.GetWordsOfTheDayAsync()).ReturnsAsync(definitionFaker.Generate(10));
         mock.Setup(u => u.GetAutocompleteResultsAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<string>(20));
         mock.Setup(u => u.GetAutocompleteResultsExtraAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<UrbanAutocompleteResult>(20));
 

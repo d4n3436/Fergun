@@ -1,8 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Text;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Urban;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -61,10 +59,7 @@ public class UrbanModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        if (Context.Interaction is SocketInteraction socketInteraction)
-        {
-           await _interactive.SendPaginatorAsync(paginator, socketInteraction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
-        }
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
         PageBuilder GeneratePage(int i)
         {

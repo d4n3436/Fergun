@@ -31,67 +31,67 @@ public class UrbanDefinition
     /// Gets the definition.
     /// </summary>
     [JsonPropertyName("definition")]
-    public string Definition { get; }
+    public string Definition { get; init; }
 
     /// <summary>
     /// Gets the date this definition was posted on the front page as a word of the day.
     /// </summary>
     [JsonPropertyName("date")]
-    public string? Date { get; }
+    public string? Date { get; init; }
 
     /// <summary>
     /// Gets a permalink to the page containing this definition.
     /// </summary>
     [JsonPropertyName("permalink")]
-    public string Permalink { get; }
+    public string Permalink { get; init; }
 
     /// <summary>
     /// Gets the number of thumps-up.
     /// </summary>
     [JsonPropertyName("thumbs_up")]
-    public int ThumbsUp { get; }
+    public int ThumbsUp { get; init; }
 
     /// <summary>
     /// Gets a collection of sound URLs.
     /// </summary>
     [JsonPropertyName("sound_urls")]
-    public IReadOnlyCollection<string> SoundUrls { get; }
+    public IReadOnlyCollection<string> SoundUrls { get; init; }
 
     /// <summary>
     /// Gets the author of this definition.
     /// </summary>
     [JsonPropertyName("author")]
-    public string Author { get; }
+    public string Author { get; init; }
 
     /// <summary>
     /// Gets the word (term) being defined.
     /// </summary>
     [JsonPropertyName("word")]
-    public string Word { get; }
+    public string Word { get; init; }
 
     /// <summary>
     /// Gets the ID of this definition.
     /// </summary>
     [JsonPropertyName("defid")]
-    public int Id { get; }
+    public int Id { get; init; }
 
     /// <summary>
     /// Gets the date this definition was written.
     /// </summary>
     [JsonPropertyName("written_on")]
-    public DateTimeOffset WrittenOn { get; }
+    public DateTimeOffset WrittenOn { get; init; }
 
     /// <summary>
     /// Gets an example usage of the definition.
     /// </summary>
     [JsonPropertyName("example")]
-    public string Example { get; }
+    public string Example { get; init; }
 
     /// <summary>
     /// Gets the number of thumps-down.
     /// </summary>
     [JsonPropertyName("thumbs_down")]
-    public int ThumbsDown { get; }
+    public int ThumbsDown { get; init; }
 
     /// <inheritdoc/>
     public override string ToString() => $"{nameof(Word)} = {Word}, {nameof(Definition)} = {Definition}";

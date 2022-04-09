@@ -9,7 +9,6 @@ using Fergun.Interactive;
 using Fergun.Modules;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
 using Xunit;
 
 namespace Fergun.Tests;
@@ -23,6 +22,7 @@ public class OcrModuleTests
     private readonly Mock<ILogger<OcrModule>> _loggerMock = new();
     private readonly DiscordSocketClient _client = new();
     private readonly InteractiveService _interactive;
+    private readonly InteractiveConfig _interactiveConfig = new() { DeferStopSelectionInteractions = false };
     private readonly Mock<OcrModule> _ocrModuleMock;
     private const string _textImageUrl = "https://example.com/image.png";
     private const string _emptyImageUrl = "https://example.com/empty.png";
@@ -40,7 +40,7 @@ public class OcrModuleTests
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var shared = new SharedModule(sharedLogger, new(), new());
 
-        _interactive = new InteractiveService(_client);
+        _interactive = new InteractiveService(_client, _interactiveConfig);
         _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, shared, _interactive, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_ocrModuleMock.Object).SetContext(_contextMock.Object);

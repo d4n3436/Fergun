@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
@@ -54,7 +53,7 @@ public class OcrModule : InteractionModuleBase
             .WithSelectionPage(page)
             .Build();
 
-        var result = await _interactive.SendSelectionAsync(selection, (SocketInteraction)Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
+        var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
 
         // Attempt to disable the components
         _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
@@ -88,7 +87,7 @@ public class OcrModule : InteractionModuleBase
             _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
         };
 
-        if (interaction is SocketMessageComponent componentInteraction)
+        if (interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
         }
