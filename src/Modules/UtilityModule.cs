@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Discord;
@@ -22,6 +23,7 @@ namespace Fergun.Modules;
 public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 {
     private readonly ILogger<UtilityModule> _logger;
+    private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly GoogleTranslator _googleTranslator;
@@ -36,11 +38,12 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator,
-        GoogleTranslator2 googleTranslator2, MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient,
-        IWikipediaClient wikipediaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer,
+        SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator, GoogleTranslator2 googleTranslator2,
+        MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient, IWikipediaClient wikipediaClient)
     {
         _logger = logger;
+        _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
         _googleTranslator = googleTranslator;
@@ -50,6 +53,8 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         _searchClient = searchClient;
         _wikipediaClient = wikipediaClient;
     }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("Bad Translator")]
     public async Task BadTranslator(IMessage message)
@@ -61,13 +66,13 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            await Context.Interaction.RespondWarningAsync("The message must contain text.", true);
+            await Context.Interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
             return;
         }
 
         if (chainCount is < 2 or > 10)
         {
-            await Context.Interaction.RespondWarningAsync("The chain count must be between 2 and 10 (inclusive).", true);
+            await Context.Interaction.RespondWarningAsync(_localizer["The chain count must be between 2 and 10 (inclusive)."], true);
             return;
         }
 
@@ -128,7 +133,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             languageChain.Add(target);
         }
 
-        string embedText = $"**Language Chain**\n{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n**Result**\n";
+        string embedText = $"**{_localizer["Language Chain"]}**\n{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n**{_localizer["Result"]}**\n";
 
         var embed = new EmbedBuilder()
             .WithTitle("Bad translator")
@@ -150,7 +155,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 
         if (string.IsNullOrWhiteSpace(result))
         {
-            await FollowupAsync("No output.");
+            await FollowupAsync(_localizer["No output."]);
         }
         else
         {
@@ -166,7 +171,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             else
             {
                 embed = new EmbedBuilder()
-                    .WithTitle("Command output")
+                    .WithTitle(_localizer["Command output"])
                     .WithDescription(sanitized)
                     .WithColor(Color.Orange)
                     .Build();
@@ -181,14 +186,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     {
         var embed = new EmbedBuilder()
             .WithTitle("Fergun 2")
-            .WithDescription("This is Fergun 2. Fergun 2 is a complete rewrite of Fergun 1 and it will only have slash commands.\n" +
-                             "Fergun 2 is in alpha stages and only the most used commands are present, but more commands will be added soon.\n" +
-                             "Fergun 2 will be finished in May 2022 and it will include new features and commands.\n\n" +
-                             "Some modules and commands are currently in maintenance mode in Fergun 1 and they won't be migrated to Fergun 2. These modules are:\n" +
-                             "- **AI Dungeon** module\n" +
-                             "- **Music** module\n" +
-                             "- **Snipe** commands\n\n" +
-                             $"You can find more info about the removals of these modules/commands {Format.Url("here", "https://github.com/d4n3436/Fergun/wiki/Command-removal-notice")}.")
+            .WithDescription(_localizer["Fergun2Info", "https://github.com/d4n3436/Fergun/wiki/Command-removal-notice"])
             .WithColor(Color.Orange)
             .Build();
 
@@ -335,28 +333,28 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
 
         var builder = new EmbedBuilder()
-            .WithTitle("Fergun Stats")
-            .AddField("Operating System", os, true)
+            .WithTitle(_localizer["Fergun Stats"])
+            .AddField(_localizer["Operating System"], os, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("CPU", cpu, true)
-            .AddField("CPU Usage", cpuUsage + "%", true)
+            .AddField(_localizer["CPU Usage"], cpuUsage + "%", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("RAM Usage",
+            .AddField(_localizer["RAM Usage"],
                 $"{processRamUsage}MB ({(totalRam == null ? 0 : Math.Round((double)processRamUsage / totalRam.Value * 100, 2))}%) " +
                 $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
                 $"/ {totalRam?.ToString() ?? "?"}MB", true)
-            .AddField("Library", $"Discord.Net v{DiscordConfig.Version}", true)
+            .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("Bot Version", version, true)
-            .AddField("Total Servers", $"{Context.Client.Guilds.Count} (Shard: {Context.Client.GetShard(shardId).Guilds.Count})", true)
+            .AddField(_localizer["Bot Version"], version, true)
+            .AddField(_localizer["Total Servers"], $"{Context.Client.Guilds.Count} (Shard: {Context.Client.GetShard(shardId).Guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("Total Users", $"{totalUsers} (Shard: {totalUsersInShard})", true)
-            .AddField("Shard ID", shardId, true)
+            .AddField(_localizer["Total Users"], $"{totalUsers} (Shard: {totalUsersInShard})", true)
+            .AddField(_localizer["Shard ID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", Context.Client.Shards.Count, true)
-            .AddField("Uptime", elapsed.Humanize(), true)
+            .AddField(_localizer["Uptime"], elapsed.Humanize(), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("Bot Owner", owner, true);
+            .AddField(_localizer["Bot Owner"], owner, true);
 
         builder.WithColor(Color.Orange);
 
@@ -393,7 +391,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 
         if (articles.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -418,7 +416,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
                 .WithUrl($"https://{Context.Interaction.GetLanguageCode()}.wikipedia.org/?curid={article.Id}")
                 .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
                 .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
-                .WithFooter($"Wikipedia Search | Page {index + 1} of {articles.Length}")
+                .WithFooter(_localizer["Wikipedia Search | Page {0} of {1}", index + 1, articles.Length])
                 .WithColor(Color.Orange);
 
             if (Context.Channel.IsNsfw() && article.Image is not null)
@@ -447,7 +445,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         switch (videos.Count)
         {
             case 0:
-                await Context.Interaction.FollowupWarning("No results.");
+                await Context.Interaction.FollowupWarning(_localizer["No results."]);
                 break;
 
             case 1:
@@ -457,7 +455,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             default:
                 var paginator = new StaticPaginatorBuilder()
                     .AddUser(Context.User)
-                    .WithPages(videos.Select((x, i) => new PageBuilder { Text = $"{x.Url}\nPage {i + 1} of {videos.Count}" } as IPageBuilder).ToArray())
+                    .WithPages(videos.Select((x, i) => new PageBuilder { Text = $"{x.Url}\n{_localizer["Page {0} of {1}", i + 1, videos.Count]}" } as IPageBuilder).ToArray())
                     .WithActionOnCancellation(ActionOnStop.DisableInput)
                     .WithActionOnTimeout(ActionOnStop.DisableInput)
                     .WithFooter(PaginatorFooter.None)

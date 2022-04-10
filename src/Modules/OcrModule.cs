@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Bing;
@@ -15,19 +16,24 @@ namespace Fergun.Modules;
 public class OcrModule : InteractionModuleBase
 {
     private readonly ILogger<OcrModule> _logger;
+    private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, SharedModule shared, InteractiveService interactive, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
+        InteractiveService interactive,IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
+        _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("OCR")]
     public async Task Ocr(IMessage message)
@@ -39,12 +45,12 @@ public class OcrModule : InteractionModuleBase
 
         if (url is null)
         {
-            await Context.Interaction.RespondWarningAsync("Unable to get an image URL from the message.", true);
+            await Context.Interaction.RespondWarningAsync(_localizer["Unable to get an image URL from the message."], true);
             return;
         }
 
         var page = new PageBuilder()
-            .WithTitle("Select an OCR engine")
+            .WithTitle(_localizer["Select an OCR engine"])
             .WithColor(Color.Orange);
 
         var selection = new SelectionBuilder<OcrEngine>()
@@ -76,7 +82,7 @@ public class OcrModule : InteractionModuleBase
     {
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
-            await interaction.RespondWarningAsync("The URL is not well formed.", true);
+            await interaction.RespondWarningAsync(_localizer["The URL is not well formed."], true);
             return;
         }
 
@@ -112,7 +118,7 @@ public class OcrModule : InteractionModuleBase
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.FollowupWarning("The OCR did not give results.", ephemeral);
+            await interaction.FollowupWarning(_localizer["The OCR yielded no results."], ephemeral);
             return;
         }
 
@@ -122,22 +128,22 @@ public class OcrModule : InteractionModuleBase
 
         var (name, iconUrl) = ocrEngine switch
         {
-            OcrEngine.Bing => ("Bing Visual Search", Constants.BingIconUrl),
-            OcrEngine.Yandex => ("Yandex OCR", Constants.YandexIconUrl),
+            OcrEngine.Bing => (_localizer["Bing Visual Search"], Constants.BingIconUrl),
+            OcrEngine.Yandex => (_localizer["Yandex OCR"], Constants.YandexIconUrl),
             _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
         };
 
-        string embedText = "**Output**\n";
+        string embedText = $"**{_localizer["Output"]}**\n";
 
         var builder = new EmbedBuilder()
-            .WithTitle("OCR Results")
+            .WithTitle(_localizer["OCR Results"])
             .WithDescription($"{embedText}```{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6)}```")
             .WithThumbnailUrl(url)
-            .WithFooter($"{name} | Processing time: {stopwatch.ElapsedMilliseconds}ms", iconUrl)
+            .WithFooter(_localizer["{0} | Processing time: {1}ms", name, stopwatch.ElapsedMilliseconds], iconUrl)
             .WithColor(Color.Orange);
 
         var components = new ComponentBuilder()
-            .WithButton($"Translate{(language is null ? "" : $" to {language.Name}")}", "ocrtranslate", ButtonStyle.Secondary)
+            .WithButton(language is null ? _localizer["Translate"] : _localizer["Translate to {0}", language.Name], "ocrtranslate", ButtonStyle.Secondary)
             .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
             .Build();
 

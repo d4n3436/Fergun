@@ -7,6 +7,7 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -38,10 +39,16 @@ public class OcrModuleTests
         _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _invalidImageUrl))).ThrowsAsync(new YandexException("Invalid image."));
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
-        var shared = new SharedModule(sharedLogger, new(), new());
+        var sharedLocalizer = new Mock<IFergunLocalizer<SharedResource>>();
+        sharedLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
+        sharedLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
+        var ocrLocalizer = new Mock<IFergunLocalizer<OcrModule>>();
+        ocrLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
+        ocrLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
+        var shared = new SharedModule(sharedLogger, sharedLocalizer.Object, new(), new());
 
         _interactive = new InteractiveService(_client, _interactiveConfig);
-        _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, shared, _interactive, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
+        _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, ocrLocalizer.Object, shared, _interactive, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_ocrModuleMock.Object).SetContext(_contextMock.Object);
     }

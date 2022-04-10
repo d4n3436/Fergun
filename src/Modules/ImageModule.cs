@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Globalization;
+using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
@@ -17,7 +18,8 @@ namespace Fergun.Modules;
 [Group("img", "Image search commands.")]
 public class ImageModule : InteractionModuleBase
 {
-    private readonly ILogger<UtilityModule> _logger;
+    private readonly ILogger<ImageModule> _logger;
+    private readonly IFergunLocalizer<ImageModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
@@ -26,10 +28,11 @@ public class ImageModule : InteractionModuleBase
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public ImageModule(ILogger<UtilityModule> logger, SharedModule shared, InteractiveService interactive, GoogleScraper googleScraper,
-        DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, SharedModule shared, InteractiveService interactive,
+        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
+        _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
         _googleScraper = googleScraper;
@@ -38,6 +41,8 @@ public class ImageModule : InteractionModuleBase
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
     public async Task Google([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,
@@ -59,7 +64,7 @@ public class ImageModule : InteractionModuleBase
 
         if (filteredImages.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -79,10 +84,10 @@ public class ImageModule : InteractionModuleBase
         {
             var builders = filteredImages[index].Select(result => new EmbedBuilder()
                 .WithTitle(result.Title)
-                .WithDescription("Google Images results")
+                .WithDescription(_localizer["Google Images search"])
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.GoogleLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.GoogleLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -107,7 +112,7 @@ public class ImageModule : InteractionModuleBase
 
         if (filteredImages.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -127,10 +132,10 @@ public class ImageModule : InteractionModuleBase
         {
             var pageBuilder = new PageBuilder()
                 .WithTitle(filteredImages[index].Title)
-                .WithDescription("DuckDuckGo image search")
+                .WithDescription(_localizer["DuckDuckGo image search"])
                 .WithUrl(filteredImages[index].SourceUrl)
                 .WithImageUrl(filteredImages[index].Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.DuckDuckGoLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.DuckDuckGoLogoUrl)
                 .WithColor(Color.Orange);
 
             return Task.FromResult(pageBuilder);
@@ -155,7 +160,7 @@ public class ImageModule : InteractionModuleBase
 
         if (filteredImages.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -175,10 +180,10 @@ public class ImageModule : InteractionModuleBase
         {
             var pageBuilder = new PageBuilder()
                 .WithTitle(filteredImages[index].Title)
-                .WithDescription("Brave image search")
+                .WithDescription(_localizer["Brave image search"])
                 .WithUrl(filteredImages[index].SourceUrl)
                 .WithImageUrl(filteredImages[index].Url)
-                .WithFooter($"Page {index + 1}/{filteredImages.Length}", Constants.BraveLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.BraveLogoUrl)
                 .WithColor(Color.Orange);
 
             return Task.FromResult(pageBuilder);
@@ -209,7 +214,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -233,7 +238,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
-                .WithFooter($"Yandex Image Search | Page {index + 1}/{results.Length}", Constants.YandexIconUrl)
+                .WithFooter(_localizer["Yandex Visual Search | Page {0} of {1}", index + 1, results.Length], Constants.YandexIconUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -251,7 +256,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning("No results.");
+            await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
@@ -274,7 +279,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? "https://www.bing.com/visualsearch" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
-                .WithFooter($"Bing Visual Search | Page {index + 1}/{results.Length}", Constants.BingIconUrl)
+                .WithFooter(_localizer["Bing Visual Search | Page {0} of {1}", index + 1, results.Length], Constants.BingIconUrl)
                 .WithColor((Color)result.AccentColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);

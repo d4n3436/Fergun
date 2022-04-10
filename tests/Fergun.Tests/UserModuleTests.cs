@@ -6,6 +6,7 @@ using Bogus;
 using Discord;
 using Discord.Interactions;
 using Fergun.Modules;
+using Microsoft.Extensions.Localization;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -16,10 +17,15 @@ public class UserModuleTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
-    private readonly Mock<UserModule> _userModuleMock = new();
+    private readonly Mock<UserModule> _userModuleMock;
 
     public UserModuleTests()
     {
+        var userLocalizer = new Mock<IFergunLocalizer<UserModule>>();
+        userLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
+        userLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
+
+        _userModuleMock = new Mock<UserModule>(() => new UserModule(userLocalizer.Object));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_userModuleMock.Object).SetContext(_contextMock.Object);
     }

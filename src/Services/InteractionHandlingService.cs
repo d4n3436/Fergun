@@ -1,9 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Extensions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -102,10 +104,13 @@ public class InteractionHandlingService : IHostedService
         await HandleInteractionErrorAsync(context, result);
     }
 
-    private static async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
+    private async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
     {
+        var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
+        localizer.CurrentCulture = new CultureInfo(context.Interaction.GetLanguageCode());
+
         string message = result.Error == InteractionCommandError.Exception
-            ? $"An error occurred.\n\nError message: ```{((ExecuteResult)result).Exception.Message}```"
+            ? $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{((ExecuteResult)result).Exception.Message}```"]}"
             : result.ErrorReason;
 
         if (context.Interaction.HasResponded)

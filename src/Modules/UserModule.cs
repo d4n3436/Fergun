@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Globalization;
+using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 
@@ -6,6 +7,15 @@ namespace Fergun.Modules;
 
 public class UserModule : InteractionModuleBase
 {
+    private readonly IFergunLocalizer<UserModule> _localizer;
+
+    public UserModule(IFergunLocalizer<UserModule> localizer)
+    {
+        _localizer = localizer;
+    }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+
     [UserCommand("Avatar")]
     public async Task Avatar(IUser user)
     {
@@ -34,7 +44,7 @@ public class UserModule : InteractionModuleBase
         }
 
         if (string.IsNullOrWhiteSpace(activities))
-            activities = "None";
+            activities = $"({_localizer["None"]})";
 
         string clients = "?";
         if (user.ActiveClients.Count > 0)
@@ -56,16 +66,16 @@ public class UserModule : InteractionModuleBase
         string avatarUrl = guildUser?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
         var builder = new EmbedBuilder()
-            .WithTitle("User Info")
-            .AddField("Name", user.ToString())
-            .AddField("Nickname", guildUser?.Nickname ?? "None")
+            .WithTitle(_localizer["User Info"])
+            .AddField(_localizer["Name"], user.ToString())
+            .AddField("Nickname", guildUser?.Nickname ?? $"({_localizer["None"]})")
             .AddField("ID", user.Id)
-            .AddField("Activity", activities, true)
+            .AddField(_localizer["Activities"], activities, true)
             .AddField("Active Clients", clients, true)
-            .AddField("Is Bot", user.IsBot)
-            .AddField("Created At", GetTimestamp(user.CreatedAt))
-            .AddField("Guild Join Date", GetTimestamp(guildUser?.JoinedAt))
-            .AddField("Boosting Since", GetTimestamp(guildUser?.PremiumSince))
+            .AddField(_localizer["Is Bot"], user.IsBot)
+            .AddField(_localizer["Created At"], GetTimestamp(user.CreatedAt))
+            .AddField(_localizer["Server Join Date"], GetTimestamp(guildUser?.JoinedAt))
+            .AddField(_localizer["Boosting Since"], GetTimestamp(guildUser?.PremiumSince))
             .WithThumbnailUrl(avatarUrl)
             .WithColor(Color.Orange);
 

@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Globalization;
+using Discord;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
@@ -14,33 +15,37 @@ namespace Fergun.Modules;
 public class SharedModule
 {
     private readonly ILogger<SharedModule> _logger;
+    private readonly IFergunLocalizer<SharedResource> _localizer;
     private readonly AggregateTranslator _translator;
     private readonly GoogleTranslator2 _googleTranslator2;
 
-    public SharedModule(ILogger<SharedModule> logger, AggregateTranslator translator, GoogleTranslator2 googleTranslator2)
+    public SharedModule(ILogger<SharedModule> logger, IFergunLocalizer<SharedResource> localizer, AggregateTranslator translator, GoogleTranslator2 googleTranslator2)
     {
         _logger = logger;
+        _localizer = localizer;
         _translator = translator;
         _googleTranslator2 = googleTranslator2;
     }
 
     public async Task TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false, bool deferLoad = false)
     {
+        _localizer.CurrentCulture = new CultureInfo(interaction.GetLanguageCode());
+
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync("The message must contain text.", true);
+            await interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
             return;
         }
 
         if (!Language.TryGetLanguage(target, out _))
         {
-            await interaction.RespondWarningAsync($"Invalid target language \"{target}\".", true);
+            await interaction.RespondWarningAsync(_localizer["Invalid target language \"{0}\".", target], true);
             return;
         }
 
         if (source != null && !Language.TryGetLanguage(source, out _))
         {
-            await interaction.RespondWarningAsync($"Invalid source language \"{source}\".", true);
+            await interaction.RespondWarningAsync(_localizer["Invalid source language \"{0}\".", source], true);
             return;
         }
 
@@ -74,16 +79,16 @@ public class SharedModule
             _ => Constants.GoogleTranslateLogoUrl
         };
 
-        string embedText = $"**Source language** {(source == null ? "**(Detected)**" : "")}\n" +
-                           $"{result.SourceLanguage.Name}\n\n" +
-                           "**Target language**\n" +
-                           $"{result.TargetLanguage.Name}" +
-                           "\n\n**Result**\n";
+        string embedText = $"**{_localizer[source is null ? "Source language (Detected)" : "Source language"]}**\n" +
+                            $"{result.SourceLanguage.Name}\n\n" +
+                            $"**{_localizer["Target language"]}**\n" +
+                            $"{result.TargetLanguage.Name}" +
+                            $"\n\n**{_localizer["Result"]}**\n";
 
         string translation = result.Translation.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6);
 
         var builder = new EmbedBuilder()
-            .WithTitle("Translation result")
+            .WithTitle(_localizer["Translation result"])
             .WithDescription($"{embedText}```{translation}```")
             .WithThumbnailUrl(thumbnailUrl)
             .WithColor(Color.Orange);
@@ -93,9 +98,11 @@ public class SharedModule
 
     public async Task TtsAsync(IDiscordInteraction interaction, string text, string? target = null, bool ephemeral = false, bool deferLoad = false)
     {
+        _localizer.CurrentCulture = new CultureInfo(interaction.GetLanguageCode());
+
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync("The message must contain text.", true);
+            await interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
             return;
         }
 
@@ -103,7 +110,7 @@ public class SharedModule
 
         if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
         {
-            await interaction.RespondWarningAsync($"Language \"{target}\" not supported.", true);
+            await interaction.RespondWarningAsync(_localizer["Language \"{0}\" not supported.", target], true);
             return;
         }
 

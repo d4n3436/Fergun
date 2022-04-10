@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using Fergun.Apis.Urban;
 using Fergun.Interactive;
 using Fergun.Modules;
+using Microsoft.Extensions.Localization;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -29,7 +30,11 @@ public class UrbanModuleTests
     public UrbanModuleTests()
     {
         var interactive = new InteractiveService(_client, _interactiveConfig);
-        _urbanModuleMock = new Mock<UrbanModule>(() => new UrbanModule(_urbanDictionaryMock.Object, interactive));
+        var urbanLocalizer = new Mock<IFergunLocalizer<UrbanModule>>();
+        urbanLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
+        urbanLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
+
+        _urbanModuleMock = new Mock<UrbanModule>(() => new UrbanModule(urbanLocalizer.Object, _urbanDictionaryMock.Object, interactive));
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         _contextMock.SetupGet(x => x.User).Returns(() => AutoFaker.Generate<IUser>(b => b.WithBinder(new MoqBinder())));
         ((IInteractionModuleBase)_urbanModuleMock.Object).SetContext(_contextMock.Object);

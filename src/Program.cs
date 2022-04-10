@@ -50,12 +50,14 @@ await Host.CreateDefaultBuilder()
     {
         config.MinimumLevel.Debug()
             .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
-            .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && Matching.FromSource("Microsoft.Extensions.Http").Invoke(e))
+            .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && (Matching.FromSource("Microsoft.Extensions.Http").Invoke(e) || Matching.FromSource("Microsoft.Extensions.Localization").Invoke(e)))
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File("logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })
     .ConfigureServices(services =>
     {
+        services.AddLocalization(options => options.ResourcesPath = "Resources");
+        services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
         services.AddHostedService<InteractionHandlingService>();
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
