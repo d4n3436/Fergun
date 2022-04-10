@@ -137,12 +137,7 @@ namespace Fergun.Modules
                 await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Command", "New: Using cached mode list..."));
             }
 
-            string description = $"\u2139 {string.Format(Locate("AIDUsageNote"), GetPrefix())}";
-
-            if (DisplayRewriteWarning)
-            {
-                description += $"\n\u26a0 {Locate("AIDRemovalWarning")}";
-            }
+            string description = $"\u2139 {string.Format(Locate("AIDUsageNote"), GetPrefix())}\n\u26a0 {Locate("AIDRemovalWarning")}";
 
             description += $"\n\n{Locate("ModeSelect")}";
 

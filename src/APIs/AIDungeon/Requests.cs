@@ -14,7 +14,7 @@ namespace Fergun.APIs.AIDungeon
 
             Query = requestType switch
             {
-                RequestType.CreateAdventure => "mutation ($scenarioId: String, $prompt: String, $memory: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt, memory: $memory) {\n    id\n    publicId\n    title\n    description\n    musicTheme\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n",
+                RequestType.CreateAdventure => "mutation ($scenarioId: String, $prompt: String, $memory: String) {\n  addAdventure(scenarioId: $scenarioId, prompt: $prompt, memory: $memory) {\n    id\n    publicId\n    title\n    description\n    tags\n    nsfw\n    published\n    createdAt\n    updatedAt\n    deletedAt\n    publicId\n    __typename\n  }\n}\n",
                 RequestType.GetScenario => "query ($publicId: String) {\n  scenario(publicId: $publicId) {\n    memory\n    ...SelectOptionScenario\n    __typename\n  }\n}\n\nfragment SelectOptionScenario on Scenario {\n  id\n  prompt\n  publicId\n  options {\n    id\n    publicId\n    title\n    __typename\n  }\n  __typename\n}\n",
                 RequestType.GetAdventure => "query ($publicId: String) {\n  adventure(publicId: $publicId) {\n    id\n    publicId\n    title\n    description\n    nsfw\n    published\n    actions {\n      id\n      text\n      undoneAt\n      deletedAt\n    }\n    undoneWindow {\n      id\n      text\n      undoneAt\n      deletedAt\n    }\n    createdAt\n    updatedAt\n    deletedAt\n  }\n}",
                 RequestType.DeleteAdventure => "mutation ($publicId: String) {\n  deleteAdventure(publicId: $publicId) {\n    id\n    publicId\n    deletedAt\n    __typename\n  }\n}\n",
