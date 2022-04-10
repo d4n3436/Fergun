@@ -432,10 +432,7 @@ namespace Fergun.Modules
                 }
             }
 
-            if (DisplayRewriteWarning)
-            {
-                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
-            }
+            builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
 
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -481,10 +478,7 @@ namespace Fergun.Modules
                 }
             }
 
-            if (DisplayRewriteWarning)
-            {
-                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
-            }
+            builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
 
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -897,10 +891,7 @@ namespace Fergun.Modules
                 }
             }
 
-            if (DisplayRewriteWarning)
-            {
-                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
-            }
+            builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
 
             builder.WithColor(FergunClient.Config.EmbedColor);
 
@@ -1787,10 +1778,7 @@ namespace Fergun.Modules
                 }
             }
 
-            if (DisplayRewriteWarning)
-            {
-                builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
-            }
+            builder.AddField(Locate("CommandRemovalWarning"), Locate("SnipeRemovalWarning"));
 
             builder.WithColor(FergunClient.Config.EmbedColor);
 
