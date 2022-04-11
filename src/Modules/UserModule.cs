@@ -14,7 +14,7 @@ public class UserModule : InteractionModuleBase
         _localizer = localizer;
     }
 
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [UserCommand("Avatar")]
     public async Task Avatar(IUser user)

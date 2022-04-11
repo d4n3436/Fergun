@@ -33,7 +33,7 @@ public class OcrModule : InteractionModuleBase
         _yandexImageSearch = yandexImageSearch;
     }
 
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("OCR")]
     public async Task Ocr(IMessage message)

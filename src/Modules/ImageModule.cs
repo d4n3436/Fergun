@@ -42,7 +42,7 @@ public class ImageModule : InteractionModuleBase
         _yandexImageSearch = yandexImageSearch;
     }
 
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
     public async Task Google([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,

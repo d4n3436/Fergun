@@ -54,7 +54,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
         _wikipediaClient = wikipediaClient;
     }
 
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("Bad Translator")]
     public async Task BadTranslator(IMessage message)

@@ -24,7 +24,7 @@ public class UrbanModule : InteractionModuleBase
         _interactive = interactive;
     }
 
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = new CultureInfo(Context.Interaction.GetLanguageCode());
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("search", "Searches for definitions for a term in Urban Dictionary.")]
     public async Task Search([Autocomplete(typeof(UrbanAutocompleteHandler))] [Summary(description: "The term to search.")] string term)

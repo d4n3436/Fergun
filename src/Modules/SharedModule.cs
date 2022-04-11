@@ -29,7 +29,7 @@ public class SharedModule
 
     public async Task TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false, bool deferLoad = false)
     {
-        _localizer.CurrentCulture = new CultureInfo(interaction.GetLanguageCode());
+        _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -98,7 +98,7 @@ public class SharedModule
 
     public async Task TtsAsync(IDiscordInteraction interaction, string text, string? target = null, bool ephemeral = false, bool deferLoad = false)
     {
-        _localizer.CurrentCulture = new CultureInfo(interaction.GetLanguageCode());
+        _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
         if (string.IsNullOrWhiteSpace(text))
         {

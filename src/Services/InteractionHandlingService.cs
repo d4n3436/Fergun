@@ -107,7 +107,7 @@ public class InteractionHandlingService : IHostedService
     private async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
     {
         var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
-        localizer.CurrentCulture = new CultureInfo(context.Interaction.GetLanguageCode());
+        localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
 
         string message = result.Error == InteractionCommandError.Exception
             ? $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{((ExecuteResult)result).Exception.Message}```"]}"
