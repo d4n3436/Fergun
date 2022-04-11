@@ -129,6 +129,9 @@
   <data name="Google Images search" xml:space="preserve">
     <value>Búsqueda de Google Imágenes</value>
   </data>
+  <data name="Select an image search engine" xml:space="preserve">
+    <value>Selecciona un motor de búsqueda de imágenes</value>
+  </data>
   <data name="Yandex Visual Search | Page {0} of {1}" xml:space="preserve">
     <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
   </data>

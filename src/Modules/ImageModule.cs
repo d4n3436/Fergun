@@ -6,6 +6,7 @@ using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
 using GScraper;
 using GScraper.Brave;
@@ -20,7 +21,6 @@ public class ImageModule : InteractionModuleBase
 {
     private readonly ILogger<ImageModule> _logger;
     private readonly IFergunLocalizer<ImageModule> _localizer;
-    private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
@@ -28,12 +28,11 @@ public class ImageModule : InteractionModuleBase
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, SharedModule shared, InteractiveService interactive,
-        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, InteractiveService interactive, GoogleScraper googleScraper,
+        DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
-        _shared = shared;
         _interactive = interactive;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
@@ -190,22 +189,70 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
+    [MessageCommand("Reverse Image Search")]
+    public async Task Reverse(IMessage message)
+    {
+        var attachment = message.Attachments.FirstOrDefault();
+        var embed = message.Embeds.FirstOrDefault(x => x.Image is not null || x.Thumbnail is not null);
+
+        string? url = attachment?.Url ?? embed?.Image?.Url ?? embed?.Thumbnail?.Url;
+
+        if (url is null)
+        {
+            await Context.Interaction.RespondWarningAsync(_localizer["Unable to get an image URL from the message."], true);
+            return;
+        }
+
+        var page = new PageBuilder()
+            .WithTitle(_localizer["Select an image search engine"])
+            .WithColor(Color.Orange);
+
+        var selection = new SelectionBuilder<ReverseImageSearchEngine>()
+            .AddUser(Context.User)
+            .WithOptions(Enum.GetValues<ReverseImageSearchEngine>())
+            .WithSelectionPage(page)
+            .Build();
+
+        var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
+
+        // Attempt to disable the components
+        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
+
+        if (result.IsSuccess)
+        {
+            await ReverseAsync(url, result.Value, false, result.StopInteraction!, true);
+        }
+    }
+
     [SlashCommand("reverse", "Reverse image search.")]
     public async Task Reverse([Summary(description: "The url of an image.")] string url,
         [Summary(description: $"The search engine. The default is {nameof(ReverseImageSearchEngine.Yandex)}.")] ReverseImageSearchEngine engine = ReverseImageSearchEngine.Yandex,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
+        await ReverseAsync(url, engine, multiImages, Context.Interaction);
+    }
+
+    public async Task ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    {
         await (engine switch
         {
-            ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages),
-            ReverseImageSearchEngine.Bing => BingAsync(url, multiImages),
+            ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, ephemeral),
+            ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, ephemeral),
             _ => throw new ArgumentException("Invalid engine", nameof(engine))
         });
     }
 
-    public async Task YandexAsync(string url, bool multiImages)
+    public async Task YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
-        await DeferAsync();
+        if (interaction is IComponentInteraction componentInteraction)
+        {
+            await componentInteraction.DeferLoadingAsync(ephemeral);
+        }
+        else
+        {
+            await interaction.DeferAsync(ephemeral);
+        }
+
         bool isNsfw = Context.Channel.IsNsfw();
 
         var results = (await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family))
@@ -214,7 +261,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
+            await Context.Interaction.FollowupWarning(_localizer["No results."], ephemeral);
             return;
         }
 
@@ -228,7 +275,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -245,9 +292,17 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public async Task BingAsync(string url, bool multiImages)
+    public async Task BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
-        await DeferAsync();
+        if (interaction is IComponentInteraction componentInteraction)
+        {
+            await componentInteraction.DeferLoadingAsync(ephemeral);
+        }
+        else
+        {
+            await interaction.DeferAsync(ephemeral);
+        }
+
         bool isNsfw = Context.Channel.IsNsfw();
 
         var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, !isNsfw))
@@ -256,7 +311,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
+            await Context.Interaction.FollowupWarning(_localizer["No results."], ephemeral);
             return;
         }
 
@@ -270,7 +325,7 @@ public class ImageModule : InteractionModuleBase
             .AddUser(Context.User)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
