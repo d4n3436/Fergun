@@ -10,7 +10,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 {
     private static readonly Uri _apiEndpoint = new("https://www.bing.com/images/api/custom/knowledge/");
 
-    private static readonly Dictionary<string, string> _imageCategories = new()
+    private static readonly Dictionary<string, string> _imageCategories = new(5)
     {
         ["ImageByteSizeExceedsLimit"] = "Image size exceeds the limit (Max. 20MB)",
         ["ImageDimensionsExceedLimit"] = "Image dimensions exceeds the limit (Max. 4000px)",
@@ -100,6 +100,18 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        string? imageCategory = document
+            .RootElement
+            .GetPropertyOrDefault("imageQualityHints")
+            .FirstOrDefault()
+            .GetPropertyOrDefault("category")
+            .GetStringOrDefault();
+
+        if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out var message))
+        {
+            throw new BingException(message);
+        }
 
         var root = document.RootElement.Clone();
 

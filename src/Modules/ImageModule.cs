@@ -255,9 +255,20 @@ public class ImageModule : InteractionModuleBase
 
         bool isNsfw = Context.Channel.IsNsfw();
 
-        var results = (await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family))
-            .Chunk(multiImages ? 4 : 1)
-            .ToArray();
+        IYandexReverseImageSearchResult[][] results;
+
+        try
+        {
+            results = (await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family))
+                .Chunk(multiImages ? 4 : 1)
+                .ToArray();
+        }
+        catch (YandexException e)
+        {
+            _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
+            await interaction.FollowupWarning(e.Message, ephemeral);
+            return;
+        }
 
         if (results.Length == 0)
         {
@@ -305,9 +316,20 @@ public class ImageModule : InteractionModuleBase
 
         bool isNsfw = Context.Channel.IsNsfw();
 
-        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, !isNsfw))
-            .Chunk(multiImages ? 4 : 1)
-            .ToArray();
+        IBingReverseImageSearchResult[][] results;
+
+        try
+        {
+            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, !isNsfw))
+                .Chunk(multiImages ? 4 : 1)
+                .ToArray();
+        }
+        catch (BingException e)
+        {
+            _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
+            await interaction.FollowupWarning(e.Message, ephemeral);
+            return;
+        }
 
         if (results.Length == 0)
         {
