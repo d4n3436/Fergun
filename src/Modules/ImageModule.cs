@@ -272,7 +272,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."], ephemeral);
+            await interaction.FollowupWarning(_localizer["No results."], ephemeral);
             return;
         }
 
@@ -283,7 +283,7 @@ public class ImageModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(results.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
+            .AddUser(interaction.User)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
@@ -315,12 +315,11 @@ public class ImageModule : InteractionModuleBase
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
-
         IBingReverseImageSearchResult[][] results;
 
         try
         {
-            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, !isNsfw))
+            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict))
                 .Chunk(multiImages ? 4 : 1)
                 .ToArray();
         }
@@ -333,7 +332,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."], ephemeral);
+            await interaction.FollowupWarning(_localizer["No results."], ephemeral);
             return;
         }
 
@@ -344,7 +343,7 @@ public class ImageModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(results.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
+            .AddUser(interaction.User)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);

@@ -34,11 +34,12 @@ public class BingVisualSearchTests
     }
 
     [Theory]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg", true)]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg", false)]
-    public async Task ReverseImageSearchAsync_Returns_Results(string url, bool onlyFamilyFriendly)
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg", BingSafeSearchLevel.Off)]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg", BingSafeSearchLevel.Moderate)]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/A_beautiful_landscape_of_nature.jpg/1024px-A_beautiful_landscape_of_nature.jpg", BingSafeSearchLevel.Strict)]
+    public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch)
     {
-        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, onlyFamilyFriendly)).ToArray();
+        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch)).ToArray();
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -54,7 +55,7 @@ public class BingVisualSearchTests
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task ReverseImageSearchAsync_Throws_BingException_If_Image_Is_Invalid(string url)
     {
-        var task = _bingVisualSearch.ReverseImageSearchAsync(url, true);
+        var task = _bingVisualSearch.ReverseImageSearchAsync(url);
 
         await Assert.ThrowsAsync<BingException>(() => task);
     }
@@ -66,6 +67,6 @@ public class BingVisualSearchTests
         _bingVisualSearch.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<bool>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>()));
     }
 }

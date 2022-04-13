@@ -14,9 +14,9 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     {
         ["ImageByteSizeExceedsLimit"] = "Image size exceeds the limit (Max. 20MB)",
         ["ImageDimensionsExceedLimit"] = "Image dimensions exceeds the limit (Max. 4000px)",
-        ["ImageDownloadFailed"] = "Image download failed",
-        ["ServiceUnavailable"] = "Bing Visual search is currently unavailable. Try again later",
-        ["UnknownFormat"] = "Unknown format (Only JPEG, PNG or BMP allowed)."
+        ["ImageDownloadFailed"] = "Image download failed.",
+        ["ServiceUnavailable"] = "Bing Visual search is currently unavailable. Try again later.",
+        ["UnknownFormat"] = "Unknown format. Try using JPEG, PNG, or BMP files."
     };
 
     private const string _sKey = "ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug";
@@ -89,11 +89,11 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         return string.Join("\n\n", textRegions);
     }
 
-    /// <inheritdoc cref="IBingVisualSearch.ReverseImageSearchAsync(string, bool)"/>
-    public async Task<IEnumerable<BingReverseImageSearchResult>> ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
+    /// <inheritdoc cref="IBingVisualSearch.ReverseImageSearchAsync(string, BingSafeSearchLevel)"/>
+    public async Task<IEnumerable<BingReverseImageSearchResult>> ReverseImageSearchAsync(string url, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate)
     {
         EnsureNotDisposed();
-        using var request = BuildRequest(url, "SimilarImages");
+        using var request = BuildRequest(url, "SimilarImages", safeSearch);
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();
@@ -125,21 +125,10 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             .GetPropertyOrDefault("value")
             .EnumerateArrayOrEmpty();
 
-        return EnumerateResults(rawItems, onlyFamilyFriendly);
+        return rawItems.Select(item => item.Deserialize<BingReverseImageSearchResult>()!);
     }
-
-    private static IEnumerable<BingReverseImageSearchResult> EnumerateResults(IEnumerable<JsonElement> rawItems, bool onlyFamilyFriendly)
-    {
-        foreach (var item in rawItems)
-        {
-            if (onlyFamilyFriendly && item.GetPropertyOrDefault("isFamilyFriendly").ValueKind == JsonValueKind.False)
-                continue;
-
-            yield return item.Deserialize<BingReverseImageSearchResult>()!;
-        }
-    }
-
-    private static HttpRequestMessage BuildRequest(string url, string invokedSkill)
+    //ImageBrqTag
+    private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate)
     {
         string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"{invokedSkill}\"]}}}}";
         var content = new MultipartFormDataContent
@@ -150,7 +139,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
-            RequestUri = new Uri($"?skey={_sKey}", UriKind.Relative),
+            RequestUri = new Uri($"?skey={_sKey}&safeSearch={safeSearch}", UriKind.Relative),
             Content = content
         };
 
@@ -180,6 +169,6 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    async Task<IEnumerable<IBingReverseImageSearchResult>> IBingVisualSearch.ReverseImageSearchAsync(string url, bool onlyFamilyFriendly)
-        => await ReverseImageSearchAsync(url, onlyFamilyFriendly).ConfigureAwait(false);
+    async Task<IEnumerable<IBingReverseImageSearchResult>> IBingVisualSearch.ReverseImageSearchAsync(string url, BingSafeSearchLevel safeSearch)
+        => await ReverseImageSearchAsync(url, safeSearch).ConfigureAwait(false);
 }
