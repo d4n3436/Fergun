@@ -13,6 +13,11 @@ public interface IBingReverseImageSearchResult
     string Url { get; }
 
     /// <summary>
+    /// Gets a friendly domain name.
+    /// </summary>
+    string? FriendlyDomainName { get; }
+
+    /// <summary>
     /// Gets a URL pointing to the webpage hosting the image.
     /// </summary>
     string SourceUrl { get; }

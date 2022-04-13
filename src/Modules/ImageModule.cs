@@ -354,6 +354,7 @@ public class ImageModule : InteractionModuleBase
                 .WithTitle(result.Text)
                 .WithUrl(multiImages ? "https://www.bing.com/visualsearch" : result.SourceUrl)
                 .WithThumbnailUrl(url)
+                .WithDescription(result.FriendlyDomainName ?? (Uri.TryCreate(result.SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : null))
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["Bing Visual Search | Page {0} of {1}", index + 1, results.Length], Constants.BingIconUrl)
                 .WithColor((Color)result.AccentColor));

@@ -11,9 +11,10 @@ namespace Fergun.Apis.Bing;
 [DebuggerDisplay($"{{{nameof(DebuggerDisplay)}}}")]
 public class BingReverseImageSearchResult : IBingReverseImageSearchResult
 {
-    public BingReverseImageSearchResult(string url, string sourceUrl, string text, Color accentColor)
+    public BingReverseImageSearchResult(string url, string? friendlyDomainName, string sourceUrl, string text, Color accentColor)
     {
         Url = url;
+        FriendlyDomainName = friendlyDomainName;
         SourceUrl = sourceUrl;
         Text = text;
         AccentColor = accentColor;
@@ -22,6 +23,10 @@ public class BingReverseImageSearchResult : IBingReverseImageSearchResult
     /// <inheritdoc/>
     [JsonPropertyName("contentUrl")]
     public string Url { get; }
+
+    /// <inheritdoc/>
+    [JsonPropertyName("hostPageDomainFriendlyName")]
+    public string? FriendlyDomainName { get; }
 
     /// <inheritdoc/>
     [JsonPropertyName("hostPageUrl")]
