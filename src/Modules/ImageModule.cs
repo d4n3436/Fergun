@@ -47,10 +47,10 @@ public class ImageModule : InteractionModuleBase
     public async Task Google([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
         var images = await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode());
 
@@ -59,7 +59,7 @@ public class ImageModule : InteractionModuleBase
             .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
-        _logger.LogInformation(new EventId(0, "img"), "Image results: {count}", filteredImages.Length);
+        _logger.LogInformation("Image results: {count}", filteredImages.Length);
 
         if (filteredImages.Length == 0)
         {
@@ -94,98 +94,96 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("duckduckgo", "Searches for images from DuckDuckGo and displays them in a paginator.")]
-    public async Task DuckDuckGo([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][Summary(description: "The query to search.")] string query)
+    public async Task DuckDuckGo([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+        [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img2"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
-        var images = await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
-
-        var filteredImages = images
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
+        var images = (await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
+            .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
-        _logger.LogInformation(new EventId(0, "img2"), "Image results: {count}", filteredImages.Length);
+        _logger.LogInformation("Image results: {count}", images.Length);
 
-        if (filteredImages.Length == 0)
+        if (images.Length == 0)
         {
             await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
         var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePageAsync)
+            .WithPageFactory(GeneratePage)
             .WithFergunEmotes()
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
+            .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
-        Task<PageBuilder> GeneratePageAsync(int index)
+        MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var pageBuilder = new PageBuilder()
-                .WithTitle(filteredImages[index].Title)
+            var builders = images[index].Select(result => new EmbedBuilder()
+                .WithTitle(result.Title)
                 .WithDescription(_localizer["DuckDuckGo image search"])
-                .WithUrl(filteredImages[index].SourceUrl)
-                .WithImageUrl(filteredImages[index].Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.DuckDuckGoLogoUrl)
-                .WithColor(Color.Orange);
+                .WithUrl(multiImages ? "https://duckduckgo.com": result.SourceUrl)
+                .WithImageUrl(result.Url)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.DuckDuckGoLogoUrl)
+                .WithColor(Color.Orange));
 
-            return Task.FromResult(pageBuilder);
+            return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
     }
 
     [SlashCommand("brave", "Searches for images from Brave and displays them in a paginator.")]
-    public async Task Brave([Autocomplete(typeof(BraveAutocompleteHandler))][Summary(description: "The query to search.")] string query)
+    public async Task Brave([Autocomplete(typeof(BraveAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+        [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation(new EventId(0, "img3"), "Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
-        var images = await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict);
-
-        var filteredImages = images
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
+        var images = (await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
+            .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
-        _logger.LogInformation(new EventId(0, "img3"), "Image results: {count}", filteredImages.Length);
+        _logger.LogInformation("Image results: {count}", images.Length);
 
-        if (filteredImages.Length == 0)
+        if (images.Length == 0)
         {
             await Context.Interaction.FollowupWarning(_localizer["No results."]);
             return;
         }
 
         var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePageAsync)
+            .WithPageFactory(GeneratePage)
             .WithFergunEmotes()
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
+            .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
-        Task<PageBuilder> GeneratePageAsync(int index)
+        MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var pageBuilder = new PageBuilder()
-                .WithTitle(filteredImages[index].Title)
+            var builders = images[index].Select(result => new EmbedBuilder()
+                .WithTitle(result.Title)
                 .WithDescription(_localizer["Brave image search"])
-                .WithUrl(filteredImages[index].SourceUrl)
-                .WithImageUrl(filteredImages[index].Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.BraveLogoUrl)
-                .WithColor(Color.Orange);
+                .WithUrl(multiImages ? "https://search.brave.com" : result.SourceUrl)
+                .WithImageUrl(result.Url)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.BraveLogoUrl)
+                .WithColor(Color.Orange));
 
-            return Task.FromResult(pageBuilder);
+            return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
     }
 
@@ -238,11 +236,11 @@ public class ImageModule : InteractionModuleBase
         {
             ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, ephemeral),
             ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, ephemeral),
-            _ => throw new ArgumentException("Invalid engine", nameof(engine))
+            _ => throw new ArgumentException("Invalid engine.", nameof(engine))
         });
     }
 
-    public async Task YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -303,7 +301,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public async Task BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
