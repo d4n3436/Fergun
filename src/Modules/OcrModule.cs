@@ -112,7 +112,7 @@ public class OcrModule : InteractionModuleBase
         catch (Exception e) when (e is BingException or YandexException)
         {
             _logger.LogWarning(e, "Failed to perform OCR to url {url}", url);
-            await interaction.FollowupWarning(e.Message, ephemeral);
+            await interaction.FollowupWarning(_localizer[e.Message], ephemeral);
             return;
         }
 

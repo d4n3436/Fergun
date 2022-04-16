@@ -324,7 +324,7 @@ public class ImageModule : InteractionModuleBase
         catch (BingException e)
         {
             _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
-            await interaction.FollowupWarning(e.Message, ephemeral);
+            await interaction.FollowupWarning(_localizer[e.Message], ephemeral);
             return;
         }
 

@@ -120,8 +120,20 @@
   <data name="An error occurred." xml:space="preserve">
     <value>Ocurrió un error.</value>
   </data>
+  <data name="Bing Visual search failed to download the image." xml:space="preserve">
+    <value>La Búsqueda Visual de Bing no pudo descargar la imagen.</value>
+  </data>
+  <data name="Bing Visual search is currently unavailable. Try again later." xml:space="preserve">
+    <value>La Búsqueda Visual de Bing no está disponible actualmente. Vuelva a intentarlo más tarde.</value>
+  </data>
   <data name="Error message: {0}" xml:space="preserve">
     <value>Mensaje de error: {0}</value>
+  </data>
+  <data name="Image dimensions exceeds the limit (Max. 4000px)." xml:space="preserve">
+    <value>Las dimensiones de imagen supera el límite (Máx. 4000px).</value>
+  </data>
+  <data name="Image size exceeds the limit (Max. 20MB)." xml:space="preserve">
+    <value>El tamaño de imagen supera el límite (Máx. 20MB).</value>
   </data>
   <data name="Invalid source language &quot;{0}&quot;." xml:space="preserve">
     <value>Idioma de origen "{0}" inválido.</value>
@@ -167,5 +179,8 @@
   </data>
   <data name="Unable to get an image URL from the message." xml:space="preserve">
     <value>No se puede obtener una URL de imagen del mensaje.</value>
+  </data>
+  <data name="Unknown format. Try using JPEG, PNG, or BMP files." xml:space="preserve">
+    <value>Formato desconocido. Intenta usar archivos JPEG, PNG o BMP.</value>
   </data>
 </root>

@@ -12,9 +12,9 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
     private static readonly Dictionary<string, string> _imageCategories = new(5)
     {
-        ["ImageByteSizeExceedsLimit"] = "Image size exceeds the limit (Max. 20MB)",
-        ["ImageDimensionsExceedLimit"] = "Image dimensions exceeds the limit (Max. 4000px)",
-        ["ImageDownloadFailed"] = "Image download failed.",
+        ["ImageByteSizeExceedsLimit"] = "Image size exceeds the limit (Max. 20MB).",
+        ["ImageDimensionsExceedLimit"] = "Image dimensions exceeds the limit (Max. 4000px).",
+        ["ImageDownloadFailed"] = "Bing Visual search failed to download the image.",
         ["ServiceUnavailable"] = "Bing Visual search is currently unavailable. Try again later.",
         ["UnknownFormat"] = "Unknown format. Try using JPEG, PNG, or BMP files."
     };
