@@ -89,11 +89,12 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         return string.Join("\n\n", textRegions);
     }
 
-    /// <inheritdoc cref="IBingVisualSearch.ReverseImageSearchAsync(string, BingSafeSearchLevel)"/>
-    public async Task<IEnumerable<BingReverseImageSearchResult>> ReverseImageSearchAsync(string url, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate)
+    /// <inheritdoc cref="IBingVisualSearch.ReverseImageSearchAsync(string, BingSafeSearchLevel, string)"/>
+    public async Task<IEnumerable<BingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+        BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
     {
         EnsureNotDisposed();
-        using var request = BuildRequest(url, "SimilarImages", safeSearch);
+        using var request = BuildRequest(url, "SimilarImages", safeSearch, language);
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();
@@ -127,8 +128,8 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         return rawItems.Select(item => item.Deserialize<BingReverseImageSearchResult>()!);
     }
-    //ImageBrqTag
-    private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate)
+
+    private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
     {
         string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"{invokedSkill}\"]}}}}";
         var content = new MultipartFormDataContent
@@ -139,7 +140,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
-            RequestUri = new Uri($"?skey={_sKey}&safeSearch={safeSearch}", UriKind.Relative),
+            RequestUri = new Uri($"?skey={_sKey}&safeSearch={safeSearch}{(language is null ? string.Empty : $"&setLang={language}")}", UriKind.Relative),
             Content = content
         };
 
@@ -169,6 +170,6 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    async Task<IEnumerable<IBingReverseImageSearchResult>> IBingVisualSearch.ReverseImageSearchAsync(string url, BingSafeSearchLevel safeSearch)
-        => await ReverseImageSearchAsync(url, safeSearch).ConfigureAwait(false);
+    async Task<IEnumerable<IBingReverseImageSearchResult>> IBingVisualSearch.ReverseImageSearchAsync(string url, BingSafeSearchLevel safeSearch, string? language)
+        => await ReverseImageSearchAsync(url, safeSearch, language).ConfigureAwait(false);
 }

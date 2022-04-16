@@ -160,6 +160,7 @@ public class ImageModuleTests
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
+        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
 
         await _module.Reverse(url, engine, multiImages);
 
@@ -173,7 +174,7 @@ public class ImageModuleTests
         if (engine == ImageModule.ReverseImageSearchEngine.Bing)
         {
             _moduleMock.Verify(x => x.BingAsync(It.Is<string>(s => s == url), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.Is<bool>(b => !b)), Times.Once);
-            Mock.Get(_bingVisualSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == url), It.Is<BingSafeSearchLevel>(l => l == (nsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict))), Times.Once);
+            Mock.Get(_bingVisualSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == url), It.Is<BingSafeSearchLevel>(l => l == (nsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict)), It.IsAny<string>()), Times.Once);
         }
         else if (engine == ImageModule.ReverseImageSearchEngine.Yandex)
         {

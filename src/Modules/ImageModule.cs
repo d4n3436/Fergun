@@ -317,7 +317,7 @@ public class ImageModule : InteractionModuleBase
 
         try
         {
-            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict))
+            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict, interaction.GetLanguageCode()))
                 .Chunk(multiImages ? 4 : 1)
                 .ToArray();
         }

@@ -34,12 +34,12 @@ public class BingVisualSearchTests
     }
 
     [Theory]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg", BingSafeSearchLevel.Off)]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg", BingSafeSearchLevel.Moderate)]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/A_beautiful_landscape_of_nature.jpg/1024px-A_beautiful_landscape_of_nature.jpg", BingSafeSearchLevel.Strict)]
-    public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch)
+    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/876bb7a8-e8dd-4e36-ab3a-f0b9aba942e5.jpg", BingSafeSearchLevel.Off, null)]
+    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/391126cd-977a-43c7-9937-4f139623cd58.jpeg", BingSafeSearchLevel.Moderate, "en")]
+    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/5a5e947c-c248-4e4c-a717-d1f798ddb1ba.jpeg", BingSafeSearchLevel.Strict, "es")]
+    public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch, string? language)
     {
-        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch)).ToArray();
+        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language)).ToArray();
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -67,6 +67,6 @@ public class BingVisualSearchTests
         _bingVisualSearch.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
     }
 }
