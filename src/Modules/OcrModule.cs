@@ -157,7 +157,7 @@ public class OcrModule : InteractionModuleBase
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
-        await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true, deferLoad: true);
+        await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true);
     }
 
     [ComponentInteraction("ocrtts", true)]
@@ -167,7 +167,7 @@ public class OcrModule : InteractionModuleBase
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
-        await _shared.TtsAsync(Context.Interaction, text, ephemeral: true, deferLoad: true);
+        await _shared.TtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
     }
 
     public enum OcrEngine

@@ -380,7 +380,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     public async Task TTS([Summary(description: "The text to convert.")] string text,
         [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
-        => await _shared.TtsAsync(Context.Interaction, text, target, ephemeral);
+        => await _shared.TtsAsync(Context.Interaction, text, target ?? Context.Interaction.GetLanguageCode(), ephemeral);
 
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
     public async Task Wikipedia([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)

@@ -131,7 +131,7 @@ await Host.CreateDefaultBuilder()
         services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
-        services.AddSingleton<AggregateTranslator>();
+        services.AddSingleton<ITranslator, AggregateTranslator>();
         services.AddSingleton(x => new GoogleScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
         services.AddSingleton(x => new DuckDuckGoScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
         services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));

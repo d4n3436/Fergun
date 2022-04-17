@@ -16,10 +16,10 @@ public class SharedModule
 {
     private readonly ILogger<SharedModule> _logger;
     private readonly IFergunLocalizer<SharedResource> _localizer;
-    private readonly AggregateTranslator _translator;
+    private readonly ITranslator _translator;
     private readonly GoogleTranslator2 _googleTranslator2;
 
-    public SharedModule(ILogger<SharedModule> logger, IFergunLocalizer<SharedResource> localizer, AggregateTranslator translator, GoogleTranslator2 googleTranslator2)
+    public SharedModule(ILogger<SharedModule> logger, IFergunLocalizer<SharedResource> localizer, ITranslator translator, GoogleTranslator2 googleTranslator2)
     {
         _logger = logger;
         _localizer = localizer;
@@ -27,7 +27,7 @@ public class SharedModule
         _googleTranslator2 = googleTranslator2;
     }
 
-    public async Task TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false, bool deferLoad = false)
+    public async Task TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false)
     {
         _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
@@ -49,7 +49,7 @@ public class SharedModule
             return;
         }
 
-        if (deferLoad && interaction is IComponentInteraction componentInteraction)
+        if (interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
         }
@@ -66,7 +66,7 @@ public class SharedModule
         }
         catch (Exception e)
         {
-            _logger.LogWarning(new(0, "Translate"), e, "Error translating text {text} ({source} -> {target})", text, source ?? "auto", target);
+            _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source ?? "auto", target);
             await interaction.FollowupWarning(e.Message, ephemeral);
             return;
         }
@@ -96,7 +96,7 @@ public class SharedModule
         await interaction.FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
     }
 
-    public async Task TtsAsync(IDiscordInteraction interaction, string text, string? target = null, bool ephemeral = false, bool deferLoad = false)
+    public async Task TtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)
     {
         _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
@@ -106,15 +106,13 @@ public class SharedModule
             return;
         }
 
-        target ??= interaction.GetLanguageCode();
-
         if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
         {
             await interaction.RespondWarningAsync(_localizer["Language \"{0}\" not supported.", target], true);
             return;
         }
 
-        if (deferLoad && interaction is IComponentInteraction componentInteraction)
+        if (interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
         }
@@ -123,15 +121,7 @@ public class SharedModule
             await interaction.DeferAsync(ephemeral);
         }
 
-        try
-        {
-            await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
-            await interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"), ephemeral: ephemeral);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "TTS: Error obtaining TTS from text {text} ({language})", text, language);
-            await interaction.FollowupWarning(e.Message, ephemeral);
-        }
+        await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
+        await interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"), ephemeral: ephemeral);
     }
 }
