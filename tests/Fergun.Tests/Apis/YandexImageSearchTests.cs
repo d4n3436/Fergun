@@ -13,11 +13,11 @@ using Moq;
 using Moq.Protected;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Apis;
 
 public class YandexImageSearchTests
 {
-    private readonly YandexImageSearch _yandexImageSearch = new();
+    private readonly IYandexImageSearch _yandexImageSearch = new YandexImageSearch();
 
     [Theory]
     [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
@@ -189,8 +189,8 @@ public class YandexImageSearchTests
     [Fact]
     public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
     {
-        _yandexImageSearch.Dispose();
-        _yandexImageSearch.Dispose();
+        (_yandexImageSearch as IDisposable)?.Dispose();
+        (_yandexImageSearch as IDisposable)?.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(It.IsAny<string>()));

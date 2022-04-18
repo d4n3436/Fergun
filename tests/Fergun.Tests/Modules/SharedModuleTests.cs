@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules;
 
 public class SharedModuleTests
 {

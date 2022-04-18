@@ -4,7 +4,7 @@ using Fergun.Apis.Urban;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Apis;
 
 public class UrbanDictionaryTests
 {

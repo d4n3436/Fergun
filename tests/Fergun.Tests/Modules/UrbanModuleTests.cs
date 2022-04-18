@@ -11,44 +11,49 @@ using Discord.WebSocket;
 using Fergun.Apis.Urban;
 using Fergun.Interactive;
 using Fergun.Modules;
-using Microsoft.Extensions.Localization;
 using Moq;
 using Moq.Protected;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules;
 
 public class UrbanModuleTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly Mock<IUrbanDictionary> _urbanDictionaryMock = CreateMockedUrbanDictionary();
-    private readonly Mock<UrbanModule> _urbanModuleMock;
+    private readonly Mock<UrbanModule> _moduleMock;
     private readonly DiscordSocketClient _client = new();
     private readonly InteractiveConfig _interactiveConfig = new() { ReturnAfterSendingPaginator = true };
+    private readonly IFergunLocalizer<UrbanModule> _localizer = Utils.CreateMockedLocalizer<UrbanModule>();
 
     public UrbanModuleTests()
     {
         var interactive = new InteractiveService(_client, _interactiveConfig);
-        var urbanLocalizer = new Mock<IFergunLocalizer<UrbanModule>>();
-        urbanLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
-        urbanLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
 
-        _urbanModuleMock = new Mock<UrbanModule>(() => new UrbanModule(urbanLocalizer.Object, _urbanDictionaryMock.Object, interactive));
+        _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(_localizer, _urbanDictionaryMock.Object, interactive)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         _contextMock.SetupGet(x => x.User).Returns(() => AutoFaker.Generate<IUser>(b => b.WithBinder(new MoqBinder())));
-        ((IInteractionModuleBase)_urbanModuleMock.Object).SetContext(_contextMock.Object);
+        ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
+    }
+
+    [Fact]
+    public void BeforeExecute_Sets_Language()
+    {
+        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
+        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
+        Assert.Equal("en", _localizer.CurrentCulture.TwoLetterISOLanguageName);
     }
 
     [MemberData(nameof(GetRandomWords))]
     [Theory]
     public async Task Search_Calls_GetDefinitionsAsync(string term)
     {
-        var module = _urbanModuleMock.Object;
+        var module = _moduleMock.Object;
 
         await module.Search(term);
 
-        _urbanModuleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
+        _moduleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
         _urbanDictionaryMock.Verify(u => u.GetDefinitionsAsync(It.Is<string>(x => x == term)), Times.Once);
         int count = (await _urbanDictionaryMock.Object.GetDefinitionsAsync(It.IsAny<string>())).Count;
 
@@ -62,29 +67,29 @@ public class UrbanModuleTests
     [Fact]
     public async Task Random_Calls_GetRandomDefinitionsAsync()
     {
-        var module = _urbanModuleMock.Object;
+        var module = _moduleMock.Object;
 
         await module.Random();
 
-        _urbanModuleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
+        _moduleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
         _urbanDictionaryMock.Verify(u => u.GetRandomDefinitionsAsync(), Times.Once);
     }
 
     [Fact]
     public async Task WordsOfTheDay_Calls_GetWordsOfTheDayAsync()
     {
-        var module = _urbanModuleMock.Object;
+        var module = _moduleMock.Object;
 
         await module.WordsOfTheDay();
 
-        _urbanModuleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
+        _moduleMock.Protected().Verify<Task>("DeferAsync", Times.Once(), ItExpr.IsAny<bool>(), ItExpr.IsAny<RequestOptions>());
         _urbanDictionaryMock.Verify(u => u.GetWordsOfTheDayAsync(), Times.Once);
     }
 
     [Fact]
     public async Task Invalid_SearchType_Throws_ArgumentException()
     {
-        var module = _urbanModuleMock.Object;
+        var module = _moduleMock.Object;
 
         var task = module.SearchAndSendAsync((UrbanModule.UrbanSearchType)3);
 

@@ -28,7 +28,7 @@ public class UserModule : InteractionModuleBase
             Color = Color.Orange
         };
 
-        await RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: builder.Build());
     }
 
     [UserCommand("User Info")]
@@ -79,7 +79,7 @@ public class UserModule : InteractionModuleBase
             .WithThumbnailUrl(avatarUrl)
             .WithColor(Color.Orange);
 
-        await RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: builder.Build());
 
         static string GetTimestamp(DateTimeOffset? dateTime)
             => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";

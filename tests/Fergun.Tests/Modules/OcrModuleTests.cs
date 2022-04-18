@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules;
 
 public class OcrModuleTests
 {
@@ -24,7 +24,8 @@ public class OcrModuleTests
     private readonly DiscordSocketClient _client = new();
     private readonly InteractiveService _interactive;
     private readonly InteractiveConfig _interactiveConfig = new() { DeferStopSelectionInteractions = false };
-    private readonly Mock<OcrModule> _ocrModuleMock;
+    private readonly IFergunLocalizer<OcrModule> _ocrLocalizer = Utils.CreateMockedLocalizer<OcrModule>();
+    private readonly Mock<OcrModule> _moduleMock;
     private const string _textImageUrl = "https://example.com/image.png";
     private const string _emptyImageUrl = "https://example.com/empty.png";
     private const string _invalidImageUrl = "https://example.com/file.bin";
@@ -40,13 +41,21 @@ public class OcrModuleTests
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
-        var ocrLocalizer = Utils.CreateMockedLocalizer<OcrModule>();
         var shared = new SharedModule(sharedLogger, sharedLocalizer, new AggregateTranslator(), new());
 
         _interactive = new InteractiveService(_client, _interactiveConfig);
-        _ocrModuleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, ocrLocalizer, shared, _interactive, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object));
+        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, _interactive,
+            _bingVisualSearchMock.Object, _yandexImageSearchMock.Object)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
-        ((IInteractionModuleBase)_ocrModuleMock.Object).SetContext(_contextMock.Object);
+        ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
+    }
+
+    [Fact]
+    public void BeforeExecute_Sets_Language()
+    {
+        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
+        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
+        Assert.Equal("en", _ocrLocalizer.CurrentCulture.TwoLetterISOLanguageName);
     }
 
     [Theory]
@@ -54,7 +63,7 @@ public class OcrModuleTests
     [InlineData(_emptyImageUrl)]
     public async Task Bing_Uses_BingVisualSearch(string url)
     {
-        var module = _ocrModuleMock.Object;
+        var module = _moduleMock.Object;
         const bool isEphemeral = false;
 
         await module.Bing(url);
@@ -72,7 +81,7 @@ public class OcrModuleTests
     [InlineData(_emptyImageUrl)]
     public async Task Yandex_Uses_YandexImageSearch(string url)
     {
-        var module = _ocrModuleMock.Object;
+        var module = _moduleMock.Object;
         const bool isEphemeral = false;
 
         await module.Yandex(url);
@@ -88,7 +97,7 @@ public class OcrModuleTests
     [Fact]
     public async Task OcrAsync_Returns_Warning_If_Url_Is_Invalid()
     {
-        var module = _ocrModuleMock.Object;
+        var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
         await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, isEphemeral);
@@ -100,7 +109,7 @@ public class OcrModuleTests
     [Fact]
     public async Task Invalid_OcrEngine_Throws_ArgumentException()
     {
-        var module = _ocrModuleMock.Object;
+        var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
         var task = module.OcrAsync((OcrModule.OcrEngine)2, _textImageUrl, _interactionMock.Object, isEphemeral);
@@ -111,7 +120,7 @@ public class OcrModuleTests
     [Fact]
     public async Task OcrAsync_Returns_Warning_On_Exception()
     {
-        var module = _ocrModuleMock.Object;
+        var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
         await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), _invalidImageUrl, _interactionMock.Object, isEphemeral);

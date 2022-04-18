@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules;
 
 public class ImageModuleTests
 {
@@ -35,10 +35,7 @@ public class ImageModuleTests
         var logger = Mock.Of<ILogger<ImageModule>>();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, interactive, _googleScraper,
-            _duckDuckGoScraper, _braveScraper, _bingVisualSearch, _yandexImageSearch))
-        {
-            CallBase = true
-        };
+            _duckDuckGoScraper, _braveScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };
 
         _module = _moduleMock.Object;
         _interactionMock.SetupGet(x => x.User).Returns(() => Utils.CreateMockedUser());

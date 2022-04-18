@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -20,7 +21,7 @@ using YoutubeExplode.Search;
 
 namespace Fergun.Modules;
 
-public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
+public class UtilityModule : InteractionModuleBase
 {
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
@@ -147,7 +148,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
 
     [RequireOwner]
     [SlashCommand("cmd", "(Owner only) Executes a command.")]
-    public async Task Cmd([Summary(description: "The command to execute")] string command, [Summary("noembed", "No embed.")] bool noEmbed = false)
+    public async Task Cmd([Summary(description: "The command to execute")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
     {
         await DeferAsync();
 
@@ -315,20 +316,23 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
         }
 
-        int totalUsers = 0;
-        foreach (var guild in Context.Client.Guilds)
+        var guilds = await Context.Client.GetGuildsAsync(CacheMode.CacheOnly);
+        int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
+
+        int shards = 1;
+        int shardId = 0;
+        int? totalUsersInShard = null;
+        DiscordSocketClient? shard = null;
+
+        if (Context.Client is DiscordShardedClient shardedClient)
         {
-            totalUsers += guild.MemberCount;
+            shards = shardedClient.Shards.Count;
+            shardId = Context.Channel.IsPrivate() ? 0 : shardedClient.GetShardIdFor(Context.Guild);
+            shard = shardedClient.GetShard(shardId);
+            totalUsersInShard = shard.Guilds.Sum(x => x.MemberCount);
         }
 
-        int totalUsersInShard = 0;
-        int shardId = Context.Channel.IsPrivate() ? 0 : Context.Client.GetShardIdFor(Context.Guild);
-        foreach (var guild in Context.Client.GetShard(shardId).Guilds)
-        {
-            totalUsersInShard += guild.MemberCount;
-        }
-
-        string version = $"v{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion}";
+        string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
 
@@ -337,7 +341,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
             .AddField(_localizer["Operating System"], os, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("CPU", cpu, true)
-            .AddField(_localizer["CPU Usage"], cpuUsage + "%", true)
+            .AddField(_localizer["CPU Usage"], $"{cpuUsage}%", true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["RAM Usage"],
                 $"{processRamUsage}MB ({(totalRam == null ? 0 : Math.Round((double)processRamUsage / totalRam.Value * 100, 2))}%) " +
@@ -345,13 +349,13 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
                 $"/ {totalRam?.ToString() ?? "?"}MB", true)
             .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Bot Version"], version, true)
-            .AddField(_localizer["Total Servers"], $"{Context.Client.Guilds.Count} (Shard: {Context.Client.GetShard(shardId).Guilds.Count})", true)
+            .AddField(_localizer["Bot Version"], version is null ? "?" : $"v{version}", true)
+            .AddField(_localizer["Total Servers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Total Users"], $"{totalUsers} (Shard: {totalUsersInShard})", true)
+            .AddField(_localizer["Total Users"], $"{totalUsers?.ToString() ?? "?"} (Shard: {totalUsersInShard?.ToString() ?? totalUsers?.ToString() ?? "?"})", true)
             .AddField(_localizer["Shard ID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
-            .AddField("Shards", Context.Client.Shards.Count, true)
+            .AddField("Shards", shards, true)
             .AddField(_localizer["Uptime"], elapsed.Humanize(), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["Bot Owner"], owner, true);

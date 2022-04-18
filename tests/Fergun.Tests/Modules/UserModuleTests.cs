@@ -5,35 +5,38 @@ using Bogus;
 using Discord;
 using Discord.Interactions;
 using Fergun.Modules;
-using Microsoft.Extensions.Localization;
 using Moq;
-using Moq.Protected;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules;
 
 public class UserModuleTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
-    private readonly Mock<UserModule> _userModuleMock;
+    private readonly IFergunLocalizer<UserModule> _localizer = Utils.CreateMockedLocalizer<UserModule>();
+    private readonly Mock<UserModule> _moduleMock;
 
     public UserModuleTests()
     {
-        var userLocalizer = new Mock<IFergunLocalizer<UserModule>>();
-        userLocalizer.Setup(x => x[It.IsAny<string>()]).Returns<string>(s => new LocalizedString(s, s));
-        userLocalizer.Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()]).Returns<string, object[]>((s, p) => new LocalizedString(s, string.Format(s, p)));
-
-        _userModuleMock = new Mock<UserModule>(() => new UserModule(userLocalizer.Object));
+        _moduleMock = new Mock<UserModule>(() => new UserModule(_localizer)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
-        ((IInteractionModuleBase)_userModuleMock.Object).SetContext(_contextMock.Object);
+        ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
+    }
+
+    [Fact]
+    public void BeforeExecute_Sets_Language()
+    {
+        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
+        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
+        Assert.Equal("en", _localizer.CurrentCulture.TwoLetterISOLanguageName);
     }
 
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
     public async Task Avatar_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        await _userModuleMock.Object.Avatar(userMock.Object);
+        await _moduleMock.Object.Avatar(userMock.Object);
 
         userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -49,7 +52,7 @@ public class UserModuleTests
     [MemberData(nameof(GetFakeGuildUsers))]
     public async Task Avatar_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        await _userModuleMock.Object.Avatar(guildUserMock.Object);
+        await _moduleMock.Object.Avatar(guildUserMock.Object);
 
         guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -60,7 +63,7 @@ public class UserModuleTests
     [MemberData(nameof(GetFakeUsers))]
     public async Task UserInfo_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        await _userModuleMock.Object.UserInfo(userMock.Object);
+        await _moduleMock.Object.UserInfo(userMock.Object);
 
         userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -82,7 +85,7 @@ public class UserModuleTests
     [MemberData(nameof(GetFakeGuildUsers))]
     public async Task UserInfo_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        await _userModuleMock.Object.UserInfo(guildUserMock.Object);
+        await _moduleMock.Object.UserInfo(guildUserMock.Object);
 
         guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -97,13 +100,12 @@ public class UserModuleTests
 
         VerifyRespondAsyncCall(guildUserMock.Object);
     }
-
+    
     private void VerifyRespondAsyncCall(IUser user)
     {
-        _userModuleMock.Protected().Verify<Task>("RespondAsync", Times.Once(), ItExpr.IsAny<string>(),
-            ItExpr.IsAny<Embed[]>(), ItExpr.IsAny<bool>(), ItExpr.IsAny<bool>(), ItExpr.IsAny<AllowedMentions>(),
-            ItExpr.IsAny<RequestOptions>(), ItExpr.IsAny<MessageComponent>(),
-            ItExpr.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)));
+        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(),
+            It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(),
+            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>()), Times.Once);
     }
 
     private static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)

@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Modules.Handlers;
 
 public class AutocompleteHandlerTests
 {

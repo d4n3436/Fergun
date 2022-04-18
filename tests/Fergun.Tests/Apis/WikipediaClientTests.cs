@@ -5,7 +5,7 @@ using Fergun.Apis.Wikipedia;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Apis;
 
 public class WikipediaClientTests
 {
@@ -52,7 +52,7 @@ public class WikipediaClientTests
     }
 
     [Fact]
-    public async Task Disposed_UrbanDictionary_Usage_Should_Throw_ObjectDisposedException()
+    public async Task Disposed_WikipediaClient_Usage_Should_Throw_ObjectDisposedException()
     {
         (_wikipediaClient as IDisposable)?.Dispose();
         (_wikipediaClient as IDisposable)?.Dispose();

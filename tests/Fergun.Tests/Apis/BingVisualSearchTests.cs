@@ -5,11 +5,11 @@ using Fergun.Apis.Bing;
 using Moq;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Apis;
 
 public class BingVisualSearchTests
 {
-    private readonly BingVisualSearch _bingVisualSearch = new();
+    private readonly IBingVisualSearch _bingVisualSearch = new BingVisualSearch();
 
     [Theory]
     [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
@@ -61,10 +61,10 @@ public class BingVisualSearchTests
     }
 
     [Fact]
-    public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
+    public async Task Disposed_BingVisualSearch_Usage_Throws_ObjectDisposedException()
     {
-        _bingVisualSearch.Dispose();
-        _bingVisualSearch.Dispose();
+        (_bingVisualSearch as IDisposable)?.Dispose();
+        (_bingVisualSearch as IDisposable)?.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
