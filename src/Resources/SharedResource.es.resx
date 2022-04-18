@@ -168,8 +168,8 @@
   <data name="Target language" xml:space="preserve">
     <value>Idioma de destino</value>
   </data>
-  <data name="The message must contain text." xml:space="preserve">
-    <value>El mensaje debe contener texto.</value>
+  <data name="The text must not be empty." xml:space="preserve">
+    <value>El texto no debe estar vacío.</value>
   </data>
   <data name="The URL is not well formed." xml:space="preserve">
     <value>La URL no está bien formada.</value>

@@ -66,7 +66,7 @@ public class UtilityModule : InteractionModuleBase<ShardedInteractionContext>
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            await Context.Interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
+            await Context.Interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
             return;
         }
 

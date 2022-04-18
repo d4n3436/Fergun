@@ -33,7 +33,7 @@ public class SharedModule
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
+            await interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
             return;
         }
 
@@ -102,7 +102,7 @@ public class SharedModule
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync(_localizer["The message must contain text."], true);
+            await interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
             return;
         }
 
