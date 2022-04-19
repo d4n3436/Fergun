@@ -120,6 +120,9 @@
   <data name="Bing Visual Search" xml:space="preserve">
     <value>Búsqueda Visual de Bing</value>
   </data>
+  <data name="Invalid OCR engine." xml:space="preserve">
+    <value>Motor de OCR inválido.</value>
+  </data>
   <data name="OCR Results" xml:space="preserve">
     <value>Resultados de OCR</value>
   </data>

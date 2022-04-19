@@ -98,7 +98,7 @@ public class InteractionHandlingService : IHostedService
         _logger.LogInformation("Executed context menu command \"{name}\" for {username}#{discriminator} ({id}) in {context}",
             contextCommand.Name, context.User.Username, context.User.Discriminator, context.User.Id, context.Display());
 
-        if (result.IsSuccess)
+        if (result.IsSuccess || result is FergunResult { IsSilent: true })
             return;
 
         await HandleInteractionErrorAsync(context, result);
@@ -106,20 +106,24 @@ public class InteractionHandlingService : IHostedService
 
     private async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
     {
-        var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
-        localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
+        string message = result.ErrorReason;
+        bool ephemeral = (result as FergunResult)?.IsEphemeral ?? true;
+        var interaction = (result as FergunResult)?.Interaction ?? context.Interaction;
 
-        string message = result.Error == InteractionCommandError.Exception
-            ? $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{((ExecuteResult)result).Exception.Message}```"]}"
-            : result.ErrorReason;
+        if (result.Error == InteractionCommandError.Exception)
+        {
+            var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
+            localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
+            message = $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{((ExecuteResult)result).Exception.Message}```"]}";
+        }
 
         if (context.Interaction.HasResponded)
         {
-            await context.Interaction.FollowupWarning(message, true);
+            await interaction.FollowupWarning($"⚠ {message}", ephemeral);
         }
         else
         {
-            await context.Interaction.RespondWarningAsync(message, true);
+            await interaction.RespondWarningAsync($"⚠ {message}", ephemeral);
         }
     }
 

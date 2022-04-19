@@ -44,7 +44,7 @@ public class ImageModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
-    public async Task Google([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+    public async Task<RuntimeResult> GoogleAsync([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();
@@ -52,19 +52,16 @@ public class ImageModule : InteractionModuleBase
         bool isNsfw = Context.Channel.IsNsfw();
         _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
-        var images = await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode());
-
-        var filteredImages = images
+        var images = (await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode()))
             .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
             .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
-        _logger.LogInformation("Image results: {count}", filteredImages.Length);
+        _logger.LogInformation("Image results: {count}", images.Length);
 
-        if (filteredImages.Length == 0)
+        if (images.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
-            return;
+            return FergunResult.FromError(_localizer["No results."]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -72,21 +69,23 @@ public class ImageModule : InteractionModuleBase
             .WithFergunEmotes()
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(filteredImages.Length - 1)
+            .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
+        return FergunResult.FromSuccess();
+
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = filteredImages[index].Select(result => new EmbedBuilder()
+            var builders = images[index].Select(result => new EmbedBuilder()
                 .WithTitle(result.Title)
                 .WithDescription(_localizer["Google Images search"])
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, filteredImages.Length], Constants.GoogleLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.GoogleLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -94,7 +93,7 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("duckduckgo", "Searches for images from DuckDuckGo and displays them in a paginator.")]
-    public async Task DuckDuckGo([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+    public async Task<RuntimeResult> DuckDuckGoAsync([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();
@@ -110,8 +109,7 @@ public class ImageModule : InteractionModuleBase
 
         if (images.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
-            return;
+            return FergunResult.FromError(_localizer["No results."]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -125,6 +123,8 @@ public class ImageModule : InteractionModuleBase
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -141,7 +141,7 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("brave", "Searches for images from Brave and displays them in a paginator.")]
-    public async Task Brave([Autocomplete(typeof(BraveAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+    public async Task<RuntimeResult> BraveAsync([Autocomplete(typeof(BraveAutocompleteHandler))][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();
@@ -157,8 +157,7 @@ public class ImageModule : InteractionModuleBase
 
         if (images.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
-            return;
+            return FergunResult.FromError(_localizer["No results."]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -172,6 +171,8 @@ public class ImageModule : InteractionModuleBase
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -188,7 +189,7 @@ public class ImageModule : InteractionModuleBase
     }
 
     [MessageCommand("Reverse Image Search")]
-    public async Task Reverse(IMessage message)
+    public async Task<RuntimeResult> ReverseAsync(IMessage message)
     {
         var attachment = message.Attachments.FirstOrDefault();
         var embed = message.Embeds.FirstOrDefault(x => x.Image is not null || x.Thumbnail is not null);
@@ -197,8 +198,7 @@ public class ImageModule : InteractionModuleBase
 
         if (url is null)
         {
-            await Context.Interaction.RespondWarningAsync(_localizer["Unable to get an image URL from the message."], true);
-            return;
+            return FergunResult.FromError(_localizer["Unable to get an image URL from the message."], true);
         }
 
         var page = new PageBuilder()
@@ -218,29 +218,31 @@ public class ImageModule : InteractionModuleBase
 
         if (result.IsSuccess)
         {
-            await ReverseAsync(url, result.Value, false, result.StopInteraction!, true);
+            return await ReverseAsync(url, result.Value, false, result.StopInteraction!, true);
         }
+
+        return FergunResult.FromSilentError();
     }
 
     [SlashCommand("reverse", "Reverse image search.")]
-    public async Task Reverse([Summary(description: "The url of an image.")] string url,
+    public async Task<RuntimeResult> ReverseAsync([Summary(description: "The url of an image.")] string url,
         [Summary(description: $"The search engine. The default is {nameof(ReverseImageSearchEngine.Yandex)}.")] ReverseImageSearchEngine engine = ReverseImageSearchEngine.Yandex,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
-        await ReverseAsync(url, engine, multiImages, Context.Interaction);
+        return await ReverseAsync(url, engine, multiImages, Context.Interaction);
     }
 
-    public async Task ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
-        await (engine switch
+        return await (engine switch
         {
             ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, ephemeral),
             ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, ephemeral),
-            _ => throw new ArgumentException("Invalid engine.", nameof(engine))
+            _ => throw new ArgumentException(_localizer["Invalid image search engine."], nameof(engine))
         });
     }
 
-    public virtual async Task YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task<RuntimeResult> YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -264,14 +266,12 @@ public class ImageModule : InteractionModuleBase
         catch (YandexException e)
         {
             _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
-            await interaction.FollowupWarning(e.Message, ephemeral);
-            return;
+            return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 
         if (results.Length == 0)
         {
-            await interaction.FollowupWarning(_localizer["No results."], ephemeral);
-            return;
+            return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -285,6 +285,8 @@ public class ImageModule : InteractionModuleBase
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
+
+        return FergunResult.FromSuccess();
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
@@ -301,7 +303,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task<RuntimeResult> BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -324,14 +326,12 @@ public class ImageModule : InteractionModuleBase
         catch (BingException e)
         {
             _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
-            await interaction.FollowupWarning(_localizer[e.Message], ephemeral);
-            return;
+            return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
         }
 
         if (results.Length == 0)
         {
-            await interaction.FollowupWarning(_localizer["No results."], ephemeral);
-            return;
+            return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -345,6 +345,8 @@ public class ImageModule : InteractionModuleBase
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
+
+        return FergunResult.FromSuccess();
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {

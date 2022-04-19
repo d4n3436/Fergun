@@ -55,13 +55,14 @@ public class ImageModuleTests
     [Theory]
     [InlineData("Discord", false, true)]
     [InlineData("Google", true, false)]
-    public async Task Google_Sends_Paginator(string query, bool multiImages, bool nsfw)
+    public async Task GoogleAsync_Sends_Paginator(string query, bool multiImages, bool nsfw)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
-        await _module.Google(query, multiImages);
+        var result = await _module.GoogleAsync(query, multiImages);
+        Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -73,26 +74,25 @@ public class ImageModuleTests
     }
 
     [Fact]
-    public async Task Google_Returns_No_Results()
+    public async Task GoogleAsync_Returns_No_Results()
     {
-        await _module.Google(" ");
+        var result = await _module.GoogleAsync(" ");
+        Assert.False(result.IsSuccess);
 
         Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
     }
 
     [Theory]
     [InlineData("Discord", false, true)]
     [InlineData("DuckDuckGo", true, false)]
-    public async Task DuckDuckGo_Sends_Paginator(string query, bool multiImages, bool nsfw)
+    public async Task DuckDuckGoAsync_Sends_Paginator(string query, bool multiImages, bool nsfw)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
-        await _module.DuckDuckGo(query, multiImages);
+        var result = await _module.DuckDuckGoAsync(query, multiImages);
+        Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -104,26 +104,25 @@ public class ImageModuleTests
     }
 
     [Fact]
-    public async Task DuckDuckGo_Returns_No_Results()
+    public async Task DuckDuckGoAsync_Returns_No_Results()
     {
-        await _module.DuckDuckGo("\u200b");
+        var result = await _module.DuckDuckGoAsync("\u200b");
+        Assert.False(result.IsSuccess);
 
         Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
     }
 
     [Theory]
     [InlineData("Discord", false, true)]
     [InlineData("Brave", true, false)]
-    public async Task Brave_Sends_Paginator(string query, bool multiImages, bool nsfw)
+    public async Task BraveAsync_Sends_Paginator(string query, bool multiImages, bool nsfw)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
-        await _module.Brave(query, multiImages);
+        var result = await _module.BraveAsync(query, multiImages);
+        Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -135,31 +134,28 @@ public class ImageModuleTests
     }
 
     [Fact]
-    public async Task Brave_Returns_No_Results()
+    public async Task BraveAsync_Returns_No_Results()
     {
-        await _module.Brave("\u200b");
+        var result = await _module.BraveAsync("\u200b");
+        Assert.False(result.IsSuccess);
 
         Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
     }
 
     [Theory]
     [InlineData("https://example.com/image.png", ImageModule.ReverseImageSearchEngine.Bing, false, false)]
     [InlineData("https://example.com/image.png", ImageModule.ReverseImageSearchEngine.Bing, true, true)]
-    [InlineData("", ImageModule.ReverseImageSearchEngine.Bing, true, false)]
     [InlineData("https://example.com/image.png", ImageModule.ReverseImageSearchEngine.Yandex, false, false)]
     [InlineData("https://example.com/image.png", ImageModule.ReverseImageSearchEngine.Yandex, true, true)]
-    [InlineData("", ImageModule.ReverseImageSearchEngine.Yandex, true, true)]
-    public async Task Reverse_Sends_Paginator(string url, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
+    public async Task ReverseAsync_Sends_Paginator(string url, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
         _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
 
-        await _module.Reverse(url, engine, multiImages);
+        var result = await _module.ReverseAsync(url, engine, multiImages);
+        Assert.True(result.IsSuccess);
 
         _contextMock.VerifyGet(x => x.Channel);
         _interactionMock.VerifyGet(x => x.User);
@@ -180,25 +176,41 @@ public class ImageModuleTests
         }
     }
 
-    [Fact]
-    public async Task Reverse_Throws_Exception_If_Invalid_Engine_Is_Passed()
+    [Theory]
+    [InlineData("", ImageModule.ReverseImageSearchEngine.Bing, true, false)]
+    [InlineData("", ImageModule.ReverseImageSearchEngine.Yandex, true, true)]
+    public async Task ReverseAsync_Returns_No_Results(string url, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
     {
-        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.Reverse(It.IsAny<string>(), (ImageModule.ReverseImageSearchEngine)2, It.IsAny<bool>()));
+        var channel = new Mock<ITextChannel>();
+        channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
+        _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
+        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
+
+        var result = await _module.ReverseAsync(url, engine, multiImages);
+        Assert.False(result.IsSuccess);
+
+        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
+    }
+
+    [Fact]
+    public async Task ReverseAsync_Throws_Exception_If_Invalid_Engine_Is_Passed()
+    {
+        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync(It.IsAny<string>(), (ImageModule.ReverseImageSearchEngine)2, It.IsAny<bool>()));
     }
 
     [Theory]
     [InlineData(ImageModule.ReverseImageSearchEngine.Bing)]
     [InlineData(ImageModule.ReverseImageSearchEngine.Yandex)]
-    public async Task Reverse_Throws_Exception_If_Invalid_Parameters_Are_Passed(ImageModule.ReverseImageSearchEngine engine)
+    public async Task ReverseAsync_Throws_Exception_If_Invalid_Parameters_Are_Passed(ImageModule.ReverseImageSearchEngine engine)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(false);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
-        await _module.Reverse(null!, engine, It.IsAny<bool>());
+        var result = await _module.ReverseAsync(null!, engine, It.IsAny<bool>());
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Error message.", result.ErrorReason);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => !b),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.Is<Embed>(e => e.Description.EndsWith("Error message.")), It.IsAny<RequestOptions>()), Times.Once);
     }
 }

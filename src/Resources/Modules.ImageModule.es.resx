@@ -129,6 +129,9 @@
   <data name="Google Images search" xml:space="preserve">
     <value>Búsqueda de Google Imágenes</value>
   </data>
+  <data name="Invalid image search engine." xml:space="preserve">
+    <value>Motor de búsqueda de imágenes inválido.</value>
+  </data>
   <data name="Select an image search engine" xml:space="preserve">
     <value>Selecciona un motor de búsqueda de imágenes</value>
   </data>

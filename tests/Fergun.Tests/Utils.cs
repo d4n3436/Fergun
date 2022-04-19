@@ -2,9 +2,11 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using AutoBogus;
 using Bogus;
 using Discord;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
 using Microsoft.Extensions.Localization;
 using Moq;
@@ -170,5 +172,37 @@ internal static class Utils
         resultMock.SetupGet(x => x.Text).Returns(faker.Commerce.ProductDescription());
 
         return resultMock.Object;
+    }
+
+    public static IUrbanDictionary CreateMockedUrbanDictionaryApi(Faker? faker = null)
+    {
+        faker ??= new Faker();
+        var mock = new Mock<IUrbanDictionary>();
+
+        mock.Setup(u => u.GetDefinitionsAsync(It.IsNotNull<string>())).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetDefinitionsAsync(It.Is<string>(s => s == null))).ReturnsAsync(Array.Empty<UrbanDefinition>());
+        mock.Setup(u => u.GetRandomDefinitionsAsync()).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetDefinitionAsync(It.IsAny<int>())).ReturnsAsync(CreateFakeUrbanDefinition);
+        mock.Setup(u => u.GetWordsOfTheDayAsync()).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetAutocompleteResultsAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<string>(20));
+        mock.Setup(u => u.GetAutocompleteResultsExtraAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<UrbanAutocompleteResult>(20));
+
+        return mock.Object;
+    }
+
+    public static UrbanDefinition CreateFakeUrbanDefinition()
+    {
+        return new AutoFaker<UrbanDefinition>()
+            .RuleFor(x => x.Definition, f => f.Lorem.Sentence())
+            .RuleFor(x => x.Date, f => f.Date.Weekday().OrNull(f))
+            .RuleFor(x => x.Permalink, f => f.Internet.Url())
+            .RuleFor(x => x.ThumbsUp, f => f.Random.Int())
+            .RuleFor(x => x.SoundUrls, Array.Empty<string>())
+            .RuleFor(x => x.Author, f => f.Internet.UserName())
+            .RuleFor(x => x.Word, f => f.Lorem.Word())
+            .RuleFor(x => x.Id, f => f.Random.Int())
+            .RuleFor(x => x.WrittenOn, f => f.Date.PastOffset())
+            .RuleFor(x => x.Example, f => f.Lorem.Sentence())
+            .Generate();
     }
 }

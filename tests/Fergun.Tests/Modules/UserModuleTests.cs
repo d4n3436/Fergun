@@ -34,9 +34,10 @@ public class UserModuleTests
 
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
-    public async Task Avatar_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
+    public async Task AvatarAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        await _moduleMock.Object.Avatar(userMock.Object);
+        var result = await _moduleMock.Object.AvatarAsync(userMock.Object);
+        Assert.True(result.IsSuccess);
 
         userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -50,9 +51,10 @@ public class UserModuleTests
 
     [Theory]
     [MemberData(nameof(GetFakeGuildUsers))]
-    public async Task Avatar_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
+    public async Task AvatarAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        await _moduleMock.Object.Avatar(guildUserMock.Object);
+        var result = await _moduleMock.Object.AvatarAsync(guildUserMock.Object);
+        Assert.True(result.IsSuccess);
 
         guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -61,9 +63,10 @@ public class UserModuleTests
 
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
-    public async Task UserInfo_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
+    public async Task UserInfoAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        await _moduleMock.Object.UserInfo(userMock.Object);
+        var result = await _moduleMock.Object.UserInfoAsync(userMock.Object);
+        Assert.True(result.IsSuccess);
 
         userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
@@ -83,9 +86,10 @@ public class UserModuleTests
 
     [Theory]
     [MemberData(nameof(GetFakeGuildUsers))]
-    public async Task UserInfo_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
+    public async Task UserInfoAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        await _moduleMock.Object.UserInfo(guildUserMock.Object);
+        var result = await _moduleMock.Object.UserInfoAsync(guildUserMock.Object);
+        Assert.True(result.IsSuccess);
 
         guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));

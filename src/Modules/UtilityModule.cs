@@ -58,26 +58,24 @@ public class UtilityModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("Bad Translator")]
-    public async Task BadTranslator(IMessage message)
-        => await BadTranslator(message.GetText());
+    public async Task<RuntimeResult> BadTranslatorAsync(IMessage message)
+        => await BadTranslatorAsync(message.GetText());
 
     [SlashCommand("badtranslator", "Passes a text through multiple, different translators.")]
-    public async Task BadTranslator([Summary(description: "The text to use.")] string text,
+    public async Task<RuntimeResult> BadTranslatorAsync([Summary(description: "The text to use.")] string text,
         [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            await Context.Interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
-            return;
+            return FergunResult.FromError(_localizer["The text must not be empty."], true);
         }
 
         if (chainCount is < 2 or > 10)
         {
-            await Context.Interaction.RespondWarningAsync(_localizer["The chain count must be between 2 and 10 (inclusive)."], true);
-            return;
+            return FergunResult.FromError(_localizer["The chain count must be between 2 and 10 (inclusive)."], true);
         }
-
-        await DeferAsync();
+        
+        await Context.Interaction.DeferAsync();
 
         // Create an aggregated translator manually so we can randomize the initial order of the translators and shift them.
         // Bing Translator is not included because it only allows max. 1000 chars per translation
@@ -117,8 +115,7 @@ public class UtilityModule : InteractionModuleBase
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
-                await Context.Interaction.FollowupWarning(e.Message);
-                return;
+                return FergunResult.FromError(e.Message);
             }
 
             if (i == 0)
@@ -143,20 +140,22 @@ public class UtilityModule : InteractionModuleBase
             .WithColor(Color.Orange)
             .Build();
 
-        await FollowupAsync(embed: embed);
+        await Context.Interaction.FollowupAsync(embed: embed);
+
+        return FergunResult.FromSuccess();
     }
 
     [RequireOwner]
     [SlashCommand("cmd", "(Owner only) Executes a command.")]
-    public async Task Cmd([Summary(description: "The command to execute")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
+    public async Task<RuntimeResult> CmdAsync([Summary(description: "The command to execute.")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
-        var result = CommandUtils.RunCommand(command);
+        string? result = CommandUtils.RunCommand(command);
 
         if (string.IsNullOrWhiteSpace(result))
         {
-            await FollowupAsync(_localizer["No output."]);
+            await Context.Interaction.FollowupAsync(_localizer["No output."]);
         }
         else
         {
@@ -178,12 +177,14 @@ public class UtilityModule : InteractionModuleBase
                     .Build();
             }
 
-            await FollowupAsync(text, embed: embed);
+            await Context.Interaction.FollowupAsync(text, embed: embed);
         }
+
+        return FergunResult.FromSuccess();
     }
 
     [SlashCommand("help", "Information about Fergun 2")]
-    public async Task Help()
+    public async Task<RuntimeResult> HelpAsync()
     {
         var embed = new EmbedBuilder()
             .WithTitle("Fergun 2")
@@ -192,10 +193,12 @@ public class UtilityModule : InteractionModuleBase
             .Build();
 
         await RespondAsync(embed: embed);
+
+        return FergunResult.FromSuccess();
     }
 
     [SlashCommand("ping", "Sends the response time of the bot.")]
-    public async Task Ping()
+    public async Task<RuntimeResult> PingAsync()
     {
         var embed = new EmbedBuilder()
             .WithDescription("Pong!")
@@ -203,7 +206,7 @@ public class UtilityModule : InteractionModuleBase
             .Build();
 
         var sw = Stopwatch.StartNew();
-        await RespondAsync(embed: embed);
+        await Context.Interaction.RespondAsync(embed: embed);
         sw.Stop();
 
         embed = new EmbedBuilder()
@@ -212,18 +215,22 @@ public class UtilityModule : InteractionModuleBase
             .Build();
 
         await Context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
-    }
 
+        return FergunResult.FromSuccess();
+    }
+    
     [SlashCommand("say", "Says something.")]
-    public async Task Say([Summary(description: "The text to send.")] string text)
+    public async Task<RuntimeResult> SayAsync([Summary(description: "The text to send.")] string text)
     {
-        await RespondAsync(text.Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+        await Context.Interaction.RespondAsync(text.Truncate(DiscordConfig.MaxMessageSize), allowedMentions: AllowedMentions.None);
+
+        return FergunResult.FromSuccess();
     }
 
     [SlashCommand("stats", "Sends the stats of the bot.")]
-    public async Task Stats()
+    public async Task<RuntimeResult> StatsAsync()
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         long temp;
         var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
@@ -361,42 +368,43 @@ public class UtilityModule : InteractionModuleBase
             .AddField(_localizer["Bot Owner"], owner, true);
 
         builder.WithColor(Color.Orange);
+        
+        await Context.Interaction.FollowupAsync(embed: builder.Build());
 
-        await FollowupAsync(embed: builder.Build());
+        return FergunResult.FromSuccess();
     }
 
     [MessageCommand("Translate")]
-    public async Task Translate(IMessage message)
-        => await Translate(message.GetText(), Context.Interaction.GetLanguageCode());
+    public async Task<RuntimeResult> TranslateAsync(IMessage message)
+        => await TranslateAsync(message.GetText(), Context.Interaction.GetLanguageCode());
 
     [SlashCommand("translate", "Translates a text.")]
-    public async Task Translate([Summary(description: "The text to translate.")] string text,
+    public async Task<RuntimeResult> TranslateAsync([Summary(description: "The text to translate.")] string text,
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias).")] string? source = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TranslateAsync(Context.Interaction, text, target, source, ephemeral);
-
+    
     [MessageCommand("TTS")]
-    public async Task TTS(IMessage message)
-        => await TTS(message.GetText());
+    public async Task<RuntimeResult> TtsAsync(IMessage message)
+        => await TtsAsync(message.GetText());
 
     [SlashCommand("tts", "Converts text into synthesized speech.")]
-    public async Task TTS([Summary(description: "The text to convert.")] string text,
+    public async Task<RuntimeResult> TtsAsync([Summary(description: "The text to convert.")] string text,
         [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TtsAsync(Context.Interaction, text, target ?? Context.Interaction.GetLanguageCode(), ephemeral);
 
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
-    public async Task Wikipedia([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)
+    public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         var articles = (await _wikipediaClient.GetArticlesAsync(query, Context.Interaction.GetLanguageCode())).ToArray();
 
         if (articles.Length == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
-            return;
+            return FergunResult.FromError(_localizer["No results."]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -410,6 +418,8 @@ public class UtilityModule : InteractionModuleBase
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
 
         PageBuilder GeneratePage(int index)
         {
@@ -440,17 +450,16 @@ public class UtilityModule : InteractionModuleBase
     }
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
-    public async Task YouTube([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)
+    public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         var videos = await _searchClient.GetVideosAsync(query).Take(10);
 
         switch (videos.Count)
         {
             case 0:
-                await Context.Interaction.FollowupWarning(_localizer["No results."]);
-                break;
+                return FergunResult.FromError(_localizer["No results."]);
 
             case 1:
                 await Context.Interaction.FollowupAsync(videos[0].Url);
@@ -469,5 +478,7 @@ public class UtilityModule : InteractionModuleBase
                 await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
                 break;
         }
+
+        return FergunResult.FromSuccess();
     }
 }

@@ -17,7 +17,7 @@ public class UserModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [UserCommand("Avatar")]
-    public async Task Avatar(IUser user)
+    public async Task<RuntimeResult> AvatarAsync(IUser user)
     {
         string url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
 
@@ -29,10 +29,12 @@ public class UserModule : InteractionModuleBase
         };
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
+
+        return FergunResult.FromSuccess();
     }
 
     [UserCommand("User Info")]
-    public async Task UserInfo(IUser user)
+    public async Task<RuntimeResult> UserInfoAsync(IUser user)
     {
         string activities = "";
         if (user.Activities.Count > 0)
@@ -80,6 +82,8 @@ public class UserModule : InteractionModuleBase
             .WithColor(Color.Orange);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
+
+        return FergunResult.FromSuccess();
 
         static string GetTimestamp(DateTimeOffset? dateTime)
             => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";

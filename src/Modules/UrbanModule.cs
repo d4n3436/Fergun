@@ -27,31 +27,30 @@ public class UrbanModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("search", "Searches for definitions for a term in Urban Dictionary.")]
-    public async Task Search([Autocomplete(typeof(UrbanAutocompleteHandler))] [Summary(description: "The term to search.")] string term)
+    public async Task<RuntimeResult> SearchAsync([Autocomplete(typeof(UrbanAutocompleteHandler))] [Summary(description: "The term to search.")] string term)
         => await SearchAndSendAsync(UrbanSearchType.Search, term);
 
     [SlashCommand("random", "Gets random definitions from Urban Dictionary.")]
-    public async Task Random() => await SearchAndSendAsync(UrbanSearchType.Random);
+    public async Task<RuntimeResult> RandomAsync() => await SearchAndSendAsync(UrbanSearchType.Random);
 
     [SlashCommand("words-of-the-day", "Gets the words of the day in Urban Dictionary.")]
-    public async Task WordsOfTheDay() => await SearchAndSendAsync(UrbanSearchType.WordsOfTheDay);
+    public async Task<RuntimeResult> WordsOfTheDayAsync() => await SearchAndSendAsync(UrbanSearchType.WordsOfTheDay);
 
-    public async Task SearchAndSendAsync(UrbanSearchType searchType, string? term = null)
+    public async Task<RuntimeResult> SearchAndSendAsync(UrbanSearchType searchType, string? term = null)
     {
-        await DeferAsync();
+        await Context.Interaction.DeferAsync();
 
         var definitions = searchType switch
         {
             UrbanSearchType.Search => await _urbanDictionary.GetDefinitionsAsync(term!),
             UrbanSearchType.Random => await _urbanDictionary.GetRandomDefinitionsAsync(),
             UrbanSearchType.WordsOfTheDay => await _urbanDictionary.GetWordsOfTheDayAsync(),
-            _ => throw new ArgumentException("Invalid search type.", nameof(searchType))
+            _ => throw new ArgumentException(_localizer["Invalid search type."], nameof(searchType))
         };
 
         if (definitions.Count == 0)
         {
-            await Context.Interaction.FollowupWarning(_localizer["No results."]);
-            return;
+            return FergunResult.FromError(_localizer["No results."]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -66,32 +65,36 @@ public class UrbanModule : InteractionModuleBase
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
 
+        return FergunResult.FromSuccess();
+
         PageBuilder GeneratePage(int i)
         {
-            var description = new StringBuilder(definitions[i].Definition.Length + definitions[i].Example.Length);
-            description.Append(Format.Sanitize(definitions[i].Definition));
-            if (!string.IsNullOrEmpty(definitions[i].Example))
+            var definition = definitions[i];
+
+            var description = new StringBuilder(definition.Definition.Length + definition.Example.Length);
+            description.Append(Format.Sanitize(definition.Definition));
+            if (!string.IsNullOrEmpty(definition.Example))
             {
                 description.Append("\n\n");
-                description.Append(Format.Italics(Format.Sanitize(definitions[i].Example.Trim())));
+                description.Append(Format.Italics(Format.Sanitize(definition.Example.Trim())));
             }
 
             string footer = searchType switch
             {
                 UrbanSearchType.Random => _localizer["Urban Dictionary (Random Definitions) | Page {0} of {1}", i + 1, definitions.Count],
-                UrbanSearchType.WordsOfTheDay => _localizer["Urban Dictionary (Words of the day, {0}) | Page {1} of {2}", definitions[i].Date!, i + 1, definitions.Count],
+                UrbanSearchType.WordsOfTheDay => _localizer["Urban Dictionary (Words of the day, {0}) | Page {1} of {2}", definition.Date!, i + 1, definitions.Count],
                 _ => _localizer["Urban Dictionary | Page {0} of {1}", i + 1, definitions.Count]
             };
 
             return new PageBuilder()
-                .WithTitle(definitions[i].Word)
-                .WithUrl(definitions[i].Permalink)
-                .WithAuthor(_localizer["By {0}", definitions[i].Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definitions[i].Author)}")
+                .WithTitle(definition.Word)
+                .WithUrl(definition.Permalink)
+                .WithAuthor(_localizer["By {0}", definition.Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definition.Author)}")
                 .WithDescription(description.ToString())
-                .AddField("👍", definitions[i].ThumbsUp, true)
-                .AddField("👎", definitions[i].ThumbsDown, true)
+                .AddField("👍", definition.ThumbsUp, true)
+                .AddField("👎", definition.ThumbsDown, true)
                 .WithFooter(footer, Constants.UrbanDictionaryIconUrl)
-                .WithTimestamp(definitions[i].WrittenOn)
+                .WithTimestamp(definition.WrittenOn)
                 .WithColor(Color.Orange); // 0x10151BU 0x1B2936U
         }
     }

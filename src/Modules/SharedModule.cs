@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Discord;
+using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
@@ -27,26 +28,23 @@ public class SharedModule
         _googleTranslator2 = googleTranslator2;
     }
 
-    public async Task TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false)
+    public async Task<RuntimeResult> TranslateAsync(IDiscordInteraction interaction, string text, string target, string? source = null, bool ephemeral = false)
     {
         _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
-            return;
+            return FergunResult.FromError(_localizer["The text must not be empty."], true, interaction);
         }
 
         if (!Language.TryGetLanguage(target, out _))
         {
-            await interaction.RespondWarningAsync(_localizer["Invalid target language \"{0}\".", target], true);
-            return;
+            return FergunResult.FromError(_localizer["Invalid target language \"{0}\".", target], true, interaction);
         }
 
         if (source != null && !Language.TryGetLanguage(source, out _))
         {
-            await interaction.RespondWarningAsync(_localizer["Invalid source language \"{0}\".", source], true);
-            return;
+            return FergunResult.FromError(_localizer["Invalid source language \"{0}\".", source], true, interaction);
         }
 
         if (interaction is IComponentInteraction componentInteraction)
@@ -67,8 +65,7 @@ public class SharedModule
         catch (Exception e)
         {
             _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source ?? "auto", target);
-            await interaction.FollowupWarning(e.Message, ephemeral);
-            return;
+            return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 
         string thumbnailUrl = result.Service switch
@@ -94,22 +91,22 @@ public class SharedModule
             .WithColor(Color.Orange);
 
         await interaction.FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
+
+        return FergunResult.FromSuccess();
     }
 
-    public async Task TtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)
+    public async Task<RuntimeResult> TtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)
     {
         _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.RespondWarningAsync(_localizer["The text must not be empty."], true);
-            return;
+            return FergunResult.FromError(_localizer["The text must not be empty."], true, interaction);
         }
 
         if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
         {
-            await interaction.RespondWarningAsync(_localizer["Language \"{0}\" not supported.", target], true);
-            return;
+            return FergunResult.FromError(_localizer["Language \"{0}\" not supported.", target], true, interaction);
         }
 
         if (interaction is IComponentInteraction componentInteraction)
@@ -123,5 +120,7 @@ public class SharedModule
 
         await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
         await interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"), ephemeral: ephemeral);
+
+        return FergunResult.FromSuccess();
     }
 }

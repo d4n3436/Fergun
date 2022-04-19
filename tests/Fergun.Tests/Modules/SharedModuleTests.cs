@@ -28,7 +28,7 @@ public class SharedModuleTests
             {
                 if (text == "Error")
                 {
-                    throw new ArgumentException("Error.", nameof(text));
+                    throw new ArgumentException(null, nameof(text));
                 }
 
                 var targetLanguage = Language.GetLanguage(target);
@@ -62,16 +62,16 @@ public class SharedModuleTests
     [InlineData("Bing", "en", null, true)]
     [InlineData("Microsoft", "tr", "es", true)]
     [InlineData("Yandex", "ru", "en", false)]
+    [InlineData("Error", "fr", "it", true)]
     public async Task TranslateAsync_Returns_Results_Or_Fails_Preconditions(string text, string target, string? source, bool ephemeral)
     {
-        await _sharedModuleMock.Object.TranslateAsync(_interactionMock.Object, text, target, source, ephemeral);
+        var result = await _sharedModuleMock.Object.TranslateAsync(_interactionMock.Object, text, target, source, ephemeral);
 
         _interactionMock.VerifyGet(x => x.UserLocale);
 
         bool passedPreconditions = !string.IsNullOrEmpty(text) && Language.TryGetLanguage(target, out _) && (source == null || Language.TryGetLanguage(source, out _));
 
-        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Never : Times.Once);
+        Assert.Equal(result.IsSuccess, passedPreconditions);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
 
@@ -84,10 +84,11 @@ public class SharedModuleTests
     [Theory]
     [InlineData("Microsoft", "tr", "es", true)]
     [InlineData("Yandex", "ru", "en", false)]
-    [InlineData("Error", "fr", "it", true)]
     public async Task TranslateAsync_Uses_DeferLoadingAsync(string text, string target, string? source, bool ephemeral)
     {
-        await _sharedModuleMock.Object.TranslateAsync(_componentInteractionMock.Object, text, target, source, ephemeral);
+        var result = await _sharedModuleMock.Object.TranslateAsync(_componentInteractionMock.Object, text, target, source, ephemeral);
+
+        Assert.True(result.IsSuccess);
 
         _componentInteractionMock.VerifyGet(x => x.UserLocale);
 
@@ -119,7 +120,7 @@ public class SharedModuleTests
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
 
-        _interactionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(x => x.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
+        _interactionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
             It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
     }
 
@@ -135,7 +136,7 @@ public class SharedModuleTests
         _componentInteractionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Never);
         _componentInteractionMock.Verify(x => x.DeferLoadingAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Once);
 
-        _componentInteractionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(x => x.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
+        _componentInteractionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
             It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
     }
 }

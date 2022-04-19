@@ -26,18 +26,18 @@ public class OcrModuleTests
     private readonly InteractiveConfig _interactiveConfig = new() { DeferStopSelectionInteractions = false };
     private readonly IFergunLocalizer<OcrModule> _ocrLocalizer = Utils.CreateMockedLocalizer<OcrModule>();
     private readonly Mock<OcrModule> _moduleMock;
-    private const string _textImageUrl = "https://example.com/image.png";
-    private const string _emptyImageUrl = "https://example.com/empty.png";
-    private const string _invalidImageUrl = "https://example.com/file.bin";
+    private const string TextImageUrl = "https://example.com/image.png";
+    private const string EmptyImageUrl = "https://example.com/empty.png";
+    private const string InvalidImageUrl = "https://example.com/file.bin";
 
     public OcrModuleTests()
     {
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _textImageUrl))).ReturnsAsync("test");
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _emptyImageUrl))).ReturnsAsync(string.Empty);
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _invalidImageUrl))).ThrowsAsync(new BingException("Invalid image."));
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _textImageUrl))).ReturnsAsync("test");
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _emptyImageUrl))).ReturnsAsync(string.Empty);
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == _invalidImageUrl))).ThrowsAsync(new YandexException("Invalid image."));
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl))).ReturnsAsync("test");
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl))).ReturnsAsync(string.Empty);
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl))).ThrowsAsync(new BingException("Invalid image."));
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl))).ReturnsAsync("test");
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl))).ReturnsAsync(string.Empty);
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl))).ThrowsAsync(new YandexException("Invalid image."));
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
@@ -57,41 +57,43 @@ public class OcrModuleTests
         _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
         Assert.Equal("en", _ocrLocalizer.CurrentCulture.TwoLetterISOLanguageName);
     }
-
+    
     [Theory]
-    [InlineData(_textImageUrl)]
-    [InlineData(_emptyImageUrl)]
-    public async Task Bing_Uses_BingVisualSearch(string url)
+    [InlineData(TextImageUrl, true)]
+    [InlineData(EmptyImageUrl, false)]
+    public async Task BingAsync_Uses_BingVisualSearch(string url, bool success)
     {
         var module = _moduleMock.Object;
         const bool isEphemeral = false;
 
-        await module.Bing(url);
+        var result = await module.BingAsync(url);
+        Assert.Equal(success, result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
 
         _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());
+                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), success ? Times.Once : Times.Never);
     }
 
     [Theory]
-    [InlineData(_textImageUrl)]
-    [InlineData(_emptyImageUrl)]
-    public async Task Yandex_Uses_YandexImageSearch(string url)
+    [InlineData(TextImageUrl, true)]
+    [InlineData(EmptyImageUrl, false)]
+    public async Task YandexAsync_Uses_YandexImageSearch(string url, bool success)
     {
         var module = _moduleMock.Object;
         const bool isEphemeral = false;
 
-        await module.Yandex(url);
+        var result = await module.YandexAsync(url);
+        Assert.Equal(success, result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
 
         _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());
+                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), success ? Times.Once : Times.Never);
     }
 
     [Fact]
@@ -100,10 +102,8 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, isEphemeral);
-
-        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());
+        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, isEphemeral);
+        Assert.False(result.IsSuccess);
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        var task = module.OcrAsync((OcrModule.OcrEngine)2, _textImageUrl, _interactionMock.Object, isEphemeral);
+        var task = module.OcrAsync((OcrModule.OcrEngine)2, TextImageUrl, _interactionMock.Object, isEphemeral);
 
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }
@@ -123,11 +123,9 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), _invalidImageUrl, _interactionMock.Object, isEphemeral);
+        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), InvalidImageUrl, _interactionMock.Object, isEphemeral);
+        Assert.False(result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once());
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once());
+        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
     }
 }

@@ -120,6 +120,9 @@
   <data name="By {0}" xml:space="preserve">
     <value>Por {0}</value>
   </data>
+  <data name="Invalid search type." xml:space="preserve">
+    <value>Tipo de búsqueda inválido.</value>
+  </data>
   <data name="Urban Dictionary (Random Definitions) | Page {0} of {1}" xml:space="preserve">
     <value>Urban Dictionary (Definiciones Aleatorias) | Página {0} de {1}</value>
   </data>

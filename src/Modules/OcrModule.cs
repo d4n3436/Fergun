@@ -36,7 +36,7 @@ public class OcrModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("OCR")]
-    public async Task Ocr(IMessage message)
+    public async Task<RuntimeResult> OcrAsync(IMessage message)
     {
         var attachment = message.Attachments.FirstOrDefault();
         var embed = message.Embeds.FirstOrDefault(x => x.Image is not null || x.Thumbnail is not null);
@@ -45,8 +45,7 @@ public class OcrModule : InteractionModuleBase
 
         if (url is null)
         {
-            await Context.Interaction.RespondWarningAsync(_localizer["Unable to get an image URL from the message."], true);
-            return;
+            return FergunResult.FromError(_localizer["Unable to get an image URL from the message."], true);
         }
 
         var page = new PageBuilder()
@@ -66,31 +65,32 @@ public class OcrModule : InteractionModuleBase
 
         if (result.IsSuccess)
         {
-            await OcrAsync(result.Value, url, result.StopInteraction!, true);
+            return await OcrAsync(result.Value, url, result.StopInteraction!, true);
         }
+
+        return FergunResult.FromSilentError();
     }
 
     [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
-    public async Task Bing([Summary(description: "An image URL.")] string url)
+    public async Task<RuntimeResult> BingAsync([Summary(description: "An image URL.")] string url)
         => await OcrAsync(OcrEngine.Bing, url, Context.Interaction);
 
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
-    public async Task Yandex([Summary(description: "An image URL.")] string url)
+    public async Task<RuntimeResult> YandexAsync([Summary(description: "An image URL.")] string url)
         => await OcrAsync(OcrEngine.Yandex, url, Context.Interaction);
 
-    public async Task OcrAsync(OcrEngine ocrEngine, string url, IDiscordInteraction interaction, bool ephemeral = false)
+    public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string url, IDiscordInteraction interaction, bool ephemeral = false)
     {
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
-            await interaction.RespondWarningAsync(_localizer["The URL is not well formed."], true);
-            return;
+            return FergunResult.FromError(_localizer["The URL is not well formed."], true, interaction);
         }
 
         var ocrTask = ocrEngine switch
         {
             OcrEngine.Bing => _bingVisualSearch.OcrAsync(url),
             OcrEngine.Yandex => _yandexImageSearch.OcrAsync(url),
-            _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
+            _ => throw new ArgumentException(_localizer["Invalid OCR engine."], nameof(ocrEngine))
         };
 
         if (interaction is IComponentInteraction componentInteraction)
@@ -112,14 +112,12 @@ public class OcrModule : InteractionModuleBase
         catch (Exception e) when (e is BingException or YandexException)
         {
             _logger.LogWarning(e, "Failed to perform OCR to url {url}", url);
-            await interaction.FollowupWarning(_localizer[e.Message], ephemeral);
-            return;
+            return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            await interaction.FollowupWarning(_localizer["The OCR yielded no results."], ephemeral);
-            return;
+            return FergunResult.FromError(_localizer["The OCR yielded no results."], ephemeral, interaction);
         }
 
         stopwatch.Stop();
@@ -130,7 +128,7 @@ public class OcrModule : InteractionModuleBase
         {
             OcrEngine.Bing => (_localizer["Bing Visual Search"], Constants.BingIconUrl),
             OcrEngine.Yandex => (_localizer["Yandex OCR"], Constants.YandexIconUrl),
-            _ => throw new ArgumentException("Invalid OCR engine.", nameof(ocrEngine))
+            _ => throw new ArgumentException(_localizer["Invalid OCR engine."], nameof(ocrEngine))
         };
 
         string embedText = $"**{_localizer["Output"]}**\n";
@@ -148,26 +146,28 @@ public class OcrModule : InteractionModuleBase
             .Build();
 
         await interaction.FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
+
+        return FergunResult.FromSuccess();
     }
 
     [ComponentInteraction("ocrtranslate", true)]
-    public async Task OcrTranslate()
+    public async Task<RuntimeResult> OcrTranslateAsync()
     {
         string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
-        await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true);
+        return await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true);
     }
 
     [ComponentInteraction("ocrtts", true)]
-    public async Task OcrTts()
+    public async Task<RuntimeResult> OcrTtsAsync()
     {
         string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
-        await _shared.TtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
+        return await _shared.TtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
     }
 
     public enum OcrEngine
