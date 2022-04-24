@@ -138,6 +138,9 @@
   <data name="Translate to {0}" xml:space="preserve">
     <value>Traducir a {0}</value>
   </data>
+  <data name="Translate to {0} ({1})" xml:space="preserve">
+    <value>Traducir a {0} ({1})</value>
+  </data>
   <data name="Yandex OCR" xml:space="preserve">
     <value>OCR de Yandex</value>
   </data>

@@ -77,10 +77,10 @@ public class SharedModule
         };
 
         string embedText = $"**{_localizer[source is null ? "Source language (Detected)" : "Source language"]}**\n" +
-                            $"{result.SourceLanguage.Name}\n\n" +
+                            $"{DisplayName(result.SourceLanguage)}\n\n" +
                             $"**{_localizer["Target language"]}**\n" +
-                            $"{result.TargetLanguage.Name}" +
-                            $"\n\n**{_localizer["Result"]}**\n";
+                            $"{DisplayName(result.TargetLanguage)}\n\n" +
+                            $"**{_localizer["Result"]}**\n";
 
         string translation = result.Translation.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6);
 
@@ -93,6 +93,9 @@ public class SharedModule
         await interaction.FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
 
         return FergunResult.FromSuccess();
+        
+        static string DisplayName(ILanguage language)
+            => $"{language.Name}{(language is not Language lang || lang.NativeName == language.Name ? "" : $" ({lang.NativeName})")}";
     }
 
     public async Task<RuntimeResult> TtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)

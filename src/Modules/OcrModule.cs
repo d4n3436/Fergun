@@ -140,8 +140,24 @@ public class OcrModule : InteractionModuleBase
             .WithFooter(_localizer["{0} | Processing time: {1}ms", name, stopwatch.ElapsedMilliseconds], iconUrl)
             .WithColor(Color.Orange);
 
+        string buttonText;
+        if (language is null)
+        {
+            buttonText = _localizer["Translate"];
+        }
+        else
+        {
+            var localizedString = _localizer["Translate to {0}", language.NativeName];
+            if (localizedString.ResourceNotFound && language.ISO6391 != "en")
+            {
+                localizedString = _localizer["Translate to {0} ({1})", language.Name, language.NativeName];
+            }
+
+            buttonText = localizedString.Value;
+        }
+
         var components = new ComponentBuilder()
-            .WithButton(language is null ? _localizer["Translate"] : _localizer["Translate to {0}", language.Name], "ocrtranslate", ButtonStyle.Secondary)
+            .WithButton(buttonText, "ocrtranslate", ButtonStyle.Secondary)
             .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
             .Build();
 
