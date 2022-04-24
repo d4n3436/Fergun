@@ -119,11 +119,11 @@ public class InteractionHandlingService : IHostedService
 
         if (context.Interaction.HasResponded)
         {
-            await interaction.FollowupWarning($"⚠ {message}", ephemeral);
+            await interaction.FollowupWarning(message, ephemeral);
         }
         else
         {
-            await interaction.RespondWarningAsync($"⚠ {message}", ephemeral);
+            await interaction.RespondWarningAsync(message, ephemeral);
         }
     }
 
