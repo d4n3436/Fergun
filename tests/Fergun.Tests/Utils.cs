@@ -122,12 +122,13 @@ internal static class Utils
         faker ??= new Faker();
         var bingMock = new Mock<IBingVisualSearch>();
 
-        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == null))).ThrowsAsync(new BingException("Error message."));
         bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty))).ReturnsAsync(() => string.Empty);
         bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)))).ReturnsAsync(() => faker.Lorem.Sentence());
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == null), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ThrowsAsync(new BingException("Error message."));
+        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"))).ThrowsAsync(new BingException("Error message."));
+
         bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ReturnsAsync(Enumerable.Empty<IBingReverseImageSearchResult>);
         bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedBingReverseImageSearchResult(faker)));
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ThrowsAsync(new BingException("Error message."));
 
         return bingMock.Object;
     }
@@ -151,12 +152,13 @@ internal static class Utils
         faker ??= new Faker();
         var yandexMock = new Mock<IYandexImageSearch>();
 
-        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == null))).ThrowsAsync(new YandexException("Error message."));
         yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty))).ReturnsAsync(() => string.Empty);
         yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)))).ReturnsAsync(() => faker.Lorem.Sentence());
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == null), It.IsAny<YandexSearchFilterMode>())).ThrowsAsync(new YandexException("Error message."));
+        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"))).ThrowsAsync(new YandexException("Error message."));
+        
         yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<YandexSearchFilterMode>())).ReturnsAsync(Enumerable.Empty<IYandexReverseImageSearchResult>);
         yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<YandexSearchFilterMode>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedYandexReverseImageSearchResult(faker)));
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<YandexSearchFilterMode>())).ThrowsAsync(new YandexException("Error message."));
 
         return yandexMock.Object;
     }

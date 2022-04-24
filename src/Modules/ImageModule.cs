@@ -225,10 +225,18 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("reverse", "Reverse image search.")]
-    public async Task<RuntimeResult> ReverseAsync([Summary(description: "The url of an image.")] string url,
+    public async Task<RuntimeResult> ReverseAsync([Summary(description: "The url of an image.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null,
         [Summary(description: $"The search engine. The default is {nameof(ReverseImageSearchEngine.Yandex)}.")] ReverseImageSearchEngine engine = ReverseImageSearchEngine.Yandex,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
+        url = file?.Url ?? url;
+
+        if (url is null)
+        {
+            return FergunResult.FromError(_localizer["A URL or attachment is required."], true);
+        }
+
         return await ReverseAsync(url, engine, multiImages, Context.Interaction);
     }
 

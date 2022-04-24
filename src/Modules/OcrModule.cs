@@ -72,15 +72,22 @@ public class OcrModule : InteractionModuleBase
     }
 
     [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
-    public async Task<RuntimeResult> BingAsync([Summary(description: "An image URL.")] string url)
-        => await OcrAsync(OcrEngine.Bing, url, Context.Interaction);
+    public async Task<RuntimeResult> BingAsync([Summary(description: "An image URL.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Bing, file?.Url ?? url, Context.Interaction);
 
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
-    public async Task<RuntimeResult> YandexAsync([Summary(description: "An image URL.")] string url)
-        => await OcrAsync(OcrEngine.Yandex, url, Context.Interaction);
+    public async Task<RuntimeResult> YandexAsync([Summary(description: "An image URL.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Yandex, file?.Url ?? url, Context.Interaction);
 
-    public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string url, IDiscordInteraction interaction, bool ephemeral = false)
+    public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string? url, IDiscordInteraction interaction, bool ephemeral = false)
     {
+        if (url is null)
+        {
+            return FergunResult.FromError(_localizer["A URL or attachment is required."], true, interaction);
+        }
+
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
             return FergunResult.FromError(_localizer["The URL is not well formed."], true, interaction);
