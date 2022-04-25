@@ -4,22 +4,37 @@ using System.Threading.Tasks;
 using Bogus;
 using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
+using Fergun.Apis.Wikipedia;
+using Fergun.Interactive;
 using Fergun.Modules;
+using GTranslate.Translators;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using YoutubeExplode.Search;
 
 namespace Fergun.Tests.Modules;
 
-public class UserModuleTests
+public class UtilityModuleTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
-    private readonly IFergunLocalizer<UserModule> _localizer = Utils.CreateMockedLocalizer<UserModule>();
-    private readonly Mock<UserModule> _moduleMock;
+    private readonly IFergunLocalizer<UtilityModule> _localizer = Utils.CreateMockedLocalizer<UtilityModule>();
+    private readonly GoogleTranslator _googleTranslator = new();
+    private readonly GoogleTranslator2 _googleTranslator2 = new();
+    private readonly MicrosoftTranslator _microsoftTranslator = new();
+    private readonly YandexTranslator _yandexTranslator = new();
+    private readonly SearchClient _searchClient = new(new());
+    private readonly IWikipediaClient _wikipediaClient = null!;
+    private readonly Mock<UtilityModule> _moduleMock;
 
-    public UserModuleTests()
+    public UtilityModuleTests()
     {
-        _moduleMock = new Mock<UserModule>(() => new UserModule(_localizer)) { CallBase = true };
+        SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), new AggregateTranslator(), _googleTranslator2);
+        var interactive = new InteractiveService(new DiscordSocketClient(), new InteractiveConfig { ReturnAfterSendingPaginator = true });
+        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, shared,
+            interactive, _googleTranslator, _googleTranslator2, _microsoftTranslator, _yandexTranslator, _searchClient, _wikipediaClient)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }

@@ -1,10 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -56,6 +53,24 @@ public class UtilityModule : InteractionModuleBase
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
+
+    [UserCommand("Avatar")]
+    [SlashCommand("avatar", "Displays the avatar of a user.")]
+    public async Task<RuntimeResult> AvatarAsync(IUser user)
+    {
+        string url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
+
+        var builder = new EmbedBuilder
+        {
+            Title = user.ToString(),
+            ImageUrl = url,
+            Color = Color.Orange
+        };
+
+        await Context.Interaction.RespondAsync(embed: builder.Build());
+
+        return FergunResult.FromSuccess();
+    }
 
     [MessageCommand("Bad Translator")]
     public async Task<RuntimeResult> BadTranslatorAsync(IMessage message)
@@ -227,153 +242,6 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
-    [SlashCommand("stats", "Sends the stats of the bot.")]
-    public async Task<RuntimeResult> StatsAsync()
-    {
-        await Context.Interaction.DeferAsync();
-
-        long temp;
-        var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-        var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
-        string? cpu = null;
-        long? totalRamUsage = null;
-        long processRamUsage = 0;
-        long? totalRam = null;
-        string? os = RuntimeInformation.OSDescription;
-
-        if (OperatingSystem.IsLinux())
-        {
-            // CPU Name
-            if (File.Exists("/proc/cpuinfo"))
-            {
-                cpu = File.ReadAllLines("/proc/cpuinfo")
-                    .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
-                    .Split(':')
-                    .ElementAtOrDefault(1)?
-                    .Trim();
-            }
-
-            if (string.IsNullOrWhiteSpace(cpu))
-            {
-                cpu = CommandUtils.RunCommand("lscpu")?
-                    .Split('\n')
-                    .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
-                    .Split(':')
-                    .ElementAtOrDefault(1)?
-                    .Trim();
-
-                if (string.IsNullOrWhiteSpace(cpu))
-                {
-                    cpu = "?";
-                }
-            }
-
-            // OS Name
-            if (File.Exists("/etc/lsb-release"))
-            {
-                var distroInfo = File.ReadAllLines("/etc/lsb-release");
-                os = distroInfo.ElementAtOrDefault(3)?.Split('=').ElementAtOrDefault(1)?.Trim('\"');
-            }
-
-            // Total RAM & total RAM usage
-            var output = CommandUtils.RunCommand("free -m")?.Split(Environment.NewLine);
-            var memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (long.TryParse(memory?.ElementAtOrDefault(1), out temp)) totalRam = temp;
-            if (long.TryParse(memory?.ElementAtOrDefault(2), out temp)) totalRamUsage = temp;
-
-            // Process RAM usage
-            processRamUsage = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024;
-        }
-        else if (OperatingSystem.IsWindows())
-        {
-            // CPU Name
-            cpu = CommandUtils.RunCommand("wmic cpu get name")
-                ?.Trim()
-                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                .ElementAtOrDefault(1);
-
-            // Total RAM & total RAM usage
-            var output = CommandUtils.RunCommand("wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value")
-                ?.Trim()
-                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-            if (output?.Length > 1)
-            {
-                long freeRam = 0;
-                var split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length > 1 && long.TryParse(split[1], out temp))
-                {
-                    freeRam = temp / 1024;
-                }
-
-                split = output[1].Split('=', StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length > 1 && long.TryParse(split[1], out temp))
-                {
-                    totalRam = temp / 1024;
-                }
-
-                if (totalRam != null && freeRam != 0)
-                {
-                    totalRamUsage = totalRam - freeRam;
-                }
-            }
-
-            // Process RAM usage
-            processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
-        }
-
-        var guilds = await Context.Client.GetGuildsAsync(CacheMode.CacheOnly);
-        int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
-
-        int shards = 1;
-        int shardId = 0;
-        int? totalUsersInShard = null;
-        DiscordSocketClient? shard = null;
-
-        if (Context.Client is DiscordShardedClient shardedClient)
-        {
-            shards = shardedClient.Shards.Count;
-            shardId = Context.Channel.IsPrivate() ? 0 : shardedClient.GetShardIdFor(Context.Guild);
-            shard = shardedClient.GetShard(shardId);
-            totalUsersInShard = shard.Guilds.Sum(x => x.MemberCount);
-        }
-
-        string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-
-        var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
-
-        var builder = new EmbedBuilder()
-            .WithTitle(_localizer["Fergun Stats"])
-            .AddField(_localizer["Operating System"], os, true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField("CPU", cpu, true)
-            .AddField(_localizer["CPU Usage"], $"{cpuUsage}%", true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["RAM Usage"],
-                $"{processRamUsage}MB ({(totalRam == null ? 0 : Math.Round((double)processRamUsage / totalRam.Value * 100, 2))}%) " +
-                $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
-                $"/ {totalRam?.ToString() ?? "?"}MB", true)
-            .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Bot Version"], version is null ? "?" : $"v{version}", true)
-            .AddField(_localizer["Total Servers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Total Users"], $"{totalUsers?.ToString() ?? "?"} (Shard: {totalUsersInShard?.ToString() ?? totalUsers?.ToString() ?? "?"})", true)
-            .AddField(_localizer["Shard ID"], shardId, true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField("Shards", shards, true)
-            .AddField(_localizer["Uptime"], elapsed.Humanize(), true)
-            .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Bot Owner"], owner, true);
-
-        builder.WithColor(Color.Orange);
-        
-        await Context.Interaction.FollowupAsync(embed: builder.Build());
-
-        return FergunResult.FromSuccess();
-    }
-
     [MessageCommand("Translate")]
     public async Task<RuntimeResult> TranslateAsync(IMessage message)
         => await TranslateAsync(message.GetText(), Context.Interaction.GetLanguageCode());
@@ -394,6 +262,63 @@ public class UtilityModule : InteractionModuleBase
         [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TtsAsync(Context.Interaction, text, target ?? Context.Interaction.GetLanguageCode(), ephemeral);
+
+    [UserCommand("User Info")]
+    [SlashCommand("user", "Gets information about a user.")]
+    public async Task<RuntimeResult> UserInfoAsync([Summary(description: "The user.")] IUser user)
+    {
+        string activities = "";
+        if (user.Activities.Count > 0)
+        {
+            activities = string.Join('\n', user.Activities.Select(x =>
+                x.Type == ActivityType.CustomStatus
+                    ? ((CustomStatusGame)x).ToString()
+                    : $"{x.Type} {x.Name}"));
+        }
+
+        if (string.IsNullOrWhiteSpace(activities))
+            activities = $"({_localizer["None"]})";
+
+        string clients = "?";
+        if (user.ActiveClients.Count > 0)
+        {
+            clients = string.Join(' ', user.ActiveClients.Select(x =>
+                x switch
+                {
+                    ClientType.Desktop => "🖥",
+                    ClientType.Mobile => "📱",
+                    ClientType.Web => "🌐",
+                    _ => ""
+                }));
+        }
+
+        if (string.IsNullOrWhiteSpace(clients))
+            clients = "?";
+
+        var guildUser = user as IGuildUser;
+        string avatarUrl = guildUser?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
+
+        var builder = new EmbedBuilder()
+            .WithTitle(_localizer["User Info"])
+            .AddField(_localizer["Name"], user.ToString())
+            .AddField("Nickname", guildUser?.Nickname ?? $"({_localizer["None"]})")
+            .AddField("ID", user.Id)
+            .AddField(_localizer["Activities"], activities, true)
+            .AddField(_localizer["Active Clients"], clients, true)
+            .AddField(_localizer["Is Bot"], user.IsBot)
+            .AddField(_localizer["Created At"], GetTimestamp(user.CreatedAt))
+            .AddField(_localizer["Server Join Date"], GetTimestamp(guildUser?.JoinedAt))
+            .AddField(_localizer["Boosting Since"], GetTimestamp(guildUser?.PremiumSince))
+            .WithThumbnailUrl(avatarUrl)
+            .WithColor(Color.Orange);
+
+        await Context.Interaction.RespondAsync(embed: builder.Build());
+
+        return FergunResult.FromSuccess();
+
+        static string GetTimestamp(DateTimeOffset? dateTime)
+            => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";
+    }
 
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
     public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)
