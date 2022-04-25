@@ -126,6 +126,9 @@
   <data name="Bing Visual search is currently unavailable. Try again later." xml:space="preserve">
     <value>La Búsqueda Visual de Bing no está disponible actualmente. Vuelva a intentarlo más tarde.</value>
   </data>
+  <data name="Could not convert &quot;{0}&quot; to a color." xml:space="preserve">
+    <value>No se pudo convertir "{0}" a un color.</value>
+  </data>
   <data name="Error message: {0}" xml:space="preserve">
     <value>Mensaje de error: {0}</value>
   </data>

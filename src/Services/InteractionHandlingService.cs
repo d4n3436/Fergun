@@ -3,6 +3,7 @@ using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Fergun.Converters;
 using Fergun.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +38,7 @@ public class InteractionHandlingService : IHostedService
         _interactionService.ContextCommandExecuted += ContextMenuCommandExecuted;
         _shardedClient.InteractionCreated += HandleInteractionAsync;
 
+        _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
         var modules = await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         _logger.LogDebug("Added {moduleCount} command modules", modules.Count());
 

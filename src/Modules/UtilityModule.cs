@@ -13,8 +13,14 @@ using GTranslate.Results;
 using GTranslate.Translators;
 using Humanizer;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using YoutubeExplode.Common;
 using YoutubeExplode.Search;
+using Color = Discord.Color;
 
 namespace Fergun.Modules;
 
@@ -31,6 +37,8 @@ public class UtilityModule : InteractionModuleBase
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
 
+    private static readonly DrawingOptions _cachedDrawingOptions = new();
+    private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, IgnoreMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
@@ -194,6 +202,35 @@ public class UtilityModule : InteractionModuleBase
 
             await Context.Interaction.FollowupAsync(text, embed: embed);
         }
+
+        return FergunResult.FromSuccess();
+    }
+
+    [SlashCommand("color", "Displays a color.")]
+    public async Task<RuntimeResult> ColorAsync([Summary(description: "A color name, hex string or raw value. Leave empty to get a random color.")]
+        System.Drawing.Color color = default)
+    {
+        if (color.IsEmpty)
+        {
+            color = System.Drawing.Color.FromArgb(Random.Shared.Next((int)(Color.MaxDecimalValue + 1)));
+        }
+
+        using var image = new Image<Rgba32>(500, 500);
+
+        image.Mutate(x => x.Fill(_cachedDrawingOptions, SixLabors.ImageSharp.Color.FromRgb(color.R, color.G, color.B)));
+        await using var stream = new MemoryStream();
+        await image.SaveAsPngAsync(stream, _cachedPngEncoder);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        string hex = $"{color.R:X2}{color.G:X2}{color.B:X2}";
+
+        var builder = new EmbedBuilder()
+            .WithTitle($"#{hex}{(color.IsNamedColor ? $" ({color.Name})" : "")}")
+            .WithImageUrl($"attachment://{hex}.png")
+            .WithFooter($"R: {color.R}, G: {color.G}, B: {color.B}")
+            .WithColor((Color)color);
+
+        await Context.Interaction.RespondWithFileAsync(new FileAttachment(stream, $"{hex}.png"), embed: builder.Build());
 
         return FergunResult.FromSuccess();
     }

@@ -43,7 +43,7 @@ await Host.CreateDefaultBuilder()
     {
         config.LogLevel = LogSeverity.Verbose;
         config.DefaultRunMode = RunMode.Async;
-        config.UseCompiledLambda = true;
+        config.UseCompiledLambda = false;
     })
     .ConfigureLogging(logging => logging.ClearProviders())
     .UseSerilog((_, config) =>
