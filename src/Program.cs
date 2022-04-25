@@ -111,7 +111,7 @@ await Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<UtilityModule>()
+        services.AddHttpClient<OtherModule>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

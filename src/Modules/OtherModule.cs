@@ -15,11 +15,30 @@ public class OtherModule : InteractionModuleBase
 {
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
+    private readonly HttpClient _httpClient;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer)
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, HttpClient httpClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _httpClient = httpClient;
+    }
+
+    [SlashCommand("inspirobot", "Sends an inspirational quote.")]
+    public async Task<RuntimeResult> InspiroBotAsync()
+    {
+        await Context.Interaction.DeferAsync();
+
+        string url = await _httpClient.GetStringAsync(new Uri("https://inspirobot.me/api?generate=true"));
+
+        var builder = new EmbedBuilder()
+            .WithTitle("InspiroBot")
+            .WithImageUrl(url)
+            .WithColor(Color.Orange);
+
+        await Context.Interaction.FollowupAsync(embed: builder.Build());
+
+        return FergunResult.FromSuccess();
     }
 
     [SlashCommand("stats", "Sends the stats of the bot.")]
