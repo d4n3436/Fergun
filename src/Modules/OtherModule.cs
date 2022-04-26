@@ -143,12 +143,12 @@ public class OtherModule : InteractionModuleBase
         int? totalUsersInShard = null;
         DiscordSocketClient? shard = null;
 
-        if (Context.Client is DiscordShardedClient shardedClient)
+        if (Context is ShardedInteractionContext shardedContext)
         {
-            guilds = shardedClient.Guilds;
-            shards = shardedClient.Shards.Count;
-            shardId = Context.Channel.IsPrivate() ? 0 : shardedClient.GetShardIdFor(Context.Guild);
-            shard = shardedClient.GetShard(shardId);
+            guilds = shardedContext.Client.Guilds;
+            shards = shardedContext.Client.Shards.Count;
+            shardId = Context.Channel.IsPrivate() ? 0 : shardedContext.Client.GetShardIdFor(Context.Guild);
+            shard = shardedContext.Client.GetShard(shardId);
             totalUsersInShard = shard.Guilds.Sum(x => x.MemberCount);
         }
         else
