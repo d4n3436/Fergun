@@ -23,23 +23,16 @@ public class ColorConverter : TypeConverter<Color>
         var color = Color.FromName(value);
         if (color.ToArgb() == 0)
         {
-            var span = value.AsSpan().Trim();
-            int index = span.IndexOf('#');
-            if (index != -1)
-            {
-                span = span[++index..];
-            }
-            else
-            {
-                index = span.IndexOf("0x");
-            }
-            if (index != -1)
-            {
-                span = span[(index + 2)..];
-            }
+            var span = value.AsSpan()
+                .TrimStart()
+                .TrimStart('#')
+                .TrimStart("0x")
+                .TrimStart("0X")
+                .TrimStart("&h")
+                .TrimStart("&H");
 
             if ((uint.TryParse(span, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint rawColor)
-                || uint.TryParse(span, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out rawColor))
+                 || uint.TryParse(span, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out rawColor))
                 && rawColor <= Discord.Color.MaxDecimalValue)
             {
                 color = Color.FromArgb((int)rawColor);
