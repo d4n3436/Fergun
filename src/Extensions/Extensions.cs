@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Polly;
@@ -59,24 +58,5 @@ public static class Extensions
             displayMessage += $"/{guildChannel.Guild.Name}";
 
         return displayMessage;
-    }
-
-    /// <summary>
-    /// Adds Fergun emotes.
-    /// </summary>
-    /// <param name="builder">A paginator builder.</param>
-    /// <returns>This builder.</returns>
-    public static TBuilder WithFergunEmotes<TPaginator, TBuilder>(this PaginatorBuilder<TPaginator, TBuilder> builder)
-        where TPaginator : Paginator
-        where TBuilder : PaginatorBuilder<TPaginator, TBuilder>
-    {
-        builder.Options.Clear();
-
-        builder.AddOption(Emoji.Parse("◀️"), PaginatorAction.Backward);
-        builder.AddOption(Emoji.Parse("▶️"), PaginatorAction.Forward);
-        builder.AddOption(Emoji.Parse("🔢"), PaginatorAction.Jump);
-        builder.AddOption(Emoji.Parse("🛑"), PaginatorAction.Exit);
-
-        return (TBuilder)builder;
     }
 }

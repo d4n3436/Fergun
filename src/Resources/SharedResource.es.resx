@@ -120,6 +120,9 @@
   <data name="An error occurred." xml:space="preserve">
     <value>Ocurrió un error.</value>
   </data>
+  <data name="Another user is currently using this action. Try again later." xml:space="preserve">
+    <value>Otro usuario está usando esta acción actualmente. Vuelva a intentarlo más tarde.</value>
+  </data>
   <data name="Bing Visual search failed to download the image." xml:space="preserve">
     <value>La Búsqueda Visual de Bing no pudo descargar la imagen.</value>
   </data>
@@ -129,14 +132,23 @@
   <data name="Could not convert &quot;{0}&quot; to a color." xml:space="preserve">
     <value>No se pudo convertir "{0}" a un color.</value>
   </data>
+  <data name="Enter a page number" xml:space="preserve">
+    <value>Ingresa un número de página</value>
+  </data>
   <data name="Error message: {0}" xml:space="preserve">
     <value>Mensaje de error: {0}</value>
+  </data>
+  <data name="Expired modal interaction. You must respond within {0} seconds." xml:space="preserve">
+    <value>Interacción de modal expirada. Debes responder en {0} segundos.</value>
   </data>
   <data name="Image dimensions exceeds the limit (Max. 4000px)." xml:space="preserve">
     <value>Las dimensiones de imagen supera el límite (Máx. 4000px).</value>
   </data>
   <data name="Image size exceeds the limit (Max. 20MB)." xml:space="preserve">
     <value>El tamaño de imagen supera el límite (Máx. 20MB).</value>
+  </data>
+  <data name="Invalid input. The number must be in the range of {0} to {1}, excluding the current page." xml:space="preserve">
+    <value>Entrada inválida. El número debe estar en rango de {0} a {1}, excluyendo la página actual.</value>
   </data>
   <data name="Invalid source language &quot;{0}&quot;." xml:space="preserve">
     <value>Idioma de origen "{0}" inválido.</value>
@@ -155,6 +167,9 @@
   </data>
   <data name="Output" xml:space="preserve">
     <value>Salida</value>
+  </data>
+  <data name="Page number ({0}-{1})" xml:space="preserve">
+    <value>Número de página ({0}-{1})</value>
   </data>
   <data name="Page {0} of {1}" xml:space="preserve">
     <value>Página {0} de {1}</value>

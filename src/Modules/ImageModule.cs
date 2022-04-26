@@ -72,6 +72,7 @@ public class ImageModule : InteractionModuleBase
             .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
@@ -120,6 +121,7 @@ public class ImageModule : InteractionModuleBase
             .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
@@ -168,6 +170,7 @@ public class ImageModule : InteractionModuleBase
             .WithMaxPageIndex(images.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
@@ -290,6 +293,7 @@ public class ImageModule : InteractionModuleBase
             .WithMaxPageIndex(results.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(interaction.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
@@ -350,6 +354,7 @@ public class ImageModule : InteractionModuleBase
             .WithMaxPageIndex(results.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(interaction.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);

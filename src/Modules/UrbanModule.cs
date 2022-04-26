@@ -61,6 +61,7 @@ public class UrbanModule : InteractionModuleBase
             .WithMaxPageIndex(definitions.Count - 1)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);

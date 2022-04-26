@@ -377,6 +377,7 @@ public class UtilityModule : InteractionModuleBase
             .WithMaxPageIndex(articles.Length - 1)
             .WithFooter(PaginatorFooter.None)
             .WithFergunEmotes()
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
@@ -426,15 +427,17 @@ public class UtilityModule : InteractionModuleBase
             case 1:
                 await Context.Interaction.FollowupAsync(videos[0].Url);
                 break;
-
+                
             default:
-                var paginator = new StaticPaginatorBuilder()
+                var paginator = new LazyPaginatorBuilder()
                     .AddUser(Context.User)
-                    .WithPages(videos.Select((x, i) => new PageBuilder { Text = $"{x.Url}\n{_localizer["Page {0} of {1}", i + 1, videos.Count]}" } as IPageBuilder).ToArray())
+                    .WithPageFactory(GeneratePage)
                     .WithActionOnCancellation(ActionOnStop.DisableInput)
                     .WithActionOnTimeout(ActionOnStop.DisableInput)
+                    .WithMaxPageIndex(videos.Count - 1)
                     .WithFooter(PaginatorFooter.None)
                     .WithFergunEmotes()
+                    .WithLocalizedPrompts(_localizer)
                     .Build();
 
                 await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
@@ -442,5 +445,7 @@ public class UtilityModule : InteractionModuleBase
         }
 
         return FergunResult.FromSuccess();
+        
+        PageBuilder GeneratePage(int index) => new PageBuilder().WithText($"{videos[index].Url}\n{_localizer["Page {0} of {1}", index + 1, videos.Count]}");
     }
 }
