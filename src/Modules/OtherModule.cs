@@ -137,9 +137,7 @@ public class OtherModule : InteractionModuleBase
             processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
         }
 
-        var guilds = await Context.Client.GetGuildsAsync(CacheMode.CacheOnly);
-        int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
-
+        IReadOnlyCollection<IGuild> guilds;
         int shards = 1;
         int shardId = 0;
         int? totalUsersInShard = null;
@@ -147,11 +145,19 @@ public class OtherModule : InteractionModuleBase
 
         if (Context.Client is DiscordShardedClient shardedClient)
         {
+            guilds = shardedClient.Guilds;
             shards = shardedClient.Shards.Count;
             shardId = Context.Channel.IsPrivate() ? 0 : shardedClient.GetShardIdFor(Context.Guild);
             shard = shardedClient.GetShard(shardId);
             totalUsersInShard = shard.Guilds.Sum(x => x.MemberCount);
         }
+        else
+        {
+            // Context.Client returns the current socket client instead of the shared client
+            guilds = await Context.Client.GetGuildsAsync(CacheMode.CacheOnly);
+        }
+
+        int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
 
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
