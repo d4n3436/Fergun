@@ -168,4 +168,19 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="User Info" xml:space="preserve">
     <value>Información de usuario</value>
   </data>
+  <data name="Default" xml:space="preserve">
+    <value>Predeterminado</value>
+  </data>
+  <data name="Global" xml:space="preserve">
+    <value>Global</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>Servidor</value>
+  </data>
+  <data name="{0} doesn't have a global (main) avatar." xml:space="preserve">
+    <value>{0} no tiene un avatar global (principal).</value>
+  </data>
+  <data name="{0} doesn't have a server avatar." xml:space="preserve">
+    <value>{0} no tiene un avatar de servidor.</value>
+  </data>
 </root>

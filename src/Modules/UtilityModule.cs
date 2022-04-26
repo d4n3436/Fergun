@@ -63,14 +63,53 @@ public class UtilityModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [UserCommand("Avatar")]
+    public async Task<RuntimeResult> AvatarUserCommandAsync(IUser user)
+        => await AvatarAsync(user);
+
     [SlashCommand("avatar", "Displays the avatar of a user.")]
-    public async Task<RuntimeResult> AvatarAsync(IUser user)
+    public async Task<RuntimeResult> AvatarAsync([Summary(description: "The user.")] IUser user,
+        [Summary(description: "An specific avatar type.")] AvatarType type = AvatarType.FirstAvailable)
     {
-        string url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
+        string? url;
+        string title;
+
+        switch (type)
+        {
+            case AvatarType.FirstAvailable:
+                url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
+                title = user.ToString()!;
+                break;
+
+            case AvatarType.Server:
+                url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048);
+                if (url is null)
+                {
+                    return FergunResult.FromError(_localizer["{0} doesn't have a server avatar.", user]);
+                }
+
+                title = $"{user} ({_localizer["Server"]})";
+                break;
+
+            case AvatarType.Global:
+                url = user.GetAvatarUrl(size: 2048);
+                if (url is null)
+                {
+                    return FergunResult.FromError(_localizer["{0} doesn't have a global (main) avatar.", user]);
+                }
+
+                title = $"{user} ({_localizer["Global"]})";
+                break;
+
+            case AvatarType.Default:
+            default:
+                url = user.GetDefaultAvatarUrl();
+                title = $"{user} ({_localizer["Default"]})";
+                break;
+        }
 
         var builder = new EmbedBuilder
         {
-            Title = user.ToString(),
+            Title = title,
             ImageUrl = url,
             Color = Color.Orange
         };
