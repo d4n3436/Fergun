@@ -14,7 +14,7 @@ namespace Fergun.Tests.Modules;
 
 public class SharedModuleTests
 {
-    private readonly Mock<ITranslator> _translatorMock = new();
+    private readonly Mock<IFergunTranslator> _translatorMock = new();
     private readonly Mock<SharedModule> _sharedModuleMock;
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly Mock<IComponentInteraction> _componentInteractionMock = new();
@@ -24,7 +24,7 @@ public class SharedModuleTests
         var localizer = Utils.CreateMockedLocalizer<SharedResource>();
         _sharedModuleMock = new Mock<SharedModule>(() => new SharedModule(Mock.Of<ILogger<SharedModule>>(), localizer, _translatorMock.Object, new()));
         _translatorMock.Setup(x => x.TranslateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
-            .ReturnsAsync<string, string, string?, ITranslator, ITranslationResult>((text, target, source) =>
+            .ReturnsAsync<string, string, string?, IFergunTranslator, ITranslationResult>((text, target, source) =>
             {
                 if (text == "Error")
                 {

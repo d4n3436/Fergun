@@ -10,7 +10,6 @@ using Fergun.Modules.Handlers;
 using Fergun.Utils;
 using GTranslate;
 using GTranslate.Results;
-using GTranslate.Translators;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
@@ -30,10 +29,7 @@ public class UtilityModule : InteractionModuleBase
     private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
-    private readonly GoogleTranslator _googleTranslator;
-    private readonly GoogleTranslator2 _googleTranslator2;
-    private readonly MicrosoftTranslator _microsoftTranslator;
-    private readonly YandexTranslator _yandexTranslator;
+    private readonly IFergunTranslator _translator;
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
 
@@ -44,18 +40,14 @@ public class UtilityModule : InteractionModuleBase
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer,
-        SharedModule shared, InteractiveService interactive, GoogleTranslator googleTranslator, GoogleTranslator2 googleTranslator2,
-        MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator, SearchClient searchClient, IWikipediaClient wikipediaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, SharedModule shared,
+        InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
     {
         _logger = logger;
         _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
-        _googleTranslator = googleTranslator;
-        _googleTranslator2 = googleTranslator2;
-        _microsoftTranslator = microsoftTranslator;
-        _yandexTranslator = yandexTranslator;
+        _translator = translator;
         _searchClient = searchClient;
         _wikipediaClient = wikipediaClient;
     }
@@ -139,11 +131,7 @@ public class UtilityModule : InteractionModuleBase
         
         await Context.Interaction.DeferAsync();
 
-        // Create an aggregated translator manually so we can randomize the initial order of the translators and shift them.
-        // Bing Translator is not included because it only allows max. 1000 chars per translation
-        var translators = new ITranslator[] { _googleTranslator, _googleTranslator2, _microsoftTranslator, _yandexTranslator };
-        translators.Shuffle();
-        var badTranslator = new AggregateTranslator(translators);
+        _translator.Randomize();
 
         var languageChain = new List<ILanguage>(chainCount + 1);
         ILanguage? source = null;
@@ -163,22 +151,20 @@ public class UtilityModule : InteractionModuleBase
                 } while (languageChain.Contains(target));
             }
 
-            // Shift the translators to avoid spamming them and get more variety
-            var last = translators[^1];
-            Array.Copy(translators, 0, translators, 1, translators.Length - 1);
-            translators[0] = last;
-
             ITranslationResult result;
             try
             {
                 _logger.LogInformation("Translating to: {target}", target.ISO6391);
-                result = await badTranslator.TranslateAsync(text, target);
+                result = await _translator.TranslateAsync(text, target);
             }
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
                 return FergunResult.FromError(e.Message);
             }
+
+            // Switch the translators to avoid spamming them and get more variety
+            _translator.Next();
 
             if (i == 0)
             {

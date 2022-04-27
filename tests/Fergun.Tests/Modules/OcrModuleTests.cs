@@ -41,7 +41,7 @@ public class OcrModuleTests
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
-        var shared = new SharedModule(sharedLogger, sharedLocalizer, new AggregateTranslator(), new());
+        var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new());
 
         _interactive = new InteractiveService(_client, _interactiveConfig);
         _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, _interactive,

@@ -17,10 +17,10 @@ public class SharedModule
 {
     private readonly ILogger<SharedModule> _logger;
     private readonly IFergunLocalizer<SharedResource> _localizer;
-    private readonly ITranslator _translator;
+    private readonly IFergunTranslator _translator;
     private readonly GoogleTranslator2 _googleTranslator2;
 
-    public SharedModule(ILogger<SharedModule> logger, IFergunLocalizer<SharedResource> localizer, ITranslator translator, GoogleTranslator2 googleTranslator2)
+    public SharedModule(ILogger<SharedModule> logger, IFergunLocalizer<SharedResource> localizer, IFergunTranslator translator, GoogleTranslator2 googleTranslator2)
     {
         _logger = logger;
         _localizer = localizer;

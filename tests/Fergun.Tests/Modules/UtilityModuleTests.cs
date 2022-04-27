@@ -21,20 +21,17 @@ public class UtilityModuleTests
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly IFergunLocalizer<UtilityModule> _localizer = Utils.CreateMockedLocalizer<UtilityModule>();
-    private readonly GoogleTranslator _googleTranslator = new();
     private readonly GoogleTranslator2 _googleTranslator2 = new();
-    private readonly MicrosoftTranslator _microsoftTranslator = new();
-    private readonly YandexTranslator _yandexTranslator = new();
     private readonly SearchClient _searchClient = new(new());
     private readonly IWikipediaClient _wikipediaClient = null!;
     private readonly Mock<UtilityModule> _moduleMock;
-
+    
     public UtilityModuleTests()
     {
-        SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), new AggregateTranslator(), _googleTranslator2);
+        SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
         var interactive = new InteractiveService(new DiscordSocketClient(), new InteractiveConfig { ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, shared,
-            interactive, _googleTranslator, _googleTranslator2, _microsoftTranslator, _yandexTranslator, _searchClient, _wikipediaClient)) { CallBase = true };
+            interactive, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }

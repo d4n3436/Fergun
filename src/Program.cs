@@ -92,20 +92,14 @@ await Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        // We have to register the named client and service separately because Bing Translator and Microsoft Translator aren't stateless,
-        // They store a token required to make API calls that is obtained once and updated occasionally, since AddHttpClient<TClient>
+        // We have to register the named client and service separately because Microsoft Translator isn't stateless,
+        // It stores a token required to make API calls that is obtained once and updated occasionally, since AddHttpClient<TClient>
         // adds the services with a transient scope, this means that the token would be obtained every time the services are used.
         services.AddHttpClient(nameof(MicrosoftTranslator))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
         services.AddSingleton(s => new MicrosoftTranslator(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(MicrosoftTranslator))));
-
-        services.AddHttpClient(nameof(BingTranslator))
-            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
-            .AddRetryPolicy();
-
-        services.AddSingleton(s => new BingTranslator(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BingTranslator))));
 
         services.AddHttpClient<SearchClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
@@ -131,7 +125,7 @@ await Host.CreateDefaultBuilder()
         services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
-        services.AddSingleton<ITranslator, AggregateTranslator>();
+        services.AddTransient<IFergunTranslator, FergunTranslator>();
         services.AddSingleton(x => new GoogleScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
         services.AddSingleton(x => new DuckDuckGoScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
         services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
