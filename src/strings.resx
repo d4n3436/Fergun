@@ -2176,12 +2176,14 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 		<value>Archived</value>
 	</data>
 	<data name="RewriteWarning" xml:space="preserve">
-		<value>Fergun now has **slash commands**! These commands are already enabled on this server/channel, type `/` to try them out.
-Due to changes to bots made by Discord, **slash commands** will be required in late April 2022, and text commands (like the one you used) will stop working.</value>
+		<value>Fergun now has **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**! These commands are already enabled on this server/channel, type `/` to try them out.
+Due to changes to bots made by Discord, **slash commands** will be required on September 2022.
+Fergun will stop working with text commands (like the one you used) on **May 2022**.</value>
 	</data>
 	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
-		<value>Fergun now has **slash commands**, but they aren't enabled on this server yet!
-Due to changes to bots made by Discord, **slash commands** will be required in late April 2022, and text commands (like the one you used) will stop working.</value>
+		<value>Fergun now has **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**, but they aren't enabled on this server yet!
+Due to changes to bots made by Discord, **slash commands** will be required on September 2022.
+Fergun will stop working with text commands (like the one you used) on **May 2022**.</value>
 	</data>
 	<data name="SwitchToSlashCommands" xml:space="preserve">
 		<value>Switch to slash commands</value>
@@ -2199,15 +2201,15 @@ Due to changes to bots made by Discord, **slash commands** will be required in l
 		<value>⚠️ Command removal warning</value>
 	</data>
 	<data name="SnipeRemovalWarning" xml:space="preserve">
-		<value>Snipe commands will be removed in April 2022 due to changes by Discord. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-early-2022).</value>
+		<value>Snipe commands will be removed in May 2022 due to changes by Discord. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-may-2022).</value>
 	</data>
 	<data name="MusicRemovalWarning" xml:space="preserve">
-		<value>The music module will be removed in April 2022. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-april-2022).</value>
+		<value>The music module will be removed in May 2022. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-may-2022).</value>
 	</data>
 	<data name="AIDUsageNote" xml:space="preserve">
 		<value>Make sure to read the info and commands with `{0}aid info` before continuing.</value>
 	</data>
 	<data name="AIDRemovalWarning" xml:space="preserve">
-		<value>The AI Dungeon module will be removed in April 2022. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-april-2022).</value>
+		<value>The AI Dungeon module will be removed in May 2022. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
 </root>

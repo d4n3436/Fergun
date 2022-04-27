@@ -2185,12 +2185,14 @@
 		<value>مؤرشف</value>
 	</data>
 	<data name="RewriteWarning" xml:space="preserve">
-		<value>لدى Fergun الآن أوامر مائلة! تم تمكين هذه الأوامر بالفعل على هذا الخادم / القناة ، اكتب '/ `لتجربتها.
-نظرًا للتغييرات التي تم إجراؤها على برامج الروبوت بواسطة Discord ، ستكون أوامر الشرطة المائلة مطلوبة في أواخر أبريل 2022 ، وستتوقف الأوامر النصية (مثل التي استخدمتها) عن العمل.</value>
+		<value>لدى Fergun الآن **[أوامر مائلة](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**! تم تمكين هذه الأوامر بالفعل على هذا الخادم / القناة ، اكتب `/` لتجربتها.
+نظرًا للتغييرات التي تم إجراؤها على برامج الروبوت بواسطة Discord ، ستكون ** أوامر الشرطة المائلة ** مطلوبة في سبتمبر 2022.
+سيتوقف Fergun عن العمل مع الأوامر النصية (مثل الأمر الذي استخدمته) في **مايو 2022**.</value>
 	</data>
 	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
-		<value>لدى Fergun الآن أوامر مائلة ، لكن لم يتم تمكينها على هذا الخادم حتى الآن!
-نظرًا للتغييرات التي تم إجراؤها على برامج الروبوت بواسطة Discord ، ستكون أوامر الشرطة المائلة مطلوبة في أواخر أبريل 2022 ، وستتوقف الأوامر النصية (مثل التي استخدمتها) عن العمل.</value>
+		<value>لدى Fergun الآن **[أوامر مائلة](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)** ، لكن لم يتم تمكينها على هذا الخادم حتى الآن!
+نظرًا للتغييرات التي تم إجراؤها على برامج الروبوت بواسطة Discord ، ستكون ** أوامر الشرطة المائلة ** مطلوبة في سبتمبر 2022.
+سيتوقف Fergun عن العمل مع الأوامر النصية (مثل الأمر الذي استخدمته) في **مايو 2022**.</value>
 	</data>
 	<data name="SwitchToSlashCommands" xml:space="preserve">
 		<value>قم بالتبديل إلى أوامر الشرطة المائلة</value>
@@ -2208,15 +2210,15 @@
 		<value>⚠️ تحذير إزالة الأوامر</value>
 	</data>
 	<data name="SnipeRemovalWarning" xml:space="preserve">
-		<value>ستتم إزالة أوامر Snipe في أبريل 2022 بسبب التغييرات التي أجراها Discord. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-early-2022)</value>
+		<value>ستتم إزالة أوامر Snipe في مايو 2022 بسبب التغييرات التي أجراها Discord. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#snipe-commands-will-be-removed-in-may-2022)</value>
 	</data>
 	<data name="MusicRemovalWarning" xml:space="preserve">
-		<value>ستتم إزالة وحدة الموسيقى في أبريل 2022. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-april-2022)</value>
+		<value>ستتم إزالة وحدة الموسيقى في مايو 2022. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#music-module-will-be-removed-in-may-2022)</value>
 	</data>
 	<data name="AIDUsageNote" xml:space="preserve">
 		<value>تأكد من قراءة المعلومات والأوامر باستخدام `aid info{0}` قبل المتابعة.</value>
 	</data>
 	<data name="AIDRemovalWarning" xml:space="preserve">
-		<value>ستتم إزالة وحدة AI Dungeon في أبريل 2022. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-april-2022).</value>
+		<value>ستتم إزالة وحدة AI Dungeon في مايو 2022. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
 </root>
