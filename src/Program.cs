@@ -54,14 +54,16 @@ await Host.CreateDefaultBuilder()
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File("logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
         services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
         services.AddHostedService<InteractionHandlingService>();
+        services.AddHostedService<BotListService>();
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
+        services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
 
         services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
