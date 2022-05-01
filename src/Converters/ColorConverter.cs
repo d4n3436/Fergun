@@ -48,9 +48,4 @@ public class ColorConverter : TypeConverter<Color>
 
         return Task.FromResult(TypeConverterResult.FromSuccess(color));
     }
-
-    /// <inheritdoc/>
-    public override void Write(ApplicationCommandOptionProperties properties, IParameterInfo parameterInfo)
-    {
-    }
 }

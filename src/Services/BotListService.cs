@@ -16,7 +16,7 @@ public sealed class BotListService : BackgroundService
     private readonly DiscordShardedClient _discordClient;
     private readonly HttpClient _httpClient;
     private readonly ILogger<BotListService> _logger;
-    private readonly IOptions<BotListOptions> _options;
+    private readonly BotListOptions _options;
     private int _lastServerCount = -1;
 
     /// <summary>
@@ -31,28 +31,28 @@ public sealed class BotListService : BackgroundService
         _discordClient = discordClient;
         _httpClient = httpClient;
         _logger = logger;
-        _options = options;
+        _options = options.Value;
     }
     
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var botLists = _options.Value.Tokens.Where(x => string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).ToArray();
+        var botLists = _options.Tokens.Where(x => string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).ToArray();
         foreach (var botList in botLists)
         {
-            _options.Value.Tokens.Remove(botList);
+            _options.Tokens.Remove(botList);
         }
 
-        if (_options.Value.Tokens.Count == 0)
+        if (_options.Tokens.Count == 0)
         {
             _logger.LogInformation("Bot list service started. No bot stats will be updated because no tokens were provided.");
             return;
         }
         
         _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod} minute(s).",
-            string.Join(", ", _options.Value.Tokens.Keys), _options.Value.UpdatePeriodInMinutes);
+            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriodInMinutes);
 
-        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(_options.Value.UpdatePeriodInMinutes));
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(_options.UpdatePeriodInMinutes));
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             await UpdateStatsAsync();
@@ -68,7 +68,7 @@ public sealed class BotListService : BackgroundService
         if (_lastServerCount == -1) _lastServerCount = serverCount;
         else if (_lastServerCount == serverCount) return;
 
-        foreach ((var botList, string token) in _options.Value.Tokens)
+        foreach ((var botList, string token) in _options.Tokens)
         {
             if (!string.IsNullOrWhiteSpace(token))
             {
@@ -115,7 +115,7 @@ public sealed class BotListService : BackgroundService
                 }
 
                 _logger.LogInformation("Bot stats will not be sent to {BotList} API.", botList);
-                _options.Value.Tokens.Remove(botList);
+                _options.Tokens.Remove(botList);
             }
         }
     }

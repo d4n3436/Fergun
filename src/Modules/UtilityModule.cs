@@ -92,7 +92,6 @@ public class UtilityModule : InteractionModuleBase
                 title = $"{user} ({_localizer["Global"]})";
                 break;
 
-            case AvatarType.Default:
             default:
                 url = user.GetDefaultAvatarUrl();
                 title = $"{user} ({_localizer["Default"]})";
