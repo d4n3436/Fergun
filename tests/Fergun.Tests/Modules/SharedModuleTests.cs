@@ -109,7 +109,7 @@ public class SharedModuleTests
     [InlineData("Hola mundo", "es", false)]
     public async Task TtsAsync_Sends_Results_Or_Fails_Preconditions(string text, string target, bool ephemeral)
     {
-        await _sharedModuleMock.Object.TtsAsync(_interactionMock.Object, text, target, ephemeral);
+        await _sharedModuleMock.Object.GoogleTtsAsync(_interactionMock.Object, text, target, ephemeral);
 
         _interactionMock.VerifyGet(x => x.UserLocale);
 
@@ -129,7 +129,7 @@ public class SharedModuleTests
     [InlineData("Bonjour le monde", "fr", false)]
     public async Task TtsAsync_Uses_DeferLoadingAsync(string text, string target, bool ephemeral)
     {
-        await _sharedModuleMock.Object.TtsAsync(_componentInteractionMock.Object, text, target, ephemeral);
+        await _sharedModuleMock.Object.GoogleTtsAsync(_componentInteractionMock.Object, text, target, ephemeral);
 
         _componentInteractionMock.VerifyGet(x => x.UserLocale);
 

@@ -198,6 +198,9 @@
   <data name="Unable to get an image URL from the message." xml:space="preserve">
     <value>No se puede obtener una URL de imagen del mensaje.</value>
   </data>
+  <data name="Unable to get the specified voice. Use the autocomplete results." xml:space="preserve">
+    <value>No se puede obtener la voz especificada. Utilice los resultados de autocompletado.</value>
+  </data>
   <data name="Unknown format. Try using JPEG, PNG, or BMP files." xml:space="preserve">
     <value>Formato desconocido. Intenta usar archivos JPEG, PNG o BMP.</value>
   </data>

@@ -5,6 +5,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Converters;
 using Fergun.Extensions;
+using GTranslate;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,6 +40,7 @@ public class InteractionHandlingService : IHostedService
         _shardedClient.InteractionCreated += HandleInteractionAsync;
 
         _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
+        _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
         var modules = await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         _logger.LogDebug("Added {moduleCount} command modules", modules.Count());
 

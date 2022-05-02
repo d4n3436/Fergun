@@ -190,7 +190,7 @@ public class OcrModule : InteractionModuleBase
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
-        return await _shared.TtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
+        return await _shared.GoogleTtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
     }
 
     public enum OcrEngine

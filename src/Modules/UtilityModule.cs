@@ -313,16 +313,6 @@ public class UtilityModule : InteractionModuleBase
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias).")] string? source = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TranslateAsync(Context.Interaction, text, target, source, ephemeral);
-    
-    [MessageCommand("TTS")]
-    public async Task<RuntimeResult> TtsAsync(IMessage message)
-        => await TtsAsync(message.GetText());
-
-    [SlashCommand("tts", "Converts text into synthesized speech.")]
-    public async Task<RuntimeResult> TtsAsync([Summary(description: "The text to convert.")] string text,
-        [Autocomplete(typeof(TtsAutocompleteHandler))] [Summary(description: "The target language.")] string? target = null,
-        [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
-        => await _shared.TtsAsync(Context.Interaction, text, target ?? Context.Interaction.GetLanguageCode(), ephemeral);
 
     [UserCommand("User Info")]
     [SlashCommand("user", "Gets information about a user.")]

@@ -98,7 +98,7 @@ public class SharedModule
             => $"{language.Name}{(language is not Language lang || lang.NativeName == language.Name ? "" : $" ({lang.NativeName})")}";
     }
 
-    public async Task<RuntimeResult> TtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)
+    public async Task<RuntimeResult> GoogleTtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)
     {
         _localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
