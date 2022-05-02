@@ -26,6 +26,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 using YoutubeExplode.Search;
 
 await Host.CreateDefaultBuilder()
+    .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
     .ConfigureDiscordShardedHost((context, config) =>
     {
         config.SocketConfig = new DiscordSocketConfig
@@ -46,13 +47,13 @@ await Host.CreateDefaultBuilder()
         config.UseCompiledLambda = false;
     })
     .ConfigureLogging(logging => logging.ClearProviders())
-    .UseSerilog((_, config) =>
+    .UseSerilog((context, config) =>
     {
         config.MinimumLevel.Debug()
             .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
             .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && (Matching.FromSource("Microsoft.Extensions.Http").Invoke(e) || Matching.FromSource("Microsoft.Extensions.Localization").Invoke(e)))
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
-            .WriteTo.Async(logger => logger.File("logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
+            .WriteTo.Async(logger => logger.File($"{context.HostingEnvironment.ContentRootPath}logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })
     .ConfigureServices((context, services) =>
     {
