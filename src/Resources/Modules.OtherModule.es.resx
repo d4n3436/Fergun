@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="&quot;{0}&quot; is instrumental." xml:space="preserve">
+    <value>"{0}" es instrumental.</value>
+  </data>
   <data name="Bot Owner" xml:space="preserve">
     <value>Dueño del bot</value>
   </data>
@@ -131,6 +134,9 @@
   </data>
   <data name="Library" xml:space="preserve">
     <value>Librería</value>
+  </data>
+  <data name="Lyrics by Genius | Page {0} of {1}" xml:space="preserve">
+    <value>Letra por Genius | Página {0} de {1}</value>
   </data>
   <data name="Operating System" xml:space="preserve">
     <value>Sistema Operativo</value>
@@ -147,7 +153,19 @@
   <data name="Total Users" xml:space="preserve">
     <value>Usuarios Totales</value>
   </data>
+  <data name="Unable to find a song with ID {0}. Use the autocomplete results." xml:space="preserve">
+    <value>No se pudo encontrar una canción con ID {0}. Usa los resultados de autocompletado.</value>
+  </data>
+  <data name="Unable to get the lyrics of &quot;{0}&quot;." xml:space="preserve">
+    <value>No es posible obtener la letra de "{0}".</value>
+  </data>
   <data name="Uptime" xml:space="preserve">
     <value>Tiempo activo</value>
+  </data>
+  <data name="View Artist" xml:space="preserve">
+    <value>Ver Artista</value>
+  </data>
+  <data name="View on Genius" xml:space="preserve">
+    <value>Ver en Genius</value>
   </data>
 </root>

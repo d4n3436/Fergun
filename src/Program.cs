@@ -4,6 +4,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Genius;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.Yandex;
@@ -80,6 +81,10 @@ await Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient<IWikipediaClient, WikipediaClient>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<IGeniusClient, GeniusClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

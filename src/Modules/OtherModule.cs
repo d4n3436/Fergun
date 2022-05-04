@@ -4,7 +4,11 @@ using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Fergun.Apis.Genius;
 using Fergun.Extensions;
+using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
+using Fergun.Modules.Handlers;
 using Fergun.Utils;
 using Humanizer;
 using Microsoft.Extensions.Logging;
@@ -15,13 +19,18 @@ public class OtherModule : InteractionModuleBase
 {
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
+    private readonly InteractiveService _interactive;
+    private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, HttpClient httpClient)
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer,
+        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _geniusClient = geniusClient;
         _httpClient = httpClient;
+        _interactive = interactive;
     }
 
     [SlashCommand("inspirobot", "Sends an inspirational quote.")]
@@ -39,6 +48,59 @@ public class OtherModule : InteractionModuleBase
         await Context.Interaction.FollowupAsync(embed: builder.Build());
 
         return FergunResult.FromSuccess();
+    }
+    
+    [SlashCommand("lyrics", "Gets the lyrics of a song.")]
+    public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
+    {
+        await Context.Interaction.DeferAsync();
+        var song = await _geniusClient.GetSongAsync(id);
+
+        if (song is null)
+        {
+            return FergunResult.FromError(_localizer["Unable to find a song with ID {0}. Use the autocomplete results.", id]);
+        }
+        
+        if (song.IsInstrumental)
+        {
+            // This shouldn't be reachable unless someone manually passes an instrumental ID.
+            return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
+        if (song.Lyrics is null)
+        {
+            return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
+        var chunks = song.Lyrics.SplitWithoutWordBreaking(EmbedBuilder.MaxDescriptionLength).ToArray();
+
+        var paginator = new LazyPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithMaxPageIndex(chunks.Length - 1)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes()
+            .WithLocalizedPrompts(_localizer)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
+
+        PageBuilder GeneratePage(int index)
+        {
+            var chunk = chunks[index];
+            
+            return new PageBuilder()
+                .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
+                .WithThumbnailUrl(song.SongArtImageUrl)
+                .WithDescription(chunk.ToString())
+                .AddField("Links", $"{Format.Url(_localizer["View on Genius"], song.Url)}{(song.PrimaryArtistUrl is null ? "" : $" | {Format.Url(_localizer["View Artist"], song.PrimaryArtistUrl)}")}")
+                .WithFooter(_localizer["Lyrics by Genius | Page {0} of {1}", index + 1, chunks.Length])
+                .WithColor((Color)(song.PrimaryArtColor ?? Color.Orange));
+        }
     }
 
     [SlashCommand("stats", "Sends the stats of the bot.")]
