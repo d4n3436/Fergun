@@ -7,7 +7,6 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
-using Fergun.Utils;
 using GTranslate;
 using GTranslate.Results;
 using Humanizer;
@@ -188,44 +187,6 @@ public class UtilityModule : InteractionModuleBase
             .Build();
 
         await Context.Interaction.FollowupAsync(embed: embed);
-
-        return FergunResult.FromSuccess();
-    }
-
-    [RequireOwner]
-    [SlashCommand("cmd", "(Owner only) Executes a command.")]
-    public async Task<RuntimeResult> CmdAsync([Summary(description: "The command to execute.")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
-    {
-        await Context.Interaction.DeferAsync();
-
-        string? result = CommandUtils.RunCommand(command);
-
-        if (string.IsNullOrWhiteSpace(result))
-        {
-            await Context.Interaction.FollowupAsync(_localizer["No output."]);
-        }
-        else
-        {
-            int limit = noEmbed ? DiscordConfig.MaxMessageSize : EmbedBuilder.MaxDescriptionLength;
-            string sanitized = Format.Code(result.Replace('`', '´').Truncate(limit - 12), "ansi");
-            string? text = null;
-            Embed? embed = null;
-
-            if (noEmbed)
-            {
-                text = sanitized;
-            }
-            else
-            {
-                embed = new EmbedBuilder()
-                    .WithTitle(_localizer["Command output"])
-                    .WithDescription(sanitized)
-                    .WithColor(Color.Orange)
-                    .Build();
-            }
-
-            await Context.Interaction.FollowupAsync(text, embed: embed);
-        }
 
         return FergunResult.FromSuccess();
     }
