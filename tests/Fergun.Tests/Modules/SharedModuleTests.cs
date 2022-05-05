@@ -71,14 +71,17 @@ public class SharedModuleTests
 
         bool passedPreconditions = !string.IsNullOrEmpty(text) && Language.TryGetLanguage(target, out _) && (source == null || Language.TryGetLanguage(source, out _));
 
-        Assert.Equal(result.IsSuccess, passedPreconditions);
+        if (text != "Error")
+        {
+            Assert.Equal(result.IsSuccess, passedPreconditions);
+        }
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
 
         _translatorMock.Verify(x => x.TranslateAsync(It.Is<string>(s => s == text), It.Is<string>(s => s == target), It.Is<string>(s => s == source)), passedPreconditions ? Times.Once : Times.Never);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), result.IsSuccess && passedPreconditions ? Times.Once : Times.Never);
     }
 
     [Theory]
@@ -109,14 +112,12 @@ public class SharedModuleTests
     [InlineData("Hola mundo", "es", false)]
     public async Task TtsAsync_Sends_Results_Or_Fails_Preconditions(string text, string target, bool ephemeral)
     {
-        await _sharedModuleMock.Object.GoogleTtsAsync(_interactionMock.Object, text, target, ephemeral);
+        var result = await _sharedModuleMock.Object.GoogleTtsAsync(_interactionMock.Object, text, target, ephemeral);
 
         _interactionMock.VerifyGet(x => x.UserLocale);
 
         bool passedPreconditions = !string.IsNullOrWhiteSpace(text) && Language.TryGetLanguage(target, out var language) && GoogleTranslator2.TextToSpeechLanguages.Contains(language);
-
-        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Never : Times.Once);
+        Assert.Equal(passedPreconditions, result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
 
