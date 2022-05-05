@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Discord;
@@ -32,6 +33,8 @@ public class OtherModule : InteractionModuleBase
         _httpClient = httpClient;
         _interactive = interactive;
     }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("inspirobot", "Sends an inspirational quote.")]
     public async Task<RuntimeResult> InspiroBotAsync()
