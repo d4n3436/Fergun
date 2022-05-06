@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using Fergun.Apis.Urban;
 using Fergun.Interactive;
 using Fergun.Modules;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -27,9 +28,10 @@ public class UrbanModuleTests
 
     public UrbanModuleTests()
     {
+        var options = Mock.Of<IOptionsSnapshot<InteractiveOptions>>();
         var interactive = new InteractiveService(_client, _interactiveConfig);
 
-        _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(_localizer, _urbanDictionary, interactive)) { CallBase = true };
+        _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(_localizer, options, _urbanDictionary, interactive)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         _contextMock.SetupGet(x => x.User).Returns(() => AutoFaker.Generate<IUser>(b => b.WithBinder(new MoqBinder())));
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);

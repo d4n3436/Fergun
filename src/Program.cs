@@ -66,6 +66,7 @@ await Host.CreateDefaultBuilder()
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
         services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
+        services.Configure<InteractiveOptions>(context.Configuration.GetSection(InteractiveOptions.Interactive));
 
         services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))

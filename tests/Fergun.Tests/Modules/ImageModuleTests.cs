@@ -12,6 +12,7 @@ using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -34,8 +35,9 @@ public class ImageModuleTests
     public ImageModuleTests()
     {
         var logger = Mock.Of<ILogger<ImageModule>>();
+        var options = Mock.Of<IOptionsSnapshot<InteractiveOptions>>();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
-        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, interactive, _googleScraper,
+        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive, _googleScraper,
             _duckDuckGoScraper, _braveScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };
 
         _module = _moduleMock.Object;

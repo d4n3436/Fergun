@@ -13,6 +13,7 @@ using Fergun.Modules.Handlers;
 using Fergun.Utils;
 using Humanizer;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
@@ -20,15 +21,17 @@ public class OtherModule : InteractionModuleBase
 {
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
+    private readonly InteractiveOptions _interactiveOptions;
     private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer,
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
         InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _interactiveOptions = interactiveOptions.Value;
         _geniusClient = geniusClient;
         _httpClient = httpClient;
         _interactive = interactive;
@@ -84,7 +87,7 @@ public class OtherModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(chunks.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes()
+            .WithFergunEmotes(_interactiveOptions)
             .WithLocalizedPrompts(_localizer)
             .Build();
 

@@ -7,6 +7,7 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
+using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
@@ -14,12 +15,15 @@ namespace Fergun.Modules;
 public class UrbanModule : InteractionModuleBase
 {
     private readonly IFergunLocalizer<UrbanModule> _localizer;
+    private readonly InteractiveOptions _interactiveOptions;
     private readonly IUrbanDictionary _urbanDictionary;
     private readonly InteractiveService _interactive;
 
-    public UrbanModule(IFergunLocalizer<UrbanModule> localizer, IUrbanDictionary urbanDictionary, InteractiveService interactive)
+    public UrbanModule(IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
+        IUrbanDictionary urbanDictionary, InteractiveService interactive)
     {
         _localizer = localizer;
+        _interactiveOptions = interactiveOptions.Value;
         _urbanDictionary = urbanDictionary;
         _interactive = interactive;
     }
@@ -55,7 +59,7 @@ public class UrbanModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes()
+            .WithFergunEmotes(_interactiveOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(definitions.Count - 1)

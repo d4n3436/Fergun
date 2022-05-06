@@ -11,6 +11,7 @@ using GTranslate;
 using GTranslate.Results;
 using Humanizer;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
@@ -26,6 +27,7 @@ public class UtilityModule : InteractionModuleBase
 {
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
+    private readonly InteractiveOptions _interactiveOptions;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly IFergunTranslator _translator;
@@ -39,11 +41,12 @@ public class UtilityModule : InteractionModuleBase
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, SharedModule shared,
-        InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions, 
+        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _interactiveOptions = interactiveOptions.Value;
         _shared = shared;
         _interactive = interactive;
         _translator = translator;
@@ -351,7 +354,7 @@ public class UtilityModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(articles.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes()
+            .WithFergunEmotes(_interactiveOptions)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -411,7 +414,7 @@ public class UtilityModule : InteractionModuleBase
                     .WithActionOnTimeout(ActionOnStop.DisableInput)
                     .WithMaxPageIndex(videos.Count - 1)
                     .WithFooter(PaginatorFooter.None)
-                    .WithFergunEmotes()
+                    .WithFergunEmotes(_interactiveOptions)
                     .WithLocalizedPrompts(_localizer)
                     .Build();
 
