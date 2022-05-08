@@ -8,6 +8,7 @@ using Fergun.Apis.Genius;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.Yandex;
+using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Modules;
@@ -16,6 +17,7 @@ using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using GTranslate.Translators;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,7 +28,12 @@ using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
 using YoutubeExplode.Search;
 
-await Host.CreateDefaultBuilder()
+// The current directory is changed so the SQLite database is stored in the current folder
+// instead of the project folder (if the data source path is relative).
+Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
+var host = Host.CreateDefaultBuilder()
+    .UseConsoleLifetime()
     .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
     .ConfigureDiscordShardedHost((context, config) =>
     {
@@ -53,6 +60,7 @@ await Host.CreateDefaultBuilder()
         config.MinimumLevel.Debug()
             .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
             .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && (Matching.FromSource("Microsoft.Extensions.Http").Invoke(e) || Matching.FromSource("Microsoft.Extensions.Localization").Invoke(e)))
+            .Filter.ByExcluding(e => e.Level <= LogEventLevel.Information && Matching.FromSource("Microsoft.EntityFrameworkCore").Invoke(e))
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File($"{context.HostingEnvironment.ContentRootPath}logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })
@@ -67,7 +75,8 @@ await Host.CreateDefaultBuilder()
         services.AddFergunPolicies();
         services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
         services.Configure<InteractiveOptions>(context.Configuration.GetSection(InteractiveOptions.Interactive));
-
+        services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
+        
         services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
@@ -76,7 +85,7 @@ await Host.CreateDefaultBuilder()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
-
+        
         services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
@@ -139,4 +148,21 @@ await Host.CreateDefaultBuilder()
         services.AddSingleton(x => new DuckDuckGoScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
         services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
         services.AddTransient<SharedModule>();
-    }).RunConsoleAsync();
+    })
+    .Build();
+
+// Semi-automatic migration
+await using (var scope = host.Services.CreateAsyncScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
+    int pendingMigrations = (await db.Database.GetPendingMigrationsAsync()).Count();
+
+    if (pendingMigrations > 0)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        await db.Database.MigrateAsync();
+        logger.LogInformation("Applied {Count} pending database migration(s).", pendingMigrations);
+    }
+}
+
+await host.RunAsync();

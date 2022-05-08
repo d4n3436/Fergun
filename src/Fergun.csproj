@@ -15,6 +15,11 @@
     <PackageReference Include="GScraper" Version="1.0.2" />
     <PackageReference Include="GTranslate" Version="2.1.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.4" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.4" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.4" />
@@ -26,6 +31,10 @@
     <PackageReference Include="SixLabors.ImageSharp" Version="2.1.1" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta14" />
     <PackageReference Include="YoutubeExplode" Version="6.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\Models\" />
   </ItemGroup>
 
 </Project>
