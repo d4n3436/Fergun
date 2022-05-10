@@ -52,10 +52,12 @@ public static class Extensions
 
     public static string Display(this IInteractionContext context)
     {
-        string displayMessage = context.Channel.Name;
+        string displayMessage = string.Empty;
 
         if (context.Channel is IGuildChannel guildChannel)
-            displayMessage += $"/{guildChannel.Guild.Name}";
+            displayMessage = $"{guildChannel.Guild.Name}/";
+
+        displayMessage += context.Channel.Name;
 
         return displayMessage;
     }

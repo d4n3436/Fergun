@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Bogus;
 using Discord;
 using Fergun.Extensions;
@@ -13,26 +12,6 @@ namespace Fergun.Tests.Extensions;
 
 public class InteractionExtensionsTests
 {
-    [Fact]
-    public async Task Interaction_RespondWarningAsync_Should_Call_RespondAsync_Once()
-    {
-        var interactionMock = new Mock<IDiscordInteraction>();
-        await interactionMock.Object.RespondWarningAsync(It.IsAny<string>(), It.IsAny<bool>());
-
-        interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(),
-            It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Interaction_FollowupWarningAsync_Should_Call_FollowupAsync_Once()
-    {
-        var interactionMock = new Mock<IDiscordInteraction>();
-        await interactionMock.Object.FollowupWarning(It.IsAny<string>(), It.IsAny<bool>());
-
-        interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(),
-            It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
-    }
-
     [Theory]
     [MemberData(nameof(GetLocales))]
     [MemberData(nameof(GetRandomStrings))]

@@ -43,14 +43,15 @@ var host = Host.CreateDefaultBuilder()
             GatewayIntents = GatewayIntents.Guilds,
             UseInteractionSnowflakeDate = false,
             LogGatewayIntentWarnings = false,
-            SuppressUnknownDispatchWarnings = true
+            SuppressUnknownDispatchWarnings = true,
+            FormatUsersInBidirectionalUnicode = false
         };
 
         config.Token = context.Configuration.Get<FergunConfig>().Token;
     })
     .UseInteractionService((_, config) =>
     {
-        config.LogLevel = LogSeverity.Verbose;
+        config.LogLevel = LogSeverity.Critical;
         config.DefaultRunMode = RunMode.Async;
         config.UseCompiledLambda = false;
     })
@@ -60,7 +61,7 @@ var host = Host.CreateDefaultBuilder()
         config.MinimumLevel.Debug()
             .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
             .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && (Matching.FromSource("Microsoft.Extensions.Http").Invoke(e) || Matching.FromSource("Microsoft.Extensions.Localization").Invoke(e)))
-            .Filter.ByExcluding(e => e.Level <= LogEventLevel.Information && Matching.FromSource("Microsoft.EntityFrameworkCore").Invoke(e))
+            //.Filter.ByExcluding(e => e.Level <= LogEventLevel.Information && Matching.FromSource("Microsoft.EntityFrameworkCore").Invoke(e))
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File($"{context.HostingEnvironment.ContentRootPath}logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })

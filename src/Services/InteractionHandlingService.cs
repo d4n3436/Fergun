@@ -4,8 +4,11 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Converters;
+using Fergun.Data;
+using Fergun.Data.Models;
 using Fergun.Extensions;
 using GTranslate;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,15 +37,16 @@ public class InteractionHandlingService : IHostedService
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _interactionService.Log += LogInteraction;
         _interactionService.SlashCommandExecuted += SlashCommandExecuted;
-        _interactionService.ContextCommandExecuted += ContextMenuCommandExecuted;
-        _shardedClient.InteractionCreated += HandleInteractionAsync;
+        _interactionService.ContextCommandExecuted += ContextCommandExecuted;
+        _interactionService.AutocompleteHandlerExecuted += AutocompleteHandlerExecuted;
+        _shardedClient.InteractionCreated += InteractionCreated;
 
         _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
         _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
-        var modules = await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
-        _logger.LogDebug("Added {moduleCount} command modules", modules.Count());
+        var modules = (await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)).ToArray();
+        _logger.LogDebug("Added {Modules} command modules ({Commands} commands)", modules.Length,
+            modules.Sum(x => x.ContextCommands.Count) + modules.Sum(x => x.SlashCommands.Count));
 
         _shardedClient.ShardReady += ReadyAsync;
     }
@@ -50,8 +54,7 @@ public class InteractionHandlingService : IHostedService
     /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _interactionService.Log -= LogInteraction;
-        _shardedClient.InteractionCreated -= HandleInteractionAsync;
+        _shardedClient.InteractionCreated -= InteractionCreated;
         _shardedClient.ShardReady -= ReadyAsync;
 
         return Task.CompletedTask;
@@ -80,62 +83,174 @@ public class InteractionHandlingService : IHostedService
         }
     }
 
-    public async Task HandleInteractionAsync(SocketInteraction interaction)
+    private Task InteractionCreated(SocketInteraction interaction)
     {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleInteractionAsync(interaction);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "The interaction handler has thrown an exception.");
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private async Task HandleInteractionAsync(SocketInteraction interaction)
+    {
+        var db = _services.GetRequiredService<FergunContext>();
+        
+        var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == interaction.User.Id);
+        
+        switch (user?.BlacklistStatus)
+        {
+            case BlacklistStatus.Blacklisted when interaction.Type is InteractionType.ApplicationCommand or InteractionType.MessageComponent:
+            {
+                _logger.LogInformation("Blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
+                
+                var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
+                localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
+
+                string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
+                    ? localizer["You're blacklisted."]
+                    : localizer["You're blacklisted with reason: {0}", user.BlacklistReason];
+                    
+                var builder = new EmbedBuilder()
+                    .WithDescription($"❌ {description}")
+                    .WithColor(Color.Orange);
+
+                await interaction.RespondAsync(embed: builder.Build(), ephemeral: true);
+
+                return;
+            }
+            case BlacklistStatus.ShadowBlacklisted:
+                _logger.LogInformation("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
+                return;
+        }
+
         var context = new ShardedInteractionContext(_shardedClient, interaction);
         await _interactionService.ExecuteCommandAsync(context, _services);
     }
 
-    private async Task SlashCommandExecuted(SlashCommandInfo slashCommand, IInteractionContext context, IResult result)
+    private Task SlashCommandExecuted(SlashCommandInfo slashCommand, IInteractionContext context, IResult result)
     {
-        _logger.LogInformation("Executed slash command \"{name}\" for {username}#{discriminator} ({id}) in {context}",
-            slashCommand.Name, context.User.Username, context.User.Discriminator, context.User.Id, context.Display());
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleCommandExecutedAsync(slashCommand, context, result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task ContextCommandExecuted(ContextCommandInfo contextCommand, IInteractionContext context, IResult result)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleCommandExecutedAsync(contextCommand, context, result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+            }
+        });
+        
+        return Task.CompletedTask;
+    }
+
+    private Task AutocompleteHandlerExecuted(IAutocompleteHandler autocompleteCommand, IInteractionContext context, IResult result)
+    {
+        var interaction = (IAutocompleteInteraction)context.Interaction;
+        var subCommands = string.Join(" ", interaction.Data.Options
+            .Where(x => x.Type == ApplicationCommandOptionType.SubCommand).Select(x => x.Name));
+
+        if (!string.IsNullOrEmpty(subCommands))
+        {
+            subCommands = $" {subCommands}";
+        }
+
+        string name = $"{interaction.Data.CommandName}{subCommands} ({interaction.Data.Current.Name})";
 
         if (result.IsSuccess)
-            return;
+        {
+            _logger.LogDebug("Executed Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context}",
+                name, context.User, context.User.Id, context.Display());
+        }
+        else if (result.Error == InteractionCommandError.Exception)
+        {
+            var exception = ((ExecuteResult)result).Exception;
 
-        await HandleInteractionErrorAsync(context, result);
+            _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception.",
+                name, context.User, context.User.Id, context.Display());
+        }
+        else
+        {
+            _logger.LogWarning("Failed to execute Autocomplete handler of command  \"{Name}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
+                name, context.User, context.User.Id, context.Display(), result.ErrorReason);
+        }
+        
+
+        return Task.CompletedTask;
     }
 
-    private async Task ContextMenuCommandExecuted(ContextCommandInfo contextCommand, IInteractionContext context, IResult result)
+    private async Task HandleCommandExecutedAsync(IApplicationCommandInfo command, IInteractionContext context, IResult result)
     {
-        _logger.LogInformation("Executed context menu command \"{name}\" for {username}#{discriminator} ({id}) in {context}",
-            contextCommand.Name, context.User.Username, context.User.Discriminator, context.User.Id, context.Display());
+        if (result.IsSuccess)
+        {
+            _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
+                command.CommandType, command, context.User, context.User.Id, context.Display());
 
-        if (result.IsSuccess || result is FergunResult { IsSilent: true })
+            return;
+        }
+        
+        if (result is FergunResult { IsSilent: true })
             return;
 
-        await HandleInteractionErrorAsync(context, result);
-    }
-
-    private async Task HandleInteractionErrorAsync(IInteractionContext context, IResult result)
-    {
         string message = result.ErrorReason;
         bool ephemeral = (result as FergunResult)?.IsEphemeral ?? true;
         var interaction = (result as FergunResult)?.Interaction ?? context.Interaction;
 
         if (result.Error == InteractionCommandError.Exception)
         {
+            var exception = ((ExecuteResult)result).Exception;
+
+            _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception.",
+                command.CommandType, command, context.User, context.User.Id, context.Display());
+
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
-            message = $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{((ExecuteResult)result).Exception.Message}```"]}";
-        }
-
-        if (context.Interaction.HasResponded)
-        {
-            await interaction.FollowupWarning(message, ephemeral);
+            message = $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{exception.Message}```"]}";
         }
         else
         {
-            await interaction.RespondWarningAsync(message, ephemeral);
+            _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
+                command.CommandType, command, context.User, context.User.Id, context.Display(), message);
         }
-    }
 
-    private Task LogInteraction(LogMessage log)
-    {
-#pragma warning disable CA2254 // Template should be a static expression
-        _logger.Log(log.Severity.ToLogLevel(), new EventId(0, log.Source), log.Exception, log.Message);
-#pragma warning restore CA2254 // Template should be a static expression
-        return Task.CompletedTask;
+        var embed = new EmbedBuilder()
+            .WithDescription($"⚠ {message}")
+            .WithColor(Color.Orange)
+            .Build();
+
+        if (context.Interaction.HasResponded)
+        {
+            await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral);
+        }
+        else
+        {
+            await interaction.RespondAsync(embed: embed, ephemeral: ephemeral);
+        }
     }
 }

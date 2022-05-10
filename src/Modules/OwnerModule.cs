@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[RequireOwner]
 public class OwnerModule : InteractionModuleBase
 {
     private readonly ILogger<UtilityModule> _logger;
@@ -17,7 +18,6 @@ public class OwnerModule : InteractionModuleBase
         _localizer = localizer;
     }
 
-    [RequireOwner]
     [SlashCommand("cmd", "(Owner only) Executes a command.")]
     public async Task<RuntimeResult> CmdAsync([Summary(description: "The command to execute.")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
     {
