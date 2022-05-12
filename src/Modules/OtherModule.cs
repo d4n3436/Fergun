@@ -6,12 +6,14 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Apis.Genius;
+using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Utils;
 using Humanizer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -25,9 +27,10 @@ public class OtherModule : InteractionModuleBase
     private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
+    private readonly FergunContext _db;
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
-        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient)
+        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
@@ -35,9 +38,49 @@ public class OtherModule : InteractionModuleBase
         _geniusClient = geniusClient;
         _httpClient = httpClient;
         _interactive = interactive;
+        _db = db;
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
+
+    [SlashCommand("cmdstats", "Displays the command usage stats.")]
+    public async Task<RuntimeResult> CommandStatsAsync()
+    {
+        await Context.Interaction.DeferAsync();
+
+        var commandStats = (await _db.CommandStats
+            .AsNoTracking()
+            .OrderByDescending(x => x.UsageCount)
+            .ToListAsync())
+            .Chunk(25)
+            .ToArray();
+
+        if (commandStats.Length == 0)
+        {
+            return FergunResult.FromError(_localizer["No stats to display."]);
+        }
+
+        var paginator = new LazyPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithMaxPageIndex(commandStats.Length - 1)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes(_interactiveOptions)
+            .WithLocalizedPrompts(_localizer)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
+
+        PageBuilder GeneratePage(int index) => new PageBuilder()
+                .WithTitle(_localizer["Command Stats"])
+                .WithDescription(string.Join('\n', commandStats[index].Select((x, i) => $"{index * 25 + i + 1}. `{x.Name}`: {x.UsageCount}")))
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, commandStats.Length])
+                .WithColor(Color.Orange);
+    }
 
     [SlashCommand("inspirobot", "Sends an inspirational quote.")]
     public async Task<RuntimeResult> InspiroBotAsync()

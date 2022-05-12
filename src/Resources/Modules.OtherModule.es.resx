@@ -126,6 +126,9 @@
   <data name="Bot Version" xml:space="preserve">
     <value>Versión del bot</value>
   </data>
+  <data name="Command Stats" xml:space="preserve">
+    <value>Estadísticas de Comandos</value>
+  </data>
   <data name="CPU Usage" xml:space="preserve">
     <value>Uso de CPU</value>
   </data>
@@ -137,6 +140,9 @@
   </data>
   <data name="Lyrics by Genius | Page {0} of {1}" xml:space="preserve">
     <value>Letra por Genius | Página {0} de {1}</value>
+  </data>
+  <data name="No stats to display." xml:space="preserve">
+    <value>Sin estadísticas que mostrar.</value>
   </data>
   <data name="Operating System" xml:space="preserve">
     <value>Sistema Operativo</value>

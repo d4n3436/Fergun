@@ -23,6 +23,7 @@ public class InteractionHandlingService : IHostedService
     private readonly ILogger<InteractionHandlingService> _logger;
     private readonly IServiceProvider _services;
     private readonly ulong _targetGuildId;
+    private readonly SemaphoreSlim _cmdStatsSemaphore = new SemaphoreSlim(1, 1);
 
     public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService,
         ILogger<InteractionHandlingService> logger, IServiceProvider services, IConfiguration configuration)
@@ -102,7 +103,8 @@ public class InteractionHandlingService : IHostedService
 
     private async Task HandleInteractionAsync(SocketInteraction interaction)
     {
-        var db = _services.GetRequiredService<FergunContext>();
+        await using var scope = _services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
         
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == interaction.User.Id);
         
@@ -207,6 +209,30 @@ public class InteractionHandlingService : IHostedService
 
     private async Task HandleCommandExecutedAsync(IApplicationCommandInfo command, IInteractionContext context, IResult result)
     {
+        string commandName = command.ToString()!.ToLowerInvariant();
+        await _cmdStatsSemaphore.WaitAsync();
+
+        try
+        {
+            await using var scope = _services.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
+            var dbCommand = await db.CommandStats.FirstOrDefaultAsync(x => x.Name == commandName);
+
+            if (dbCommand is null)
+            {
+                dbCommand = new Command { Name = commandName };
+                await db.AddAsync(dbCommand);
+            }
+
+            dbCommand.UsageCount++;
+
+            await db.SaveChangesAsync();
+        }
+        finally
+        {
+            _cmdStatsSemaphore.Release();
+        }
+        
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
