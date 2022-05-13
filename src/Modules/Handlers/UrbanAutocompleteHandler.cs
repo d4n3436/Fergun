@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Urban;
+using Fergun.Extensions;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,8 @@ public class UrbanAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IUrbanDictionary>();
 
         var results = (await urbanDictionary.GetAutocompleteResultsAsync(text))
-            .Select(x => new AutocompleteResult(x, x))
+            .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))
+            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);

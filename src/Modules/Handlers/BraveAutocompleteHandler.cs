@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Discord;
 using Discord.Interactions;
+using Fergun.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
@@ -38,6 +39,7 @@ public class BraveAutocompleteHandler : AutocompleteHandler
             .RootElement[1]
             .EnumerateArray()
             .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
+            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);

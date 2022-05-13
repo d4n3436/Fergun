@@ -41,6 +41,7 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
             .RootElement[1]
             .EnumerateArray()
             .Select(x => new AutocompleteResult(x[0].GetString(), x[0].GetString()))
+            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);
