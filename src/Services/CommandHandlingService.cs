@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -46,98 +46,89 @@ namespace Fergun.Services
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
         }
 
-        public async Task HandleCommandAsync(SocketMessage messageParam)
+        public Task HandleCommandAsync(SocketMessage messageParam)
         {
             // Don't process the command if it was a system message
-            if (!(messageParam is SocketUserMessage message)) return;
+            if (!(messageParam is SocketUserMessage message)) return Task.CompletedTask;
 
             // Ignore empty messages
-            if (string.IsNullOrEmpty(message.Content)) return;
+            if (string.IsNullOrEmpty(message.Content)) return Task.CompletedTask;
 
             // Ignore messages from bots
-            if (message.Author.IsBot) return;
+            if (message.Author.IsBot) return Task.CompletedTask;
 
             string prefix = GuildUtils.GetCachedPrefix(message.Channel);
-            if (message.Content == prefix) return;
+            if (message.Content == prefix) return Task.CompletedTask;
 
-            if (message.Content == _client.CurrentUser.Mention)
+            if (MentionUtils.TryParseUser(message.Content, out ulong userId) && userId == _client.CurrentUser.Id)
             {
-                lock (_userLock)
-                {
-                    if (_ignoredUsers.Contains(message.Author.Id)) return;
-                }
-
-                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.MentionIgnoreTime));
-                await SendEmbedAsync(message, string.Format(GuildUtils.Locate("BotMention", message.Channel), prefix));
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"{message.Author} ({message.Author.Id}) mentioned me."));
-                return;
+                _ = Task.Run(async () => await DisplayMigrationMessageAsync(message, true));
+                return Task.CompletedTask;
             }
 
-            // Create a number to track where the prefix ends and the command begins
             int argPos = 0;
 
-            // Determine if the message is a command based on the prefix or mention
             if (!(message.HasStringPrefix(prefix, ref argPos) ||
                   message.HasMentionPrefix(_client.CurrentUser, ref argPos)))
-                return;
-
-            // Ignore ignored users
-            lock (_userLock)
-            {
-                if (_ignoredUsers.Contains(message.Author.Id)) return;
-            }
+                return Task.CompletedTask;
 
             var result = _cmdService.Search(message.Content.Substring(argPos));
-            if (!result.IsSuccess) return;
+            if (!result.IsSuccess) return Task.CompletedTask;
 
-            if (GuildUtils.UserConfigCache.TryGetValue(message.Author.Id, out var userConfig) && userConfig.IsBlacklisted)
+            _ = Task.Run(async () => await DisplayMigrationMessageAsync(message, false));
+
+            return Task.CompletedTask;
+        }
+
+        public async ValueTask DisplayMigrationMessageAsync(SocketUserMessage message, bool isMention)
+        {
+            lock (_userLock)
             {
-                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromMinutes(Constants.BlacklistIgnoreTime));
-                if (userConfig.BlacklistReason == null)
+                if (_ignoredUsers.Contains(message.Author.Id))
                 {
-                    await SendEmbedAsync(message, "\u274c " + GuildUtils.Locate("Blacklisted", message.Channel), message.Author.Mention);
+                    return;
                 }
-                else
-                {
-                    await SendEmbedAsync(message, "\u274c " + string.Format(GuildUtils.Locate("BlacklistedWithReason", message.Channel), userConfig.BlacklistReason), message.Author.Mention);
-                }
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Blacklist", $"{message.Author} ({message.Author.Id}) wanted to use the command \"{result.Commands[0].Alias}\" but they are blacklisted."));
-                return;
             }
 
-            var disabledCommands = GuildUtils.GetGuildConfig(message.Channel)?.DisabledCommands;
-            var disabled = disabledCommands?.FirstOrDefault(x => result.Commands.Any(y =>
-                x == (y.Command.Module.Group == null ? y.Command.Name : $"{y.Command.Module.Group} {y.Command.Name}")));
+            _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(5));
 
-            if (disabled != null)
+
+            var context = new ShardedCommandContext(_client, message);
+            bool slashCommandsEnabled = await context.SlashCommandsEnabledAsync();
+
+            var componentBuilder = new ComponentBuilder();
+            if (!slashCommandsEnabled)
             {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the locally disabled command \"{disabled}\"."));
-                await SendEmbedAsync(message, "\u26a0 " + string.Format(GuildUtils.Locate("CommandDisabled", message.Channel), Format.Code(disabled)));
-                _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
+                componentBuilder.WithButton(GuildUtils.Locate("EnableSlashCommands", context.Channel), style: ButtonStyle.Link, url: FergunClient.AppCommandsAuthLink);
+            }
+
+            componentBuilder.WithButton(GuildUtils.Locate("SupportServer", context.Channel), style: ButtonStyle.Link, url: FergunClient.Config.SupportServer);
+
+            var builder = new EmbedBuilder()
+                .WithTitle($"⚠️ {GuildUtils.Locate("SwitchToSlashCommands", context.Channel)}")
+                .WithDescription(GuildUtils.Locate(slashCommandsEnabled ? "RewriteWarning" : "RewriteWarningSlashCommandsNotEnabled", context.Channel))
+                .WithColor(Color.Orange);
+
+            await message.ReplyAsync(embed: builder.Build(), components: componentBuilder.Build(), allowedMentions: AllowedMentions.None);
+
+            var sb = new StringBuilder($"Displayed migration message to {message.Author} ({message.Author.Id})");
+            if (!slashCommandsEnabled)
+            {
+                sb.Append($" (slash command not enabled in server {context.Guild?.Id.ToString() ?? "?"})");
+            }
+
+            if (isMention)
+            {
+                sb.Append(" from mention");
             }
             else
             {
-                var globalDisabled = DatabaseConfig.GloballyDisabledCommands.FirstOrDefault(x =>
-                    result.Commands.Any(y =>
-                        x.Key == (y.Command.Module.Group == null ? y.Command.Name : $"{y.Command.Module.Group} {y.Command.Name}")));
-
-                if (globalDisabled.Key != null)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Command", $"User {message.Author} ({message.Author.Id}) tried to use the globally disabled command \"{globalDisabled.Key}\"."));
-                    await SendEmbedAsync(message, $"\u26a0 {string.Format(GuildUtils.Locate("CommandDisabledGlobally", message.Channel), Format.Code(globalDisabled.Key))}" +
-                        $"{(!string.IsNullOrEmpty(globalDisabled.Value) ? $"\n{GuildUtils.Locate("Reason", message.Channel)}: {globalDisabled.Value}" : "")}");
-                    _ = IgnoreUserAsync(message.Author.Id, TimeSpan.FromSeconds(Constants.DefaultIgnoreTime));
-                }
-                else
-                {
-                    // Create a WebSocket-based command context based on the message
-                    var context = new ShardedCommandContext(_client, message);
-
-                    // Execute the command with the command context we just
-                    // created, along with the service provider for precondition checks.
-                    await _cmdService.ExecuteAsync(context, argPos, _services);
-                }
+                sb.Append($" from message \"{message.Content}\"");
             }
+
+            sb.Append('.');
+
+            await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", sb.ToString()));
         }
 
         private async Task OnCommandExecutedAsync(Optional<CommandInfo> optionalCommand, ICommandContext commandContext, IResult result)

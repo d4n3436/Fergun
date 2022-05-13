@@ -141,27 +141,6 @@ namespace Fergun
             _client.LeftGuild += LeftGuild;
             _client.InteractionCreated += InteractionCreated;
 
-            if (Config.LavaConfig.Hostname == "127.0.0.1" || Config.LavaConfig.Hostname == "0.0.0.0" || Config.LavaConfig.Hostname == "localhost")
-            {
-                bool hasLavalink = File.Exists(Path.Combine(AppContext.BaseDirectory, "Lavalink", "Lavalink.jar"));
-                if (hasLavalink)
-                {
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using local lavalink server. Updating and starting Lavalink..."));
-                    await UpdateLavalinkAsync();
-                    await StartLavalinkAsync();
-                }
-                else
-                {
-                    // Ignore all log messages from Victoria
-                    Config.LavaConfig.LogSeverity = LogSeverity.Critical;
-                    await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Lavalink.jar not found."));
-                }
-            }
-            else
-            {
-                await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Lavalink", "Using remote lavalink server."));
-            }
-
             _logService.Dispose();
 
             _services = SetupServices();
@@ -169,7 +148,6 @@ namespace Fergun
 
             // Resolve dependencies
             _services.GetService<ReliabilityService>();
-            _services.GetService<BotListService>();
 
             await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
 
@@ -181,8 +159,24 @@ namespace Fergun
                 await _client.SetActivityAsync(new Game($"{DatabaseConfig.GlobalPrefix}help, /help"));
             }
 
+            _ = ClearSlashCommandScopeCacheAsync();
+
             // Block this task until the program is closed.
             await Task.Delay(Timeout.Infinite);
+        }
+
+        private static async Task ClearSlashCommandScopeCacheAsync()
+        {
+            using var timer = new PeriodicTimer(TimeSpan.FromHours(3));
+            while (await timer.WaitForNextTickAsync())
+            {
+                var guildIds = GuildUtils.SlashCommandScopeCache.Where(x => !x.Value).Select(x => x.Key).ToArray();
+
+                foreach (ulong guildId in guildIds)
+                {
+                    GuildUtils.SlashCommandScopeCache.TryRemove(guildId, out _);
+                }
+            }
         }
 
         private async Task<T> LoadConfigAsync<T>(string path) where T : class, new()
@@ -381,23 +375,10 @@ namespace Fergun
                 .AddSingleton<YandexTranslator>()
                 .AddSingleton<AggregateTranslator>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton(s => Config.UseMessageCacheService && Config.MessageCacheSize > 0
-                ? new MessageCacheService(s.GetRequiredService<DiscordShardedClient>(), Config.MessageCacheSize,
-                s.GetRequiredService<LogService>().LogAsync,
-                Constants.MessageCacheClearInterval,
-                Constants.MaxMessageCacheLongevity, Config.MinimumCommandTime)
-                : MessageCacheService.Disabled)
-                .AddSingleton(s => Config.UseCommandCacheService
-                ? new CommandCacheService(s.GetRequiredService<DiscordShardedClient>(), Constants.MessageCacheCapacity,
-                s.GetRequiredService<CommandHandlingService>().HandleCommandAsync,
-                s.GetRequiredService<LogService>().LogAsync, Constants.CommandCacheClearInterval,
-                Constants.MaxCommandCacheLongevity, s.GetRequiredService<MessageCacheService>())
-                : CommandCacheService.Disabled)
+                .AddSingleton(MessageCacheService.Disabled)
+                .AddSingleton(CommandCacheService.Disabled)
                 .AddSingletonIf(Config.UseReliabilityService,
                 s => new ReliabilityService(s.GetRequiredService<DiscordShardedClient>(), s.GetRequiredService<LogService>().LogAsync))
-                .AddSingletonIf(!IsDebugMode,
-                s => new BotListService(s.GetRequiredService<DiscordShardedClient>(), Config.TopGgApiToken, Config.DiscordBotsApiToken,
-                logger: s.GetRequiredService<LogService>().LogAsync))
                 .BuildServiceProvider();
         }
 
@@ -432,15 +413,12 @@ namespace Fergun
             _firstConnect = false;
             Uptime = DateTimeOffset.UtcNow;
 
-            if (!IsDebugMode)
-            {
-                InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&permissions={(ulong)Constants.InvitePermissions}&scope=bot%20applications.commands";
-                AppCommandsAuthLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=applications.commands";
+            InviteLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&permissions={(ulong)Constants.InvitePermissions}&scope=bot%20applications.commands";
+            AppCommandsAuthLink = $"https://discord.com/oauth2/authorize?client_id={_client.CurrentUser.Id}&scope=applications.commands";
 
-                if (!string.IsNullOrEmpty(Config.TopGgApiToken))
-                {
-                    TopGgBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
-                }
+            if (!string.IsNullOrEmpty(Config.TopGgApiToken))
+            {
+                TopGgBotPage = $"https://top.gg/bot/{_client.CurrentUser.Id}";
             }
         }
 

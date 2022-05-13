@@ -2176,14 +2176,26 @@ These messages are only stored for 6 hours, and you can decide to opt out using 
 		<value>Archived</value>
 	</data>
 	<data name="RewriteWarning" xml:space="preserve">
-		<value>Fergun now has **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**! These commands are already enabled on this server/channel, type `/` to try them out.
-Due to changes to bots made by Discord, **slash commands** will be required on September 2022.
-Fergun will stop working with text commands (like the one you used) on **May 2022**.</value>
+		<value>Fergun v1 has been discontinued in favor of Fergun 2, a complete rewrite that has new features and uses [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ).
+To start using Fergun 2, simply type `/`.
+
+Fergun 2 is currently in open beta. The most used commands have been rewritten to use slash commands and more commands will be added soon.
+
+Some commands (like music and AI Dungeon commands) won't be migrated for reasons listed [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice). Other commands (like snipe commands) won't be migrated because Discord is limiting what content verified bots can see. This is the reason why Fergun is migrating to slash commands.
+
+If you have any questions about the rewrite or have any suggestions, feel free to join the support server.</value>
 	</data>
 	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
-		<value>Fergun now has **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**, but they aren't enabled on this server yet!
-Due to changes to bots made by Discord, **slash commands** will be required on September 2022.
-Fergun will stop working with text commands (like the one you used) on **May 2022**.</value>
+		<value>Fergun v1 has been discontinued in favor of Fergun 2, a complete rewrite that has new features and uses [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ).
+To start using Fergun 2, simply type `/`.
+
+Fergun 2 is currently in open beta. The most used commands have been rewritten to use slash commands and more commands will be added soon.
+
+Some commands (like music and AI Dungeon commands) won't be migrated for reasons listed [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice). Other commands (like snipe commands) won't be migrated because Discord is limiting what content verified bots can see. This is the reason why Fergun is migrating to slash commands.
+
+If you have any questions about the rewrite or have any suggestions, feel free to join the support server.
+
+⚠ Slash commands have not been enabled on this server! Use the button below to enable them.</value>
 	</data>
 	<data name="SwitchToSlashCommands" xml:space="preserve">
 		<value>Switch to slash commands</value>

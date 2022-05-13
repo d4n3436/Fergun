@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2175,14 +2175,26 @@ Estos mensajes solo se almacenan por 6 horas, y puede optar por no participar ut
 		<value>Archivado</value>
 	</data>
 	<data name="RewriteWarning" xml:space="preserve">
-		<value>Fergun ahora tiene **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**! Éstos comandos ya están habilitados en este servidor, escribe `/` para probarlos.
-Debido a cambios a bots por Discord, los **slash commands** (comandos de barra diagonal) serán obligatorios en Septiembre 2022.
-Fergun dejará de funcionar con comandos de texto (como el que acabas de usar) en **Mayo 2022**.</value>
+		<value>Fergun v1 ha sido descontinuado a favor de Fergun 2, una reescritura completa que tiene nuevas características y usa [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ).
+Para comenzar a usar Fergun 2, simplemente escriba `/`.
+
+Fergun 2 se encuentra actualmente en beta abierta. Los comandos más utilizados se han reescrito para usar slash commands y más comandos serán agregados pronto.
+
+Algunos comandos (como música y comandos de AI Dungeon) no se migrarán por motivos listados [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice). Otros comandos (como los comandos de snipe) no se migrarán porque Discord limitará el contenido que pueden ver los bots verificados. Esta es la razón por la que Fergun está migrando a slash commands.
+
+Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
 	</data>
 	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
-		<value>Fergun ahora tiene **[slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)**, pero éstos aún no han sido habilitados en este servidor!
-Debido a cambios a bots por Discord, los **slash commands** (comandos de barra diagonal) serán obligatorios en Septiembre 2022.
-Fergun dejará de funcionar con comandos de texto (como el que acabas de usar) en **Mayo 2022**.</value>
+		<value>Fergun v1 ha sido descontinuado a favor de Fergun 2, una reescritura completa que tiene nuevas características y usa [slash commands](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ).
+Para comenzar a usar Fergun 2, simplemente escriba `/`.
+
+Fergun 2 se encuentra actualmente en beta abierta. Los comandos más utilizados se han reescrito para usar slash commands y más comandos serán agregados pronto.
+
+Algunos comandos (como música y comandos de AI Dungeon) no se migrarán por motivos listados [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice). Otros comandos (como los comandos de snipe) no se migrarán porque Discord limitará el contenido que pueden ver los bots verificados. Esta es la razón por la que Fergun está migrando a slash commands.
+
+Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude en unirse al servidor de soporte.
+
+⚠ Los comandos de barra no se han habilitado en este servidor! Use el botón de abajo para habilitarlos.</value>
 	</data>
 	<data name="SwitchToSlashCommands" xml:space="preserve">
 		<value>Cambia a slash commands</value>

@@ -29,25 +29,12 @@ Changes:
         public static string GitHash { get; } = Assembly.GetExecutingAssembly()
             .GetCustomAttribute<GitHashInfoAttribute>()?
             .GitHash;
-
+        
         public static DiscordSocketConfig ClientConfig { get; } = new DiscordSocketConfig
         {
             LogLevel = LogSeverity.Verbose,
             UseSystemClock = false,
-            GatewayIntents =
-            GatewayIntents.Guilds |
-
-            // Moderation commands
-            GatewayIntents.GuildBans |
-
-            // General + Moderation commands
-            GatewayIntents.GuildMessages |
-
-            // Music commands
-            GatewayIntents.GuildVoiceStates |
-
-            // DM support
-            GatewayIntents.DirectMessages
+            GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.DirectMessages
         };
 
         public static CommandServiceConfig CommandServiceConfig { get; } = new CommandServiceConfig

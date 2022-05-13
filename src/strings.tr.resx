@@ -2176,14 +2176,26 @@ Bu mesajlar yalnızca 6 saat süreyle saklanır ve aşağıdaki reaksiyonları k
 		<value>Arşivlendi</value>
 	</data>
 	<data name="RewriteWarning" xml:space="preserve">
-		<value>Fergun artık **[eğik çizgi komutlarına](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)** sahip! Bu komutlar bu sunucuda/kanalda zaten etkin, denemek için `/` yazın.
-Discord tarafından botlarda yapılan değişiklikler nedeniyle, Eylül 2022'de **eğik çizgi komutları** gerekli olacaktır.
-Fergun, **Mayıs 2022**'de metin komutlarıyla (kullandığınız gibi) çalışmayı bırakacak.</value>
+		<value>Fergun v1, yeni özelliklere sahip ve [eğik çizgi komutlarını](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ) kullanan eksiksiz bir yeniden yazma olan Fergun 2 lehine durduruldu.
+Fergun 2'yi kullanmaya başlamak için `/` karakterini yazmanız yeterlidir.
+
+Fergun 2 şu anda açık betada. En çok kullanılan komutlar, eğik çizgi komutlarını kullanacak şekilde yeniden yazılmıştır ve yakında daha fazla komut eklenecektir.
+
+Bazı komutlar (müzik ve AI Dungeon komutları gibi) [burada](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice) listelenen nedenlerle taşınmaz. Discord, içeriği doğrulanmış botların görebileceklerini sınırladığı için diğer komutlar (snipe komutları gibi) taşınmaz. Fergun'un eğik çizgi komutlarına geçiş yapmasının nedeni budur.
+
+Yeniden yazma hakkında herhangi bir sorunuz varsa veya herhangi bir öneriniz varsa, destek sunucusuna katılmaktan çekinmeyin.</value>
 	</data>
 	<data name="RewriteWarningSlashCommandsNotEnabled" xml:space="preserve">
-		<value>Fergun artık **[eğik çizgi komutlarına](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ)** sahip, ancak bunlar bu sunucuda etkin değil hala!
-Discord tarafından botlarda yapılan değişiklikler nedeniyle, Eylül 2022'de **eğik çizgi komutları** gerekli olacaktır.
-Fergun, **Mayıs 2022**'de metin komutlarıyla (kullandığınız gibi) çalışmayı bırakacak.</value>
+		<value>Fergun v1, yeni özelliklere sahip ve [eğik çizgi komutlarını](https://support.discord.com/hc/en-us/articles/1500000368501-Slash-Commands-FAQ) kullanan eksiksiz bir yeniden yazma olan Fergun 2 lehine durduruldu.
+Fergun 2'yi kullanmaya başlamak için `/` karakterini yazmanız yeterlidir.
+
+Fergun 2 şu anda açık betada. En çok kullanılan komutlar, eğik çizgi komutlarını kullanacak şekilde yeniden yazılmıştır ve yakında daha fazla komut eklenecektir.
+
+Bazı komutlar (müzik ve AI Dungeon komutları gibi) [burada](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice) listelenen nedenlerle taşınmaz. Discord, içeriği doğrulanmış botların görebileceklerini sınırladığı için diğer komutlar (snipe komutları gibi) taşınmaz. Fergun'un eğik çizgi komutlarına geçiş yapmasının nedeni budur.
+
+Yeniden yazma hakkında herhangi bir sorunuz varsa veya herhangi bir öneriniz varsa, destek sunucusuna katılmaktan çekinmeyin.
+
+⚠ Eğik çizgi komutları bu sunucuda etkinleştirilmedi! Bunları etkinleştirmek için aşağıdaki düğmeyi kullanın.</value>
 	</data>
 	<data name="SwitchToSlashCommands" xml:space="preserve">
 		<value>Eğik çizgi komutlarına geç</value>

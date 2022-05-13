@@ -40,11 +40,6 @@ namespace Fergun.Services
 
         private Task ShardReadyAsync(DiscordSocketClient client)
         {
-            if (!_lavaNode.IsConnected)
-            {
-                _ = _lavaNode.ConnectAsync();
-            }
-
             return Task.CompletedTask;
         }
 
