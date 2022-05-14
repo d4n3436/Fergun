@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +9,9 @@ using Discord;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
+using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Fergun.Tests;
@@ -206,5 +209,24 @@ internal static class Utils
             .RuleFor(x => x.WrittenOn, f => f.Date.PastOffset())
             .RuleFor(x => x.Example, f => f.Lorem.Sentence())
             .Generate();
+    }
+
+    public static IOptionsSnapshot<InteractiveOptions> CreateMockedInteractiveOptions()
+    {
+        var mock = new Mock<IOptionsSnapshot<InteractiveOptions>>();
+        var faker = new Faker<InteractiveOptions>()
+            .RuleFor(x => x.PaginatorTimeout, f => f.Date.Timespan())
+            .RuleFor(x => x.SelectionTimeout, f => f.Date.Timespan())
+            .RuleFor(x => x.PaginatorEmotes, f => new Dictionary<PaginatorAction, string>
+            {
+                { PaginatorAction.Backward, "◀️" }, // Valid emoji
+                { PaginatorAction.Forward, $"<:forward:{f.Random.ULong()}>" }, // Valid emote
+                { PaginatorAction.Jump, "123" }, // Invalid emote
+                { PaginatorAction.Exit, "🛑" }
+            });
+
+        mock.Setup(x => x.Value).Returns(() => faker.Generate());
+
+        return mock.Object;
     }
 }
