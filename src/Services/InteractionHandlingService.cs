@@ -7,12 +7,13 @@ using Fergun.Converters;
 using Fergun.Data;
 using Fergun.Data.Models;
 using Fergun.Extensions;
+using Fergun.Modules;
 using GTranslate;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Fergun.Services;
 
@@ -22,17 +23,19 @@ public class InteractionHandlingService : IHostedService
     private readonly InteractionService _interactionService;
     private readonly ILogger<InteractionHandlingService> _logger;
     private readonly IServiceProvider _services;
-    private readonly ulong _targetGuildId;
-    private readonly SemaphoreSlim _cmdStatsSemaphore = new SemaphoreSlim(1, 1);
+    private readonly ulong _testingGuildId;
+    private readonly ulong _ownerCommandsGuildId;
+    private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
 
     public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService,
-        ILogger<InteractionHandlingService> logger, IServiceProvider services, IConfiguration configuration)
+        ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<FergunOptions> options)
     {
         _shardedClient = client;
         _interactionService = interactionService;
         _logger = logger;
         _services = services;
-        _targetGuildId = configuration.Get<FergunConfig>().TargetGuildId;
+        _testingGuildId = options.Value.TestingGuildId;
+        _ownerCommandsGuildId = options.Value.OwnerCommandsGuildId;
     }
 
     /// <inheritdoc />
@@ -45,6 +48,7 @@ public class InteractionHandlingService : IHostedService
 
         _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
         _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
+
         var modules = (await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)).ToArray();
         _logger.LogDebug("Added {Modules} command modules ({Commands} commands)", modules.Length,
             modules.Sum(x => x.ContextCommands.Count) + modules.Sum(x => x.SlashCommands.Count));
@@ -69,18 +73,46 @@ public class InteractionHandlingService : IHostedService
             await ReadyAsync();
         }
     }
-
+    
     public async Task ReadyAsync()
     {
-        if (_targetGuildId == 0)
+        var modules = _interactionService.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule));
+        var ownerModules = _interactionService.Modules
+            .Where(x => x.Name is nameof(OwnerModule) or nameof(BlacklistModule))
+            .ToArray();
+
+        if (_testingGuildId == 0)
         {
             _logger.LogInformation("Registering commands globally");
-            await _interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
+            
+            if (_ownerCommandsGuildId != 0)
+            {
+                _logger.LogInformation("Registering owner commands to guild {GuildId}", _ownerCommandsGuildId);
+                var ownerCommandsGuild = _shardedClient.GetGuild(_ownerCommandsGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_ownerCommandsGuildId);
+                await _interactionService.AddModulesToGuildAsync(ownerCommandsGuild, true, ownerModules);
+            }
         }
         else
         {
-            _logger.LogInformation("Registering commands to guild {guildId}", _targetGuildId);
-            await _interactionService.RegisterCommandsToGuildAsync(_targetGuildId);
+            _logger.LogInformation("Registering commands to guild {GuildId}", _testingGuildId);
+
+            if (_testingGuildId == _ownerCommandsGuildId)
+            {
+                await _interactionService.RegisterCommandsToGuildAsync(_testingGuildId);
+            }
+            else
+            {
+                var testingGuild = _shardedClient.GetGuild(_testingGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_testingGuildId);
+                await _interactionService.AddModulesToGuildAsync(testingGuild, true, modules.ToArray());
+
+                if (_ownerCommandsGuildId != 0)
+                {
+                    _logger.LogInformation("Registering owner commands to guild {GuildId}", _ownerCommandsGuildId);
+                    var ownerCommandsGuild = _shardedClient.GetGuild(_ownerCommandsGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_ownerCommandsGuildId);
+                    await _interactionService.AddModulesToGuildAsync(ownerCommandsGuild, true, ownerModules);
+                }
+            }
         }
     }
 

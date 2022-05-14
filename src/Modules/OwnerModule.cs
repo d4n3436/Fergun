@@ -18,7 +18,7 @@ public class OwnerModule : InteractionModuleBase
         _localizer = localizer;
     }
 
-    [SlashCommand("cmd", "(Owner only) Executes a command.")]
+    [SlashCommand("cmd", "Executes a command.")]
     public async Task<RuntimeResult> CmdAsync([Summary(description: "The command to execute.")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
     {
         await Context.Interaction.DeferAsync();

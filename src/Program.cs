@@ -35,6 +35,13 @@ Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 var host = Host.CreateDefaultBuilder()
     .UseConsoleLifetime()
     .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
+    .ConfigureServices((context, services) =>
+    {
+        services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
+        services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
+        services.Configure<InteractiveOptions>(context.Configuration.GetSection(InteractiveOptions.Interactive));
+        services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
+    })
     .ConfigureDiscordShardedHost((context, config) =>
     {
         config.SocketConfig = new DiscordSocketConfig
@@ -47,7 +54,7 @@ var host = Host.CreateDefaultBuilder()
             FormatUsersInBidirectionalUnicode = false
         };
 
-        config.Token = context.Configuration.Get<FergunConfig>().Token;
+        config.Token = context.Configuration.GetSection(FergunOptions.Fergun).Get<FergunOptions>().Token;
     })
     .UseInteractionService((_, config) =>
     {
@@ -65,7 +72,7 @@ var host = Host.CreateDefaultBuilder()
             .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
             .WriteTo.Async(logger => logger.File($"{context.HostingEnvironment.ContentRootPath}logs/log-.txt", LogEventLevel.Debug, rollingInterval: RollingInterval.Day));
     })
-    .ConfigureServices((context, services) =>
+    .ConfigureServices(services =>
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
         services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
@@ -74,10 +81,7 @@ var host = Host.CreateDefaultBuilder()
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
         services.AddFergunPolicies();
-        services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
-        services.Configure<InteractiveOptions>(context.Configuration.GetSection(InteractiveOptions.Interactive));
-        services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
-        
+
         services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
