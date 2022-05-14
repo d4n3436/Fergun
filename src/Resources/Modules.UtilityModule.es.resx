@@ -121,11 +121,10 @@
     <value>Salida de comando</value>
   </data>
   <data name="Fergun2Info" xml:space="preserve">
-    <value>Esto es Fergun 2. Fergun 2 es una reescritura completa de Fergun 1 y solo tendrá slash commands.
-Fergun 2 esta en estado alfa y sólo los comandos más usados están presentes, pero más comandos serán agregados pronto.
-Fergun 2 será termindo en Mayo 2022 e incluirá nuevas funcionalidades y comandos.
+    <value>Bienvenido(a) a **Fergun** 2, una reescritura completa de Fergun 1 que usa slash commands.
+Fergun 2 se encuentra actualmente en beta abierta. Los comandos más utilizados se han reescrito para usar slash commands y más comandos serán agregados pronto.
 
-Algunos módulos y comandos estan actualmente en modo de mantenimiento en Fergun 1 y no se migrarán a Fergun 2. Estos comandos son:
+Los siguientes módulos y comandos no se migrarán a Fergun 2 debido a varias razones:
 - Módulo de **AI Dungeon**
 - Módulo de **Música**
 - Comandos de **snipe**
@@ -182,5 +181,11 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   </data>
   <data name="{0} doesn't have a server avatar." xml:space="preserve">
     <value>{0} no tiene un avatar de servidor.</value>
+  </data>
+  <data name="Fergun2SupportInfo" xml:space="preserve">
+    <value>Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
+  </data>
+  <data name="Support Server" xml:space="preserve">
+    <value>Servidor de soporte</value>
   </data>
 </root>

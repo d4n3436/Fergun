@@ -27,6 +27,7 @@ public class UtilityModule : InteractionModuleBase
 {
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
+    private readonly FergunOptions _fergunOptions;
     private readonly InteractiveOptions _interactiveOptions;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
@@ -41,11 +42,13 @@ public class UtilityModule : InteractionModuleBase
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions, 
-        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
+        IOptionsSnapshot<InteractiveOptions> interactiveOptions, SharedModule shared, InteractiveService interactive,
+        IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _fergunOptions = fergunOptions.Value;
         _interactiveOptions = interactiveOptions.Value;
         _shared = shared;
         _interactive = interactive;
@@ -223,16 +226,28 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
-    [SlashCommand("help", "Information about Fergun 2")]
+    [SlashCommand("help", "Information about Fergun 2.")]
     public async Task<RuntimeResult> HelpAsync()
     {
+        MessageComponent? components = null;
+        string description = _localizer["Fergun2Info", "https://github.com/d4n3436/Fergun/wiki/Command-removal-notice"];
+        var url = _fergunOptions.SupportServerUrl;
+
+        if (url is not null && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps))
+        {
+            description += $"\n\n{_localizer["Fergun2SupportInfo"]}";
+            components = new ComponentBuilder()
+                .WithButton(_localizer["Support Server"], style: ButtonStyle.Link, url: url.AbsoluteUri)
+                .Build();
+        }
+
         var embed = new EmbedBuilder()
             .WithTitle("Fergun 2")
-            .WithDescription(_localizer["Fergun2Info", "https://github.com/d4n3436/Fergun/wiki/Command-removal-notice"])
+            .WithDescription(description)
             .WithColor(Color.Orange)
             .Build();
 
-        await RespondAsync(embed: embed);
+        await Context.Interaction.RespondAsync(embed: embed, components: components);
 
         return FergunResult.FromSuccess();
     }

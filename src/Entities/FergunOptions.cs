@@ -21,4 +21,9 @@ public class FergunOptions
     /// Gets or sets the ID of the guild to register owner commands.
     /// </summary>
     public ulong OwnerCommandsGuildId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the support server URL.
+    /// </summary>
+    public Uri? SupportServerUrl { get; set; }
 }
