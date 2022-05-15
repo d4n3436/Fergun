@@ -49,10 +49,10 @@ public sealed class BotListService : BackgroundService
             return;
         }
         
-        _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod} minute(s).",
-            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriodInMinutes);
+        _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod}.",
+            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'"));
 
-        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(_options.UpdatePeriodInMinutes));
+        using var timer = new PeriodicTimer(_options.UpdatePeriod);
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             await UpdateStatsAsync();
