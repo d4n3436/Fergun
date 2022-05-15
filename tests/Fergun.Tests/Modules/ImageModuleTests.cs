@@ -34,7 +34,7 @@ public class ImageModuleTests
     public ImageModuleTests()
     {
         var logger = Mock.Of<ILogger<ImageModule>>();
-        var options = Utils.CreateMockedInteractiveOptions();
+        var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive, _googleScraper,
             _duckDuckGoScraper, _braveScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };

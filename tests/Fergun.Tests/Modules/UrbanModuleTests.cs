@@ -27,7 +27,7 @@ public class UrbanModuleTests
 
     public UrbanModuleTests()
     {
-        var options = Utils.CreateMockedInteractiveOptions();
+        var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, _interactiveConfig);
 
         _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(_localizer, options, _urbanDictionary, interactive)) { CallBase = true };

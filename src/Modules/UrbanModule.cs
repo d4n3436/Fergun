@@ -15,15 +15,15 @@ namespace Fergun.Modules;
 public class UrbanModule : InteractionModuleBase
 {
     private readonly IFergunLocalizer<UrbanModule> _localizer;
-    private readonly InteractiveOptions _interactiveOptions;
+    private readonly FergunOptions _fergunOptions;
     private readonly IUrbanDictionary _urbanDictionary;
     private readonly InteractiveService _interactive;
 
-    public UrbanModule(IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
+    public UrbanModule(IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         IUrbanDictionary urbanDictionary, InteractiveService interactive)
     {
         _localizer = localizer;
-        _interactiveOptions = interactiveOptions.Value;
+        _fergunOptions = fergunOptions.Value;
         _urbanDictionary = urbanDictionary;
         _interactive = interactive;
     }
@@ -59,7 +59,7 @@ public class UrbanModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(definitions.Count - 1)

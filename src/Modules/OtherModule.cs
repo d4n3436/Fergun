@@ -23,18 +23,18 @@ public class OtherModule : InteractionModuleBase
 {
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
-    private readonly InteractiveOptions _interactiveOptions;
+    private readonly FergunOptions _fergunOptions;
     private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
-        _interactiveOptions = interactiveOptions.Value;
+        _fergunOptions = fergunOptions.Value;
         _geniusClient = geniusClient;
         _httpClient = httpClient;
         _interactive = interactive;
@@ -67,11 +67,11 @@ public class OtherModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(commandStats.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
 
@@ -130,7 +130,7 @@ public class OtherModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(chunks.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithLocalizedPrompts(_localizer)
             .Build();
 

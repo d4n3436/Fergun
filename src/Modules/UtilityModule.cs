@@ -28,7 +28,6 @@ public class UtilityModule : InteractionModuleBase
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly FergunOptions _fergunOptions;
-    private readonly InteractiveOptions _interactiveOptions;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly IFergunTranslator _translator;
@@ -43,13 +42,11 @@ public class UtilityModule : InteractionModuleBase
         .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        IOptionsSnapshot<InteractiveOptions> interactiveOptions, SharedModule shared, InteractiveService interactive,
-        IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
+        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _interactiveOptions = interactiveOptions.Value;
         _shared = shared;
         _interactive = interactive;
         _translator = translator;
@@ -369,7 +366,7 @@ public class UtilityModule : InteractionModuleBase
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(articles.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -429,7 +426,7 @@ public class UtilityModule : InteractionModuleBase
                     .WithActionOnTimeout(ActionOnStop.DisableInput)
                     .WithMaxPageIndex(videos.Count - 1)
                     .WithFooter(PaginatorFooter.None)
-                    .WithFergunEmotes(_interactiveOptions)
+                    .WithFergunEmotes(_fergunOptions)
                     .WithLocalizedPrompts(_localizer)
                     .Build();
 

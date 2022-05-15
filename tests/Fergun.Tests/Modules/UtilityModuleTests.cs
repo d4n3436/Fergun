@@ -10,7 +10,6 @@ using Fergun.Interactive;
 using Fergun.Modules;
 using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 using YoutubeExplode.Search;
@@ -29,7 +28,7 @@ public class UtilityModuleTests
     
     public UtilityModuleTests()
     {
-        var options = Mock.Of<IOptionsSnapshot<InteractiveOptions>>();
+        var options = Utils.CreateMockedFergunOptions();
         SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
         var interactive = new InteractiveService(new DiscordSocketClient(), new InteractiveConfig { ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, shared,

@@ -211,10 +211,10 @@ internal static class Utils
             .Generate();
     }
 
-    public static IOptionsSnapshot<InteractiveOptions> CreateMockedInteractiveOptions()
+    public static IOptionsSnapshot<FergunOptions> CreateMockedFergunOptions()
     {
-        var mock = new Mock<IOptionsSnapshot<InteractiveOptions>>();
-        var faker = new Faker<InteractiveOptions>()
+        var mock = new Mock<IOptionsSnapshot<FergunOptions>>();
+        var faker = new Faker<FergunOptions>()
             .RuleFor(x => x.PaginatorTimeout, f => f.Date.Timespan())
             .RuleFor(x => x.SelectionTimeout, f => f.Date.Timespan())
             .RuleFor(x => x.PaginatorEmotes, f => new Dictionary<PaginatorAction, string>

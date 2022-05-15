@@ -37,9 +37,9 @@ var host = Host.CreateDefaultBuilder()
     .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
     .ConfigureServices((context, services) =>
     {
-        services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
+        services.Configure<StartupOptions>(context.Configuration.GetSection(StartupOptions.Startup));
         services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
-        services.Configure<InteractiveOptions>(context.Configuration.GetSection(InteractiveOptions.Interactive));
+        services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
         services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
     })
     .ConfigureDiscordShardedHost((context, config) =>
@@ -54,7 +54,7 @@ var host = Host.CreateDefaultBuilder()
             FormatUsersInBidirectionalUnicode = false
         };
 
-        config.Token = context.Configuration.GetSection(FergunOptions.Fergun).Get<FergunOptions>().Token;
+        config.Token = context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>().Token;
     })
     .UseInteractionService((_, config) =>
     {

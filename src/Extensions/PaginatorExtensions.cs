@@ -26,7 +26,7 @@ public static class PaginatorExtensions
     /// <param name="builder">A paginator builder.</param>
     /// <param name="options">The interactive options.</param>
     /// <returns>This builder.</returns>
-    public static TBuilder WithFergunEmotes<TPaginator, TBuilder>(this PaginatorBuilder<TPaginator, TBuilder> builder, InteractiveOptions options)
+    public static TBuilder WithFergunEmotes<TPaginator, TBuilder>(this PaginatorBuilder<TPaginator, TBuilder> builder, FergunOptions options)
         where TPaginator : Paginator
         where TBuilder : PaginatorBuilder<TPaginator, TBuilder>
     {

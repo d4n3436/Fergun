@@ -22,7 +22,7 @@ public class ImageModule : InteractionModuleBase
 {
     private readonly ILogger<ImageModule> _logger;
     private readonly IFergunLocalizer<ImageModule> _localizer;
-    private readonly InteractiveOptions _interactiveOptions;
+    private readonly FergunOptions _fergunOptions;
     private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
@@ -30,13 +30,13 @@ public class ImageModule : InteractionModuleBase
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<InteractiveOptions> interactiveOptions,
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         InteractiveService interactive, GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper,
         IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
-        _interactiveOptions = interactiveOptions.Value;
+        _fergunOptions = fergunOptions.Value;
         _interactive = interactive;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
@@ -70,7 +70,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(images.Length - 1)
@@ -79,7 +79,7 @@ public class ImageModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
 
@@ -119,7 +119,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(images.Length - 1)
@@ -128,7 +128,7 @@ public class ImageModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
 
@@ -168,7 +168,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(images.Length - 1)
@@ -177,7 +177,7 @@ public class ImageModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
 
@@ -291,7 +291,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(results.Length - 1)
@@ -300,7 +300,7 @@ public class ImageModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
+        await _interactive.SendPaginatorAsync(paginator, interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
 
         return FergunResult.FromSuccess();
 
@@ -352,7 +352,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_interactiveOptions)
+            .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithMaxPageIndex(results.Length - 1)
@@ -361,7 +361,7 @@ public class ImageModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, interaction, _interactiveOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
+        await _interactive.SendPaginatorAsync(paginator, interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
 
         return FergunResult.FromSuccess();
 

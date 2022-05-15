@@ -28,7 +28,7 @@ public class InteractionHandlingService : IHostedService
     private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
 
     public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService,
-        ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<FergunOptions> options)
+        ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
     {
         _shardedClient = client;
         _interactionService = interactionService;
