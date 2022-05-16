@@ -126,6 +126,9 @@
   <data name="Bot Version" xml:space="preserve">
     <value>Versión del bot</value>
   </data>
+  <data name="Click the button below to invite Fergun to your server." xml:space="preserve">
+    <value>Haga click en el botón de abajo para invitar a Fergun a tu servidor.</value>
+  </data>
   <data name="Command Stats" xml:space="preserve">
     <value>Estadísticas de Comandos</value>
   </data>
@@ -134,6 +137,9 @@
   </data>
   <data name="Fergun Stats" xml:space="preserve">
     <value>Estadísticas de Fergun</value>
+  </data>
+  <data name="Invite Fergun" xml:space="preserve">
+    <value>Invita a Fergun</value>
   </data>
   <data name="Library" xml:space="preserve">
     <value>Librería</value>

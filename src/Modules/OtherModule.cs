@@ -98,6 +98,23 @@ public class OtherModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
     }
+
+    [SlashCommand("invite", "Invite Fergun to your server.")]
+    public async Task<RuntimeResult> InviteAsync()
+    {
+        var builder = new EmbedBuilder()
+            .WithDescription(_localizer["Click the button below to invite Fergun to your server."])
+            .WithColor(Color.Orange);
+
+        ulong applicationId = (await Context.Client.GetApplicationInfoAsync()).Id;
+
+        var button = new ComponentBuilder()
+            .WithButton(_localizer["Invite Fergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands");
+
+        await Context.Interaction.RespondAsync(embed: builder.Build(), components: button.Build());
+
+        return FergunResult.FromSuccess();
+    }
     
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
     public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
