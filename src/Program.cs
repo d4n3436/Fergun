@@ -41,6 +41,11 @@ var host = Host.CreateDefaultBuilder()
         services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
         services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
         services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
+
+        if (context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>().MobileStatus)
+        {
+            MobilePatcher.Patch();
+        }
     })
     .ConfigureDiscordShardedHost((context, config) =>
     {

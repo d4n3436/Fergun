@@ -21,4 +21,9 @@ public class StartupOptions
     /// Gets or sets the ID of the guild to register owner commands.
     /// </summary>
     public ulong OwnerCommandsGuildId { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the mobile status should be used.
+    /// </summary>
+    public bool MobileStatus { get; set; }
 }
