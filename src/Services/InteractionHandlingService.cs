@@ -241,9 +241,9 @@ public class InteractionHandlingService : IHostedService
 
     private async Task HandleCommandExecutedAsync(IApplicationCommandInfo command, IInteractionContext context, IResult result)
     {
-        string commandName = command.ToString()!.ToLowerInvariant();
+        string commandName = command.CommandType == ApplicationCommandType.Slash ? command.ToString()! : command.Name;
         await _cmdStatsSemaphore.WaitAsync();
-
+        
         try
         {
             await using var scope = _services.CreateAsyncScope();
@@ -268,7 +268,7 @@ public class InteractionHandlingService : IHostedService
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
-                command.CommandType, command, context.User, context.User.Id, context.Display());
+                command.CommandType, commandName, context.User, context.User.Id, context.Display());
 
             return;
         }
