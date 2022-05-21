@@ -1,3 +1,5 @@
+> :warning: Fergun v1 has been discontinued and is no longer maintained. **No support** will be given to self-hosted instances using this version.
+
 # Fergun
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/V3TgaZRUPX)
 
