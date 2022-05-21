@@ -156,7 +156,7 @@ namespace Fergun
 
             if (!IsDebugMode)
             {
-                await _client.SetActivityAsync(new Game($"{DatabaseConfig.GlobalPrefix}help, /help"));
+                await _client.SetActivityAsync(new Game("/help"));
             }
 
             _ = ClearSlashCommandScopeCacheAsync();
