@@ -287,7 +287,7 @@ public class InteractionHandlingService : IHostedService
             var exception = ((ExecuteResult)result).Exception;
 
             _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception.",
-                command.CommandType, command, context.User, context.User.Id, context.Display());
+                command.CommandType, commandName, context.User, context.User.Id, context.Display());
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
@@ -296,7 +296,7 @@ public class InteractionHandlingService : IHostedService
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                command.CommandType, command, context.User, context.User.Id, context.Display(), message);
+                command.CommandType, commandName, context.User, context.User.Id, context.Display(), message);
         }
 
         var embed = new EmbedBuilder()
