@@ -1,397 +1,68 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-using Fergun.Attributes;
-using Fergun.Attributes.Preconditions;
-using Fergun.Services;
-using Fergun.Utils;
+﻿using Discord;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using Victoria;
-using Victoria.Responses.Search;
+using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Caching;
+using Polly.Caching.Memory;
+using Polly.Extensions.Http;
+using Polly.Registry;
 
-namespace Fergun.Extensions
+namespace Fergun.Extensions;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static IHttpClientBuilder AddRetryPolicy(this IHttpClientBuilder builder)
+        => builder.AddTransientHttpErrorPolicy(policyBuilder
+            => policyBuilder.OrTransientHttpStatusCode().WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
+    public static IServiceCollection AddFergunPolicies(this IServiceCollection services)
     {
-        // Copy pasted from SocketGuildUser Hierarchy property to be used with RestGuildUser
-        public static int GetHierarchy(this IGuildUser user)
-        {
-            if (user.Guild.OwnerId == user.Id)
+        return services.AddMemoryCache()
+            .AddSingleton<IAsyncCacheProvider, MemoryCacheProvider>()
+            .AddSingleton<IReadOnlyPolicyRegistry<string>, PolicyRegistry>(provider =>
             {
-                return int.MaxValue;
-            }
+                var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<HttpResponseMessage>();
+                var cachePolicy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
 
-            int maxPos = 0;
-            for (int i = 0; i < user.RoleIds.Count; i++)
-            {
-                var role = user.Guild.GetRole(user.RoleIds.ElementAt(i));
-                if (role != null && role.Position > maxPos)
+                var retryPolicy = HttpPolicyExtensions.HandleTransientHttpError()
+                    .OrTransientHttpStatusCode()
+                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+
+                var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(3));
+
+                return new PolicyRegistry
                 {
-                    maxPos = role.Position;
-                }
-            }
-
-            return maxPos;
-        }
-
-        public static void Shuffle<T>(this IList<T> list, Random rng = null)
-        {
-            rng ??= Random.Shared;
-
-            int n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = rng.Next(n + 1);
-                var value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
-
-        public static string GetFriendlyName(this Type type)
-        {
-            if (type == typeof(bool))
-                return "bool";
-            if (type == typeof(byte))
-                return "byte";
-            if (type == typeof(sbyte))
-                return "sbyte";
-            if (type == typeof(short))
-                return "short";
-            if (type == typeof(ushort))
-                return "ushort";
-            if (type == typeof(char))
-                return "char";
-            if (type == typeof(int))
-                return "int";
-            if (type == typeof(uint))
-                return "uint";
-            if (type == typeof(long))
-                return "long";
-            if (type == typeof(ulong))
-                return "ulong";
-            if (type == typeof(float))
-                return "float";
-            if (type == typeof(double))
-                return "double";
-            if (type == typeof(decimal))
-                return "decimal";
-            if (type == typeof(string))
-                return "string";
-            if (type == typeof(object))
-                return "object";
-
-            if (!type.IsGenericType) return type.Name;
-
-            string arguments = string.Join(", ", type.GetGenericArguments().Select(GetFriendlyName).ToArray());
-            if (type.Name.Contains("Nullable", StringComparison.OrdinalIgnoreCase))
-            {
-                return arguments + "?";
-            }
-
-            return $"{type.Name.Split('`')[0]}<{arguments}>";
-        }
-
-        public static string ToTrackLink(this LavaTrack track, bool withTime = true)
-        {
-            return Format.Url(track.Title, track.Url) + (withTime ? $" ({track.Duration.ToShortForm()})" : "");
-        }
-
-        public static async Task<SearchResponse> SearchAsync(this LavaNode<LavaPlayer> player, string query, SearchType searchType = SearchType.YouTube)
-        {
-            var search = await player.SearchAsync(searchType, query);
-            if (search.Tracks.Count != 0 && search.Status != SearchStatus.NoMatches && search.Status != SearchStatus.LoadFailed)
-            {
-                return search;
-            }
-
-            searchType = searchType switch
-            {
-                SearchType.YouTube => SearchType.YouTubeMusic,
-                SearchType.YouTubeMusic => SearchType.SoundCloud,
-                SearchType.SoundCloud => SearchType.Direct,
-                SearchType.Direct => SearchType.YouTube,
-                _ => SearchType.YouTube
-            };
-
-            if (searchType != SearchType.YouTube)
-                return await player.SearchAsync(query, searchType);
-
-            return default;
-        }
-
-        public static Embed ToHelpEmbed(this CommandInfo command, string language, string prefix)
-        {
-            var builder = new EmbedBuilder
-            {
-                Title = command.Name,
-                Description = GuildUtils.Locate(command.Summary ?? "NoDescription", language),
-                Color = new Color(FergunClient.Config.EmbedColor)
-            };
-
-            if (command.Parameters.Count > 0)
-            {
-                // Add parameters: param1 (type) (Optional): description
-                var field = new StringBuilder();
-                foreach (var parameter in command.Parameters)
-                {
-                    field.Append($"{parameter.Name} ({parameter.Type.GetFriendlyName()})");
-                    if (parameter.IsOptional)
-                    {
-                        field.Append(' ');
-                        field.Append(GuildUtils.Locate("Optional", language));
-                    }
-
-                    field.Append($": {GuildUtils.Locate(parameter.Summary ?? "NoDescription", language)}\n");
-                }
-                builder.AddField(GuildUtils.Locate("Parameters", language), field.ToString());
-            }
-
-            // Add usage field (`prefix group command <param1> [param2...]`)
-            var usage = new StringBuilder('`' + prefix);
-            if (!string.IsNullOrEmpty(command.Module.Group))
-            {
-                usage.Append(command.Module.Group);
-                usage.Append(' ');
-            }
-            usage.Append(command.Name);
-            foreach (var parameter in command.Parameters)
-            {
-                usage.Append(' ');
-                usage.Append(parameter.IsOptional ? '[' : '<');
-                usage.Append(parameter.Name);
-                if (parameter.IsRemainder || parameter.IsMultiple)
-                {
-                    usage.Append("...");
-                }
-
-                usage.Append(parameter.IsOptional ? ']' : '>');
-            }
-            usage.Append('`');
-            builder.AddField(GuildUtils.Locate("Usage", language), usage.ToString());
-
-            // Add example if the command has parameters
-            if (command.Parameters.Count > 0)
-            {
-                var attribute = command.Attributes.OfType<ExampleAttribute>().FirstOrDefault();
-                if (attribute != null)
-                {
-                    string example = prefix;
-                    if (!string.IsNullOrEmpty(command.Module.Group))
-                    {
-                        example += command.Module.Group + ' ';
-                    }
-                    example += $"{command.Name} {attribute.Example}";
-                    builder.AddField(GuildUtils.Locate("Example", language), example);
-                }
-            }
-
-            // Add notes if present
-            if (!string.IsNullOrEmpty(command.Remarks))
-            {
-                builder.AddField(GuildUtils.Locate("Notes", language), GuildUtils.Locate(command.Remarks, language));
-            }
-
-            var modulePreconditions = command.Module.Preconditions;
-            var commandPreconditions = command.Preconditions;
-
-            // Add ratelimit info if present
-            var ratelimit = commandPreconditions.Concat(modulePreconditions).OfType<RatelimitAttribute>().FirstOrDefault();
-
-            if (ratelimit != null)
-            {
-                builder.AddField("Ratelimit", string.Format(GuildUtils.Locate("RatelimitUses", language), ratelimit.InvokeLimit, ratelimit.InvokeLimitPeriod.ToShortForm2()));
-            }
-
-            // Add required permissions if there's any
-            var preconditions = modulePreconditions
-                .Concat(commandPreconditions).Where(x => !(x is RatelimitAttribute) && !(x is LongRunningAttribute) && !(x is DisabledAttribute));
-
-            var list = new StringBuilder();
-            foreach (var precondition in preconditions)
-            {
-                string name = precondition.GetType().Name;
-                list.Append(Format.Code(name.Substring(0, name.Length - 9)));
-                switch (precondition)
-                {
-                    case RequireContextAttribute requireContext:
-                        list.Append($": {requireContext.Contexts}");
-                        break;
-
-                    case RequireUserPermissionAttribute requireUser:
-                        list.Append($": {requireUser.GuildPermission?.ToString() ?? requireUser.ChannelPermission?.ToString()}");
-                        break;
-
-                    case RequireBotPermissionAttribute requireBot:
-                        list.Append($": {requireBot.GuildPermission?.ToString() ?? requireBot.ChannelPermission?.ToString()}");
-                        break;
-                }
-                list.Append('\n');
-            }
-
-            if (list.Length != 0)
-            {
-                builder.AddField(GuildUtils.Locate("Requirements", language), list.ToString());
-            }
-
-            // Add aliases if present
-            if (command.Aliases.Count > 1)
-            {
-                builder.AddField(GuildUtils.Locate("Alias", language), string.Join(", ", command.Aliases.Skip(1)));
-            }
-
-            // Add footer with info about required and optional parameters
-            if (command.Parameters.Count > 0)
-            {
-                builder.WithFooter(GuildUtils.Locate("HelpFooter2", language));
-            }
-
-            return builder.Build();
-        }
-
-        /// <summary>
-        /// Gets the last url in the last <paramref name="messageCount"/> messages.
-        /// </summary>
-        /// <param name="context">The channel to search.</param>
-        /// <param name="messageCount">The number of messages to search.</param>
-        /// <param name="cache">The message cache service.</param>
-        /// <param name="onlyImage">Get only urls of images.</param>
-        /// <param name="url">An optional url to use before searching in the channel.</param>
-        /// <param name="maxSize">The maximum file size in bytes, <see cref="Constants.AttachmentSizeLimit"/> by default.</param>
-        /// <returns>A task that represents an asynchronous search operation.</returns>
-        public static Task<(string, UrlFindResult)> GetLastUrlAsync(this ICommandContext context, int messageCount, MessageCacheService cache = null,
-            bool onlyImage = false, string url = null, long maxSize = Constants.AttachmentSizeLimit)
-        {
-            return context.Channel.GetLastUrlAsync(messageCount, cache, onlyImage, context.Message, url, maxSize);
-        }
-
-        public static bool IsSourceUserAndChannel(this ICommandContext context, SocketMessage message)
-            => message.Author.Id == context.User.Id && message.Channel.Id == context.Channel.Id;
-
-        public static bool IsNsfw(this ICommandContext context)
-        {
-            // Considering a DM channel a SFW channel.
-            return context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
-        }
-
-        public static string Display(this ICommandContext context, bool displayUser = false)
-        {
-            return context.Channel.Display() + (displayUser ? $"/{context.User}" : "");
-        }
-
-        public static string Display(this IChannel channel)
-        {
-            return (channel is IGuildChannel guildChannel ? $"{guildChannel.Guild.Name}/" : "") + channel.Name;
-        }
-
-        public static string Display(this IMessage message)
-        {
-            return message.Channel.Display() + $"/{message.Author}";
-        }
-
-        public static string ToDiscordTimestamp(this DateTimeOffset dateTime, char style = 'f')
-        {
-            return dateTime.ToUnixTimeSeconds().ToDiscordTimestamp(style);
-        }
-
-        public static string ToDiscordTimestamp(this DateTimeOffset? dateTime, char style = 'f')
-        {
-            return dateTime.GetValueOrDefault().ToDiscordTimestamp(style);
-        }
-
-        public static string ToDiscordTimestamp(this ulong timestamp, char style = 'f')
-        {
-            return ((long)timestamp).ToDiscordTimestamp(style);
-        }
-
-        public static string ToDiscordTimestamp(this long timestamp, char style = 'f')
-        {
-            return $"<t:{timestamp}:{style}>";
-        }
-
-        public static IServiceCollection AddSingletonIf<TService>(this IServiceCollection services, bool condition, TService implementationInstance) where TService : class
-        {
-            return condition ? services.AddSingleton(implementationInstance) : services;
-        }
-
-        public static IServiceCollection AddSingletonIf<TService>(this IServiceCollection services, bool condition,
-            Func<IServiceProvider, TService> implementationFactory) where TService : class
-        {
-            return condition ? services.AddSingleton(implementationFactory) : services;
-        }
-
-        public static string Dump<T>(this T obj, int maxDepth = 2)
-        {
-            try
-            {
-                using var strWriter = new StringWriter();
-                using var jsonWriter = new CustomJsonTextWriter(strWriter);
-                var resolver = new CustomContractResolver(() => jsonWriter.CurrentDepth <= maxDepth);
-                var serializer = new JsonSerializer
-                {
-                    ContractResolver = resolver,
-                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                    Formatting = Formatting.Indented
+                    { "GeneralPolicy", Policy.WrapAsync(cachePolicy, retryPolicy) },
+                    { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, retryPolicy, timeoutPolicy) }
                 };
-                serializer.Serialize(jsonWriter, obj);
-                return strWriter.ToString();
-            }
-            catch (JsonSerializationException)
-            {
-                return null;
-            }
-        }
+            });
     }
 
-    public class CustomJsonTextWriter : JsonTextWriter
+    public static LogLevel ToLogLevel(this LogSeverity logSeverity)
+        => logSeverity switch
+        {
+            LogSeverity.Critical => LogLevel.Critical,
+            LogSeverity.Error => LogLevel.Error,
+            LogSeverity.Warning => LogLevel.Warning,
+            LogSeverity.Info => LogLevel.Information,
+            LogSeverity.Verbose => LogLevel.Debug,
+            LogSeverity.Debug => LogLevel.Trace,
+            _ => throw new ArgumentOutOfRangeException(nameof(logSeverity), logSeverity.ToString())
+        };
+
+    public static string Display(this IInteractionContext context)
     {
-        public CustomJsonTextWriter(TextWriter textWriter) : base(textWriter)
-        {
-        }
+        string displayMessage = string.Empty;
 
-        public int CurrentDepth { get; private set; }
+        if (context.Channel is IGuildChannel guildChannel)
+            displayMessage = $"{guildChannel.Guild.Name}/";
 
-        public override void WriteStartObject()
-        {
-            CurrentDepth++;
-            base.WriteStartObject();
-        }
+        displayMessage += context.Channel.Name;
 
-        public override void WriteEndObject()
-        {
-            CurrentDepth--;
-            base.WriteEndObject();
-        }
+        return displayMessage;
     }
 
-    public class CustomContractResolver : DefaultContractResolver
-    {
-        private readonly Func<bool> _includeProperty;
-
-        public CustomContractResolver(Func<bool> includeProperty)
-        {
-            _includeProperty = includeProperty;
-        }
-
-        protected override JsonProperty CreateProperty(
-            MemberInfo member, MemberSerialization memberSerialization)
-        {
-            var property = base.CreateProperty(member, memberSerialization);
-            var shouldSerialize = property.ShouldSerialize;
-            property.ShouldSerialize = obj => _includeProperty() &&
-                                              (shouldSerialize == null ||
-                                               shouldSerialize(obj));
-            return property;
-        }
-    }
+    public static IEnumerable<AutocompleteResult> PrependCurrentIfNotPresent(this IEnumerable<AutocompleteResult> source, string option)
+        => source.Any(x => string.Equals(x.Name, option, StringComparison.OrdinalIgnoreCase))
+            ? source : source.Prepend(new AutocompleteResult { Name = option, Value = option });
 }
