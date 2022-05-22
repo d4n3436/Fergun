@@ -148,7 +148,7 @@ public sealed class BotListService : BackgroundService
     private HttpRequestMessage CreateDiscordBotsRequest(int serverCount, int shardCount, string token) => new()
     {
         Method = HttpMethod.Post,
-        RequestUri = new Uri($"https://discord.bots.gg/api/bots/{_discordClient.CurrentUser.Id}/stats"),
+        RequestUri = new Uri($"https://discord.bots.gg/api/v1/bots/{_discordClient.CurrentUser.Id}/stats"),
         Content = new StringContent($"{{\"guildCount\": {serverCount},\"shardCount\":{shardCount}}}", Encoding.UTF8, "application/json"),
         Headers =
         {
