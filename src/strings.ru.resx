@@ -2225,4 +2225,13 @@ Fergun 2 в настоящее время находится в стадии о�
 	<data name="AIDRemovalWarning" xml:space="preserve">
 		<value>Модуль AI Dungeon будет удален в мае 2022 года. Подробнее [здесь](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
+	<data name="ChangePrefix" xml:space="preserve">
+		<value>Изменить префикс</value>
+	</data>
+	<data name="NewPrefixPrompt" xml:space="preserve">
+		<value>Новый префикс</value>
+	</data>
+	<data name="CannotChangePrefix" xml:space="preserve">
+		<value>Вам нужно разрешение `Управление сервером` для изменения префикса.</value>
+	</data>
 </root>

@@ -2233,4 +2233,13 @@ Fergun 2 حاليا في نسخة تجريبية مفتوحة. تمت إعادة
 	<data name="AIDRemovalWarning" xml:space="preserve">
 		<value>ستتم إزالة وحدة AI Dungeon في مايو 2022. مزيد من المعلومات [هنا](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
+	<data name="ChangePrefix" xml:space="preserve">
+		<value>تغيير البادئة</value>
+	</data>
+	<data name="NewPrefixPrompt" xml:space="preserve">
+		<value>بادئة جديدة</value>
+	</data>
+	<data name="CannotChangePrefix" xml:space="preserve">
+		<value>تحتاج إلى إذن `إدارة الخادم` لتغيير البادئة.</value>
+	</data>
 </root>

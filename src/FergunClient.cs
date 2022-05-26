@@ -460,56 +460,61 @@ namespace Fergun
 
             GuildUtils.SlashCommandScopeCache.TryRemove(guild.Id, out _);
         }
-
+        
         private Task InteractionCreated(SocketInteraction interaction)
         {
-            if (interaction is not SocketMessageComponent componentInteraction)
-                return Task.CompletedTask;
-
-            if (componentInteraction.Data.Type == ComponentType.Button && componentInteraction.Data.CustomId == "disable_warning")
+            if (interaction is SocketMessageComponent { Data: { Type: ComponentType.Button, CustomId: "change_prefix" } } componentInteraction)
             {
-                var cmdCache = _services.GetRequiredService<CommandCacheService>();
-                ulong userMsgId = 0;
-
-                foreach ((ulong key, ulong value) in cmdCache)
-                {
-                    if (value == componentInteraction.Message.Id)
-                    {
-                        userMsgId = key;
-                        break;
-                    }
-                }
-
-                if (userMsgId == 0)
-                    return Task.CompletedTask;
-
-                var cache = _services.GetRequiredService<MessageCacheService>();
-
-                bool success = cache.TryGetCachedMessage(componentInteraction.Channel, userMsgId, out var userMessage) ||
-                               cache.TryGetCachedMessage(componentInteraction.Channel, userMsgId, out userMessage, MessageSourceEvent.MessageUpdated);
-
-                if (!success || userMessage.Author.Id != interaction.User.Id)
-                    return Task.CompletedTask;
-
                 _ = Task.Run(async () =>
                 {
-                    ulong userId = interaction.User.Id;
-                    var userConfig = GuildUtils.UserConfigCache.GetValueOrDefault(userId, new UserConfig(userId));
-                    var expirationDate = DateTimeOffset.FromUnixTimeSeconds(userConfig.RewriteWarningExpirationTime);
-
-                    if (expirationDate < DateTimeOffset.UtcNow)
+                    if (interaction.User is SocketGuildUser guildUser &&
+                        guildUser.GuildPermissions.Has(GuildPermission.ManageGuild))
                     {
-                        userConfig.RewriteWarningExpirationTime = DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds();
-                        Database.InsertOrUpdateDocument(Constants.UserConfigCollection, userConfig);
-                        GuildUtils.UserConfigCache[userId] = userConfig;
+                        string prefix = GuildUtils.GetCachedPrefix(interaction.Channel);
 
-                        await _logService.LogAsync(new LogMessage(LogSeverity.Info, "RewriteWarning", $"Disabled rewrite warning temporarily for user {componentInteraction.User} ({userId})."));
-                        await componentInteraction.RespondAsync(GuildUtils.Locate("RewriteWarningDisabled", componentInteraction.Channel), ephemeral: true);
+                        var modal = new ModalBuilder()
+                            .WithCustomId("prefix_modal")
+                            .WithTitle(GuildUtils.Locate("ChangePrefix", interaction.UserLocale))
+                            .AddTextInput(GuildUtils.Locate("NewPrefixPrompt", interaction.UserLocale), "new_prefix", TextInputStyle.Short, prefix, 1, 10, true)
+                            .Build();
+                        
+                        await componentInteraction.RespondWithModalAsync(modal);
                     }
                     else
                     {
-                        // Got expiration date in the future, this means the user pressed the warning button and the warning is already disabled
-                        await componentInteraction.DeferAsync();
+                        await componentInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", interaction.UserLocale)}", ephemeral: true);
+                    }
+                });
+            }
+            else if (interaction is SocketModal { Data.CustomId: "prefix_modal" } modalInteraction)
+            {
+                _ = Task.Run(async () =>
+                {
+                    if (interaction.User is SocketGuildUser guildUser &&
+                        guildUser.GuildPermissions.Has(GuildPermission.ManageGuild))
+                    {
+                        string newPrefix = modalInteraction.Data.Components.First(x => x.CustomId == "new_prefix").Value;
+
+                        if (newPrefix == GuildUtils.GetCachedPrefix(modalInteraction.Channel))
+                        {
+                            await modalInteraction.RespondAsync(GuildUtils.Locate("PrefixSameCurrentTarget", modalInteraction.UserLocale), ephemeral: true);
+                        }
+                        else
+                        {
+                            var guild = GuildUtils.GetGuildConfig(modalInteraction.Channel) ?? new GuildConfig(guildUser.Guild.Id);
+                            guild.Prefix = newPrefix == DatabaseConfig.GlobalPrefix ? null : newPrefix;
+
+                            Database.InsertOrUpdateDocument(Constants.GuildConfigCollection, guild);
+                            GuildUtils.PrefixCache[guildUser.Guild.Id] = newPrefix;
+                            await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Updated prefix to: \"{newPrefix}\" in {guildUser.Guild.Name}"));
+
+                            await modalInteraction.RespondAsync(string.Format(GuildUtils.Locate("NewPrefix", modalInteraction.UserLocale), newPrefix), ephemeral: true);
+                            
+                        }
+                    }
+                    else
+                    {
+                        await modalInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", interaction.UserLocale)}", ephemeral: true);
                     }
                 });
             }

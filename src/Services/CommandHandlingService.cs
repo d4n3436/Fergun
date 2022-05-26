@@ -104,6 +104,11 @@ namespace Fergun.Services
 
             componentBuilder.WithButton(GuildUtils.Locate("SupportServer", context.Channel), style: ButtonStyle.Link, url: FergunClient.Config.SupportServer);
 
+            if (!context.IsPrivate)
+            {
+                componentBuilder.WithButton(GuildUtils.Locate("ChangePrefix", context.Channel), "change_prefix", ButtonStyle.Secondary);
+            }
+
             var builder = new EmbedBuilder()
                 .WithTitle($"⚠️ {GuildUtils.Locate("SwitchToSlashCommands", context.Channel)}")
                 .WithDescription(GuildUtils.Locate(slashCommandsEnabled ? "RewriteWarning" : "RewriteWarningSlashCommandsNotEnabled", context.Channel))
@@ -126,8 +131,8 @@ namespace Fergun.Services
                 sb.Append($" from message \"{message.Content}\"");
             }
 
-            sb.Append('.');
-
+            sb.Append($" in {context.Display()}.");
+            
             await _logService.LogAsync(new LogMessage(LogSeverity.Info, "Bot", sb.ToString()));
         }
 

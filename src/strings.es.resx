@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 	<!-- 
     Microsoft ResX Schema 
@@ -2222,5 +2222,14 @@ Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude
 	</data>
 	<data name="AIDRemovalWarning" xml:space="preserve">
 		<value>El módulo de AI Dungeon será eliminado en Mayo 2022. Más información [aquí](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
+	</data>
+	<data name="ChangePrefix" xml:space="preserve">
+		<value>Cambiar prefijo</value>
+	</data>
+	<data name="NewPrefixPrompt" xml:space="preserve">
+		<value>Nuevo prefijo</value>
+	</data>
+	<data name="CannotChangePrefix" xml:space="preserve">
+		<value>Necesitas el permiso `Gestionar Servidor` para cambiar el prefijo.</value>
 	</data>
 </root>

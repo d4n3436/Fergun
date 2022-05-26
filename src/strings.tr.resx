@@ -2224,4 +2224,13 @@ Yeniden yazma hakkında herhangi bir sorunuz varsa veya herhangi bir öneriniz v
 	<data name="AIDRemovalWarning" xml:space="preserve">
 		<value>AI Dungeon modülü Mayıs 2022'de kaldırılacak. Daha fazla bilgi [buradan](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
+	<data name="ChangePrefix" xml:space="preserve">
+		<value>Önek değiştir</value>
+	</data>
+	<data name="NewPrefixPrompt" xml:space="preserve">
+		<value>Yeni önek</value>
+	</data>
+	<data name="CannotChangePrefix" xml:space="preserve">
+		<value>Önek değiştirmek için `sunucuyu yönet` iznine ihtiyacınız var.</value>
+	</data>
 </root>

@@ -2224,4 +2224,13 @@ If you have any questions about the rewrite or have any suggestions, feel free t
 	<data name="AIDRemovalWarning" xml:space="preserve">
 		<value>The AI Dungeon module will be removed in May 2022. More info [here](https://github.com/d4n3436/Fergun/wiki/Command-removal-notice#ai-dungeon-module-will-be-removed-in-may-2022).</value>
 	</data>
+	<data name="ChangePrefix" xml:space="preserve">
+		<value>Change prefix</value>
+	</data>
+	<data name="NewPrefixPrompt" xml:space="preserve">
+		<value>New prefix</value>
+	</data>
+	<data name="CannotChangePrefix" xml:space="preserve">
+		<value>You need the `Manage Server` permission to change the prefix.</value>
+	</data>
 </root>
