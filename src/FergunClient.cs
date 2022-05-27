@@ -467,6 +467,8 @@ namespace Fergun
             {
                 _ = Task.Run(async () =>
                 {
+                    string language = interaction.UserLocale.Split('-')[0];
+
                     if (interaction.User is SocketGuildUser guildUser &&
                         guildUser.GuildPermissions.Has(GuildPermission.ManageGuild))
                     {
@@ -474,15 +476,15 @@ namespace Fergun
 
                         var modal = new ModalBuilder()
                             .WithCustomId("prefix_modal")
-                            .WithTitle(GuildUtils.Locate("ChangePrefix", interaction.UserLocale))
-                            .AddTextInput(GuildUtils.Locate("NewPrefixPrompt", interaction.UserLocale), "new_prefix", TextInputStyle.Short, prefix, 1, 10, true)
+                            .WithTitle(GuildUtils.Locate("ChangePrefix", language))
+                            .AddTextInput(GuildUtils.Locate("NewPrefixPrompt", language), "new_prefix", TextInputStyle.Short, prefix, 1, 10, true)
                             .Build();
                         
                         await componentInteraction.RespondWithModalAsync(modal);
                     }
                     else
                     {
-                        await componentInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", interaction.UserLocale)}", ephemeral: true);
+                        await componentInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", language)}", ephemeral: true);
                     }
                 });
             }
@@ -490,6 +492,8 @@ namespace Fergun
             {
                 _ = Task.Run(async () =>
                 {
+                    string language = interaction.UserLocale.Split('-')[0];
+
                     if (interaction.User is SocketGuildUser guildUser &&
                         guildUser.GuildPermissions.Has(GuildPermission.ManageGuild))
                     {
@@ -497,7 +501,7 @@ namespace Fergun
 
                         if (newPrefix == GuildUtils.GetCachedPrefix(modalInteraction.Channel))
                         {
-                            await modalInteraction.RespondAsync(GuildUtils.Locate("PrefixSameCurrentTarget", modalInteraction.UserLocale), ephemeral: true);
+                            await modalInteraction.RespondAsync(GuildUtils.Locate("PrefixSameCurrentTarget", language), ephemeral: true);
                         }
                         else
                         {
@@ -508,13 +512,13 @@ namespace Fergun
                             GuildUtils.PrefixCache[guildUser.Guild.Id] = newPrefix;
                             await _logService.LogAsync(new LogMessage(LogSeverity.Verbose, "Bot", $"Updated prefix to: \"{newPrefix}\" in {guildUser.Guild.Name}"));
 
-                            await modalInteraction.RespondAsync(string.Format(GuildUtils.Locate("NewPrefix", modalInteraction.UserLocale), newPrefix), ephemeral: true);
+                            await modalInteraction.RespondAsync(string.Format(GuildUtils.Locate("NewPrefix", language), newPrefix), ephemeral: true);
                             
                         }
                     }
                     else
                     {
-                        await modalInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", interaction.UserLocale)}", ephemeral: true);
+                        await modalInteraction.RespondAsync($"⚠️ {GuildUtils.Locate("CannotChangePrefix", language)}", ephemeral: true);
                     }
                 });
             }
