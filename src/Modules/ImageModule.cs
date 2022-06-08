@@ -12,6 +12,7 @@ using GScraper;
 using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -82,11 +83,11 @@ public class ImageModule : InteractionModuleBase
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
-
+        
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             var builders = images[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Title)
+                .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["Google Images search"])
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
@@ -135,7 +136,7 @@ public class ImageModule : InteractionModuleBase
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             var builders = images[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Title)
+                .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["DuckDuckGo image search"])
                 .WithUrl(multiImages ? "https://duckduckgo.com": result.SourceUrl)
                 .WithImageUrl(result.Url)
@@ -184,7 +185,7 @@ public class ImageModule : InteractionModuleBase
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             var builders = images[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Title)
+                .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["Brave image search"])
                 .WithUrl(multiImages ? "https://search.brave.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
@@ -307,7 +308,7 @@ public class ImageModule : InteractionModuleBase
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             var builders = results[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Title ?? "")
+                .WithTitle(result.Title?.Truncate(EmbedBuilder.MaxTitleLength) ?? "")
                 .WithDescription(result.Text)
                 .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
                 .WithThumbnailUrl(url)
@@ -368,7 +369,7 @@ public class ImageModule : InteractionModuleBase
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             var builders = results[index].Select(result => new EmbedBuilder()
-                .WithTitle(result.Text)
+                .WithTitle(result.Text.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithUrl(multiImages ? "https://www.bing.com/visualsearch" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithDescription(result.FriendlyDomainName ?? (Uri.TryCreate(result.SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : null))
