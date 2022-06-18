@@ -116,7 +116,7 @@ public class UtilityModule : InteractionModuleBase
     public async Task<RuntimeResult> BadTranslatorAsync(IMessage message)
         => await BadTranslatorAsync(message.GetText());
 
-    [SlashCommand("badtranslator", "Passes a text through multiple, different translators.")]
+    [SlashCommand("bad-translator", "Passes a text through multiple, different translators.")]
     public async Task<RuntimeResult> BadTranslatorAsync([Summary(description: "The text to use.")] string text,
         [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
     {

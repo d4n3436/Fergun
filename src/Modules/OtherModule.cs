@@ -43,7 +43,7 @@ public class OtherModule : InteractionModuleBase
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
-    [SlashCommand("cmdstats", "Displays the command usage stats.")]
+    [SlashCommand("command-stats", "Displays the command usage stats.")]
     public async Task<RuntimeResult> CommandStatsAsync()
     {
         await Context.Interaction.DeferAsync();
