@@ -89,8 +89,7 @@ public class InteractionHandlingService : IHostedService
             if (_ownerCommandsGuildId != 0)
             {
                 _logger.LogInformation("Registering owner commands to guild {GuildId}", _ownerCommandsGuildId);
-                var ownerCommandsGuild = _shardedClient.GetGuild(_ownerCommandsGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_ownerCommandsGuildId);
-                await _interactionService.AddModulesToGuildAsync(ownerCommandsGuild, true, ownerModules);
+                await _interactionService.AddModulesToGuildAsync(_ownerCommandsGuildId, true, ownerModules);
             }
         }
         else
@@ -103,14 +102,12 @@ public class InteractionHandlingService : IHostedService
             }
             else
             {
-                var testingGuild = _shardedClient.GetGuild(_testingGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_testingGuildId);
-                await _interactionService.AddModulesToGuildAsync(testingGuild, true, modules.ToArray());
+                await _interactionService.AddModulesToGuildAsync(_testingGuildId, true, modules.ToArray());
 
                 if (_ownerCommandsGuildId != 0)
                 {
                     _logger.LogInformation("Registering owner commands to guild {GuildId}", _ownerCommandsGuildId);
-                    var ownerCommandsGuild = _shardedClient.GetGuild(_ownerCommandsGuildId) ?? (IGuild)await _shardedClient.Rest.GetGuildAsync(_ownerCommandsGuildId);
-                    await _interactionService.AddModulesToGuildAsync(ownerCommandsGuild, true, ownerModules);
+                    await _interactionService.AddModulesToGuildAsync(_ownerCommandsGuildId, true, ownerModules);
                 }
             }
         }
