@@ -133,6 +133,12 @@ public class OtherModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistNames} - {song.Title}"]);
         }
 
+        if (song.LyricsState == "unreleased")
+        {
+            // This shouldn't be reachable unless someone manually passes an unreleased ID.
+            return FergunResult.FromError(_localizer["\"{0}\" is unreleased.", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
         if (song.Lyrics is null)
         {
             return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistNames} - {song.Title}"]);

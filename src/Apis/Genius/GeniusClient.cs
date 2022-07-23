@@ -103,6 +103,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         string artistNames = song.GetProperty("artistNames").GetString() ?? throw new GeniusException("Unable to get the artist names.");
         string headerImageUrl = song.GetProperty("headerImageUrl").GetString() ?? throw new GeniusException("Unable to get the song header image URL.");
         bool isInstrumental = song.GetProperty("instrumental").GetBoolean();
+        string lyricsState = song.GetProperty("lyricsState").GetString() ?? throw new GeniusException("Unable to get the lyrics state.");
         string songArtImageUrl = song.GetProperty("songArtImageUrl").GetString() ?? throw new GeniusException("Unable to get the song art image URL.");
         string title = song.GetProperty("title").GetString() ?? throw new GeniusException("Unable to get the song title.");
         string url = song.GetProperty("url").GetString() ?? throw new GeniusException("Unable to get the lyrics page URL.");
@@ -120,18 +121,22 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             .GetProperty("url")
             .GetString();
 
-        var chunks = document
-            .RootElement
+        document.RootElement
             .GetProperty("songPage")
             .GetProperty("lyricsData")
             .GetProperty("body")
-            .GetProperty("children");
+            .TryGetProperty("children", out var chunks);
 
-        var lyricsBuilder = new StringBuilder();
+        StringBuilder? lyricsBuilder = null;
 
-        IterateChunks(chunks, lyricsBuilder);
-
-        return new GeniusSong(artistNames, headerImageUrl, id, isInstrumental, songArtImageUrl, title, url, primaryArtistUrl, primaryColor, lyricsBuilder.ToString());
+        if (chunks.ValueKind != JsonValueKind.Undefined)
+        {
+            lyricsBuilder = new StringBuilder();
+            IterateChunks(chunks, lyricsBuilder);
+        }
+        
+        return new GeniusSong(artistNames, headerImageUrl, id, isInstrumental, lyricsState,
+            songArtImageUrl, title, url, primaryArtistUrl, primaryColor, lyricsBuilder?.ToString());
     }
 
     /// <inheritdoc/>

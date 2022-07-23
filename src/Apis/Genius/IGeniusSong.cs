@@ -28,6 +28,15 @@ public interface IGeniusSong
     bool IsInstrumental { get; }
 
     /// <summary>
+    /// Gets the state of the lyrics. It can be one of the following:<br/>
+    /// - <c>instrumental</c><br/>
+    /// - <c>unreleased</c><br/>
+    /// - <c>incomplete</c><br/>
+    /// - <c>complete</c><br/>
+    /// </summary>
+    string LyricsState { get; }
+
+    /// <summary>
     /// Gets the song art image URL.
     /// </summary>
     string SongArtImageUrl { get; }

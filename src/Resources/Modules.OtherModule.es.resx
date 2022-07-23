@@ -120,6 +120,9 @@
   <data name="&quot;{0}&quot; is instrumental." xml:space="preserve">
     <value>"{0}" es instrumental.</value>
   </data>
+  <data name="&quot;{0}&quot; is unreleased." xml:space="preserve">
+    <value>"{0}" aún no ha sido lanzado.</value>
+  </data>
   <data name="Bot Owner" xml:space="preserve">
     <value>Dueño del bot</value>
   </data>

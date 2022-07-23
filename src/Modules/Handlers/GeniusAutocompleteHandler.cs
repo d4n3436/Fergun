@@ -24,7 +24,7 @@ public class GeniusAutocompleteHandler : AutocompleteHandler
         var songs = await geniusClient.SearchSongsAsync(text);
 
         var results = songs
-            .Where(x => !x.IsInstrumental)
+            .Where(x => !x.IsInstrumental && x.LyricsState != "unreleased")
             .Take(25)
             .Select(x => new AutocompleteResult($"{x.ArtistNames} - {x.Title}".Truncate(100), x.Id));
 

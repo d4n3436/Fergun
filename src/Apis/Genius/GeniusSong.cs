@@ -8,12 +8,13 @@ namespace Fergun.Apis.Genius;
 /// </summary>
 public class GeniusSong : IGeniusSong
 {
-    public GeniusSong(string artistNames, string headerImageUrl, int id, bool isInstrumental,
+    public GeniusSong(string artistNames, string headerImageUrl, int id, bool isInstrumental, string lyricsState,
         string songArtImageUrl, string title, string url, string? primaryArtistUrl, Color? primaryArtColor, string? lyrics)
     {
         ArtistNames = artistNames;
         HeaderImageUrl = headerImageUrl;
         Id = id;
+        LyricsState = lyricsState;
         IsInstrumental = isInstrumental;
         SongArtImageUrl = songArtImageUrl;
         Title = title;
@@ -39,6 +40,10 @@ public class GeniusSong : IGeniusSong
     /// <inheritdoc/>
     [JsonPropertyName("instrumental")]
     public bool IsInstrumental { get; }
+
+    /// <inheritdoc/>
+    [JsonPropertyName("lyrics_state")]
+    public string LyricsState { get; }
 
     /// <inheritdoc/>
     [JsonPropertyName("song_art_image_url")]
