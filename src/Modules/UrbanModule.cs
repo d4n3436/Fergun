@@ -93,7 +93,7 @@ public class UrbanModule : InteractionModuleBase
 
             return new PageBuilder()
                 .WithTitle(definition.Word)
-                .WithUrl(definition.Permalink)
+                .WithUrl($"https://www.urbandictionary.com/urbanup.php?path=%2F{definition.Id}")
                 .WithAuthor(_localizer["By {0}", definition.Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definition.Author)}")
                 .WithDescription(description.ToString())
                 .AddField("👍", definition.ThumbsUp, true)
