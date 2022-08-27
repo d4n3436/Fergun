@@ -18,7 +18,10 @@ public class WikipediaAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        var urbanDictionary = services
+        await using var scope = services.CreateAsyncScope();
+
+        var urbanDictionary = scope
+            .ServiceProvider
             .GetRequiredService<IWikipediaClient>();
 
         var results = (await urbanDictionary.GetAutocompleteResultsAsync(text, autocompleteInteraction.GetLanguageCode()))

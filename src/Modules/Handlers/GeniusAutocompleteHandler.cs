@@ -18,7 +18,10 @@ public class GeniusAutocompleteHandler : AutocompleteHandler
             return AutocompletionResult.FromSuccess();
         }
 
-        var geniusClient = services
+        await using var scope = services.CreateAsyncScope();
+
+        var geniusClient = scope
+            .ServiceProvider
             .GetRequiredService<IGeniusClient>();
 
         var songs = await geniusClient.SearchSongsAsync(text);
