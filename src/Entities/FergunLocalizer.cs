@@ -37,9 +37,8 @@ public class FergunLocalizer<T> : IFergunLocalizer<T>
     {
         get
         {
-            Thread.CurrentThread.CurrentUICulture = CurrentCulture;
-            var localized = _localizer[name];
-            return localized.ResourceNotFound ? _sharedLocalizer[name] : localized;
+            var localized = DualLocalizedString.Create(_localizer, CurrentCulture, name);
+            return localized.ResourceNotFound ? DualLocalizedString.Create(_sharedLocalizer, CurrentCulture, name) : localized;
         }
     }
 
@@ -48,9 +47,8 @@ public class FergunLocalizer<T> : IFergunLocalizer<T>
     {
         get
         {
-            Thread.CurrentThread.CurrentUICulture = CurrentCulture;
-            var localized = _localizer[name, arguments];
-            return localized.ResourceNotFound ? _sharedLocalizer[name, arguments] : localized;
+            var localized = DualLocalizedString.Create(_localizer, CurrentCulture, name, arguments);
+            return localized.ResourceNotFound ? DualLocalizedString.Create(_sharedLocalizer, CurrentCulture, name, arguments) : localized;
         }
     }
 }

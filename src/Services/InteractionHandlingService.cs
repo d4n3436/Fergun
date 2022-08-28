@@ -276,6 +276,7 @@ public class InteractionHandlingService : IHostedService
             return;
 
         string message = result.ErrorReason;
+        string? englishMessage = ((result as FergunResult)?.LocalizedErrorReason as DualLocalizedString)?.EnglishValue;
         bool ephemeral = (result as FergunResult)?.IsEphemeral ?? true;
         var interaction = (result as FergunResult)?.Interaction ?? context.Interaction;
 
@@ -293,7 +294,7 @@ public class InteractionHandlingService : IHostedService
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                command.CommandType, commandName, context.User, context.User.Id, context.Display(), message);
+                command.CommandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
 
         var embed = new EmbedBuilder()
