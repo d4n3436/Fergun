@@ -64,7 +64,7 @@ public class ImageModuleTests
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
         var result = await _module.GoogleAsync(query, multiImages);
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsSuccess, result.ErrorReason);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -94,7 +94,7 @@ public class ImageModuleTests
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
         var result = await _module.DuckDuckGoAsync(query, multiImages);
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsSuccess, result.ErrorReason);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -124,7 +124,7 @@ public class ImageModuleTests
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
 
         var result = await _module.BraveAsync(query, multiImages);
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsSuccess, result.ErrorReason);
 
         _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
         _contextMock.VerifyGet(x => x.Channel);
@@ -154,7 +154,7 @@ public class ImageModuleTests
         _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
 
         var result = await _module.ReverseAsync(url, file, engine, multiImages);
-        Assert.True(result.IsSuccess);
+        Assert.True(result.IsSuccess, result.ErrorReason);
 
         _contextMock.VerifyGet(x => x.Channel);
         _interactionMock.VerifyGet(x => x.User);
@@ -215,7 +215,7 @@ public class ImageModuleTests
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
     }
 
-    private static IEnumerable<object?[]> GetReverseImageSearchData()
+    public static IEnumerable<object?[]> GetReverseImageSearchData()
     {
         var attachmentMock = new Mock<IAttachment>();
         attachmentMock.SetupGet(x => x.Url).Returns("https://example.com/image.png");

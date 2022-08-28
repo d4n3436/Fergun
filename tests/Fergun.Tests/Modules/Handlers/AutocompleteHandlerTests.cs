@@ -196,14 +196,14 @@ public class AutocompleteHandlerTests
         return services.BuildServiceProvider();
     }
 
-    private static IEnumerable<object?[]> GetBraveTestData()
+    public static IEnumerable<object?[]> GetBraveTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => faker.Random.String2(1))
             .Append(string.Empty).Append(null).Select(x => new object?[] { x });
     }
 
-    private static IEnumerable<object?[]> GetDuckDuckGoTestData()
+    public static IEnumerable<object?[]> GetDuckDuckGoTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => faker.Music.Genre())
@@ -212,7 +212,7 @@ public class AutocompleteHandlerTests
             .Select(x => new object?[] { x.First, x.Second, x.Third });
     }
 
-    private static IEnumerable<object?[]> GetGoogleTestData()
+    public static IEnumerable<object?[]> GetGoogleTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => faker.Music.Genre())
@@ -221,7 +221,7 @@ public class AutocompleteHandlerTests
             .Select(x => new object?[] { x.First, x.Second });
     }
 
-    private static IEnumerable<object?[]> GetUrbanTestData()
+    public static IEnumerable<object?[]> GetUrbanTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => faker.Hacker.Noun())

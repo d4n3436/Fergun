@@ -53,17 +53,17 @@ public class MessageExtensionsTests
         }
     }
 
-    private static IEnumerable<object[]> GetEmbeds()
+    public static IEnumerable<object[]> GetEmbeds()
     {
         return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => new object[] { x.Build() });
     }
 
-    private static IEnumerable<object[]> GetContentsAndEmbeds()
+    public static IEnumerable<object[]> GetContentsAndEmbeds()
     {
         return GetRandomStrings().Zip(GetEmbeds()).Select(x => new[] { x.First[0], x.Second[0] });
     }
 
-    private static IEnumerable<object[]> GetRandomStrings()
+    public static IEnumerable<object[]> GetRandomStrings()
     {
         var faker = new Faker();
 

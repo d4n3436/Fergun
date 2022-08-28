@@ -66,7 +66,7 @@ public class InteractionExtensionsTests
         Assert.True(success);
     }
 
-    private static IEnumerable<object?[]> GetLanguages()
+    public static IEnumerable<object?[]> GetLanguages()
     {
         var faker = new Faker();
 
@@ -76,7 +76,7 @@ public class InteractionExtensionsTests
             .Select(x => new object?[] { x });
     }
 
-    private static IEnumerable<object[]> GetLocales()
+    public static IEnumerable<object[]> GetLocales()
     {
         var faker = new Faker();
 
@@ -84,7 +84,7 @@ public class InteractionExtensionsTests
             .Select(x => new object[] { x });
     }
 
-    private static IEnumerable<object[]> GetRandomStrings()
+    public static IEnumerable<object[]> GetRandomStrings()
     {
         var faker = new Faker();
 

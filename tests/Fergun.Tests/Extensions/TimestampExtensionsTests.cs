@@ -20,7 +20,7 @@ public class TimestampExtensionsTests
         Assert.Equal(timestamp, $"<t:{unixSeconds}:{style}>");
     }
 
-    private static IEnumerable<object[]> GetDatesAndStyles()
+    public static IEnumerable<object[]> GetDatesAndStyles()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => (faker.Date.BetweenOffset(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), faker.Random.Char()))

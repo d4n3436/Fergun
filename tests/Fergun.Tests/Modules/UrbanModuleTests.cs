@@ -94,5 +94,5 @@ public class UrbanModuleTests
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }
 
-    private static IEnumerable<object?[]> GetRandomWords() => AutoFaker.Generate<string>(10).Select(x => new object[] { x });
+    public static IEnumerable<object?[]> GetRandomWords() => AutoFaker.Generate<string>(10).Select(x => new object[] { x });
 }
