@@ -71,7 +71,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetInt32();
 
         // Get OCR text
-        const string ocrJsonRequest = @"{""blocks"":[{""block"":{""block"":""i-react-ajax-adapter:ajax""},""params"":{""type"":""CbirOcr""},""version"":2}]}";
+        const string ocrJsonRequest = @"{""blocks"":[{""block"":{""block"":""i-react-ajax-adapter:ajax""},""params"":{""type"":""CbirOcr"",""subtype"":""legacy""},""version"":2}]}";
 
         using var ocrRequest = new HttpRequestMessage
         {
@@ -82,18 +82,18 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
         using var ocrResponse = await _httpClient.SendAsync(ocrRequest, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
         ocrResponse.EnsureSuccessStatusCode();
 
-        // Using an stream here causes Parse(Async) to throw a JsonReaderException for some reason
-        var bytes = await ocrResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+        // A byte array is used because SendAsync returns a chunked response and the Stream from ReadAsStreamAsync is not seekable.
+        byte[] bytes = await ocrResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
         using var ocrDocument = JsonDocument.Parse(bytes);
 
-        if (ocrDocument.RootElement.TryGetProperty("type", out var typeProp) && typeProp.GetString() == "captcha")
+        if (ocrDocument.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
         {
             throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
         }
 
         return ocrDocument
             .RootElement
-            .GetProperty("blocks")[0]
+            .GetProperty("blocks")[0] // There should be a single block, "i-react-ajax-adapter:ajax"
             .GetProperty("params")
             .GetPropertyOrDefault("adapterData")
             .GetPropertyOrDefault("plainText")
@@ -133,7 +133,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
         await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
-        if (document.RootElement.TryGetProperty("type", out var typeProp) && typeProp.GetString() == "captcha")
+        if (document.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
         {
             throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
         }
@@ -187,13 +187,13 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             var item = document.RootElement.GetPropertyOrDefault("serp-item");
             var snippet = item.GetPropertyOrDefault("snippet");
 
-            var url = item
+            string? url = item
                 .GetPropertyOrDefault("img_href")
                 .GetStringOrDefault();
 
-            var sourceUrl = snippet.GetPropertyOrDefault("url").GetStringOrDefault();
-            var title = snippet.GetPropertyOrDefault("title").GetStringOrDefault();
-            var text = snippet.GetPropertyOrDefault("text").GetStringOrDefault();
+            string? sourceUrl = snippet.GetPropertyOrDefault("url").GetStringOrDefault();
+            string? title = snippet.GetPropertyOrDefault("title").GetStringOrDefault();
+            string? text = snippet.GetPropertyOrDefault("text").GetStringOrDefault();
 
             if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(sourceUrl) || string.IsNullOrEmpty(text))
             {
