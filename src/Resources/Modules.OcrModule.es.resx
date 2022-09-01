@@ -123,6 +123,24 @@
   <data name="Bing Visual Search" xml:space="preserve">
     <value>Búsqueda Visual de Bing</value>
   </data>
+  <data name="bing.description" xml:space="preserve">
+    <value>Realiza OCR a una imagen usando la Búsqueda Visual de Bing.</value>
+  </data>
+  <data name="bing.file.description" xml:space="preserve">
+    <value>Un archivo de imagen.</value>
+  </data>
+  <data name="bing.file.name" xml:space="preserve">
+    <value>archivo</value>
+  </data>
+  <data name="bing.name" xml:space="preserve">
+    <value>bing</value>
+  </data>
+  <data name="bing.url.description" xml:space="preserve">
+    <value>La URL de una imagen.</value>
+  </data>
+  <data name="bing.url.name" xml:space="preserve">
+    <value>url</value>
+  </data>
   <data name="Invalid OCR engine." xml:space="preserve">
     <value>Motor de OCR inválido.</value>
   </data>
@@ -146,6 +164,24 @@
   </data>
   <data name="Yandex OCR" xml:space="preserve">
     <value>OCR de Yandex</value>
+  </data>
+  <data name="yandex.description" xml:space="preserve">
+    <value>Realiza OCR a una imagen usando Yandex.</value>
+  </data>
+  <data name="yandex.file.description" xml:space="preserve">
+    <value>Un archivo de imagen.</value>
+  </data>
+  <data name="yandex.file.name" xml:space="preserve">
+    <value>archivo</value>
+  </data>
+  <data name="yandex.name" xml:space="preserve">
+    <value>yandex</value>
+  </data>
+  <data name="yandex.url.description" xml:space="preserve">
+    <value>La URL de una imagen.</value>
+  </data>
+  <data name="yandex.url.name" xml:space="preserve">
+    <value>url</value>
   </data>
   <data name="{0} | Processing time: {1}ms" xml:space="preserve">
     <value>{0} | Tiempo de procesado: {1}ms</value>

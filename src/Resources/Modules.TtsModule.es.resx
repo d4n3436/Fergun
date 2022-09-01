@@ -117,43 +117,52 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="By {0}" xml:space="preserve">
-    <value>Por {0}</value>
+  <data name="google.description" xml:space="preserve">
+    <value>Convierte texto en voz sintetizada usando Google.</value>
   </data>
-  <data name="Invalid search type." xml:space="preserve">
-    <value>Tipo de búsqueda inválido.</value>
+  <data name="google.ephemeral.description" xml:space="preserve">
+    <value>Si responder efímeramente.</value>
   </data>
-  <data name="random.description" xml:space="preserve">
-    <value>Obtiene definiciones aleatoria de Urban Dictionary.</value>
+  <data name="google.ephemeral.name" xml:space="preserve">
+    <value>efímero</value>
   </data>
-  <data name="random.name" xml:space="preserve">
-    <value>aleatorio</value>
+  <data name="google.name" xml:space="preserve">
+    <value>google</value>
   </data>
-  <data name="search.description" xml:space="preserve">
-    <value>Busca las definiciones de un término en Urban Dictionary.</value>
+  <data name="google.target.description" xml:space="preserve">
+    <value>El idioma de destino.</value>
   </data>
-  <data name="search.name" xml:space="preserve">
-    <value>buscar</value>
+  <data name="google.target.name" xml:space="preserve">
+    <value>destino</value>
   </data>
-  <data name="search.term.description" xml:space="preserve">
-    <value>El término a buscar.</value>
+  <data name="google.text.description" xml:space="preserve">
+    <value>El texto a convertir.</value>
   </data>
-  <data name="search.term.name" xml:space="preserve">
-    <value>término</value>
+  <data name="google.text.name" xml:space="preserve">
+    <value>texto</value>
   </data>
-  <data name="Urban Dictionary (Random Definitions) | Page {0} of {1}" xml:space="preserve">
-    <value>Urban Dictionary (Definiciones Aleatorias) | Página {0} de {1}</value>
+  <data name="microsoft.description" xml:space="preserve">
+    <value>Convierte texto en voz sintetizada usando Microsoft Azure.</value>
   </data>
-  <data name="Urban Dictionary (Words of the day, {0}) | Page {1} of {2}" xml:space="preserve">
-    <value>Urban Dictionary (Palabras del día, {0}) | Página {1} de {2}</value>
+  <data name="microsoft.ephemeral.description" xml:space="preserve">
+    <value>Si responder efímeramente.</value>
   </data>
-  <data name="Urban Dictionary | Page {0} of {1}" xml:space="preserve">
-    <value>Urban Dictionary | Página {0} de {1}</value>
+  <data name="microsoft.ephemeral.name" xml:space="preserve">
+    <value>efímero</value>
   </data>
-  <data name="words-of-the-day.description" xml:space="preserve">
-    <value>Obtiene las palabras del día en Urban Dictionary.</value>
+  <data name="microsoft.name" xml:space="preserve">
+    <value>microsoft</value>
   </data>
-  <data name="words-of-the-day.name" xml:space="preserve">
-    <value>palabras-del-día</value>
+  <data name="microsoft.text.description" xml:space="preserve">
+    <value>El texto a convertir.</value>
+  </data>
+  <data name="microsoft.text.name" xml:space="preserve">
+    <value>texto</value>
+  </data>
+  <data name="microsoft.voice.description" xml:space="preserve">
+    <value>La voz de destino.</value>
+  </data>
+  <data name="microsoft.voice.name" xml:space="preserve">
+    <value>voz</value>
   </data>
 </root>

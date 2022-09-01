@@ -117,43 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="By {0}" xml:space="preserve">
-    <value>Por {0}</value>
+  <data name="cmd.command.description" xml:space="preserve">
+    <value>El comando a ejecutar.</value>
   </data>
-  <data name="Invalid search type." xml:space="preserve">
-    <value>Tipo de búsqueda inválido.</value>
+  <data name="cmd.command.name" xml:space="preserve">
+    <value>comando</value>
   </data>
-  <data name="random.description" xml:space="preserve">
-    <value>Obtiene definiciones aleatoria de Urban Dictionary.</value>
+  <data name="cmd.description" xml:space="preserve">
+    <value>Ejecuta un comando.</value>
   </data>
-  <data name="random.name" xml:space="preserve">
-    <value>aleatorio</value>
+  <data name="cmd.name" xml:space="preserve">
+    <value>cmd</value>
   </data>
-  <data name="search.description" xml:space="preserve">
-    <value>Busca las definiciones de un término en Urban Dictionary.</value>
+  <data name="cmd.no-embed.description" xml:space="preserve">
+    <value>Sin embed.</value>
   </data>
-  <data name="search.name" xml:space="preserve">
-    <value>buscar</value>
-  </data>
-  <data name="search.term.description" xml:space="preserve">
-    <value>El término a buscar.</value>
-  </data>
-  <data name="search.term.name" xml:space="preserve">
-    <value>término</value>
-  </data>
-  <data name="Urban Dictionary (Random Definitions) | Page {0} of {1}" xml:space="preserve">
-    <value>Urban Dictionary (Definiciones Aleatorias) | Página {0} de {1}</value>
-  </data>
-  <data name="Urban Dictionary (Words of the day, {0}) | Page {1} of {2}" xml:space="preserve">
-    <value>Urban Dictionary (Palabras del día, {0}) | Página {1} de {2}</value>
-  </data>
-  <data name="Urban Dictionary | Page {0} of {1}" xml:space="preserve">
-    <value>Urban Dictionary | Página {0} de {1}</value>
-  </data>
-  <data name="words-of-the-day.description" xml:space="preserve">
-    <value>Obtiene las palabras del día en Urban Dictionary.</value>
-  </data>
-  <data name="words-of-the-day.name" xml:space="preserve">
-    <value>palabras-del-día</value>
+  <data name="cmd.no-embed.name" xml:space="preserve">
+    <value>sin-embed</value>
   </data>
 </root>

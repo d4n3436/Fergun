@@ -188,4 +188,136 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Support Server" xml:space="preserve">
     <value>Servidor de soporte</value>
   </data>
+  <data name="avatar.description" xml:space="preserve">
+    <value>Muesta el avatar de un usuario.</value>
+  </data>
+  <data name="avatar.name" xml:space="preserve">
+    <value>avatar</value>
+  </data>
+  <data name="avatar.type.description" xml:space="preserve">
+    <value>Un tipo de avatar en específico.</value>
+  </data>
+  <data name="avatar.type.name" xml:space="preserve">
+    <value>tipo</value>
+  </data>
+  <data name="avatar.user.description" xml:space="preserve">
+    <value>El usuario.</value>
+  </data>
+  <data name="avatar.user.name" xml:space="preserve">
+    <value>usuario</value>
+  </data>
+  <data name="bad-translator.chain-count.description" xml:space="preserve">
+    <value>La cantidad de veces a traducir el texto.</value>
+  </data>
+  <data name="bad-translator.chain-count.name" xml:space="preserve">
+    <value>cantidad-en-cadena</value>
+  </data>
+  <data name="bad-translator.description" xml:space="preserve">
+    <value>Pasa un texto por varios traductores diferentes.</value>
+  </data>
+  <data name="bad-translator.name" xml:space="preserve">
+    <value>traductor-malo</value>
+  </data>
+  <data name="bad-translator.text.description" xml:space="preserve">
+    <value>El texto a usar.</value>
+  </data>
+  <data name="bad-translator.text.name" xml:space="preserve">
+    <value>texto</value>
+  </data>
+  <data name="color.color.description" xml:space="preserve">
+    <value>Un nombre de color (en Inglés), cadena hex. o valor en bruto. Dejar vacío para un color aleatorio.</value>
+  </data>
+  <data name="color.color.name" xml:space="preserve">
+    <value>color</value>
+  </data>
+  <data name="color.description" xml:space="preserve">
+    <value>Muestra un color.</value>
+  </data>
+  <data name="color.name" xml:space="preserve">
+    <value>color</value>
+  </data>
+  <data name="help.description" xml:space="preserve">
+    <value>Información sobre Fergun 2.</value>
+  </data>
+  <data name="help.name" xml:space="preserve">
+    <value>ayuda</value>
+  </data>
+  <data name="ping.description" xml:space="preserve">
+    <value>Envía el tiempo de respuesta del bot.</value>
+  </data>
+  <data name="ping.name" xml:space="preserve">
+    <value>ping</value>
+  </data>
+  <data name="say.description" xml:space="preserve">
+    <value>Dice algo.</value>
+  </data>
+  <data name="say.name" xml:space="preserve">
+    <value>decir</value>
+  </data>
+  <data name="translate.description" xml:space="preserve">
+    <value>Traduce un texto.</value>
+  </data>
+  <data name="translate.ephemeral.description" xml:space="preserve">
+    <value>Si responder efímeramente.</value>
+  </data>
+  <data name="translate.ephemeral.name" xml:space="preserve">
+    <value>efímero</value>
+  </data>
+  <data name="translate.name" xml:space="preserve">
+    <value>traducir</value>
+  </data>
+  <data name="translate.source.description" xml:space="preserve">
+    <value>El idioma de origen.</value>
+  </data>
+  <data name="translate.source.name" xml:space="preserve">
+    <value>origen</value>
+  </data>
+  <data name="translate.target.description" xml:space="preserve">
+    <value>El idioma de destino.</value>
+  </data>
+  <data name="translate.target.name" xml:space="preserve">
+    <value>destino</value>
+  </data>
+  <data name="translate.text.description" xml:space="preserve">
+    <value>El texto a traducir.</value>
+  </data>
+  <data name="translate.text.name" xml:space="preserve">
+    <value>texto</value>
+  </data>
+  <data name="user.description" xml:space="preserve">
+    <value>Obtiene información sobre un usuario.</value>
+  </data>
+  <data name="user.name" xml:space="preserve">
+    <value>usuario</value>
+  </data>
+  <data name="user.user.description" xml:space="preserve">
+    <value>El usuario.</value>
+  </data>
+  <data name="user.user.name" xml:space="preserve">
+    <value>usuario</value>
+  </data>
+  <data name="wikipedia.description" xml:space="preserve">
+    <value>Busca artículos de Wikipedia.</value>
+  </data>
+  <data name="wikipedia.name" xml:space="preserve">
+    <value>wikipedia</value>
+  </data>
+  <data name="wikipedia.query.description" xml:space="preserve">
+    <value>La consulta a buscar.</value>
+  </data>
+  <data name="wikipedia.query.name" xml:space="preserve">
+    <value>consulta</value>
+  </data>
+  <data name="youtube.description" xml:space="preserve">
+    <value>Envía un paginador conteniendo videos de YouTube.</value>
+  </data>
+  <data name="youtube.name" xml:space="preserve">
+    <value>youtube</value>
+  </data>
+  <data name="youtube.query.description" xml:space="preserve">
+    <value>La consulta a buscar.</value>
+  </data>
+  <data name="youtube.query.name" xml:space="preserve">
+    <value>consulta</value>
+  </data>
 </root>

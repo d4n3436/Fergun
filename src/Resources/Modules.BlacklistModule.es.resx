@@ -117,11 +117,50 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="{0} has been blacklisted" xml:space="preserve">
+  <data name="add.description" xml:space="preserve">
+    <value>Agrega un usuario a la lista negra.</value>
+  </data>
+  <data name="add.name" xml:space="preserve">
+    <value>agregar</value>
+  </data>
+  <data name="add.reason.description" xml:space="preserve">
+    <value>La razón del listamiento.</value>
+  </data>
+  <data name="add.reason.name" xml:space="preserve">
+    <value>razón</value>
+  </data>
+  <data name="add.shadow.description" xml:space="preserve">
+    <value>Si el usuario debería ser agregado de manera oculta.</value>
+  </data>
+  <data name="add.shadow.name" xml:space="preserve">
+    <value>oculto</value>
+  </data>
+  <data name="add.user.description" xml:space="preserve">
+    <value>El usuario a agregar.</value>
+  </data>
+  <data name="add.user.name" xml:space="preserve">
+    <value>usuario</value>
+  </data>
+  <data name="blacklist.name" xml:space="preserve">
+    <value>lista-negra</value>
+  </data>
+  <data name="remove.description" xml:space="preserve">
+    <value>Remueve un usuario de la lista negra.</value>
+  </data>
+  <data name="remove.name" xml:space="preserve">
+    <value>remover</value>
+  </data>
+  <data name="remove.user.description" xml:space="preserve">
+    <value>El usuario a remover.</value>
+  </data>
+  <data name="remove.user.name" xml:space="preserve">
+    <value>usuario</value>
+  </data>
+  <data name="{0} has been blacklisted." xml:space="preserve">
     <value>{0} ahora está en la lista negra.</value>
   </data>
   <data name="{0} has been removed from the blacklist." xml:space="preserve">
-    <value>{0} ya no está en la lista negra.</value>
+    <value>{0} ha sido eliminado de la lista negra.</value>
   </data>
   <data name="{0} is already blacklisted." xml:space="preserve">
     <value>{0} ya está en la lista negra.</value>

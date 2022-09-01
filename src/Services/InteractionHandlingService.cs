@@ -21,21 +21,24 @@ public class InteractionHandlingService : IHostedService
 {
     private readonly DiscordShardedClient _shardedClient;
     private readonly InteractionService _interactionService;
+    private readonly FergunLocalizationManager _localizationManager;
     private readonly ILogger<InteractionHandlingService> _logger;
     private readonly IServiceProvider _services;
     private readonly ulong _testingGuildId;
     private readonly ulong _ownerCommandsGuildId;
     private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
 
-    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService,
+    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, FergunLocalizationManager localizationManager,
         ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
     {
         _shardedClient = client;
         _interactionService = interactionService;
+        _localizationManager = localizationManager;
         _logger = logger;
         _services = services;
         _testingGuildId = options.Value.TestingGuildId;
         _ownerCommandsGuildId = options.Value.OwnerCommandsGuildId;
+        _interactionService.LocalizationManager = _localizationManager; // Should be set while configuring the services but it's not possible 
     }
 
     /// <inheritdoc />
@@ -50,6 +53,8 @@ public class InteractionHandlingService : IHostedService
         _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
 
         var modules = (await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)).ToArray();
+        _localizationManager.AddModules(modules);
+
         _logger.LogDebug("Added {Modules} command modules ({Commands} commands)", modules.Length,
             modules.Sum(x => x.ContextCommands.Count) + modules.Sum(x => x.SlashCommands.Count));
 

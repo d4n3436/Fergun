@@ -81,6 +81,7 @@ var host = Host.CreateDefaultBuilder()
     {
         services.AddLocalization(options => options.ResourcesPath = "Resources");
         services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
+        services.AddSingleton<FergunLocalizationManager>();
         services.AddHostedService<InteractionHandlingService>();
         services.AddHostedService<BotListService>();
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });

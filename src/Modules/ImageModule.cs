@@ -233,7 +233,7 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("reverse", "Reverse image search.")]
-    public async Task<RuntimeResult> ReverseAsync([Summary(description: "The url of an image.")] string? url = null,
+    public async Task<RuntimeResult> ReverseAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null,
         [Summary(description: $"The search engine. The default is {nameof(ReverseImageSearchEngine.Yandex)}.")] ReverseImageSearchEngine engine = ReverseImageSearchEngine.Yandex,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)

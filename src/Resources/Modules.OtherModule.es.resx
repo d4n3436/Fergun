@@ -135,20 +135,50 @@
   <data name="Command Stats" xml:space="preserve">
     <value>Estadísticas de Comandos</value>
   </data>
+  <data name="command-stats.description" xml:space="preserve">
+    <value>Muestra las estadísticas de uso de los comandos.</value>
+  </data>
+  <data name="command-stats.name" xml:space="preserve">
+    <value>estadísticas-de-comandos</value>
+  </data>
   <data name="CPU Usage" xml:space="preserve">
     <value>Uso de CPU</value>
   </data>
   <data name="Fergun Stats" xml:space="preserve">
     <value>Estadísticas de Fergun</value>
   </data>
+  <data name="inspirobot.description" xml:space="preserve">
+    <value>Envía una cita inspiradora.</value>
+  </data>
+  <data name="inspirobot.name" xml:space="preserve">
+    <value>inspirobot</value>
+  </data>
   <data name="Invite Fergun" xml:space="preserve">
     <value>Invita a Fergun</value>
+  </data>
+  <data name="invite.description" xml:space="preserve">
+    <value>Invita Fergun a tu servidor.</value>
+  </data>
+  <data name="invite.name" xml:space="preserve">
+    <value>invitar</value>
   </data>
   <data name="Library" xml:space="preserve">
     <value>Librería</value>
   </data>
   <data name="Lyrics by Genius | Page {0} of {1}" xml:space="preserve">
     <value>Letra por Genius | Página {0} de {1}</value>
+  </data>
+  <data name="lyrics.description" xml:space="preserve">
+    <value>Obtiene la letra de una canción.</value>
+  </data>
+  <data name="lyrics.name" xml:space="preserve">
+    <value>letra</value>
+  </data>
+  <data name="lyrics.name.description" xml:space="preserve">
+    <value>El nombre de la canción.</value>
+  </data>
+  <data name="lyrics.name.name" xml:space="preserve">
+    <value>nombre</value>
   </data>
   <data name="No stats to display." xml:space="preserve">
     <value>Sin estadísticas que mostrar.</value>
@@ -161,6 +191,12 @@
   </data>
   <data name="Shard ID" xml:space="preserve">
     <value>ID de shard</value>
+  </data>
+  <data name="stats.description" xml:space="preserve">
+    <value>Envía las estadísticas del bot.</value>
+  </data>
+  <data name="stats.name" xml:space="preserve">
+    <value>estadísticas</value>
   </data>
   <data name="Total Servers" xml:space="preserve">
     <value>Servidores Totales</value>

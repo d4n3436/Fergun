@@ -403,7 +403,7 @@ public class UtilityModule : InteractionModuleBase
     }
 
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
-    public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The query.")] string query)
+    public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The search query.")] string query)
     {
         await Context.Interaction.DeferAsync();
 

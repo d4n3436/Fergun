@@ -72,12 +72,12 @@ public class OcrModule : InteractionModuleBase
     }
 
     [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
-    public async Task<RuntimeResult> BingAsync([Summary(description: "An image URL.")] string? url = null,
+    public async Task<RuntimeResult> BingAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null)
         => await OcrAsync(OcrEngine.Bing, file?.Url ?? url, Context.Interaction);
 
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
-    public async Task<RuntimeResult> YandexAsync([Summary(description: "An image URL.")] string? url = null,
+    public async Task<RuntimeResult> YandexAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null)
         => await OcrAsync(OcrEngine.Yandex, file?.Url ?? url, Context.Interaction);
 
