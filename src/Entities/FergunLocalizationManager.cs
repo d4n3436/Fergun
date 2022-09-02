@@ -13,9 +13,12 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     private const string ModulesNamespace = "Fergun.Modules";
     
     private readonly IStringLocalizerFactory _localizerFactory;
-    private readonly Dictionary<ModuleInfo, Type> _types = new();
-    private readonly Dictionary<string, ModuleInfo> _modules = new();
-    private readonly IEnumerable<string> _supportedLocales = new[] { "es-ES" }; // TODO: use Options pattern
+    private readonly Dictionary<ModuleInfo, Type> _types = new(); 
+    private readonly Dictionary<string, ModuleInfo> _modules = new(); // TODO: use Options pattern
+    private readonly Dictionary<string, string> _supportedLocales = new() 
+    {
+        { "es", "es-ES" },
+    };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FergunLocalizationManager"/> class.
@@ -64,16 +67,16 @@ public sealed class FergunLocalizationManager : ILocalizationManager
         var dictionary = new Dictionary<string, string>();
         var localizer = _localizerFactory.Create(type);
 
-        foreach (var localizedString in localizer.GetAllStrings())
+        foreach (var locale in _supportedLocales.Keys)
         {
-            if (IsMatch(localizedString.Name, module.SlashGroupName, key, identifier))
-            {
-                foreach (var locale in _supportedLocales)
-                {
-                    var cultureInfo = CultureInfo.GetCultureInfo(locale);
-                    Thread.CurrentThread.CurrentUICulture = cultureInfo;
+            var cultureInfo = CultureInfo.GetCultureInfo(locale);
+            Thread.CurrentThread.CurrentUICulture = cultureInfo;
 
-                    dictionary.Add(locale, localizer[localizedString.Value]);
+            foreach (var localizedString in localizer.GetAllStrings(false))
+            {
+                if (IsMatch(localizedString.Name, module.SlashGroupName, key, identifier))
+                {
+                    dictionary.Add(_supportedLocales[locale], localizer[localizedString.Value]);
                 }
             }
         }
