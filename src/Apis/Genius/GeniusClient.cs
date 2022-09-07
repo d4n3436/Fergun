@@ -12,6 +12,9 @@ namespace Fergun.Apis.Genius;
 /// </summary>
 public sealed class GeniusClient : IGeniusClient, IDisposable
 {
+    private static ReadOnlySpan<byte> StartString => Encoding.UTF8.GetBytes("window.__PRELOADED_STATE__ = JSON.parse('");
+    private static ReadOnlySpan<byte> EndString => new[] { (byte)'\'', (byte)')', (byte)';', (byte)'\n' };
+
     private static readonly Uri _apiEndpoint = new("https://genius.com/");
 
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
@@ -64,8 +67,6 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
     public async Task<GeniusSong?> GetSongAsync(int id)
     {
         EnsureNotDisposed();
-        const string startString = "window.__PRELOADED_STATE__ = JSON.parse('";
-        const string endString = "');\n";
 
         // The API doesn't provide the lyrics, so we scrape the lyrics page and extract the embedded JSON which contains the lyrics.
         using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
@@ -76,23 +77,25 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         }
 
         response.EnsureSuccessStatusCode();
-        string rawHtml = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
 
-        int start = rawHtml.IndexOf(startString, StringComparison.Ordinal);
+        int start = bytes.AsSpan().IndexOf(StartString);
         if (start == -1)
         {
             throw new GeniusException("Failed the extract the embedded JSON from the lyrics page.");
         }
 
-        start += startString.Length;
+        start += StartString.Length;
 
-        int end = rawHtml.IndexOf(endString, start, StringComparison.Ordinal);
-        if (end == -1)
+        int length = bytes.AsSpan(start).IndexOf(EndString);
+        if (length == -1)
         {
             throw new GeniusException("Failed the extract the embedded JSON from the lyrics page.");
         }
 
-        var document = JsonDocument.Parse(Regex.Unescape(rawHtml[start..end]));
+        string data = Encoding.UTF8.GetString(bytes.AsSpan(start, length));
+
+        var document = JsonDocument.Parse(Regex.Unescape(data));
 
         var song = document
             .RootElement
