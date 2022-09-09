@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Net;
+using Discord;
 using Discord.Addons.Hosting;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -22,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
@@ -106,6 +108,18 @@ var host = Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient<IGeniusClient, GeniusClient>()
+            .ConfigurePrimaryHttpMessageHandler(s =>
+            {
+                using var scope = s.CreateScope();
+                var snapshot = s.GetRequiredService<IOptionsSnapshot<FergunOptions>>();
+
+                if (string.IsNullOrEmpty(snapshot.Value.CloudflareClearance))
+                    return new HttpClientHandler();
+
+                var container = new CookieContainer();
+                container.Add(new Cookie("cf_clearance", snapshot.Value.CloudflareClearance, "/", ".genius.com"));
+                return new HttpClientHandler { CookieContainer = container };
+            })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

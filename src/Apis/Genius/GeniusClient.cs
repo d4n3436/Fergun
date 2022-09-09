@@ -17,7 +17,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
     private static readonly Uri _apiEndpoint = new("https://genius.com/");
 
-    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 

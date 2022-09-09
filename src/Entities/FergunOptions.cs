@@ -15,6 +15,11 @@ public class FergunOptions
     public Uri? SupportServerUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the Cloudflare clearance string. Used in the Genius client.
+    /// </summary>
+    public string CloudflareClearance { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the default paginator timeout.
     /// </summary>
     public TimeSpan PaginatorTimeout { get; set; }
