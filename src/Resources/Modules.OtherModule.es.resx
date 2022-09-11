@@ -168,6 +168,9 @@
   <data name="Lyrics by Genius | Page {0} of {1}" xml:space="preserve">
     <value>Letra por Genius | Página {0} de {1}</value>
   </data>
+  <data name="Lyrics by Musixmatch | Page {0} of {1}" xml:space="preserve">
+    <value>Letra por Musixmatch | Página {0} de {1}</value>
+  </data>
   <data name="lyrics.description" xml:space="preserve">
     <value>Obtiene la letra de una canción.</value>
   </data>
@@ -218,5 +221,8 @@
   </data>
   <data name="View on Genius" xml:space="preserve">
     <value>Ver en Genius</value>
+  </data>
+  <data name="View on Musixmatch" xml:space="preserve">
+    <value>Ver en Musixmatch</value>
   </data>
 </root>

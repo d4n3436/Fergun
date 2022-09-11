@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
-using Fergun.Apis.Genius;
+using Fergun.Apis.Musixmatch;
 using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -25,17 +25,17 @@ public class OtherModule : InteractionModuleBase
     private readonly IFergunLocalizer<OtherModule> _localizer;
     private readonly FergunOptions _fergunOptions;
     private readonly InteractiveService _interactive;
-    private readonly IGeniusClient _geniusClient;
+    private readonly IMusixmatchClient _musixmatchClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db)
+        InteractiveService interactive, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _geniusClient = geniusClient;
+        _musixmatchClient = musixmatchClient;
         _httpClient = httpClient;
         _interactive = interactive;
         _db = db;
@@ -117,31 +117,25 @@ public class OtherModule : InteractionModuleBase
     }
     
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
-    public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
+    public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
-        var song = await _geniusClient.GetSongAsync(id);
+        var song = await _musixmatchClient.GetSongAsync(id);
 
         if (song is null)
         {
             return FergunResult.FromError(_localizer["Unable to find a song with ID {0}. Use the autocomplete results.", id]);
         }
         
-        if (song.IsInstrumental)
+        if (song.IsInstrumental || !song.HasLyrics)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
-            return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistNames} - {song.Title}"]);
-        }
-
-        if (song.LyricsState == "unreleased")
-        {
-            // This shouldn't be reachable unless someone manually passes an unreleased ID.
-            return FergunResult.FromError(_localizer["\"{0}\" is unreleased.", $"{song.ArtistNames} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistName} - {song.Title}"]);
         }
 
         if (song.Lyrics is null)
         {
-            return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistNames} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistName} - {song.Title}"]);
         }
 
         var chunks = song.Lyrics.SplitWithoutWordBreaking(EmbedBuilder.MaxDescriptionLength).ToArray();
@@ -166,12 +160,12 @@ public class OtherModule : InteractionModuleBase
             var chunk = chunks[index];
             
             return new PageBuilder()
-                .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
+                .WithTitle($"{song.ArtistName} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunk.ToString())
-                .AddField("Links", $"{Format.Url(_localizer["View on Genius"], song.Url)}{(song.PrimaryArtistUrl is null ? "" : $" | {Format.Url(_localizer["View Artist"], song.PrimaryArtistUrl)}")}")
-                .WithFooter(_localizer["Lyrics by Genius | Page {0} of {1}", index + 1, chunks.Length])
-                .WithColor((Color)(song.PrimaryArtColor ?? Color.Orange));
+                .AddField("Links", $"{Format.Url(_localizer["View on Musixmatch"], song.Url)}{(song.ArtistUrl is null ? "" : $" | {Format.Url(_localizer["View Artist"], song.ArtistUrl)}")}")
+                .WithFooter(_localizer["Lyrics by Musixmatch | Page {0} of {1}", index + 1, chunks.Length])
+                .WithColor(Color.Orange);
         }
     }
 

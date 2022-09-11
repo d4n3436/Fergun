@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Fergun;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Genius;
+using Fergun.Apis.Musixmatch;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.Yandex;
@@ -116,6 +117,11 @@ var host = Host.CreateDefaultBuilder()
                 if (!string.IsNullOrEmpty(snapshot.Value.CloudflareClearance))
                     c.DefaultRequestHeaders.Add("Cookie", $"cf_clearance={snapshot.Value.CloudflareClearance}");
             })
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<IMusixmatchClient, MusixmatchClient>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

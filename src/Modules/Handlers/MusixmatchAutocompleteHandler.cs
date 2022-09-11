@@ -1,18 +1,19 @@
-﻿using Discord;
+﻿using System.Text.Json;
+using Discord;
 using Discord.Interactions;
-using Fergun.Apis.Genius;
+using Fergun.Apis.Musixmatch;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Modules.Handlers;
 
-public class GeniusAutocompleteHandler : AutocompleteHandler
+public class MusixmatchAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
         string text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
-        
+
         if (string.IsNullOrWhiteSpace(text))
         {
             return AutocompletionResult.FromSuccess();
@@ -20,16 +21,16 @@ public class GeniusAutocompleteHandler : AutocompleteHandler
 
         await using var scope = services.CreateAsyncScope();
 
-        var geniusClient = scope
+        var musixmatchClient = scope
             .ServiceProvider
-            .GetRequiredService<IGeniusClient>();
+            .GetRequiredService<IMusixmatchClient>();
 
-        var songs = await geniusClient.SearchSongsAsync(text);
+        var songs = await musixmatchClient.SearchSongsAsync(text);
 
         var results = songs
-            .Where(x => !x.IsInstrumental && x.LyricsState != "unreleased")
+            .Where(x => !x.IsInstrumental && x.HasLyrics)
             .Take(25)
-            .Select(x => new AutocompleteResult($"{x.ArtistNames} - {x.Title}".Truncate(100), x.Id));
+            .Select(x => new AutocompleteResult($"{x.ArtistName} - {x.Title}".Truncate(100), x.Id));
 
         return AutocompletionResult.FromSuccess(results);
     }
