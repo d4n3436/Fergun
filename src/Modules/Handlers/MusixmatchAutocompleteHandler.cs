@@ -28,7 +28,7 @@ public class MusixmatchAutocompleteHandler : AutocompleteHandler
         var songs = await musixmatchClient.SearchSongsAsync(text);
 
         var results = songs
-            .Where(x => !x.IsInstrumental && x.HasLyrics)
+            .Where(x => !x.IsInstrumental && x.HasLyrics && !x.IsRestricted)
             .Take(25)
             .Select(x => new AutocompleteResult($"{x.ArtistName} - {x.Title}".Truncate(100), x.Id));
 

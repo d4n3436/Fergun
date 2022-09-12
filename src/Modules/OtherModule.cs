@@ -133,7 +133,15 @@ public class OtherModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistName} - {song.Title}"]);
         }
 
-        if (song.Lyrics is null)
+        // Some (or all) songs in Musixmatch have their "restricted" field set to 0 in the track data,
+        // but the real "restricted" value is in the lyrics data, this means we can't filter those restricted songs
+        // in the autocomplete results
+        if (song.IsRestricted)
+        {
+            return FergunResult.FromError(_localizer["\"{0}\" has restricted lyrics.", $"{song.ArtistName} - {song.Title}"]);
+        }
+
+        if (string.IsNullOrEmpty(song.Lyrics))
         {
             return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistName} - {song.Title}"]);
         }

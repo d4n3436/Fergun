@@ -7,13 +7,14 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public class MusixmatchSong : IMusixmatchSong
 {
-    public MusixmatchSong(string artistName, int id, bool isInstrumental, bool hasLyrics,
+    public MusixmatchSong(string artistName, int id, bool isInstrumental, bool hasLyrics, bool isRestricted,
         string songArtImageUrl, string title, string url, string? artistUrl, string? lyrics)
     {
         ArtistName = artistName;
         Id = id;
         IsInstrumental = isInstrumental;
         HasLyrics = hasLyrics;
+        IsRestricted = isRestricted;
         SongArtImageUrl = songArtImageUrl;
         Title = title;
         Url = url;
@@ -38,6 +39,10 @@ public class MusixmatchSong : IMusixmatchSong
     [JsonPropertyName("has_lyrics")]
     [JsonConverter(typeof(BoolConverter))]
     public bool HasLyrics { get; }
+
+    [JsonPropertyName("restricted")]
+    [JsonConverter(typeof(BoolConverter))]
+    public bool IsRestricted { get; }
 
     /// <inheritdoc/>
     [JsonPropertyName("album_coverart_500x500")]

@@ -44,21 +44,15 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMusixmatchClient.SearchSongsAsync(string)"/>
-    public async Task<IEnumerable<MusixmatchSong>> SearchSongsAsync(string query)
+    /// <inheritdoc cref="IMusixmatchClient.SearchSongsAsync(string, bool)"/>
+    public async Task<IEnumerable<MusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true)
     {
         EnsureNotDisposed();
 
-        string url = $"https://www.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}";
+        string url = $"https://www.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
         url = $"{url}&signature={GetSignature(url)}&signature_protocol=sha1";
 
-        var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
-        request.Headers.Add("Cookie", $"musixmatchUserGuid={Guid.NewGuid()}");
-
-        var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
-        var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
         var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
         var message = document.RootElement.GetProperty("message");
@@ -88,13 +82,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         string url = $"https://www.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
         url = $"{url}&signature={GetSignature(url)}&signature_protocol=sha1";
 
-        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
-        request.Headers.Add("Cookie", $"musixmatchUserGuid={Guid.NewGuid()}");
-
-        using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
         var message = document.RootElement.GetProperty("message");
@@ -144,6 +132,12 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .GetProperty("lyrics_body")
             .GetString();
 
+        bool isRestricted = lyricsMessage
+            .GetProperty("body")
+            .GetProperty("lyrics")
+            .GetProperty("restricted")
+            .GetInt32() != 0; // from lyricsMessage
+
         var trackData = macroCalls
             .GetProperty("track.get")
             .GetProperty("message")
@@ -164,7 +158,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             songArtImageUrl = "https://s.mxmcdn.net/images-storage/albums/nocover.png";
         }
 
-        return new MusixmatchSong(artistName, id, isInstrumental, hasLyrics, songArtImageUrl, title, songUrl, artistUrl, lyrics);
+        return new MusixmatchSong(artistName, id, isInstrumental, hasLyrics, isRestricted, songArtImageUrl, title, songUrl, artistUrl, lyrics);
     }
 
     /// <inheritdoc/>
@@ -196,7 +190,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     }
 
     /// <inheritdoc/>
-    async Task<IEnumerable<IMusixmatchSong>> IMusixmatchClient.SearchSongsAsync(string query) => await SearchSongsAsync(query).ConfigureAwait(false);
+    async Task<IEnumerable<IMusixmatchSong>> IMusixmatchClient.SearchSongsAsync(string query, bool onlyWithLyrics) => await SearchSongsAsync(query, onlyWithLyrics).ConfigureAwait(false);
 
     /// <inheritdoc/>
     async Task<IMusixmatchSong?> IMusixmatchClient.GetSongAsync(int id) => await GetSongAsync(id).ConfigureAwait(false);

@@ -26,6 +26,11 @@ public interface IMusixmatchSong
     bool HasLyrics { get; }
 
     /// <summary>
+    /// Gets a value indicating whether this song is restricted.
+    /// </summary>
+    bool IsRestricted { get; }
+
+    /// <summary>
     /// Gets the song art image URL.
     /// </summary>
     string SongArtImageUrl { get; }
