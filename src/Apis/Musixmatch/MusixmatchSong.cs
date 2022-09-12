@@ -17,7 +17,6 @@ public class MusixmatchSong : IMusixmatchSong
         SongArtImageUrl = songArtImageUrl;
         Title = title;
         Url = url;
-        Id = id;
         ArtistUrl = artistUrl;
         Lyrics = lyrics;
     }

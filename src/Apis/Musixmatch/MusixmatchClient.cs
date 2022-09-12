@@ -49,7 +49,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     {
         EnsureNotDisposed();
 
-        string url = $"https://www.musixmatch.com/ws/1.1/macro.search?q={Uri.EscapeDataString(query)}&format=json&app_id={_appId}";
+        string url = $"https://www.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}";
         url = $"{url}&signature={GetSignature(url)}&signature_protocol=sha1";
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(url));
@@ -63,19 +63,18 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         var message = document.RootElement.GetProperty("message");
 
-        int statusCode = message
+        var statusCode = (HttpStatusCode)message
             .GetProperty("header")
             .GetProperty("status_code")
             .GetInt32();
 
-        if (statusCode != 200)
+        if (statusCode != HttpStatusCode.OK)
         {
-            throw new HttpRequestException($"The API returned a {statusCode} status code.", null, (HttpStatusCode)statusCode);
+            throw new HttpRequestException($"The API returned a {statusCode} status code.", null, statusCode);
         }
 
         return message
             .GetProperty("body")
-            .GetProperty("macro_result_list")
             .GetProperty("track_list")
             .EnumerateArray()
             .Select(x => x.GetProperty("track").Deserialize<MusixmatchSong>()!);

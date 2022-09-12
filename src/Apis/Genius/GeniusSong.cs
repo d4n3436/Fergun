@@ -19,7 +19,6 @@ public class GeniusSong : IGeniusSong
         SongArtImageUrl = songArtImageUrl;
         Title = title;
         Url = url;
-        Id = id;
         PrimaryArtistUrl = primaryArtistUrl;
         PrimaryArtColor = primaryArtColor;
         Lyrics = lyrics;
