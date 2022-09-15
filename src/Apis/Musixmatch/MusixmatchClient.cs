@@ -10,12 +10,7 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
-    // a73051eb424674a19bc323eb5c5b6629fbc8ef46, treated literally
-    private static ReadOnlySpan<byte> SignatureSecret => new byte[]
-    {
-        97, 55, 51, 48, 53, 49, 101, 98, 52, 50, 52, 54, 55, 52, 97, 49, 57, 98, 99, 51, 50, 51, 101, 98, 53, 99, 53, 98, 54, 54, 50, 57, 102, 98, 99, 56, 101, 102, 52, 54
-    };
-
+    private static readonly byte[] _signatureSecret = Encoding.UTF8.GetBytes("741941edc264ea6293cb9a6458103b4eda3ac8ed");
     private const string _appId = "community-app-v1.0";
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly HttpClient _httpClient;
@@ -185,7 +180,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     {
         // Get SHA1 HMAC as Base64
         var date = DateTimeOffset.UtcNow;
-        byte[] bytes = HMACSHA1.HashData(SignatureSecret, Encoding.UTF8.GetBytes($"{source}{date.Year}{date.Month:D2}{date.Day:D2}"));
+        byte[] bytes = HMACSHA1.HashData(_signatureSecret, Encoding.UTF8.GetBytes($"{source}{date.Year}{date.Month:D2}{date.Day:D2}"));
         return Uri.EscapeDataString(Convert.ToBase64String(bytes));
     }
 
