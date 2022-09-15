@@ -186,6 +186,9 @@
   <data name="Invalid image search engine." xml:space="preserve">
     <value>Motor de búsqueda de imágenes inválido.</value>
   </data>
+  <data name="Reverse Image Search.name" xml:space="preserve">
+    <value>Buscar por imagen</value>
+  </data>
   <data name="reverse.description" xml:space="preserve">
     <value>Búsqueda inversa de imagen.</value>
   </data>
