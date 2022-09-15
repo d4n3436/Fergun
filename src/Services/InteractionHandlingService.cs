@@ -116,8 +116,6 @@ public class InteractionHandlingService : IHostedService
                 }
             }
         }
-
-        await _shardedClient.SetActivityAsync(new Game("/help"));
     }
 
     private Task InteractionCreated(SocketInteraction interaction)
