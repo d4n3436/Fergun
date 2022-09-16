@@ -88,6 +88,7 @@ var host = Host.CreateDefaultBuilder()
         services.AddHostedService<BotListService>();
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
+        services.AddSingleton<MusixmatchClientState>();
         services.AddFergunPolicies();
 
         services.AddHttpClient<IBingVisualSearch, BingVisualSearch>()

@@ -10,28 +10,29 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
-    private static readonly byte[] _signatureSecret = Encoding.UTF8.GetBytes("741941edc264ea6293cb9a6458103b4eda3ac8ed");
     private const string _appId = "community-app-v1.0";
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly HttpClient _httpClient;
+    private readonly MusixmatchClientState _state;
     private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClient"/> class.
     /// </summary>
     public MusixmatchClient()
-        : this(new HttpClient(new HttpClientHandler { UseCookies = false }))
+        : this(new HttpClient(new HttpClientHandler { UseCookies = false }), new MusixmatchClientState())
     {
     }
-
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClient"/> class using the specified <see cref="HttpClient"/>.
     /// </summary>
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
-    public MusixmatchClient(HttpClient httpClient)
+    /// <param name="state">The client state.</param>
+    public MusixmatchClient(HttpClient httpClient, MusixmatchClientState state)
     {
         _httpClient = httpClient;
+        _state = state;
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
@@ -43,9 +44,10 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     public async Task<IEnumerable<MusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true)
     {
         EnsureNotDisposed();
+        byte[] signatureSecret = await _state.GetSignatureSecretAsync(_httpClient).ConfigureAwait(false);
 
         string url = $"https://www.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
-        url = $"{url}&signature={GetSignature(url)}&signature_protocol=sha1";
+        url = $"{url}&signature={GetSignature(signatureSecret, url)}&signature_protocol=sha1";
 
         var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
         var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
@@ -73,9 +75,10 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     public async Task<MusixmatchSong?> GetSongAsync(int id)
     {
         EnsureNotDisposed();
+        byte[] signatureSecret = await _state.GetSignatureSecretAsync(_httpClient).ConfigureAwait(false);
 
         string url = $"https://www.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
-        url = $"{url}&signature={GetSignature(url)}&signature_protocol=sha1";
+        url = $"{url}&signature={GetSignature(signatureSecret, url)}&signature_protocol=sha1";
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
@@ -176,11 +179,11 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
     }
 
-    private static string GetSignature(string source)
+    private static string GetSignature(byte[] key, string source)
     {
         // Get SHA1 HMAC as Base64
         var date = DateTimeOffset.UtcNow;
-        byte[] bytes = HMACSHA1.HashData(_signatureSecret, Encoding.UTF8.GetBytes($"{source}{date.Year}{date.Month:D2}{date.Day:D2}"));
+        byte[] bytes = HMACSHA1.HashData(key, Encoding.UTF8.GetBytes($"{source}{date.Year}{date.Month:D2}{date.Day:D2}"));
         return Uri.EscapeDataString(Convert.ToBase64String(bytes));
     }
 
