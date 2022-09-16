@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
@@ -22,7 +23,7 @@ public class ImageModuleTests
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly GoogleScraper _googleScraper = new();
-    private readonly DuckDuckGoScraper _duckDuckGoScraper = new();
+    private readonly DuckDuckGoScraper _duckDuckGoScraper;
     private readonly BraveScraper _braveScraper = new();
     private readonly IBingVisualSearch _bingVisualSearch = Utils.CreateMockedBingVisualSearchApi();
     private readonly IYandexImageSearch _yandexImageSearch = Utils.CreateMockedYandexImageSearchApi();
@@ -33,6 +34,9 @@ public class ImageModuleTests
 
     public ImageModuleTests()
     {
+        var ddgClient = new HttpClient();
+        ddgClient.DefaultRequestHeaders.Referrer = new Uri("https://duckduckgo.com/");
+        _duckDuckGoScraper = new(ddgClient);
         var logger = Mock.Of<ILogger<ImageModule>>();
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
