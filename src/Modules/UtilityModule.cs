@@ -279,7 +279,7 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
-    [MessageCommand("Translate")]
+    [MessageCommand("Translate Text")]
     public async Task<RuntimeResult> TranslateAsync(IMessage message)
         => await TranslateAsync(message.GetText(), Context.Interaction.GetLanguageCode());
 

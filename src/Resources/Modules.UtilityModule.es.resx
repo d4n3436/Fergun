@@ -263,8 +263,8 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="translate.ephemeral.name" xml:space="preserve">
     <value>efímero</value>
   </data>
-  <data name="Translate.name" xml:space="preserve">
-    <value>Traducir</value>
+  <data name="translate.name" xml:space="preserve">
+    <value>traducir</value>
   </data>
   <data name="translate.source.description" xml:space="preserve">
     <value>El idioma de origen.</value>
@@ -325,5 +325,8 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   </data>
   <data name="User Info.name" xml:space="preserve">
     <value>Información</value>
+  </data>
+  <data name="Translate Text.name" xml:space="preserve">
+    <value>Traducir Texto</value>
   </data>
 </root>
