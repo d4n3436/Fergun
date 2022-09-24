@@ -120,7 +120,6 @@ public class UrbanDictionaryTests
         Assert.NotNull(definition.Permalink);
         Assert.NotEmpty(definition.Permalink);
         Assert.NotNull(definition.Author);
-        Assert.NotEmpty(definition.Author);
         Assert.NotNull(definition.SoundUrls);
         Assert.NotNull(definition.Example);
         Assert.True(definition.ThumbsDown >= 0);
