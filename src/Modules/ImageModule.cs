@@ -92,7 +92,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.GoogleLogoUrl)
-                .WithColor(Color.Orange));
+                .WithColor((Color)(result.Color ?? Color.Orange)));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }

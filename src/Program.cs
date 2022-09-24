@@ -161,7 +161,6 @@ var host = Host.CreateDefaultBuilder()
 
         services.AddHttpClient(nameof(DuckDuckGoScraper))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
-            .ConfigureHttpClient(client => client.DefaultRequestHeaders.Referrer = new Uri("https://duckduckgo.com/"))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
