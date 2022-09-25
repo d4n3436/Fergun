@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using System.Runtime.Serialization;
 
 namespace Fergun.Apis.Musixmatch;
 
@@ -8,6 +10,24 @@ namespace Fergun.Apis.Musixmatch;
 [Serializable]
 public class MusixmatchException : Exception
 {
+    [DoesNotReturn]
+    public static MusixmatchException Throw(HttpStatusCode statusCode, string? hint)
+    {
+        string message = hint switch
+        {
+            "renew" => "Request failed due to an expired user token.",
+            "captcha" => "Musixmatch API returned a CAPTCHA. Try again later.",
+            _ => $"The API returned a {(int)statusCode} ({statusCode}) status code."
+        };
+
+        throw new MusixmatchException(message, hint);
+    }
+
+    /// <summary>
+    /// Gets a hint from the API that describes the error.
+    /// </summary>
+    public string? Hint { get; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchException"/> class.
     /// </summary>
@@ -22,6 +42,17 @@ public class MusixmatchException : Exception
     public MusixmatchException(string? message)
         : base(message)
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MusixmatchException"/> class with a specified error message.
+    /// </summary>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="hint">The hint.</param>
+    public MusixmatchException(string? message, string? hint)
+        : base(message)
+    {
+        Hint = hint;
     }
 
     /// <summary>

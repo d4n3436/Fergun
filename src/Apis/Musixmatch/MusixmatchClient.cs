@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using System.Text;
-using System.Security.Cryptography;
 using System.Text.Json;
+using Polly;
+using Polly.Retry;
 
 namespace Fergun.Apis.Musixmatch;
 
@@ -10,19 +10,12 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
-    private const string _appId = "community-app-v1.0";
+    private const string _appId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private readonly AsyncRetryPolicy<JsonDocument> _retryPolicy;
     private readonly HttpClient _httpClient;
     private readonly MusixmatchClientState _state;
     private bool _disposed;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MusixmatchClient"/> class.
-    /// </summary>
-    public MusixmatchClient()
-        : this(new HttpClient(new HttpClientHandler { UseCookies = false }), new MusixmatchClientState())
-    {
-    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClient"/> class using the specified <see cref="HttpClient"/>.
@@ -33,6 +26,9 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     {
         _httpClient = httpClient;
         _state = state;
+        _retryPolicy = Policy<JsonDocument>
+            .Handle<MusixmatchException>(x => x.Hint == "renew")
+            .RetryAsync(async (_, _) => await _state.GetUserTokenAsync(refresh: true).ConfigureAwait(false));
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
@@ -44,27 +40,14 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     public async Task<IEnumerable<MusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true)
     {
         EnsureNotDisposed();
-        byte[] signatureSecret = await _state.GetSignatureSecretAsync(_httpClient).ConfigureAwait(false);
 
-        string url = $"https://www.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
-        url = $"{url}&signature={GetSignature(signatureSecret, url)}&signature_protocol=sha1";
+        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
 
-        var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
-        var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url)).ConfigureAwait(false);
 
-        var message = document.RootElement.GetProperty("message");
-
-        var statusCode = (HttpStatusCode)message
-            .GetProperty("header")
-            .GetProperty("status_code")
-            .GetInt32();
-
-        if (statusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"The API returned a {statusCode} status code.", null, statusCode);
-        }
-
-        return message
+        return document
+            .RootElement
+            .GetProperty("message")
             .GetProperty("body")
             .GetProperty("track_list")
             .EnumerateArray()
@@ -75,27 +58,14 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     public async Task<MusixmatchSong?> GetSongAsync(int id)
     {
         EnsureNotDisposed();
-        byte[] signatureSecret = await _state.GetSignatureSecretAsync(_httpClient).ConfigureAwait(false);
 
-        string url = $"https://www.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
-        url = $"{url}&signature={GetSignature(signatureSecret, url)}&signature_protocol=sha1";
+        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri(url)).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url)).ConfigureAwait(false);
 
-        var message = document.RootElement.GetProperty("message");
-
-        var statusCode = (HttpStatusCode)message
-            .GetProperty("header")
-            .GetProperty("status_code")
-            .GetInt32();
-
-        if (statusCode != HttpStatusCode.OK)
-        {
-            throw new HttpRequestException($"The API returned a {(int)statusCode} ({statusCode}) status code.", null, statusCode);
-        }
-
-        var macroCalls = message
+        var macroCalls = document
+            .RootElement
+            .GetProperty("message")
             .GetProperty("body")
             .GetProperty("macro_calls")[0];
 
@@ -113,7 +83,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
                 return null;
             }
 
-            throw new HttpRequestException($"The track.get API method returned a {(int)trackStatusCode} ({trackStatusCode}) status code.", null, trackStatusCode);
+            MusixmatchException.Throw(trackStatusCode, null);
         }
 
         var lyricsMessage = macroCalls
@@ -171,20 +141,47 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         _disposed = true;
     }
 
+    private async Task<JsonDocument> SendRequestAndValidateAsync(string url)
+    {
+        string userToken = await _state.GetUserTokenAsync().ConfigureAwait(false);
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{url}&usertoken={userToken}"));
+        request.Headers.Add("Cookie", "x-mxm-token-guid=undefined");
+
+        using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        var statusCode = (HttpStatusCode)document
+            .RootElement
+            .GetProperty("message")
+            .GetProperty("header")
+            .GetProperty("status_code")
+            .GetInt32();
+
+        if (statusCode != HttpStatusCode.OK)
+        {
+            string? hint = document
+                .RootElement
+                .GetProperty("message")
+                .GetProperty("header")
+                .GetProperty("hint")
+                .GetString();
+
+            MusixmatchException.Throw(statusCode, hint);
+        }
+
+        return document;
+    }
+
     private void EnsureNotDisposed()
     {
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(MusixmatchClient));
         }
-    }
-
-    private static string GetSignature(byte[] key, string source)
-    {
-        // Get SHA1 HMAC as Base64
-        var date = DateTimeOffset.UtcNow;
-        byte[] bytes = HMACSHA1.HashData(key, Encoding.UTF8.GetBytes($"{source}{date.Year}{date.Month:D2}{date.Day:D2}"));
-        return Uri.EscapeDataString(Convert.ToBase64String(bytes));
     }
 
     /// <inheritdoc/>

@@ -1,82 +1,96 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text.Json;
 
 namespace Fergun.Apis.Musixmatch;
 
 /// <summary>
-/// Represents the state of <see cref="MusixmatchClient"/>. It contains a cached HMAC key (signature secret) used to call the APIs.
+/// Represents the state of <see cref="MusixmatchClient"/>. It contains a cached user token used to call the APIs.
 /// </summary>
 public class MusixmatchClientState
 {
-    private static ReadOnlySpan<byte> SignatureSecretStart => Encoding.UTF8.GetBytes("apiUrlSigning:!0,signatureSecret:\"");
+    private static readonly Uri _uri = new("https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0&format=json");
 
-    private static readonly Uri _jsUri = new("https://s.mxmcdn.net/site/js/app-bd6761883f732df7f43e.js");
-    private static readonly TimeSpan _defaultAge = TimeSpan.FromDays(2);
-
+    private string? _userToken;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly SemaphoreSlim _signatureSemaphore = new(1, 1);
-    private byte[] _signatureSecret = Array.Empty<byte>();
-    private double _maxAge = 315360000; // 5256 minutes (3.65 days)
-    private DateTimeOffset _expirationDate;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClientState"/> class.
     /// </summary>
-    public MusixmatchClientState()
+    public MusixmatchClientState(IHttpClientFactory httpClientFactory)
     {
+        _httpClientFactory = httpClientFactory;
     }
 
     /// <summary>
     /// Returns a cached signature secret, or obtains a new one and caches it.
     /// </summary>
-    /// <param name="httpClient">An <see cref="HttpClient"/> instance.</param>
+    /// <param name="refresh">Whether to get a new user token.</param>
     /// <returns>A <see cref="ValueTask{TResult}"/> representing the asynchronous operation. The result contains the signature secret.</returns>
     /// <exception cref="MusixmatchException"></exception>
-    public async ValueTask<byte[]> GetSignatureSecretAsync(HttpClient httpClient)
+    public async ValueTask<string> GetUserTokenAsync(bool refresh = false)
     {
-        ArgumentNullException.ThrowIfNull(httpClient);
+        var client = _httpClientFactory.CreateClient();
 
-        if (_expirationDate > DateTimeOffset.UtcNow)
+        if (!refresh && _userToken is not null)
         {
-            return _signatureSecret;
+            return _userToken;
         }
 
         await _signatureSemaphore.WaitAsync().ConfigureAwait(false);
 
         try
         {
-            if (_expirationDate > DateTimeOffset.UtcNow)
+            if (!refresh && _userToken is not null)
             {
-                return _signatureSecret;
+                return _userToken;
             }
 
-            using var response = await httpClient.GetAsync(_jsUri, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            using var request = new HttpRequestMessage(HttpMethod.Get, _uri);
+            request.Headers.Add("Cookie", "AWSELB=0");
 
-            byte[] js = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            using var response = await client.SendAsync(request).ConfigureAwait(false);
+            await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
 
-            int start = js.AsSpan().IndexOf(SignatureSecretStart);
-            if (start == -1)
+            var statusCode = (HttpStatusCode)document
+                .RootElement
+                .GetProperty("message")
+                .GetProperty("header")
+                .GetProperty("status_code")
+                .GetInt32();
+
+            if (statusCode != HttpStatusCode.OK)
             {
-                throw new MusixmatchException("Unable to get Musixmatch signature secret.");
+                string? hint = document
+                    .RootElement
+                    .GetProperty("message")
+                    .GetProperty("header")
+                    .GetProperty("hint")
+                    .GetString();
+
+                MusixmatchException.Throw(statusCode, hint);
             }
 
-            start += SignatureSecretStart.Length;
+            string? token = document
+                .RootElement
+                .GetProperty("message")
+                .GetProperty("body")
+                .GetProperty("user_token")
+                .GetString();
 
-            int length = js.AsSpan(start).IndexOf((byte)'"');
-            if (length == -1)
+            if (string.IsNullOrEmpty(token) || token == "UpgradeOnlyUpgradeOnlyUpgradeOnlyUpgradeOnly")
             {
-                throw new MusixmatchException("Unable to get Musixmatch signature secret.");
+                throw new MusixmatchException("Unable to get the Musixmatch user token.");
             }
 
-            _maxAge = response.Headers.CacheControl?.MaxAge?.TotalMilliseconds / 1000 ?? _maxAge;
-            _expirationDate = DateTimeOffset.UtcNow.AddMilliseconds(_maxAge).Subtract(response.Headers.Age.GetValueOrDefault(_defaultAge)); // Use _defaultAge if there's no Age header (which shouldn't happen)
-
-            _signatureSecret = js.AsSpan(start, length).ToArray(); // Copy to a new array so the 3MB array we got can be reclaimed by the GC
+            _userToken = token;
         }
         finally
         {
             _signatureSemaphore.Release();
         }
 
-        return _signatureSecret;
+        return _userToken;
     }
 }
