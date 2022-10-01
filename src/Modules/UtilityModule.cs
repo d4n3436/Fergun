@@ -522,6 +522,9 @@ public class UtilityModule : InteractionModuleBase
 
             if (builders.Count == 0)
             {
+                topEmbed.WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, 1],
+                    Constants.WolframAlphaLogoUrl);
+
                 return builder;
             }
 

@@ -8,11 +8,6 @@ namespace Fergun.Apis.WolframAlpha;
 public interface IWolframAlphaImageData
 {
     /// <summary>
-    /// Gets a descriptive title used for internal identification of an image.
-    /// </summary>
-    string AltText { get; }
-
-    /// <summary>
     /// Gets the binary data of the image.
     /// </summary>
     byte[]? Data { get; }

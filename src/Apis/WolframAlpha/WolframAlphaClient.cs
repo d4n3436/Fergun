@@ -60,10 +60,10 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         ArgumentNullException.ThrowIfNull(language);
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var ws = new ClientWebSocket();
-        ws.Options.SetRequestHeader("User-Agent", _defaultUserAgent);
+        using var webSocket = new ClientWebSocket();
+        webSocket.Options.SetRequestHeader("User-Agent", _defaultUserAgent);
 
-        await ws.ConnectAsync(_resultsUri, cancellationToken).ConfigureAwait(false);
+        await webSocket.ConnectAsync(_resultsUri, cancellationToken).ConfigureAwait(false);
 
         var encodedInput = JsonEncodedText.Encode(input);
 
@@ -87,14 +87,13 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         writer.WriteEndObject();
 
         await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await ws.SendAsync(stream.GetBuffer().AsMemory(0, (int)writer.BytesCommitted), WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
+        await webSocket.SendAsync(stream.GetBuffer().AsMemory(0, (int)writer.BytesCommitted), WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
 
         var wolframResult = new WolframAlphaResult();
         var pods = new List<IWolframAlphaPod>();
         var positions = new HashSet<int>();
 
-        bool exit = false;
-        while (!exit && ws.State == WebSocketState.Open)
+        while (webSocket.State == WebSocketState.Open)
         {
             cancellationToken.ThrowIfCancellationRequested();
             OwnedMemorySegment? start = null;
@@ -107,7 +106,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
                 do
                 {
                     var owner = MemoryPool<byte>.Shared.Rent(4096);
-                    result = await ws.ReceiveAsync(owner.Memory, cancellationToken).ConfigureAwait(false);
+                    result = await webSocket.ReceiveAsync(owner.Memory, cancellationToken).ConfigureAwait(false);
 
                     var memory = owner.Memory[..result.Count];
 
@@ -124,24 +123,9 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
                         end = end.Append(owner, memory);
                     }
                 } while (!result.EndOfMessage);
-            }
-            catch
-            {
-                var current = start;
 
-                while (current is not null)
-                {
-                    current.Dispose();
-                    current = current.Next as OwnedMemorySegment;
-                }
+                var sequence = end is null ? new ReadOnlySequence<byte>(start.Memory) : new ReadOnlySequence<byte>(start, 0, end, end.Memory.Length);
 
-                continue;
-            }
-
-            var sequence = end is null ? new ReadOnlySequence<byte>(start.Memory) : new ReadOnlySequence<byte>(start, 0, end, end.Memory.Length);
-
-            try
-            {
                 using var document = JsonDocument.Parse(sequence);
                 string? type = document.RootElement.GetProperty("type").GetString();
 
@@ -181,20 +165,18 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
                         break;
 
                     case "queryComplete":
-                        exit = true;
                         if (wolframResult.Type == WolframAlphaResultType.Unknown)
                         {
                             wolframResult.Type = WolframAlphaResultType.Success;
                         }
-                        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case "error":
-                        exit = true;
                         wolframResult.Type = WolframAlphaResultType.Error;
                         wolframResult.StatusCode = document.RootElement.GetProperty("status").GetInt32();
                         wolframResult.ErrorMessage = document.RootElement.GetProperty("message").GetString();
-                        await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
                         break;
 
                 }
