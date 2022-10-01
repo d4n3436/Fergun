@@ -6,6 +6,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Apis.Wikipedia;
+using Fergun.Apis.WolframAlpha;
 using Fergun.Interactive;
 using Fergun.Modules;
 using GTranslate.Translators;
@@ -24,6 +25,7 @@ public class UtilityModuleTests
     private readonly GoogleTranslator2 _googleTranslator2 = new();
     private readonly SearchClient _searchClient = new(new());
     private readonly IWikipediaClient _wikipediaClient = null!;
+    private readonly IWolframAlphaClient _wolframAlphaClient = null!;
     private readonly Mock<UtilityModule> _moduleMock;
     
     public UtilityModuleTests()
@@ -32,7 +34,7 @@ public class UtilityModuleTests
         SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
         var interactive = new InteractiveService(new DiscordSocketClient(), new InteractiveConfig { ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, shared,
-            interactive, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient)) { CallBase = true };
+            interactive, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }

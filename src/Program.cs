@@ -8,6 +8,7 @@ using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
+using Fergun.Apis.WolframAlpha;
 using Fergun.Apis.Yandex;
 using Fergun.Data;
 using Fergun.Extensions;
@@ -88,6 +89,7 @@ var host = Host.CreateDefaultBuilder()
         services.AddHostedService<BotListService>();
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
+        services.AddHostedService<InteractiveServiceLoggerHost>();
         services.AddSingleton<MusixmatchClientState>();
         services.AddFergunPolicies();
 
@@ -105,6 +107,10 @@ var host = Host.CreateDefaultBuilder()
             .AddRetryPolicy();
 
         services.AddHttpClient<IWikipediaClient, WikipediaClient>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<IWolframAlphaClient, WolframAlphaClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

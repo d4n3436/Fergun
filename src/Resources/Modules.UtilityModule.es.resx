@@ -329,4 +329,31 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Translate Text.name" xml:space="preserve">
     <value>Traducir Texto</value>
   </data>
+  <data name="Failed to get the results. Status code: {0}. Error message: {1}" xml:space="preserve">
+    <value>No se pudo obtener los resultados. Código de estado: {0}. Mensaje de error: {1}</value>
+  </data>
+  <data name="No results found. Did you mean...{0}" xml:space="preserve">
+    <value>No se encontraron resultados. Quisiste decir...{0}</value>
+  </data>
+  <data name="wolfram.description" xml:space="preserve">
+    <value>Pregunta a Wolfram|Alpha sobre algo.</value>
+  </data>
+  <data name="wolfram.input.description" xml:space="preserve">
+    <value>Algo a calcular o saber.</value>
+  </data>
+  <data name="wolfram.input.name" xml:space="preserve">
+    <value>entrada</value>
+  </data>
+  <data name="wolfram.name" xml:space="preserve">
+    <value>wolfram</value>
+  </data>
+  <data name="WolframAlpha Results | Page {0} of {1}" xml:space="preserve">
+    <value>Resultados de WolframAlpha | Página {0} de {1}</value>
+  </data>
+  <data name="Wolfram|Alpha doesn't understand your query." xml:space="preserve">
+    <value>Wolfram|Alpha no entiende su consulta.</value>
+  </data>
+  <data name="Wolfram|Alpha Results" xml:space="preserve">
+    <value>Resultados de Wolfram|Alpha</value>
+  </data>
 </root>

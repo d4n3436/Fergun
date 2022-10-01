@@ -3,6 +3,7 @@ using System.Globalization;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Wikipedia;
+using Fergun.Apis.WolframAlpha;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
@@ -33,6 +34,7 @@ public class UtilityModule : InteractionModuleBase
     private readonly IFergunTranslator _translator;
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
+    private readonly IWolframAlphaClient _wolframAlphaClient;
 
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, IgnoreMetadata = true };
@@ -42,7 +44,8 @@ public class UtilityModule : InteractionModuleBase
         .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient)
+        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient,
+        IWolframAlphaClient wolframAlphaClient)
     {
         _logger = logger;
         _localizer = localizer;
@@ -52,6 +55,7 @@ public class UtilityModule : InteractionModuleBase
         _translator = translator;
         _searchClient = searchClient;
         _wikipediaClient = wikipediaClient;
+        _wolframAlphaClient = wolframAlphaClient;
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
@@ -399,6 +403,139 @@ public class UtilityModule : InteractionModuleBase
             }
 
             return page;
+        }
+    }
+
+    [SlashCommand("wolfram", "Asks Wolfram|Alpha about something.")]
+    public async Task<RuntimeResult> WolframAlpha([Autocomplete(typeof(WolframAlphaAutocompleteHandler))] [Summary(description: "Something to calculate or know about.")] string input)
+    {
+        await Context.Interaction.DeferAsync();
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
+        var result = await _wolframAlphaClient.GetResultsAsync(input, Context.Interaction.GetLanguageCode(), cts.Token);
+
+        if (result.Type == WolframAlphaResultType.Error)
+        {
+            return FergunResult.FromError(_localizer["Failed to get the results. Status code: {0}. Error message: {1}", result.StatusCode!, result.ErrorMessage!]);
+        }
+
+        if (result.Type == WolframAlphaResultType.DidYouMean)
+        {
+            return FergunResult.FromError(_localizer["No results found. Did you mean...{0}", $"\n- {string.Join("\n- ", result.DidYouMean)}"]);
+        }
+
+        if (result.Type == WolframAlphaResultType.FutureTopic)
+        {
+            var embed = new EmbedBuilder()
+                .WithTitle(result.FutureTopic!.Topic)
+                .WithDescription(result.FutureTopic!.Message)
+                .WithThumbnailUrl(Constants.WolframAlphaLogoUrl)
+                .WithColor(Color.Red)
+                .Build();
+
+            await Context.Interaction.FollowupAsync(embed: embed);
+            return FergunResult.FromSuccess();
+        }
+
+        if (result.Pods.Count == 0 || result.Type == WolframAlphaResultType.NoResult)
+        {
+            return FergunResult.FromError(_localizer["Wolfram|Alpha doesn't understand your query."]);
+        }
+
+        var builders = new List<EmbedBuilder>();
+        var images = new Dictionary<int, byte[]>();
+
+        var topEmbed = new EmbedBuilder()
+            .WithTitle(_localizer["Wolfram|Alpha Results"])
+            .WithThumbnailUrl(Constants.WolframAlphaLogoUrl)
+            .WithColor(Color.Red);
+
+        // TODO: Add warnings and assumptions
+        foreach (var pod in result.Pods)
+        {
+            if (pod.SubPods.Count == 0) // Shouldn't happen
+                continue;
+
+            if (pod.SubPods.Count == 1)
+            {
+                var subPod = pod.SubPods[0];
+
+                // If there's data in plain text and there isn't a newline, use that instead
+                if (!string.IsNullOrEmpty(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
+                {
+                    topEmbed.AddField(pod.Title, subPod.PlainText, true);
+                }
+                else
+                {
+                    var builder = new EmbedBuilder()
+                        .WithDescription(Format.Bold(pod.Title));
+
+                    if (subPod.Image.IsDataPresent)
+                    {
+                        builder.WithImageUrl($"attachment://{builders.Count + 1}.gif");
+                        images.Add(builders.Count, subPod.Image.Data);
+                    }
+                    else
+                    {
+                        builder.WithImageUrl(subPod.Image.SourceUrl);
+                    }
+
+                    builder.WithColor(Color.Red);
+                    builders.Add(builder);
+                }
+            }
+            else
+            {
+                // TODO: Merge subpods images
+            }
+        }
+
+        var paginator = new LazyPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithMaxPageIndex(builders.Count == 0 ? 0 : builders.Count - 1)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes(_fergunOptions)
+            .WithLocalizedPrompts(_localizer)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10),
+            InteractionResponseType.DeferredChannelMessageWithSource, cancellationToken: CancellationToken.None);
+
+        return FergunResult.FromSuccess();
+
+        IPageBuilder GeneratePage(int index)
+        {
+            var builder = new MultiEmbedPageBuilder();
+            if (topEmbed.Fields.Count == 0) // No info in plain text
+            {
+                builders[index].WithTitle(_localizer["Wolfram|Alpha Results"])
+                    .WithThumbnailUrl(Constants.WolframAlphaLogoUrl);
+            }
+            else
+            {
+                builder.AddBuilder(topEmbed);
+            }
+
+            if (builders.Count == 0)
+            {
+                return builder;
+            }
+
+            return builder
+                .AddBuilder(builders[index].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl))
+                .WithAttachmentsFactory(() => GetAttachments(index));
+        }
+
+        IEnumerable<FileAttachment> GetAttachments(int index)
+        {
+            // TODO: Cache attachments
+            return images.TryGetValue(index, out byte[]? bytes)
+                ? new FileAttachment[] { new(new MemoryStream(bytes), $"{index + 1}.gif") }
+                : Enumerable.Empty<FileAttachment>();
         }
     }
 
