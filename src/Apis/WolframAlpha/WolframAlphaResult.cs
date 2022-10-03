@@ -18,6 +18,9 @@ public class WolframAlphaResult : IWolframAlphaResult
     /// <inheritdoc/>
     public string? ErrorMessage { get; set; }
 
+    /// <inheritdoc cref="IWolframAlphaResult.Pods"/>
+    public IReadOnlyCollection<WolframAlphaPod> Pods { get; set; } = Array.Empty<WolframAlphaPod>();
+
     /// <inheritdoc/>
-    public IReadOnlyList<IWolframAlphaPod> Pods { get; set; } = Array.Empty<IWolframAlphaPod>();
+    IReadOnlyCollection<IWolframAlphaPod> IWolframAlphaResult.Pods => Pods;
 }

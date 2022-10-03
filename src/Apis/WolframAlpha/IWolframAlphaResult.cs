@@ -33,5 +33,5 @@ public interface IWolframAlphaResult
     /// <summary>
     /// Gets the pods.
     /// </summary>
-    IReadOnlyList<IWolframAlphaPod> Pods { get; }
+    IReadOnlyCollection<IWolframAlphaPod> Pods { get; }
 }
