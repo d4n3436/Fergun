@@ -445,6 +445,7 @@ public class UtilityModule : InteractionModuleBase
 
         var builders = new List<EmbedBuilder>();
         var images = new Dictionary<int, byte[]>();
+        var cachedAttachments = new Dictionary<int, string>();
 
         var topEmbed = new EmbedBuilder()
             .WithTitle(_localizer["Wolfram|Alpha Results"])
@@ -491,7 +492,7 @@ public class UtilityModule : InteractionModuleBase
             }
         }
 
-        var paginator = new LazyPaginatorBuilder()
+        var paginator = new WolframAlphaPaginatorBuilder()
             .AddUser(Context.User)
             .WithPageFactory(GeneratePage)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
@@ -499,6 +500,7 @@ public class UtilityModule : InteractionModuleBase
             .WithMaxPageIndex(builders.Count == 0 ? 0 : builders.Count - 1)
             .WithFooter(PaginatorFooter.None)
             .WithFergunEmotes(_fergunOptions)
+            .WithCacheLoadedPages(false)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -507,7 +509,7 @@ public class UtilityModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
 
-        IPageBuilder GeneratePage(int index)
+        IPageBuilder GeneratePage(int index, int lastIndex, IUserMessage? message)
         {
             var builder = new MultiEmbedPageBuilder();
             if (topEmbed.Fields.Count == 0) // No info in plain text
@@ -522,10 +524,26 @@ public class UtilityModule : InteractionModuleBase
 
             if (builders.Count == 0)
             {
-                topEmbed.WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, 1],
-                    Constants.WolframAlphaLogoUrl);
+                topEmbed.WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, 1], Constants.WolframAlphaLogoUrl);
 
                 return builder;
+            }
+
+            if (cachedAttachments.TryGetValue(lastIndex, out string? imageUrl))
+            {
+                if (images.Remove(lastIndex))
+                {
+                    builders[lastIndex].WithImageUrl(imageUrl);
+                }
+            }
+            else
+            {
+                var first = message?.Embeds?.FirstOrDefault(x => x.Image.HasValue && x.Image.Value.Url.StartsWith("https://cdn.discordapp.com/attachments"));
+
+                if (first is not null)
+                {
+                    cachedAttachments.Add(lastIndex, first.Image!.Value.Url);
+                }
             }
 
             return builder
@@ -535,7 +553,6 @@ public class UtilityModule : InteractionModuleBase
 
         IEnumerable<FileAttachment> GetAttachments(int index)
         {
-            // TODO: Cache attachments
             return images.TryGetValue(index, out byte[]? bytes)
                 ? new FileAttachment[] { new(new MemoryStream(bytes), $"{index + 1}.gif") }
                 : Enumerable.Empty<FileAttachment>();
