@@ -58,7 +58,7 @@ public static class Extensions
         if (context.Channel is IGuildChannel guildChannel)
             displayMessage = $"{guildChannel.Guild.Name}/";
 
-        displayMessage += context.Channel.Name;
+        displayMessage += context.Channel?.Name ?? $"??? (Id: {context.Interaction.ChannelId})";
 
         return displayMessage;
     }
