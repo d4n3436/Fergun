@@ -147,6 +147,9 @@
   <data name="Image size exceeds the limit (Max. 20MB)." xml:space="preserve">
     <value>El tamaño de imagen supera el límite (Máx. 20MB).</value>
   </data>
+  <data name="Input" xml:space="preserve">
+    <value>Entrada</value>
+  </data>
   <data name="Invalid input. The number must be in the range of {0} to {1}, excluding the current page." xml:space="preserve">
     <value>Entrada inválida. El número debe estar en rango de {0} a {1}, excluyendo la página actual.</value>
   </data>

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Polly;
 using Polly.Caching;
 using Polly.Caching.Memory;
@@ -60,6 +61,21 @@ public static class Extensions
         displayMessage += context.Channel.Name;
 
         return displayMessage;
+    }
+
+    public static string Dump<T>(this T obj, int maxDepth = 2)
+    {
+        using var strWriter = new StringWriter();
+        using var jsonWriter = new CustomJsonTextWriter(strWriter);
+        var resolver = new CustomContractResolver(jsonWriter, maxDepth);
+        var serializer = new JsonSerializer
+        {
+            ContractResolver = resolver,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            Formatting = Formatting.Indented
+        };
+        serializer.Serialize(jsonWriter, obj);
+        return strWriter.ToString();
     }
 
     public static IEnumerable<AutocompleteResult> PrependCurrentIfNotPresent(this IEnumerable<AutocompleteResult> source, string option)
