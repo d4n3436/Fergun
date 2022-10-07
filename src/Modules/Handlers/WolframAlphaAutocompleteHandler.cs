@@ -2,6 +2,8 @@
 using Discord.Interactions;
 using Microsoft.Extensions.DependencyInjection;
 using Fergun.Apis.WolframAlpha;
+using Polly;
+using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
@@ -11,7 +13,7 @@ public class WolframAlphaAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        string input = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? input = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -24,10 +26,17 @@ public class WolframAlphaAutocompleteHandler : AutocompleteHandler
             .ServiceProvider
             .GetRequiredService<IWolframAlphaClient>();
 
-        var results = (await wolframAlphaClient.GetAutocompleteResultsAsync(input))
+        var policy = scope
+            .ServiceProvider
+            .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
+            .Get<IAsyncPolicy<string[]>>("WolframPolicy");
+
+        string[] results = await policy.ExecuteAsync(async _ =>  (await wolframAlphaClient.GetAutocompleteResultsAsync(input)).ToArray(), new Context(input));
+
+        var suggestions = results
             .Take(25)
             .Select(x => new AutocompleteResult(x, x));
 
-        return AutocompletionResult.FromSuccess(results);
+        return AutocompletionResult.FromSuccess(suggestions);
     }
 }

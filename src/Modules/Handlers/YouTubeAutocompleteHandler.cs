@@ -15,7 +15,7 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim().Truncate(100, string.Empty);
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim().Truncate(100, string.Empty);
 
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
@@ -33,7 +33,7 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
         string url = $"https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl={language}&gs_ri=youtube&ds=yt&q={Uri.EscapeDataString(text)}&xhr=t";
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 

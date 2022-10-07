@@ -15,7 +15,7 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim().Truncate(100, string.Empty);
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim().Truncate(100, string.Empty);
 
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
@@ -32,7 +32,7 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
 
         string url = $"https://www.google.com/complete/search?q={Uri.EscapeDataString(text)}&client=chrome&hl={locale}&xhr=t";
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 

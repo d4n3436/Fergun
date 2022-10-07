@@ -4,6 +4,8 @@ using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using Polly.Registry;
+using Polly;
 
 namespace Fergun.Modules.Handlers;
 
@@ -13,22 +15,31 @@ public class WikipediaAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim().Truncate(100, string.Empty);
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim().Truncate(100, string.Empty);
 
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
+        string language = autocompleteInteraction.GetLanguageCode();
+
         await using var scope = services.CreateAsyncScope();
 
-        var urbanDictionary = scope
+        var wikipediaClient = scope
             .ServiceProvider
             .GetRequiredService<IWikipediaClient>();
 
-        var results = (await urbanDictionary.GetAutocompleteResultsAsync(text, autocompleteInteraction.GetLanguageCode()))
+        var policy = scope
+            .ServiceProvider
+            .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
+            .Get<IAsyncPolicy<IReadOnlyList<string>>>("WikipediaPolicy");
+
+        var results = await policy.ExecuteAsync(_ => wikipediaClient.GetAutocompleteResultsAsync(text, language), new Context($"{text}-{language}"));
+
+        var suggestions = results
             .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))
             .PrependCurrentIfNotPresent(text)
             .Take(25);
 
-        return AutocompletionResult.FromSuccess(results);
+        return AutocompletionResult.FromSuccess(suggestions);
     }
 }

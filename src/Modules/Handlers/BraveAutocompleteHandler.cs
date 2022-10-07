@@ -14,7 +14,7 @@ public class BraveAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
@@ -31,7 +31,7 @@ public class BraveAutocompleteHandler : AutocompleteHandler
 
         var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
 
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 

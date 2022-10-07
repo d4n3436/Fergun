@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
-using GTranslate;
 using GTranslate.Translators;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +10,10 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
 {
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        string text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
+
+        if (string.IsNullOrEmpty(text))
+            return Task.FromResult(AutocompletionResult.FromSuccess());
 
         var translator = services
             .GetRequiredService<MicrosoftTranslator>();

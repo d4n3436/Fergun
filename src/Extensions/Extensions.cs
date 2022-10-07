@@ -1,4 +1,6 @@
 ﻿using Discord;
+using Fergun.Apis.Genius;
+using Fergun.Apis.Musixmatch;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -34,9 +36,21 @@ public static class Extensions
                 return new PolicyRegistry
                 {
                     { "GeneralPolicy", Policy.WrapAsync(cachePolicy, retryPolicy) },
-                    { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, retryPolicy, timeoutPolicy) }
+                    { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, timeoutPolicy, retryPolicy) },
+                    { "GeniusPolicy", provider.CreateAutocompletePolicy<IGeniusSong[]>() },
+                    { "MusixmatchPolicy", provider.CreateAutocompletePolicy<IMusixmatchSong[]>() },
+                    { "UrbanPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
+                    { "WikipediaPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
+                    { "WolframPolicy", provider.CreateAutocompletePolicy<string[]>() }
                 };
             });
+    }
+
+    private static IAsyncPolicy<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
+    {
+        var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<TResult>();
+        var policy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
+        return Policy.WrapAsync(policy, Policy.TimeoutAsync<TResult>(TimeSpan.FromSeconds(3)));
     }
 
     public static LogLevel ToLogLevel(this LogSeverity logSeverity)

@@ -1,9 +1,10 @@
-﻿using System.Text.Json;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Musixmatch;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using Polly.Registry;
+using Polly;
 
 namespace Fergun.Modules.Handlers;
 
@@ -12,7 +13,7 @@ public class MusixmatchAutocompleteHandler : AutocompleteHandler
     /// <inheritdoc />
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        string text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -25,7 +26,12 @@ public class MusixmatchAutocompleteHandler : AutocompleteHandler
             .ServiceProvider
             .GetRequiredService<IMusixmatchClient>();
 
-        var songs = await musixmatchClient.SearchSongsAsync(text);
+        var policy = scope
+            .ServiceProvider
+            .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
+            .Get<IAsyncPolicy<IMusixmatchSong[]>>("MusixmatchPolicy");
+
+        var songs = await policy.ExecuteAsync(async _ => (await musixmatchClient.SearchSongsAsync(text)).ToArray(), new Context(text));
 
         var results = songs
             .Where(x => !x.IsInstrumental && x.HasLyrics && !x.IsRestricted)

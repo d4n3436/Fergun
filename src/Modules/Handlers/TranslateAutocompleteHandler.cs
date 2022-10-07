@@ -11,7 +11,10 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        string text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
+
+        if (string.IsNullOrEmpty(text))
+            return Task.FromResult(AutocompletionResult.FromSuccess());
 
         IEnumerable<Language> languages = Language
             .LanguageDictionary

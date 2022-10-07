@@ -14,7 +14,7 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        var text = (autocompleteInteraction.Data.Current.Value as string ?? "").Trim();
+        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
@@ -36,12 +36,10 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
 
         bool isNsfw = context.Channel.IsNsfw();
 
-        client.DefaultRequestHeaders.TryAddWithoutValidation("cookie", $"p={(isNsfw ? -2 : 1)}");
+        string url = $"https://duckduckgo.com/ac/?q={Uri.EscapeDataString(text)}&kl={locale}&p={(isNsfw ? -1 : 1)}";
 
-        string url = $"https://duckduckgo.com/ac/?q={Uri.EscapeDataString(text)}&kl={locale}";
-
-        var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context($"{url}-nsfw:{isNsfw}"));
-        var bytes = await response.Content.ReadAsByteArrayAsync();
+        var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);
 
