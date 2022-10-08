@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
 using AutoBogus.Moq;
@@ -52,7 +53,7 @@ public class UrbanModuleTests
         Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
-        Mock.Get(_urbanDictionary).Verify(u => u.GetDefinitionsAsync(It.Is<string>(x => x == term)), Times.Once);
+        Mock.Get(_urbanDictionary).Verify(u => u.GetDefinitionsAsync(It.Is<string>(x => x == term), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Theory]
@@ -63,7 +64,7 @@ public class UrbanModuleTests
         Assert.False(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
-        Mock.Get(_urbanDictionary).Verify(u => u.GetDefinitionsAsync(It.Is<string>(x => x == term)), Times.Once);
+        Mock.Get(_urbanDictionary).Verify(u => u.GetDefinitionsAsync(It.Is<string>(x => x == term), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -73,7 +74,7 @@ public class UrbanModuleTests
         Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
-        Mock.Get(_urbanDictionary).Verify(u => u.GetRandomDefinitionsAsync(), Times.Once);
+        Mock.Get(_urbanDictionary).Verify(u => u.GetRandomDefinitionsAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -83,7 +84,7 @@ public class UrbanModuleTests
         Assert.True(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
-        Mock.Get(_urbanDictionary).Verify(u => u.GetWordsOfTheDayAsync(), Times.Once);
+        Mock.Get(_urbanDictionary).Verify(u => u.GetWordsOfTheDayAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

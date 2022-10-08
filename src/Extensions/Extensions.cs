@@ -37,11 +37,11 @@ public static class Extensions
                 {
                     { "GeneralPolicy", Policy.WrapAsync(cachePolicy, retryPolicy) },
                     { "AutocompletePolicy", Policy.WrapAsync(cachePolicy, timeoutPolicy, retryPolicy) },
-                    { "GeniusPolicy", provider.CreateAutocompletePolicy<IGeniusSong[]>() },
-                    { "MusixmatchPolicy", provider.CreateAutocompletePolicy<IMusixmatchSong[]>() },
+                    { "GeniusPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IGeniusSong>>() },
+                    { "MusixmatchPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IMusixmatchSong>>() },
                     { "UrbanPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
                     { "WikipediaPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
-                    { "WolframPolicy", provider.CreateAutocompletePolicy<string[]>() }
+                    { "WolframPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() }
                 };
             });
     }

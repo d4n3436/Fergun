@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using AutoBogus;
 using Bogus;
 using Discord;
@@ -125,13 +126,13 @@ internal static class Utils
         faker ??= new Faker();
         var bingMock = new Mock<IBingVisualSearch>();
 
-        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty))).ReturnsAsync(() => string.Empty);
-        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)))).ReturnsAsync(() => faker.Lorem.Sentence());
-        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"))).ThrowsAsync(new BingException("Error message."));
+        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty), It.IsAny<CancellationToken>())).ReturnsAsync(() => string.Empty);
+        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.Lorem.Sentence());
+        bingMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Error message."));
 
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ReturnsAsync(Enumerable.Empty<IBingReverseImageSearchResult>);
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedBingReverseImageSearchResult(faker)));
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>())).ThrowsAsync(new BingException("Error message."));
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(Enumerable.Empty<IBingReverseImageSearchResult>);
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedBingReverseImageSearchResult(faker)));
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Error message."));
 
         return bingMock.Object;
     }
@@ -155,13 +156,13 @@ internal static class Utils
         faker ??= new Faker();
         var yandexMock = new Mock<IYandexImageSearch>();
 
-        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty))).ReturnsAsync(() => string.Empty);
-        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)))).ReturnsAsync(() => faker.Lorem.Sentence());
-        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"))).ThrowsAsync(new YandexException("Error message."));
+        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty), It.IsAny<CancellationToken>())).ReturnsAsync(() => string.Empty);
+        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.Lorem.Sentence());
+        yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Error message."));
         
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<YandexSearchFilterMode>())).ReturnsAsync(Enumerable.Empty<IYandexReverseImageSearchResult>);
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<YandexSearchFilterMode>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedYandexReverseImageSearchResult(faker)));
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<YandexSearchFilterMode>())).ThrowsAsync(new YandexException("Error message."));
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(Enumerable.Empty<IYandexReverseImageSearchResult>);
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedYandexReverseImageSearchResult(faker)));
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Error message."));
 
         return yandexMock.Object;
     }
@@ -184,13 +185,13 @@ internal static class Utils
         faker ??= new Faker();
         var mock = new Mock<IUrbanDictionary>();
 
-        mock.Setup(u => u.GetDefinitionsAsync(It.IsNotNull<string>())).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
-        mock.Setup(u => u.GetDefinitionsAsync(It.Is<string>(s => s == null))).ReturnsAsync(Array.Empty<UrbanDefinition>());
-        mock.Setup(u => u.GetRandomDefinitionsAsync()).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
-        mock.Setup(u => u.GetDefinitionAsync(It.IsAny<int>())).ReturnsAsync(CreateFakeUrbanDefinition);
-        mock.Setup(u => u.GetWordsOfTheDayAsync()).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
-        mock.Setup(u => u.GetAutocompleteResultsAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<string>(20));
-        mock.Setup(u => u.GetAutocompleteResultsExtraAsync(It.IsAny<string>())).ReturnsAsync(AutoFaker.Generate<UrbanAutocompleteResult>(20));
+        mock.Setup(u => u.GetDefinitionsAsync(It.IsNotNull<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetDefinitionsAsync(It.Is<string>(s => s == null), It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<UrbanDefinition>());
+        mock.Setup(u => u.GetRandomDefinitionsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetDefinitionAsync(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(CreateFakeUrbanDefinition);
+        mock.Setup(u => u.GetWordsOfTheDayAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(10, CreateFakeUrbanDefinition).ToList());
+        mock.Setup(u => u.GetAutocompleteResultsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(AutoFaker.Generate<string>(20));
+        mock.Setup(u => u.GetAutocompleteResultsExtraAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(AutoFaker.Generate<UrbanAutocompleteResult>(20));
 
         return mock.Object;
     }

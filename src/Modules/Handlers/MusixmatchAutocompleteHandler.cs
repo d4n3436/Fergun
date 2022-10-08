@@ -29,9 +29,9 @@ public class MusixmatchAutocompleteHandler : AutocompleteHandler
         var policy = scope
             .ServiceProvider
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
-            .Get<IAsyncPolicy<IMusixmatchSong[]>>("MusixmatchPolicy");
+            .Get<IAsyncPolicy<IReadOnlyList<IMusixmatchSong>>>("MusixmatchPolicy");
 
-        var songs = await policy.ExecuteAsync(async _ => (await musixmatchClient.SearchSongsAsync(text)).ToArray(), new Context(text));
+        var songs = await policy.ExecuteAsync((_, ct) => musixmatchClient.SearchSongsAsync(text, true, ct), new Context(text), CancellationToken.None);
 
         var results = songs
             .Where(x => !x.IsInstrumental && x.HasLyrics && !x.IsRestricted)

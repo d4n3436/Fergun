@@ -29,7 +29,7 @@ public class BraveAutocompleteHandler : AutocompleteHandler
 
         string url = $"https://search.brave.com/api/suggest?q={Uri.EscapeDataString(text)}&source=web";
 
-        var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
+        var response = await policy.ExecuteAsync((_, ct) => client.GetAsync(new Uri(url), ct), new Context(url), CancellationToken.None);
 
         byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 

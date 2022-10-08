@@ -31,7 +31,7 @@ public class UrbanAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<IReadOnlyList<string>>>("UrbanPolicy");
 
-        var results = await policy.ExecuteAsync(_ => urbanDictionary.GetAutocompleteResultsAsync(text), new Context(text));
+        var results = await policy.ExecuteAsync((_, ct) => urbanDictionary.GetAutocompleteResultsAsync(text, ct), new Context(text), CancellationToken.None);
 
         var suggestions = results
             .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))

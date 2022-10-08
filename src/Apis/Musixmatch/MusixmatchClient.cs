@@ -36,14 +36,15 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMusixmatchClient.SearchSongsAsync(string, bool)"/>
-    public async Task<IEnumerable<MusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true)
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<IMusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://apic-desktop.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
 
-        var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url)).ConfigureAwait(false);
+        using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url, cancellationToken)).ConfigureAwait(false);
 
         return document
             .RootElement
@@ -51,17 +52,19 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .GetProperty("body")
             .GetProperty("track_list")
             .EnumerateArray()
-            .Select(x => x.GetProperty("track").Deserialize<MusixmatchSong>()!);
+            .Select(x => x.GetProperty("track").Deserialize<MusixmatchSong>()!)
+            .ToArray();
     }
 
-    /// <inheritdoc cref="IMusixmatchClient.GetSongAsync(int)"/>
-    public async Task<MusixmatchSong?> GetSongAsync(int id)
+    /// <inheritdoc/>
+    public async Task<IMusixmatchSong?> GetSongAsync(int id, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://apic-desktop.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
 
-        using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url)).ConfigureAwait(false);
+        using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url, cancellationToken)).ConfigureAwait(false);
 
         var macroCalls = document
             .RootElement
@@ -141,18 +144,18 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         _disposed = true;
     }
 
-    private async Task<JsonDocument> SendRequestAndValidateAsync(string url)
+    private async Task<JsonDocument> SendRequestAndValidateAsync(string url, CancellationToken cancellationToken = default)
     {
         string userToken = await _state.GetUserTokenAsync().ConfigureAwait(false);
 
         using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{url}&usertoken={userToken}"));
         request.Headers.Add("Cookie", "x-mxm-token-guid=undefined");
 
-        using var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-        var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         var statusCode = (HttpStatusCode)document
             .RootElement
@@ -183,10 +186,4 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             throw new ObjectDisposedException(nameof(MusixmatchClient));
         }
     }
-
-    /// <inheritdoc/>
-    async Task<IEnumerable<IMusixmatchSong>> IMusixmatchClient.SearchSongsAsync(string query, bool onlyWithLyrics) => await SearchSongsAsync(query, onlyWithLyrics).ConfigureAwait(false);
-
-    /// <inheritdoc/>
-    async Task<IMusixmatchSong?> IMusixmatchClient.GetSongAsync(int id) => await GetSongAsync(id).ConfigureAwait(false);
 }

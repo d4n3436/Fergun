@@ -37,23 +37,25 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<string>> GetAutocompleteResultsAsync(string input)
+    public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string input, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://www.wolframalpha.com/n/v1/api/autocomplete/?i={Uri.EscapeDataString(input)}")).ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://www.wolframalpha.com/n/v1/api/autocomplete/?i={Uri.EscapeDataString(input)}"), cancellationToken).ConfigureAwait(false);
 
-        var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         return document
             .RootElement
             .GetProperty("results")
             .EnumerateArray()
-            .Select(x => x.GetProperty("input").GetString()!);
+            .Select(x => x.GetProperty("input").GetString()!)
+            .ToArray();
     }
 
     /// <inheritdoc/>
-    public async Task<IWolframAlphaResult> GetResultsAsync(string input, string language, CancellationToken cancellationToken)
+    public async Task<IWolframAlphaResult> GetResultsAsync(string input, string language, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
         ArgumentNullException.ThrowIfNull(input);

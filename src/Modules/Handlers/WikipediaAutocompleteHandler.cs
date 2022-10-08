@@ -33,7 +33,7 @@ public class WikipediaAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<IReadOnlyList<string>>>("WikipediaPolicy");
 
-        var results = await policy.ExecuteAsync(_ => wikipediaClient.GetAutocompleteResultsAsync(text, language), new Context($"{text}-{language}"));
+        var results = await policy.ExecuteAsync((_, ct) => wikipediaClient.GetAutocompleteResultsAsync(text, language, ct), new Context($"{text}-{language}"), CancellationToken.None);
 
         var suggestions = results
             .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))

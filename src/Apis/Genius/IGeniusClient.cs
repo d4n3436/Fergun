@@ -9,13 +9,15 @@ public interface IGeniusClient
     /// Searches for Genius songs that matches <paramref name="query"/>.
     /// </summary>
     /// <param name="query">The search term.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains an <see cref="IEnumerable{T}"/> of matching songs.</returns>
-    Task<IEnumerable<IGeniusSong>> SearchSongsAsync(string query);
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only list of matching songs.</returns>
+    Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets a Genius song by its ID.
     /// </summary>
     /// <param name="id">The ID of the song.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains the song.</returns>
-    Task<IGeniusSong?> GetSongAsync(int id);
+    Task<IGeniusSong?> GetSongAsync(int id, CancellationToken cancellationToken = default);
 }

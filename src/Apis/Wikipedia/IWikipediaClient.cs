@@ -10,14 +10,16 @@ public interface IWikipediaClient
     /// </summary>
     /// <param name="query">The search string.</param>
     /// <param name="language">The search language.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation. The result contains an ordered <see cref="IEnumerable{T}"/> of articles.</returns>
-    Task<IEnumerable<IWikipediaArticle>> GetArticlesAsync(string query, string language);
+    Task<IEnumerable<IWikipediaArticle>> GetArticlesAsync(string query, string language, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets autocomplete results.
     /// </summary>
     /// <param name="query">The search string.</param>
     /// <param name="language">The search language.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation. The result contains a read-only list of autocomplete results.</returns>
-    Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string query, string language);
+    Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string query, string language, CancellationToken cancellationToken = default);
 }

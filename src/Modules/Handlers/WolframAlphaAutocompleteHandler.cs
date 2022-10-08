@@ -29,9 +29,9 @@ public class WolframAlphaAutocompleteHandler : AutocompleteHandler
         var policy = scope
             .ServiceProvider
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
-            .Get<IAsyncPolicy<string[]>>("WolframPolicy");
+            .Get<IAsyncPolicy<IReadOnlyList<string>>>("WolframPolicy");
 
-        string[] results = await policy.ExecuteAsync(async _ =>  (await wolframAlphaClient.GetAutocompleteResultsAsync(input)).ToArray(), new Context(input));
+        var results = await policy.ExecuteAsync((_, ct) =>  wolframAlphaClient.GetAutocompleteResultsAsync(input, ct), new Context(input), CancellationToken.None);
 
         var suggestions = results
             .Take(25)

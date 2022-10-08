@@ -32,7 +32,7 @@ public class YouTubeAutocompleteHandler : AutocompleteHandler
 
         string url = $"https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl={language}&gs_ri=youtube&ds=yt&q={Uri.EscapeDataString(text)}&xhr=t";
 
-        var response = await policy.ExecuteAsync(_ => client.GetAsync(new Uri(url)), new Context(url));
+        var response = await policy.ExecuteAsync((_, ct) => client.GetAsync(new Uri(url), ct), new Context(url), CancellationToken.None);
         byte[] bytes = await response.Content.ReadAsByteArrayAsync();
 
         using var document = JsonDocument.Parse(bytes);

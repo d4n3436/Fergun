@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
@@ -7,7 +8,6 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
-using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -32,12 +32,12 @@ public class OcrModuleTests
 
     public OcrModuleTests()
     {
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl))).ReturnsAsync("test");
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl))).ReturnsAsync(string.Empty);
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl))).ThrowsAsync(new BingException("Invalid image."));
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl))).ReturnsAsync("test");
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl))).ReturnsAsync(string.Empty);
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl))).ThrowsAsync(new YandexException("Invalid image."));
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync("test");
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Invalid image."));
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync("test");
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Invalid image."));
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
@@ -71,7 +71,7 @@ public class OcrModuleTests
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
 
-        _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
+        _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
                 It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), success ? Times.Once : Times.Never);
@@ -90,7 +90,7 @@ public class OcrModuleTests
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
 
-        _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url)), Times.Once);
+        _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
                 It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), success ? Times.Once : Times.Never);

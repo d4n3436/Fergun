@@ -29,9 +29,9 @@ public class GeniusAutocompleteHandler : AutocompleteHandler
         var policy = scope
             .ServiceProvider
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
-            .Get<IAsyncPolicy<IGeniusSong[]>>("MusixmatchPolicy");
+            .Get<IAsyncPolicy<IReadOnlyList<IGeniusSong>>>("GeniusPolicy");
 
-        var songs = await policy.ExecuteAsync(async _ => (await geniusClient.SearchSongsAsync(text)).ToArray(), new Context(text));
+        var songs = await policy.ExecuteAsync((_, ct) => geniusClient.SearchSongsAsync(text, ct), new Context(text), CancellationToken.None);
 
         var results = songs
             .Where(x => !x.IsInstrumental && x.LyricsState != "unreleased")

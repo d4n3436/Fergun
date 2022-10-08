@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly.Timeout;
 
 namespace Fergun.Services;
 
@@ -228,8 +229,16 @@ public class InteractionHandlingService : IHostedService
         {
             var exception = ((ExecuteResult)result).Exception;
 
-            _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception.",
-                name, context.User, context.User.Id, context.Display());
+            if (exception is TimeoutRejectedException)
+            {
+                _logger.LogWarning("The autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} was canceled because it exceeded the timeout.",
+                    name, context.User, context.User.Id, context.Display());
+            }
+            else
+            {
+                _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception.",
+                    name, context.User, context.User.Id, context.Display());
+            }
         }
         else
         {

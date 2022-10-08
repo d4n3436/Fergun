@@ -45,31 +45,34 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IGeniusClient.SearchSongsAsync(string)"/>
-    public async Task<IEnumerable<GeniusSong>> SearchSongsAsync(string query)
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var response = await _httpClient.GetAsync(new Uri($"api/search?q={Uri.EscapeDataString(query)}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"api/search?q={Uri.EscapeDataString(query)}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-        var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         return document.RootElement
             .GetProperty("response")
             .GetProperty("hits")
             .EnumerateArray()
-            .Select(x => x.GetProperty("result").Deserialize<GeniusSong>()!);
+            .Select(x => x.GetProperty("result").Deserialize<GeniusSong>()!)
+            .ToArray();
     }
 
-    /// <inheritdoc cref="IGeniusClient.GetSongAsync(int)"/>
-    public async Task<GeniusSong?> GetSongAsync(int id)
+    /// <inheritdoc/>
+    public async Task<IGeniusSong?> GetSongAsync(int id, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
         // The API doesn't provide the lyrics, so we scrape the lyrics page and extract the embedded JSON which contains the lyrics.
-        using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -77,7 +80,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         }
 
         response.EnsureSuccessStatusCode();
-        byte[] bytes = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+        byte[] bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
 
         int start = bytes.AsSpan().IndexOf(StartString);
         if (start == -1)
@@ -209,10 +212,4 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             }
         }
     }
-
-    /// <inheritdoc/>
-    async Task<IEnumerable<IGeniusSong>> IGeniusClient.SearchSongsAsync(string query) => await SearchSongsAsync(query).ConfigureAwait(false);
-
-    /// <inheritdoc/>
-    async Task<IGeniusSong?> IGeniusClient.GetSongAsync(int id) => await GetSongAsync(id).ConfigureAwait(false);
 }

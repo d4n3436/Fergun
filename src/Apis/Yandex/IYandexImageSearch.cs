@@ -9,14 +9,17 @@ public interface IYandexImageSearch
     /// Performs OCR to the specified image URL.
     /// </summary>
     /// <param name="url">The URL of an image.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
-    Task<string?> OcrAsync(string url);
+    Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Performs reverse image search to the specified image URL.
     /// </summary>
     /// <param name="url">The URL of an image.</param>
     /// <param name="mode">The search filter mode.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous search operation. The result contains an <see cref="IEnumerable{T}"/> of search results.</returns>
-    Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url, YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate);
+    Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+        YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate, CancellationToken cancellationToken = default);
 }

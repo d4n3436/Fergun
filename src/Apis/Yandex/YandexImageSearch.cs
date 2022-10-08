@@ -38,9 +38,10 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<string?> OcrAsync(string url)
+    public async Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
         // Get CBIR ID
         using var request = new HttpRequestMessage
@@ -49,16 +50,16 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             RequestUri = new Uri($"https://yandex.com/images-apphost/image-download?url={Uri.EscapeDataString(url)}&cbird=37&images_avatars_size=orig&images_avatars_namespace=images-cbir")
         };
 
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {
-            string message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            string message = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             throw new YandexException(message);
         }
 
-        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         string? imageId = document
             .RootElement
@@ -79,11 +80,11 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             RequestUri = new Uri($"https://yandex.com/images/search?format=json&request={ocrJsonRequest}&rpt=ocr&cbir_id={imageShard}/{imageId}")
         };
 
-        using var ocrResponse = await _httpClient.SendAsync(ocrRequest, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        using var ocrResponse = await _httpClient.SendAsync(ocrRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         ocrResponse.EnsureSuccessStatusCode();
 
         // A byte array is used because SendAsync returns a chunked response and the Stream from ReadAsStreamAsync is not seekable.
-        byte[] bytes = await ocrResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+        byte[] bytes = await ocrResponse.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
         using var ocrDocument = JsonDocument.Parse(bytes);
 
         if (ocrDocument.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
@@ -100,10 +101,12 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetStringOrDefault();
     }
 
-    /// <inheritdoc cref="IYandexImageSearch.ReverseImageSearchAsync(string, YandexSearchFilterMode)"/>
-    public async Task<IEnumerable<YandexReverseImageSearchResult>> ReverseImageSearchAsync(string url, YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate)
+    /// <inheritdoc/>
+    public async Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+        YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
 
         const string imageSearchRequest = @"{""blocks"":[{""block"":""content_type_similar"",""params"":{},""version"":2}]}";
 
@@ -127,11 +130,11 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             request.Headers.Add("Cookie", $"yp={yp}");
         }
 
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         if (document.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
         {
@@ -144,7 +147,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetProperty("html")
             .GetString() ?? string.Empty;
 
-        var htmlDocument = _parser.ParseDocument(html);
+        var htmlDocument = await _parser.ParseDocumentAsync(html, cancellationToken).ConfigureAwait(false);
 
         var rawItems = htmlDocument
             .GetElementsByClassName("serp-list")
@@ -211,8 +214,4 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             throw new ObjectDisposedException(nameof(YandexImageSearch));
         }
     }
-
-    /// <inheritdoc/>
-    async Task<IEnumerable<IYandexReverseImageSearchResult>> IYandexImageSearch.ReverseImageSearchAsync(string url, YandexSearchFilterMode mode)
-        => await ReverseImageSearchAsync(url, mode).ConfigureAwait(false);
 }
