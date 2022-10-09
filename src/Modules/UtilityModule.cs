@@ -352,58 +352,40 @@ public class UtilityModule : InteractionModuleBase
     }
 
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
-    public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(description: "The search query.")] string query)
+    public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(name: "query", description: "The search query.")] int id)
     {
         await Context.Interaction.DeferAsync();
 
-        var articles = (await _wikipediaClient.GetArticlesAsync(query, Context.Interaction.GetLanguageCode())).ToArray();
+        var article = await _wikipediaClient.GetArticleAsync(id, Context.Interaction.GetLanguageCode());
 
-        if (articles.Length == 0)
+        if (article is null)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["Unable to get the article."]);
         }
 
-        var paginator = new LazyPaginatorBuilder()
-            .AddUser(Context.User)
-            .WithPageFactory(GeneratePage)
-            .WithActionOnCancellation(ActionOnStop.DisableInput)
-            .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(articles.Length - 1)
-            .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
-            .WithLocalizedPrompts(_localizer)
-            .Build();
+        var builder = new EmbedBuilder()
+            .WithTitle(article.Title.Truncate(EmbedBuilder.MaxTitleLength))
+            .WithUrl($"https://{Context.Interaction.GetLanguageCode()}.wikipedia.org/?curid={article.Id}")
+            .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
+            .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
+            .WithFooter(_localizer["Wikipedia Search"])
+            .WithColor(Color.Orange);
 
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(10), InteractionResponseType.DeferredChannelMessageWithSource);
+        if (Context.Channel.IsNsfw() && article.Image is not null)
+        {
+            if (article.Image.Width >= 500 && article.Image.Height >= 500)
+            {
+                builder.WithImageUrl(article.Image.Url);
+            }
+            else
+            {
+                builder.WithThumbnailUrl(article.Image.Url);
+            }
+        }
+
+        await Context.Interaction.FollowupAsync(embed: builder.Build());
 
         return FergunResult.FromSuccess();
-
-        PageBuilder GeneratePage(int index)
-        {
-            var article = articles[index];
-
-            var page = new PageBuilder()
-                .WithTitle(article.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithUrl($"https://{Context.Interaction.GetLanguageCode()}.wikipedia.org/?curid={article.Id}")
-                .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
-                .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
-                .WithFooter(_localizer["Wikipedia Search | Page {0} of {1}", index + 1, articles.Length])
-                .WithColor(Color.Orange);
-
-            if (Context.Channel.IsNsfw() && article.Image is not null)
-            {
-                if (article.Image.Width >= 500 && article.Image.Height >= 500)
-                {
-                    page.WithImageUrl(article.Image.Url);
-                }
-                else
-                {
-                    page.WithThumbnailUrl(article.Image.Url);
-                }
-            }
-
-            return page;
-        }
     }
 
     [SlashCommand("wolfram", "Asks Wolfram|Alpha about something.")]

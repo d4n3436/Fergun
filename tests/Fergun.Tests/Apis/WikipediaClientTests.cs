@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Fergun.Apis.Wikipedia;
 using Moq;
@@ -12,39 +11,34 @@ public class WikipediaClientTests
     private readonly IWikipediaClient _wikipediaClient = new WikipediaClient();
 
     [Theory]
-    [InlineData("Guitar", "en")]
-    [InlineData("Wikipedia", "es")]
-    public async Task GetArticlesAsync_Returns_Articles(string term, string language)
+    [InlineData(11846, "en")] // Guitar
+    [InlineData(5043734, "es")] // Wikipedia
+    public async Task GetArticlesAsync_Returns_Articles(int id, string language)
     {
-        var articles = (await _wikipediaClient.GetArticlesAsync(term, language)).ToArray();
+        var article = await _wikipediaClient.GetArticleAsync(id, language);
 
-        Assert.NotNull(articles);
-        Assert.NotEmpty(articles);
-        Assert.All(articles, Assert.NotNull);
-        Assert.All(articles, x => Assert.NotNull(x.Title));
-        Assert.All(articles, x => Assert.NotNull(x.Extract));
-        Assert.All(articles, x => Assert.True(x.Id >= 0));
-        Assert.All(articles, x => Assert.NotNull(x.ToString()));
+        Assert.NotNull(article);
+        Assert.NotNull(article.Title);
+        Assert.NotNull(article.Extract);
+        Assert.True(article.Id >= 0);
+        Assert.NotNull(article.ToString());
 
-        Assert.All(articles, x =>
+        if (article.Image is not null)
         {
-            if (x.Image is not null)
-            {
-                Assert.NotNull(x.Image.Url.ToString());
-                Assert.True(x.Image.Width > 0);
-                Assert.True(x.Image.Height > 0);
-                Assert.NotNull(x.Image.ToString());
-            }
-        });
+            Assert.NotNull(article.Image.Url);
+            Assert.True(article.Image.Width > 0);
+            Assert.True(article.Image.Height > 0);
+            Assert.NotNull(article.Image.ToString());
+        }
     }
 
     [Theory]
     [InlineData("a", "en")]
     [InlineData("b", "es")]
     [InlineData("c", "fr")]
-    public async Task GetAutocompleteResultsAsync_Returns_Results(string term, string language)
+    public async Task SearchArticlesAsync_Returns_Results(string term, string language)
     {
-        var results = (await _wikipediaClient.GetAutocompleteResultsAsync(term, language)).ToArray();
+        var results = await _wikipediaClient.SearchArticlesAsync(term, language);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -57,7 +51,7 @@ public class WikipediaClientTests
         (_wikipediaClient as IDisposable)?.Dispose();
         (_wikipediaClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticlesAsync(It.IsAny<string>(), It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetAutocompleteResultsAsync(It.IsAny<string>(), It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync(It.IsAny<string>(), It.IsAny<string>()));
     }
 }

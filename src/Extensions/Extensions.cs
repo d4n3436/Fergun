@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;
+using Fergun.Apis.Wikipedia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -40,7 +41,7 @@ public static class Extensions
                     { "GeniusPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IGeniusSong>>() },
                     { "MusixmatchPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IMusixmatchSong>>() },
                     { "UrbanPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
-                    { "WikipediaPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
+                    { "WikipediaPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IPartialWikipediaArticle>>() },
                     { "WolframPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() }
                 };
             });

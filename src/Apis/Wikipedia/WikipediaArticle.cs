@@ -3,12 +3,12 @@
 namespace Fergun.Apis.Wikipedia;
 
 /// <summary>
-/// Represent a Wikipedia article.
+/// Represents a Wikipedia article.
 /// </summary>
 public class WikipediaArticle : IWikipediaArticle
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="WikipediaArticle"/>.
+    /// Initializes a new instance of the <see cref="WikipediaArticle"/> class.
     /// </summary>
     /// <param name="title">The title.</param>
     /// <param name="description">The description.</param>

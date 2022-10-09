@@ -356,4 +356,10 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Wolfram|Alpha Results" xml:space="preserve">
     <value>Resultados de Wolfram|Alpha</value>
   </data>
+  <data name="Unable to get the article." xml:space="preserve">
+    <value>No se pudo obtener el artículo.</value>
+  </data>
+  <data name="Wikipedia Search" xml:space="preserve">
+    <value>Búsqueda de Wikipedia</value>
+  </data>
 </root>

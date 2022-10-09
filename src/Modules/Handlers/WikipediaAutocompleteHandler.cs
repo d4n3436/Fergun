@@ -31,14 +31,13 @@ public class WikipediaAutocompleteHandler : AutocompleteHandler
         var policy = scope
             .ServiceProvider
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
-            .Get<IAsyncPolicy<IReadOnlyList<string>>>("WikipediaPolicy");
+            .Get<IAsyncPolicy<IReadOnlyList<IPartialWikipediaArticle>>>("WikipediaPolicy");
 
-        var results = await policy.ExecuteAsync((_, ct) => wikipediaClient.GetAutocompleteResultsAsync(text, language, ct), new Context($"{text}-{language}"), CancellationToken.None);
+        var results = await policy.ExecuteAsync((_, ct) => wikipediaClient.SearchArticlesAsync(text, language, ct), new Context($"{text}-{language}"), CancellationToken.None);
 
         var suggestions = results
-            .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))
-            .PrependCurrentIfNotPresent(text)
-            .Take(25);
+            .Take(25)
+            .Select(x => new AutocompleteResult(x.Title.Truncate(100), x.Id));
 
         return AutocompletionResult.FromSuccess(suggestions);
     }

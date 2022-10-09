@@ -1,15 +1,10 @@
 ﻿namespace Fergun.Apis.Wikipedia;
 
 /// <summary>
-/// Represent a Wikipedia article.
+/// Represents a Wikipedia article.
 /// </summary>
-public interface IWikipediaArticle
+public interface IWikipediaArticle : IPartialWikipediaArticle
 {
-    /// <summary>
-    /// Gets the title of this article.
-    /// </summary>
-    string Title { get; }
-
     /// <summary>
     /// Gets the description of this article.
     /// </summary>
@@ -24,9 +19,4 @@ public interface IWikipediaArticle
     /// Gets the image of this article.
     /// </summary>
     IWikipediaImage? Image { get; }
-
-    /// <summary>
-    /// Gets the ID of this article.
-    /// </summary>
-    int Id { get; }
 }

@@ -6,7 +6,7 @@
 public interface IWikipediaImage
 {
     /// <summary>
-    /// Gets a URL to the image.
+    /// Gets the URL of the image.
     /// </summary>
     string Url { get; }
 
