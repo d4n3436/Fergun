@@ -12,8 +12,8 @@ public class WikipediaClientTests
 
     [Theory]
     [InlineData(11846, "en")] // Guitar
-    [InlineData(5043734, "es")] // Wikipedia
-    public async Task GetArticlesAsync_Returns_Articles(int id, string language)
+    [InlineData(3328953, "es")] // Wikipedia
+    public async Task GetArticleAsync_Returns_Valid_Article(int id, string language)
     {
         var article = await _wikipediaClient.GetArticleAsync(id, language);
 
