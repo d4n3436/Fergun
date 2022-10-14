@@ -86,7 +86,39 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
                 return null;
             }
 
-            MusixmatchException.Throw(trackStatusCode, null);
+            string? hint = macroCalls
+                .GetProperty("track.get")
+                .GetProperty("message")
+                .GetProperty("header")
+                .GetProperty("hint")
+                .GetString();
+
+            MusixmatchException.Throw(trackStatusCode, hint);
+        }
+
+        var lyricsData = macroCalls
+            .GetProperty("track.lyrics.get")
+            .GetProperty("message")
+            .GetProperty("body")
+            .GetProperty("lyrics");
+
+        var lyricsStatusCode = (HttpStatusCode)macroCalls
+            .GetProperty("track.lyrics.get")
+            .GetProperty("message")
+            .GetProperty("header")
+            .GetProperty("status_code")
+            .GetInt32();
+
+        if (trackStatusCode != HttpStatusCode.OK && lyricsStatusCode != HttpStatusCode.NotFound)
+        {
+            string? hint = macroCalls
+                .GetProperty("track.lyrics.get")
+                .GetProperty("message")
+                .GetProperty("header")
+                .GetProperty("hint")
+                .GetString();
+
+            MusixmatchException.Throw(trackStatusCode, hint);
         }
 
         var trackData = macroCalls
@@ -95,26 +127,13 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .GetProperty("body")
             .GetProperty("track");
 
-        var lyricsMessage = macroCalls
-            .GetProperty("track.lyrics.get")
-            .GetProperty("message");
-
-        int lyricsStatusCode = lyricsMessage
-            .GetProperty("header")
-            .GetProperty("status_code")
-            .GetInt32();
-
-        string? lyrics = lyricsStatusCode == 404 ? null : lyricsMessage
-            .GetProperty("body")
-            .GetProperty("lyrics")
+        string? lyrics = lyricsStatusCode == HttpStatusCode.NotFound ? null : lyricsData
             .GetProperty("lyrics_body")
             .GetString();
 
-        bool isRestricted = lyricsStatusCode == 404 ? trackData
+        bool isRestricted = lyricsStatusCode == HttpStatusCode.NotFound ? trackData
             .GetProperty("restricted")
-            .GetInt32() != 0 : lyricsMessage
-            .GetProperty("body")
-            .GetProperty("lyrics")
+            .GetInt32() != 0 : lyricsData
             .GetProperty("restricted")
             .GetInt32() != 0;
 
