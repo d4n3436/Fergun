@@ -8,7 +8,7 @@ namespace Fergun.Apis.Musixmatch;
 public class MusixmatchSong : IMusixmatchSong
 {
     public MusixmatchSong(string artistName, int id, bool isInstrumental, bool hasLyrics, bool isRestricted,
-        string songArtImageUrl, string title, string url, string? artistUrl, string? lyrics)
+        string songArtImageUrl, string title, string url, string? artistUrl, string? lyrics, string? spotifyTrackId)
     {
         ArtistName = artistName;
         Id = id;
@@ -20,6 +20,7 @@ public class MusixmatchSong : IMusixmatchSong
         Url = url;
         ArtistUrl = artistUrl;
         Lyrics = lyrics;
+        SpotifyTrackId = spotifyTrackId;
     }
 
     /// <inheritdoc/>
@@ -61,6 +62,9 @@ public class MusixmatchSong : IMusixmatchSong
 
     /// <inheritdoc/>
     public string? Lyrics { get; }
+
+    /// <inheritdoc/>
+    public string? SpotifyTrackId { get; }
 
     /// <summary>
     /// Returns the full title of this song.

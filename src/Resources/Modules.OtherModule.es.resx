@@ -189,6 +189,9 @@
   <data name="No stats to display." xml:space="preserve">
     <value>Sin estadísticas que mostrar.</value>
   </data>
+  <data name="Open in Spotify" xml:space="preserve">
+    <value>Abrir en Spotify</value>
+  </data>
   <data name="Operating System" xml:space="preserve">
     <value>Sistema Operativo</value>
   </data>

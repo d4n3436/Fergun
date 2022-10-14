@@ -165,13 +165,19 @@ public class OtherModule : InteractionModuleBase
 
         PageBuilder GeneratePage(int index)
         {
-            var chunk = chunks[index];
-            
+            string links = Format.Url(_localizer["View on Musixmatch"], song.Url);
+            if (song.ArtistUrl is not null)
+                links += $" | {Format.Url(_localizer["View Artist"], song.ArtistUrl)}";
+
+            // Discord doesn't support custom protocols in embeds (spotify://track/id)
+            if (song.SpotifyTrackId is not null)
+                links += $" | {Format.Url(_localizer["Open in Spotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
+
             return new PageBuilder()
                 .WithTitle($"{song.ArtistName} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
                 .WithThumbnailUrl(song.SongArtImageUrl)
-                .WithDescription(chunk.ToString())
-                .AddField("Links", $"{Format.Url(_localizer["View on Musixmatch"], song.Url)}{(song.ArtistUrl is null ? "" : $" | {Format.Url(_localizer["View Artist"], song.ArtistUrl)}")}")
+                .WithDescription(chunks[index].ToString())
+                .AddField("Links", links)
                 .WithFooter(_localizer["Lyrics by Musixmatch | Page {0} of {1}", index + 1, chunks.Length])
                 .WithColor(Color.Orange);
         }

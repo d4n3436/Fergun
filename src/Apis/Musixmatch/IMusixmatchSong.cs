@@ -54,4 +54,9 @@ public interface IMusixmatchSong
     /// Gets the lyrics of this song.
     /// </summary>
     string? Lyrics { get; }
+
+    /// <summary>
+    /// Gets the Spotify track ID.
+    /// </summary>
+    string? SpotifyTrackId { get; }
 }

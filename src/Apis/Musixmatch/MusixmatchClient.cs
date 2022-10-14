@@ -89,31 +89,34 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             MusixmatchException.Throw(trackStatusCode, null);
         }
 
-        var lyricsMessage = macroCalls
-            .GetProperty("track.lyrics.get")
-            .GetProperty("message");
-
-        string? lyrics = lyricsMessage
-            .GetProperty("header")
-            .GetProperty("status_code")
-            .GetInt32() == 404 ? null
-            : lyricsMessage
-            .GetProperty("body")
-            .GetProperty("lyrics")
-            .GetProperty("lyrics_body")
-            .GetString();
-
-        bool isRestricted = lyricsMessage
-            .GetProperty("body")
-            .GetProperty("lyrics")
-            .GetProperty("restricted")
-            .GetInt32() != 0; // from lyricsMessage
-
         var trackData = macroCalls
             .GetProperty("track.get")
             .GetProperty("message")
             .GetProperty("body")
             .GetProperty("track");
+
+        var lyricsMessage = macroCalls
+            .GetProperty("track.lyrics.get")
+            .GetProperty("message");
+
+        int lyricsStatusCode = lyricsMessage
+            .GetProperty("header")
+            .GetProperty("status_code")
+            .GetInt32();
+
+        string? lyrics = lyricsStatusCode == 404 ? null : lyricsMessage
+            .GetProperty("body")
+            .GetProperty("lyrics")
+            .GetProperty("lyrics_body")
+            .GetString();
+
+        bool isRestricted = lyricsStatusCode == 404 ? trackData
+            .GetProperty("restricted")
+            .GetInt32() != 0 : lyricsMessage
+            .GetProperty("body")
+            .GetProperty("lyrics")
+            .GetProperty("restricted")
+            .GetInt32() != 0;
 
         string artistName = trackData.GetProperty("artist_name").GetString() ?? throw new MusixmatchException("Unable to get the artist name.");
         bool isInstrumental = trackData.GetProperty("instrumental").GetInt32() != 0;
@@ -122,6 +125,12 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         string title = trackData.GetProperty("track_name").GetString() ?? throw new MusixmatchException("Unable to get the song name.");
         int artistId = trackData.GetProperty("artist_id").GetInt32();
 
+        string? spotifyTrackId = null;
+        if (trackData.TryGetProperty("track_spotify_id", out var trackIdProp))
+        {
+            spotifyTrackId = trackIdProp.GetString();
+        }
+
         string songUrl = $"https://www.musixmatch.com/track/{id}";
         string artistUrl = $"https://www.musixmatch.com/artist/{artistId}";
         if (string.IsNullOrEmpty(songArtImageUrl))
@@ -129,7 +138,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             songArtImageUrl = "https://s.mxmcdn.net/images-storage/albums/nocover.png";
         }
 
-        return new MusixmatchSong(artistName, id, isInstrumental, hasLyrics, isRestricted, songArtImageUrl, title, songUrl, artistUrl, lyrics);
+        return new MusixmatchSong(artistName, id, isInstrumental, hasLyrics, isRestricted, songArtImageUrl, title, songUrl, artistUrl, lyrics, spotifyTrackId);
     }
 
     /// <inheritdoc/>
