@@ -219,6 +219,9 @@
   <data name="Unable to get the lyrics of &quot;{0}&quot;." xml:space="preserve">
     <value>No es posible obtener la letra de "{0}".</value>
   </data>
+  <data name="Unable to get the requested lyrics right now. Try again in {0}." xml:space="preserve">
+    <value>No se puede obtener la letra solicitada ahora mismo. Intente nuevamente en {0}.</value>
+  </data>
   <data name="Uptime" xml:space="preserve">
     <value>Tiempo activo</value>
   </data>

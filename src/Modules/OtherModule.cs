@@ -16,6 +16,7 @@ using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Polly.RateLimit;
 
 namespace Fergun.Modules;
 
@@ -120,8 +121,18 @@ public class OtherModule : InteractionModuleBase
     public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
-        var song = await _musixmatchClient.GetSongAsync(id);
 
+        IMusixmatchSong? song;
+        try
+        {
+            song = await _musixmatchClient.GetSongAsync(id);
+        }
+        catch (RateLimitRejectedException e)
+        {
+            return FergunResult.FromError(_localizer["Unable to get the requested lyrics right now. Try again in {0}.",
+                e.RetryAfter.Humanize(culture: _localizer.CurrentCulture)]);
+        }
+        
         if (song is null)
         {
             return FergunResult.FromError(_localizer["Unable to find a song with ID {0}. Use the autocomplete results.", id]);
@@ -325,7 +336,7 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["Shard ID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", shards, true)
-            .AddField(_localizer["Uptime"], elapsed.Humanize(), true)
+            .AddField(_localizer["Uptime"], elapsed.Humanize(culture: _localizer.CurrentCulture), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["Bot Owner"], owner, true);
 

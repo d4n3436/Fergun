@@ -1,5 +1,6 @@
-﻿using System.Net;
+﻿using Polly;
 using System.Text.Json;
+using Polly.RateLimit;
 
 namespace Fergun.Apis.Musixmatch;
 
@@ -12,7 +13,8 @@ public class MusixmatchClientState
 
     private string? _userToken;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly SemaphoreSlim _signatureSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
+    private readonly AsyncRateLimitPolicy<string> _rateLimitPolicy = Policy.RateLimitAsync<string>(1, TimeSpan.FromMinutes(1));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClientState"/> class.
@@ -23,21 +25,19 @@ public class MusixmatchClientState
     }
 
     /// <summary>
-    /// Returns a cached signature secret, or obtains a new one and caches it.
+    /// Returns a cached user token, or obtains a new one and caches it.
     /// </summary>
     /// <param name="refresh">Whether to get a new user token.</param>
-    /// <returns>A <see cref="ValueTask{TResult}"/> representing the asynchronous operation. The result contains the signature secret.</returns>
+    /// <returns>A <see cref="ValueTask{TResult}"/> representing the asynchronous operation. The result contains the user token.</returns>
     /// <exception cref="MusixmatchException"></exception>
     public async ValueTask<string> GetUserTokenAsync(bool refresh = false)
     {
-        var client = _httpClientFactory.CreateClient();
-
         if (!refresh && _userToken is not null)
         {
             return _userToken;
         }
 
-        await _signatureSemaphore.WaitAsync().ConfigureAwait(false);
+        await _tokenSemaphore.WaitAsync().ConfigureAwait(false);
 
         try
         {
@@ -46,51 +46,46 @@ public class MusixmatchClientState
                 return _userToken;
             }
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, _uri);
-            request.Headers.Add("Cookie", "AWSELB=0");
-
-            using var response = await client.SendAsync(request).ConfigureAwait(false);
-            await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-            using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
-
-            var statusCode = (HttpStatusCode)document
-                .RootElement
-                .GetProperty("message")
-                .GetProperty("header")
-                .GetProperty("status_code")
-                .GetInt32();
-
-            if (statusCode != HttpStatusCode.OK)
-            {
-                string? hint = document
-                    .RootElement
-                    .GetProperty("message")
-                    .GetProperty("header")
-                    .GetProperty("hint")
-                    .GetString();
-
-                MusixmatchException.Throw(statusCode, hint);
-            }
-
-            string? token = document
-                .RootElement
-                .GetProperty("message")
-                .GetProperty("body")
-                .GetProperty("user_token")
-                .GetString();
-
-            if (string.IsNullOrEmpty(token) || token == "UpgradeOnlyUpgradeOnlyUpgradeOnlyUpgradeOnly")
-            {
-                throw new MusixmatchException("Unable to get the Musixmatch user token.");
-            }
-
-            _userToken = token;
+            _userToken = null; // Invalidate the token
+            _userToken = await _rateLimitPolicy.ExecuteAsync(FetchUserTokenAsync).ConfigureAwait(false);
         }
         finally
         {
-            _signatureSemaphore.Release();
+            _tokenSemaphore.Release();
         }
 
         return _userToken;
+    }
+
+    /// <summary>
+    /// Gets a new token.
+    /// </summary>
+    /// <returns>A new token.</returns>
+    /// <exception cref="MusixmatchException"></exception>
+    private async Task<string> FetchUserTokenAsync()
+    {
+        var client = _httpClientFactory.CreateClient();
+        using var request = new HttpRequestMessage(HttpMethod.Get, _uri);
+        request.Headers.Add("Cookie", "AWSELB=0");
+
+        using var response = await client.SendAsync(request).ConfigureAwait(false);
+        await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream).ConfigureAwait(false);
+
+        MusixmatchClient.ThrowIfNotSuccessful(document.RootElement);
+
+        string? token = document
+            .RootElement
+            .GetProperty("message")
+            .GetProperty("body")
+            .GetProperty("user_token")
+            .GetString();
+
+        if (string.IsNullOrEmpty(token) || token == "UpgradeOnlyUpgradeOnlyUpgradeOnlyUpgradeOnly")
+        {
+            throw new MusixmatchException("Unable to get the Musixmatch user token.");
+        }
+
+        return token;
     }
 }

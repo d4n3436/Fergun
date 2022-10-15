@@ -5,19 +5,19 @@ using System.Runtime.Serialization;
 namespace Fergun.Apis.Musixmatch;
 
 /// <summary>
-/// The exception that is thrown when <see cref="MusixmatchClient"/> fails to scrape a song.
+/// The exception that is thrown when a call to the Musixmatch API fails.
 /// </summary>
 [Serializable]
 public class MusixmatchException : Exception
 {
     [DoesNotReturn]
-    public static MusixmatchException Throw(HttpStatusCode statusCode, string? hint)
+    public static MusixmatchException Throw(HttpStatusCode statusCode, string? path, string? hint)
     {
         string message = hint switch
         {
-            "renew" => "Request failed due to an expired user token.",
-            "captcha" => "Musixmatch API returned a CAPTCHA. Try again later.",
-            _ => $"The API returned a {(int)statusCode} ({statusCode}) status code."
+            "renew" => $"Request failed due to an expired user token.{(path is null ? "" : $" (Path: {path})")}",
+            "captcha" => $"Musixmatch API returned a CAPTCHA. Try again later.{(path is null ? "" : $" (Path: {path})")}",
+            _ => $"The API returned a {(int)statusCode} ({statusCode}) status code.{(path is null ? "" : $" (Path: {path})")}"
         };
 
         throw new MusixmatchException(message, hint);

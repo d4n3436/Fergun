@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
 
@@ -10,11 +11,12 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
-    private const string _appId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0
+    private const string _appId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0, android-player-v1.0, mac-ios-v2.0
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly AsyncRetryPolicy<JsonDocument> _retryPolicy;
     private readonly HttpClient _httpClient;
     private readonly MusixmatchClientState _state;
+    private readonly ILogger<MusixmatchClient> _logger;
     private bool _disposed;
 
     /// <summary>
@@ -22,13 +24,20 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     /// </summary>
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     /// <param name="state">The client state.</param>
-    public MusixmatchClient(HttpClient httpClient, MusixmatchClientState state)
+    /// <param name="logger">The logger.</param>
+    public MusixmatchClient(HttpClient httpClient, MusixmatchClientState state, ILogger<MusixmatchClient> logger)
     {
         _httpClient = httpClient;
         _state = state;
+        _logger = logger;
+
         _retryPolicy = Policy<JsonDocument>
-            .Handle<MusixmatchException>(x => x.Hint == "renew")
-            .RetryAsync(async (_, _) => await _state.GetUserTokenAsync(refresh: true).ConfigureAwait(false));
+            .Handle<MusixmatchException>(x => x.Hint is "renew" or "captcha")
+            .RetryAsync(async (result, _) =>
+            {
+                _logger.LogWarning(result.Exception, "Got exception with hint \"{Hint}\". Requesting a new user token...", ((MusixmatchException)result.Exception).Hint);
+                await _state.GetUserTokenAsync(refresh: true).ConfigureAwait(false);
+            });
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
@@ -79,21 +88,9 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .GetProperty("status_code")
             .GetInt32();
 
-        if (trackStatusCode != HttpStatusCode.OK)
+        if (trackStatusCode == HttpStatusCode.NotFound)
         {
-            if (trackStatusCode == HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-
-            string? hint = macroCalls
-                .GetProperty("track.get")
-                .GetProperty("message")
-                .GetProperty("header")
-                .GetProperty("hint")
-                .GetString();
-
-            MusixmatchException.Throw(trackStatusCode, hint);
+            return null;
         }
 
         var lyricsData = macroCalls
@@ -108,18 +105,6 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .GetProperty("header")
             .GetProperty("status_code")
             .GetInt32();
-
-        if (trackStatusCode != HttpStatusCode.OK && lyricsStatusCode != HttpStatusCode.NotFound)
-        {
-            string? hint = macroCalls
-                .GetProperty("track.lyrics.get")
-                .GetProperty("message")
-                .GetProperty("header")
-                .GetProperty("hint")
-                .GetString();
-
-            MusixmatchException.Throw(trackStatusCode, hint);
-        }
 
         var trackData = macroCalls
             .GetProperty("track.get")
@@ -185,26 +170,42 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
-        var statusCode = (HttpStatusCode)document
-            .RootElement
-            .GetProperty("message")
-            .GetProperty("header")
-            .GetProperty("status_code")
-            .GetInt32();
+        ThrowIfNotSuccessful(document.RootElement);
 
-        if (statusCode != HttpStatusCode.OK)
+        var body = document.RootElement.GetProperty("message").GetProperty("body");
+        if (body.TryGetProperty("macro_calls", out var macroCalls) && macroCalls.ValueKind == JsonValueKind.Array)
         {
-            string? hint = document
-                .RootElement
-                .GetProperty("message")
-                .GetProperty("header")
-                .GetProperty("hint")
-                .GetString();
-
-            MusixmatchException.Throw(statusCode, hint);
+            foreach (var prop in macroCalls.EnumerateArray())
+            {
+                var first = prop.EnumerateObject().FirstOrDefault();
+                if (first.Value.ValueKind == JsonValueKind.Object)
+                {
+                    ThrowIfNotSuccessful(first.Value, first.Name);
+                }
+            }
         }
 
         return document;
+    }
+
+    internal static void ThrowIfNotSuccessful(in JsonElement body, string? path = null)
+    {
+        var header = body
+            .GetProperty("message")
+            .GetProperty("header");
+
+        var statusCode = (HttpStatusCode)header
+            .GetProperty("status_code")
+            .GetInt32();
+
+        if (statusCode != HttpStatusCode.OK && statusCode != HttpStatusCode.NotFound)
+        {
+            string? hint = header
+                .GetProperty("hint")
+                .GetString();
+
+            MusixmatchException.Throw(statusCode, path, hint);
+        }
     }
 
     private void EnsureNotDisposed()
