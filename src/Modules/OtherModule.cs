@@ -29,6 +29,7 @@ public class OtherModule : InteractionModuleBase
     private readonly IMusixmatchClient _musixmatchClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
+    private static readonly Uri _inspiroBotUri = new("https://inspirobot.me/api?generate=true");
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         InteractiveService interactive, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
@@ -49,24 +50,24 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        var commandStats = (await _db.CommandStats
+        var commandStats = await _db.CommandStats
             .AsNoTracking()
             .OrderByDescending(x => x.UsageCount)
-            .ToListAsync())
-            .Chunk(25)
-            .ToArray();
+            .ToListAsync();
 
-        if (commandStats.Length == 0)
+        if (commandStats.Count == 0)
         {
             return FergunResult.FromError(_localizer["No stats to display."]);
         }
+
+        int maxIndex = (int)Math.Ceiling((double)commandStats.Count / 25) - 1;
 
         var paginator = new LazyPaginatorBuilder()
             .AddUser(Context.User)
             .WithPageFactory(GeneratePage)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(commandStats.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .WithFergunEmotes(_fergunOptions)
             .WithLocalizedPrompts(_localizer)
@@ -76,11 +77,16 @@ public class OtherModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
 
-        PageBuilder GeneratePage(int index) => new PageBuilder()
+        PageBuilder GeneratePage(int index)
+        {
+            int start = index * 25;
+
+            return new PageBuilder()
                 .WithTitle(_localizer["Command Stats"])
-                .WithDescription(string.Join('\n', commandStats[index].Select((x, i) => $"{index * 25 + i + 1}. `{x.Name}`: {x.UsageCount}")))
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, commandStats.Length])
+                .WithDescription(string.Join('\n', commandStats.Take(start..(start + 25)).Select((x, i) => $"{start + i + 1}. `{x.Name}`: {x.UsageCount}")))
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1])
                 .WithColor(Color.Orange);
+        }
     }
 
     [SlashCommand("inspirobot", "Sends an inspirational quote.")]
@@ -88,7 +94,7 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        string url = await _httpClient.GetStringAsync(new Uri("https://inspirobot.me/api?generate=true"));
+        string url = await _httpClient.GetStringAsync(_inspiroBotUri);
 
         var builder = new EmbedBuilder()
             .WithTitle("InspiroBot")
@@ -201,7 +207,7 @@ public class OtherModule : InteractionModuleBase
 
         long temp;
         var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-        var cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
+        int cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
         string? cpu = null;
         long? totalRamUsage = null;
         long processRamUsage = 0;
@@ -213,7 +219,7 @@ public class OtherModule : InteractionModuleBase
             // CPU Name
             if (File.Exists("/proc/cpuinfo"))
             {
-                cpu = File.ReadAllLines("/proc/cpuinfo")
+                cpu = (await File.ReadAllLinesAsync("/proc/cpuinfo"))
                     .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
                     .Split(':')
                     .ElementAtOrDefault(1)?
@@ -238,13 +244,13 @@ public class OtherModule : InteractionModuleBase
             // OS Name
             if (File.Exists("/etc/lsb-release"))
             {
-                var distroInfo = File.ReadAllLines("/etc/lsb-release");
+                string[] distroInfo = await File.ReadAllLinesAsync("/etc/lsb-release");
                 os = distroInfo.ElementAtOrDefault(3)?.Split('=').ElementAtOrDefault(1)?.Trim('\"');
             }
 
             // Total RAM & total RAM usage
-            var output = CommandUtils.RunCommand("free -m")?.Split(Environment.NewLine);
-            var memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            string[]? output = CommandUtils.RunCommand("free -m")?.Split(Environment.NewLine);
+            string[]? memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (long.TryParse(memory?.ElementAtOrDefault(1), out temp)) totalRam = temp;
             if (long.TryParse(memory?.ElementAtOrDefault(2), out temp)) totalRamUsage = temp;
@@ -261,14 +267,14 @@ public class OtherModule : InteractionModuleBase
                 .ElementAtOrDefault(1);
 
             // Total RAM & total RAM usage
-            var output = CommandUtils.RunCommand("wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value")
+            string[]? output = CommandUtils.RunCommand("wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value")
                 ?.Trim()
                 .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
             if (output?.Length > 1)
             {
                 long freeRam = 0;
-                var split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
+                string[] split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
                 if (split.Length > 1 && long.TryParse(split[1], out temp))
                 {
                     freeRam = temp / 1024;

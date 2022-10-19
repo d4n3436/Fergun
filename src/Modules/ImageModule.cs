@@ -58,8 +58,6 @@ public class ImageModule : InteractionModuleBase
         _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
         var images = (await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode()))
-            .Where(x => x.Url.StartsWith("http") && x.SourceUrl.StartsWith("http"))
-            .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
         _logger.LogInformation("Image results: {count}", images.Length);
@@ -69,12 +67,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["No results."]);
         }
 
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
+
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
             .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(images.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .WithLocalizedPrompts(_localizer)
@@ -86,12 +87,14 @@ public class ImageModule : InteractionModuleBase
         
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = images[index].Select(result => new EmbedBuilder()
+            int start = index * count;
+
+            var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["Google Images search"])
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.GoogleLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.GoogleLogoUrl)
                 .WithColor((Color)(result.Color ?? Color.Orange)));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -108,7 +111,6 @@ public class ImageModule : InteractionModuleBase
         _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
         var images = (await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
-            .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
         _logger.LogInformation("Image results: {count}", images.Length);
@@ -118,12 +120,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["No results."]);
         }
 
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
+
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
             .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(images.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .WithLocalizedPrompts(_localizer)
@@ -135,12 +140,14 @@ public class ImageModule : InteractionModuleBase
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = images[index].Select(result => new EmbedBuilder()
+            int start = index * count;
+
+            var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["DuckDuckGo image search"])
                 .WithUrl(multiImages ? "https://duckduckgo.com": result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.DuckDuckGoLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -157,7 +164,6 @@ public class ImageModule : InteractionModuleBase
         _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
 
         var images = (await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
-            .Chunk(multiImages ? 4 : 1)
             .ToArray();
 
         _logger.LogInformation("Image results: {count}", images.Length);
@@ -167,12 +173,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["No results."]);
         }
 
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
+
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
             .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(images.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .AddUser(Context.User)
             .WithLocalizedPrompts(_localizer)
@@ -184,12 +193,14 @@ public class ImageModule : InteractionModuleBase
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = images[index].Select(result => new EmbedBuilder()
+            int start = index * count;
+
+            var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["Brave image search"])
                 .WithUrl(multiImages ? "https://search.brave.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, images.Length], Constants.BraveLogoUrl)
+                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.BraveLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -271,12 +282,11 @@ public class ImageModule : InteractionModuleBase
 
         bool isNsfw = Context.Channel.IsNsfw();
 
-        IYandexReverseImageSearchResult[][] results;
+        IYandexReverseImageSearchResult[] results;
 
         try
         {
             results = (await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family))
-                .Chunk(multiImages ? 4 : 1)
                 .ToArray();
         }
         catch (YandexException e)
@@ -290,12 +300,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
         }
 
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)results.Length / count) - 1;
+
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
             .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(results.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .AddUser(interaction.User)
             .WithLocalizedPrompts(_localizer)
@@ -307,13 +320,15 @@ public class ImageModule : InteractionModuleBase
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = results[index].Select(result => new EmbedBuilder()
+            int start = index * count;
+
+            var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title?.Truncate(EmbedBuilder.MaxTitleLength) ?? "")
                 .WithDescription(result.Text)
                 .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Yandex Visual Search | Page {0} of {1}", index + 1, results.Length], Constants.YandexIconUrl)
+                .WithFooter(_localizer["Yandex Visual Search | Page {0} of {1}", index + 1, maxIndex + 1], Constants.YandexIconUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -332,12 +347,11 @@ public class ImageModule : InteractionModuleBase
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
-        IBingReverseImageSearchResult[][] results;
+        IBingReverseImageSearchResult[] results;
 
         try
         {
             results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict, interaction.GetLanguageCode()))
-                .Chunk(multiImages ? 4 : 1)
                 .ToArray();
         }
         catch (BingException e)
@@ -351,12 +365,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
         }
 
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)results.Length / count) - 1;
+
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
             .WithFergunEmotes(_fergunOptions)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(results.Length - 1)
+            .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
             .AddUser(interaction.User)
             .WithLocalizedPrompts(_localizer)
@@ -368,13 +385,15 @@ public class ImageModule : InteractionModuleBase
 
         MultiEmbedPageBuilder GeneratePage(int index)
         {
-            var builders = results[index].Select(result => new EmbedBuilder()
+            int start = index * count;
+
+            var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Text.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithUrl(multiImages ? "https://www.bing.com/visualsearch" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithDescription(result.FriendlyDomainName ?? (Uri.TryCreate(result.SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : null))
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Bing Visual Search | Page {0} of {1}", index + 1, results.Length], Constants.BingIconUrl)
+                .WithFooter(_localizer["Bing Visual Search | Page {0} of {1}", index + 1, maxIndex + 1], Constants.BingIconUrl)
                 .WithColor((Color)result.AccentColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);

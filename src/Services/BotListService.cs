@@ -14,7 +14,7 @@ namespace Fergun.Services;
 public sealed class BotListService : BackgroundService
 {
     private readonly DiscordShardedClient _discordClient;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<BotListService> _logger;
     private readonly BotListOptions _options;
     private int _lastServerCount = -1;
@@ -23,13 +23,13 @@ public sealed class BotListService : BackgroundService
     /// Initializes a new instance of the <see cref="BotListService"/> class.
     /// </summary>
     /// <param name="discordClient">The Discord client.</param>
-    /// <param name="httpClient">The HTTP client.</param>
+    /// <param name="httpClientFactoryFactory"></param>
     /// <param name="logger">The logger.</param>
     /// <param name="options">The bot list options.</param>
-    public BotListService(DiscordShardedClient discordClient, HttpClient httpClient, ILogger<BotListService> logger, IOptions<BotListOptions> options)
+    public BotListService(DiscordShardedClient discordClient, IHttpClientFactory httpClientFactoryFactory, ILogger<BotListService> logger, IOptions<BotListOptions> options)
     {
         _discordClient = discordClient;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactoryFactory;
         _logger = logger;
         _options = options.Value;
     }
@@ -53,9 +53,9 @@ public sealed class BotListService : BackgroundService
             string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'"));
 
         using var timer = new PeriodicTimer(_options.UpdatePeriod);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
         {
-            await UpdateStatsAsync();
+            await UpdateStatsAsync().ConfigureAwait(false);
         }
     }
 
@@ -72,7 +72,7 @@ public sealed class BotListService : BackgroundService
         {
             if (!string.IsNullOrWhiteSpace(token))
             {
-                await UpdateStatsAsync(botList, serverCount, _discordClient.Shards.Count, token);
+                await UpdateStatsAsync(botList, serverCount, _discordClient.Shards.Count, token).ConfigureAwait(false);
             }
         }
 
@@ -93,7 +93,8 @@ public sealed class BotListService : BackgroundService
         using var request = CreateRequest(botList, serverCount, shardCount, token);
         try
         {
-            using var response = await _httpClient.SendAsync(request);
+            using var httpClient = _httpClientFactory.CreateClient();
+            using var response = await httpClient.SendAsync(request).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
             _logger.LogDebug("Successfully updated {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount}).", botList, serverCount, shardCount);
         }
@@ -118,13 +119,6 @@ public sealed class BotListService : BackgroundService
                 _options.Tokens.Remove(botList);
             }
         }
-    }
-
-    /// <inheritdoc/>
-    public override void Dispose()
-    {
-        _httpClient.Dispose();
-        base.Dispose();
     }
 
     private HttpRequestMessage CreateRequest(BotList botList, int serverCount, int shardCount, string token) => botList switch
