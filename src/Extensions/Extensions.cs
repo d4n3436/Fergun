@@ -92,8 +92,4 @@ public static class Extensions
         serializer.Serialize(jsonWriter, obj);
         return strWriter.ToString();
     }
-
-    public static IEnumerable<AutocompleteResult> PrependCurrentIfNotPresent(this IEnumerable<AutocompleteResult> source, string option)
-        => source.Any(x => string.Equals(x.Name, option, StringComparison.OrdinalIgnoreCase))
-            ? source : source.Prepend(new AutocompleteResult { Name = option, Value = option });
 }

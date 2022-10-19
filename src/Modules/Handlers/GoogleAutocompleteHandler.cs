@@ -40,7 +40,6 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
             .RootElement[1]
             .EnumerateArray()
             .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
-            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);

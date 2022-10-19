@@ -47,7 +47,6 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
             .RootElement
             .EnumerateArray()
             .Select(x => new AutocompleteResult(x.GetProperty("phrase").GetString(), x.GetProperty("phrase").GetString()))
-            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);

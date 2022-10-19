@@ -35,7 +35,6 @@ public class UrbanAutocompleteHandler : AutocompleteHandler
 
         var suggestions = results
             .Select(x => new AutocompleteResult(x.Truncate(100), x.Truncate(100)))
-            .PrependCurrentIfNotPresent(text)
             .Take(25);
 
         return AutocompletionResult.FromSuccess(suggestions);
