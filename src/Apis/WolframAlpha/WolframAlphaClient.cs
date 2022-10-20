@@ -1,5 +1,5 @@
-﻿using System.Buffers;
-using System.Net.WebSockets;
+﻿using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 
 namespace Fergun.Apis.WolframAlpha;
@@ -10,7 +10,14 @@ namespace Fergun.Apis.WolframAlpha;
 public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 {
     private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
-    private static readonly Uri _resultsUri = new("wss://www.wolframalpha.com/n/v1/api/fetcher/results");
+
+    // This AppID is the result of an algorithm in the Android app that takes 2 byte arrays,
+    // the first one comes from the values of the resource keys "app_one_id", "id_2_app", "appid_three", "four_appid"
+    // and the other array is the MD5 hash of assets\close_dont_change.png (3AC2AA8E493A260B877A68AFC5D1F9F4), also inside the app.
+    private const string _appId = "Y5H46L-2KR8T4PPQQ";
+
+    // The secret key is also the result of the same algorithm using the values of the resource keys "secret_1_key", "key_secret_2", "three_secret_key", "four_secret_key"
+    private const string _secretKey = "EumRuvaOhx7ENr9N";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -62,123 +69,17 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         ArgumentNullException.ThrowIfNull(language);
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var webSocket = new ClientWebSocket();
-        webSocket.Options.SetRequestHeader("User-Agent", _defaultUserAgent);
+        string escapedInput = Uri.EscapeDataString(input);
 
-        await webSocket.ConnectAsync(_resultsUri, cancellationToken).ConfigureAwait(false);
+        // The key-value pairs must be ordered like tuples would
+        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{_secretKey}appid{_appId}input{escapedInput}languagecode{language}outputjson"));
+        string signature = Convert.ToHexString(bytes);
 
-        var encodedInput = JsonEncodedText.Encode(input);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={_appId}&languagecode={language}&input={escapedInput}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
 
-        var bufferWriter = new ArrayBufferWriter<byte>(126 + language.Length * 2 + encodedInput.EncodedUtf8Bytes.Length);
-        await using var writer = new Utf8JsonWriter(bufferWriter);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
-        writer.WriteStartObject();
-        writer.WriteString("type", "init");
-        writer.WriteString("lang", language);
-        
-        writer.WriteStartArray("messages");
-        writer.WriteStartObject();
-        writer.WriteString("type", "newQuery");
-        writer.WriteNull("locationId");
-        writer.WriteString("language", language);
-        writer.WriteBoolean("requestSidebarAd", false);
-        writer.WriteString("input", encodedInput);
-        writer.WriteEndObject();
-        writer.WriteEndArray();
-
-        writer.WriteEndObject();
-
-        await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
-        await webSocket.SendAsync(bufferWriter.WrittenMemory, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
-
-        var wolframResult = new WolframAlphaResult();
-        var pods = new SortedSet<WolframAlphaPod>();
-        var positions = new HashSet<int>();
-
-        while (webSocket.State == WebSocketState.Open)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            using var builder = new OwnedMemorySequenceBuilder<byte>();
-
-            ValueWebSocketReceiveResult result;
-
-            do
-            {
-                var owner = MemoryPool<byte>.Shared.Rent(4096);
-                try
-                {
-                    result = await webSocket.ReceiveAsync(owner.Memory, cancellationToken).ConfigureAwait(false);
-                }
-                catch
-                {
-                    owner.Dispose();
-                    throw;
-                }
-
-                builder.Append(owner, owner.Memory[..result.Count]);
-            } while (!result.EndOfMessage);
-
-            var sequence = builder.Build();
-
-            using var document = JsonDocument.Parse(sequence);
-            string? type = document.RootElement.GetProperty("type").GetString();
-
-            switch (type)
-            {
-                case "pods":
-                    foreach (var pod in document.RootElement.GetProperty("pods").EnumerateArray())
-                    {
-                        if (!pod.GetProperty("error").GetBoolean() &&
-                            pod.TryGetProperty("numsubpods", out var subPodCount) && subPodCount.GetInt32() != 0 &&
-                            positions.Add(pod.GetProperty("position").GetInt32()))
-                        {
-                            pods.Add(pod.Deserialize<WolframAlphaPod>()!);
-                        }
-                    }
-                    break;
-
-                case "didyoumean": // After queryComplete, the API returns info about one of the interpretations from didyoumean
-                    wolframResult.Type = WolframAlphaResultType.DidYouMean;
-                    string[] values = document
-                        .RootElement
-                        .GetProperty("didyoumean")
-                        .EnumerateArray()
-                        .Select(x => x.GetProperty("val").GetString()!)
-                        .ToArray();
-
-                    wolframResult.DidYouMean = Array.AsReadOnly(values);
-                    break;
-
-                case "futureTopic":
-                    wolframResult.Type = WolframAlphaResultType.FutureTopic;
-                    wolframResult.FutureTopic = document.RootElement.GetProperty("futureTopic").Deserialize<WolframAlphaFutureTopic>();
-                    break;
-
-                case "noResult":
-                    wolframResult.Type = WolframAlphaResultType.NoResult;
-                    break;
-
-                case "queryComplete":
-                    if (wolframResult.Type == WolframAlphaResultType.Unknown)
-                    {
-                        wolframResult.Type = WolframAlphaResultType.Success;
-                    }
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
-                    break;
-
-                case "error":
-                    wolframResult.Type = WolframAlphaResultType.Error;
-                    wolframResult.StatusCode = document.RootElement.GetProperty("status").GetInt32();
-                    wolframResult.ErrorMessage = document.RootElement.GetProperty("message").GetString();
-                    await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken).ConfigureAwait(false);
-                    break;
-
-            }
-        }
-
-        wolframResult.Pods = pods;
-
-        return wolframResult;
+        return document.RootElement.GetProperty("queryresult").Deserialize<WolframAlphaResult>()!;
     }
 
     /// <inheritdoc/>

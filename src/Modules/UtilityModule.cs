@@ -399,12 +399,12 @@ public class UtilityModule : InteractionModuleBase
 
         if (result.Type == WolframAlphaResultType.Error)
         {
-            return FergunResult.FromError(_localizer["Failed to get the results. Status code: {0}. Error message: {1}", result.StatusCode!, result.ErrorMessage!]);
+            return FergunResult.FromError(_localizer["Failed to get the results. Status code: {0}. Error message: {1}", result.ErrorInfo!.StatusCode, result.ErrorInfo!.Message]);
         }
 
         if (result.Type == WolframAlphaResultType.DidYouMean)
         {
-            return FergunResult.FromError(_localizer["No results found. Did you mean...{0}", $"\n- {string.Join("\n- ", result.DidYouMean)}"]);
+            return FergunResult.FromError(_localizer["No results found. Did you mean...{0}", $"\n- {string.Join("\n- ", result.DidYouMeans.Select(x => x.Value))}"]);
         }
 
         if (result.Type == WolframAlphaResultType.FutureTopic)
@@ -426,8 +426,6 @@ public class UtilityModule : InteractionModuleBase
         }
 
         var builders = new List<EmbedBuilder>();
-        var images = new Dictionary<int, byte[]>();
-        var cachedAttachments = new Dictionary<int, string>();
 
         var topEmbed = new EmbedBuilder()
             .WithTitle(_localizer["Wolfram|Alpha Results"])
@@ -452,19 +450,10 @@ public class UtilityModule : InteractionModuleBase
                 else
                 {
                     var builder = new EmbedBuilder()
-                        .WithDescription(Format.Bold(pod.Title));
+                        .WithDescription(Format.Bold(pod.Title))
+                        .WithImageUrl(subPod.Image.SourceUrl)
+                        .WithColor(Color.Red);
 
-                    if (subPod.Image.IsDataPresent)
-                    {
-                        builder.WithImageUrl($"attachment://{builders.Count + 1}.gif");
-                        images.Add(builders.Count, subPod.Image.Data);
-                    }
-                    else
-                    {
-                        builder.WithImageUrl(subPod.Image.SourceUrl);
-                    }
-
-                    builder.WithColor(Color.Red);
                     builders.Add(builder);
                 }
             }
@@ -474,7 +463,7 @@ public class UtilityModule : InteractionModuleBase
             }
         }
 
-        var paginator = new WolframAlphaPaginatorBuilder()
+        var paginator = new LazyPaginatorBuilder()
             .AddUser(Context.User)
             .WithPageFactory(GeneratePage)
             .WithActionOnCancellation(ActionOnStop.DisableInput)
@@ -482,7 +471,6 @@ public class UtilityModule : InteractionModuleBase
             .WithMaxPageIndex(builders.Count == 0 ? 0 : builders.Count - 1)
             .WithFooter(PaginatorFooter.None)
             .WithFergunEmotes(_fergunOptions)
-            .WithCacheLoadedPages(false)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -491,7 +479,7 @@ public class UtilityModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
 
-        IPageBuilder GeneratePage(int index, int lastIndex, IUserMessage? message)
+        IPageBuilder GeneratePage(int index)
         {
             var builder = new MultiEmbedPageBuilder();
             if (topEmbed.Fields.Count == 0) // No info in plain text
@@ -511,33 +499,8 @@ public class UtilityModule : InteractionModuleBase
                 return builder;
             }
 
-            if (cachedAttachments.TryGetValue(lastIndex, out string? imageUrl))
-            {
-                if (images.Remove(lastIndex))
-                {
-                    builders[lastIndex].WithImageUrl(imageUrl);
-                }
-            }
-            else
-            {
-                var first = message?.Embeds?.FirstOrDefault(x => x.Image.HasValue && x.Image.Value.Url.StartsWith("https://cdn.discordapp.com/attachments"));
-
-                if (first is not null)
-                {
-                    cachedAttachments.Add(lastIndex, first.Image!.Value.Url);
-                }
-            }
-
             return builder
-                .AddBuilder(builders[index].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl))
-                .WithAttachmentsFactory(() => GetAttachments(index));
-        }
-
-        IEnumerable<FileAttachment> GetAttachments(int index)
-        {
-            return images.TryGetValue(index, out byte[]? bytes)
-                ? new FileAttachment[] { new(new MemoryStream(bytes), $"{index + 1}.gif") }
-                : Enumerable.Empty<FileAttachment>();
+                .AddBuilder(builders[index].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl));
         }
     }
 

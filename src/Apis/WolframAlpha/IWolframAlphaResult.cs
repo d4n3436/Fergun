@@ -11,9 +11,19 @@ public interface IWolframAlphaResult
     WolframAlphaResultType Type { get; }
 
     /// <summary>
+    /// Gets a value indicating whether the result is successful.
+    /// </summary>
+    public bool IsSuccess { get; }
+
+    /// <summary>
     /// Gets a read-only list containing alternative queries.
     /// </summary>
-    IReadOnlyList<string> DidYouMean { get; }
+    IReadOnlyList<IWolframAlphaQuerySuggestion> DidYouMeans { get; }
+
+    /// <summary>
+    /// Gets the error information.
+    /// </summary>
+    IWolframAlphaErrorInfo? ErrorInfo { get; }
 
     /// <summary>
     /// Gets the future topic.
@@ -21,17 +31,7 @@ public interface IWolframAlphaResult
     IWolframAlphaFutureTopic? FutureTopic { get; }
 
     /// <summary>
-    /// Gets the error status code.
-    /// </summary>
-    int? StatusCode { get; }
-
-    /// <summary>
-    /// Gets the error message.
-    /// </summary>
-    string? ErrorMessage { get; }
-
-    /// <summary>
     /// Gets the pods.
     /// </summary>
-    IReadOnlyCollection<IWolframAlphaPod> Pods { get; }
+    IReadOnlyList<IWolframAlphaPod> Pods { get; }
 }
