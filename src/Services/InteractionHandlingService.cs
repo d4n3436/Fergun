@@ -303,6 +303,11 @@ public class InteractionHandlingService : IHostedService
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
             message = $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{exception.Message}```"]}";
         }
+        else if (result.Error == InteractionCommandError.Unsuccessful)
+        {
+            _logger.LogInformation("Unsuccessful execution of {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
+                command.CommandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
+        }
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
