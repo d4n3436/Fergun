@@ -21,6 +21,11 @@ public interface IWolframAlphaResult
     IReadOnlyList<IWolframAlphaQuerySuggestion> DidYouMeans { get; }
 
     /// <summary>
+    /// Gets the warnings.
+    /// </summary>
+    IReadOnlyList<IWolframAlphaWarning> Warnings { get; }
+
+    /// <summary>
     /// Gets the error information.
     /// </summary>
     IWolframAlphaErrorInfo? ErrorInfo { get; }

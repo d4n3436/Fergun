@@ -13,14 +13,16 @@ public class WolframAlphaResult : IWolframAlphaResult
     /// <param name="isSuccess">Whether if the result is successful.</param>
     /// <param name="pods">The pods.</param>
     /// <param name="didYouMeans">The alternative queries.</param>
+    /// <param name="warnings">The warnings.</param>
     /// <param name="futureTopic">The future topic info.</param>
     /// <param name="errorInfo">The error info.</param>
     public WolframAlphaResult(bool isSuccess, IReadOnlyList<WolframAlphaPod>? pods, IReadOnlyList<WolframAlphaQuerySuggestion>? didYouMeans,
-        WolframAlphaFutureTopic? futureTopic, WolframAlphaErrorInfo? errorInfo)
+        IReadOnlyList<WolframAlphaWarning>? warnings, WolframAlphaFutureTopic? futureTopic, WolframAlphaErrorInfo? errorInfo)
     {
         IsSuccess = isSuccess;
         Pods = pods ?? Array.Empty<WolframAlphaPod>();
         DidYouMeans = didYouMeans ?? Array.Empty<WolframAlphaQuerySuggestion>();
+        Warnings = warnings ?? Array.Empty<WolframAlphaWarning>();
         FutureTopic = futureTopic;
         ErrorInfo = errorInfo;
     }
@@ -38,7 +40,13 @@ public class WolframAlphaResult : IWolframAlphaResult
 
     /// <inheritdoc cref="IWolframAlphaResult.DidYouMeans"/>
     [JsonPropertyName("didyoumeans")]
+    [JsonConverter(typeof(WolframAlphaQuerySuggestionConverter))]
     public IReadOnlyList<WolframAlphaQuerySuggestion> DidYouMeans { get; }
+
+    /// <inheritdoc cref="IWolframAlphaResult.Warnings"/>
+    [JsonPropertyName("warnings")]
+    [JsonConverter(typeof(WolframAlphaWarningConverter))]
+    public IReadOnlyList<WolframAlphaWarning> Warnings { get; }
 
     /// <inheritdoc cref="IWolframAlphaResult.FutureTopic"/>
     [JsonPropertyName("futuretopic")]
@@ -46,7 +54,7 @@ public class WolframAlphaResult : IWolframAlphaResult
 
     /// <inheritdoc cref="IWolframAlphaResult.ErrorInfo"/>
     [JsonPropertyName("error")]
-    [JsonConverter(typeof(ErrorConverter))]
+    [JsonConverter(typeof(WolframAlphaErrorInfoConverter))]
     public WolframAlphaErrorInfo? ErrorInfo { get; }
 
     /// <inheritdoc/>
@@ -54,6 +62,9 @@ public class WolframAlphaResult : IWolframAlphaResult
 
     /// <inheritdoc/>
     IReadOnlyList<IWolframAlphaQuerySuggestion> IWolframAlphaResult.DidYouMeans => DidYouMeans;
+
+    /// <inheritdoc/>
+    IReadOnlyList<IWolframAlphaWarning> IWolframAlphaResult.Warnings => Warnings;
 
     /// <inheritdoc/>
     IWolframAlphaFutureTopic? IWolframAlphaResult.FutureTopic => FutureTopic;

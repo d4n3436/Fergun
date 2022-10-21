@@ -395,7 +395,7 @@ public class UtilityModule : InteractionModuleBase
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
-        var result = await _wolframAlphaClient.GetResultsAsync(input, Context.Interaction.GetLanguageCode(), cts.Token);
+        var result = await _wolframAlphaClient.SendQueryAsync(input, Context.Interaction.GetLanguageCode(), true, cts.Token);
 
         if (result.Type == WolframAlphaResultType.Error)
         {
@@ -429,10 +429,10 @@ public class UtilityModule : InteractionModuleBase
 
         var topEmbed = new EmbedBuilder()
             .WithTitle(_localizer["Wolfram|Alpha Results"])
+            .WithDescription(string.Join('\n', result.Warnings.Select(x => $"⚠️ {x.Text}")))
             .WithThumbnailUrl(Constants.WolframAlphaLogoUrl)
             .WithColor(Color.Red);
 
-        // TODO: Add warnings and assumptions
         foreach (var pod in result.Pods)
         {
             if (pod.SubPods.Count == 0) // Shouldn't happen

@@ -14,11 +14,12 @@ public interface IWolframAlphaClient
     Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string input, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets results from WolframAlpha.
+    /// Sends a query to WolframAlpha.
     /// </summary>
     /// <param name="input">The query input.</param>
     /// <param name="language">The language of the results.</param>
+    /// <param name="reinterpret">Whether to allow WolframAlpha to reinterpret queries that would otherwise not be understood.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns> <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains the response from WolframAlpha.</returns>
-    Task<IWolframAlphaResult> GetResultsAsync(string input, string language, CancellationToken cancellationToken = default);
+    Task<IWolframAlphaResult> SendQueryAsync(string input, string language, bool reinterpret = true, CancellationToken cancellationToken = default);
 }

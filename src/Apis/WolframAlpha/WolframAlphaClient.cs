@@ -62,7 +62,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<IWolframAlphaResult> GetResultsAsync(string input, string language, CancellationToken cancellationToken = default)
+    public async Task<IWolframAlphaResult> SendQueryAsync(string input, string language, bool reinterpret = true, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
         ArgumentNullException.ThrowIfNull(input);
@@ -72,10 +72,10 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         string escapedInput = Uri.EscapeDataString(input);
 
         // The key-value pairs must be ordered like tuples would
-        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{_secretKey}appid{_appId}input{escapedInput}languagecode{language}outputjson"));
+        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{_secretKey}appid{_appId}input{escapedInput}languagecode{language}outputjsonreinterpret{reinterpret}"));
         string signature = Convert.ToHexString(bytes);
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={_appId}&languagecode={language}&input={escapedInput}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={_appId}&languagecode={language}&input={escapedInput}&reinterpret={reinterpret}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
 
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 

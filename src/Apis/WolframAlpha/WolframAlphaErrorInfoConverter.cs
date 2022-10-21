@@ -6,7 +6,7 @@ namespace Fergun.Apis.WolframAlpha;
 /// <summary>
 /// Represents a converter of <see cref="WolframAlphaErrorInfo"/> that handles cases where the type is a boolean.
 /// </summary>
-internal class ErrorConverter : JsonConverter<WolframAlphaErrorInfo>
+internal class WolframAlphaErrorInfoConverter : JsonConverter<WolframAlphaErrorInfo>
 {
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, WolframAlphaErrorInfo value, JsonSerializerOptions options)
