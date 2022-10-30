@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Wikipedia;
@@ -425,7 +426,7 @@ public class UtilityModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["Wolfram|Alpha doesn't understand your query."]);
         }
 
-        var builders = new List<EmbedBuilder>();
+        var builders = new List<List<EmbedBuilder>>();
 
         var topEmbed = new EmbedBuilder()
             .WithTitle(_localizer["Wolfram|Alpha Results"])
@@ -435,32 +436,32 @@ public class UtilityModule : InteractionModuleBase
 
         foreach (var pod in result.Pods)
         {
-            if (pod.SubPods.Count == 0) // Shouldn't happen
-                continue;
+            var text = new StringBuilder();
+            var subBuilders = new List<EmbedBuilder>();
 
-            if (pod.SubPods.Count == 1)
+            foreach (var subPod in pod.SubPods)
             {
-                var subPod = pod.SubPods[0];
-
                 // If there's data in plain text and there isn't a newline, use that instead
                 if (!string.IsNullOrEmpty(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
                 {
-                    topEmbed.AddField(pod.Title, subPod.PlainText, true);
+                    text.AppendLine(subPod.PlainText);
                 }
                 else
                 {
                     var builder = new EmbedBuilder()
-                        .WithDescription(Format.Bold(pod.Title))
+                        .WithDescription(subBuilders.Count == 0 ? Format.Bold(pod.Title) : null)
                         .WithImageUrl(subPod.Image.SourceUrl)
                         .WithColor(Color.Red);
 
-                    builders.Add(builder);
+                    subBuilders.Add(builder);
                 }
             }
-            else
-            {
-                // TODO: Merge subpods images
-            }
+
+            if (text.Length > 0) 
+                topEmbed.AddField(pod.Title, text.ToString(), true);
+
+            if (subBuilders.Count > 0)
+                builders.Add(subBuilders);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -484,7 +485,7 @@ public class UtilityModule : InteractionModuleBase
             var builder = new MultiEmbedPageBuilder();
             if (topEmbed.Fields.Count == 0) // No info in plain text
             {
-                builders[index].WithTitle(_localizer["Wolfram|Alpha Results"])
+                builders[index][0].WithTitle(_localizer["Wolfram|Alpha Results"])
                     .WithThumbnailUrl(Constants.WolframAlphaLogoUrl);
             }
             else
@@ -499,8 +500,14 @@ public class UtilityModule : InteractionModuleBase
                 return builder;
             }
 
-            return builder
-                .AddBuilder(builders[index].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl));
+            for (int i = 0; i < builders[index].Count; i++)
+            {
+                builder.AddBuilder(builders[index][i]);
+            }
+
+            builders[index][builders[index].Count - 1].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl);
+
+            return builder;
         }
     }
 
