@@ -13,6 +13,7 @@ using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Utils;
 using Humanizer;
+using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -338,11 +339,11 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["Bot Version"], version is null ? "?" : $"v{version}", true)
             .AddField(_localizer["Total Servers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Total Users"], $"{totalUsers?.ToString() ?? "?"} (Shard: {totalUsersInShard?.ToString() ?? totalUsers?.ToString() ?? "?"})", true)
+            .AddField(_localizer["Total Users"], $"{totalUsers?.ToString() ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString() ?? "?"})", true)
             .AddField(_localizer["Shard ID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", shards, true)
-            .AddField(_localizer["Uptime"], elapsed.Humanize(culture: _localizer.CurrentCulture), true)
+            .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["Bot Owner"], owner, true);
 
