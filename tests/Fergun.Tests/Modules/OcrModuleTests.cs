@@ -102,7 +102,7 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, isEphemeral);
+        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), string.Empty, _interactionMock.Object, null, isEphemeral);
         Assert.False(result.IsSuccess);
     }
 
@@ -112,7 +112,7 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        var task = module.OcrAsync((OcrModule.OcrEngine)2, TextImageUrl, _interactionMock.Object, isEphemeral);
+        var task = module.OcrAsync((OcrModule.OcrEngine)2, TextImageUrl, _interactionMock.Object, null, isEphemeral);
 
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }
@@ -123,7 +123,7 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), InvalidImageUrl, _interactionMock.Object, isEphemeral);
+        var result = await module.OcrAsync(It.IsAny<OcrModule.OcrEngine>(), InvalidImageUrl, _interactionMock.Object, null, isEphemeral);
         Assert.False(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);

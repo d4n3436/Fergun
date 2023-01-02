@@ -166,12 +166,12 @@ public class ImageModuleTests
 
         if (engine == ImageModule.ReverseImageSearchEngine.Bing)
         {
-            _moduleMock.Verify(x => x.BingAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.Is<bool>(b => !b)), Times.Once);
+            _moduleMock.Verify(x => x.BingAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
             Mock.Get(_bingVisualSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<BingSafeSearchLevel>(l => l == (nsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict)), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
         else if (engine == ImageModule.ReverseImageSearchEngine.Yandex)
         {
-            _moduleMock.Verify(x => x.YandexAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.Is<bool>(b => !b)), Times.Once);
+            _moduleMock.Verify(x => x.YandexAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
             Mock.Get(_yandexImageSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<YandexSearchFilterMode>(l => l == (nsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family)), It.IsAny<CancellationToken>()), Times.Once);
         }
     }

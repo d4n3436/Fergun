@@ -60,13 +60,13 @@ public class OcrModule : InteractionModuleBase
 
         var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
 
-        // Attempt to disable the components
-        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
-
         if (result.IsSuccess)
         {
-            return await OcrAsync(result.Value, url, result.StopInteraction!, true);
+            return await OcrAsync(result.Value, url, result.StopInteraction!, Context.Interaction, true);
         }
+
+        // Attempt to disable the components
+        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
 
         return FergunResult.FromSilentError();
     }
@@ -81,7 +81,8 @@ public class OcrModule : InteractionModuleBase
         [Summary(description: "An image file.")] IAttachment? file = null)
         => await OcrAsync(OcrEngine.Yandex, file?.Url ?? url, Context.Interaction);
 
-    public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string? url, IDiscordInteraction interaction, bool ephemeral = false)
+    public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string? url, IDiscordInteraction interaction,
+        IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (url is null)
         {
@@ -107,6 +108,16 @@ public class OcrModule : InteractionModuleBase
         else
         {
             await interaction.DeferAsync(ephemeral);
+        }
+
+        try
+        {
+            if (originalInteraction is not null)
+                await originalInteraction.DeleteOriginalResponseAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Failed to delete the original interaction response.");
         }
 
         var stopwatch = Stopwatch.StartNew();

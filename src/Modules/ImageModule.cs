@@ -237,7 +237,7 @@ public class ImageModule : InteractionModuleBase
 
         if (result.IsSuccess)
         {
-            return await ReverseAsync(url, result.Value, false, result.StopInteraction!, true);
+            return await ReverseAsync(url, result.Value, false, result.StopInteraction!, Context.Interaction, true);
         }
 
         return FergunResult.FromSilentError();
@@ -259,17 +259,19 @@ public class ImageModule : InteractionModuleBase
         return await ReverseAsync(url, engine, multiImages, Context.Interaction);
     }
 
-    public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages,
+        IDiscordInteraction interaction, IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         return await (engine switch
         {
-            ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, ephemeral),
-            ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, ephemeral),
+            ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             _ => throw new ArgumentException(_localizer["Invalid image search engine."], nameof(engine))
         });
     }
 
-    public virtual async Task<RuntimeResult> YandexAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task<RuntimeResult> YandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
+        IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -278,6 +280,16 @@ public class ImageModule : InteractionModuleBase
         else
         {
             await interaction.DeferAsync(ephemeral);
+        }
+
+        try
+        {
+            if (originalInteraction is not null)
+                await originalInteraction.DeleteOriginalResponseAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Failed to delete the original interaction response.");
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
@@ -335,7 +347,8 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task<RuntimeResult> BingAsync(string url, bool multiImages, IDiscordInteraction interaction, bool ephemeral = false)
+    public virtual async Task<RuntimeResult> BingAsync(string url, bool multiImages, IDiscordInteraction interaction,
+        IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -344,6 +357,16 @@ public class ImageModule : InteractionModuleBase
         else
         {
             await interaction.DeferAsync(ephemeral);
+        }
+
+        try
+        {
+            if (originalInteraction is not null)
+                await originalInteraction.DeleteOriginalResponseAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Failed to delete the original interaction response.");
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
