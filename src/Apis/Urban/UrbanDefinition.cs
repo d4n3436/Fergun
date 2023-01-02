@@ -11,14 +11,14 @@ namespace Fergun.Apis.Urban;
 public class UrbanDefinition
 {
     [JsonConstructor]
-    public UrbanDefinition(string definition, string? date, string permalink, int thumbsUp, IReadOnlyCollection<string> soundUrls,
+    public UrbanDefinition(string definition, string? date, string permalink, int thumbsUp, IReadOnlyCollection<string>? soundUrls,
         string author, string word, int id, DateTimeOffset writtenOn, string example, int thumbsDown)
     {
         Definition = definition;
         Date = date;
         Permalink = permalink;
         ThumbsUp = thumbsUp;
-        SoundUrls = soundUrls;
+        SoundUrls = soundUrls ?? Array.Empty<string>();
         Author = author;
         Word = word;
         Id = id;
