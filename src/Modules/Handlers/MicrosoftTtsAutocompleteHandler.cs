@@ -12,9 +12,6 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
     {
         string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
-        if (string.IsNullOrEmpty(text))
-            return Task.FromResult(AutocompletionResult.FromSuccess());
-
         var translator = services
             .GetRequiredService<MicrosoftTranslator>();
 
@@ -25,29 +22,28 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
             voices = task.GetAwaiter().GetResult();
         }
 
-        voices = voices
-            .Where(x => x.DisplayName.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
-                        x.Locale.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
-                        x.Gender.StartsWith(text, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(x => x.DisplayName);
-
-        if (context.Interaction.TryGetLanguage(out var userLanguage) && string.IsNullOrEmpty(text))
+        if (string.IsNullOrEmpty(text))
         {
-            var matchingVoices = voices
-                .Where(x => x.Locale.StartsWith(userLanguage.ISO6391, StringComparison.OrdinalIgnoreCase))
-                .ToHashSet();
-
-            matchingVoices.UnionWith(voices);
-            voices = matchingVoices;
-            
+            if (context.Interaction.TryGetLanguage(out var userLanguage))
+            {
+                voices = voices
+                    .Where(x => x.Locale.StartsWith(userLanguage.ISO6391, StringComparison.OrdinalIgnoreCase));
+            }
+            else return Task.FromResult(AutocompletionResult.FromSuccess());
         }
-
+        else
+        {
+            voices = voices
+                .Where(x => x.DisplayName.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
+                            x.Locale.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
+                            x.Gender.StartsWith(text, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(x => x.DisplayName);
+        }
+        
         var results = voices
             .Take(25)
             .Select(x => new AutocompleteResult($"{x.DisplayName} ({x.Gender}, {x.Locale})", x.ShortName));
 
         return Task.FromResult(AutocompletionResult.FromSuccess(results));
     }
-
-    
 }

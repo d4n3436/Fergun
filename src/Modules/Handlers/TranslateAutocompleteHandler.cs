@@ -2,6 +2,7 @@
 using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Modules.Handlers;
 
@@ -11,10 +12,9 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context,
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
-        string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
+        var localizer = services.GetRequiredService<IFergunLocalizer<SharedModule>>();
 
-        if (string.IsNullOrEmpty(text))
-            return Task.FromResult(AutocompletionResult.FromSuccess());
+        string text = (autocompleteInteraction.Data.Current.Value as string)?.Trim() ?? string.Empty;
 
         IEnumerable<Language> languages = Language
             .LanguageDictionary
@@ -34,7 +34,7 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
 
             // Return only languages that supports both target and source languages
             languages = languages
-                .Where(x => x.IsServiceSupported(language.SupportedServices));
+                .Where(x => language.IsServiceSupported(x.SupportedServices));
         }
         else
         {
@@ -44,12 +44,24 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
                 userLanguage.ISO6391.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
                 userLanguage.ISO6393.StartsWith(text, StringComparison.OrdinalIgnoreCase)))
             {
+                // Move language to top
                 languages = languages.Where(x => !x.Equals(userLanguage)).Prepend(userLanguage);
             }
         }
-        
-        var results = languages
-            .Select(x => new AutocompleteResult($"{x.Name}{(x.Name == x.NativeName ? "" : $" ({x.NativeName})")} ({x.ISO6391})", x.ISO6391))
+
+        var array = languages.ToArray();
+        int last = Math.Min(25, array.Length);
+        int excess = array.Length - 25;
+
+        var results = array
+            .Select((x, i) =>
+            {
+                string name = x.Name;
+                name += x.Name == x.NativeName ? "" : $" ({x.NativeName})";
+                name += $" ({x.ISO6391})";
+                name += i == last - 1 && excess > 0 ? $" ({localizer["and {0} more...", excess]})" : "";
+                return new AutocompleteResult(name, x.ISO6391);
+            })
             .Take(25);
 
         return Task.FromResult(AutocompletionResult.FromSuccess(results));

@@ -79,6 +79,11 @@ public class FergunTranslator : IFergunTranslator
             }
         }
 
+        if (exceptions is null)
+        {
+            throw new TranslatorException($"No available translator supports the translation of the provided text from \"{fromLanguage}\" to \"{toLanguage}\".");
+        }
+
         throw new AggregateException("No translator provided a valid result.", exceptions);
     }
 
@@ -104,6 +109,11 @@ public class FergunTranslator : IFergunTranslator
                 exceptions ??= new List<Exception>();
                 exceptions.Add(e);
             }
+        }
+
+        if (exceptions is null)
+        {
+            throw new TranslatorException($"No available translator supports the translation of the provided text from \"{fromLanguage}\" to \"{toLanguage}\".");
         }
 
         throw new AggregateException("No translator provided a valid result.", exceptions);
@@ -152,6 +162,11 @@ public class FergunTranslator : IFergunTranslator
                 exceptions ??= new List<Exception>();
                 exceptions.Add(e);
             }
+        }
+
+        if (exceptions is null)
+        {
+            throw new TranslatorException($"No available translator supports the transliteration of the provided text from \"{fromLanguage}\" to \"{toLanguage}\".");
         }
 
         throw new AggregateException("No translator provided a valid result.", exceptions);

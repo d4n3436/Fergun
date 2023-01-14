@@ -120,6 +120,9 @@
   <data name="An error occurred." xml:space="preserve">
     <value>Ocurrió un error.</value>
   </data>
+  <data name="and {0} more..." xml:space="preserve">
+    <value>y {0} más...</value>
+  </data>
   <data name="Another user is currently using this action. Try again later." xml:space="preserve">
     <value>Otro usuario está usando esta acción actualmente. Vuelva a intentarlo más tarde.</value>
   </data>
