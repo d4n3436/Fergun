@@ -1,11 +1,8 @@
-﻿using System.Runtime.Serialization;
-
-namespace Fergun.Apis.Bing;
+﻿namespace Fergun.Apis.Bing;
 
 /// <summary>
 /// The exception that is thrown when Bing Visual Search fails to retrieve the results of an operation.
 /// </summary>
-[Serializable]
 public class BingException : Exception
 {
     /// <summary>
@@ -31,16 +28,6 @@ public class BingException : Exception
     /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
     public BingException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BingException"/> class with serialized data.
-    /// </summary>
-    /// <param name="serializationInfo">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
-    /// <param name="streamingContext">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
-    protected BingException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        : base(serializationInfo, streamingContext)
     {
     }
 }

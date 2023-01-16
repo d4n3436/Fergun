@@ -33,6 +33,16 @@ public class WikipediaClientTests
     }
 
     [Theory]
+    [InlineData(0, "en")]
+    [InlineData(1, "es")]
+    public async Task GetArticleAsync_Returns_Null_Article(int id, string language)
+    {
+        var article = await _wikipediaClient.GetArticleAsync(id, language);
+
+        Assert.Null(article);
+    }
+
+    [Theory]
     [InlineData("a", "en")]
     [InlineData("b", "es")]
     [InlineData("c", "fr")]

@@ -98,7 +98,7 @@ public class UrbanDictionaryTests
     }
 
     [Fact]
-    public async Task Disposed_UrbanDictionary_Usage_Should_Throw_ObjectDisposedException()
+    public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
     {
         _urbanDictionary.Dispose();
         _urbanDictionary.Dispose();

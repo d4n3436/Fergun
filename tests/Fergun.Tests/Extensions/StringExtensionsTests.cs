@@ -1,4 +1,7 @@
+using Bogus;
 using Fergun.Extensions;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;
@@ -18,5 +21,22 @@ public class StringExtensionsTests
         bool containsAny = str.ContainsAny(str0, str1);
 
         Assert.Equal(containsAny, containsFirst || containsSecond);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetSplitStringData))]
+    public void String_SplitWithoutWordBreaking_Should_Not_Divide_Words(string str, int length)
+    {
+        var split = str.SplitWithoutWordBreaking(length);
+        string joined = string.Join(' ', split);
+
+        Assert.Equal(str, joined);
+    }
+
+    public static IEnumerable<object[]> GetSplitStringData()
+    {
+        var faker = new Faker();
+        return faker.MakeLazy(10, () => (faker.Lorem.Sentence(100), faker.Random.Int(20, 30)))
+            .Select(x => new object[] { x.Item1, x.Item2 });
     }
 }

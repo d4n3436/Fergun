@@ -38,7 +38,7 @@ public class BingReverseImageSearchResult : IBingReverseImageSearchResult
 
     /// <inheritdoc/>
     [JsonPropertyName("accentColor")]
-    [JsonConverter(typeof(ColorJsonConverter))]
+    [JsonConverter(typeof(ColorConverter))]
     public Color AccentColor { get; }
 
     /// <inheritdoc/>

@@ -63,7 +63,7 @@ public static class Extensions
             LogSeverity.Info => LogLevel.Information,
             LogSeverity.Verbose => LogLevel.Debug,
             LogSeverity.Debug => LogLevel.Trace,
-            _ => throw new ArgumentOutOfRangeException(nameof(logSeverity), logSeverity.ToString())
+            _ => throw new ArgumentOutOfRangeException(nameof(logSeverity))
         };
 
     public static string Display(this IInteractionContext context)

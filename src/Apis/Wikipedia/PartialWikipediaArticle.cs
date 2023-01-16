@@ -25,10 +25,4 @@ public class PartialWikipediaArticle : IPartialWikipediaArticle
     /// <inheritdoc/>
     [JsonPropertyName("pageid")]
     public int Id { get; }
-
-    /// <summary>
-    /// Returns the title of this article.
-    /// </summary>
-    /// <returns>The title of this article.</returns>
-    public override string ToString() => Title;
 }

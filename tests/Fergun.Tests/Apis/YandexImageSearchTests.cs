@@ -187,12 +187,30 @@ public class YandexImageSearchTests
     }
 
     [Fact]
-    public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
+    public async Task Disposed_YandexImageSearch_Usage_Throws_ObjectDisposedException()
     {
         (_yandexImageSearch as IDisposable)?.Dispose();
         (_yandexImageSearch as IDisposable)?.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(It.IsAny<string>()));
+    }
+
+    [Fact]
+    public void YandexException_Has_Expected_Values()
+    {
+        var innerException = new Exception();
+
+        var exception1 = new YandexException();
+        var exception2 = new YandexException("Custom message");
+        var exception3 = new YandexException("Custom message 2", innerException);
+
+        Assert.Null(exception1.InnerException);
+
+        Assert.Equal("Custom message", exception2.Message);
+        Assert.Null(exception2.InnerException);
+
+        Assert.Equal("Custom message 2", exception3.Message);
+        Assert.Same(innerException, exception3.InnerException);
     }
 }

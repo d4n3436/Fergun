@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Fergun.Apis.Bing;
 using Moq;
@@ -46,7 +48,15 @@ public class BingVisualSearchTests
         Assert.All(results, x => Assert.NotNull(x.Url));
         Assert.All(results, x => Assert.NotNull(x.SourceUrl));
         Assert.All(results, x => Assert.NotNull(x.Text));
+        Assert.All(results, x => Assert.True(x.AccentColor.A == 0));
         Assert.All(results, x => Assert.NotNull(x.ToString()));
+        Assert.All(results, x =>
+        {
+            if (x.FriendlyDomainName is null)
+            {
+                Assert.True(Uri.TryCreate(x.SourceUrl, UriKind.Absolute, out _));
+            }
+        });
     }
 
     [Theory]
@@ -68,5 +78,39 @@ public class BingVisualSearchTests
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
+    }
+
+    [Fact]
+    public void BingException_Has_Expected_Values()
+    {
+        var innerException = new Exception();
+
+        var exception1 = new BingException();
+        var exception2 = new BingException("Custom message");
+        var exception3 = new BingException("Custom message 2", innerException);
+
+        Assert.Null(exception1.InnerException);
+
+        Assert.Equal("Custom message", exception2.Message);
+        Assert.Null(exception2.InnerException);
+
+        Assert.Equal("Custom message 2", exception3.Message);
+        Assert.Same(innerException, exception3.InnerException);
+    }
+
+    [Theory]
+    [InlineData("\"B38E18\"", 0xB38E18)]
+    [InlineData("\"73A02B\"", 0x73A02B)]
+    [InlineData("\"676962\"", 0x676962)]
+    public void ColorConverter_Returns_Expected_Values(string hexString, int number)
+    {
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new Fergun.Apis.Bing.ColorConverter());
+
+        var color = JsonSerializer.Deserialize<Color>(hexString, options);
+        string serializedColor = JsonSerializer.Serialize(color, options);
+
+        Assert.Equal(number, color.ToArgb());
+        Assert.Equal(hexString, serializedColor);
     }
 }
