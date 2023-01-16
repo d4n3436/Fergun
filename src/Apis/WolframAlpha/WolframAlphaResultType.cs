@@ -6,9 +6,9 @@
 public enum WolframAlphaResultType
 {
     /// <summary>
-    /// Unknown result.
+    /// No results.
     /// </summary>
-    Unknown,
+    NoResult,
 
     /// <summary>
     /// Successful result.
@@ -24,11 +24,6 @@ public enum WolframAlphaResultType
     /// The query result refers to a topic still under development.
     /// </summary>
     FutureTopic,
-
-    /// <summary>
-    /// No results.
-    /// </summary>
-    NoResult,
 
     /// <summary>
     /// An error occurred.

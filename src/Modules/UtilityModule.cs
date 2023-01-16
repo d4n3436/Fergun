@@ -421,7 +421,7 @@ public class UtilityModule : InteractionModuleBase
             return FergunResult.FromSuccess();
         }
 
-        if (result.Pods.Count == 0 || result.Type == WolframAlphaResultType.NoResult)
+        if (result.Type == WolframAlphaResultType.NoResult)
         {
             return FergunResult.FromError(_localizer["Wolfram|Alpha doesn't understand your query."]);
         }

@@ -40,12 +40,12 @@ public class WolframAlphaResult : IWolframAlphaResult
 
     /// <inheritdoc cref="IWolframAlphaResult.DidYouMeans"/>
     [JsonPropertyName("didyoumeans")]
-    [JsonConverter(typeof(WolframAlphaQuerySuggestionConverter))]
+    [JsonConverter(typeof(ArrayOrObjectConverter<WolframAlphaQuerySuggestion>))]
     public IReadOnlyList<WolframAlphaQuerySuggestion> DidYouMeans { get; }
 
     /// <inheritdoc cref="IWolframAlphaResult.Warnings"/>
     [JsonPropertyName("warnings")]
-    [JsonConverter(typeof(WolframAlphaWarningConverter))]
+    [JsonConverter(typeof(ArrayOrObjectConverter<WolframAlphaWarning>))]
     public IReadOnlyList<WolframAlphaWarning> Warnings { get; }
 
     /// <inheritdoc cref="IWolframAlphaResult.FutureTopic"/>
@@ -84,11 +84,11 @@ public class WolframAlphaResult : IWolframAlphaResult
             return WolframAlphaResultType.DidYouMean;
         }
 
-        if (!IsSuccess)
+        if (!IsSuccess && ErrorInfo is not null)
         {
-            return ErrorInfo is not null ? WolframAlphaResultType.Error : WolframAlphaResultType.Unknown;
+            return WolframAlphaResultType.Error;
         }
 
-        return WolframAlphaResultType.Success;
+        return Pods.Count == 0 ? WolframAlphaResultType.NoResult : WolframAlphaResultType.Success;
     }
 }
