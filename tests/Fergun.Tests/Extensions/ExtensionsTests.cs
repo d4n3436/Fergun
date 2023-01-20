@@ -53,7 +53,7 @@ public class ExtensionsTests
     [Fact]
     public void Object_Dump_Returns_Expected_Result()
     {
-        const string serialized = "{\r\n  \"one\": {\r\n    \"two\": {}\r\n  }\r\n}";
+        const string serialized = "{\n  \"one\": {\n    \"two\": {}\n  }\n}";
 
         var depth2Obj = new
         {
