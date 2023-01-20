@@ -14,7 +14,7 @@ public class MusixmatchClientState
     private string? _userToken;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
-    private readonly AsyncRateLimitPolicy<string> _rateLimitPolicy = Policy.RateLimitAsync<string>(1, TimeSpan.FromMinutes(1));
+    private readonly AsyncRateLimitPolicy<string> _rateLimitPolicy = Policy.RateLimitAsync<string>(1, TimeSpan.FromMinutes(1), 2);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClientState"/> class.

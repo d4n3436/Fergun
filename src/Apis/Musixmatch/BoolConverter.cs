@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Buffers.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Musixmatch;
@@ -9,17 +10,17 @@ namespace Fergun.Apis.Musixmatch;
 public class BoolConverter : JsonConverter<bool>
 {
     /// <inheritdoc/>
-    public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options) =>
-        writer.WriteBooleanValue(value);
-
-    /// <inheritdoc/>
     public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
         reader.TokenType switch
         {
             JsonTokenType.True => true,
             JsonTokenType.False => false,
-            JsonTokenType.String => bool.TryParse(reader.GetString(), out var b) ? b : throw new InvalidOperationException($"Cannot get the value of a token type '{reader.TokenType}' as a boolean."),
+            JsonTokenType.String => Utf8Parser.TryParse(reader.ValueSpan, out bool b, out _, 'l') ? b : throw new InvalidOperationException($"Cannot get the value of a token type '{reader.TokenType}' as a boolean."),
             JsonTokenType.Number => reader.TryGetInt32(out int val) && val != 0,
             _ => throw new InvalidOperationException($"Cannot get the value of a token type '{reader.TokenType}' as a boolean.")
         };
+
+    /// <inheritdoc/>
+    public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options) =>
+        writer.WriteBooleanValue(value);
 }

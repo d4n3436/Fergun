@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Runtime.Serialization;
 
 namespace Fergun.Apis.Musixmatch;
 
 /// <summary>
 /// The exception that is thrown when a call to the Musixmatch API fails.
 /// </summary>
-[Serializable]
 public class MusixmatchException : Exception
 {
     [DoesNotReturn]
@@ -62,16 +60,6 @@ public class MusixmatchException : Exception
     /// <param name="innerException">The exception that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
     public MusixmatchException(string? message, Exception? innerException)
         : base(message, innerException)
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MusixmatchException"/> class with serialized data.
-    /// </summary>
-    /// <param name="serializationInfo">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
-    /// <param name="streamingContext">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
-    protected MusixmatchException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-        : base(serializationInfo, streamingContext)
     {
     }
 }

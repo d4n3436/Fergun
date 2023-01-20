@@ -35,11 +35,11 @@ public class SharedModuleTests
                 Language.TryGetLanguage(source ?? string.Empty, out var sourceLanguage);
 
                 var mock = new Mock<ITranslationResult>();
-                mock.SetupGet(x => x.Translation).Returns(() => text);
-                mock.SetupGet(x => x.Source).Returns(() => text);
-                mock.SetupGet(x => x.SourceLanguage).Returns(() => sourceLanguage ?? targetLanguage);
-                mock.SetupGet(x => x.TargetLanguage).Returns(() => targetLanguage);
-                mock.SetupGet(x => x.Service).Returns(() => text switch
+                mock.SetupGet(x => x.Translation).Returns(text);
+                mock.SetupGet(x => x.Source).Returns(text);
+                mock.SetupGet(x => x.SourceLanguage).Returns(sourceLanguage ?? targetLanguage);
+                mock.SetupGet(x => x.TargetLanguage).Returns(targetLanguage);
+                mock.SetupGet(x => x.Service).Returns(text switch
                 {
                     "Bing" => "BingTranslator",
                     "Microsoft" => "MicrosoftTranslator",

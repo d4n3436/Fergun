@@ -183,9 +183,7 @@ public class OtherModule : InteractionModuleBase
 
         PageBuilder GeneratePage(int index)
         {
-            string links = Format.Url(_localizer["View on Musixmatch"], song.Url);
-            if (song.ArtistUrl is not null)
-                links += $" | {Format.Url(_localizer["View Artist"], song.ArtistUrl)}";
+            string links = $"{Format.Url(_localizer["View on Musixmatch"], song.Url)}  | {Format.Url(_localizer["View Artist"], song.ArtistUrl!)}";
 
             // Discord doesn't support custom protocols in embeds (spotify://track/id)
             if (song.SpotifyTrackId is not null)
