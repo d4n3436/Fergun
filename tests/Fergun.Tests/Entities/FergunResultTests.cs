@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Localization;
 using Xunit;
 
-namespace Fergun.Tests;
+namespace Fergun.Tests.Entities;
 
 public class FergunResultTests
 {

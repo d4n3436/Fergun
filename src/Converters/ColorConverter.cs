@@ -24,18 +24,19 @@ public class ColorConverter : TypeConverter<Color>
         if (color.ToArgb() == 0)
         {
             var span = value.AsSpan()
-                .TrimStart()
-                .TrimStart('#')
+                .Trim();
+
+            int length = span.Length;
+
+            span = span.TrimStart('#')
                 .TrimStart("0x")
                 .TrimStart("0X")
                 .TrimStart("&h")
                 .TrimStart("&H");
 
-            if ((uint.TryParse(span, NumberStyles.Integer, CultureInfo.InvariantCulture, out uint rawColor)
-                 || uint.TryParse(span, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out rawColor))
-                && rawColor <= Discord.Color.MaxDecimalValue)
+            if (TryParseInt32(span, span.Length < length, out int rawColor))
             {
-                color = Color.FromArgb((int)rawColor);
+                color = Color.FromArgb(rawColor);
             }
         }
 
@@ -47,5 +48,11 @@ public class ColorConverter : TypeConverter<Color>
         }
 
         return Task.FromResult(TypeConverterResult.FromSuccess(color));
+    }
+
+    private static bool TryParseInt32(ReadOnlySpan<char> str, bool tryParseAsHexFirst, out int result)
+    {
+        bool success = int.TryParse(str, tryParseAsHexFirst ? NumberStyles.HexNumber : NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
+        return success ? success : int.TryParse(str, tryParseAsHexFirst ? NumberStyles.Integer : NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
     }
 }

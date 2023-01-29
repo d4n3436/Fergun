@@ -26,7 +26,7 @@ public class FergunLocalizer<T> : IFergunLocalizer<T>
     }
 
     /// <inheritdoc/>
-    public CultureInfo CurrentCulture { get; set; } = CultureInfo.CurrentCulture;
+    public CultureInfo CurrentCulture { get; set; } = CultureInfo.CurrentUICulture;
 
     /// <inheritdoc/>
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
