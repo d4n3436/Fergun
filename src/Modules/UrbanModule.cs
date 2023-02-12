@@ -7,6 +7,7 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
+using Humanizer;
 using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
@@ -95,7 +96,7 @@ public class UrbanModule : InteractionModuleBase
                 .WithTitle(definition.Word)
                 .WithUrl($"https://www.urbandictionary.com/urbanup.php?path=%2F{definition.Id}")
                 .WithAuthor(_localizer["By {0}", definition.Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definition.Author)}")
-                .WithDescription(description.ToString())
+                .WithDescription(description.ToString().Truncate(EmbedBuilder.MaxDescriptionLength))
                 .AddField("👍", definition.ThumbsUp, true)
                 .AddField("👎", definition.ThumbsDown, true)
                 .WithFooter(footer, Constants.UrbanDictionaryIconUrl)
