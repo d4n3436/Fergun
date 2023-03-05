@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Fergun.Apis.Dictionary;
 using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;
 using Fergun.Apis.Wikipedia;
@@ -42,7 +43,8 @@ public static class Extensions
                     { "MusixmatchPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IMusixmatchSong>>() },
                     { "UrbanPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
                     { "WikipediaPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IPartialWikipediaArticle>>() },
-                    { "WolframPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() }
+                    { "WolframPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<string>>() },
+                    { "DictionaryPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IDictionaryWord>>() }
                 };
             });
     }

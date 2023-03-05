@@ -362,4 +362,16 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Wikipedia Search" xml:space="preserve">
     <value>Búsqueda de Wikipedia</value>
   </data>
+  <data name="define.description" xml:space="preserve">
+    <value>Obtiene las definiciones de una palabra de Dictionary.com (sólo en Inglés).</value>
+  </data>
+  <data name="define.name" xml:space="preserve">
+    <value>definir</value>
+  </data>
+  <data name="define.word.description" xml:space="preserve">
+    <value>La palabra a obtener sus definiciones.</value>
+  </data>
+  <data name="define.word.name" xml:space="preserve">
+    <value>palabra</value>
+  </data>
 </root>

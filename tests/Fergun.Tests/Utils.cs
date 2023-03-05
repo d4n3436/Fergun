@@ -218,12 +218,12 @@ internal static class Utils
         var faker = new Faker<FergunOptions>()
             .RuleFor(x => x.PaginatorTimeout, f => f.Date.Timespan())
             .RuleFor(x => x.SelectionTimeout, f => f.Date.Timespan())
-            .RuleFor(x => x.PaginatorEmotes, f => new Dictionary<PaginatorAction, string>
+            .RuleFor(x => x.PaginatorEmotes, f => new Dictionary<PaginatorAction, IEmote>
             {
-                { PaginatorAction.Backward, "◀️" }, // Valid emoji
-                { PaginatorAction.Forward, $"<:forward:{f.Random.ULong()}>" }, // Valid emote
-                { PaginatorAction.Jump, "123" }, // Invalid emote
-                { PaginatorAction.Exit, "🛑" }
+                { PaginatorAction.Backward, Emoji.Parse("◀️") }, // Valid emoji
+                { PaginatorAction.Forward, Emote.Parse($"<:forward:{f.Random.ULong()}>") }, // Valid emote
+                { PaginatorAction.Jump, new Emoji("123") }, // Invalid emote
+                { PaginatorAction.Exit, Emoji.Parse("🛑") }
             });
 
         mock.Setup(x => x.Value).Returns(() => faker.Generate());

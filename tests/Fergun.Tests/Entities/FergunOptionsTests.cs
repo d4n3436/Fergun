@@ -14,17 +14,17 @@ public class FergunOptionsTests
         var other = new FergunOptions
         {
             SupportServerUrl = options.SupportServerUrl,
-            CloudflareClearance = options.CloudflareClearance,
             PaginatorTimeout = options.PaginatorTimeout,
             SelectionTimeout = options.SelectionTimeout,
-            PaginatorEmotes = options.PaginatorEmotes
+            PaginatorEmotes = options.PaginatorEmotes,
+            ExtraEmotes = options.ExtraEmotes
         };
 
         Assert.Equal(options.SupportServerUrl, other.SupportServerUrl);
-        Assert.Equal(options.CloudflareClearance, other.CloudflareClearance);
         Assert.Equal(options.PaginatorTimeout, other.PaginatorTimeout);
         Assert.Equal(options.SelectionTimeout, other.SelectionTimeout);
         Assert.True(options.PaginatorEmotes.SequenceEqual(other.PaginatorEmotes));
+        Assert.Equal(options.ExtraEmotes, other.ExtraEmotes);
     }
 
     public static IEnumerable<object[]> GetFergunOptionsTestData()

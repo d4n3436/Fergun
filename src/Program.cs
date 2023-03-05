@@ -4,12 +4,14 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Dictionary;
 using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Apis.Yandex;
+using Fergun.Converters;
 using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -24,11 +26,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.ComponentModel;
 using YoutubeExplode.Search;
 
 // The current directory is changed so the SQLite database is stored in the current folder
@@ -40,9 +42,11 @@ var host = Host.CreateDefaultBuilder()
     .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
     .ConfigureServices((context, services) =>
     {
+        TypeDescriptor.AddAttributes(typeof(IEmote), new TypeConverterAttribute(typeof(EmoteConverter)));
         services.Configure<StartupOptions>(context.Configuration.GetSection(StartupOptions.Startup));
         services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
         services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
+        services.Configure<ExtraEmotes>(context.Configuration.GetSection(FergunOptions.Fergun).GetSection(nameof(ExtraEmotes)));
         services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
 
         if (context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>().MobileStatus)
@@ -110,20 +114,16 @@ var host = Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
+        services.AddHttpClient<IDictionaryClient, DictionaryClient>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
         services.AddHttpClient<IWolframAlphaClient, WolframAlphaClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
         services.AddHttpClient<IGeniusClient, GeniusClient>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
-            .ConfigureHttpClient((s, c) =>
-            {
-                using var scope = s.CreateScope();
-                var snapshot = scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<FergunOptions>>();
-
-                if (!string.IsNullOrEmpty(snapshot.Value.CloudflareClearance))
-                    c.DefaultRequestHeaders.Add("Cookie", $"cf_clearance={snapshot.Value.CloudflareClearance}");
-            })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

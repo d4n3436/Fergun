@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using Discord;
 using Discord.Interactions;
+using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Extensions;
@@ -33,6 +34,7 @@ public class UtilityModule : InteractionModuleBase
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly IFergunTranslator _translator;
+    private readonly IDictionaryClient _dictionary;
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
@@ -45,14 +47,15 @@ public class UtilityModule : InteractionModuleBase
         .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        SharedModule shared, InteractiveService interactive, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient,
-        IWolframAlphaClient wolframAlphaClient)
+        SharedModule shared, InteractiveService interactive, IDictionaryClient dictionary, IFergunTranslator translator,
+        SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
         _shared = shared;
         _interactive = interactive;
+        _dictionary = dictionary;
         _translator = translator;
         _searchClient = searchClient;
         _wikipediaClient = wikipediaClient;
@@ -226,6 +229,97 @@ public class UtilityModule : InteractionModuleBase
         await Context.Interaction.RespondWithFileAsync(new FileAttachment(stream, $"{hex}.png"), embed: builder.Build());
 
         return FergunResult.FromSuccess();
+    }
+
+    [SlashCommand("define", "Gets the definitions of a word from Dictionary.com (only English).")]
+    public async Task<RuntimeResult> DefineAsync(
+        [Autocomplete(typeof(DictionaryAutocompleteHandler))] [Summary(description: "The word to get its defintions.")] string word)
+    {
+        await Context.Interaction.DeferAsync();
+
+        var result = await _dictionary.GetDefinitionsAsync(word);
+
+        var entries = result.Data?.Content
+            .First(content => content.Source == "luna")
+            .Entries;
+
+        if (entries is null)
+        {
+            return FergunResult.FromError(_localizer["No results."]);
+        }
+
+        var maxIndexes = new List<int>();
+        var pages = new List<List<PageBuilder>>();
+        var extraInfos = new List<IPage?>();
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            var entry = entries[i];
+            string title = DictionaryFormatter.FormatEntry(entry);
+            var innerPages = new List<PageBuilder>();
+            
+            for (int j = 0; j < entry.PartOfSpeechBlocks.Count; j++)
+            {
+                var block = entry.PartOfSpeechBlocks[j];
+                string description = DictionaryFormatter.FormatPartOfSpeechBlock(block);
+
+                var builder = new PageBuilder()
+                    .WithTitle(title)
+                    .WithDescription(description)
+                    .WithFooter($"Dictionary.com results | Definition {i + 1} of {entries.Count} (Category {j + 1} of {entry.PartOfSpeechBlocks.Count})")
+                    .WithColor(Color.Blue);
+
+                innerPages.Add(builder);
+            }
+
+            pages.Add(innerPages);
+            maxIndexes.Add(innerPages.Count - 1);
+
+            string extraInfo = DictionaryFormatter.FormatExtraInformation(entry);
+            if (!string.IsNullOrEmpty(extraInfo))
+            {
+                var extraInfoPage = new PageBuilder()
+                    .WithDescription(extraInfo.Truncate(EmbedBuilder.MaxDescriptionLength))
+                    .WithColor(Color.Blue)
+                    .Build();
+
+                extraInfos.Add(extraInfoPage);
+            }
+            else
+            {
+                extraInfos.Add(null);
+            }
+        }
+
+        var actions = new[]
+        {
+            PaginatorAction.Backward,
+            PaginatorAction.Forward,
+            PaginatorAction.SkipToStart,
+            PaginatorAction.SkipToEnd
+        };
+
+        DictionaryPaginator? paginator = null;
+        paginator = new DictionaryPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithCacheLoadedPages(false)
+            .WithMaxPageIndex(pages.Count - 1)
+            .WithMaxCategoryIndexes(maxIndexes)
+            .WithExtraInformation(extraInfos)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes(_fergunOptions, actions)
+            .AddOption(_fergunOptions.ExtraEmotes.InfoEmote, PaginatorAction.Jump)
+            .AddOption(_fergunOptions.PaginatorEmotes[PaginatorAction.Exit], PaginatorAction.Exit)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
+
+        PageBuilder GeneratePage(int entryIndex) => pages[entryIndex][paginator!.CurrentCategoryIndex];
     }
 
     [SlashCommand("help", "Information about Fergun 2.")]
