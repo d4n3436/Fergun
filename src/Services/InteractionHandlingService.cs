@@ -71,13 +71,25 @@ public class InteractionHandlingService : IHostedService
         return Task.CompletedTask;
     }
 
-    public async Task ReadyAsync(DiscordSocketClient client)
+    public Task ReadyAsync(DiscordSocketClient client)
     {
         if (_shardedClient.Shards.All(x => x.ConnectionState == ConnectionState.Connected))
         {
             _shardedClient.ShardReady -= ReadyAsync;
-            await ReadyAsync();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await ReadyAsync();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e, "The ready handler has thrown an exception.");
+                }
+            });
         }
+
+        return Task.CompletedTask;
     }
     
     public async Task ReadyAsync()
