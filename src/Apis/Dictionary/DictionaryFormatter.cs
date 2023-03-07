@@ -6,7 +6,7 @@ using Discord;
 namespace Fergun.Apis.Dictionary;
 
 /// <summary>
-/// Contains methods that helps formatting dictionary entries into markdown text that will be sent in a Discord embed.
+/// Contains methods that help formatting dictionary entries into markdown text that will be sent in a Discord embed.
 /// </summary>
 public static class DictionaryFormatter
 {
@@ -152,18 +152,20 @@ public static class DictionaryFormatter
             if (element is IHtmlSpanElement span)
             {
                 string className = span.ClassName ?? string.Empty;
+                string content = span.TextContent;
 
                 if (className == "luna-example italic" && newLineExample)
                 {
-                    builder.Append($"\n> *{span.TextContent}*");
-                }
-                else if (className == "superscript")
+                    builder.Append($"\n> *{content}*");
+                } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
+                else if (className == "superscript" && content.Length == 1 && content[0] >= '0' && content[0] <= '9')
                 {
-                    builder.Append(SuperscriptDigits[span.TextContent[0] - '0']);
+                    
+                    builder.Append(SuperscriptDigits[content[0] - '0']);
                 }
                 else if (className == "luna-wud small-caps")
                 {
-                    builder.Append(string.Create(span.TextContent.Length, span.TextContent, (converted, state) =>
+                    builder.Append(string.Create(content.Length, content, (converted, state) =>
                     {
                         for (int i = 0; i < converted.Length; i++)
                         {
@@ -174,19 +176,19 @@ public static class DictionaryFormatter
                 }
                 else if (className.EndsWith("italic") || className.EndsWith("pos"))
                 {
-                    builder.Append($"*{span.TextContent}*");
+                    builder.Append($"*{content}*");
                 }
                 else if (className.EndsWith("bold"))
                 {
-                    builder.Append($"**{span.TextContent}**");
+                    builder.Append($"**{content}**");
                 }
                 else if (className == "luna-def-number")
                 {
-                    builder.Append($"\n**{span.TextContent}**");
+                    builder.Append($"\n**{content}**");
                 }
                 else
                 {
-                    builder.Append(span.TextContent);
+                    builder.Append(content);
                 }
             }
             else if (element is IHtmlAnchorElement anchor)
