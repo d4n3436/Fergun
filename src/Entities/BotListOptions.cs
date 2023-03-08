@@ -8,12 +8,12 @@ public class BotListOptions
     public const string BotList = nameof(BotList);
 
     /// <summary>
-    /// Gets or sets the update period.
+    /// Gets the update period.
     /// </summary>
-    public TimeSpan UpdatePeriod { get; set; }
+    public TimeSpan UpdatePeriod { get; init; }
 
     /// <summary>
-    /// Gets or sets the dictionary of tokens.
+    /// Gets the dictionary of tokens.
     /// </summary>
-    public IDictionary<BotList, string> Tokens { get; set; } = new Dictionary<BotList, string>();
+    public IDictionary<BotList, string> Tokens { get; init; } = new Dictionary<BotList, string>();
 }

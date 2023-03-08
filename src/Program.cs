@@ -43,16 +43,23 @@ var host = Host.CreateDefaultBuilder()
     .ConfigureServices((context, services) =>
     {
         TypeDescriptor.AddAttributes(typeof(IEmote), new TypeConverterAttribute(typeof(EmoteConverter)));
-        services.Configure<StartupOptions>(context.Configuration.GetSection(StartupOptions.Startup));
-        services.Configure<BotListOptions>(context.Configuration.GetSection(BotListOptions.BotList));
-        services.Configure<FergunOptions>(context.Configuration.GetSection(FergunOptions.Fergun));
-        services.Configure<ExtraEmotes>(context.Configuration.GetSection(FergunOptions.Fergun).GetSection(nameof(ExtraEmotes)));
-        services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
+        services.AddOptions<StartupOptions>()
+            .BindConfiguration(StartupOptions.Startup)
+            .PostConfigure(startup =>
+            {
+                if (startup.MobileStatus)
+                {
+                    MobilePatcher.Patch();
+                }
+            });
 
-        if (context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>().MobileStatus)
-        {
-            MobilePatcher.Patch();
-        }
+        services.AddOptions<BotListOptions>()
+            .BindConfiguration(BotListOptions.BotList);
+
+        services.AddOptions<FergunOptions>()
+            .BindConfiguration(FergunOptions.Fergun);
+
+        services.AddSqlite<FergunContext>(context.Configuration.GetConnectionString("FergunDatabase"));
     })
     .ConfigureDiscordShardedHost((context, config) =>
     {

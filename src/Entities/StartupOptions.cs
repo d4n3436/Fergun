@@ -8,22 +8,22 @@ public class StartupOptions
     public const string Startup = nameof(Startup);
 
     /// <summary>
-    /// Gets or sets the token of the bot.
+    /// Gets the token of the bot.
     /// </summary>
-    public string Token { get; set; } = string.Empty;
+    public string Token { get; init; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the ID of the guild to register the commands for testing.
+    /// Gets the ID of the guild to register the commands for testing.
     /// </summary>
-    public ulong TestingGuildId { get; set; }
+    public ulong TestingGuildId { get; init; }
 
     /// <summary>
-    /// Gets or sets the ID of the guild to register owner commands.
+    /// Gets the ID of the guild to register owner commands.
     /// </summary>
-    public ulong OwnerCommandsGuildId { get; set; }
+    public ulong OwnerCommandsGuildId { get; init; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the mobile status should be used.
+    /// Gets a value indicating whether the mobile status should be used.
     /// </summary>
-    public bool MobileStatus { get; set; }
+    public bool MobileStatus { get; init; }
 }
