@@ -1,4 +1,7 @@
-﻿namespace Fergun;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Fergun;
 
 /// <summary>
 /// Represents the settings related to bot lists.

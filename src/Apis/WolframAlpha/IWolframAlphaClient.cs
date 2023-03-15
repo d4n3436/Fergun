@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.WolframAlpha;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.WolframAlpha;
 
 /// <summary>
 /// Represents a WolframAlpha client.
@@ -10,7 +14,7 @@ public interface IWolframAlphaClient
     /// </summary>
     /// <param name="input">The query input.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only list containing the results.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains a read-only list containing the results.</returns>
     Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string input, CancellationToken cancellationToken = default);
 
     /// <summary>

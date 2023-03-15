@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using System;
+using System.Collections.Generic;
+using Discord;
 using Fergun.Converters;
 using Fergun.Interactive.Pagination;
 using System.ComponentModel;

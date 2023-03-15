@@ -1,4 +1,6 @@
-﻿namespace Fergun;
+﻿using System;
+
+namespace Fergun;
 
 /// <summary>
 /// Represents an enumerator that slices <see cref="ReadOnlySpan{T}"/> by a separator.

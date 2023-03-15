@@ -1,4 +1,8 @@
-﻿using Discord;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using Discord;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;

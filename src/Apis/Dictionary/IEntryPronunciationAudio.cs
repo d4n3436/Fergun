@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.Dictionary;
+﻿using System;
+
+namespace Fergun.Apis.Dictionary;
 
 /// <summary>
 /// Represents the pronunciation audio data.

@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Genius;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Genius;
 
 /// <summary>
 /// Represents a Genius API client.
@@ -10,7 +14,7 @@ public interface IGeniusClient
     /// </summary>
     /// <param name="query">The search term.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only list of matching songs.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains a read-only list of matching songs.</returns>
     Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default);
 
     /// <summary>

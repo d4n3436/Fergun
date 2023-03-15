@@ -1,5 +1,9 @@
-﻿using Polly;
+﻿using System;
+using System.Net.Http;
+using Polly;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Polly.RateLimit;
 
 namespace Fergun.Apis.Musixmatch;
@@ -28,7 +32,7 @@ public class MusixmatchClientState
     /// Returns a cached user token, or obtains a new one and caches it.
     /// </summary>
     /// <param name="refresh">Whether to get a new user token.</param>
-    /// <returns>A <see cref="ValueTask{TResult}"/> representing the asynchronous operation. The result contains the user token.</returns>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation. The result contains the user token.</returns>
     /// <exception cref="MusixmatchException"></exception>
     public async ValueTask<string> GetUserTokenAsync(bool refresh = false)
     {

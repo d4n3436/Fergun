@@ -1,4 +1,7 @@
-﻿using Discord;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate.Translators;

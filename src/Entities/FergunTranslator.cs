@@ -1,4 +1,6 @@
-﻿using Fergun.Extensions;
+﻿using System;
+using System.Threading.Tasks;
+using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
 using GTranslate.Translators;

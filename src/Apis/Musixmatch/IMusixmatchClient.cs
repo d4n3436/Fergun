@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Musixmatch;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Musixmatch;
 
 /// <summary>
 /// Represents a Musixmatch client.
@@ -11,7 +15,7 @@ public interface IMusixmatchClient
     /// <param name="query">The search term.</param>
     /// <param name="onlyWithLyrics">Whether to only search songs with lyrics.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only list of matching songs.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains a read-only list of matching songs.</returns>
     Task<IReadOnlyList<IMusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true, CancellationToken cancellationToken = default);
 
     /// <summary>

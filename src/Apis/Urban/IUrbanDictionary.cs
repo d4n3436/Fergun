@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Urban;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Urban;
 
 /// <summary>
 /// Represents an Urban Dictionary API.
@@ -10,7 +14,7 @@ public interface IUrbanDictionary
     /// </summary>
     /// <param name="term">The term to search.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains a read-only collection of definitions.</returns>
     Task<IReadOnlyList<UrbanDefinition>> GetDefinitionsAsync(string term, CancellationToken cancellationToken = default);
 
     /// <summary>

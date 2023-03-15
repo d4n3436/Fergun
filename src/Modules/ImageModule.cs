@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Bing;

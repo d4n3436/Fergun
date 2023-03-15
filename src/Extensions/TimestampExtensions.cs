@@ -1,4 +1,6 @@
-﻿namespace Fergun.Extensions;
+﻿using System;
+
+namespace Fergun.Extensions;
 
 public static class TimestampExtensions
 {

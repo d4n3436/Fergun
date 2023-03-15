@@ -1,4 +1,7 @@
-﻿namespace Fergun.Extensions;
+﻿using System;
+using System.Collections.Generic;
+
+namespace Fergun.Extensions;
 
 public static class ListExtensions
 {

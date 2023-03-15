@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Dictionary;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Dictionary;
 
 /// <summary>
 /// Represents a dictionary client.
@@ -10,7 +14,7 @@ public interface IDictionaryClient
     /// </summary>
     /// <param name="text">The text.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only list of matching definitions.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation. The result contains a read-only list of matching definitions.</returns>
     Task<IReadOnlyList<IDictionaryWord>> GetSearchResultsAsync(string text, CancellationToken cancellationToken = default);
 
     /// <summary>

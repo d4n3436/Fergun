@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.WolframAlpha;
+﻿using System.Collections.Generic;
+
+namespace Fergun.Apis.WolframAlpha;
 
 /// <summary>
 /// Represents a WolframAlpha pod.

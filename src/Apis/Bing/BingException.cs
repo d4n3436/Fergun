@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.Bing;
+﻿using System;
+
+namespace Fergun.Apis.Bing;
 
 /// <summary>
 /// The exception that is thrown when Bing Visual Search fails to retrieve the results of an operation.

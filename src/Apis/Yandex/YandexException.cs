@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.Yandex;
+﻿using System;
+
+namespace Fergun.Apis.Yandex;
 
 /// <summary>
 /// The exception that is thrown when Yandex Image search fails to retrieve the results of an operation.

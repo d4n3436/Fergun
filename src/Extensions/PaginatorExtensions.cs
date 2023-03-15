@@ -1,4 +1,6 @@
-﻿using Fergun.Interactive.Pagination;
+﻿using System;
+using System.Linq;
+using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 
 namespace Fergun.Extensions;

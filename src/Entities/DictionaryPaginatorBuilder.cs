@@ -1,4 +1,6 @@
-﻿using Fergun.Interactive;
+﻿using System;
+using System.Collections.Generic;
+using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 
 namespace Fergun;

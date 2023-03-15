@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 using Discord.Addons.Hosting;
 using Discord.Interactions;
 using Discord.WebSocket;
@@ -31,6 +32,9 @@ using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using YoutubeExplode.Search;
 
 // The current directory is changed so the SQLite database is stored in the current folder

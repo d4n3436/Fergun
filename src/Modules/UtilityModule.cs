@@ -1,6 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Dictionary;
@@ -40,7 +46,7 @@ public class UtilityModule : InteractionModuleBase
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
     private static readonly DrawingOptions _cachedDrawingOptions = new();
-    private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, IgnoreMetadata = true };
+    private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))

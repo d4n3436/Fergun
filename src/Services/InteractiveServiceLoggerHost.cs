@@ -1,4 +1,6 @@
-﻿using Discord;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Discord;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Microsoft.Extensions.Hosting;

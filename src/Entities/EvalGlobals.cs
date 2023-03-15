@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 
 namespace Fergun;
 

@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.Dictionary;
+﻿using System.Collections.Generic;
+
+namespace Fergun.Apis.Dictionary;
 
 /// <summary>
 /// Represents a group of entries from a specific source.

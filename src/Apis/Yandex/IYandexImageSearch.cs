@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Yandex;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Yandex;
 
 /// <summary>
 /// Represents a Yandex Image Search API.
@@ -10,7 +14,7 @@ public interface IYandexImageSearch
     /// </summary>
     /// <param name="url">The URL of an image.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
+    /// <returns>A <see cref="Task"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
     Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default);
 
     /// <summary>

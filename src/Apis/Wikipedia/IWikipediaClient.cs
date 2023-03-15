@@ -1,4 +1,8 @@
-﻿namespace Fergun.Apis.Wikipedia;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Fergun.Apis.Wikipedia;
 
 /// <summary>
 /// Represents a Wikipedia API client.
@@ -11,7 +15,7 @@ public interface IWikipediaClient
     /// <param name="id">The ID of an article.</param>
     /// <param name="language">The search language.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> that represents the asynchronous operation. The result contains the article.</returns>
+    /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The result contains the article.</returns>
     Task<IWikipediaArticle?> GetArticleAsync(int id, string language, CancellationToken cancellationToken = default);
 
     /// <summary>
