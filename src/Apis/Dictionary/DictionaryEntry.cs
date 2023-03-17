@@ -19,7 +19,7 @@ public record DictionaryEntry([property: JsonPropertyName("entry")] string Entry
     IEntryPronunciation? IDictionaryEntry.Pronunciation => Pronunciation;
 
     /// <inheritdoc/>
-    IReadOnlyList<IDictionaryEntryBlock> IDictionaryEntry.PartOfSpeechBlocks => PartOfSpeechBlocks;
+    IReadOnlyList<IDictionaryEntryBlock> IDictionaryEntry.PartOfSpeechBlocks => PartOfSpeechBlocks; // empty in some cases like monks
 
     /// <inheritdoc/>
     IReadOnlyList<IEntrySupplementaryNote> IDictionaryEntry.SupplementaryNotes => SupplementaryNotes;

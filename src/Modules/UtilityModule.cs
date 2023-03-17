@@ -246,7 +246,7 @@ public class UtilityModule : InteractionModuleBase
         var result = await _dictionary.GetDefinitionsAsync(word);
 
         var entries = result.Data?.Content
-            .First(content => content.Source == "luna")
+            .FirstOrDefault(content => content.Source == "luna")?
             .Entries;
 
         if (entries is null)
