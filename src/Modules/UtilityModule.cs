@@ -297,13 +297,18 @@ public class UtilityModule : InteractionModuleBase
             }
         }
 
-        var actions = new[]
+        var actions = new List<PaginatorAction>();
+
+        if (pages.Count > 1 || pages[0].Count > 1)
         {
-            PaginatorAction.Backward,
-            PaginatorAction.Forward,
-            PaginatorAction.SkipToStart,
-            PaginatorAction.SkipToEnd
-        };
+            actions.Add(PaginatorAction.Backward);
+            actions.Add(PaginatorAction.Forward);
+        }
+        if (pages.Count > 1)
+        {
+            actions.Add(PaginatorAction.SkipToStart);
+            actions.Add(PaginatorAction.SkipToEnd);
+        }
 
         DictionaryPaginator? paginator = null;
         paginator = new DictionaryPaginatorBuilder()
@@ -316,7 +321,7 @@ public class UtilityModule : InteractionModuleBase
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions, actions)
+            .WithFergunEmotes(_fergunOptions, actions.ToArray())
             .AddOption(_fergunOptions.ExtraEmotes.InfoEmote, PaginatorAction.Jump)
             .AddOption(_fergunOptions.PaginatorEmotes[PaginatorAction.Exit], PaginatorAction.Exit)
             .Build();
