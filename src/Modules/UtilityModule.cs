@@ -544,7 +544,7 @@ public class UtilityModule : InteractionModuleBase
             var text = new StringBuilder();
             var subBuilders = new List<EmbedBuilder>();
 
-            foreach (var subPod in pod.SubPods)
+            foreach (var subPod in pod.SubPods.Take(9))
             {
                 // If there's data in plain text and there isn't a newline, use that instead
                 if (!string.IsNullOrEmpty(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
