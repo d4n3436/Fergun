@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
@@ -14,10 +12,10 @@ using Discord.WebSocket;
 using Fergun.Apis.Musixmatch;
 using Fergun.Data;
 using Fergun.Extensions;
+using Fergun.Hardware;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
-using Fergun.Utils;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
@@ -210,96 +208,16 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        long temp;
         var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
-        int cpuUsage = (int)await CommandUtils.GetCpuUsageForProcessAsync();
-        string? cpu = null;
-        long? totalRamUsage = null;
-        long processRamUsage = 0;
-        long? totalRam = null;
-        string? os = RuntimeInformation.OSDescription;
 
-        if (OperatingSystem.IsLinux())
-        {
-            // CPU Name
-            if (File.Exists("/proc/cpuinfo"))
-            {
-                cpu = (await File.ReadAllLinesAsync("/proc/cpuinfo"))
-                    .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
-                    .Split(':')
-                    .ElementAtOrDefault(1)?
-                    .Trim();
-            }
+        double cpuUsage = await HardwareInfo.GetCpuUsageAsync();
+        string cpu = HardwareInfo.GetCpuName() ?? "?";
+        string os = HardwareInfo.GetOperatingSystemName();
 
-            if (string.IsNullOrWhiteSpace(cpu))
-            {
-                cpu = CommandUtils.RunCommand("lscpu")?
-                    .Split('\n')
-                    .FirstOrDefault(x => x.StartsWith("model name", StringComparison.OrdinalIgnoreCase))?
-                    .Split(':')
-                    .ElementAtOrDefault(1)?
-                    .Trim();
-
-                if (string.IsNullOrWhiteSpace(cpu))
-                {
-                    cpu = "?";
-                }
-            }
-
-            // OS Name
-            if (File.Exists("/etc/lsb-release"))
-            {
-                string[] distroInfo = await File.ReadAllLinesAsync("/etc/lsb-release");
-                os = distroInfo.ElementAtOrDefault(3)?.Split('=').ElementAtOrDefault(1)?.Trim('\"');
-            }
-
-            // Total RAM & total RAM usage
-            string[]? output = CommandUtils.RunCommand("free -m")?.Split(Environment.NewLine);
-            string[]? memory = output?.ElementAtOrDefault(1)?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (long.TryParse(memory?.ElementAtOrDefault(1), out temp)) totalRam = temp;
-            if (long.TryParse(memory?.ElementAtOrDefault(2), out temp)) totalRamUsage = temp;
-
-            // Process RAM usage
-            processRamUsage = Process.GetCurrentProcess().WorkingSet64 / 1024 / 1024;
-        }
-        else if (OperatingSystem.IsWindows())
-        {
-            // CPU Name
-            cpu = CommandUtils.RunCommand("wmic cpu get name")
-                ?.Trim()
-                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-                .ElementAtOrDefault(1);
-
-            // Total RAM & total RAM usage
-            string[]? output = CommandUtils.RunCommand("wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /Value")
-                ?.Trim()
-                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-
-            if (output?.Length > 1)
-            {
-                long freeRam = 0;
-                string[] split = output[0].Split('=', StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length > 1 && long.TryParse(split[1], out temp))
-                {
-                    freeRam = temp / 1024;
-                }
-
-                split = output[1].Split('=', StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length > 1 && long.TryParse(split[1], out temp))
-                {
-                    totalRam = temp / 1024;
-                }
-
-                if (totalRam != null && freeRam != 0)
-                {
-                    totalRamUsage = totalRam - freeRam;
-                }
-            }
-
-            // Process RAM usage
-            processRamUsage = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
-        }
+        var memoryStatus = HardwareInfo.GetMemoryStatus();
+        long totalRamUsage = memoryStatus.UsedPhysicalMemory;
+        long processRamUsage = memoryStatus.ProcessUsedMemory;
+        long totalRam = memoryStatus.TotalPhysicalMemory;
 
         IReadOnlyCollection<IGuild> guilds;
         int shards = 1;
@@ -326,18 +244,27 @@ public class OtherModule : InteractionModuleBase
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
+        string ramUsage = processRamUsage.Bytes().ToString();
+        if (totalRam > 0)
+        {
+            if (totalRamUsage > 0)
+            {
+                string usagePercentage = ((double)processRamUsage / totalRamUsage).ToString("P2", _localizer.CurrentCulture);
+                string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
+                ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes()} ({totalUsagePercentage})";
+            }
+            
+            ramUsage += $" / {totalRam.Bytes()}";
+        }
 
         var builder = new EmbedBuilder()
             .WithTitle(_localizer["Fergun Stats"])
             .AddField(_localizer["Operating System"], os, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("CPU", cpu, true)
-            .AddField(_localizer["CPU Usage"], $"{cpuUsage}%", true)
+            .AddField(_localizer["CPU Usage"], cpuUsage.ToString("P0", _localizer.CurrentCulture), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["RAM Usage"],
-                $"{processRamUsage}MB ({(totalRam == null ? 0 : Math.Round((double)processRamUsage / totalRam.Value * 100, 2))}%) " +
-                $"/ {(totalRamUsage == null || totalRam == null ? "?MB" : $"{totalRamUsage}MB ({Math.Round((double)totalRamUsage.Value / totalRam.Value * 100, 2)}%)")} " +
-                $"/ {totalRam?.ToString() ?? "?"}MB", true)
+            .AddField(_localizer["RAM Usage"], ramUsage, true)
             .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["Bot Version"], version is null ? "?" : $"v{version}", true)
@@ -347,7 +274,7 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["Shard ID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", shards, true)
-            .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day), true)
+            .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day, TimeUnit.Second), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["Bot Owner"], owner, true);
 

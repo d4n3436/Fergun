@@ -34,6 +34,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.0" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
+    <PackageReference Include="System.Management" Version="7.0.0" />
     <PackageReference Include="YoutubeExplode" Version="6.2.1" />
   </ItemGroup>
 

@@ -1,26 +1,11 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Fergun.Utils;
 
 public static class CommandUtils
 {
-    public static async Task<double> GetCpuUsageForProcessAsync()
-    {
-        var startTime = DateTimeOffset.UtcNow;
-        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        await Task.Delay(500);
-
-        var endTime = DateTimeOffset.UtcNow;
-        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
-        var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        var totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-        return cpuUsageTotal * 100;
-    }
-
     public static string? RunCommand(string command)
     {
         bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
