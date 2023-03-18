@@ -16,14 +16,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Fergun.Converters;
 using System;
+using Bogus.DataSets;
 using Discord.Interactions;
 
 namespace Fergun.Tests.Converters;
 
 public class MicrosoftVoiceConverterTests
 {
-    private static readonly byte[] _bingCredentialsResponse = Encoding.UTF8.GetBytes("var params_AbusePreventionHelper = [0,\"test\",3600000];");
-    private static readonly byte[] _microsoftTokenResponse = Encoding.UTF8.GetBytes("{\"token\":\"token\",\"expiryDurationInMS\":\"600000\",\"region\":\"eastus\"}");
+    private static readonly byte[] _microsoftTokenResponse = Encoding.UTF8.GetBytes("{\"r\":\"westus\",\"t\":\"dGVzdA==.eyJleHAiOjIxNDc0ODM2NDd9.dGVzdA==\"}");
 
     [Fact]
     public void MicrosoftVoiceConverter_GetDiscordType_Returns_String()
@@ -52,6 +52,11 @@ public class MicrosoftVoiceConverterTests
         var services = new ServiceCollection()
             .AddSingleton(microsoftTranslator)
             .BuildServiceProvider();
+
+        if (!isDefault)
+        {
+            await microsoftTranslator.GetTTSVoicesAsync();
+        }
 
         var converter = new MicrosoftVoiceConverter();
         var contextMock = new Mock<IInteractionContext>();
@@ -109,7 +114,6 @@ public class MicrosoftVoiceConverterTests
             .Protected()
             .As<HttpClient>()
             .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => GetResponseMessage(_bingCredentialsResponse))
             .ReturnsAsync(() => GetResponseMessage(_microsoftTokenResponse))
             .Returns(getVoicesFunc);
 
@@ -123,11 +127,12 @@ public class MicrosoftVoiceConverterTests
         var faker = new Faker();
         var fakeVoices = faker.MakeLazy(10, () =>
         {
+            var gender = faker.PickRandom<Name.Gender>();
             string locale = faker.Random.RandomLocale().Replace('_', '-');
-            string displayName = faker.Person.FirstName;
-            string gender = faker.Person.Gender.ToString();
+            string displayName = faker.Name.FirstName(gender);
+            string genderStr = gender.ToString();
 
-            return new MicrosoftVoice(displayName, $"{locale}-{displayName}Neural", gender, locale);
+            return new MicrosoftVoice(displayName, $"{locale}-{displayName}Neural", genderStr, locale);
         }).Select(x => new object[] { x, false });
 
         return MicrosoftTranslator.DefaultVoices.Values
