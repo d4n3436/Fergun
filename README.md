@@ -14,16 +14,18 @@ Have any questions or need help with the bot? Join the [support server](https://
 - Perform OCR to images using Bing and Yandex
 - Perform text-to-speech using Google and Microsoft Azure
 - Translate a text multiple times using different translators for bad translations
+- Get complete definitions of words from Dictionary.com
+- Get complete solutions to your problems using Wolfram Alpha
 - Get inspirational quotes from InspiroBot
 - Search or get random definitions from Urban Dictionary
 - Search and get Wikipedia articles
-- Search and get music lyrics from Genius
+- Search and get music lyrics from ~~Genius~~ Musixmatch
 - Search YouTube videos
 - Get user information and server/global/default avatar
 - Generate images of colors
 - 2 supported languages (English and Spanish)
 - Support for localized output (like localized results) in most commands
-- And more coming soon�
+- And more coming soon™️
 
 ## Setup
 
