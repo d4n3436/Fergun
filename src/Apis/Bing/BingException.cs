@@ -24,6 +24,17 @@ public class BingException : Exception
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="BingException"/> class with a specified error message and image category.
+    /// </summary>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="imageCategory">The image category.</param>
+    public BingException(string? message, string imageCategory)
+        : base(message)
+    {
+        ImageCategory = imageCategory;
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="BingException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
     /// </summary>
     /// <param name="message">The error message that explains the reason for the exception.</param>
@@ -32,4 +43,9 @@ public class BingException : Exception
         : base(message, innerException)
     {
     }
+
+    /// <summary>
+    /// Gets the image category.
+    /// </summary>
+    public string? ImageCategory { get; }
 }

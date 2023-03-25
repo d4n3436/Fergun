@@ -156,16 +156,16 @@
   <data name="remove.user.name" xml:space="preserve">
     <value>usuario</value>
   </data>
-  <data name="{0} has been blacklisted." xml:space="preserve">
-    <value>{0} ahora está en la lista negra.</value>
-  </data>
-  <data name="{0} has been removed from the blacklist." xml:space="preserve">
-    <value>{0} ha sido eliminado de la lista negra.</value>
-  </data>
-  <data name="{0} is already blacklisted." xml:space="preserve">
+  <data name="UserAlreadyBlacklisted" xml:space="preserve">
     <value>{0} ya está en la lista negra.</value>
   </data>
-  <data name="{0} is not blacklisted." xml:space="preserve">
+  <data name="UserBlacklisted" xml:space="preserve">
+    <value>{0} ahora está en la lista negra.</value>
+  </data>
+  <data name="UserNotBlacklisted" xml:space="preserve">
     <value>{0} no está en la lista negra.</value>
+  </data>
+  <data name="UserRemovedFromBlacklist" xml:space="preserve">
+    <value>{0} ha sido eliminado de la lista negra.</value>
   </data>
 </root>

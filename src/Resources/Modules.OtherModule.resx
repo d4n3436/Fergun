@@ -117,112 +117,88 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BingVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Bing | Página {0} de {1}</value>
+  <data name="BotOwner" xml:space="preserve">
+    <value>Bot Owner</value>
   </data>
-  <data name="brave.description" xml:space="preserve">
-    <value>Búsca imágenes de Brave y los muestra en un paginador.</value>
+  <data name="BotVersion" xml:space="preserve">
+    <value>Bot Version</value>
   </data>
-  <data name="brave.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="CommandStats" xml:space="preserve">
+    <value>Command Stats</value>
   </data>
-  <data name="brave.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="CPUUsage" xml:space="preserve">
+    <value>CPU Usage</value>
   </data>
-  <data name="brave.name" xml:space="preserve">
-    <value>brave</value>
+  <data name="FergunStats" xml:space="preserve">
+    <value>Fergun Stats</value>
   </data>
-  <data name="brave.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="GeniusPaginatorFooter" xml:space="preserve">
+    <value>Lyrics by Genius | Page {0} of {1}</value>
   </data>
-  <data name="brave.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="InviteDescription" xml:space="preserve">
+    <value>Click the button below to invite Fergun to your server.</value>
   </data>
-  <data name="BraveImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en Brave</value>
+  <data name="InviteFergun" xml:space="preserve">
+    <value>Invite Fergun</value>
   </data>
-  <data name="duckduckgo.description" xml:space="preserve">
-    <value>Búsca imágenes de DuckDuckGo y los muestra en un paginador.</value>
+  <data name="Library" xml:space="preserve">
+    <value>Library</value>
   </data>
-  <data name="duckduckgo.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="Links" xml:space="preserve">
+    <value>Links</value>
   </data>
-  <data name="duckduckgo.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="LyricsEmpty" xml:space="preserve">
+    <value>Unable to get the lyrics of "{0}".</value>
   </data>
-  <data name="duckduckgo.name" xml:space="preserve">
-    <value>duckduckgo</value>
+  <data name="LyricsInstrumental" xml:space="preserve">
+    <value>"{0}" is instrumental.</value>
   </data>
-  <data name="duckduckgo.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="LyricsNotFound" xml:space="preserve">
+    <value>Unable to find a song with ID {0}. Use the autocomplete results.</value>
   </data>
-  <data name="duckduckgo.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="LyricsRatelimited" xml:space="preserve">
+    <value>Unable to get the requested lyrics right now. Try again in {0}.</value>
   </data>
-  <data name="DuckDuckGoImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en DuckDuckGo</value>
+  <data name="LyricsRestricted" xml:space="preserve">
+    <value>"{0}" has restricted lyrics.</value>
   </data>
-  <data name="google.description" xml:space="preserve">
-    <value>Búsca imágenes de Google Imágenes y los muestra en un paginador.</value>
+  <data name="LyricsUnreleased" xml:space="preserve">
+    <value>"{0}" is unreleased.</value>
   </data>
-  <data name="google.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="MusixmatchPaginatorFooter" xml:space="preserve">
+    <value>Lyrics by Musixmatch | Page {0} of {1}</value>
   </data>
-  <data name="google.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="NoStats" xml:space="preserve">
+    <value>No stats to display.</value>
   </data>
-  <data name="google.name" xml:space="preserve">
-    <value>google</value>
+  <data name="OpenInSpotify" xml:space="preserve">
+    <value>Open in Spotify</value>
   </data>
-  <data name="google.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="OperatingSystem" xml:space="preserve">
+    <value>Operating System</value>
   </data>
-  <data name="google.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="RAMUsage" xml:space="preserve">
+    <value>RAM Usage</value>
   </data>
-  <data name="GoogleImagesSearch" xml:space="preserve">
-    <value>Búsqueda de Google Imágenes</value>
+  <data name="ShardID" xml:space="preserve">
+    <value>Shard ID</value>
   </data>
-  <data name="InvalidImageSearchEngine" xml:space="preserve">
-    <value>Motor de búsqueda de imágenes inválido.</value>
+  <data name="TotalServers" xml:space="preserve">
+    <value>Total Servers</value>
   </data>
-  <data name="Reverse Image Search.name" xml:space="preserve">
-    <value>Buscar por imagen</value>
+  <data name="TotalUsers" xml:space="preserve">
+    <value>Total Users</value>
   </data>
-  <data name="reverse.description" xml:space="preserve">
-    <value>Búsqueda inversa de imagen.</value>
+  <data name="Uptime" xml:space="preserve">
+    <value>Uptime</value>
   </data>
-  <data name="reverse.engine.description" xml:space="preserve">
-    <value>El motor de búsqueda. El predeterminado es Yandex.</value>
+  <data name="ViewArtist" xml:space="preserve">
+    <value>View Artist</value>
   </data>
-  <data name="reverse.engine.name" xml:space="preserve">
-    <value>motor</value>
+  <data name="ViewOnGenius" xml:space="preserve">
+    <value>View on Genius</value>
   </data>
-  <data name="reverse.file.description" xml:space="preserve">
-    <value>Un archivo de imagen.</value>
-  </data>
-  <data name="reverse.file.name" xml:space="preserve">
-    <value>archivo</value>
-  </data>
-  <data name="reverse.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
-  </data>
-  <data name="reverse.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
-  </data>
-  <data name="reverse.name" xml:space="preserve">
-    <value>inversa</value>
-  </data>
-  <data name="reverse.url.description" xml:space="preserve">
-    <value>La URL de una imagen.</value>
-  </data>
-  <data name="reverse.url.name" xml:space="preserve">
-    <value>url</value>
-  </data>
-  <data name="SelectImageSearchEngine" xml:space="preserve">
-    <value>Selecciona un motor de búsqueda de imágenes</value>
-  </data>
-  <data name="YandexVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
+  <data name="ViewOnMusixmatch" xml:space="preserve">
+    <value>View on Musixmatch</value>
   </data>
 </root>

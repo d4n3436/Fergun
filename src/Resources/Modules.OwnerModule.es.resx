@@ -138,17 +138,11 @@
   <data name="Code" xml:space="preserve">
     <value>Código</value>
   </data>
-  <data name="Elapsed time: {0}ms" xml:space="preserve">
+  <data name="CommandOutput" xml:space="preserve">
+    <value>Salida del comando</value>
+  </data>
+  <data name="ElapsedTime" xml:space="preserve">
     <value>Tiempo transcurrido: {0}ms</value>
-  </data>
-  <data name="Elapsed time: {0}ms | Page {1} of {2}" xml:space="preserve">
-    <value>Tiempo transcurrido: {0}ms | Página {1} de {2}</value>
-  </data>
-  <data name="Enter the code to evaluate" xml:space="preserve">
-    <value>Ingresa el código a evaluar</value>
-  </data>
-  <data name="Eval results" xml:space="preserve">
-    <value>Resultados de eval</value>
   </data>
   <data name="eval.description" xml:space="preserve">
     <value>Evalúa código en C#.</value>
@@ -156,10 +150,19 @@
   <data name="eval.name" xml:space="preserve">
     <value>eval</value>
   </data>
-  <data name="Failed to evaluate code.```{0}```" xml:space="preserve">
-    <value>No se pudo evaluar el código.```{0}```</value>
+  <data name="EvalPaginatorFooter" xml:space="preserve">
+    <value>Tiempo transcurrido: {0}ms | Página {1} de {2}</value>
   </data>
-  <data name="You took too long to respond!" xml:space="preserve">
+  <data name="EvalPrompt" xml:space="preserve">
+    <value>Ingresa el código a evaluar</value>
+  </data>
+  <data name="EvalResults" xml:space="preserve">
+    <value>Resultados de eval</value>
+  </data>
+  <data name="ModalTimeout" xml:space="preserve">
     <value>Tardaste demasiado en responder!</value>
+  </data>
+  <data name="NoOutput" xml:space="preserve">
+    <value>Sin salida.</value>
   </data>
 </root>

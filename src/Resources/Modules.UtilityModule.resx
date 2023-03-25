@@ -117,6 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ActiveClients" xml:space="preserve">
+    <value>Active Clients</value>
+  </data>
+  <data name="Activities" xml:space="preserve">
+    <value>Activities</value>
+  </data>
+  <data name="BoostingSince" xml:space="preserve">
+    <value>Boosting Since</value>
+  </data>
+  <data name="ChainCountMustBeInRange" xml:space="preserve">
+    <value>The chain count must be between {0} and {1} (inclusive).</value>
+  </data>
+  <data name="CreatedAt" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
   <data name="Fergun2Info" xml:space="preserve">
     <value>Welcome to **Fergun** 2, a complete rewrite of Fergun 1 that uses slash commands.
 Fergun 2 is currently in open beta. The most used commands have been rewritten to use slash commands and more commands will be added soon.
@@ -130,5 +148,62 @@ You can find more info about the removals of these modules/commands [here]({0}).
   </data>
   <data name="Fergun2SupportInfo" xml:space="preserve">
     <value>If you have any questions about the rewrite or have any suggestions, feel free to join the support server.</value>
+  </data>
+  <data name="Global" xml:space="preserve">
+    <value>Global</value>
+  </data>
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="IsBot" xml:space="preserve">
+    <value>Is Bot</value>
+  </data>
+  <data name="LanguageChain" xml:space="preserve">
+    <value>Language Chain</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>Nickname</value>
+  </data>
+  <data name="NoGlobalAvatar" xml:space="preserve">
+    <value>{0} doesn't have a global (main) avatar.</value>
+  </data>
+  <data name="NoServerAvatar" xml:space="preserve">
+    <value>{0} doesn't have a server avatar.</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="ServerJoinDate" xml:space="preserve">
+    <value>Server Join Date</value>
+  </data>
+  <data name="SupportServer" xml:space="preserve">
+    <value>Support Server</value>
+  </data>
+  <data name="UnableToGetArticle" xml:space="preserve">
+    <value>Unable to get the article.</value>
+  </data>
+  <data name="UserInfo" xml:space="preserve">
+    <value>User Info</value>
+  </data>
+  <data name="WikipediaSearch" xml:space="preserve">
+    <value>Wikipedia Search</value>
+  </data>
+  <data name="WolframAlphaDidYouMean" xml:space="preserve">
+    <value>No results found. Did you mean...{0}</value>
+  </data>
+  <data name="WolframAlphaError" xml:space="preserve">
+    <value>Failed to get the results. Status code: {0}. Error message: {1}</value>
+  </data>
+  <data name="WolframAlphaNoResults" xml:space="preserve">
+    <value>Wolfram|Alpha doesn't understand your query.</value>
+  </data>
+  <data name="WolframAlphaPaginatorFooter" xml:space="preserve">
+    <value>WolframAlpha Results | Page {0} of {1}</value>
+  </data>
+  <data name="WolframAlphaResults" xml:space="preserve">
+    <value>Wolfram|Alpha Results</value>
   </data>
 </root>

@@ -45,7 +45,7 @@ public class TtsModule : InteractionModuleBase
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            return FergunResult.FromError(_localizer["The text must not be empty."], true);
+            return FergunResult.FromError(_localizer["TextMustNotBeEmpty"], true);
         }
 
         await Context.Interaction.DeferAsync(ephemeral);

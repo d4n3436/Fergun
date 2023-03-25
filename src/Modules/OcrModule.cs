@@ -48,11 +48,11 @@ public class OcrModule : InteractionModuleBase
 
         if (url is null)
         {
-            return FergunResult.FromError(_localizer["Unable to get an image URL from the message."], true);
+            return FergunResult.FromError(_localizer["NoImageUrlInMessage"], true);
         }
 
         var page = new PageBuilder()
-            .WithTitle(_localizer["Select an OCR engine"])
+            .WithTitle(_localizer["SelectOCREngine"])
             .WithColor(Color.Orange);
 
         var selection = new SelectionBuilder<OcrEngine>()
@@ -89,19 +89,19 @@ public class OcrModule : InteractionModuleBase
     {
         if (url is null)
         {
-            return FergunResult.FromError(_localizer["A URL or attachment is required."], true, interaction);
+            return FergunResult.FromError(_localizer["UrlOrAttachmentRequired"], true, interaction);
         }
 
         if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
         {
-            return FergunResult.FromError(_localizer["The URL is not well formed."], true, interaction);
+            return FergunResult.FromError(_localizer["UrlNotWellFormed"], true, interaction);
         }
 
         var ocrTask = ocrEngine switch
         {
             OcrEngine.Bing => _bingVisualSearch.OcrAsync(url),
             OcrEngine.Yandex => _yandexImageSearch.OcrAsync(url),
-            _ => throw new ArgumentException(_localizer["Invalid OCR engine."], nameof(ocrEngine))
+            _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
 
         if (interaction is IComponentInteraction componentInteraction)
@@ -130,15 +130,20 @@ public class OcrModule : InteractionModuleBase
         {
             text = await ocrTask;
         }
-        catch (Exception e) when (e is BingException or YandexException)
+        catch (BingException e)
         {
-            _logger.LogWarning(e, "Failed to perform OCR to url {url}", url);
+            _logger.LogWarning(e, "Failed to perform Bing OCR to url {url}", url);
+            return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
+        }
+        catch (YandexException e)
+        {
+            _logger.LogWarning(e, "Failed to perform Yandex OCR to url {url}", url);
             return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            return FergunResult.FromError(_localizer["The OCR yielded no results."], ephemeral, interaction);
+            return FergunResult.FromError(_localizer["OCRNoResults"], ephemeral, interaction);
         }
 
         stopwatch.Stop();
@@ -147,18 +152,18 @@ public class OcrModule : InteractionModuleBase
 
         var (name, iconUrl) = ocrEngine switch
         {
-            OcrEngine.Bing => (_localizer["Bing Visual Search"], Constants.BingIconUrl),
-            OcrEngine.Yandex => (_localizer["Yandex OCR"], Constants.YandexIconUrl),
-            _ => throw new ArgumentException(_localizer["Invalid OCR engine."], nameof(ocrEngine))
+            OcrEngine.Bing => (_localizer["BingVisualSearch"], Constants.BingIconUrl),
+            OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),
+            _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
 
         string embedText = $"**{_localizer["Output"]}**\n";
 
         var builder = new EmbedBuilder()
-            .WithTitle(_localizer["OCR Results"])
+            .WithTitle(_localizer["OCRResults"])
             .WithDescription($"{embedText}```{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6)}```")
             .WithThumbnailUrl(url)
-            .WithFooter(_localizer["{0} | Processing time: {1}ms", name, stopwatch.ElapsedMilliseconds], iconUrl)
+            .WithFooter(_localizer["OCRPaginatorFooter", name, stopwatch.ElapsedMilliseconds], iconUrl)
             .WithColor(Color.Orange);
 
         string buttonText;
@@ -168,10 +173,10 @@ public class OcrModule : InteractionModuleBase
         }
         else
         {
-            var localizedString = _localizer["Translate to {0}", language.NativeName];
+            var localizedString = _localizer["TranslateTo", language.NativeName];
             if (localizedString.ResourceNotFound && language.ISO6391 != "en")
             {
-                localizedString = _localizer["Translate to {0} ({1})", language.Name, language.NativeName];
+                localizedString = _localizer["TranslateToWithNativeName", language.Name, language.NativeName];
             }
 
             buttonText = localizedString.Value;

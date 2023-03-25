@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Command output" xml:space="preserve">
-    <value>Salida de comando</value>
-  </data>
   <data name="Fergun2Info" xml:space="preserve">
     <value>Bienvenido(a) a **Fergun** 2, una reescritura completa de Fergun 1 que usa slash commands.
 Fergun 2 se encuentra actualmente en beta abierta. Los comandos más utilizados se han reescrito para usar slash commands y más comandos serán agregados pronto.
@@ -131,40 +128,34 @@ Los siguientes módulos y comandos no se migrarán a Fergun 2 debido a varias ra
 
 Puedes encontrar más información sobre la eliminación de estos módulos/comandos [aquí]({0}).</value>
   </data>
-  <data name="Language Chain" xml:space="preserve">
+  <data name="LanguageChain" xml:space="preserve">
     <value>Cadena de Idiomas</value>
   </data>
-  <data name="No output." xml:space="preserve">
-    <value>Sin salida.</value>
+  <data name="ChainCountMustBeInRange" xml:space="preserve">
+    <value>El número de cadenas debe estar entre {0} y {1} (inclusivo).</value>
   </data>
-  <data name="The chain count must be between 2 and 10 (inclusive)." xml:space="preserve">
-    <value>El número de cadenas debe estar entre 2 y 10 (inclusivo).</value>
-  </data>
-  <data name="Wikipedia Search | Page {0} of {1}" xml:space="preserve">
-    <value>Búsqueda de Wikipedia | Página {0} de {1}</value>
-  </data>
-  <data name="Active Clients" xml:space="preserve">
+  <data name="ActiveClients" xml:space="preserve">
     <value>Clientes Activos</value>
   </data>
   <data name="Activities" xml:space="preserve">
     <value>Actividades</value>
   </data>
-  <data name="Boosting Since" xml:space="preserve">
+  <data name="BoostingSince" xml:space="preserve">
     <value>Mejorando desde</value>
   </data>
-  <data name="Created At" xml:space="preserve">
+  <data name="CreatedAt" xml:space="preserve">
     <value>Creado En</value>
   </data>
-  <data name="Is Bot" xml:space="preserve">
+  <data name="IsBot" xml:space="preserve">
     <value>Es Bot</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Nombre</value>
   </data>
-  <data name="Server Join Date" xml:space="preserve">
+  <data name="ServerJoinDate" xml:space="preserve">
     <value>Fecha de ingreso al servidor</value>
   </data>
-  <data name="User Info" xml:space="preserve">
+  <data name="UserInfo" xml:space="preserve">
     <value>Información de usuario</value>
   </data>
   <data name="Default" xml:space="preserve">
@@ -176,16 +167,16 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Server" xml:space="preserve">
     <value>Servidor</value>
   </data>
-  <data name="{0} doesn't have a global (main) avatar." xml:space="preserve">
+  <data name="NoGlobalAvatar" xml:space="preserve">
     <value>{0} no tiene un avatar global (principal).</value>
   </data>
-  <data name="{0} doesn't have a server avatar." xml:space="preserve">
+  <data name="NoServerAvatar" xml:space="preserve">
     <value>{0} no tiene un avatar de servidor.</value>
   </data>
   <data name="Fergun2SupportInfo" xml:space="preserve">
     <value>Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
   </data>
-  <data name="Support Server" xml:space="preserve">
+  <data name="SupportServer" xml:space="preserve">
     <value>Servidor de soporte</value>
   </data>
   <data name="avatar.description" xml:space="preserve">
@@ -329,10 +320,10 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="Translate Text.name" xml:space="preserve">
     <value>Traducir Texto</value>
   </data>
-  <data name="Failed to get the results. Status code: {0}. Error message: {1}" xml:space="preserve">
+  <data name="WolframAlphaError" xml:space="preserve">
     <value>No se pudo obtener los resultados. Código de estado: {0}. Mensaje de error: {1}</value>
   </data>
-  <data name="No results found. Did you mean...{0}" xml:space="preserve">
+  <data name="WolframAlphaDidYouMean" xml:space="preserve">
     <value>No se encontraron resultados. Quisiste decir...{0}</value>
   </data>
   <data name="wolfram.description" xml:space="preserve">
@@ -347,19 +338,19 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   <data name="wolfram.name" xml:space="preserve">
     <value>wolfram</value>
   </data>
-  <data name="WolframAlpha Results | Page {0} of {1}" xml:space="preserve">
+  <data name="WolframAlphaPaginatorFooter" xml:space="preserve">
     <value>Resultados de WolframAlpha | Página {0} de {1}</value>
   </data>
-  <data name="Wolfram|Alpha doesn't understand your query." xml:space="preserve">
+  <data name="WolframAlphaNoResults" xml:space="preserve">
     <value>Wolfram|Alpha no entiende su consulta.</value>
   </data>
-  <data name="Wolfram|Alpha Results" xml:space="preserve">
+  <data name="WolframAlphaResults" xml:space="preserve">
     <value>Resultados de Wolfram|Alpha</value>
   </data>
-  <data name="Unable to get the article." xml:space="preserve">
+  <data name="UnableToGetArticle" xml:space="preserve">
     <value>No se pudo obtener el artículo.</value>
   </data>
-  <data name="Wikipedia Search" xml:space="preserve">
+  <data name="WikipediaSearch" xml:space="preserve">
     <value>Búsqueda de Wikipedia</value>
   </data>
   <data name="define.description" xml:space="preserve">
@@ -373,5 +364,11 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   </data>
   <data name="define.word.name" xml:space="preserve">
     <value>palabra</value>
+  </data>
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>Nickname</value>
   </data>
 </root>

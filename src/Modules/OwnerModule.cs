@@ -51,7 +51,7 @@ public class OwnerModule : InteractionModuleBase
 
         if (string.IsNullOrWhiteSpace(result))
         {
-            await Context.Interaction.FollowupAsync(_localizer["No output."]);
+            await Context.Interaction.FollowupAsync(_localizer["NoOutput"]);
         }
         else
         {
@@ -67,7 +67,7 @@ public class OwnerModule : InteractionModuleBase
             else
             {
                 embed = new EmbedBuilder()
-                    .WithTitle(_localizer["Command output"])
+                    .WithTitle(_localizer["CommandOutput"])
                     .WithDescription(sanitized)
                     .WithColor(Color.Orange)
                     .Build();
@@ -84,7 +84,7 @@ public class OwnerModule : InteractionModuleBase
     {
         var modal = new ModalBuilder()
             .WithCustomId(Context.Interaction.Id.ToString())
-            .WithTitle(_localizer["Enter the code to evaluate"])
+            .WithTitle(_localizer["EvalPrompt"])
             .AddTextInput(_localizer["Code"], "code", TextInputStyle.Paragraph, "2 + 2", required: true)
             .Build();
 
@@ -95,7 +95,7 @@ public class OwnerModule : InteractionModuleBase
 
         if (!interactiveResult.IsSuccess)
         {
-            return FergunResult.FromError(_localizer["You took too long to respond!"]);
+            return FergunResult.FromError(_localizer["ModalTimeout"]);
         }
 
         await interactiveResult.Value.DeferAsync();
@@ -123,7 +123,7 @@ public class OwnerModule : InteractionModuleBase
         if (exception is not null)
         {
             var embed = new EmbedBuilder()
-                .WithTitle(_localizer["Eval results"])
+                .WithTitle(_localizer["EvalResults"])
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .AddField($"⚠ {_localizer["Output"]}", $"```cs\n{string.Join('\n', exception.Diagnostics).Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .WithColor(Color.Orange)
@@ -139,10 +139,10 @@ public class OwnerModule : InteractionModuleBase
         if (chunks.Length == 0)
         {
             var embed = new EmbedBuilder()
-                .WithTitle(_localizer["Eval results"])
+                .WithTitle(_localizer["EvalResults"])
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .AddField(_localizer["Output"], $"({_localizer["None"]})")
-                .WithFooter(_localizer["Elapsed time: {0}ms", sw.ElapsedMilliseconds])
+                .WithFooter(_localizer["ElapsedTime", sw.ElapsedMilliseconds])
                 .WithColor(Color.Orange)
                 .Build();
 
@@ -172,10 +172,10 @@ public class OwnerModule : InteractionModuleBase
             var chunk = chunks[index];
 
             return new PageBuilder()
-                .WithTitle(_localizer["Eval results"])
-                .AddField("Input", $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
-                .AddField("Output", $"```cs\n{chunk}```")
-                .WithFooter(_localizer["Elapsed time: {0}ms | Page {1} of {2}", sw.ElapsedMilliseconds, index + 1, chunks.Length])
+                .WithTitle(_localizer["EvalResults"])
+                .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
+                .AddField(_localizer["Output"], $"```cs\n{chunk}```")
+                .WithFooter(_localizer["EvalPaginatorFooter", sw.ElapsedMilliseconds, index + 1, chunks.Length])
                 .WithColor(Color.Orange);
         }
     }

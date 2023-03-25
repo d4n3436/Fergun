@@ -37,17 +37,17 @@ public class SharedModule
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            return FergunResult.FromError(_localizer["The text must not be empty."], true, interaction);
+            return FergunResult.FromError(_localizer["TextMustNotBeEmpty"], true, interaction);
         }
 
         if (!Language.TryGetLanguage(target, out _))
         {
-            return FergunResult.FromError(_localizer["Invalid target language \"{0}\".", target], true, interaction);
+            return FergunResult.FromError(_localizer["InvalidTargetLanguage", target], true, interaction);
         }
 
         if (source != null && !Language.TryGetLanguage(source, out _))
         {
-            return FergunResult.FromError(_localizer["Invalid source language \"{0}\".", source], true, interaction);
+            return FergunResult.FromError(_localizer["InvalidSourceLanguage", source], true, interaction);
         }
 
         if (interaction is IComponentInteraction componentInteraction)
@@ -79,16 +79,16 @@ public class SharedModule
             _ => Constants.GoogleTranslateLogoUrl
         };
 
-        string embedText = $"**{_localizer[source is null ? "Source language (Detected)" : "Source language"]}**\n" +
+        string embedText = $"**{_localizer[source is null ? "SourceLanguageDetected" : "SourceLanguage"]}**\n" +
                             $"{DisplayName(result.SourceLanguage)}\n\n" +
-                            $"**{_localizer["Target language"]}**\n" +
+                            $"**{_localizer["TargetLanguage"]}**\n" +
                             $"{DisplayName(result.TargetLanguage)}\n\n" +
                             $"**{_localizer["Result"]}**\n";
 
         string translation = result.Translation.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6);
 
         var builder = new EmbedBuilder()
-            .WithTitle(_localizer["Translation result"])
+            .WithTitle(_localizer["TranslationResult"])
             .WithDescription($"{embedText}```{translation}```")
             .WithThumbnailUrl(thumbnailUrl)
             .WithColor(Color.Orange);
@@ -107,12 +107,12 @@ public class SharedModule
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            return FergunResult.FromError(_localizer["The text must not be empty."], true, interaction);
+            return FergunResult.FromError(_localizer["TextMustNotBeEmpty"], true, interaction);
         }
 
         if (!Language.TryGetLanguage(target, out var language) || !GoogleTranslator2.TextToSpeechLanguages.Contains(language))
         {
-            return FergunResult.FromError(_localizer["Language \"{0}\" not supported.", target], true, interaction);
+            return FergunResult.FromError(_localizer["LanguageNotSupported", target], true, interaction);
         }
 
         if (interaction is IComponentInteraction componentInteraction)

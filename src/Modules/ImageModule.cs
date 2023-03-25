@@ -67,7 +67,7 @@ public class ImageModule : InteractionModuleBase
 
         if (images.Length == 0)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["NoResults"]);
         }
 
         int count = multiImages ? 4 : 1;
@@ -94,10 +94,10 @@ public class ImageModule : InteractionModuleBase
 
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithDescription(_localizer["Google Images search"])
+                .WithDescription(_localizer["GoogleImagesSearch"])
                 .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.GoogleLogoUrl)
+                .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.GoogleLogoUrl)
                 .WithColor((Color)(result.Color ?? Color.Orange)));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -120,7 +120,7 @@ public class ImageModule : InteractionModuleBase
 
         if (images.Length == 0)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["NoResults"]);
         }
 
         int count = multiImages ? 4 : 1;
@@ -147,10 +147,10 @@ public class ImageModule : InteractionModuleBase
 
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithDescription(_localizer["DuckDuckGo image search"])
+                .WithDescription(_localizer["DuckDuckGoImageSearch"])
                 .WithUrl(multiImages ? "https://duckduckgo.com": result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
+                .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -173,7 +173,7 @@ public class ImageModule : InteractionModuleBase
 
         if (images.Length == 0)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["NoResults"]);
         }
 
         int count = multiImages ? 4 : 1;
@@ -200,10 +200,10 @@ public class ImageModule : InteractionModuleBase
 
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithDescription(_localizer["Brave image search"])
+                .WithDescription(_localizer["BraveImageSearch"])
                 .WithUrl(multiImages ? "https://search.brave.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1], Constants.BraveLogoUrl)
+                .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.BraveLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -220,11 +220,11 @@ public class ImageModule : InteractionModuleBase
 
         if (url is null)
         {
-            return FergunResult.FromError(_localizer["Unable to get an image URL from the message."], true);
+            return FergunResult.FromError(_localizer["NoImageUrlInMessage"], true);
         }
 
         var page = new PageBuilder()
-            .WithTitle(_localizer["Select an image search engine"])
+            .WithTitle(_localizer["SelectImageSearchEngine"])
             .WithColor(Color.Orange);
 
         var selection = new SelectionBuilder<ReverseImageSearchEngine>()
@@ -256,7 +256,7 @@ public class ImageModule : InteractionModuleBase
 
         if (url is null)
         {
-            return FergunResult.FromError(_localizer["A URL or attachment is required."], true);
+            return FergunResult.FromError(_localizer["UrlOrAttachmentRequired"], true);
         }
 
         return await ReverseAsync(url, engine, multiImages, Context.Interaction);
@@ -269,7 +269,7 @@ public class ImageModule : InteractionModuleBase
         {
             ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
-            _ => throw new ArgumentException(_localizer["Invalid image search engine."], nameof(engine))
+            _ => throw new ArgumentException(_localizer["InvalidImageSearchEngine"], nameof(engine))
         });
     }
 
@@ -312,7 +312,7 @@ public class ImageModule : InteractionModuleBase
 
         if (results.Length == 0)
         {
-            return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
+            return FergunResult.FromError(_localizer["NoResults"], ephemeral, interaction);
         }
 
         int count = multiImages ? 4 : 1;
@@ -343,7 +343,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Yandex Visual Search | Page {0} of {1}", index + 1, maxIndex + 1], Constants.YandexIconUrl)
+                .WithFooter(_localizer["YandexVisualSearchPaginatorFooter", index + 1, maxIndex + 1], Constants.YandexIconUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
@@ -383,12 +383,12 @@ public class ImageModule : InteractionModuleBase
         catch (BingException e)
         {
             _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
-            return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
+            return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
 
         if (results.Length == 0)
         {
-            return FergunResult.FromError(_localizer["No results."], ephemeral, interaction);
+            return FergunResult.FromError(_localizer["NoResults"], ephemeral, interaction);
         }
 
         int count = multiImages ? 4 : 1;
@@ -419,7 +419,7 @@ public class ImageModule : InteractionModuleBase
                 .WithThumbnailUrl(url)
                 .WithDescription(result.FriendlyDomainName ?? (Uri.TryCreate(result.SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : null))
                 .WithImageUrl(result.Url)
-                .WithFooter(_localizer["Bing Visual Search | Page {0} of {1}", index + 1, maxIndex + 1], Constants.BingIconUrl)
+                .WithFooter(_localizer["BingVisualSearchPaginatorFooter", index + 1, maxIndex + 1], Constants.BingIconUrl)
                 .WithColor((Color)result.AccentColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);

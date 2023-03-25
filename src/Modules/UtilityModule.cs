@@ -92,7 +92,7 @@ public class UtilityModule : InteractionModuleBase
                 url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048);
                 if (url is null)
                 {
-                    return FergunResult.FromError(_localizer["{0} doesn't have a server avatar.", user]);
+                    return FergunResult.FromError(_localizer["NoServerAvatar", user]);
                 }
 
                 title = $"{user} ({_localizer["Server"]})";
@@ -102,7 +102,7 @@ public class UtilityModule : InteractionModuleBase
                 url = user.GetAvatarUrl(size: 2048);
                 if (url is null)
                 {
-                    return FergunResult.FromError(_localizer["{0} doesn't have a global (main) avatar.", user]);
+                    return FergunResult.FromError(_localizer["NoGlobalAvatar", user]);
                 }
 
                 title = $"{user} ({_localizer["Global"]})";
@@ -136,12 +136,12 @@ public class UtilityModule : InteractionModuleBase
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            return FergunResult.FromError(_localizer["The text must not be empty."], true);
+            return FergunResult.FromError(_localizer["TextMustNotBeEmpty"], true);
         }
 
         if (chainCount is < 2 or > 10)
         {
-            return FergunResult.FromError(_localizer["The chain count must be between 2 and 10 (inclusive)."], true);
+            return FergunResult.FromError(_localizer["ChainCountMustBeInRange", 2, 10], true);
         }
         
         await Context.Interaction.DeferAsync();
@@ -194,7 +194,7 @@ public class UtilityModule : InteractionModuleBase
             languageChain.Add(target);
         }
 
-        string embedText = $"**{_localizer["Language Chain"]}**\n{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n**{_localizer["Result"]}**\n";
+        string embedText = $"**{_localizer["LanguageChain"]}**\n{string.Join(" -> ", languageChain.Select(x => x.ISO6391))}\n\n**{_localizer["Result"]}**\n";
 
         var embed = new EmbedBuilder()
             .WithTitle("Bad translator")
@@ -251,7 +251,7 @@ public class UtilityModule : InteractionModuleBase
 
         if (entries is null)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["NoResults"]);
         }
 
         var maxIndexes = new List<int>();
@@ -344,7 +344,7 @@ public class UtilityModule : InteractionModuleBase
         {
             description += $"\n\n{_localizer["Fergun2SupportInfo"]}";
             components = new ComponentBuilder()
-                .WithButton(_localizer["Support Server"], style: ButtonStyle.Link, url: url.AbsoluteUri)
+                .WithButton(_localizer["SupportServer"], style: ButtonStyle.Link, url: url.AbsoluteUri)
                 .Build();
         }
 
@@ -436,16 +436,16 @@ public class UtilityModule : InteractionModuleBase
         string avatarUrl = guildUser?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
         var builder = new EmbedBuilder()
-            .WithTitle(_localizer["User Info"])
+            .WithTitle(_localizer["UserInfo"])
             .AddField(_localizer["Name"], user.ToString())
-            .AddField("Nickname", guildUser?.Nickname ?? $"({_localizer["None"]})")
-            .AddField("ID", user.Id)
+            .AddField(_localizer["Nickname"], guildUser?.Nickname ?? $"({_localizer["None"]})")
+            .AddField(_localizer["ID"], user.Id)
             .AddField(_localizer["Activities"], activities, true)
-            .AddField(_localizer["Active Clients"], clients, true)
-            .AddField(_localizer["Is Bot"], user.IsBot)
-            .AddField(_localizer["Created At"], GetTimestamp(user.CreatedAt))
-            .AddField(_localizer["Server Join Date"], GetTimestamp(guildUser?.JoinedAt))
-            .AddField(_localizer["Boosting Since"], GetTimestamp(guildUser?.PremiumSince))
+            .AddField(_localizer["ActiveClients"], clients, true)
+            .AddField(_localizer["IsBot"], user.IsBot)
+            .AddField(_localizer["CreatedAt"], GetTimestamp(user.CreatedAt))
+            .AddField(_localizer["ServerJoinDate"], GetTimestamp(guildUser?.JoinedAt))
+            .AddField(_localizer["BoostingSince"], GetTimestamp(guildUser?.PremiumSince))
             .WithThumbnailUrl(avatarUrl)
             .WithColor(Color.Orange);
 
@@ -466,7 +466,7 @@ public class UtilityModule : InteractionModuleBase
 
         if (article is null)
         {
-            return FergunResult.FromError(_localizer["Unable to get the article."]);
+            return FergunResult.FromError(_localizer["UnableToGetArticle"]);
         }
 
         var builder = new EmbedBuilder()
@@ -474,7 +474,7 @@ public class UtilityModule : InteractionModuleBase
             .WithUrl($"https://{Context.Interaction.GetLanguageCode()}.wikipedia.org/?curid={article.Id}")
             .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
             .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
-            .WithFooter(_localizer["Wikipedia Search"])
+            .WithFooter(_localizer["WikipediaSearch"])
             .WithColor(Color.Orange);
 
         if (Context.Channel.IsNsfw() && article.Image is not null)
@@ -505,12 +505,12 @@ public class UtilityModule : InteractionModuleBase
 
         if (result.Type == WolframAlphaResultType.Error)
         {
-            return FergunResult.FromError(_localizer["Failed to get the results. Status code: {0}. Error message: {1}", result.ErrorInfo!.StatusCode, result.ErrorInfo!.Message]);
+            return FergunResult.FromError(_localizer["WolframAlphaError", result.ErrorInfo!.StatusCode, result.ErrorInfo!.Message]);
         }
 
         if (result.Type == WolframAlphaResultType.DidYouMean)
         {
-            return FergunResult.FromError(_localizer["No results found. Did you mean...{0}", $"\n- {string.Join("\n- ", result.DidYouMeans.Select(x => x.Value))}"]);
+            return FergunResult.FromError(_localizer["WolframAlphaDidYouMean", $"\n- {string.Join("\n- ", result.DidYouMeans.Select(x => x.Value))}"]);
         }
 
         if (result.Type == WolframAlphaResultType.FutureTopic)
@@ -528,13 +528,13 @@ public class UtilityModule : InteractionModuleBase
 
         if (result.Type == WolframAlphaResultType.NoResult)
         {
-            return FergunResult.FromError(_localizer["Wolfram|Alpha doesn't understand your query."]);
+            return FergunResult.FromError(_localizer["WolframAlphaNoResults"]);
         }
 
         var builders = new List<List<EmbedBuilder>>();
 
         var topEmbed = new EmbedBuilder()
-            .WithTitle(_localizer["Wolfram|Alpha Results"])
+            .WithTitle(_localizer["WolframAlphaResults"])
             .WithDescription(string.Join('\n', result.Warnings.Select(x => $"⚠️ {x.Text}")))
             .WithThumbnailUrl(Constants.WolframAlphaLogoUrl)
             .WithColor(Color.Red);
@@ -590,7 +590,7 @@ public class UtilityModule : InteractionModuleBase
             var builder = new MultiEmbedPageBuilder();
             if (topEmbed.Fields.Count == 0) // No info in plain text
             {
-                builders[index][0].WithTitle(_localizer["Wolfram|Alpha Results"])
+                builders[index][0].WithTitle(_localizer["WolframAlphaResults"])
                     .WithThumbnailUrl(Constants.WolframAlphaLogoUrl);
             }
             else
@@ -600,7 +600,7 @@ public class UtilityModule : InteractionModuleBase
 
             if (builders.Count == 0)
             {
-                topEmbed.WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, 1], Constants.WolframAlphaLogoUrl);
+                topEmbed.WithFooter(_localizer["WolframAlphaPaginatorFooter", index + 1, 1], Constants.WolframAlphaLogoUrl);
 
                 return builder;
             }
@@ -610,7 +610,7 @@ public class UtilityModule : InteractionModuleBase
                 builder.AddBuilder(builders[index][i]);
             }
 
-            builders[index][builders[index].Count - 1].WithFooter(_localizer["WolframAlpha Results | Page {0} of {1}", index + 1, builders.Count], Constants.WolframAlphaLogoUrl);
+            builders[index][builders[index].Count - 1].WithFooter(_localizer["WolframAlphaPaginatorFooter", index + 1, builders.Count], Constants.WolframAlphaLogoUrl);
 
             return builder;
         }
@@ -626,7 +626,7 @@ public class UtilityModule : InteractionModuleBase
         switch (videos.Count)
         {
             case 0:
-                return FergunResult.FromError(_localizer["No results."]);
+                return FergunResult.FromError(_localizer["NoResults"]);
 
             case 1:
                 await Context.Interaction.FollowupAsync(videos[0].Url);
@@ -650,6 +650,6 @@ public class UtilityModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
         
-        PageBuilder GeneratePage(int index) => new PageBuilder().WithText($"{videos[index].Url}\n{_localizer["Page {0} of {1}", index + 1, videos.Count]}");
+        PageBuilder GeneratePage(int index) => new PageBuilder().WithText($"{videos[index].Url}\n{_localizer["PaginatorFooter", index + 1, videos.Count]}");
     }
 }

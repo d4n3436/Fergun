@@ -118,111 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BingVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Bing | Página {0} de {1}</value>
-  </data>
-  <data name="brave.description" xml:space="preserve">
-    <value>Búsca imágenes de Brave y los muestra en un paginador.</value>
-  </data>
-  <data name="brave.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
-  </data>
-  <data name="brave.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
-  </data>
-  <data name="brave.name" xml:space="preserve">
-    <value>brave</value>
-  </data>
-  <data name="brave.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
-  </data>
-  <data name="brave.query.name" xml:space="preserve">
-    <value>consulta</value>
+    <value>Bing Visual Search | Page {0} of {1}</value>
   </data>
   <data name="BraveImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en Brave</value>
-  </data>
-  <data name="duckduckgo.description" xml:space="preserve">
-    <value>Búsca imágenes de DuckDuckGo y los muestra en un paginador.</value>
-  </data>
-  <data name="duckduckgo.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
-  </data>
-  <data name="duckduckgo.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
-  </data>
-  <data name="duckduckgo.name" xml:space="preserve">
-    <value>duckduckgo</value>
-  </data>
-  <data name="duckduckgo.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
-  </data>
-  <data name="duckduckgo.query.name" xml:space="preserve">
-    <value>consulta</value>
+    <value>Brave image search</value>
   </data>
   <data name="DuckDuckGoImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en DuckDuckGo</value>
-  </data>
-  <data name="google.description" xml:space="preserve">
-    <value>Búsca imágenes de Google Imágenes y los muestra en un paginador.</value>
-  </data>
-  <data name="google.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
-  </data>
-  <data name="google.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
-  </data>
-  <data name="google.name" xml:space="preserve">
-    <value>google</value>
-  </data>
-  <data name="google.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
-  </data>
-  <data name="google.query.name" xml:space="preserve">
-    <value>consulta</value>
+    <value>DuckDuckGo image search</value>
   </data>
   <data name="GoogleImagesSearch" xml:space="preserve">
-    <value>Búsqueda de Google Imágenes</value>
+    <value>Google Images search</value>
   </data>
   <data name="InvalidImageSearchEngine" xml:space="preserve">
-    <value>Motor de búsqueda de imágenes inválido.</value>
-  </data>
-  <data name="Reverse Image Search.name" xml:space="preserve">
-    <value>Buscar por imagen</value>
-  </data>
-  <data name="reverse.description" xml:space="preserve">
-    <value>Búsqueda inversa de imagen.</value>
-  </data>
-  <data name="reverse.engine.description" xml:space="preserve">
-    <value>El motor de búsqueda. El predeterminado es Yandex.</value>
-  </data>
-  <data name="reverse.engine.name" xml:space="preserve">
-    <value>motor</value>
-  </data>
-  <data name="reverse.file.description" xml:space="preserve">
-    <value>Un archivo de imagen.</value>
-  </data>
-  <data name="reverse.file.name" xml:space="preserve">
-    <value>archivo</value>
-  </data>
-  <data name="reverse.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
-  </data>
-  <data name="reverse.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
-  </data>
-  <data name="reverse.name" xml:space="preserve">
-    <value>inversa</value>
-  </data>
-  <data name="reverse.url.description" xml:space="preserve">
-    <value>La URL de una imagen.</value>
-  </data>
-  <data name="reverse.url.name" xml:space="preserve">
-    <value>url</value>
+    <value>Invalid image search engine.</value>
   </data>
   <data name="SelectImageSearchEngine" xml:space="preserve">
-    <value>Selecciona un motor de búsqueda de imágenes</value>
+    <value>Select an image search engine</value>
   </data>
   <data name="YandexVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
+    <value>Yandex Visual Search | Page {0} of {1}</value>
   </data>
 </root>

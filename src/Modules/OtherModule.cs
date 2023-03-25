@@ -62,7 +62,7 @@ public class OtherModule : InteractionModuleBase
 
         if (commandStats.Count == 0)
         {
-            return FergunResult.FromError(_localizer["No stats to display."]);
+            return FergunResult.FromError(_localizer["NoStats"]);
         }
 
         int maxIndex = (int)Math.Ceiling((double)commandStats.Count / 25) - 1;
@@ -87,7 +87,7 @@ public class OtherModule : InteractionModuleBase
             int start = index * 25;
 
             return new PageBuilder()
-                .WithTitle(_localizer["Command Stats"])
+                .WithTitle(_localizer["CommandStats"])
                 .WithDescription(string.Join('\n', commandStats.Take(start..(start + 25)).Select((x, i) => $"{start + i + 1}. `{x.Name}`: {x.UsageCount}")))
                 .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1])
                 .WithColor(Color.Orange);
@@ -115,13 +115,13 @@ public class OtherModule : InteractionModuleBase
     public async Task<RuntimeResult> InviteAsync()
     {
         var builder = new EmbedBuilder()
-            .WithDescription(_localizer["Click the button below to invite Fergun to your server."])
+            .WithDescription(_localizer["InviteDescription"])
             .WithColor(Color.Orange);
 
         ulong applicationId = (await Context.Client.GetApplicationInfoAsync()).Id;
 
         var button = new ComponentBuilder()
-            .WithButton(_localizer["Invite Fergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands");
+            .WithButton(_localizer["InviteFergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands");
 
         await Context.Interaction.RespondAsync(embed: builder.Build(), components: button.Build());
 
@@ -140,19 +140,18 @@ public class OtherModule : InteractionModuleBase
         }
         catch (RateLimitRejectedException e)
         {
-            return FergunResult.FromError(_localizer["Unable to get the requested lyrics right now. Try again in {0}.",
-                e.RetryAfter.Humanize(culture: _localizer.CurrentCulture)]);
+            return FergunResult.FromError(_localizer["LyricsRatelimited", e.RetryAfter.Humanize(culture: _localizer.CurrentCulture)]);
         }
         
         if (song is null)
         {
-            return FergunResult.FromError(_localizer["Unable to find a song with ID {0}. Use the autocomplete results.", id]);
+            return FergunResult.FromError(_localizer["LyricsNotFound", id]);
         }
         
         if (song.IsInstrumental || !song.HasLyrics)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
-            return FergunResult.FromError(_localizer["\"{0}\" is instrumental.", $"{song.ArtistName} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistName} - {song.Title}"]);
         }
 
         // Some (or all) songs in Musixmatch have their "restricted" field set to 0 in the track data,
@@ -160,12 +159,12 @@ public class OtherModule : InteractionModuleBase
         // in the autocomplete results
         if (song.IsRestricted)
         {
-            return FergunResult.FromError(_localizer["\"{0}\" has restricted lyrics.", $"{song.ArtistName} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["LyricsRestricted", $"{song.ArtistName} - {song.Title}"]);
         }
 
         if (string.IsNullOrEmpty(song.Lyrics))
         {
-            return FergunResult.FromError(_localizer["Unable to get the lyrics of \"{0}\".", $"{song.ArtistName} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistName} - {song.Title}"]);
         }
 
         var chunks = song.Lyrics.SplitWithoutWordBreaking(EmbedBuilder.MaxDescriptionLength).ToArray();
@@ -187,18 +186,18 @@ public class OtherModule : InteractionModuleBase
 
         PageBuilder GeneratePage(int index)
         {
-            string links = $"{Format.Url(_localizer["View on Musixmatch"], song.Url)}  | {Format.Url(_localizer["View Artist"], song.ArtistUrl!)}";
+            string links = $"{Format.Url(_localizer["ViewOnMusixmatch"], song.Url)}  | {Format.Url(_localizer["ViewArtist"], song.ArtistUrl!)}";
 
             // Discord doesn't support custom protocols in embeds (spotify://track/id)
             if (song.SpotifyTrackId is not null)
-                links += $" | {Format.Url(_localizer["Open in Spotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
+                links += $" | {Format.Url(_localizer["OpenInSpotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
 
             return new PageBuilder()
                 .WithTitle($"{song.ArtistName} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunks[index].ToString())
-                .AddField("Links", links)
-                .WithFooter(_localizer["Lyrics by Musixmatch | Page {0} of {1}", index + 1, chunks.Length])
+                .AddField(_localizer["Links"], links)
+                .WithFooter(_localizer["MusixmatchPaginatorFooter", index + 1, chunks.Length])
                 .WithColor(Color.Orange);
         }
     }
@@ -258,25 +257,25 @@ public class OtherModule : InteractionModuleBase
         }
 
         var builder = new EmbedBuilder()
-            .WithTitle(_localizer["Fergun Stats"])
-            .AddField(_localizer["Operating System"], os, true)
+            .WithTitle(_localizer["FergunStats"])
+            .AddField(_localizer["OperatingSystem"], os, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("CPU", cpu, true)
-            .AddField(_localizer["CPU Usage"], cpuUsage.ToString("P0", _localizer.CurrentCulture), true)
+            .AddField(_localizer["CPUUsage"], cpuUsage.ToString("P0", _localizer.CurrentCulture), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["RAM Usage"], ramUsage, true)
+            .AddField(_localizer["RAMUsage"], ramUsage, true)
             .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Bot Version"], version is null ? "?" : $"v{version}", true)
-            .AddField(_localizer["Total Servers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
+            .AddField(_localizer["BotVersion"], version is null ? "?" : $"v{version}", true)
+            .AddField(_localizer["TotalServers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Total Users"], $"{totalUsers?.ToString() ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString() ?? "?"})", true)
-            .AddField(_localizer["Shard ID"], shardId, true)
+            .AddField(_localizer["TotalUsers"], $"{totalUsers?.ToString() ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString() ?? "?"})", true)
+            .AddField(_localizer["ShardID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", shards, true)
             .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day, TimeUnit.Second), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["Bot Owner"], owner, true);
+            .AddField(_localizer["BotOwner"], owner, true);
 
         builder.WithColor(Color.Orange);
 

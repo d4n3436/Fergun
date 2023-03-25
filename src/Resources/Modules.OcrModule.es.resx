@@ -117,12 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="A URL or attachment is required." xml:space="preserve">
-    <value>Se requiere una URL o un archivo adjunto.</value>
-  </data>
-  <data name="Bing Visual Search" xml:space="preserve">
-    <value>Búsqueda Visual de Bing</value>
-  </data>
   <data name="bing.description" xml:space="preserve">
     <value>Realiza OCR a una imagen usando la Búsqueda Visual de Bing.</value>
   </data>
@@ -141,29 +135,32 @@
   <data name="bing.url.name" xml:space="preserve">
     <value>url</value>
   </data>
-  <data name="Invalid OCR engine." xml:space="preserve">
+  <data name="BingVisualSearch" xml:space="preserve">
+    <value>Búsqueda Visual de Bing</value>
+  </data>
+  <data name="InvalidOCREngine" xml:space="preserve">
     <value>Motor de OCR inválido.</value>
   </data>
-  <data name="OCR Results" xml:space="preserve">
+  <data name="OCRNoResults" xml:space="preserve">
+    <value>El OCR no dio resultados.</value>
+  </data>
+  <data name="OCRPaginatorFooter" xml:space="preserve">
+    <value>{0} | Tiempo de procesado: {1}ms</value>
+  </data>
+  <data name="OCRResults" xml:space="preserve">
     <value>Resultados de OCR</value>
   </data>
-  <data name="Select an OCR engine" xml:space="preserve">
+  <data name="SelectOCREngine" xml:space="preserve">
     <value>Selecciona un motor de OCR</value>
-  </data>
-  <data name="The OCR yielded no results." xml:space="preserve">
-    <value>El OCR no dio resultados.</value>
   </data>
   <data name="Translate" xml:space="preserve">
     <value>Traducir</value>
   </data>
-  <data name="Translate to {0}" xml:space="preserve">
+  <data name="TranslateTo" xml:space="preserve">
     <value>Traducir a {0}</value>
   </data>
-  <data name="Translate to {0} ({1})" xml:space="preserve">
+  <data name="TranslateToWithNativeName" xml:space="preserve">
     <value>Traducir a {0} ({1})</value>
-  </data>
-  <data name="Yandex OCR" xml:space="preserve">
-    <value>OCR de Yandex</value>
   </data>
   <data name="yandex.description" xml:space="preserve">
     <value>Realiza OCR a una imagen usando Yandex.</value>
@@ -183,7 +180,7 @@
   <data name="yandex.url.name" xml:space="preserve">
     <value>url</value>
   </data>
-  <data name="{0} | Processing time: {1}ms" xml:space="preserve">
-    <value>{0} | Tiempo de procesado: {1}ms</value>
+  <data name="YandexOCR" xml:space="preserve">
+    <value>OCR de Yandex</value>
   </data>
 </root>

@@ -40,7 +40,7 @@ public class MicrosoftVoiceConverter : TypeConverter<MicrosoftVoice>
         {
             var localizer = services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
-            return Task.FromResult(TypeConverterResult.FromError(InteractionCommandError.ConvertFailed, localizer["Unable to get the specified voice. Use the autocomplete results."]));
+            return Task.FromResult(TypeConverterResult.FromError(InteractionCommandError.ConvertFailed, localizer["UnableToGetVoice"]));
         }
 
         return Task.FromResult(TypeConverterResult.FromSuccess(voice));

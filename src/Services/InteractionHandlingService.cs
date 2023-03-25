@@ -169,8 +169,8 @@ public class InteractionHandlingService : IHostedService
                 localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
                 string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
-                    ? localizer["You're blacklisted."]
-                    : localizer["You're blacklisted with reason: {0}", user.BlacklistReason];
+                    ? localizer["Blacklisted"]
+                    : localizer["BlacklistedWithReason", user.BlacklistReason];
                     
                 var builder = new EmbedBuilder()
                     .WithDescription($"❌ {description}")
@@ -317,7 +317,7 @@ public class InteractionHandlingService : IHostedService
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
-            message = $"{localizer["An error occurred."]}\n\n{localizer["Error message: {0}", $"```{exception.Message}```"]}";
+            message = $"{localizer["AnErrorOccurred"]}\n\n{localizer["ErrorMessage", $"```{exception.Message}```"]}";
         }
         else if (result.Error == InteractionCommandError.Unsuccessful)
         {

@@ -46,7 +46,7 @@ public class ColorConverter : TypeConverter<Color>
         {
             var localizer = services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
-            return Task.FromResult(TypeConverterResult.FromError(InteractionCommandError.ConvertFailed, localizer["Could not convert \"{0}\" to a color.", value.Truncate(20)]));
+            return Task.FromResult(TypeConverterResult.FromError(InteractionCommandError.ConvertFailed, localizer["CouldNotConvertValueToColor", value.Truncate(20)]));
         }
 
         return Task.FromResult(TypeConverterResult.FromSuccess(color));

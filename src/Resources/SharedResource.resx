@@ -117,112 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BingVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Bing | Página {0} de {1}</value>
+  <data name="AnErrorOccurred" xml:space="preserve">
+    <value>An error occurred.</value>
   </data>
-  <data name="brave.description" xml:space="preserve">
-    <value>Búsca imágenes de Brave y los muestra en un paginador.</value>
+  <data name="BingImageByteSizeExceedsLimit" xml:space="preserve">
+    <value>Image size exceeds the limit (Max. 20MB).</value>
   </data>
-  <data name="brave.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="BingImageDimensionsExceedLimit" xml:space="preserve">
+    <value>Image dimensions exceeds the limit (Max. 4000px).</value>
   </data>
-  <data name="brave.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="BingImageDownloadFailed" xml:space="preserve">
+    <value>Bing Visual search failed to download the image.</value>
   </data>
-  <data name="brave.name" xml:space="preserve">
-    <value>brave</value>
+  <data name="BingServiceUnavailable" xml:space="preserve">
+    <value>Bing Visual search is currently unavailable. Try again later.</value>
   </data>
-  <data name="brave.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="BingUnknownFormat" xml:space="preserve">
+    <value>Unknown format. Try using JPEG, PNG, or BMP files.</value>
   </data>
-  <data name="brave.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="Blacklisted" xml:space="preserve">
+    <value>You're blacklisted.</value>
   </data>
-  <data name="BraveImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en Brave</value>
+  <data name="BlacklistedWithReason" xml:space="preserve">
+    <value>You're blacklisted with reason: {0}</value>
   </data>
-  <data name="duckduckgo.description" xml:space="preserve">
-    <value>Búsca imágenes de DuckDuckGo y los muestra en un paginador.</value>
+  <data name="CouldNotConvertValueToColor" xml:space="preserve">
+    <value>Could not convert \"{0}\" to a color.</value>
   </data>
-  <data name="duckduckgo.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="ErrorMessage" xml:space="preserve">
+    <value>Error message: {0}</value>
   </data>
-  <data name="duckduckgo.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="ExpiredJumpInput" xml:space="preserve">
+    <value>Expired modal interaction. You must respond within {0} seconds.</value>
   </data>
-  <data name="duckduckgo.name" xml:space="preserve">
-    <value>duckduckgo</value>
+  <data name="Input" xml:space="preserve">
+    <value>Input</value>
   </data>
-  <data name="duckduckgo.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="InvalidJumpInput" xml:space="preserve">
+    <value>Invalid input. The number must be in the range of {0} to {1}, excluding the current page.</value>
   </data>
-  <data name="duckduckgo.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="InvalidSourceLanguage" xml:space="preserve">
+    <value>Invalid source language \"{0}\".</value>
   </data>
-  <data name="DuckDuckGoImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en DuckDuckGo</value>
+  <data name="InvalidTargetLanguage" xml:space="preserve">
+    <value>Invalid target language \"{0}\".</value>
   </data>
-  <data name="google.description" xml:space="preserve">
-    <value>Búsca imágenes de Google Imágenes y los muestra en un paginador.</value>
+  <data name="JumpInputInUse" xml:space="preserve">
+    <value>Another user is currently using this action. Try again later.</value>
   </data>
-  <data name="google.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="JumpInputPrompt" xml:space="preserve">
+    <value>Enter a page number</value>
   </data>
-  <data name="google.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="JumptInputTextLabel" xml:space="preserve">
+    <value>Page number ({0}-{1})</value>
   </data>
-  <data name="google.name" xml:space="preserve">
-    <value>google</value>
+  <data name="LanguageNotSupported" xml:space="preserve">
+    <value>Language \"{0}\" not supported.</value>
   </data>
-  <data name="google.query.description" xml:space="preserve">
-    <value>La consulta a buscar.</value>
+  <data name="NoImageUrlInMessage" xml:space="preserve">
+    <value>Unable to get an image URL from the message.</value>
   </data>
-  <data name="google.query.name" xml:space="preserve">
-    <value>consulta</value>
+  <data name="None" xml:space="preserve">
+    <value>None</value>
   </data>
-  <data name="GoogleImagesSearch" xml:space="preserve">
-    <value>Búsqueda de Google Imágenes</value>
+  <data name="NoResults" xml:space="preserve">
+    <value>No results.</value>
   </data>
-  <data name="InvalidImageSearchEngine" xml:space="preserve">
-    <value>Motor de búsqueda de imágenes inválido.</value>
+  <data name="NumberExcess" xml:space="preserve">
+    <value>and {0} more...</value>
   </data>
-  <data name="Reverse Image Search.name" xml:space="preserve">
-    <value>Buscar por imagen</value>
+  <data name="Output" xml:space="preserve">
+    <value>Output</value>
   </data>
-  <data name="reverse.description" xml:space="preserve">
-    <value>Búsqueda inversa de imagen.</value>
+  <data name="PaginatorFooter" xml:space="preserve">
+    <value>Page {0} of {1}</value>
   </data>
-  <data name="reverse.engine.description" xml:space="preserve">
-    <value>El motor de búsqueda. El predeterminado es Yandex.</value>
+  <data name="Result" xml:space="preserve">
+    <value>Result</value>
   </data>
-  <data name="reverse.engine.name" xml:space="preserve">
-    <value>motor</value>
+  <data name="SourceLanguage" xml:space="preserve">
+    <value>Source language</value>
   </data>
-  <data name="reverse.file.description" xml:space="preserve">
-    <value>Un archivo de imagen.</value>
+  <data name="SourceLanguageDetected" xml:space="preserve">
+    <value>Source language (Detected)</value>
   </data>
-  <data name="reverse.file.name" xml:space="preserve">
-    <value>archivo</value>
+  <data name="TargetLanguage" xml:space="preserve">
+    <value>Target language</value>
   </data>
-  <data name="reverse.multi-images.description" xml:space="preserve">
-    <value>Si se muestran múltiples imágenes en una sola página.</value>
+  <data name="TextMustNotBeEmpty" xml:space="preserve">
+    <value>The text must not be empty.</value>
   </data>
-  <data name="reverse.multi-images.name" xml:space="preserve">
-    <value>multi-imágenes</value>
+  <data name="TranslationResult" xml:space="preserve">
+    <value>Translation result</value>
   </data>
-  <data name="reverse.name" xml:space="preserve">
-    <value>inversa</value>
+  <data name="UnableToGetVoice" xml:space="preserve">
+    <value>Unable to get the specified voice. Use the autocomplete results.</value>
   </data>
-  <data name="reverse.url.description" xml:space="preserve">
-    <value>La URL de una imagen.</value>
+  <data name="UnknownPaginatorBuilderType" xml:space="preserve">
+    <value>Unknown paginator builder type</value>
   </data>
-  <data name="reverse.url.name" xml:space="preserve">
-    <value>url</value>
+  <data name="UrlNotWellFormed" xml:space="preserve">
+    <value>The URL is not well formed.</value>
   </data>
-  <data name="SelectImageSearchEngine" xml:space="preserve">
-    <value>Selecciona un motor de búsqueda de imágenes</value>
-  </data>
-  <data name="YandexVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
+  <data name="UrlOrAttachmentRequired" xml:space="preserve">
+    <value>A URL or attachment is required.</value>
   </data>
 </root>

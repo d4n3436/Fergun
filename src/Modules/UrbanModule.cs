@@ -52,12 +52,12 @@ public class UrbanModule : InteractionModuleBase
             UrbanSearchType.Search => await _urbanDictionary.GetDefinitionsAsync(term!),
             UrbanSearchType.Random => await _urbanDictionary.GetRandomDefinitionsAsync(),
             UrbanSearchType.WordsOfTheDay => await _urbanDictionary.GetWordsOfTheDayAsync(),
-            _ => throw new ArgumentException(_localizer["Invalid search type."], nameof(searchType))
+            _ => throw new ArgumentException(_localizer["InvalidSearchType"], nameof(searchType))
         };
 
         if (definitions.Count == 0)
         {
-            return FergunResult.FromError(_localizer["No results."]);
+            return FergunResult.FromError(_localizer["NoResults"]);
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -89,15 +89,15 @@ public class UrbanModule : InteractionModuleBase
 
             string footer = searchType switch
             {
-                UrbanSearchType.Random => _localizer["Urban Dictionary (Random Definitions) | Page {0} of {1}", i + 1, definitions.Count],
-                UrbanSearchType.WordsOfTheDay => _localizer["Urban Dictionary (Words of the day, {0}) | Page {1} of {2}", definition.Date!, i + 1, definitions.Count],
-                _ => _localizer["Urban Dictionary | Page {0} of {1}", i + 1, definitions.Count]
+                UrbanSearchType.Random => _localizer["UrbanRandomPaginatorFooter", i + 1, definitions.Count],
+                UrbanSearchType.WordsOfTheDay => _localizer["UrbanWordsOfTheDayPaginatorFooter", definition.Date!, i + 1, definitions.Count],
+                _ => _localizer["UrbanPaginatorFooter", i + 1, definitions.Count]
             };
 
             return new PageBuilder()
                 .WithTitle(definition.Word)
                 .WithUrl($"https://www.urbandictionary.com/urbanup.php?path=%2F{definition.Id}")
-                .WithAuthor(_localizer["By {0}", definition.Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definition.Author)}")
+                .WithAuthor(_localizer["ByAuthor", definition.Author], url: $"https://www.urbandictionary.com/author.php?author={Uri.EscapeDataString(definition.Author)}")
                 .WithDescription(description.ToString().Truncate(EmbedBuilder.MaxDescriptionLength))
                 .AddField("👍", definition.ThumbsUp, true)
                 .AddField("👎", definition.ThumbsDown, true)

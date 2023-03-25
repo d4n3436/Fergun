@@ -77,7 +77,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out var message))
         {
-            throw new BingException(message);
+            throw new BingException(message, imageCategory);
         }
 
         var textRegions = document
@@ -122,7 +122,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out string? message))
         {
-            throw new BingException(message);
+            throw new BingException(message, imageCategory);
         }
 
         var root = document.RootElement.Clone();

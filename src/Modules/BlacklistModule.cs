@@ -34,7 +34,7 @@ public class BlacklistModule : InteractionModuleBase
         var dbUser = await _db.Users.FindAsync(user.Id);
         if (dbUser?.BlacklistStatus is BlacklistStatus.Blacklisted or BlacklistStatus.ShadowBlacklisted)
         {
-            return FergunResult.FromError(_localizer["{0} is already blacklisted.", user]);
+            return FergunResult.FromError(_localizer["UserAlreadyBlacklisted", user]);
         }
 
         if (dbUser is null)
@@ -49,7 +49,7 @@ public class BlacklistModule : InteractionModuleBase
         await _db.SaveChangesAsync();
 
         var builder = new EmbedBuilder()
-            .WithDescription(_localizer["{0} has been blacklisted.", user])
+            .WithDescription(_localizer["UserBlacklisted", user])
             .WithColor(Color.Orange);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
@@ -63,7 +63,7 @@ public class BlacklistModule : InteractionModuleBase
         var dbUser = await _db.Users.FindAsync(user.Id);
         if (dbUser is null or { BlacklistStatus: BlacklistStatus.None })
         {
-            return FergunResult.FromError(_localizer["{0} is not blacklisted.", user]);
+            return FergunResult.FromError(_localizer["UserNotBlacklisted", user]);
         }
 
         dbUser.BlacklistStatus = BlacklistStatus.None;
@@ -72,7 +72,7 @@ public class BlacklistModule : InteractionModuleBase
         await _db.SaveChangesAsync();
 
         var builder = new EmbedBuilder()
-            .WithDescription(_localizer["{0} has been removed from the blacklist.", user])
+            .WithDescription(_localizer["UserRemovedFromBlacklist", user])
             .WithColor(Color.Orange);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());

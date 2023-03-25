@@ -63,7 +63,7 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
                 string name = x.Name;
                 name += x.Name == x.NativeName ? "" : $" ({x.NativeName})";
                 name += $" ({x.ISO6391})";
-                name += i == last - 1 && excess > 0 ? $" ({localizer["and {0} more...", excess]})" : "";
+                name += i == last - 1 && excess > 0 ? $" ({localizer["NumberExcess", excess]})" : "";
                 return new AutocompleteResult(name, x.ISO6391);
             })
             .Take(25);

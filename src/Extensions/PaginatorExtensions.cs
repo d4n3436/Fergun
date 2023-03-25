@@ -56,14 +56,14 @@ public static class PaginatorExtensions
         {
             LazyPaginatorBuilder lazy => lazy.MaxPageIndex + 1,
             StaticPaginatorBuilder @static => @static.Pages.Count,
-            _ => throw new ArgumentException("Unknwon paginator builder type", nameof(builder))
+            _ => throw new ArgumentException(localizer["UnknownPaginatorBuilderType"], nameof(builder))
         };
 
-        builder.WithJumpInputPrompt(localizer["Enter a page number"]);
-        builder.WithJumpInputTextLabel(localizer["Page number ({0}-{1})", 1, pageCount]);
-        builder.WithInvalidJumpInputMessage(localizer["Invalid input. The number must be in the range of {0} to {1}, excluding the current page.", 1, pageCount]);
-        builder.WithJumpInputInUseMessage(localizer["Another user is currently using this action. Try again later."]);
-        builder.WithExpiredJumpInputMessage(localizer["Expired modal interaction. You must respond within {0} seconds.", builder.JumpInputTimeout.TotalSeconds]);
+        builder.WithJumpInputPrompt(localizer["JumpInputPrompt"]);
+        builder.WithJumpInputTextLabel(localizer["JumptInputTextLabel", 1, pageCount]);
+        builder.WithInvalidJumpInputMessage(localizer["InvalidJumpInput", 1, pageCount]);
+        builder.WithJumpInputInUseMessage(localizer["JumpInputInUse"]);
+        builder.WithExpiredJumpInputMessage(localizer["ExpiredJumpInput", builder.JumpInputTimeout.TotalSeconds]);
 
         return (TBuilder)builder;
     }

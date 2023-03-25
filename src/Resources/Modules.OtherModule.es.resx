@@ -117,26 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="&quot;{0}&quot; has restricted lyrics." xml:space="preserve">
-    <value>"{0}" tiene su letra restringida.</value>
-  </data>
-  <data name="&quot;{0}&quot; is instrumental." xml:space="preserve">
-    <value>"{0}" es instrumental.</value>
-  </data>
-  <data name="&quot;{0}&quot; is unreleased." xml:space="preserve">
-    <value>"{0}" aún no ha sido lanzado.</value>
-  </data>
-  <data name="Bot Owner" xml:space="preserve">
+  <data name="BotOwner" xml:space="preserve">
     <value>Dueño del bot</value>
   </data>
-  <data name="Bot Version" xml:space="preserve">
+  <data name="BotVersion" xml:space="preserve">
     <value>Versión del bot</value>
-  </data>
-  <data name="Click the button below to invite Fergun to your server." xml:space="preserve">
-    <value>Haga click en el botón de abajo para invitar a Fergun a tu servidor.</value>
-  </data>
-  <data name="Command Stats" xml:space="preserve">
-    <value>Estadísticas de Comandos</value>
   </data>
   <data name="command-stats.description" xml:space="preserve">
     <value>Muestra las estadísticas de uso de los comandos.</value>
@@ -144,11 +129,17 @@
   <data name="command-stats.name" xml:space="preserve">
     <value>estadísticas-de-comandos</value>
   </data>
-  <data name="CPU Usage" xml:space="preserve">
+  <data name="CommandStats" xml:space="preserve">
+    <value>Estadísticas de Comandos</value>
+  </data>
+  <data name="CPUUsage" xml:space="preserve">
     <value>Uso de CPU</value>
   </data>
-  <data name="Fergun Stats" xml:space="preserve">
+  <data name="FergunStats" xml:space="preserve">
     <value>Estadísticas de Fergun</value>
+  </data>
+  <data name="GeniusPaginatorFooter" xml:space="preserve">
+    <value>Letra por Genius | Página {0} de {1}</value>
   </data>
   <data name="inspirobot.description" xml:space="preserve">
     <value>Envía una cita inspiradora.</value>
@@ -156,23 +147,23 @@
   <data name="inspirobot.name" xml:space="preserve">
     <value>inspirobot</value>
   </data>
-  <data name="Invite Fergun" xml:space="preserve">
-    <value>Invita a Fergun</value>
-  </data>
   <data name="invite.description" xml:space="preserve">
     <value>Invita Fergun a tu servidor.</value>
   </data>
   <data name="invite.name" xml:space="preserve">
     <value>invitar</value>
   </data>
+  <data name="InviteDescription" xml:space="preserve">
+    <value>Haga click en el botón de abajo para invitar a Fergun a tu servidor.</value>
+  </data>
+  <data name="InviteFergun" xml:space="preserve">
+    <value>Invita a Fergun</value>
+  </data>
   <data name="Library" xml:space="preserve">
     <value>Librería</value>
   </data>
-  <data name="Lyrics by Genius | Page {0} of {1}" xml:space="preserve">
-    <value>Letra por Genius | Página {0} de {1}</value>
-  </data>
-  <data name="Lyrics by Musixmatch | Page {0} of {1}" xml:space="preserve">
-    <value>Letra por Musixmatch | Página {0} de {1}</value>
+  <data name="Links" xml:space="preserve">
+    <value>Links</value>
   </data>
   <data name="lyrics.description" xml:space="preserve">
     <value>Obtiene la letra de una canción.</value>
@@ -186,19 +177,40 @@
   <data name="lyrics.name.name" xml:space="preserve">
     <value>nombre</value>
   </data>
-  <data name="No stats to display." xml:space="preserve">
+  <data name="LyricsEmpty" xml:space="preserve">
+    <value>No es posible obtener la letra de "{0}".</value>
+  </data>
+  <data name="LyricsInstrumental" xml:space="preserve">
+    <value>"{0}" es instrumental.</value>
+  </data>
+  <data name="LyricsNotFound" xml:space="preserve">
+    <value>No se pudo encontrar una canción con ID {0}. Usa los resultados de autocompletado.</value>
+  </data>
+  <data name="LyricsRatelimited" xml:space="preserve">
+    <value>No se puede obtener la letra solicitada ahora mismo. Intente nuevamente en {0}.</value>
+  </data>
+  <data name="LyricsRestricted" xml:space="preserve">
+    <value>"{0}" tiene su letra restringida.</value>
+  </data>
+  <data name="LyricsUnreleased" xml:space="preserve">
+    <value>"{0}" aún no ha sido lanzado.</value>
+  </data>
+  <data name="MusixmatchPaginatorFooter" xml:space="preserve">
+    <value>Letra por Musixmatch | Página {0} de {1}</value>
+  </data>
+  <data name="NoStats" xml:space="preserve">
     <value>Sin estadísticas que mostrar.</value>
   </data>
-  <data name="Open in Spotify" xml:space="preserve">
+  <data name="OpenInSpotify" xml:space="preserve">
     <value>Abrir en Spotify</value>
   </data>
-  <data name="Operating System" xml:space="preserve">
+  <data name="OperatingSystem" xml:space="preserve">
     <value>Sistema Operativo</value>
   </data>
-  <data name="RAM Usage" xml:space="preserve">
+  <data name="RAMUsage" xml:space="preserve">
     <value>Uso de RAM</value>
   </data>
-  <data name="Shard ID" xml:space="preserve">
+  <data name="ShardID" xml:space="preserve">
     <value>ID de shard</value>
   </data>
   <data name="stats.description" xml:space="preserve">
@@ -207,31 +219,22 @@
   <data name="stats.name" xml:space="preserve">
     <value>estadísticas</value>
   </data>
-  <data name="Total Servers" xml:space="preserve">
+  <data name="TotalServers" xml:space="preserve">
     <value>Servidores Totales</value>
   </data>
-  <data name="Total Users" xml:space="preserve">
+  <data name="TotalUsers" xml:space="preserve">
     <value>Usuarios Totales</value>
-  </data>
-  <data name="Unable to find a song with ID {0}. Use the autocomplete results." xml:space="preserve">
-    <value>No se pudo encontrar una canción con ID {0}. Usa los resultados de autocompletado.</value>
-  </data>
-  <data name="Unable to get the lyrics of &quot;{0}&quot;." xml:space="preserve">
-    <value>No es posible obtener la letra de "{0}".</value>
-  </data>
-  <data name="Unable to get the requested lyrics right now. Try again in {0}." xml:space="preserve">
-    <value>No se puede obtener la letra solicitada ahora mismo. Intente nuevamente en {0}.</value>
   </data>
   <data name="Uptime" xml:space="preserve">
     <value>Tiempo activo</value>
   </data>
-  <data name="View Artist" xml:space="preserve">
+  <data name="ViewArtist" xml:space="preserve">
     <value>Ver Artista</value>
   </data>
-  <data name="View on Genius" xml:space="preserve">
+  <data name="ViewOnGenius" xml:space="preserve">
     <value>Ver en Genius</value>
   </data>
-  <data name="View on Musixmatch" xml:space="preserve">
+  <data name="ViewOnMusixmatch" xml:space="preserve">
     <value>Ver en Musixmatch</value>
   </data>
 </root>
