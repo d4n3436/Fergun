@@ -5,10 +5,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <Version>2.0-beta</Version>
   </PropertyGroup>
 
-	<ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Discord.Addons.Hosting" Version="5.2.0" />
     <PackageReference Include="Discord.Net.Interactions" Version="3.9.0" />
     <PackageReference Include="Fergun.Interactive" Version="1.6.0" />
