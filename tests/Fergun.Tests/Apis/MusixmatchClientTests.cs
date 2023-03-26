@@ -373,10 +373,9 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
             .ReturnsAsync(GetResponseMessage(successfulTokenResponse));
 
         var musixmatchHttpClient = new HttpClient(musixmatchMessageHandlerMock.Object);
-        var stateHtpClient = new HttpClient(stateMessageHandlerMock.Object);
 
         var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-        httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(stateHtpClient);
+        httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(() => new HttpClient(stateMessageHandlerMock.Object));
 
         var loggerMock = new Mock<ILogger<MusixmatchClient>>();
 

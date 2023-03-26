@@ -51,30 +51,11 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["NoImageUrlInMessage"], true);
         }
 
-        var page = new PageBuilder()
-            .WithTitle(_localizer["SelectOCREngine"])
-            .WithColor(Color.Orange);
-
-        var selection = new SelectionBuilder<OcrEngine>()
-            .AddUser(Context.User)
-            .WithOptions(Enum.GetValues<OcrEngine>())
-            .WithSelectionPage(page)
-            .Build();
-
-        var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
-
-        if (result.IsSuccess)
-        {
-            return await OcrAsync(result.Value, url, result.StopInteraction!, Context.Interaction, true);
-        }
-
-        // Attempt to disable the components
-        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
-
-        return FergunResult.FromSilentError();
+        return await YandexAsync(url);
     }
 
-    [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
+    // Disabled until Bing (hopefully) brings back the OCR functionality.
+    // [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
     public async Task<RuntimeResult> BingAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null)
         => await OcrAsync(OcrEngine.Bing, file?.Url ?? url, Context.Interaction);

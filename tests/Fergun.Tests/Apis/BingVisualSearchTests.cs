@@ -13,7 +13,7 @@ public class BingVisualSearchTests
 {
     private readonly IBingVisualSearch _bingVisualSearch = new BingVisualSearch();
 
-    [Theory]
+    [Theory(Skip = "Disabled until Bing (hopefully) brings back the OCR functionality.")]
     [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)

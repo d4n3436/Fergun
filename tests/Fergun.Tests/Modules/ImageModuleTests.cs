@@ -82,7 +82,7 @@ public class ImageModuleTests
         var result = await _module.GoogleAsync(" ");
         Assert.False(result.IsSuccess);
 
-        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
+        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "NoResults")]);
     }
 
     [Theory]
@@ -112,7 +112,7 @@ public class ImageModuleTests
         var result = await _module.DuckDuckGoAsync("\u200b");
         Assert.False(result.IsSuccess);
 
-        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
+        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "NoResults")]);
     }
 
     [Theory]
@@ -142,7 +142,7 @@ public class ImageModuleTests
         var result = await _module.BraveAsync("\u200b");
         Assert.False(result.IsSuccess);
 
-        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "No results.")]);
+        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "NoResults")]);
     }
 
     [Theory]
@@ -177,10 +177,10 @@ public class ImageModuleTests
     }
 
     [Theory]
-    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Bing, true, false, "No results.")]
-    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Yandex, true, true, "No results.")]
-    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Bing, false, true, "A URL or attachment is required.")]
-    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Yandex, false, true, "A URL or attachment is required.")]
+    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Bing, true, false, "NoResults")]
+    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Yandex, true, true, "NoResults")]
+    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Bing, false, true, "UrlOrAttachmentRequired")]
+    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Yandex, false, true, "UrlOrAttachmentRequired")]
     public async Task ReverseAsync_Returns_No_Results(string? url, IAttachment? file, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw, string message)
     {
         var channel = new Mock<ITextChannel>();
