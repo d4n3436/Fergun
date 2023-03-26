@@ -8,6 +8,7 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
+using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -41,7 +42,7 @@ public class OcrModuleTests
 
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
-        var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new());
+        var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
 
         _interactive = new InteractiveService(_client, _interactiveConfig);
         _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, _interactive,

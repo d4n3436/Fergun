@@ -25,8 +25,8 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         ["UnknownFormat"] = "Unknown format. Try using JPEG, PNG, or BMP files."
     };
 
-    private const string _sKey = "ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug";
-    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+    private const string SKey = "ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -50,7 +50,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_defaultUserAgent);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
 
@@ -75,7 +75,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             .GetPropertyOrDefault("category")
             .GetStringOrDefault();
 
-        if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out var message))
+        if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out string? message))
         {
             throw new BingException(message, imageCategory);
         }
@@ -151,7 +151,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
-            RequestUri = new Uri($"?skey={_sKey}&safeSearch={safeSearch}{(language is null ? string.Empty : $"&setLang={language}")}", UriKind.Relative),
+            RequestUri = new Uri($"?skey={SKey}&safeSearch={safeSearch}{(language is null ? string.Empty : $"&setLang={language}")}", UriKind.Relative),
             Content = content
         };
 

@@ -22,7 +22,7 @@ using Polly.Timeout;
 
 namespace Fergun.Services;
 
-public class InteractionHandlingService : IHostedService
+public sealed class InteractionHandlingService : IHostedService, IDisposable
 {
     private readonly DiscordShardedClient _shardedClient;
     private readonly InteractionService _interactionService;
@@ -32,6 +32,7 @@ public class InteractionHandlingService : IHostedService
     private readonly ulong _testingGuildId;
     private readonly ulong _ownerCommandsGuildId;
     private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
+    private bool _disposed;
 
     public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, FergunLocalizationManager localizationManager,
         ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
@@ -135,6 +136,18 @@ public class InteractionHandlingService : IHostedService
         }
     }
 
+    /// <summary>
+    /// Disposes the <see cref="SemaphoreSlim"/> used by this instance.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _cmdStatsSemaphore.Dispose();
+        _disposed = true;
+    }
+
     private Task InteractionCreated(SocketInteraction interaction)
     {
         _ = Task.Run(async () =>
@@ -226,7 +239,7 @@ public class InteractionHandlingService : IHostedService
     private Task AutocompleteHandlerExecuted(IAutocompleteHandler autocompleteCommand, IInteractionContext context, IResult result)
     {
         var interaction = (IAutocompleteInteraction)context.Interaction;
-        var subCommands = string.Join(" ", interaction.Data.Options
+        string subCommands = string.Join(" ", interaction.Data.Options
             .Where(x => x.Type == ApplicationCommandOptionType.SubCommand).Select(x => x.Name));
 
         if (!string.IsNullOrEmpty(subCommands))
@@ -268,6 +281,8 @@ public class InteractionHandlingService : IHostedService
 
     private async Task HandleCommandExecutedAsync(IApplicationCommandInfo command, IInteractionContext context, IResult result)
     {
+        EnsureNotDisposed();
+
         string commandName = command.CommandType == ApplicationCommandType.Slash ? command.ToString()! : command.Name;
         await _cmdStatsSemaphore.WaitAsync();
         
@@ -342,6 +357,14 @@ public class InteractionHandlingService : IHostedService
         else
         {
             await interaction.RespondAsync(embed: embed, ephemeral: ephemeral);
+        }
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(InteractionHandlingService));
         }
     }
 }

@@ -58,12 +58,12 @@ public class ImageModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
 
         var images = (await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode()))
             .ToArray();
 
-        _logger.LogInformation("Image results: {count}", images.Length);
+        _logger.LogInformation("Image results: {Count}", images.Length);
 
         if (images.Length == 0)
         {
@@ -111,12 +111,12 @@ public class ImageModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
 
         var images = (await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
             .ToArray();
 
-        _logger.LogInformation("Image results: {count}", images.Length);
+        _logger.LogInformation("Image results: {Count}", images.Length);
 
         if (images.Length == 0)
         {
@@ -164,12 +164,12 @@ public class ImageModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{query}\", is NSFW: {isNsfw}", query, isNsfw);
+        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
 
         var images = (await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
             .ToArray();
 
-        _logger.LogInformation("Image results: {count}", images.Length);
+        _logger.LogInformation("Image results: {Count}", images.Length);
 
         if (images.Length == 0)
         {
@@ -306,7 +306,7 @@ public class ImageModule : InteractionModuleBase
         }
         catch (YandexException e)
         {
-            _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
+            _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
             return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 
@@ -382,7 +382,7 @@ public class ImageModule : InteractionModuleBase
         }
         catch (BingException e)
         {
-            _logger.LogWarning(e, "Failed to perform reverse image search to url {url}", url);
+            _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
             return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
 

@@ -89,7 +89,7 @@ public class OtherModule : InteractionModuleBase
             return new PageBuilder()
                 .WithTitle(_localizer["CommandStats"])
                 .WithDescription(string.Join('\n', commandStats.Take(start..(start + 25)).Select((x, i) => $"{start + i + 1}. `{x.Name}`: {x.UsageCount}")))
-                .WithFooter(_localizer["Page {0} of {1}", index + 1, maxIndex + 1])
+                .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1])
                 .WithColor(Color.Orange);
         }
     }
@@ -100,6 +100,7 @@ public class OtherModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         string url = await _httpClient.GetStringAsync(_inspiroBotUri);
+        _logger.LogInformation("Obtained url from InspiroBot API: {Url}", url);
 
         var builder = new EmbedBuilder()
             .WithTitle("InspiroBot")
@@ -151,6 +152,7 @@ public class OtherModule : InteractionModuleBase
         if (song.IsInstrumental || !song.HasLyrics)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
+            _logger.LogDebug("Got instrumental song from ID: {Id}", id);
             return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistName} - {song.Title}"]);
         }
 
@@ -159,6 +161,7 @@ public class OtherModule : InteractionModuleBase
         // in the autocomplete results
         if (song.IsRestricted)
         {
+            _logger.LogDebug("Got restricted lyrics from ID: {Id}", id);
             return FergunResult.FromError(_localizer["LyricsRestricted", $"{song.ArtistName} - {song.Title}"]);
         }
 

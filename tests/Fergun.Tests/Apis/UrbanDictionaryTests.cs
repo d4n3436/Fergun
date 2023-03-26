@@ -42,7 +42,7 @@ public class UrbanDictionaryTests
         var definition = await _urbanDictionary.GetDefinitionAsync(id);
 
         Assert.NotNull(definition);
-        Assert.Equal(id, definition!.Id);
+        Assert.Equal(id, definition.Id);
     }
 
     [InlineData(int.MaxValue)]

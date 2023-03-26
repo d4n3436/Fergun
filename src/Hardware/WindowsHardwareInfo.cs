@@ -13,7 +13,7 @@ internal class WindowsHardwareInfo : IHardwareInfo
     {
         string? cpuName = null;
 
-        var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
+        using var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
 
         foreach (var mo in searcher.Get())
         {

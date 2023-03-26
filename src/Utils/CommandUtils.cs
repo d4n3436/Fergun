@@ -13,7 +13,7 @@ public static class CommandUtils
         if (!isLinux && !isWindows)
             return null;
 
-        var escapedArgs = command.Replace("\"", "\\\"", StringComparison.Ordinal);
+        string escapedArgs = command.Replace("\"", "\\\"", StringComparison.Ordinal);
         var startInfo = new ProcessStartInfo
         {
             FileName = isLinux ? "/bin/bash" : "cmd.exe",

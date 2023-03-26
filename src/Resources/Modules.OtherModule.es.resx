@@ -163,7 +163,7 @@
     <value>Librería</value>
   </data>
   <data name="Links" xml:space="preserve">
-    <value>Links</value>
+    <value>Enlaces</value>
   </data>
   <data name="lyrics.description" xml:space="preserve">
     <value>Obtiene la letra de una canción.</value>

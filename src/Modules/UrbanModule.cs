@@ -81,7 +81,7 @@ public class UrbanModule : InteractionModuleBase
 
             var description = new StringBuilder(definition.Definition.Length + definition.Example.Length);
             description.Append(Format.Sanitize(definition.Definition));
-            if (!string.IsNullOrEmpty(definition.Example))
+            if (definition.Example.Length > 0)
             {
                 description.Append("\n\n");
                 description.Append(Format.Italics(Format.Sanitize(definition.Example.Trim())));

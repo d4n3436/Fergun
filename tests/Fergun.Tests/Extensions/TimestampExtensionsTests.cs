@@ -13,7 +13,7 @@ public class TimestampExtensionsTests
     [MemberData(nameof(GetDatesAndStyles))]
     public void DateTimeOffset_ToDiscordTimestamp_Should_Return_Expected(DateTimeOffset dateTimeOffset, char style)
     {
-        var unixSeconds = dateTimeOffset.ToUnixTimeSeconds();
+        long unixSeconds = dateTimeOffset.ToUnixTimeSeconds();
 
         string timestamp = dateTimeOffset.ToDiscordTimestamp(style);
 

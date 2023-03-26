@@ -15,15 +15,15 @@ namespace Fergun.Apis.WolframAlpha;
 /// </summary>
 public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 {
-    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 
     // This AppID is the result of an algorithm in the Android app that takes 2 byte arrays,
     // the first one comes from the values of the resource keys "app_one_id", "id_2_app", "appid_three", "four_appid"
     // and the other array is the MD5 hash of assets\close_dont_change.png (3AC2AA8E493A260B877A68AFC5D1F9F4), also inside the app.
-    private const string _appId = "Y5H46L-2KR8T4PPQQ";
+    private const string AppId = "Y5H46L-2KR8T4PPQQ";
 
     // The secret key is also the result of the same algorithm using the values of the resource keys "secret_1_key", "key_secret_2", "three_secret_key", "four_secret_key"
-    private const string _secretKey = "EumRuvaOhx7ENr9N";
+    private const string SecretKey = "EumRuvaOhx7ENr9N";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -45,7 +45,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_defaultUserAgent);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
 
@@ -78,10 +78,10 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         string escapedInput = Uri.EscapeDataString(input);
 
         // The key-value pairs must be ordered like tuples would
-        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{_secretKey}appid{_appId}input{escapedInput}languagecode{language}outputjsonreinterpret{reinterpret}"));
+        byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{SecretKey}appid{AppId}input{escapedInput}languagecode{language}outputjsonreinterpret{reinterpret}"));
         string signature = Convert.ToHexString(bytes);
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={_appId}&languagecode={language}&input={escapedInput}&reinterpret={reinterpret}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={AppId}&languagecode={language}&input={escapedInput}&reinterpret={reinterpret}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
 
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
@@ -92,9 +92,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     public void Dispose()
     {
         if (_disposed)
-        {
             return;
-        }
 
         _httpClient.Dispose();
         _disposed = true;

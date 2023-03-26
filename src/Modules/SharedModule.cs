@@ -67,7 +67,7 @@ public class SharedModule
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source ?? "auto", target);
+            _logger.LogWarning(e, "Error translating text {Text} ({Source} -> {Target})", text, source ?? "auto", target);
             return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 

@@ -43,7 +43,7 @@ public class InteractiveServiceLoggerHost : IHostedService
 
     private Task Log(LogMessage message)
     {
-        _logger.Log(message.Severity.ToLogLevel(), new EventId(0, message.Source), message.Exception, message.Message);
+        _logger.Log(message.Severity.ToLogLevel(), new EventId(0, message.Source), message.Exception, "{ErrorMessage}", message.Message);
         return Task.CompletedTask;
     }
 }

@@ -11,7 +11,7 @@ namespace Fergun.Apis.Musixmatch;
 /// <summary>
 /// Represents the state of <see cref="MusixmatchClient"/>. It contains a cached user token used to call the APIs.
 /// </summary>
-public class MusixmatchClientState
+public sealed class MusixmatchClientState : IDisposable
 {
     private static readonly Uri _uri = new("https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0&format=json");
 
@@ -19,6 +19,7 @@ public class MusixmatchClientState
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly SemaphoreSlim _tokenSemaphore = new(1, 1);
     private readonly AsyncRateLimitPolicy<string> _rateLimitPolicy = Policy.RateLimitAsync<string>(1, TimeSpan.FromMinutes(1), 2);
+    private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchClientState"/> class.
@@ -36,6 +37,8 @@ public class MusixmatchClientState
     /// <exception cref="MusixmatchException"></exception>
     public async ValueTask<string> GetUserTokenAsync(bool refresh = false)
     {
+        EnsureNotDisposed();
+
         if (!refresh && _userToken is not null)
         {
             return _userToken;
@@ -68,7 +71,7 @@ public class MusixmatchClientState
     /// <exception cref="MusixmatchException"></exception>
     private async Task<string> FetchUserTokenAsync()
     {
-        var client = _httpClientFactory.CreateClient();
+        using var client = _httpClientFactory.CreateClient();
         using var request = new HttpRequestMessage(HttpMethod.Get, _uri);
         request.Headers.Add("Cookie", "AWSELB=0");
 
@@ -91,5 +94,25 @@ public class MusixmatchClientState
         }
 
         return token;
+    }
+
+    /// <summary>
+    /// Disposes the <see cref="SemaphoreSlim"/> used by this instance.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _tokenSemaphore.Dispose();
+        _disposed = true;
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(MusixmatchClientState));
+        }
     }
 }

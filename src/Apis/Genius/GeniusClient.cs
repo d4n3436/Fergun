@@ -23,7 +23,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
     private static readonly Uri _apiEndpoint = new("https://genius.com/");
 
-    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -47,7 +47,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_defaultUserAgent);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
 

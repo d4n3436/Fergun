@@ -47,6 +47,7 @@ public class OwnerModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Executing command: {Command}", command);
         string? result = CommandUtils.RunCommand(command);
 
         if (string.IsNullOrWhiteSpace(result))
@@ -102,7 +103,7 @@ public class OwnerModule : InteractionModuleBase
 
         string code = ((SocketModal)interactiveResult.Value).Data.Components.First().Value;
 
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         object result = null!;
         CompilationErrorException? exception = null;
         var sw = Stopwatch.StartNew();

@@ -49,6 +49,7 @@ public class MacOsHardwareInfo : IHardwareInfo
     }
 
     [DllImport("libc", BestFitMapping = false, CharSet = CharSet.Ansi, ExactSpelling = true, ThrowOnUnmappableChar = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [SupportedOSPlatform("macos")]
     private static extern int sysctlbyname([In, MarshalAs(UnmanagedType.LPStr)] string name, [In, Out] byte[]? oldp, ref ulong oldlenp, [In, Out] byte[]? newp, ulong newlen);
 }

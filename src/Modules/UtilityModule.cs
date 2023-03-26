@@ -169,12 +169,12 @@ public class UtilityModule : InteractionModuleBase
             ITranslationResult result;
             try
             {
-                _logger.LogInformation("Translating to: {target}", target.ISO6391);
+                _logger.LogInformation("Translating to: {Target}", target.ISO6391);
                 result = await _translator.TranslateAsync(text, target);
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "Error translating text {text} ({source} -> {target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
+                _logger.LogWarning(e, "Error translating text {Text} ({Source} -> {Target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
                 return FergunResult.FromError(e.Message);
             }
 
@@ -184,11 +184,11 @@ public class UtilityModule : InteractionModuleBase
             if (i == 0)
             {
                 source = result.SourceLanguage;
-                _logger.LogDebug("Badtranslator: Original language: {source}", source.ISO6391);
+                _logger.LogDebug("Badtranslator: Original language: {Source}", source.ISO6391);
                 languageChain.Add(source);
             }
 
-            _logger.LogDebug("Badtranslator: Translated from {source} to {target}, Service: {service}", result.SourceLanguage.ISO6391, result.TargetLanguage.ISO6391, result.Service);
+            _logger.LogDebug("Badtranslator: Translated from {Source} to {Target}, Service: {Service}", result.SourceLanguage.ISO6391, result.TargetLanguage.ISO6391, result.Service);
 
             text = result.Translation;
             languageChain.Add(target);
@@ -610,7 +610,7 @@ public class UtilityModule : InteractionModuleBase
                 builder.AddBuilder(builders[index][i]);
             }
 
-            builders[index][builders[index].Count - 1].WithFooter(_localizer["WolframAlphaPaginatorFooter", index + 1, builders.Count], Constants.WolframAlphaLogoUrl);
+            builders[index][^1].WithFooter(_localizer["WolframAlphaPaginatorFooter", index + 1, builders.Count], Constants.WolframAlphaLogoUrl);
 
             return builder;
         }

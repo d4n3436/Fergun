@@ -50,7 +50,7 @@ public class TtsModule : InteractionModuleBase
 
         await Context.Interaction.DeferAsync(ephemeral);
 
-        _logger.LogInformation("Sending Microsoft TTS request (text: {text}, voice: {voice})", text, voice.ShortName);
+        _logger.LogInformation("Sending Microsoft TTS request (text: {Text}, voice: {Voice})", text, voice.ShortName);
         await using var stream = await _microsoftTranslator.TextToSpeechAsync(text, voice);
 
         await Context.Interaction.FollowupWithFileAsync(new FileAttachment(stream, $"{voice.ShortName}.mp3"), ephemeral: ephemeral);

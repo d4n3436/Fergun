@@ -21,7 +21,7 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     private readonly Dictionary<string, ModuleInfo> _modules = new(); // TODO: use Options pattern
     private readonly Dictionary<string, string> _supportedLocales = new() 
     {
-        { "es", "es-ES" },
+        { "es", "es-ES" }
     };
 
     /// <summary>
@@ -71,7 +71,7 @@ public sealed class FergunLocalizationManager : ILocalizationManager
         var dictionary = new Dictionary<string, string>();
         var localizer = _localizerFactory.Create(type);
 
-        foreach (var locale in _supportedLocales.Keys)
+        foreach (string locale in _supportedLocales.Keys)
         {
             var cultureInfo = CultureInfo.GetCultureInfo(locale);
             Thread.CurrentThread.CurrentUICulture = cultureInfo;

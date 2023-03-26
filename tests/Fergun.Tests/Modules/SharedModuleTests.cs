@@ -22,7 +22,7 @@ public class SharedModuleTests
     public SharedModuleTests()
     {
         var localizer = Utils.CreateMockedLocalizer<SharedResource>();
-        _sharedModuleMock = new Mock<SharedModule>(() => new SharedModule(Mock.Of<ILogger<SharedModule>>(), localizer, _translatorMock.Object, new()));
+        _sharedModuleMock = new Mock<SharedModule>(() => new SharedModule(Mock.Of<ILogger<SharedModule>>(), localizer, _translatorMock.Object, new GoogleTranslator2()));
         _translatorMock.Setup(x => x.TranslateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
             .ReturnsAsync<string, string, string?, IFergunTranslator, ITranslationResult>((text, target, source) =>
             {

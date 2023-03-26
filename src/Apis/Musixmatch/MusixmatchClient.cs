@@ -17,8 +17,8 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
-    private const string _appId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0, android-player-v1.0, mac-ios-v2.0
-    private const string _defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private const string AppId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0, android-player-v1.0, mac-ios-v2.0
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly AsyncRetryPolicy<JsonDocument> _retryPolicy;
     private readonly HttpClient _httpClient;
     private readonly MusixmatchClientState _state;
@@ -47,7 +47,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
         {
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(_defaultUserAgent);
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
 
@@ -57,7 +57,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         EnsureNotDisposed();
         cancellationToken.ThrowIfCancellationRequested();
 
-        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={_appId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
+        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={AppId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
 
         using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url, cancellationToken)).ConfigureAwait(false);
 
@@ -77,7 +77,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         EnsureNotDisposed();
         cancellationToken.ThrowIfCancellationRequested();
 
-        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={_appId}";
+        string url = $"https://apic-desktop.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={AppId}";
 
         using var document = await _retryPolicy.ExecuteAsync(() => SendRequestAndValidateAsync(url, cancellationToken)).ConfigureAwait(false);
 

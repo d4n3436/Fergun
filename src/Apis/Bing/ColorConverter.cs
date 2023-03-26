@@ -16,6 +16,6 @@ public class ColorConverter : JsonConverter<Color>
         => Utf8Parser.TryParse(reader.ValueSpan, out int color, out _, 'X') ? Color.FromArgb(color) : default;
 
     /// <inheritdoc/>
-    public override void Write(Utf8JsonWriter writer, Color colorValue, JsonSerializerOptions options)
-        => writer.WriteStringValue(colorValue.ToArgb().ToString("X"));
+    public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
+        => writer.WriteStringValue(value.ToArgb().ToString("X"));
 }

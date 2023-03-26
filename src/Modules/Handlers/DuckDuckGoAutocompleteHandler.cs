@@ -33,7 +33,7 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
             .Get<IAsyncPolicy<HttpResponseMessage>>("AutocompletePolicy");
 
         string locale = autocompleteInteraction.GetLocale("wt-wt").ToLowerInvariant();
-        var temp = locale.Split('-');
+        string[] temp = locale.Split('-');
         if (temp.Length == 2)
         {
             locale = $"{temp[1]}-{temp[0]}";

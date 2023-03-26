@@ -132,12 +132,12 @@ public class OcrModule : InteractionModuleBase
         }
         catch (BingException e)
         {
-            _logger.LogWarning(e, "Failed to perform Bing OCR to url {url}", url);
+            _logger.LogWarning(e, "Failed to perform Bing OCR to url {Url}", url);
             return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
         catch (YandexException e)
         {
-            _logger.LogWarning(e, "Failed to perform Yandex OCR to url {url}", url);
+            _logger.LogWarning(e, "Failed to perform Yandex OCR to url {Url}", url);
             return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
         }
 
@@ -150,7 +150,7 @@ public class OcrModule : InteractionModuleBase
 
         interaction.TryGetLanguage(out var language);
 
-        var (name, iconUrl) = ocrEngine switch
+        (var name, string iconUrl) = ocrEngine switch
         {
             OcrEngine.Bing => (_localizer["BingVisualSearch"], Constants.BingIconUrl),
             OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),

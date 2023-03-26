@@ -107,7 +107,7 @@ public class YandexImageSearchTests
     [Fact]
     public async Task ReverseImageSearchAsync_Ignores_Invalid_Results()
     {
-        var rawResults = new[]
+        string[] rawResults =
         {
             string.Empty,
             "{[",

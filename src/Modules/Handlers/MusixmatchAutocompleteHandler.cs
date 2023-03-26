@@ -39,7 +39,7 @@ public class MusixmatchAutocompleteHandler : AutocompleteHandler
         var songs = await policy.ExecuteAsync((_, ct) => musixmatchClient.SearchSongsAsync(text, true, ct), new Context(text), CancellationToken.None);
 
         var results = songs
-            .Where(x => !x.IsInstrumental && x.HasLyrics && !x.IsRestricted)
+            .Where(x => x is { IsInstrumental: false, HasLyrics: true, IsRestricted: false })
             .Take(25)
             .Select(x => new AutocompleteResult($"{x.ArtistName} - {x.Title}".Truncate(100), x.Id));
 

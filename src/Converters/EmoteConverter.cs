@@ -26,6 +26,5 @@ public class EmoteConverter : TypeConverter
         }
 
         return emote;
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
 using Discord;
@@ -24,7 +25,7 @@ public class UtilityModuleTests
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly IFergunLocalizer<UtilityModule> _localizer = Utils.CreateMockedLocalizer<UtilityModule>();
     private readonly GoogleTranslator2 _googleTranslator2 = new();
-    private readonly SearchClient _searchClient = new(new());
+    private readonly SearchClient _searchClient = new(new HttpClient());
     private readonly IWikipediaClient _wikipediaClient = null!;
     private readonly IWolframAlphaClient _wolframAlphaClient = null!;
     private readonly IDictionaryClient _dictionaryClient = null!;

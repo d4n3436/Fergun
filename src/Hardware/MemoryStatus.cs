@@ -3,7 +3,7 @@
 /// <summary>
 /// Contains information about the memory.
 /// </summary>
-public readonly struct MemoryStatus
+public readonly record struct MemoryStatus
 {
     /// <summary>
     /// Gets the total physical, memory, in bytes.

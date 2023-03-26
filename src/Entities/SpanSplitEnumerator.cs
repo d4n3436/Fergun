@@ -25,7 +25,7 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
     /// Returns the current enumerator.
     /// </summary>
     /// <returns>The current enumerator.</returns>
-    public SpanSplitEnumerator<T> GetEnumerator() => this;
+    public readonly SpanSplitEnumerator<T> GetEnumerator() => this;
 
     /// <summary>
     /// Creates a new instance of <see cref="SpanSplitEnumerator{T}"/>.
