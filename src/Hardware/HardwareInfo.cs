@@ -11,22 +11,26 @@ public static class HardwareInfo
 {
     private static readonly Lazy<string?> _lazyCpuName;
     private static readonly Lazy<string> _lazyOsName;
-    private static readonly IHardwareInfo _instance;
-    
+
     static HardwareInfo()
     {
         if (OperatingSystem.IsWindows())
-            _instance = new WindowsHardwareInfo();
+            Instance = new WindowsHardwareInfo();
         else if (OperatingSystem.IsLinux())
-            _instance = new LinuxHardwareInfo();
+            Instance = new LinuxHardwareInfo();
         else if (OperatingSystem.IsMacOS())
-            _instance = new MacOsHardwareInfo();
+            Instance = new MacOsHardwareInfo();
         else
-            _instance = new UnknownHardwareInfo();
+            Instance = new UnknownHardwareInfo();
 
-        _lazyCpuName = new Lazy<string?>(() => _instance.GetCpuName(), true);
-        _lazyOsName = new Lazy<string>(() => _instance.GetOperatingSystemName(), true);
+        _lazyCpuName = new Lazy<string?>(() => Instance.GetCpuName(), true);
+        _lazyOsName = new Lazy<string>(() => Instance.GetOperatingSystemName(), true);
     }
+
+    /// <summary>
+    /// Gets the inner (OS-specific) <see cref="IHardwareInfo"/> instance.
+    /// </summary>
+    public static IHardwareInfo Instance { get; }
 
     /// <inheritdoc cref="IHardwareInfo.GetCpuName"/>
     public static string? GetCpuName() => _lazyCpuName.Value;
@@ -35,7 +39,7 @@ public static class HardwareInfo
     public static string GetOperatingSystemName() => _lazyOsName.Value;
 
     /// <inheritdoc cref="IHardwareInfo.GetMemoryStatus"/>
-    public static MemoryStatus GetMemoryStatus() => _instance.GetMemoryStatus();
+    public static MemoryStatus GetMemoryStatus() => Instance.GetMemoryStatus();
 
     /// <summary>
     /// Gets the CPU usage for the current process.

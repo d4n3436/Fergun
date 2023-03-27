@@ -8,9 +8,16 @@ using System.Runtime.Versioning;
 
 namespace Fergun.Hardware;
 
+/// <summary>
+/// Implements the <see cref="IHardwareInfo"/> interface through Linux-specific APIs.
+/// </summary>
 [SupportedOSPlatform("linux")]
-internal class LinuxHardwareInfo : IHardwareInfo
+public class LinuxHardwareInfo : IHardwareInfo
 {
+    internal LinuxHardwareInfo()
+    {
+    }
+
     private const string CpuInfoPath = "/proc/cpuinfo";
     private const string OsReleasePath = "/etc/os-release";
     private const string MemInfoPath = "/proc/meminfo";

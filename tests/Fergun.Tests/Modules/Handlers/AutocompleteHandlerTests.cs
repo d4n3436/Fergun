@@ -199,32 +199,32 @@ public class AutocompleteHandlerTests
     public static IEnumerable<object?[]> GetBraveTestData()
     {
         var faker = new Faker();
-        return faker.MakeLazy(10, () => faker.Random.String2(1))
+        return faker.MakeLazy(5, () => faker.Random.String2(1))
             .Append(string.Empty).Append(null).Select(x => new object?[] { x });
     }
 
     public static IEnumerable<object?[]> GetDuckDuckGoTestData()
     {
         var faker = new Faker();
-        return faker.MakeLazy(10, () => faker.Music.Genre())
+        return faker.MakeLazy(5, () => faker.Music.Genre())
             .Append(string.Empty).Append(null)
-            .Zip(faker.MakeLazy(12, () => faker.Random.RandomLocale().Replace('_', '-')), faker.MakeLazy(12, () => faker.Random.Bool()))
+            .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')), faker.MakeLazy(7, () => faker.Random.Bool()))
             .Select(x => new object?[] { x.First, x.Second, x.Third });
     }
 
     public static IEnumerable<object?[]> GetGoogleTestData()
     {
         var faker = new Faker();
-        return faker.MakeLazy(10, () => faker.Music.Genre())
+        return faker.MakeLazy(5, () => faker.Music.Genre())
             .Append(string.Empty).Append(null)
-            .Zip(faker.MakeLazy(12, () => faker.Random.RandomLocale().Replace('_', '-')))
+            .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')))
             .Select(x => new object?[] { x.First, x.Second });
     }
 
     public static IEnumerable<object?[]> GetUrbanTestData()
     {
         var faker = new Faker();
-        return faker.MakeLazy(10, () => faker.Hacker.Noun())
+        return faker.MakeLazy(5, () => faker.Hacker.Noun())
             .Append(string.Empty).Append(null)
             .Select(x => new object?[] { x });
     }

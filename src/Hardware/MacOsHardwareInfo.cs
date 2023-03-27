@@ -6,9 +6,16 @@ using System.Text;
 
 namespace Fergun.Hardware;
 
+/// <summary>
+/// Implements the <see cref="IHardwareInfo"/> interface through macOS-specific APIs.
+/// </summary>
 [SupportedOSPlatform("macos")]
 public class MacOsHardwareInfo : IHardwareInfo
 {
+    internal MacOsHardwareInfo()
+    {
+    }
+
     private const int ENOMEM = 12;
     private const string CpuNameKey = "machdep.cpu.brand_string";
     private const string MemSizeKey = "hw.memsize";

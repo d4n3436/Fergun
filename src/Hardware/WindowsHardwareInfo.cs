@@ -5,9 +5,16 @@ using System.Runtime.Versioning;
 
 namespace Fergun.Hardware;
 
+/// <summary>
+/// Implements the <see cref="IHardwareInfo"/> interface through Windows-specific APIs.
+/// </summary>
 [SupportedOSPlatform("windows")]
-internal class WindowsHardwareInfo : IHardwareInfo
+public class WindowsHardwareInfo : IHardwareInfo
 {
+    internal WindowsHardwareInfo()
+    {
+    }
+
     /// <inheritdoc/>
     public string? GetCpuName()
     {
