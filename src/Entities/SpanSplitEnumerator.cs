@@ -6,10 +6,22 @@ namespace Fergun;
 /// Represents an enumerator that slices <see cref="ReadOnlySpan{T}"/> by a separator.
 /// </summary>
 /// <typeparam name="T">The type of objects to enumerate.</typeparam>
-public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
+public ref struct SpanSplitEnumerator<T>
+    where T : IEquatable<T>
 {
-    private ReadOnlySpan<T> _sequence;
     private readonly T _separator;
+    private ReadOnlySpan<T> _sequence;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SpanSplitEnumerator{T}"/> structure.
+    /// </summary>
+    /// <param name="span">The <see cref="ReadOnlySpan{T}"/> to enumerate.</param>
+    /// <param name="separator">The separator.</param>
+    public SpanSplitEnumerator(ReadOnlySpan<T> span, T separator)
+    {
+        _sequence = span;
+        _separator = separator;
+    }
 
     /// <summary>
     /// Gets the element at the current position of the enumerator.
@@ -26,17 +38,6 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
     /// </summary>
     /// <returns>The current enumerator.</returns>
     public readonly SpanSplitEnumerator<T> GetEnumerator() => this;
-
-    /// <summary>
-    /// Creates a new instance of <see cref="SpanSplitEnumerator{T}"/>.
-    /// </summary>
-    /// <param name="span">The <see cref="ReadOnlySpan{T}"/> to enumerate.</param>
-    /// <param name="separator">The separator.</param>
-    public SpanSplitEnumerator(ReadOnlySpan<T> span, T separator)
-    {
-        _sequence = span;
-        _separator = separator;
-    }
 
     /// <summary>
     /// Advances the enumerator to the next element in the <see cref="ReadOnlySpan{T}"/>.
@@ -61,7 +62,8 @@ public ref struct SpanSplitEnumerator<T> where T : IEquatable<T>
 
             Current = _sequence[..index];
             _sequence = _sequence[(index + 1)..];
-        } while (Current.IsEmpty);
+        }
+        while (Current.IsEmpty);
 
         return true;
     }

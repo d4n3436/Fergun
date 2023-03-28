@@ -24,7 +24,7 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
         if (string.IsNullOrEmpty(text))
             return AutocompletionResult.FromSuccess();
 
-        var client = services
+        using var client = services
             .GetRequiredService<IHttpClientFactory>()
             .CreateClient("autocomplete");
 

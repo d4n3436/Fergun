@@ -12,9 +12,6 @@ namespace Fergun;
 /// </summary>
 public class FergunTranslator : IFergunTranslator
 {
-    /// <inheritdoc/>
-    public string Name => nameof(FergunTranslator);
-
     private readonly WrapBackCollection<ITranslator> _translators;
     private readonly AggregateTranslator _innerTranslator;
 
@@ -38,6 +35,9 @@ public class FergunTranslator : IFergunTranslator
 
         _innerTranslator = new AggregateTranslator(_translators);
     }
+
+    /// <inheritdoc/>
+    public string Name => nameof(FergunTranslator);
 
     /// <inheritdoc/>
     public void Next()

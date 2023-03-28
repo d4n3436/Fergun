@@ -20,9 +20,16 @@ public class DictionaryPaginator : BaseLazyPaginator
     private Dictionary<PaginatorAction, string?>? _actions;
     private bool _isDisplayingExtraInfo;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DictionaryPaginator"/> class.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <param name="extraInformation">The extra information.</param>
+    /// <param name="maxCategoryIndexes">The max. category indexes.</param>
+    /// <param name="customMaxPageIndex">The max. page index.</param>
     public DictionaryPaginator(DictionaryPaginatorBuilder builder, IReadOnlyList<IPage?> extraInformation,
-        IReadOnlyList<int> maxCategoryIndexes, int customMaxPageIndex) : base(builder)
+        IReadOnlyList<int> maxCategoryIndexes, int customMaxPageIndex)
+        : base(builder)
     {
         _extraInformation = extraInformation;
         _maxCategoryIndexes = maxCategoryIndexes;
@@ -31,12 +38,12 @@ public class DictionaryPaginator : BaseLazyPaginator
     }
 
     /// <summary>
-    /// Gets the current part of speech index within an entry.
+    /// Gets or sets the current part of speech index within an entry.
     /// </summary>
     public int CurrentCategoryIndex { get; set; }
 
     /// <summary>
-    /// Gets the maximun part of speech index within an entry.
+    /// Gets or sets the maximun part of speech index within an entry.
     /// </summary>
     public int MaxCategoryIndex { get; set; }
 
@@ -49,8 +56,8 @@ public class DictionaryPaginator : BaseLazyPaginator
         _actions ??= new Dictionary<PaginatorAction, string?>
         {
             { PaginatorAction.SkipToStart, "Previous definition" },
-            { PaginatorAction.Backward, "Previous category"},
-            { PaginatorAction.Forward, "Next category "},
+            { PaginatorAction.Backward, "Previous category" },
+            { PaginatorAction.Forward, "Next category" },
             { PaginatorAction.SkipToEnd, "Next definition" }, // words can have different IPA pronuctiation like bass
             { PaginatorAction.Jump, "More information" },
             { PaginatorAction.Exit, null }
@@ -113,8 +120,8 @@ public class DictionaryPaginator : BaseLazyPaginator
     public override ValueTask<bool> ApplyActionAsync(PaginatorAction action) =>
         action switch
         {
-            PaginatorAction.Backward => SetCategoryIndex(CurrentCategoryIndex - 1),
-            PaginatorAction.Forward => SetCategoryIndex(CurrentCategoryIndex + 1),
+            PaginatorAction.Backward => SetCategoryIndexAsync(CurrentCategoryIndex - 1),
+            PaginatorAction.Forward => SetCategoryIndexAsync(CurrentCategoryIndex + 1),
             PaginatorAction.SkipToStart => SetPageAsync(CurrentPageIndex - 1),
             PaginatorAction.SkipToEnd => SetPageAsync(CurrentPageIndex + 1),
             PaginatorAction.Jump => new ValueTask<bool>(true),
@@ -132,12 +139,6 @@ public class DictionaryPaginator : BaseLazyPaginator
         CurrentCategoryIndex = 0;
         MaxCategoryIndex = _maxCategoryIndexes[CurrentPageIndex];
 
-        return ValueTask.FromResult(true);
-    }
-
-    private ValueTask<bool> SetCategoryIndex(int index)
-    {
-        CurrentCategoryIndex = index;
         return ValueTask.FromResult(true);
     }
 
@@ -214,10 +215,16 @@ public class DictionaryPaginator : BaseLazyPaginator
                 x.Embeds = currentPage.GetEmbedArray();
                 x.Components = buttons;
                 x.AllowedMentions = currentPage.AllowedMentions;
-                x.Attachments = attachments is null ? new Optional<IEnumerable<FileAttachment>>() : new Optional<IEnumerable<FileAttachment>>(attachments);
+                x.Attachments = attachments is null ? default : new Optional<IEnumerable<FileAttachment>>(attachments);
             }).ConfigureAwait(false);
         }
 
         return InteractiveInputStatus.Success;
+    }
+
+    private ValueTask<bool> SetCategoryIndexAsync(int index)
+    {
+        CurrentCategoryIndex = index;
+        return ValueTask.FromResult(true);
     }
 }

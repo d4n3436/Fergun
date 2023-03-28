@@ -90,7 +90,7 @@ public class UrbanModuleTests
     [Fact]
     public async Task Invalid_SearchType_Throws_ArgumentException()
     {
-        var task = _moduleMock.Object.SearchAndSendAsync((UrbanModule.UrbanSearchType)3);
+        var task = _moduleMock.Object.SearchAndSendAsync((UrbanSearchType)3);
 
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }

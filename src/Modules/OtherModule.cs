@@ -27,6 +27,7 @@ namespace Fergun.Modules;
 
 public class OtherModule : InteractionModuleBase
 {
+    private static readonly Uri _inspiroBotUri = new("https://inspirobot.me/api?generate=true");
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
     private readonly FergunOptions _fergunOptions;
@@ -34,7 +35,6 @@ public class OtherModule : InteractionModuleBase
     private readonly IMusixmatchClient _musixmatchClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
-    private static readonly Uri _inspiroBotUri = new("https://inspirobot.me/api?generate=true");
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         InteractiveService interactive, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
@@ -128,7 +128,7 @@ public class OtherModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
     }
-    
+
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
     public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {
@@ -143,12 +143,12 @@ public class OtherModule : InteractionModuleBase
         {
             return FergunResult.FromError(_localizer["LyricsRatelimited", e.RetryAfter.Humanize(culture: _localizer.CurrentCulture)]);
         }
-        
+
         if (song is null)
         {
             return FergunResult.FromError(_localizer["LyricsNotFound", id]);
         }
-        
+
         if (song.IsInstrumental || !song.HasLyrics)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
@@ -255,7 +255,7 @@ public class OtherModule : InteractionModuleBase
                 string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
                 ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes()} ({totalUsagePercentage})";
             }
-            
+
             ramUsage += $" / {totalRam.Bytes()}";
         }
 

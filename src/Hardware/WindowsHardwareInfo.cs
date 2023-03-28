@@ -21,8 +21,9 @@ public class WindowsHardwareInfo : IHardwareInfo
         string? cpuName = null;
 
         using var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
+        using var objects = searcher.Get();
 
-        foreach (var mo in searcher.Get())
+        foreach (var mo in objects)
         {
             cpuName = mo["Name"].ToString();
         }
@@ -65,8 +66,6 @@ public class WindowsHardwareInfo : IHardwareInfo
 [StructLayout(LayoutKind.Sequential)]
 internal struct MEMORYSTATUSEX
 {
-    public MEMORYSTATUSEX() => dwLength = (uint)Marshal.SizeOf<MEMORYSTATUSEX>();
-
     public uint dwLength;
     public uint dwMemoryLoad = default;
     public ulong ullTotalPhys = default;
@@ -76,4 +75,6 @@ internal struct MEMORYSTATUSEX
     public ulong ullTotalVirtual = default;
     public ulong ullAvailVirtual = default;
     public ulong ullAvailExtendedVirtual = default;
+
+    public MEMORYSTATUSEX() => dwLength = (uint)Marshal.SizeOf<MEMORYSTATUSEX>();
 }

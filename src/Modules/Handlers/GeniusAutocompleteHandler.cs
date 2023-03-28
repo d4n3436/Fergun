@@ -8,8 +8,8 @@ using Discord.Interactions;
 using Fergun.Apis.Genius;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
-using Polly.Registry;
 using Polly;
+using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
@@ -19,7 +19,7 @@ public class GeniusAutocompleteHandler : AutocompleteHandler
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
         string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
-        
+
         if (string.IsNullOrWhiteSpace(text))
         {
             return AutocompletionResult.FromSuccess();

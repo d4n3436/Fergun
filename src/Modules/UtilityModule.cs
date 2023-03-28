@@ -34,6 +34,13 @@ namespace Fergun.Modules;
 
 public class UtilityModule : InteractionModuleBase
 {
+    private static readonly DrawingOptions _cachedDrawingOptions = new();
+    private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
+    private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
+        .Values
+        .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
+        .ToArray());
+
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly FergunOptions _fergunOptions;
@@ -44,13 +51,6 @@ public class UtilityModule : InteractionModuleBase
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
-
-    private static readonly DrawingOptions _cachedDrawingOptions = new();
-    private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
-    private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
-        .Values
-        .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
-        .ToArray());
 
     public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         SharedModule shared, InteractiveService interactive, IDictionaryClient dictionary, IFergunTranslator translator,
@@ -143,7 +143,7 @@ public class UtilityModule : InteractionModuleBase
         {
             return FergunResult.FromError(_localizer["ChainCountMustBeInRange", 2, 10], true);
         }
-        
+
         await Context.Interaction.DeferAsync();
 
         _translator.Randomize();
@@ -163,7 +163,8 @@ public class UtilityModule : InteractionModuleBase
                 do
                 {
                     target = _lazyFilteredLanguages.Value[Random.Shared.Next(_lazyFilteredLanguages.Value.Length)];
-                } while (languageChain.Contains(target));
+                }
+                while (languageChain.Contains(target));
             }
 
             ITranslationResult result;
@@ -227,7 +228,7 @@ public class UtilityModule : InteractionModuleBase
         string hex = $"{color.R:X2}{color.G:X2}{color.B:X2}";
 
         var builder = new EmbedBuilder()
-            .WithTitle($"#{hex}{(color.IsNamedColor ? $" ({color.Name})" : "")}")
+            .WithTitle($"#{hex}{(color.IsNamedColor ? $" ({color.Name})" : string.Empty)}")
             .WithImageUrl($"attachment://{hex}.png")
             .WithFooter($"R: {color.R}, G: {color.G}, B: {color.B}")
             .WithColor((Color)color);
@@ -263,7 +264,7 @@ public class UtilityModule : InteractionModuleBase
             var entry = entries[i];
             string title = DictionaryFormatter.FormatEntry(entry);
             var innerPages = new List<PageBuilder>();
-            
+
             for (int j = 0; j < entry.PartOfSpeechBlocks.Count; j++)
             {
                 var block = entry.PartOfSpeechBlocks[j];
@@ -304,6 +305,7 @@ public class UtilityModule : InteractionModuleBase
             actions.Add(PaginatorAction.Backward);
             actions.Add(PaginatorAction.Forward);
         }
+
         if (pages.Count > 1)
         {
             actions.Add(PaginatorAction.SkipToStart);
@@ -380,7 +382,7 @@ public class UtilityModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
     }
-    
+
     [SlashCommand("say", "Says something.")]
     public async Task<RuntimeResult> SayAsync([Summary(description: "The text to send.")] string text)
     {
@@ -404,7 +406,7 @@ public class UtilityModule : InteractionModuleBase
     [SlashCommand("user", "Gets information about a user.")]
     public async Task<RuntimeResult> UserInfoAsync([Summary(description: "The user.")] IUser user)
     {
-        string activities = "";
+        string activities = string.Empty;
         if (user.Activities.Count > 0)
         {
             activities = string.Join('\n', user.Activities.Select(x =>
@@ -425,7 +427,7 @@ public class UtilityModule : InteractionModuleBase
                     ClientType.Desktop => "🖥",
                     ClientType.Mobile => "📱",
                     ClientType.Web => "🌐",
-                    _ => ""
+                    _ => string.Empty
                 }));
         }
 
@@ -495,7 +497,7 @@ public class UtilityModule : InteractionModuleBase
     }
 
     [SlashCommand("wolfram", "Asks Wolfram|Alpha about something.")]
-    public async Task<RuntimeResult> WolframAlpha([Autocomplete(typeof(WolframAlphaAutocompleteHandler))] [Summary(description: "Something to calculate or know about.")] string input)
+    public async Task<RuntimeResult> WolframAlphaAsync([Autocomplete(typeof(WolframAlphaAutocompleteHandler))] [Summary(description: "Something to calculate or know about.")] string input)
     {
         await Context.Interaction.DeferAsync();
 
@@ -562,7 +564,7 @@ public class UtilityModule : InteractionModuleBase
                 }
             }
 
-            if (text.Length > 0) 
+            if (text.Length > 0)
                 topEmbed.AddField(pod.Title, text.ToString(), true);
 
             if (subBuilders.Count > 0)
@@ -631,7 +633,7 @@ public class UtilityModule : InteractionModuleBase
             case 1:
                 await Context.Interaction.FollowupAsync(videos[0].Url);
                 break;
-                
+
             default:
                 var paginator = new LazyPaginatorBuilder()
                     .AddUser(Context.User)
@@ -649,7 +651,7 @@ public class UtilityModule : InteractionModuleBase
         }
 
         return FergunResult.FromSuccess();
-        
+
         PageBuilder GeneratePage(int index) => new PageBuilder().WithText($"{videos[index].Url}\n{_localizer["PaginatorFooter", index + 1, videos.Count]}");
     }
 }

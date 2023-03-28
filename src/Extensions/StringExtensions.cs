@@ -28,6 +28,7 @@ public static class StringExtensions
             }
 
             var line = current[..length];
+
             // skip a single space if there's one
             if (index != -1)
             {

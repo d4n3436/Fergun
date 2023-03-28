@@ -26,7 +26,7 @@ public class OcrModule : InteractionModuleBase
     private readonly IYandexImageSearch _yandexImageSearch;
 
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
-        InteractiveService interactive,IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+        InteractiveService interactive, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
@@ -191,11 +191,5 @@ public class OcrModule : InteractionModuleBase
         text = text[startIndex..^3];
 
         return await _shared.GoogleTtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
-    }
-
-    public enum OcrEngine
-    {
-        Bing,
-        Yandex
     }
 }

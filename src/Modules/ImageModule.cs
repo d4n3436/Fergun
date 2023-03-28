@@ -87,7 +87,7 @@ public class ImageModule : InteractionModuleBase
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
-        
+
         MultiEmbedPageBuilder GeneratePage(int index)
         {
             int start = index * count;
@@ -148,7 +148,7 @@ public class ImageModule : InteractionModuleBase
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["DuckDuckGoImageSearch"])
-                .WithUrl(multiImages ? "https://duckduckgo.com": result.SourceUrl)
+                .WithUrl(multiImages ? "https://duckduckgo.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
                 .WithColor(Color.Orange));
@@ -265,12 +265,12 @@ public class ImageModule : InteractionModuleBase
     public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages,
         IDiscordInteraction interaction, IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
-        return await (engine switch
+        return engine switch
         {
-            ReverseImageSearchEngine.Yandex => YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
-            ReverseImageSearchEngine.Bing => BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Yandex => await YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Bing => await BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             _ => throw new ArgumentException(_localizer["InvalidImageSearchEngine"], nameof(engine))
-        });
+        };
     }
 
     public virtual async Task<RuntimeResult> YandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
@@ -338,7 +338,7 @@ public class ImageModule : InteractionModuleBase
             int start = index * count;
 
             var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
-                .WithTitle(result.Title?.Truncate(EmbedBuilder.MaxTitleLength) ?? "")
+                .WithTitle(result.Title?.Truncate(EmbedBuilder.MaxTitleLength) ?? string.Empty)
                 .WithDescription(result.Text)
                 .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
                 .WithThumbnailUrl(url)
@@ -424,11 +424,5 @@ public class ImageModule : InteractionModuleBase
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
-    }
-
-    public enum ReverseImageSearchEngine
-    {
-        Bing,
-        Yandex
     }
 }

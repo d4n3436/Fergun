@@ -61,9 +61,9 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
             .Select((x, i) =>
             {
                 string name = x.Name;
-                name += x.Name == x.NativeName ? "" : $" ({x.NativeName})";
+                name += x.Name == x.NativeName ? string.Empty : $" ({x.NativeName})";
                 name += $" ({x.ISO6391})";
-                name += i == last - 1 && excess > 0 ? $" ({localizer["NumberExcess", excess]})" : "";
+                name += i == last - 1 && excess > 0 ? $" ({localizer["NumberExcess", excess]})" : string.Empty;
                 return new AutocompleteResult(name, x.ISO6391);
             })
             .Take(25);

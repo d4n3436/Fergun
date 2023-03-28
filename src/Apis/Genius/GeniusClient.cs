@@ -18,12 +18,9 @@ namespace Fergun.Apis.Genius;
 /// </summary>
 public sealed class GeniusClient : IGeniusClient, IDisposable
 {
-    private static ReadOnlySpan<byte> StartString => Encoding.UTF8.GetBytes("window.__PRELOADED_STATE__ = JSON.parse('");
-    private static ReadOnlySpan<byte> EndString => new[] { (byte)'\'', (byte)')', (byte)';', (byte)'\n' };
-
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private static readonly Uri _apiEndpoint = new("https://genius.com/");
 
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -50,6 +47,10 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
+
+    private static ReadOnlySpan<byte> StartString => Encoding.UTF8.GetBytes("window.__PRELOADED_STATE__ = JSON.parse('");
+
+    private static ReadOnlySpan<byte> EndString => new[] { (byte)'\'', (byte)')', (byte)';', (byte)'\n' };
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default)
@@ -146,7 +147,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             lyricsBuilder = new StringBuilder();
             IterateChunks(chunks, lyricsBuilder);
         }
-        
+
         return new GeniusSong(artistNames, headerImageUrl, id, isInstrumental, lyricsState,
             songArtImageUrl, title, url, primaryArtistUrl, primaryColor, lyricsBuilder?.ToString());
     }
@@ -161,14 +162,6 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(GeniusClient));
-        }
     }
 
     private static void IterateChunks(in JsonElement element, in StringBuilder builder, bool appendStrings = true)
@@ -193,7 +186,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             {
                 string markDownEq = tag.GetString() switch
                 {
-                    "a" => "",
+                    "a" => string.Empty,
                     "i" => "*",
                     "b" => "**",
                     _ => "\n"
@@ -211,11 +204,19 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
                     {
                         "i" => "*",
                         "b" => "**",
-                        _ => ""
+                        _ => string.Empty
                     };
                     builder.Append(markDownEq);
                 }
             }
+        }
+    }
+
+    private void EnsureNotDisposed()
+    {
+        if (_disposed)
+        {
+            throw new ObjectDisposedException(nameof(GeniusClient));
         }
     }
 }

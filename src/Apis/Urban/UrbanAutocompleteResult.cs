@@ -1,16 +1,17 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Urban;
 
 /// <summary>
 /// Represent an Urban Dictionary autocomplete result.
 /// </summary>
-[DebuggerDisplay($"{{{nameof(DebuggerDisplay)}}}")]
 public class UrbanAutocompleteResult
 {
-    [JsonConstructor]
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UrbanAutocompleteResult"/> class.
+    /// </summary>
+    /// <param name="term">The term of this result.</param>
+    /// <param name="preview">A preview definition of the term.</param>
     public UrbanAutocompleteResult(string term, string preview)
     {
         Term = term;
@@ -31,7 +32,4 @@ public class UrbanAutocompleteResult
 
     /// <inheritdoc/>
     public override string ToString() => $"{nameof(Term)} = {Term}, {nameof(Preview)} = {Preview}";
-
-    [ExcludeFromCodeCoverage]
-    private string DebuggerDisplay => ToString();
 }

@@ -9,24 +9,6 @@ namespace Fergun.Apis.Musixmatch;
 /// </summary>
 public class MusixmatchException : Exception
 {
-    [DoesNotReturn]
-    public static MusixmatchException Throw(HttpStatusCode statusCode, string? path, string? hint)
-    {
-        string message = hint switch
-        {
-            "renew" => $"Request failed due to an expired user token.{(path is null ? "" : $" (Path: {path})")}",
-            "captcha" => $"Musixmatch API returned a CAPTCHA. Try again later.{(path is null ? "" : $" (Path: {path})")}",
-            _ => $"The API returned a {(int)statusCode} ({statusCode}) status code.{(path is null ? "" : $" (Path: {path})")}"
-        };
-
-        throw new MusixmatchException(message, hint);
-    }
-
-    /// <summary>
-    /// Gets a hint from the API that describes the error.
-    /// </summary>
-    public string? Hint { get; }
-
     /// <summary>
     /// Initializes a new instance of the <see cref="MusixmatchException"/> class.
     /// </summary>
@@ -62,5 +44,29 @@ public class MusixmatchException : Exception
     public MusixmatchException(string? message, Exception? innerException)
         : base(message, innerException)
     {
+    }
+
+    /// <summary>
+    /// Gets a hint from the API that describes the error.
+    /// </summary>
+    public string? Hint { get; }
+
+    /// <summary>
+    /// Throws a <see cref="MusixmatchException"/> with a message based on the provided parameters.
+    /// </summary>
+    /// <param name="statusCode">The status code.</param>
+    /// <param name="path">The path.</param>
+    /// <param name="hint">A hint from the API that describes the error.</param>
+    [DoesNotReturn]
+    public static void Throw(HttpStatusCode statusCode, string? path, string? hint)
+    {
+        string message = hint switch
+        {
+            "renew" => $"Request failed due to an expired user token.{(path is null ? string.Empty : $" (Path: {path})")}",
+            "captcha" => $"Musixmatch API returned a CAPTCHA. Try again later.{(path is null ? string.Empty : $" (Path: {path})")}",
+            _ => $"The API returned a {(int)statusCode} ({statusCode}) status code.{(path is null ? string.Empty : $" (Path: {path})")}"
+        };
+
+        throw new MusixmatchException(message, hint);
     }
 }

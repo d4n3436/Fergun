@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Bing;
@@ -8,9 +6,16 @@ namespace Fergun.Apis.Bing;
 /// <summary>
 /// Represents a Bing reverse image search result.
 /// </summary>
-[DebuggerDisplay($"{{{nameof(DebuggerDisplay)}}}")]
 public class BingReverseImageSearchResult : IBingReverseImageSearchResult
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BingReverseImageSearchResult"/> class.
+    /// </summary>
+    /// <param name="url">A URL pointing to the image.</param>
+    /// <param name="friendlyDomainName">The friendly domain name.</param>
+    /// <param name="sourceUrl">A URL pointing to the webpage hosting the image.</param>
+    /// <param name="text">The description of the image result.</param>
+    /// <param name="accentColor">The accent color of this result.</param>
     public BingReverseImageSearchResult(string url, string? friendlyDomainName, string sourceUrl, string text, Color accentColor)
     {
         Url = url;
@@ -43,7 +48,4 @@ public class BingReverseImageSearchResult : IBingReverseImageSearchResult
 
     /// <inheritdoc/>
     public override string ToString() => $"{nameof(Text)} = {Text}";
-
-    [ExcludeFromCodeCoverage]
-    private string DebuggerDisplay => ToString();
 }

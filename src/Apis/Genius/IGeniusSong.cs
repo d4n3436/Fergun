@@ -32,7 +32,7 @@ public interface IGeniusSong
     /// - <c>instrumental</c><br/>
     /// - <c>unreleased</c><br/>
     /// - <c>incomplete</c><br/>
-    /// - <c>complete</c><br/>
+    /// - <c>complete</c>
     /// </summary>
     string LyricsState { get; }
 

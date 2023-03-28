@@ -57,7 +57,7 @@ public class BlacklistModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
     }
-    
+
     [SlashCommand("remove", "Removes a user from the blacklist.")]
     public async Task<RuntimeResult> RemoveAsync([Summary(description: "The user to remove.")] IUser user)
     {

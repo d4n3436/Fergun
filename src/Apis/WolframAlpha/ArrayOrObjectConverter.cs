@@ -8,6 +8,7 @@ namespace Fergun.Apis.WolframAlpha;
 /// <summary>
 /// Represents a converter that handles objects that should be lists.
 /// </summary>
+/// <typeparam name="T">The type of the elements in the list.</typeparam>
 public class ArrayOrObjectConverter<T> : JsonConverter<IReadOnlyList<T>>
 {
     /// <inheritdoc />

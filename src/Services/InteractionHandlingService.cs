@@ -44,16 +44,16 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _services = services;
         _testingGuildId = options.Value.TestingGuildId;
         _ownerCommandsGuildId = options.Value.OwnerCommandsGuildId;
-        _interactionService.LocalizationManager = _localizationManager; // Should be set while configuring the services but it's not possible 
+        _interactionService.LocalizationManager = _localizationManager; // Should be set while configuring the services but it's not possible
     }
 
     /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _interactionService.SlashCommandExecuted += SlashCommandExecuted;
-        _interactionService.ContextCommandExecuted += ContextCommandExecuted;
-        _interactionService.AutocompleteHandlerExecuted += AutocompleteHandlerExecuted;
-        _shardedClient.InteractionCreated += InteractionCreated;
+        _interactionService.SlashCommandExecuted += SlashCommandExecutedAsync;
+        _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
+        _interactionService.AutocompleteHandlerExecuted += AutocompleteHandlerExecutedAsync;
+        _shardedClient.InteractionCreated += InteractionCreatedAsync;
 
         _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
         _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
@@ -70,7 +70,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _shardedClient.InteractionCreated -= InteractionCreated;
+        _shardedClient.InteractionCreated -= InteractionCreatedAsync;
         _shardedClient.ShardReady -= ReadyAsync;
 
         return Task.CompletedTask;
@@ -96,7 +96,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
         return Task.CompletedTask;
     }
-    
+
     public async Task ReadyAsync()
     {
         var modules = _interactionService.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule));
@@ -108,7 +108,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             _logger.LogInformation("Registering commands globally");
             await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
-            
+
             if (_ownerCommandsGuildId != 0)
             {
                 _logger.LogInformation("Registering owner commands to guild {GuildId}", _ownerCommandsGuildId);
@@ -148,7 +148,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _disposed = true;
     }
 
-    private Task InteractionCreated(SocketInteraction interaction)
+    private Task InteractionCreatedAsync(SocketInteraction interaction)
     {
         _ = Task.Run(async () =>
         {
@@ -169,22 +169,22 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     {
         await using var scope = _services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
-        
+
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == interaction.User.Id);
-        
+
         switch (user?.BlacklistStatus)
         {
             case BlacklistStatus.Blacklisted when interaction.Type is InteractionType.ApplicationCommand or InteractionType.MessageComponent:
             {
                 _logger.LogInformation("Blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
-                
+
                 var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
                 localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
                 string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
                     ? localizer["Blacklisted"]
                     : localizer["BlacklistedWithReason", user.BlacklistReason];
-                    
+
                 var builder = new EmbedBuilder()
                     .WithDescription($"❌ {description}")
                     .WithColor(Color.Orange);
@@ -193,6 +193,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
                 return;
             }
+
             case BlacklistStatus.ShadowBlacklisted:
                 _logger.LogInformation("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
                 return;
@@ -202,7 +203,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         await _interactionService.ExecuteCommandAsync(context, _services);
     }
 
-    private Task SlashCommandExecuted(SlashCommandInfo slashCommand, IInteractionContext context, IResult result)
+    private Task SlashCommandExecutedAsync(SlashCommandInfo slashCommand, IInteractionContext context, IResult result)
     {
         _ = Task.Run(async () =>
         {
@@ -219,7 +220,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    private Task ContextCommandExecuted(ContextCommandInfo contextCommand, IInteractionContext context, IResult result)
+    private Task ContextCommandExecutedAsync(ContextCommandInfo contextCommand, IInteractionContext context, IResult result)
     {
         _ = Task.Run(async () =>
         {
@@ -232,11 +233,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
                 _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
             }
         });
-        
+
         return Task.CompletedTask;
     }
 
-    private Task AutocompleteHandlerExecuted(IAutocompleteHandler autocompleteCommand, IInteractionContext context, IResult result)
+    private Task AutocompleteHandlerExecutedAsync(IAutocompleteHandler autocompleteCommand, IInteractionContext context, IResult result)
     {
         var interaction = (IAutocompleteInteraction)context.Interaction;
         string subCommands = string.Join(" ", interaction.Data.Options
@@ -274,7 +275,6 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             _logger.LogWarning("Failed to execute Autocomplete handler of command  \"{Name}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
                 name, context.User, context.User.Id, context.Display(), result.ErrorReason);
         }
-        
 
         return Task.CompletedTask;
     }
@@ -285,7 +285,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
         string commandName = command.CommandType == ApplicationCommandType.Slash ? command.ToString()! : command.Name;
         await _cmdStatsSemaphore.WaitAsync();
-        
+
         try
         {
             await using var scope = _services.CreateAsyncScope();
@@ -306,7 +306,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             _cmdStatsSemaphore.Release();
         }
-        
+
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
@@ -314,7 +314,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
             return;
         }
-        
+
         if (result is FergunResult { IsSilent: true })
             return;
 

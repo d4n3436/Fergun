@@ -12,6 +12,27 @@ public class DualLocalizedString : LocalizedString
 {
     private readonly Lazy<string> _lazyEnglishValue;
 
+    private DualLocalizedString(LocalizedString localizedString, string englishValue)
+        : base(localizedString.Name, localizedString.Value, localizedString.ResourceNotFound, localizedString.SearchedLocation)
+    {
+        _lazyEnglishValue = new Lazy<string>(englishValue);
+    }
+
+    private DualLocalizedString(LocalizedString localizedString, IStringLocalizer localizer, string name, object[] arguments)
+        : base(localizedString.Name, localizedString.Value, localizedString.ResourceNotFound, localizedString.SearchedLocation)
+    {
+        _lazyEnglishValue = new Lazy<string>(() =>
+        {
+            Thread.CurrentThread.CurrentUICulture = EnglishCulture;
+            return localizer[name, arguments].Value;
+        }, true);
+    }
+
+    /// <summary>
+    /// Gets the actual string in English.
+    /// </summary>
+    public string EnglishValue => _lazyEnglishValue.Value;
+
     private static CultureInfo EnglishCulture => CultureInfo.GetCultureInfo("en");
 
     /// <inheritdoc cref="Create(IStringLocalizer, CultureInfo, string, object[])"/>
@@ -38,25 +59,4 @@ public class DualLocalizedString : LocalizedString
 
         return new DualLocalizedString(localized, localizer, name, arguments);
     }
-
-    private DualLocalizedString(LocalizedString localizedString, string englishValue) : base(localizedString.Name, localizedString.Value,
-        localizedString.ResourceNotFound, localizedString.SearchedLocation)
-    {
-        _lazyEnglishValue = new Lazy<string>(englishValue);
-    }
-
-    private DualLocalizedString(LocalizedString localizedString, IStringLocalizer localizer, string name, object[] arguments)
-        : base(localizedString.Name, localizedString.Value, localizedString.ResourceNotFound, localizedString.SearchedLocation)
-    {
-        _lazyEnglishValue = new Lazy<string>(() =>
-        {
-            Thread.CurrentThread.CurrentUICulture = EnglishCulture;
-            return localizer[name, arguments].Value;
-        }, true);
-    }
-
-    /// <summary>
-    /// Gets the actual string in English.
-    /// </summary>
-    public string EnglishValue => _lazyEnglishValue.Value;
 }

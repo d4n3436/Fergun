@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Fergun.Services;
 
 /// <summary>
-/// Hosts a logger for <see cref="InteractiveService"/>
+/// Hosts a logger for <see cref="InteractiveService"/>.
 /// </summary>
 public class InteractiveServiceLoggerHost : IHostedService
 {
@@ -30,18 +30,18 @@ public class InteractiveServiceLoggerHost : IHostedService
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _interactive.Log += Log;
+        _interactive.Log += LogAsync;
         return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _interactive.Log -= Log;
+        _interactive.Log -= LogAsync;
         return Task.CompletedTask;
     }
 
-    private Task Log(LogMessage message)
+    private Task LogAsync(LogMessage message)
     {
         _logger.Log(message.Severity.ToLogLevel(), new EventId(0, message.Source), message.Exception, "{ErrorMessage}", message.Message);
         return Task.CompletedTask;

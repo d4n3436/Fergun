@@ -28,7 +28,7 @@ public interface IDictionaryEntry
     IEntryPronunciation? Pronunciation { get; }
 
     /// <summary>
-    /// Gets a read-only list containing blocks for every part of speech. 
+    /// Gets a read-only list containing blocks for every part of speech.
     /// </summary>
     IReadOnlyList<IDictionaryEntryBlock> PartOfSpeechBlocks { get; }
 

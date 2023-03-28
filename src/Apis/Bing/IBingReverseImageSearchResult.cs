@@ -13,7 +13,7 @@ public interface IBingReverseImageSearchResult
     string Url { get; }
 
     /// <summary>
-    /// Gets a friendly domain name.
+    /// Gets the friendly domain name.
     /// </summary>
     string? FriendlyDomainName { get; }
 

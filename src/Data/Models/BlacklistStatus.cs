@@ -9,7 +9,7 @@ public enum BlacklistStatus
     /// The user is not blacklisted.
     /// </summary>
     None,
-    
+
     /// <summary>
     /// The user is blacklisted.
     /// </summary>

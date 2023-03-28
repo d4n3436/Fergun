@@ -43,7 +43,7 @@ public interface IUrbanDictionary
     /// Gets autocomplete results for a term.
     /// </summary>
     /// <param name="term">The term to search.</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains a read-only collection of suggested terms.</returns>
     Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string term, CancellationToken cancellationToken = default);
 

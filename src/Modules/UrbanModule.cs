@@ -106,11 +106,4 @@ public class UrbanModule : InteractionModuleBase
                 .WithColor(Color.Orange); // 0x10151BU 0x1B2936U
         }
     }
-
-    public enum UrbanSearchType
-    {
-        Search,
-        Random,
-        WordsOfTheDay
-    }
 }

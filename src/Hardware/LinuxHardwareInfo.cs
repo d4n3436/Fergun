@@ -14,13 +14,13 @@ namespace Fergun.Hardware;
 [SupportedOSPlatform("linux")]
 public class LinuxHardwareInfo : IHardwareInfo
 {
-    internal LinuxHardwareInfo()
-    {
-    }
-
     private const string CpuInfoPath = "/proc/cpuinfo";
     private const string OsReleasePath = "/etc/os-release";
     private const string MemInfoPath = "/proc/meminfo";
+
+    internal LinuxHardwareInfo()
+    {
+    }
 
     /// <inheritdoc/>
     public string? GetCpuName()
@@ -164,7 +164,7 @@ public class LinuxHardwareInfo : IHardwareInfo
             CreateNoWindow = true
         };
 
-        var process = Process.Start(processInfo);
+        using var process = Process.Start(processInfo);
         if (process is null)
             return false;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Discord;
 using Fergun.Converters;
 using Fergun.Interactive.Pagination;
-using System.ComponentModel;
 
 namespace Fergun;
 
@@ -12,6 +12,9 @@ namespace Fergun;
 /// </summary>
 public class FergunOptions
 {
+    /// <summary>
+    /// Returns the constant "Fergun".
+    /// </summary>
     public const string Fergun = nameof(Fergun);
 
     /// <summary>

@@ -14,6 +14,9 @@ namespace Fergun.Apis.Bing;
 /// </summary>
 public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 {
+    private const string SKey = "ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+
     private static readonly Uri _apiEndpoint = new("https://www.bing.com/images/api/custom/knowledge/");
 
     private static readonly Dictionary<string, string> _imageCategories = new(5)
@@ -25,8 +28,6 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         ["UnknownFormat"] = "Unknown format. Try using JPEG, PNG, or BMP files."
     };
 
-    private const string SKey = "ZbQI4MYyHrlk2E7L-vIV2VLrieGlbMfV8FcK-WCY3ug";
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
@@ -140,6 +141,18 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         return rawItems.Select(item => item.Deserialize<BingReverseImageSearchResult>()!);
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _httpClient.Dispose();
+        _disposed = true;
+    }
+
     private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
     {
         string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"{invokedSkill}\"]}}}}";
@@ -158,18 +171,6 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         request.Headers.Referrer = new Uri($"https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:{url}");
 
         return request;
-    }
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _httpClient.Dispose();
-        _disposed = true;
     }
 
     private void EnsureNotDisposed()

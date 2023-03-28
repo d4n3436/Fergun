@@ -163,6 +163,25 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         _disposed = true;
     }
 
+    internal static void ThrowIfNotSuccessful(in JsonElement body, string? path = null)
+    {
+        var header = body
+            .GetProperty("message")
+            .GetProperty("header");
+
+        var statusCode = (HttpStatusCode)header
+            .GetProperty("status_code")
+            .GetInt32();
+
+        if (statusCode is HttpStatusCode.OK or HttpStatusCode.NotFound) return;
+
+        string? hint = header
+            .GetProperty("hint")
+            .GetString();
+
+        MusixmatchException.Throw(statusCode, path, hint);
+    }
+
     private async Task<JsonDocument> SendRequestAndValidateAsync(string url, CancellationToken cancellationToken = default)
     {
         string userToken = await _state.GetUserTokenAsync().ConfigureAwait(false);
@@ -192,25 +211,6 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
 
         return document;
-    }
-
-    internal static void ThrowIfNotSuccessful(in JsonElement body, string? path = null)
-    {
-        var header = body
-            .GetProperty("message")
-            .GetProperty("header");
-
-        var statusCode = (HttpStatusCode)header
-            .GetProperty("status_code")
-            .GetInt32();
-
-        if (statusCode is HttpStatusCode.OK or HttpStatusCode.NotFound) return;
-
-        string? hint = header
-            .GetProperty("hint")
-            .GetString();
-
-        MusixmatchException.Throw(statusCode, path, hint);
     }
 
     private void EnsureNotDisposed()

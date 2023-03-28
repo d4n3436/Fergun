@@ -7,8 +7,8 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Extensions;
-using Fergun.Interactive.Pagination;
 using Fergun.Interactive;
+using Fergun.Interactive.Pagination;
 using Fergun.Utils;
 using Humanizer;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
@@ -21,16 +21,16 @@ namespace Fergun.Modules;
 [RequireOwner]
 public class OwnerModule : InteractionModuleBase
 {
+    private static readonly Lazy<ScriptOptions> _lazyOptions = new(() => ScriptOptions.Default
+        .AddReferences(typeof(OwnerModule).Assembly)
+        .WithImports("System.Linq", "Discord", "Discord.Rest", "Discord.Interactions",
+            "Fergun", "Fergun.Data", "Fergun.Modules", "Fergun.Extensions", "Microsoft.Extensions.DependencyInjection"));
+
     private readonly IServiceProvider _services;
     private readonly ILogger<OwnerModule> _logger;
     private readonly IFergunLocalizer<OwnerModule> _localizer;
     private readonly InteractiveService _interactive;
     private readonly FergunOptions _fergunOptions;
-
-    private static readonly Lazy<ScriptOptions> _lazyOptions = new(() => ScriptOptions.Default
-            .AddReferences(typeof(OwnerModule).Assembly)
-            .WithImports("System.Linq", "Discord", "Discord.Rest", "Discord.Interactions",
-                "Fergun", "Fergun.Data", "Fergun.Modules", "Fergun.Extensions", "Microsoft.Extensions.DependencyInjection"));
 
     public OwnerModule(IServiceProvider services, ILogger<OwnerModule> logger, IFergunLocalizer<OwnerModule> localizer,
         InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions)

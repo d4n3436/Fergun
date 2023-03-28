@@ -28,7 +28,7 @@ public sealed class BotListService : BackgroundService
     /// Initializes a new instance of the <see cref="BotListService"/> class.
     /// </summary>
     /// <param name="discordClient">The Discord client.</param>
-    /// <param name="httpClientFactoryFactory"></param>
+    /// <param name="httpClientFactoryFactory">The factory of <see cref="HttpClient"/> instances.</param>
     /// <param name="logger">The logger.</param>
     /// <param name="options">The bot list options.</param>
     public BotListService(DiscordShardedClient discordClient, IHttpClientFactory httpClientFactoryFactory, ILogger<BotListService> logger, IOptions<BotListOptions> options)
@@ -38,35 +38,11 @@ public sealed class BotListService : BackgroundService
         _logger = logger;
         _options = options.Value;
     }
-    
-    /// <inheritdoc/>
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        var botLists = _options.Tokens.Where(x => string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).ToArray();
-        foreach (var botList in botLists)
-        {
-            _options.Tokens.Remove(botList);
-        }
-
-        if (_options.Tokens.Count == 0)
-        {
-            _logger.LogInformation("Bot list service started. No bot stats will be updated because no tokens were provided.");
-            return;
-        }
-        
-        _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod}.",
-            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'"));
-
-        using var timer = new PeriodicTimer(_options.UpdatePeriod);
-        while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
-        {
-            await UpdateStatsAsync().ConfigureAwait(false);
-        }
-    }
 
     /// <summary>
     /// Updates the bot list server count.
     /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async ValueTask UpdateStatsAsync()
     {
         int serverCount = _discordClient.Guilds.Count;
@@ -91,6 +67,7 @@ public sealed class BotListService : BackgroundService
     /// <param name="serverCount">The server count.</param>
     /// <param name="shardCount">The shard count.</param>
     /// <param name="token">The API token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task UpdateStatsAsync(BotList botList, int serverCount, int shardCount, string token)
     {
         _logger.LogDebug("Updating {BotList} bot stats...", botList);
@@ -123,6 +100,31 @@ public sealed class BotListService : BackgroundService
                 _logger.LogInformation("Bot stats will not be sent to {BotList} API.", botList);
                 _options.Tokens.Remove(botList);
             }
+        }
+    }
+
+    /// <inheritdoc/>
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var botLists = _options.Tokens.Where(x => string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).ToArray();
+        foreach (var botList in botLists)
+        {
+            _options.Tokens.Remove(botList);
+        }
+
+        if (_options.Tokens.Count == 0)
+        {
+            _logger.LogInformation("Bot list service started. No bot stats will be updated because no tokens were provided.");
+            return;
+        }
+
+        _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod}.",
+            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'"));
+
+        using var timer = new PeriodicTimer(_options.UpdatePeriod);
+        while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
+        {
+            await UpdateStatsAsync().ConfigureAwait(false);
         }
     }
 

@@ -5,6 +5,9 @@
 /// </summary>
 public class StartupOptions
 {
+    /// <summary>
+    /// Returns the constant "Startup".
+    /// </summary>
     public const string Startup = nameof(Startup);
 
     /// <summary>

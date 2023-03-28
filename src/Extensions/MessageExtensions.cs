@@ -23,8 +23,8 @@ public static class MessageExtensions
 
             foreach (var field in embed.Fields)
             {
-                string name = field.Name.Trim().Replace("\u200b", "");
-                string value = field.Value.Trim().Replace("\u200b", "");
+                string name = field.Name.Trim().Replace("\u200b", string.Empty);
+                string value = field.Value.Trim().Replace("\u200b", string.Empty);
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(value))
                 {
                     builder.Append($"{name}: {value}");

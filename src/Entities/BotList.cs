@@ -9,6 +9,7 @@ public enum BotList
     /// Top.gg.
     /// </summary>
     TopGg,
+
     /// <summary>
     /// Discord Bots.
     /// </summary>

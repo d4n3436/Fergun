@@ -140,7 +140,7 @@ public static class DictionaryFormatter
             return htmlText;
 
         var parser = new HtmlParser();
-        var document = parser.ParseDocument(htmlText);
+        using var document = parser.ParseDocument(htmlText);
 
         if (!document.Body!.ChildNodes.Any())
         {
@@ -162,7 +162,6 @@ public static class DictionaryFormatter
                 } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
                 else if (className == "superscript" && content.Length == 1 && content[0] >= '0' && content[0] <= '9')
                 {
-                    
                     builder.Append(SuperscriptDigits[content[0] - '0']);
                 }
                 else if (className == "luna-wud small-caps")
@@ -171,8 +170,7 @@ public static class DictionaryFormatter
                     {
                         for (int i = 0; i < converted.Length; i++)
                         {
-                            char c = state[i] >= 'a' && state[i] <= 'z' ? SmallCapsChars[state[i] - 'a'] : state[i];
-                            converted[i] = c;
+                            converted[i] = state[i] >= 'a' && state[i] <= 'z' ? SmallCapsChars[state[i] - 'a'] : state[i];
                         }
                     }));
                 }

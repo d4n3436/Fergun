@@ -51,5 +51,5 @@ public class WikipediaArticle : IWikipediaArticle
     /// Returns the title and description of this article.
     /// </summary>
     /// <returns>The title and description of this article.</returns>
-    public override string ToString() => $"{Title} {(Description is null ? "" : $"({Description})")}";
+    public override string ToString() => $"{Title} {(Description is null ? string.Empty : $"({Description})")}";
 }

@@ -147,7 +147,7 @@ public class ImageModuleTests
 
     [Theory]
     [MemberData(nameof(GetReverseImageSearchData))]
-    public async Task ReverseAsync_Sends_Paginator(string? url, IAttachment? file, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
+    public async Task ReverseAsync_Sends_Paginator(string? url, IAttachment? file, ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
@@ -164,12 +164,12 @@ public class ImageModuleTests
         _interactionMock.Verify(x => x.FollowupWithFilesAsync(It.IsAny<IEnumerable<FileAttachment>>(), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
             It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
 
-        if (engine == ImageModule.ReverseImageSearchEngine.Bing)
+        if (engine == ReverseImageSearchEngine.Bing)
         {
             _moduleMock.Verify(x => x.BingAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
             Mock.Get(_bingVisualSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<BingSafeSearchLevel>(l => l == (nsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict)), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         }
-        else if (engine == ImageModule.ReverseImageSearchEngine.Yandex)
+        else if (engine == ReverseImageSearchEngine.Yandex)
         {
             _moduleMock.Verify(x => x.YandexAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
             Mock.Get(_yandexImageSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<YandexSearchFilterMode>(l => l == (nsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family)), It.IsAny<CancellationToken>()), Times.Once);
@@ -177,11 +177,11 @@ public class ImageModuleTests
     }
 
     [Theory]
-    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Bing, true, false, "NoResults")]
-    [InlineData("", null, ImageModule.ReverseImageSearchEngine.Yandex, true, true, "NoResults")]
-    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Bing, false, true, "UrlOrAttachmentRequired")]
-    [InlineData(null, null, ImageModule.ReverseImageSearchEngine.Yandex, false, true, "UrlOrAttachmentRequired")]
-    public async Task ReverseAsync_Returns_No_Results(string? url, IAttachment? file, ImageModule.ReverseImageSearchEngine engine, bool multiImages, bool nsfw, string message)
+    [InlineData("", null, ReverseImageSearchEngine.Bing, true, false, "NoResults")]
+    [InlineData("", null, ReverseImageSearchEngine.Yandex, true, true, "NoResults")]
+    [InlineData(null, null, ReverseImageSearchEngine.Bing, false, true, "UrlOrAttachmentRequired")]
+    [InlineData(null, null, ReverseImageSearchEngine.Yandex, false, true, "UrlOrAttachmentRequired")]
+    public async Task ReverseAsync_Returns_No_Results(string? url, IAttachment? file, ReverseImageSearchEngine engine, bool multiImages, bool nsfw, string message)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
@@ -197,13 +197,13 @@ public class ImageModuleTests
     [Fact]
     public async Task ReverseAsync_Throws_Exception_If_Invalid_Engine_Is_Passed()
     {
-        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("", It.IsAny<IAttachment>(), (ImageModule.ReverseImageSearchEngine)2, It.IsAny<bool>()));
+        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("", It.IsAny<IAttachment>(), (ReverseImageSearchEngine)2, It.IsAny<bool>()));
     }
 
     [Theory]
-    [InlineData(ImageModule.ReverseImageSearchEngine.Bing)]
-    [InlineData(ImageModule.ReverseImageSearchEngine.Yandex)]
-    public async Task ReverseAsync_Throws_Exception_If_Invalid_Parameters_Are_Passed(ImageModule.ReverseImageSearchEngine engine)
+    [InlineData(ReverseImageSearchEngine.Bing)]
+    [InlineData(ReverseImageSearchEngine.Yandex)]
+    public async Task ReverseAsync_Throws_Exception_If_Invalid_Parameters_Are_Passed(ReverseImageSearchEngine engine)
     {
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(false);
@@ -223,10 +223,10 @@ public class ImageModuleTests
 
         return new[]
         {
-            new object?[] { "https://example.com/image.png", null, ImageModule.ReverseImageSearchEngine.Bing, false, false },
-            new object?[] { null, attachmentMock.Object, ImageModule.ReverseImageSearchEngine.Bing, true, true },
-            new object?[] { "https://example.com/image.png", null, ImageModule.ReverseImageSearchEngine.Yandex, false, false },
-            new object?[] { null, attachmentMock.Object, ImageModule.ReverseImageSearchEngine.Yandex, true, true }
+            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Bing, false, false },
+            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Bing, true, true },
+            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Yandex, false, false },
+            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true }
         };
     }
 }

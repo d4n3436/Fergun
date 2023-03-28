@@ -53,13 +53,6 @@ public static class Extensions
             });
     }
 
-    private static IAsyncPolicy<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
-    {
-        var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<TResult>();
-        var policy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
-        return Policy.WrapAsync(policy, Policy.TimeoutAsync<TResult>(TimeSpan.FromSeconds(3)));
-    }
-
     public static LogLevel ToLogLevel(this LogSeverity logSeverity)
         => logSeverity switch
         {
@@ -97,5 +90,12 @@ public static class Extensions
         };
         serializer.Serialize(jsonWriter, obj);
         return strWriter.ToString();
+    }
+
+    private static IAsyncPolicy<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
+    {
+        var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<TResult>();
+        var policy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));
+        return Policy.WrapAsync(policy, Policy.TimeoutAsync<TResult>(TimeSpan.FromSeconds(3)));
     }
 }

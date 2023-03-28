@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
-using Microsoft.Extensions.DependencyInjection;
 using Fergun.Apis.WolframAlpha;
+using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
 
@@ -36,7 +36,7 @@ public class WolframAlphaAutocompleteHandler : AutocompleteHandler
             .GetRequiredService<IReadOnlyPolicyRegistry<string>>()
             .Get<IAsyncPolicy<IReadOnlyList<string>>>("WolframPolicy");
 
-        var results = await policy.ExecuteAsync((_, ct) =>  wolframAlphaClient.GetAutocompleteResultsAsync(input, ct), new Context(input), CancellationToken.None);
+        var results = await policy.ExecuteAsync((_, ct) => wolframAlphaClient.GetAutocompleteResultsAsync(input, ct), new Context(input), CancellationToken.None);
 
         var suggestions = results
             .Take(25)

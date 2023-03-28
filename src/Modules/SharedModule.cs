@@ -96,9 +96,9 @@ public class SharedModule
         await interaction.FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
 
         return FergunResult.FromSuccess();
-        
+
         static string DisplayName(ILanguage language)
-            => $"{language.Name}{(language is not Language lang || lang.NativeName == language.Name ? "" : $" ({lang.NativeName})")}";
+            => $"{language.Name}{(language is not Language lang || lang.NativeName == language.Name ? string.Empty : $" ({lang.NativeName})")}";
     }
 
     public async Task<RuntimeResult> GoogleTtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)

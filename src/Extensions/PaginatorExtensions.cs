@@ -33,8 +33,8 @@ public static class PaginatorExtensions
 
         var emotes = options
             .PaginatorEmotes
-            .OrderBy(x => Array.IndexOf(actions, x.Key))
             .Where(x => actions.Contains(x.Key))
+            .OrderBy(x => Array.IndexOf(actions, x.Key))
             .ToDictionary(x => x.Value, x => x.Key);
 
         return builder.WithOptions(emotes);

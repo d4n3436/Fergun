@@ -32,10 +32,6 @@ public class FergunLocalizer<T> : IFergunLocalizer<T>
     public CultureInfo CurrentCulture { get; set; } = CultureInfo.CurrentUICulture;
 
     /// <inheritdoc/>
-    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
-        => _localizer.GetAllStrings(includeParentCultures).Concat(_sharedLocalizer.GetAllStrings(includeParentCultures));
-
-    /// <inheritdoc/>
     public LocalizedString this[string name]
     {
         get
@@ -54,4 +50,8 @@ public class FergunLocalizer<T> : IFergunLocalizer<T>
             return localized.ResourceNotFound ? DualLocalizedString.Create(_sharedLocalizer, CurrentCulture, name, arguments) : localized;
         }
     }
+
+    /// <inheritdoc/>
+    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
+        => _localizer.GetAllStrings(includeParentCultures).Concat(_sharedLocalizer.GetAllStrings(includeParentCultures));
 }

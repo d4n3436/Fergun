@@ -35,6 +35,6 @@ public class WikipediaImage : IWikipediaImage
     /// <summary>
     /// Returns <see cref="Url"/>.
     /// </summary>
-    /// <returns><see cref="Url"/></returns>
+    /// <returns><see cref="Url"/>.</returns>
     public override string ToString() => Url;
 }

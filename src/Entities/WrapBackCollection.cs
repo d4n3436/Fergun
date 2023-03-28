@@ -13,7 +13,7 @@ public class WrapBackCollection<T> : IReadOnlyCollection<T>
     private readonly T[] _items;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WrapBackCollection{T}"/> struct.
+    /// Initializes a new instance of the <see cref="WrapBackCollection{T}"/> class.
     /// </summary>
     /// <param name="items">The items.</param>
     public WrapBackCollection(T[] items)
@@ -50,13 +50,20 @@ public class WrapBackCollection<T> : IReadOnlyCollection<T>
         private int _index;
         private int _increment;
 
-        
         internal WrapBackEnumerator(IReadOnlyList<T> items, int index)
         {
             _items = items;
             _index = index;
             _increment = 0;
         }
+
+        /// <summary>
+        /// Gets the current element.
+        /// </summary>
+        public T Current => _items[_index];
+
+        /// <inheritdoc/>
+        object IEnumerator.Current => Current!;
 
         /// <inheritdoc/>
         public bool MoveNext()
@@ -79,13 +86,5 @@ public class WrapBackCollection<T> : IReadOnlyCollection<T>
         public void Dispose()
         {
         }
-
-        /// <summary>
-        /// Gets the current element.
-        /// </summary>
-        public T Current => _items[_index];
-
-        /// <inheritdoc/>
-        object IEnumerator.Current => Current!;
     }
 }

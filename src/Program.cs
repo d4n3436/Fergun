@@ -1,4 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
 using Discord;
 using Discord.Addons.Hosting;
 using Discord.Interactions;
@@ -31,10 +35,6 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Filters;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using YoutubeExplode.Search;
 
 // The current directory is changed so the SQLite database is stored in the current folder
@@ -116,7 +116,7 @@ var host = Host.CreateDefaultBuilder()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
-        
+
         services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();

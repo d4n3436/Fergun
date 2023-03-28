@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Discord.Interactions;
-using Microsoft.Extensions.Localization;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using Discord.Interactions;
+using Microsoft.Extensions.Localization;
 
 namespace Fergun;
 
@@ -15,11 +15,10 @@ namespace Fergun;
 public sealed class FergunLocalizationManager : ILocalizationManager
 {
     private const string ModulesNamespace = "Fergun.Modules";
-    
     private readonly IStringLocalizerFactory _localizerFactory;
-    private readonly Dictionary<ModuleInfo, Type> _types = new(); 
+    private readonly Dictionary<ModuleInfo, Type> _types = new();
     private readonly Dictionary<string, ModuleInfo> _modules = new(); // TODO: use Options pattern
-    private readonly Dictionary<string, string> _supportedLocales = new() 
+    private readonly Dictionary<string, string> _supportedLocales = new()
     {
         { "es", "es-ES" }
     };
@@ -57,6 +56,28 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     /// <inheritdoc />
     public IDictionary<string, string> GetAllNames(IList<string> key, LocalizationTarget destinationType) => GetValues(key, "name");
 
+    private static bool IsMatch(ReadOnlySpan<char> resourceName, ReadOnlySpan<char> groupName, IList<string> key, ReadOnlySpan<char> identifier)
+    {
+        var enumerator = new SpanSplitEnumerator<char>(resourceName, '.');
+        int i = 0;
+
+        while (enumerator.MoveNext())
+        {
+            if (i == 0 && key.Count > 1 && groupName.SequenceEqual(key[i]))
+                i++;
+
+            if (i > key.Count - 1)
+                return enumerator.IsFinished && enumerator.Current.SequenceEqual(identifier);
+
+            if (!enumerator.Current.SequenceEqual(key[i]))
+                return false;
+
+            i++;
+        }
+
+        return false;
+    }
+
     private IDictionary<string, string> GetValues(IList<string> key, string identifier)
     {
         if (!_modules.TryGetValue(key[0], out var module) || !_types.TryGetValue(module, out var type))
@@ -86,27 +107,5 @@ public sealed class FergunLocalizationManager : ILocalizationManager
         }
 
         return dictionary;
-    }
-
-    private static bool IsMatch(ReadOnlySpan<char> resourceName, ReadOnlySpan<char> groupName, IList<string> key, ReadOnlySpan<char> identifier)
-    {
-        var enumerator = new SpanSplitEnumerator<char>(resourceName, '.');
-        int i = 0;
-
-        while (enumerator.MoveNext())
-        {
-            if (i == 0 && key.Count > 1 && groupName.SequenceEqual(key[i]))
-                i++;
-
-            if (i > key.Count - 1)
-                return enumerator.IsFinished && enumerator.Current.SequenceEqual(identifier);
-
-            if (!enumerator.Current.SequenceEqual(key[i]))
-                return false;
-
-            i++;
-        }
-
-        return false;
     }
 }

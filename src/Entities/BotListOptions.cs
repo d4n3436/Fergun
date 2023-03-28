@@ -8,6 +8,9 @@ namespace Fergun;
 /// </summary>
 public class BotListOptions
 {
+    /// <summary>
+    /// Returns the constant "BotList".
+    /// </summary>
     public const string BotList = nameof(BotList);
 
     /// <summary>

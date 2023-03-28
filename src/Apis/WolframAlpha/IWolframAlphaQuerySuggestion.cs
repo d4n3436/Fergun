@@ -6,7 +6,7 @@
 public interface IWolframAlphaQuerySuggestion
 {
     /// <summary>
-    /// Gets the score. 
+    /// Gets the score.
     /// </summary>
     float Score { get; }
 

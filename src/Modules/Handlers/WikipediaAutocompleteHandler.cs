@@ -9,8 +9,8 @@ using Fergun.Apis.Wikipedia;
 using Fergun.Extensions;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
-using Polly.Registry;
 using Polly;
+using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 

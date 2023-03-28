@@ -11,7 +11,7 @@ namespace Fergun.Modules.Handlers;
 
 public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
 {
-    public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
+    public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
         string? text = (autocompleteInteraction.Data.Current.Value as string)?.Trim();
 
@@ -22,7 +22,7 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
         var task = translator.GetTTSVoicesAsync();
         if (task.IsCompletedSuccessfully)
         {
-            voices = task.GetAwaiter().GetResult();
+            voices = await task;
         }
 
         if (string.IsNullOrEmpty(text))
@@ -32,7 +32,10 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
                 voices = voices
                     .Where(x => x.Locale.StartsWith(userLanguage.ISO6391, StringComparison.OrdinalIgnoreCase));
             }
-            else return Task.FromResult(AutocompletionResult.FromSuccess());
+            else
+            {
+                return AutocompletionResult.FromSuccess();
+            }
         }
         else
         {
@@ -42,11 +45,11 @@ public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
                             x.Gender.StartsWith(text, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(x => x.DisplayName);
         }
-        
+
         var results = voices
             .Take(25)
             .Select(x => new AutocompleteResult($"{x.DisplayName} ({x.Gender}, {x.Locale})", x.ShortName));
 
-        return Task.FromResult(AutocompletionResult.FromSuccess(results));
+        return AutocompletionResult.FromSuccess(results);
     }
 }

@@ -22,7 +22,7 @@ public static class CommandUtils
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
-            WorkingDirectory = isLinux ? "/home" : ""
+            WorkingDirectory = isLinux ? "/home" : string.Empty
         };
 
         using var process = new Process { StartInfo = startInfo };
