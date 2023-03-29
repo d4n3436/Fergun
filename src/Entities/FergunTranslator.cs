@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
@@ -8,11 +7,11 @@ using GTranslate.Translators;
 namespace Fergun;
 
 /// <summary>
-/// Represents an aggregation of translators where the order of the translators can be modified.
+/// Represents an aggregation of translators where the order of the translators can be randomized.
 /// </summary>
 public class FergunTranslator : IFergunTranslator
 {
-    private readonly WrapBackCollection<ITranslator> _translators;
+    private readonly ITranslator[] _translators;
     private readonly AggregateTranslator _innerTranslator;
 
     /// <summary>
@@ -25,13 +24,13 @@ public class FergunTranslator : IFergunTranslator
     public FergunTranslator(GoogleTranslator googleTranslator, GoogleTranslator2 googleTranslator2,
         MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator)
     {
-        _translators = new WrapBackCollection<ITranslator>(new ITranslator[]
+        _translators = new ITranslator[]
         {
             googleTranslator,
             googleTranslator2,
             microsoftTranslator,
             yandexTranslator
-        });
+        };
 
         _innerTranslator = new AggregateTranslator(_translators);
     }
@@ -39,18 +38,7 @@ public class FergunTranslator : IFergunTranslator
     /// <inheritdoc/>
     public string Name => nameof(FergunTranslator);
 
-    /// <inheritdoc/>
-    public void Next()
-    {
-        _translators.Index = _translators.Index == _translators.Count - 1 ? 0 : _translators.Index + 1;
-    }
-
-    /// <inheritdoc/>
-    public void Randomize()
-    {
-        _translators.Items.Shuffle();
-        _translators.Index = Random.Shared.Next(0, _translators.Count);
-    }
+    public void Randomize() => _translators.Shuffle();
 
     /// <inheritdoc />
     public Task<ITranslationResult> TranslateAsync(string text, string toLanguage, string? fromLanguage = null)

@@ -146,8 +146,6 @@ public class UtilityModule : InteractionModuleBase
 
         await Context.Interaction.DeferAsync();
 
-        _translator.Randomize();
-
         var languageChain = new List<ILanguage>(chainCount + 1);
         ILanguage? source = null;
         for (int i = 0; i < chainCount; i++)
@@ -167,6 +165,8 @@ public class UtilityModule : InteractionModuleBase
                 while (languageChain.Contains(target));
             }
 
+            _translator.Randomize();
+
             ITranslationResult result;
             try
             {
@@ -178,10 +178,6 @@ public class UtilityModule : InteractionModuleBase
                 _logger.LogWarning(e, "Error translating text {Text} ({Source} -> {Target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
                 return FergunResult.FromError(e.Message);
             }
-
-            // Switch the translators to avoid spamming them and get more variety
-            _translator.Next();
-
             if (i == 0)
             {
                 source = result.SourceLanguage;
