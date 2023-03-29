@@ -68,11 +68,11 @@ public class FergunLocalizerTests
 
         var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizer, sharedLocalizer);
 
-        Assert.Equal(fergunLocalizer.CurrentCulture, CultureInfo.CurrentUICulture);
+        Assert.Equal(fergunLocalizer.CurrentCulture, FergunLocalizer.DefaultCulture);
 
-        fergunLocalizer.CurrentCulture = CultureInfo.GetCultureInfo("en");
+        fergunLocalizer.CurrentCulture = CultureInfo.GetCultureInfo("es");
 
-        Assert.Equal(fergunLocalizer.CurrentCulture, CultureInfo.GetCultureInfo("en"));
+        Assert.Equal(fergunLocalizer.CurrentCulture, CultureInfo.GetCultureInfo("es"));
     }
 
     [Fact]
