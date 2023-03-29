@@ -246,14 +246,14 @@ public class OtherModule : InteractionModuleBase
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
-        string ramUsage = processRamUsage.Bytes().ToString();
+        string ramUsage = processRamUsage.Bytes().ToString(_localizer.CurrentCulture);
         if (totalRam > 0)
         {
             if (totalRamUsage > 0)
             {
                 string usagePercentage = ((double)processRamUsage / totalRamUsage).ToString("P2", _localizer.CurrentCulture);
                 string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
-                ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes()} ({totalUsagePercentage})";
+                ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes().ToString(_localizer.CurrentCulture)} ({totalUsagePercentage})";
             }
 
             ramUsage += $" / {totalRam.Bytes()}";
