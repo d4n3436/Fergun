@@ -58,7 +58,8 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _interactionService.AddTypeConverter<System.Drawing.Color>(new ColorConverter());
         _interactionService.AddTypeConverter<MicrosoftVoice>(new MicrosoftVoiceConverter());
 
-        var modules = (await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), _services)).ToArray();
+        await using var scope = _services.CreateAsyncScope();
+        var modules = (await _interactionService.AddModulesAsync(Assembly.GetEntryAssembly(), scope.ServiceProvider)).ToArray();
         _localizationManager.AddModules(modules);
 
         _logger.LogDebug("Added {Modules} command modules ({Commands} commands)", modules.Length,
