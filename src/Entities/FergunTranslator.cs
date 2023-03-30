@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
@@ -11,34 +14,24 @@ namespace Fergun;
 /// </summary>
 public class FergunTranslator : IFergunTranslator
 {
-    private readonly ITranslator[] _translators;
+    internal readonly ITranslator[] _translators;
     private readonly AggregateTranslator _innerTranslator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FergunTranslator"/> class.
     /// </summary>
-    /// <param name="googleTranslator">The Google Translator.</param>
-    /// <param name="googleTranslator2">The new Google Translator.</param>
-    /// <param name="microsoftTranslator">The Microsoft translator.</param>
-    /// <param name="yandexTranslator">The Yandex Translator.</param>
-    public FergunTranslator(GoogleTranslator googleTranslator, GoogleTranslator2 googleTranslator2,
-        MicrosoftTranslator microsoftTranslator, YandexTranslator yandexTranslator)
+    /// <param name="translators">The translators.</param>
+    public FergunTranslator(IEnumerable<ITranslator> translators)
     {
-        _translators = new ITranslator[]
-        {
-            googleTranslator,
-            googleTranslator2,
-            microsoftTranslator,
-            yandexTranslator
-        };
-
+        _translators = translators.ToArray();
         _innerTranslator = new AggregateTranslator(_translators);
     }
 
     /// <inheritdoc/>
     public string Name => nameof(FergunTranslator);
 
-    public void Randomize() => _translators.Shuffle();
+    /// <inheritdoc/>
+    public void Randomize(Random? rng = null) => _translators.Shuffle(rng);
 
     /// <inheritdoc />
     public Task<ITranslationResult> TranslateAsync(string text, string toLanguage, string? fromLanguage = null)

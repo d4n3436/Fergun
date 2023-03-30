@@ -143,25 +143,28 @@ var host = Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<GoogleTranslator>()
+        services.AddHttpClient<ITranslator, GoogleTranslator>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
+        services.AddHttpClient<ITranslator, GoogleTranslator2>()
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        // Registered twice so the one added as "itself" can be used in SharedModule
         services.AddHttpClient<GoogleTranslator2>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<YandexTranslator>()
+        services.AddHttpClient<ITranslator, YandexTranslator>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        // We have to register the named client and service separately because Microsoft Translator isn't stateless,
-        // It stores a token required to make API calls that is obtained once and updated occasionally, since AddHttpClient<TClient>
-        // adds the services with a transient scope, this means that the token would be obtained every time the services are used.
-        services.AddHttpClient(nameof(MicrosoftTranslator))
+        services.AddHttpClient<ITranslator, MicrosoftTranslator>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
+        // Singleton used in TtsModule and MicrosoftVoiceConverter
         services.AddSingleton(s => new MicrosoftTranslator(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(MicrosoftTranslator))));
 
         services.AddHttpClient<SearchClient>()
