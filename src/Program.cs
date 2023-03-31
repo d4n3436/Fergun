@@ -197,6 +197,7 @@ var host = Host.CreateDefaultBuilder()
         services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
         services.AddTransient<SharedModule>();
     })
+    .UseFergunRequestLogging()
     .Build();
 
 // Semi-automatic migration
