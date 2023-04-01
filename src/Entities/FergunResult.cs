@@ -4,7 +4,10 @@ using Microsoft.Extensions.Localization;
 
 namespace Fergun;
 
-public class FergunResult : RuntimeResult
+/// <summary>
+/// Represents the default implementation of <see cref="IFergunResult"/> for commands.
+/// </summary>
+public class FergunResult : RuntimeResult, IFergunResult
 {
     private FergunResult(InteractionCommandError? error, string reason, bool isEphemeral, bool isSilent, IDiscordInteraction? interaction)
         : base(error, reason)

@@ -341,13 +341,13 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             return;
         }
 
-        if (result is FergunResult { IsSilent: true })
+        if (result is IFergunResult { IsSilent: true })
             return;
 
         string message = result.ErrorReason;
-        string? englishMessage = ((result as FergunResult)?.LocalizedErrorReason as DualLocalizedString)?.EnglishValue;
-        bool ephemeral = (result as FergunResult)?.IsEphemeral ?? true;
-        var interaction = (result as FergunResult)?.Interaction ?? context.Interaction;
+        string? englishMessage = ((result as IFergunResult)?.LocalizedErrorReason as DualLocalizedString)?.EnglishValue;
+        bool ephemeral = (result as IFergunResult)?.IsEphemeral ?? true;
+        var interaction = (result as IFergunResult)?.Interaction ?? context.Interaction;
 
         if (result.Error == InteractionCommandError.Exception)
         {

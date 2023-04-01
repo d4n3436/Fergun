@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
-using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
@@ -56,11 +55,13 @@ public class RatelimitAttribute : PreconditionAttribute
 
         if (ratelimit.UsageCount >= _times && timePassed <= _period)
         {
-            var timeLeft = _period - timePassed;
             var localizer = services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
 
-            return PreconditionResult.FromError(localizer["Ratelimited", timeLeft.Humanize(culture: localizer.CurrentCulture)]);
+            double secondsLeft = (_period - timePassed).TotalSeconds;
+            secondsLeft = secondsLeft < 1 ? Math.Round(secondsLeft, 2) : Math.Floor(secondsLeft);
+
+            return FergunPreconditionResult.FromError(localizer["Ratelimited", secondsLeft], true);
         }
 
         if (timePassed > _period)
@@ -70,7 +71,7 @@ public class RatelimitAttribute : PreconditionAttribute
 
         ratelimit.UsageCount++;
 
-        return PreconditionResult.FromSuccess();
+        return FergunPreconditionResult.FromSuccess();
     }
 
     private sealed class RatelimitInfo

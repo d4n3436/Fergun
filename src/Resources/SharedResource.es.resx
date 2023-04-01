@@ -193,7 +193,7 @@
     <value>Página {0} de {1}</value>
   </data>
   <data name="Ratelimited" xml:space="preserve">
-    <value>Espera {0} antes de volver a usar este comando!</value>
+    <value>Espera {0} segundos antes de volver a usar este comando!</value>
   </data>
   <data name="Result" xml:space="preserve">
     <value>Resultado</value>
