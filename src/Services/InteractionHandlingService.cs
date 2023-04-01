@@ -239,8 +239,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    private Task ComponentCommandExecutedAsync(ComponentCommandInfo componentCommand, IInteractionContext context, IResult result)
+    private Task ComponentCommandExecutedAsync(ComponentCommandInfo? componentCommand, IInteractionContext context, IResult result)
     {
+        if (componentCommand is null)
+            return Task.CompletedTask;
+
         _ = Task.Run(async () =>
         {
             try
