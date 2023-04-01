@@ -192,9 +192,9 @@ var host = Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
         services.AddTransient<IFergunTranslator, FergunTranslator>();
-        services.AddSingleton(x => new GoogleScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
-        services.AddSingleton(x => new DuckDuckGoScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
-        services.AddSingleton(x => new BraveScraper(x.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
+        services.AddTransient(s => new GoogleScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
+        services.AddTransient(s => new DuckDuckGoScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
+        services.AddTransient(s => new BraveScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
         services.AddTransient<SharedModule>();
     })
     .UseFergunRequestLogging()
