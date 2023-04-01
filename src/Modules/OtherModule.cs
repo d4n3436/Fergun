@@ -16,6 +16,7 @@ using Fergun.Hardware;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
+using Fergun.Preconditions;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,7 @@ using Polly.RateLimit;
 
 namespace Fergun.Modules;
 
+[Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class OtherModule : InteractionModuleBase
 {
     private static readonly Uri _inspiroBotUri = new("https://inspirobot.me/api?generate=true");
@@ -129,6 +131,7 @@ public class OtherModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
     public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {

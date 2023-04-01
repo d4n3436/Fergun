@@ -11,6 +11,7 @@ using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
+using Fergun.Preconditions;
 using GScraper;
 using GScraper.Brave;
 using GScraper.DuckDuckGo;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("img", "Image search commands.")]
 public class ImageModule : InteractionModuleBase
 {

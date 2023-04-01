@@ -9,12 +9,13 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
-using Fergun.Interactive.Selection;
+using Fergun.Preconditions;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[Ratelimit(2, 20)]
 [Group("ocr", "OCR commands.")]
 public class OcrModule : InteractionModuleBase
 {
@@ -173,6 +174,7 @@ public class OcrModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    // Note: Components interactions share the same ratelimit, probably a bug
     [ComponentInteraction("ocrtranslate", true)]
     public async Task<RuntimeResult> OcrTranslateAsync()
     {

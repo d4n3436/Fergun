@@ -192,6 +192,9 @@
   <data name="PaginatorFooter" xml:space="preserve">
     <value>Page {0} of {1}</value>
   </data>
+  <data name="Ratelimited" xml:space="preserve">
+    <value>This command is on cooldown! Try again in {0}.</value>
+  </data>
   <data name="Result" xml:space="preserve">
     <value>Result</value>
   </data>

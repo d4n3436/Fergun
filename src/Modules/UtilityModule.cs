@@ -16,6 +16,7 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
+using Fergun.Preconditions;
 using GTranslate;
 using GTranslate.Results;
 using Humanizer;
@@ -32,6 +33,7 @@ using Color = Discord.Color;
 
 namespace Fergun.Modules;
 
+[Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class UtilityModule : InteractionModuleBase
 {
     private static readonly DrawingOptions _cachedDrawingOptions = new();
@@ -126,10 +128,12 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [MessageCommand("Bad Translator")]
     public async Task<RuntimeResult> BadTranslatorAsync(IMessage message)
         => await BadTranslatorAsync(message.GetText());
 
+    [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("bad-translator", "Passes a text through multiple, different translators.")]
     public async Task<RuntimeResult> BadTranslatorAsync([Summary(description: "The text to use.")] string text,
         [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
@@ -205,6 +209,7 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("color", "Displays a color.")]
     public async Task<RuntimeResult> ColorAsync([Summary(description: "A color name, hex string or raw value. Leave empty to get a random color.")]
         System.Drawing.Color color = default)
@@ -234,6 +239,7 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("define", "Gets the definitions of a word from Dictionary.com (only English).")]
     public async Task<RuntimeResult> DefineAsync(
         [Autocomplete(typeof(DictionaryAutocompleteHandler))] [Summary(description: "The word to get its defintions.")] string word)
@@ -455,6 +461,7 @@ public class UtilityModule : InteractionModuleBase
             => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
     public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(name: "query", description: "The search query.")] int id)
     {
@@ -492,6 +499,7 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("wolfram", "Asks Wolfram|Alpha about something.")]
     public async Task<RuntimeResult> WolframAlphaAsync([Autocomplete(typeof(WolframAlphaAutocompleteHandler))] [Summary(description: "Something to calculate or know about.")] string input)
     {

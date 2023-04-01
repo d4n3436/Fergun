@@ -2,6 +2,10 @@
 
 public static class Constants
 {
+    public const double GlobalRatelimitPeriod = 10; // Seconds
+
+    public const int GlobalCommandUsesPerPeriod = 3;
+
     public const string GoogleLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890326437268168704/unknown.png";
 
     public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";

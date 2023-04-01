@@ -52,6 +52,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     {
         _interactionService.SlashCommandExecuted += SlashCommandExecutedAsync;
         _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
+        _interactionService.ComponentCommandExecuted += ComponentCommandExecutedAsync;
         _interactionService.AutocompleteHandlerExecuted += AutocompleteHandlerExecutedAsync;
         _shardedClient.InteractionCreated += InteractionCreatedAsync;
 
@@ -210,7 +211,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             try
             {
-                await HandleCommandExecutedAsync(slashCommand, context, result);
+                await HandleCommandExecutedAsync(slashCommand.ToString(), slashCommand.CommandType, context, result);
             }
             catch (Exception e)
             {
@@ -227,7 +228,24 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             try
             {
-                await HandleCommandExecutedAsync(contextCommand, context, result);
+                await HandleCommandExecutedAsync(contextCommand.Name, contextCommand.CommandType, context, result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task ComponentCommandExecutedAsync(ComponentCommandInfo componentCommand, IInteractionContext context, IResult result)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleCommandExecutedAsync(componentCommand.Name, null, context, result);
             }
             catch (Exception e)
             {
@@ -280,38 +298,42 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    private async Task HandleCommandExecutedAsync(IApplicationCommandInfo command, IInteractionContext context, IResult result)
+    private async Task HandleCommandExecutedAsync(string commandName, ApplicationCommandType? type, IInteractionContext context, IResult result)
     {
         EnsureNotDisposed();
 
-        string commandName = command.CommandType == ApplicationCommandType.Slash ? command.ToString()! : command.Name;
-        await _cmdStatsSemaphore.WaitAsync();
-
-        try
+        if (type is not null)
         {
-            await using var scope = _services.CreateAsyncScope();
-            var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
-            var dbCommand = await db.CommandStats.FirstOrDefaultAsync(x => x.Name == commandName);
+            await _cmdStatsSemaphore.WaitAsync();
 
-            if (dbCommand is null)
+            try
             {
-                dbCommand = new Command { Name = commandName };
-                await db.AddAsync(dbCommand);
+                await using var scope = _services.CreateAsyncScope();
+                var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
+                var dbCommand = await db.CommandStats.FirstOrDefaultAsync(x => x.Name == commandName);
+
+                if (dbCommand is null)
+                {
+                    dbCommand = new Command { Name = commandName };
+                    await db.AddAsync(dbCommand);
+                }
+
+                dbCommand.UsageCount++;
+
+                await db.SaveChangesAsync();
             }
-
-            dbCommand.UsageCount++;
-
-            await db.SaveChangesAsync();
+            finally
+            {
+                _cmdStatsSemaphore.Release();
+            }
         }
-        finally
-        {
-            _cmdStatsSemaphore.Release();
-        }
+        
+        string commandType = type?.ToString() ?? "Component";
 
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
-                command.CommandType, commandName, context.User, context.User.Id, context.Display());
+                commandType, commandName, context.User, context.User.Id, context.Display());
 
             return;
         }
@@ -329,7 +351,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             var exception = ((ExecuteResult)result).Exception;
 
             _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception.",
-                command.CommandType, commandName, context.User, context.User.Id, context.Display());
+                commandType, commandName, context.User, context.User.Id, context.Display());
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
@@ -338,12 +360,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         else if (result.Error == InteractionCommandError.Unsuccessful)
         {
             _logger.LogInformation("Unsuccessful execution of {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                command.CommandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
+                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                command.CommandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
+                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
 
         var embed = new EmbedBuilder()

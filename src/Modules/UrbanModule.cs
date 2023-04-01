@@ -9,11 +9,13 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
+using Fergun.Preconditions;
 using Humanizer;
 using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 [Group("urban", "Urban Dictionary commands")]
 public class UrbanModule : InteractionModuleBase
 {

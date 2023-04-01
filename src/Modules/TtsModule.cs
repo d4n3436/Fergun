@@ -4,12 +4,14 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 using Fergun.Modules.Handlers;
+using Fergun.Preconditions;
 using GTranslate;
 using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("tts", "TTS commands.")]
 public class TtsModule : InteractionModuleBase
 {
