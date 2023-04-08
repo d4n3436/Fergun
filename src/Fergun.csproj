@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Discord.Addons.Hosting" Version="5.2.0" />
     <PackageReference Include="Discord.Net.Interactions" Version="3.9.0" />
-    <PackageReference Include="Fergun.Interactive" Version="1.6.0" />
+    <PackageReference Include="Fergun.Interactive" Version="1.7.1" />
     <PackageReference Include="GScraper" Version="1.1.0" />
     <PackageReference Include="GTranslate" Version="2.1.6" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />

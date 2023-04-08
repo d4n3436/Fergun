@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -65,26 +65,18 @@ public class DictionaryPaginator : BaseLazyPaginator
 
         builder ??= new ComponentBuilder();
 
-        int row = 0;
-        foreach (var pair in Emotes)
+        for (int i = 0; i < ButtonFactories.Count; i++)
         {
-            if (pair.Value == PaginatorAction.Jump && _extraInformation[CurrentPageIndex] is null)
-            {
-                continue;
-            }
+            var context = new ButtonContext(i, CurrentPageIndex, MaxPageIndex, disableAll);
+            var properties = ButtonFactories[i].Invoke(context);
 
-            /*
-            if (pair.Value is PaginatorAction.Backward or PaginatorAction.Forward && MaxCategoryIndex == 0)
-            {
+            if (properties is null || properties.IsHidden)
                 continue;
-            }
 
-            if (pair.Value is PaginatorAction.SkipToStart or PaginatorAction.SkipToEnd && MaxPageIndex == 0)
-            {
+            if (properties.Action == PaginatorAction.Jump && _extraInformation[CurrentPageIndex] is null)
                 continue;
-            }
-            */
-            bool isDisabled = disableAll || pair.Value switch
+
+            bool isDisabled = disableAll || properties.Action switch
             {
                 PaginatorAction.SkipToStart => _isDisplayingExtraInfo || CurrentPageIndex == 0,
                 PaginatorAction.Backward => _isDisplayingExtraInfo || CurrentCategoryIndex == 0,
@@ -93,24 +85,23 @@ public class DictionaryPaginator : BaseLazyPaginator
                 _ => false
             };
 
-            var style = pair.Value switch
+            var style = properties.Action switch
             {
                 PaginatorAction.Exit => ButtonStyle.Danger,
                 PaginatorAction.Jump => ButtonStyle.Secondary,
                 _ => ButtonStyle.Primary
             };
 
-            string? label = pair.Value == PaginatorAction.Jump && _isDisplayingExtraInfo ? "Go back" : _actions[pair.Value];
+            string? label = properties.Action == PaginatorAction.Jump && _isDisplayingExtraInfo ? "Go back" : _actions[properties.Action];
 
             var button = new ButtonBuilder()
-                .WithCustomId(pair.Key.ToString())
+                .WithCustomId($"{i}_{(int)properties.Action}")
                 .WithStyle(style)
-                .WithEmote(pair.Key)
+                .WithEmote(properties.Emote)
                 .WithLabel(label)
                 .WithDisabled(isDisabled);
 
-            builder.WithButton(button, row / 2);
-            row++;
+            builder.WithButton(button, i / 2);
         }
 
         return builder;
@@ -155,14 +146,8 @@ public class DictionaryPaginator : BaseLazyPaginator
             return InteractiveInputStatus.Ignored;
         }
 
-        var emote = (input
-                .Message
-                .Components
-                .SelectMany(x => x.Components)
-                .FirstOrDefault(x => x is ButtonComponent button && button.CustomId == input.Data.CustomId) as ButtonComponent)?
-            .Emote;
-
-        if (emote is null || !Emotes.TryGetValue(emote, out var action))
+        var action = (PaginatorAction)(input.Data.CustomId?[^1] - '0' ?? -1);
+        if (!Enum.IsDefined(typeof(PaginatorAction), action))
         {
             return InteractiveInputStatus.Ignored;
         }
