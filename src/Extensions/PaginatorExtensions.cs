@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Discord;
 using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 
@@ -31,13 +32,13 @@ public static class PaginatorExtensions
     {
         actions ??= _defaultActions;
 
-        var emotes = options
+        var buttons = options
             .PaginatorEmotes
             .Where(x => actions.Contains(x.Key))
             .OrderBy(x => Array.IndexOf(actions, x.Key))
-            .ToDictionary(x => x.Value, x => x.Key);
+            .Select(x => new PaginatorButton(x.Value, x.Key, x.Key == PaginatorAction.Exit ? ButtonStyle.Danger : ButtonStyle.Secondary));
 
-        return builder.WithOptions(emotes);
+        return builder.WithOptions(buttons);
     }
 
     /// <summary>
