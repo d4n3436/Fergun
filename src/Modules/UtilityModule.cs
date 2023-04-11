@@ -393,10 +393,12 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [MessageCommand("Translate Text")]
     public async Task<RuntimeResult> TranslateAsync(IMessage message)
         => await TranslateAsync(message.GetText(), Context.Interaction.GetLanguageCode());
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("translate", "Translates a text.")]
     public async Task<RuntimeResult> TranslateAsync([Summary(description: "The text to translate.")] string text,
         [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
@@ -622,6 +624,7 @@ public class UtilityModule : InteractionModuleBase
         }
     }
 
+    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
     public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The search query.")] string query)
     {

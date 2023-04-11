@@ -131,7 +131,7 @@ public class OtherModule : InteractionModuleBase
         return FergunResult.FromSuccess();
     }
 
-    [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
+    [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
     public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {

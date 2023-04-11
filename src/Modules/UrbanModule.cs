@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
-[Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
+[Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("urban", "Urban Dictionary commands")]
 public class UrbanModule : InteractionModuleBase
 {
