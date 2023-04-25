@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -17,6 +18,7 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
         IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)
     {
         var localizer = services.GetRequiredService<IFergunLocalizer<SharedModule>>();
+        localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
 
         string text = (autocompleteInteraction.Data.Current.Value as string)?.Trim() ?? string.Empty;
 
