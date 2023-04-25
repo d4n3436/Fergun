@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Discord;
 using Fergun.Converters;
 using Fergun.Interactive.Pagination;
@@ -20,7 +21,20 @@ public class FergunOptions
     /// <summary>
     /// Gets the support server URL.
     /// </summary>
-    public Uri? SupportServerUrl { get; init; }
+    [Url]
+    public string? SupportServerUrl { get; init; }
+
+    /// <summary>
+    /// Gets the voting page URL.
+    /// </summary>
+    [Url]
+    public string? VoteUrl { get; init; }
+
+    /// <summary>
+    /// Gets the donation page URL.
+    /// </summary>
+    [Url]
+    public string? DonationUrl { get; init; }
 
     /// <summary>
     /// Gets the default paginator timeout.

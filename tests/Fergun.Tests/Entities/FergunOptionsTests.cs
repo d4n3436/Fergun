@@ -14,6 +14,8 @@ public class FergunOptionsTests
         var other = new FergunOptions
         {
             SupportServerUrl = options.SupportServerUrl,
+            VoteUrl = options.VoteUrl,
+            DonationUrl = options.DonationUrl,
             PaginatorTimeout = options.PaginatorTimeout,
             SelectionTimeout = options.SelectionTimeout,
             PaginatorEmotes = options.PaginatorEmotes,
@@ -21,6 +23,8 @@ public class FergunOptionsTests
         };
 
         Assert.Equal(options.SupportServerUrl, other.SupportServerUrl);
+        Assert.Equal(options.VoteUrl, other.VoteUrl);
+        Assert.Equal(options.DonationUrl, other.DonationUrl);
         Assert.Equal(options.PaginatorTimeout, other.PaginatorTimeout);
         Assert.Equal(options.SelectionTimeout, other.SelectionTimeout);
         Assert.True(options.PaginatorEmotes.SequenceEqual(other.PaginatorEmotes));

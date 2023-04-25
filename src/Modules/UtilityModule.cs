@@ -9,12 +9,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
+using Discord.Rest;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
 using GTranslate;
@@ -36,6 +38,7 @@ namespace Fergun.Modules;
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class UtilityModule : InteractionModuleBase
 {
+    private static IReadOnlyCollection<RestApplicationCommand>? _cachedComands;
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
@@ -45,8 +48,10 @@ public class UtilityModule : InteractionModuleBase
 
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
+    private readonly StartupOptions _startupOptions;
     private readonly FergunOptions _fergunOptions;
     private readonly SharedModule _shared;
+    private readonly InteractionService _commands;
     private readonly InteractiveService _interactive;
     private readonly IFergunTranslator _translator;
     private readonly IDictionaryClient _dictionary;
@@ -54,14 +59,16 @@ public class UtilityModule : InteractionModuleBase
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        SharedModule shared, InteractiveService interactive, IDictionaryClient dictionary, IFergunTranslator translator,
-        SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptions<StartupOptions> startupOptions,
+        IOptionsSnapshot<FergunOptions> fergunOptions, SharedModule shared, InteractionService commands, InteractiveService interactive,
+        IDictionaryClient dictionary, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
     {
         _logger = logger;
         _localizer = localizer;
+        _startupOptions = startupOptions.Value;
         _fergunOptions = fergunOptions.Value;
         _shared = shared;
+        _commands = commands;
         _interactive = interactive;
         _dictionary = dictionary;
         _translator = translator;
@@ -337,28 +344,121 @@ public class UtilityModule : InteractionModuleBase
         PageBuilder GeneratePage(int entryIndex) => pages[entryIndex][paginator!.CurrentCategoryIndex];
     }
 
-    [SlashCommand("help", "Information about Fergun 2.")]
+    [SlashCommand("help", "Information about Fergun.")]
     public async Task<RuntimeResult> HelpAsync()
     {
-        MessageComponent? components = null;
-        string description = _localizer["Fergun2Info", "https://github.com/d4n3436/Fergun/wiki/Command-removal-notice"];
-        var url = _fergunOptions.SupportServerUrl;
+        var responseType = InteractionResponseType.ChannelMessageWithSource;
 
-        if (url is not null && (url.Scheme == Uri.UriSchemeHttp || url.Scheme == Uri.UriSchemeHttps))
+        if (_cachedComands is null)
         {
-            description += $"\n\n{_localizer["Fergun2SupportInfo"]}";
-            components = new ComponentBuilder()
-                .WithButton(_localizer["SupportServer"], style: ButtonStyle.Link, url: url.AbsoluteUri)
-                .Build();
+            responseType = InteractionResponseType.DeferredChannelMessageWithSource;
+            await Context.Interaction.DeferAsync();
         }
 
-        var embed = new EmbedBuilder()
-            .WithTitle("Fergun 2")
-            .WithDescription(description)
-            .WithColor(Color.Orange)
-            .Build();
+        if (_startupOptions.TestingGuildId == 0)
+        {
+            _cachedComands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGlobalApplicationCommands(true);
+        }
+        else
+        {
+            _cachedComands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGuildApplicationCommands(_startupOptions.TestingGuildId, true);
+        }
 
-        await Context.Interaction.RespondAsync(embed: embed, components: components);
+        string description = _localizer["Fergun2Info"];
+
+        var links = new List<string>();
+
+        if (_fergunOptions.SupportServerUrl is not null)
+        {
+            links.Add(Format.Url(_localizer["Support"], _fergunOptions.SupportServerUrl));
+            description += $"\n\n{_localizer["Fergun2SupportInfo"]}";
+        }
+
+        description += $"\n\n{_localizer["CategorySelection"]}";
+
+        if (_fergunOptions.VoteUrl is not null)
+        {
+            links.Add(Format.Url(_localizer["Vote"], _fergunOptions.VoteUrl));
+        }
+
+        if (_fergunOptions.DonationUrl is not null)
+        {
+            links.Add(Format.Url(_localizer["Donate"], _fergunOptions.DonationUrl));
+        }
+
+        string joinedLinks = string.Join(" | ", links);
+
+        var page = new PageBuilder()
+            .WithTitle(_localizer["FergunHelp"])
+            .WithDescription(description)
+            .AddField(_localizer["Links"], joinedLinks)
+            .WithColor(Color.Orange);
+
+        var categories = new List<ModuleOption>(6)
+        {
+            new(new Emoji("🛠️"), _localizer[nameof(UtilityModule)], _localizer[$"{nameof(UtilityModule)}Description"]),
+            new(new Emoji("🔍"), _localizer[nameof(ImageModule)], _localizer[$"{nameof(ImageModule)}Description"]),
+            new(new Emoji("📄"), _localizer[nameof(OcrModule)], _localizer[$"{nameof(OcrModule)}Description"]),
+            new(new Emoji("🔊"), _localizer[nameof(TtsModule)], _localizer[$"{nameof(TtsModule)}Description"]),
+            new(new Emoji("📖"), _localizer[nameof(UrbanModule)], _localizer[$"{nameof(UrbanModule)}Description"]),
+            new(new Emoji("💡"), _localizer[nameof(OtherModule)], _localizer[$"{nameof(OtherModule)}Description"])
+        };
+
+        var modules = _commands.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule))
+            .ToDictionary(x => x.Name, x => x);
+
+        InteractiveMessageResult<ModuleOption?>? result = null;
+        var interaction = Context.Interaction;
+
+        _logger.LogInformation("Displaying help menu to user {User} ({Id})", Context.User, Context.User.Id);
+
+        while (result is null || result.Status == InteractiveStatus.Success)
+        {
+            var selection = new SelectionBuilder<ModuleOption>()
+                .AddUser(Context.User)
+                .WithOptions(categories)
+                .WithEmoteConverter(x => x.Emote)
+                .WithStringConverter(x => x.Name)
+                .WithInputType(InputType.SelectMenus)
+                .WithSelectionPage(page)
+                .WithActionOnTimeout(ActionOnStop.DisableInput)
+                .Build();
+
+            result = await _interactive.SendSelectionAsync(selection, interaction, _fergunOptions.SelectionTimeout, responseType);
+
+            if (!result.IsSuccess) break;
+
+            responseType = InteractionResponseType.UpdateMessage;
+            interaction = result.StopInteraction!;
+            var module = modules[result.Value.Name.Name];
+            IEnumerable<string> commandDescriptions;
+
+            string locale = Context.Interaction.UserLocale;
+            if (module.IsSlashGroup)
+            {
+                var group = _cachedComands
+                    .First(globalCommand => module.SlashGroupName == globalCommand.Name);
+
+                // Slash command mentions can't be localized
+                commandDescriptions = group.Options
+                    .OrderBy(x => x.NameLocalized ?? x.Name)
+                    .Select(x => $"</{group.Name} {x.Name}:{group.Id}> - {x.DescriptionLocalizations.GetValueOrDefault(locale, x.Description)}");
+            }
+            else
+            {
+                commandDescriptions = _cachedComands
+                    .Where(globalCommand => module.SlashCommands.Any(slashCommand => globalCommand.Name == slashCommand.Name))
+                    .OrderBy(x => x.NameLocalized ?? x.Name)
+                    .Select(x => $"</{x.Name}:{x.Id}> - {x.DescriptionLocalizations.GetValueOrDefault(locale, x.Description)}");
+            }
+
+            page = new PageBuilder()
+                .WithTitle($"{result.Value.Emote} {_localizer[result.Value.Name]}")
+                .WithDescription(_localizer[result.Value.Description])
+                .AddField(_localizer["Commands"], string.Join('\n', commandDescriptions))
+                .AddField(_localizer["Links"], joinedLinks)
+                .WithColor(Color.Orange);
+        }
 
         return FergunResult.FromSuccess();
     }

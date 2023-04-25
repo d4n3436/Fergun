@@ -126,8 +126,14 @@
   <data name="BoostingSince" xml:space="preserve">
     <value>Boosting Since</value>
   </data>
+  <data name="CategorySelection" xml:space="preserve">
+    <value>Select a category to get information about its commands.</value>
+  </data>
   <data name="ChainCountMustBeInRange" xml:space="preserve">
     <value>The chain count must be between {0} and {1} (inclusive).</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Commands</value>
   </data>
   <data name="CreatedAt" xml:space="preserve">
     <value>Created At</value>
@@ -135,19 +141,17 @@
   <data name="Default" xml:space="preserve">
     <value>Default</value>
   </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donate</value>
+  </data>
   <data name="Fergun2Info" xml:space="preserve">
-    <value>Welcome to **Fergun** 2, a complete rewrite of Fergun 1 that uses slash commands.
-Fergun 2 is currently in open beta. The most used commands have been rewritten to use slash commands and more commands will be added soon.
-
-The following modules and commands won't be migrated to Fergun 2 due to various reasons:
-- **AI Dungeon** module
-- **Music** module
-- **Snipe** commands
-
-You can find more info about the removals of these modules/commands [here]({0}).</value>
+    <value>Fergun is an utility bot with lots of useful and powerful commands like translation, image search, reverse image search, OCR, TTS and more.</value>
   </data>
   <data name="Fergun2SupportInfo" xml:space="preserve">
-    <value>If you have any questions about the rewrite or have any suggestions, feel free to join the support server.</value>
+    <value>If you have any questions about the bot or have any suggestions, feel free to join the support server.</value>
+  </data>
+  <data name="FergunHelp" xml:space="preserve">
+    <value>Fergun Help</value>
   </data>
   <data name="Global" xml:space="preserve">
     <value>Global</value>
@@ -155,11 +159,20 @@ You can find more info about the removals of these modules/commands [here]({0}).
   <data name="ID" xml:space="preserve">
     <value>ID</value>
   </data>
+  <data name="ImageModule" xml:space="preserve">
+    <value>Image Search commands</value>
+  </data>
+  <data name="ImageModuleDescription" xml:space="preserve">
+    <value>Commands that search and display images from various sources. It also contains reverse image search commands.</value>
+  </data>
   <data name="IsBot" xml:space="preserve">
     <value>Is Bot</value>
   </data>
   <data name="LanguageChain" xml:space="preserve">
     <value>Language Chain</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Links</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -173,20 +186,53 @@ You can find more info about the removals of these modules/commands [here]({0}).
   <data name="NoServerAvatar" xml:space="preserve">
     <value>{0} doesn't have a server avatar.</value>
   </data>
+  <data name="OcrModule" xml:space="preserve">
+    <value>OCR commands</value>
+  </data>
+  <data name="OcrModuleDescription" xml:space="preserve">
+    <value>Commands that extract text from images. The commands also contain a TTS and translation functionality.</value>
+  </data>
+  <data name="OtherModule" xml:space="preserve">
+    <value>Other commands</value>
+  </data>
+  <data name="OtherModuleDescription" xml:space="preserve">
+    <value>Commands that don't fit in other modules.</value>
+  </data>
   <data name="Server" xml:space="preserve">
     <value>Server</value>
   </data>
   <data name="ServerJoinDate" xml:space="preserve">
     <value>Server Join Date</value>
   </data>
-  <data name="SupportServer" xml:space="preserve">
-    <value>Support Server</value>
+  <data name="Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="TtsModule" xml:space="preserve">
+    <value>TTS commands</value>
+  </data>
+  <data name="TtsModuleDescription" xml:space="preserve">
+    <value>Commands that synthetize speech from text input. </value>
   </data>
   <data name="UnableToGetArticle" xml:space="preserve">
     <value>Unable to get the article.</value>
   </data>
+  <data name="UrbanModule" xml:space="preserve">
+    <value>Urban Dictionary commands</value>
+  </data>
+  <data name="UrbanModuleDescription" xml:space="preserve">
+    <value>Commands that search and display definitions from Urban Dictionary.</value>
+  </data>
   <data name="UserInfo" xml:space="preserve">
     <value>User Info</value>
+  </data>
+  <data name="UtilityModule" xml:space="preserve">
+    <value>Utility commands</value>
+  </data>
+  <data name="UtilityModuleDescription" xml:space="preserve">
+    <value>General utility commands.</value>
+  </data>
+  <data name="Vote" xml:space="preserve">
+    <value>Vote</value>
   </data>
   <data name="WikipediaSearch" xml:space="preserve">
     <value>Wikipedia Search</value>

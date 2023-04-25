@@ -118,15 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Fergun2Info" xml:space="preserve">
-    <value>Bienvenido(a) a **Fergun** 2, una reescritura completa de Fergun 1 que usa slash commands.
-Fergun 2 se encuentra actualmente en beta abierta. Los comandos más utilizados se han reescrito para usar slash commands y más comandos serán agregados pronto.
-
-Los siguientes módulos y comandos no se migrarán a Fergun 2 debido a varias razones:
-- Módulo de **AI Dungeon**
-- Módulo de **Música**
-- Comandos de **snipe**
-
-Puedes encontrar más información sobre la eliminación de estos módulos/comandos [aquí]({0}).</value>
+    <value>Fergun es un bot de utilidad con muchos comandos útiles y poderosos como traducción, búsqueda de imágenes, búsqueda inversa de imágenes, OCR, TTS y más.</value>
   </data>
   <data name="LanguageChain" xml:space="preserve">
     <value>Cadena de Idiomas</value>
@@ -174,10 +166,10 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
     <value>{0} no tiene un avatar de servidor.</value>
   </data>
   <data name="Fergun2SupportInfo" xml:space="preserve">
-    <value>Si tiene alguna pregunta sobre la reescritura o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
+    <value>Si tiene alguna pregunta sobre el bot o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
   </data>
-  <data name="SupportServer" xml:space="preserve">
-    <value>Servidor de soporte</value>
+  <data name="Support" xml:space="preserve">
+    <value>Soporte</value>
   </data>
   <data name="avatar.description" xml:space="preserve">
     <value>Muesta el avatar de un usuario.</value>
@@ -228,7 +220,7 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
     <value>color</value>
   </data>
   <data name="help.description" xml:space="preserve">
-    <value>Información sobre Fergun 2.</value>
+    <value>Información sobre Fergun.</value>
   </data>
   <data name="help.name" xml:space="preserve">
     <value>ayuda</value>
@@ -370,5 +362,59 @@ Puedes encontrar más información sobre la eliminación de estos módulos/coman
   </data>
   <data name="Nickname" xml:space="preserve">
     <value>Apodo</value>
+  </data>
+  <data name="ImageModule" xml:space="preserve">
+    <value>Comandos de búsqueda de imágenes</value>
+  </data>
+  <data name="ImageModuleDescription" xml:space="preserve">
+    <value>Comandos que buscan y muestran imágenes de varias fuentes. También contiene comandos de búsqueda inversa de imágenes.</value>
+  </data>
+  <data name="OcrModule" xml:space="preserve">
+    <value>Comandos de OCR</value>
+  </data>
+  <data name="OcrModuleDescription" xml:space="preserve">
+    <value>Comandos que extraen texto de imágenes. Los comandos también contienen funcionalidad de TTS y traducción.</value>
+  </data>
+  <data name="OtherModule" xml:space="preserve">
+    <value>Otros comandos</value>
+  </data>
+  <data name="OtherModuleDescription" xml:space="preserve">
+    <value>Comandos que no se sitúan bien en otros módulos.</value>
+  </data>
+  <data name="TtsModule" xml:space="preserve">
+    <value>Comandos de TTS</value>
+  </data>
+  <data name="TtsModuleDescription" xml:space="preserve">
+    <value>Contiene comandos que convierten texto a voz.</value>
+  </data>
+  <data name="UrbanModule" xml:space="preserve">
+    <value>Comandos de Urban Dictionary</value>
+  </data>
+  <data name="UrbanModuleDescription" xml:space="preserve">
+    <value>Comandos que buscan y muestran significados de Urban Dictionary.</value>
+  </data>
+  <data name="UtilityModule" xml:space="preserve">
+    <value>Comandos de utilidad</value>
+  </data>
+  <data name="UtilityModuleDescription" xml:space="preserve">
+    <value>Comandos generales de utilidad.</value>
+  </data>
+  <data name="CategorySelection" xml:space="preserve">
+    <value>Selecciona una categoría para obtener información acerca de sus comandos.</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Comandos</value>
+  </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donar</value>
+  </data>
+  <data name="FergunHelp" xml:space="preserve">
+    <value>Ayuda de Fergun</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Enlaces</value>
+  </data>
+  <data name="Vote" xml:space="preserve">
+    <value>Votar</value>
   </data>
 </root>
