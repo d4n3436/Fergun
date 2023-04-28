@@ -13,7 +13,6 @@ using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
 using GScraper;
-using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using Humanizer;
@@ -32,13 +31,11 @@ public class ImageModule : InteractionModuleBase
     private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
-    private readonly BraveScraper _braveScraper;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        InteractiveService interactive, GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, BraveScraper braveScraper,
-        IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer,IOptionsSnapshot<FergunOptions> fergunOptions, InteractiveService interactive,
+        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
@@ -46,7 +43,6 @@ public class ImageModule : InteractionModuleBase
         _interactive = interactive;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
-        _braveScraper = braveScraper;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
@@ -153,59 +149,6 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? "https://duckduckgo.com" : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
-                .WithColor(Color.Orange));
-
-            return new MultiEmbedPageBuilder().WithBuilders(builders);
-        }
-    }
-
-    [SlashCommand("brave", "Searches for images from Brave and displays them in a paginator.")]
-    public async Task<RuntimeResult> BraveAsync([Autocomplete(typeof(BraveAutocompleteHandler))][Summary(description: "The query to search.")] string query,
-        [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
-    {
-        await Context.Interaction.DeferAsync();
-
-        bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
-
-        var images = (await _braveScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
-            .ToArray();
-
-        _logger.LogInformation("Image results: {Count}", images.Length);
-
-        if (images.Length == 0)
-        {
-            return FergunResult.FromError(_localizer["NoResults"]);
-        }
-
-        int count = multiImages ? 4 : 1;
-        int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
-
-        var paginator = new LazyPaginatorBuilder()
-            .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
-            .WithActionOnCancellation(ActionOnStop.DisableInput)
-            .WithActionOnTimeout(ActionOnStop.DisableInput)
-            .WithMaxPageIndex(maxIndex)
-            .WithFooter(PaginatorFooter.None)
-            .AddUser(Context.User)
-            .WithLocalizedPrompts(_localizer)
-            .Build();
-
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource);
-
-        return FergunResult.FromSuccess();
-
-        MultiEmbedPageBuilder GeneratePage(int index)
-        {
-            int start = index * count;
-
-            var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
-                .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithDescription(_localizer["BraveImageSearch"])
-                .WithUrl(multiImages ? "https://search.brave.com" : result.SourceUrl)
-                .WithImageUrl(result.Url)
-                .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.BraveLogoUrl)
                 .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);

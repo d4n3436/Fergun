@@ -22,7 +22,6 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Modules;
 using Fergun.Services;
-using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using GTranslate.Translators;
@@ -184,17 +183,12 @@ var host = Host.CreateDefaultBuilder()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient(nameof(BraveScraper))
-            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
-            .AddRetryPolicy();
-
         services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
         services.AddTransient<IFergunTranslator, FergunTranslator>();
         services.AddTransient(s => new GoogleScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
         services.AddTransient(s => new DuckDuckGoScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
-        services.AddTransient(s => new BraveScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(BraveScraper))));
         services.AddTransient<SharedModule>();
     })
     .UseFergunRequestLogging()

@@ -9,7 +9,6 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
-using GScraper.Brave;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using Microsoft.Extensions.Logging;
@@ -24,7 +23,6 @@ public class ImageModuleTests
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly GoogleScraper _googleScraper = new();
     private readonly DuckDuckGoScraper _duckDuckGoScraper = new();
-    private readonly BraveScraper _braveScraper = new();
     private readonly IBingVisualSearch _bingVisualSearch = Utils.CreateMockedBingVisualSearchApi();
     private readonly IYandexImageSearch _yandexImageSearch = Utils.CreateMockedYandexImageSearchApi();
     private readonly DiscordSocketClient _client = new();
@@ -37,8 +35,8 @@ public class ImageModuleTests
         var logger = Mock.Of<ILogger<ImageModule>>();
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
-        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive, _googleScraper,
-            _duckDuckGoScraper, _braveScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };
+        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive,
+            _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };
 
         _module = _moduleMock.Object;
         _interactionMock.SetupGet(x => x.User).Returns(() => Utils.CreateMockedUser());
@@ -110,36 +108,6 @@ public class ImageModuleTests
     public async Task DuckDuckGoAsync_Returns_No_Results()
     {
         var result = await _module.DuckDuckGoAsync("\u200b");
-        Assert.False(result.IsSuccess);
-
-        Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "NoResults")]);
-    }
-
-    [Theory]
-    [InlineData("Discord", false, true)]
-    [InlineData("Brave", true, false)]
-    public async Task BraveAsync_Sends_Paginator(string query, bool multiImages, bool nsfw)
-    {
-        var channel = new Mock<ITextChannel>();
-        channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
-        _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
-
-        var result = await _module.BraveAsync(query, multiImages);
-        Assert.True(result.IsSuccess, result.ErrorReason);
-
-        _interactionMock.Verify(x => x.DeferAsync(It.IsAny<bool>(), It.IsAny<RequestOptions>()), Times.Once);
-        _contextMock.VerifyGet(x => x.Channel);
-        _interactionMock.VerifyGet(x => x.User);
-        channel.VerifyGet(x => x.IsNsfw);
-
-        _interactionMock.Verify(x => x.FollowupWithFilesAsync(It.IsAny<IEnumerable<FileAttachment>>(), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task BraveAsync_Returns_No_Results()
-    {
-        var result = await _module.BraveAsync("\u200b");
         Assert.False(result.IsSuccess);
 
         Mock.Get(_localizer).VerifyGet(x => x[It.Is<string>(y => y == "NoResults")]);
