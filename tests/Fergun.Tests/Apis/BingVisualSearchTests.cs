@@ -36,9 +36,9 @@ public class BingVisualSearchTests
     }
 
     [Theory]
-    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/876bb7a8-e8dd-4e36-ab3a-f0b9aba942e5.jpg", BingSafeSearchLevel.Off, null)]
-    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/391126cd-977a-43c7-9937-4f139623cd58.jpeg", BingSafeSearchLevel.Moderate, "en")]
-    [InlineData("https://bingvsdevportalprodgbl.blob.core.windows.net/demo-images/5a5e947c-c248-4e4c-a717-d1f798ddb1ba.jpeg", BingSafeSearchLevel.Strict, "es")]
+    [InlineData("https://r.bing.com/rp/ecXQMr9jqKMeHE3ADTBrSN_WNyA.jpg", BingSafeSearchLevel.Off, null)]
+    [InlineData("https://r.bing.com/rp/vXuQ5-3dSnE08_cK26jVzOTxREk.jpg", BingSafeSearchLevel.Moderate, "en")]
+    [InlineData("https://r.bing.com/rp/NFrQjXWivF4omoTPSU03A6aosg0.jpg", BingSafeSearchLevel.Strict, "es")]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch, string? language)
     {
         var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language)).ToArray();
