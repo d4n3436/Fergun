@@ -391,8 +391,12 @@ public class UtilityModule : InteractionModuleBase
         var page = new PageBuilder()
             .WithTitle(_localizer["FergunHelp"])
             .WithDescription(description)
-            .AddField(_localizer["Links"], joinedLinks)
             .WithColor(Color.Orange);
+
+        if (!string.IsNullOrEmpty(joinedLinks))
+        {
+            page.AddField(_localizer["Links"], joinedLinks);
+        }
 
         var categories = new List<ModuleOption>(6)
         {
@@ -456,8 +460,12 @@ public class UtilityModule : InteractionModuleBase
                 .WithTitle($"{result.Value.Emote} {_localizer[result.Value.Name]}")
                 .WithDescription(_localizer[result.Value.Description])
                 .AddField(_localizer["Commands"], string.Join('\n', commandDescriptions))
-                .AddField(_localizer["Links"], joinedLinks)
                 .WithColor(Color.Orange);
+
+            if (!string.IsNullOrEmpty(joinedLinks))
+            {
+                page.AddField(_localizer["Links"], joinedLinks);
+            }
         }
 
         return FergunResult.FromSuccess();
