@@ -13,11 +13,11 @@ namespace Fergun.Modules;
 [Group("blacklist", "Blacklist commands.")]
 public class BlacklistModule : InteractionModuleBase
 {
-    private readonly ILogger<OtherModule> _logger;
-    private readonly IFergunLocalizer<OtherModule> _localizer;
+    private readonly ILogger<BlacklistModule> _logger;
+    private readonly IFergunLocalizer<BlacklistModule> _localizer;
     private readonly FergunContext _db;
 
-    public BlacklistModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, FergunContext db)
+    public BlacklistModule(ILogger<BlacklistModule> logger, IFergunLocalizer<BlacklistModule> localizer, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
