@@ -13,28 +13,6 @@ public class BingVisualSearchTests
 {
     private readonly IBingVisualSearch _bingVisualSearch = new BingVisualSearch();
 
-    [Theory(Skip = "Disabled until Bing (hopefully) brings back the OCR functionality.")]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
-    public async Task OcrAsync_Returns_Text(string url)
-    {
-        string? text = await _bingVisualSearch.OcrAsync(url);
-
-        Assert.NotNull(text);
-        Assert.NotEmpty(text);
-    }
-
-    [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954475252027641886/tts.mp3")] // MP3 file
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
-    [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
-    public async Task OcrAsync_Throws_BingException_If_Image_Is_Invalid(string url)
-    {
-        var task = _bingVisualSearch.OcrAsync(url);
-
-        await Assert.ThrowsAsync<BingException>(() => task);
-    }
-
     [Theory]
     [InlineData("https://r.bing.com/rp/ecXQMr9jqKMeHE3ADTBrSN_WNyA.jpg", BingSafeSearchLevel.Off, null)]
     [InlineData("https://r.bing.com/rp/vXuQ5-3dSnE08_cK26jVzOTxREk.jpg", BingSafeSearchLevel.Moderate, "en")]
@@ -76,7 +54,6 @@ public class BingVisualSearchTests
         (_bingVisualSearch as IDisposable)?.Dispose();
         (_bingVisualSearch as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
     }
 

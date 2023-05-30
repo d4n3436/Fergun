@@ -56,49 +56,6 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default)
-    {
-        EnsureNotDisposed();
-        cancellationToken.ThrowIfCancellationRequested();
-
-        using var request = BuildRequest(url, "OCR");
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-
-        string? imageCategory = document
-            .RootElement
-            .GetPropertyOrDefault("imageQualityHints")
-            .FirstOrDefault()
-            .GetPropertyOrDefault("category")
-            .GetStringOrDefault();
-
-        if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out string? message))
-        {
-            throw new BingException(message, imageCategory);
-        }
-
-        var textRegions = document
-            .RootElement
-            .GetProperty("tags")
-            .FirstOrDefault(x => x.GetPropertyOrDefault("displayName").GetStringOrDefault() == "##TextRecognition")
-            .GetPropertyOrDefault("actions")
-            .FirstOrDefault()
-            .GetPropertyOrDefault("data")
-            .GetPropertyOrDefault("regions")
-            .EnumerateArrayOrEmpty()
-            .Select(x => string.Join('\n',
-                x.GetPropertyOrDefault("lines")
-                    .EnumerateArrayOrEmpty()
-                    .Select(y => y.GetPropertyOrDefault("text").GetStringOrDefault())));
-
-        return string.Join("\n\n", textRegions);
-    }
-
-    /// <inheritdoc/>
     public async Task<IEnumerable<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default)

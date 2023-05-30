@@ -23,17 +23,15 @@ public class OcrModule : InteractionModuleBase
     private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
-    private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
-        InteractiveService interactive, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+        InteractiveService interactive, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
-        _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
 
@@ -55,12 +53,6 @@ public class OcrModule : InteractionModuleBase
         return await YandexAsync(url);
     }
 
-    // Disabled until Bing (hopefully) brings back the OCR functionality.
-    // [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
-    public async Task<RuntimeResult> BingAsync([Summary(description: "The URL of an image.")] string? url = null,
-        [Summary(description: "An image file.")] IAttachment? file = null)
-        => await OcrAsync(OcrEngine.Bing, file?.Url ?? url, Context.Interaction);
-
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
     public async Task<RuntimeResult> YandexAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null)
@@ -81,7 +73,6 @@ public class OcrModule : InteractionModuleBase
 
         var ocrTask = ocrEngine switch
         {
-            OcrEngine.Bing => _bingVisualSearch.OcrAsync(url),
             OcrEngine.Yandex => _yandexImageSearch.OcrAsync(url),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
@@ -134,7 +125,6 @@ public class OcrModule : InteractionModuleBase
 
         (var name, string iconUrl) = ocrEngine switch
         {
-            OcrEngine.Bing => (_localizer["BingVisualSearch"], Constants.BingIconUrl),
             OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
