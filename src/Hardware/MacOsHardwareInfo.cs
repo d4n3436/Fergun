@@ -25,7 +25,7 @@ public class MacOsHardwareInfo : IHardwareInfo
     {
         ulong length = 0;
 
-        if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not 0 or ENOMEM)
+        if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not (0 or ENOMEM))
             return null;
 
         byte[] buffer = new byte[length];
