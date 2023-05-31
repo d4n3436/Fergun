@@ -183,6 +183,12 @@
   <data name="GoogleImagesSearch" xml:space="preserve">
     <value>Búsqueda de Google Imágenes</value>
   </data>
+  <data name="GoogleLensError" xml:space="preserve">
+    <value>No fue posible obtener los resultados de búsqueda. Usa otra URL o inténtalo más tarde.</value>
+  </data>
+  <data name="GoogleLensPaginatorFooter" xml:space="preserve">
+    <value>Google Lens | Página {0} de {1}</value>
+  </data>
   <data name="InvalidImageSearchEngine" xml:space="preserve">
     <value>Motor de búsqueda de imágenes inválido.</value>
   </data>

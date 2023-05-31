@@ -8,6 +8,8 @@ public static class Constants
 
     public const string GoogleLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890326437268168704/unknown.png";
 
+    public const string GoogleLensLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/1113265509899702293/google_lens.png";
+
     public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";
 
     public const string BingTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/944755269034991666/BingTranslator.png";

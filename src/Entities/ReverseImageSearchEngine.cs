@@ -15,5 +15,10 @@ public enum ReverseImageSearchEngine
     /// <summary>
     /// Yandex.
     /// </summary>
-    Yandex
+    Yandex,
+
+    /// <summary>
+    /// Google.
+    /// </summary>
+    Google
 }

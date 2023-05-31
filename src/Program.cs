@@ -11,6 +11,7 @@ using Fergun;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Genius;
+using Fergun.Apis.Google;
 using Fergun.Apis.Musixmatch;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
@@ -113,6 +114,10 @@ var host = Host.CreateDefaultBuilder()
 
         services.AddHttpClient<IYandexImageSearch, YandexImageSearch>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false })
+            .SetHandlerLifetime(TimeSpan.FromMinutes(30))
+            .AddRetryPolicy();
+
+        services.AddHttpClient<IGoogleLensClient, GoogleLensClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

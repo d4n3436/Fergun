@@ -8,6 +8,7 @@ using AutoBogus;
 using Bogus;
 using Discord;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Google;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive.Pagination;
@@ -172,6 +173,32 @@ internal static class Utils
         resultMock.SetupGet(x => x.SourceUrl).Returns(faker.Internet.Url());
         resultMock.SetupGet(x => x.Title).Returns(faker.Commerce.ProductName());
         resultMock.SetupGet(x => x.Text).Returns(faker.Commerce.ProductDescription());
+
+        return resultMock.Object;
+    }
+
+    public static IGoogleLensClient CreateMockedGoogleLensClient(Faker? faker = null)
+    {
+        faker ??= new Faker();
+        var googleMock = new Mock<IGoogleLensClient>();
+
+        googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<IGoogleLensResult>);
+        googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedGoogleLensResult(faker)).ToArray());
+        googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ThrowsAsync(new GoogleLensException("Error message."));
+
+        return googleMock.Object;
+    }
+
+    public static IGoogleLensResult CreateMockedGoogleLensResult(Faker? faker = null)
+    {
+        faker ??= new Faker();
+        var resultMock = new Mock<IGoogleLensResult>();
+
+        resultMock.SetupGet(x => x.Title).Returns(faker.Commerce.ProductName());
+        resultMock.SetupGet(x => x.SourcePageUrl).Returns(faker.Internet.Url());
+        resultMock.SetupGet(x => x.ThumbnailUrl).Returns(faker.Internet.Url());
+        resultMock.SetupGet(x => x.SourceDomainName).Returns(faker.Internet.DomainName());
+        resultMock.SetupGet(x => x.SourceIconUrl).Returns(faker.Internet.Url());
 
         return resultMock.Object;
     }

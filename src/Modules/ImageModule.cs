@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -33,9 +35,10 @@ public class ImageModule : InteractionModuleBase
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
+    private readonly IGoogleLensClient _googleLens;
 
     public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer,IOptionsSnapshot<FergunOptions> fergunOptions, InteractiveService interactive,
-        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+        GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch, IGoogleLensClient googleLens)
     {
         _logger = logger;
         _localizer = localizer;
@@ -45,6 +48,7 @@ public class ImageModule : InteractionModuleBase
         _duckDuckGoScraper = duckDuckGoScraper;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
+        _googleLens = googleLens;
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
@@ -214,6 +218,7 @@ public class ImageModule : InteractionModuleBase
         {
             ReverseImageSearchEngine.Yandex => await YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             ReverseImageSearchEngine.Bing => await BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Google => await GoogleAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             _ => throw new ArgumentException(_localizer["InvalidImageSearchEngine"], nameof(engine))
         };
     }
@@ -366,6 +371,81 @@ public class ImageModule : InteractionModuleBase
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["BingVisualSearchPaginatorFooter", index + 1, maxIndex + 1], Constants.BingIconUrl)
                 .WithColor((Color)result.AccentColor));
+
+            return new MultiEmbedPageBuilder().WithBuilders(builders);
+        }
+    }
+
+    public virtual async Task<RuntimeResult> GoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
+        IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
+    {
+        if (interaction is IComponentInteraction componentInteraction)
+        {
+            await componentInteraction.DeferLoadingAsync(ephemeral);
+        }
+        else
+        {
+            await interaction.DeferAsync(ephemeral);
+        }
+
+        try
+        {
+            if (originalInteraction is not null)
+                await originalInteraction.DeleteOriginalResponseAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Failed to delete the original interaction response.");
+        }
+
+        bool isNsfw = Context.Channel.IsNsfw();
+        IReadOnlyList<IGoogleLensResult> results;
+
+        try
+        {
+            results = await _googleLens.ReverseImageSearchAsync(url, interaction.GetLanguageCode());
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
+            return FergunResult.FromError(_localizer["GoogleLensError"], ephemeral, interaction);
+        }
+
+        if (results.Count == 0)
+        {
+            return FergunResult.FromError(_localizer["NoResults"], ephemeral, interaction);
+        }
+
+        int count = multiImages ? 4 : 1;
+        int maxIndex = (int)Math.Ceiling((double)results.Count / count) - 1;
+
+        var paginator = new LazyPaginatorBuilder()
+            .WithPageFactory(GeneratePage)
+            .WithFergunEmotes(_fergunOptions)
+            .WithActionOnCancellation(ActionOnStop.DisableInput)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithMaxPageIndex(maxIndex)
+            .WithFooter(PaginatorFooter.None)
+            .AddUser(interaction.User)
+            .WithLocalizedPrompts(_localizer)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, interaction, _fergunOptions.PaginatorTimeout, InteractionResponseType.DeferredChannelMessageWithSource, ephemeral);
+
+        return FergunResult.FromSuccess();
+
+        MultiEmbedPageBuilder GeneratePage(int index)
+        {
+            int start = index * count;
+
+            var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
+                .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
+                .WithUrl(multiImages ? "https://lens.google.com/" : result.SourcePageUrl)
+                .WithThumbnailUrl(url)
+                .WithAuthor(result.SourceDomainName, result.SourceIconUrl)
+                .WithImageUrl(result.ThumbnailUrl)
+                .WithFooter(_localizer["GoogleLensPaginatorFooter", index + 1, maxIndex + 1], Constants.GoogleLensLogoUrl)
+                .WithColor(Color.Orange));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }

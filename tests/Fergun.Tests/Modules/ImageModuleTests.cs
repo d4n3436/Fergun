@@ -6,6 +6,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Apis.Bing;
+using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
@@ -25,6 +26,7 @@ public class ImageModuleTests
     private readonly DuckDuckGoScraper _duckDuckGoScraper = new();
     private readonly IBingVisualSearch _bingVisualSearch = Utils.CreateMockedBingVisualSearchApi();
     private readonly IYandexImageSearch _yandexImageSearch = Utils.CreateMockedYandexImageSearchApi();
+    private readonly IGoogleLensClient _googleLens = Utils.CreateMockedGoogleLensClient();
     private readonly DiscordSocketClient _client = new();
     private readonly IFergunLocalizer<ImageModule> _localizer = Utils.CreateMockedLocalizer<ImageModule>();
     private readonly Mock<ImageModule> _moduleMock;
@@ -36,7 +38,7 @@ public class ImageModuleTests
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive,
-            _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch)) { CallBase = true };
+            _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch, _googleLens)) { CallBase = true };
 
         _module = _moduleMock.Object;
         _interactionMock.SetupGet(x => x.User).Returns(() => Utils.CreateMockedUser());
@@ -165,7 +167,7 @@ public class ImageModuleTests
     [Fact]
     public async Task ReverseAsync_Throws_Exception_If_Invalid_Engine_Is_Passed()
     {
-        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("", It.IsAny<IAttachment>(), (ReverseImageSearchEngine)2, It.IsAny<bool>()));
+        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("", It.IsAny<IAttachment>(), (ReverseImageSearchEngine)3, It.IsAny<bool>()));
     }
 
     [Theory]
@@ -194,7 +196,9 @@ public class ImageModuleTests
             new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Bing, false, false },
             new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Bing, true, true },
             new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Yandex, false, false },
-            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true }
+            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true },
+            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Google, false, false },
+            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Google, true, true }
         };
     }
 }
