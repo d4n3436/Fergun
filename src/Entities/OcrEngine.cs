@@ -8,6 +8,11 @@ namespace Fergun;
 public enum OcrEngine
 {
     /// <summary>
+    /// Google.
+    /// </summary>
+    Google,
+
+    /// <summary>
     /// Yandex.
     /// </summary>
     Yandex

@@ -138,14 +138,38 @@
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Búsqueda Visual de Bing</value>
   </data>
+  <data name="google.description" xml:space="preserve">
+    <value>Realiza OCR a una imagen usando Google Lens.</value>
+  </data>
+  <data name="google.file.description" xml:space="preserve">
+    <value>Un archivo de imagen.</value>
+  </data>
+  <data name="google.file.name" xml:space="preserve">
+    <value>archivo</value>
+  </data>
+  <data name="google.name" xml:space="preserve">
+    <value>google</value>
+  </data>
+  <data name="google.url.description" xml:space="preserve">
+    <value>La URL de una imagen.</value>
+  </data>
+  <data name="google.url.name" xml:space="preserve">
+    <value>url</value>
+  </data>
+  <data name="GoogleLensOCR" xml:space="preserve">
+    <value>OCR de Google Lens</value>
+  </data>
+  <data name="GoogleLensOCRError" xml:space="preserve">
+    <value>No fue posible obtener los resultados de OCR. Usa otra URL o inténtalo más tarde.</value>
+  </data>
   <data name="InvalidOCREngine" xml:space="preserve">
     <value>Motor de OCR inválido.</value>
   </data>
+  <data name="OCRFooter" xml:space="preserve">
+    <value>{0} | Tiempo de procesado: {1}ms</value>
+  </data>
   <data name="OCRNoResults" xml:space="preserve">
     <value>El OCR no dio resultados.</value>
-  </data>
-  <data name="OCRPaginatorFooter" xml:space="preserve">
-    <value>{0} | Tiempo de procesado: {1}ms</value>
   </data>
   <data name="OCRResults" xml:space="preserve">
     <value>Resultados de OCR</value>

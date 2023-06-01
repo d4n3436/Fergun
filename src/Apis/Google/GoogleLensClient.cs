@@ -12,7 +12,7 @@ namespace Fergun.Apis.Google;
 /// <summary>
 /// Represents the default Google Lens API client.
 /// </summary>
-public sealed class GoogleLensClient : IDisposable, IGoogleLensClient
+public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 {
     private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
 
@@ -42,6 +42,19 @@ public sealed class GoogleLensClient : IDisposable, IGoogleLensClient
         {
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
+    }
+
+    /// <inheritdoc/>
+    public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
+    {
+        EnsureNotDisposed();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken);
+
+        var lines = ExtractDataPack(page, OcrCallbackStart).RootElement[3][4][0][0];
+
+        return string.Join('\n', lines.EnumerateArray().Select(x => x.GetString()));
     }
 
     /// <inheritdoc/>

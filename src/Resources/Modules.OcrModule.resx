@@ -120,14 +120,20 @@
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Bing Visual Search</value>
   </data>
+  <data name="GoogleLensOCR" xml:space="preserve">
+    <value>Google Lens OCR</value>
+  </data>
+  <data name="GoogleLensOCRError" xml:space="preserve">
+    <value>Unable to get the OCR results. Use a different URL or try again later.</value>
+  </data>
   <data name="InvalidOCREngine" xml:space="preserve">
     <value>Invalid OCR engine.</value>
   </data>
+  <data name="OCRFooter" xml:space="preserve">
+    <value>{0} | Processing time: {1}ms</value>
+  </data>
   <data name="OCRNoResults" xml:space="preserve">
     <value>The OCR yielded no results.</value>
-  </data>
-  <data name="OCRPaginatorFooter" xml:space="preserve">
-    <value>{0} | Processing time: {1}ms</value>
   </data>
   <data name="OCRResults" xml:space="preserve">
     <value>OCR Results</value>

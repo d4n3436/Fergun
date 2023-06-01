@@ -130,7 +130,7 @@
     <value>Google Images search</value>
   </data>
   <data name="GoogleLensError" xml:space="preserve">
-    <value>Unable to get search results. Use a different URL or try again later.</value>
+    <value>Unable to get the search results. Use a different URL or try again later.</value>
   </data>
   <data name="GoogleLensPaginatorFooter" xml:space="preserve">
     <value>Google Lens | Page {0} of {1}</value>

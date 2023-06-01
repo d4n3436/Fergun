@@ -182,6 +182,10 @@ internal static class Utils
         faker ??= new Faker();
         var googleMock = new Mock<IGoogleLensClient>();
 
+        googleMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == string.Empty), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        googleMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<CancellationToken>())).ReturnsAsync(faker.Lorem.Sentence());
+        googleMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<CancellationToken>())).ThrowsAsync(new GoogleLensException("Error message."));
+        
         googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<IGoogleLensResult>);
         googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedGoogleLensResult(faker)).ToArray());
         googleMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<string?>(), It.IsAny<CancellationToken>())).ThrowsAsync(new GoogleLensException("Error message."));

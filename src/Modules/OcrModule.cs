@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
-using Fergun.Apis.Bing;
+using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -23,15 +23,17 @@ public class OcrModule : InteractionModuleBase
     private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
+    private readonly IGoogleLensClient _googleLens;
     private readonly IYandexImageSearch _yandexImageSearch;
 
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
-        InteractiveService interactive, IYandexImageSearch yandexImageSearch)
+        InteractiveService interactive, IGoogleLensClient googleLens, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
         _shared = shared;
         _interactive = interactive;
+        _googleLens = googleLens;
         _yandexImageSearch = yandexImageSearch;
     }
 
@@ -53,6 +55,11 @@ public class OcrModule : InteractionModuleBase
         return await YandexAsync(url);
     }
 
+    [SlashCommand("google", "Performs OCR to an image using Google Lens.")]
+    public async Task<RuntimeResult> GoogleAsync([Summary(description: "The URL of an image.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Google, file?.Url ?? url, Context.Interaction);
+
     [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
     public async Task<RuntimeResult> YandexAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null)
@@ -71,11 +78,10 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["UrlNotWellFormed"], true, interaction);
         }
 
-        var ocrTask = ocrEngine switch
+        if (!Enum.IsDefined(ocrEngine))
         {
-            OcrEngine.Yandex => _yandexImageSearch.OcrAsync(url),
-            _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
-        };
+            throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine));
+        }
 
         if (interaction is IComponentInteraction componentInteraction)
         {
@@ -101,12 +107,17 @@ public class OcrModule : InteractionModuleBase
 
         try
         {
-            text = await ocrTask;
+            text = ocrEngine switch
+            {
+                OcrEngine.Google => await _googleLens.OcrAsync(url),
+                OcrEngine.Yandex => await _yandexImageSearch.OcrAsync(url),
+                _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
+            };
         }
-        catch (BingException e)
+        catch (GoogleLensException e)
         {
-            _logger.LogWarning(e, "Failed to perform Bing OCR to url {Url}", url);
-            return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
+            _logger.LogWarning(e, "Failed to perform Google Lens OCR to url {Url}", url);
+            return FergunResult.FromError(_localizer["GoogleLensOCRError"], ephemeral, interaction);
         }
         catch (YandexException e)
         {
@@ -125,6 +136,7 @@ public class OcrModule : InteractionModuleBase
 
         (var name, string iconUrl) = ocrEngine switch
         {
+            OcrEngine.Google => (_localizer["GoogleLensOCR"], Constants.GoogleLensLogoUrl),
             OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
@@ -135,7 +147,7 @@ public class OcrModule : InteractionModuleBase
             .WithTitle(_localizer["OCRResults"])
             .WithDescription($"{embedText}```{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6)}```")
             .WithThumbnailUrl(url)
-            .WithFooter(_localizer["OCRPaginatorFooter", name, stopwatch.ElapsedMilliseconds], iconUrl)
+            .WithFooter(_localizer["OCRFooter", name, stopwatch.ElapsedMilliseconds], iconUrl)
             .WithColor(Color.Orange);
 
         string buttonText;
