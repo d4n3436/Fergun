@@ -32,5 +32,7 @@ public static class Constants
 
     public const string WolframAlphaLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838834461638131722/wolframalpha.png";
 
+    public const string GeniusLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/1114311596450254980/genius_logo.png";
+
     public const string ChromeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
 }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Fergun.Apis.Genius;
 using Fergun.Apis.Musixmatch;
 using Fergun.Data;
 using Fergun.Extensions;
@@ -34,16 +35,18 @@ public class OtherModule : InteractionModuleBase
     private readonly IFergunLocalizer<OtherModule> _localizer;
     private readonly FergunOptions _fergunOptions;
     private readonly InteractiveService _interactive;
+    private readonly IGeniusClient _geniusClient;
     private readonly IMusixmatchClient _musixmatchClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        InteractiveService interactive, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
+        InteractiveService interactive, IGeniusClient geniusClient, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
+        _geniusClient = geniusClient;
         _musixmatchClient = musixmatchClient;
         _httpClient = httpClient;
         _interactive = interactive;
@@ -133,44 +136,33 @@ public class OtherModule : InteractionModuleBase
 
     [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
-    public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(MusixmatchAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
+    public async Task<RuntimeResult> LyricsAsync([Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
-
-        IMusixmatchSong? song;
-        try
-        {
-            song = await _musixmatchClient.GetSongAsync(id);
-        }
-        catch (RateLimitRejectedException e)
-        {
-            return FergunResult.FromError(_localizer["LyricsRatelimited", e.RetryAfter.Humanize(culture: _localizer.CurrentCulture)]);
-        }
+        var song = await _geniusClient.GetSongAsync(id);
 
         if (song is null)
         {
             return FergunResult.FromError(_localizer["LyricsNotFound", id]);
         }
 
-        if (song.IsInstrumental || !song.HasLyrics)
+        if (song.IsInstrumental)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
             _logger.LogDebug("Got instrumental song from ID: {Id}", id);
-            return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistName} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistNames} - {song.Title}"]);
         }
 
-        // Some (or all) songs in Musixmatch have their "restricted" field set to 0 in the track data,
-        // but the real "restricted" value is in the lyrics data, this means we can't filter those restricted songs
-        // in the autocomplete results
-        if (song.IsRestricted)
+        if (song.LyricsState == "unreleased")
         {
-            _logger.LogDebug("Got restricted lyrics from ID: {Id}", id);
-            return FergunResult.FromError(_localizer["LyricsRestricted", $"{song.ArtistName} - {song.Title}"]);
+            // This shouldn't be reachable unless someone manually passes an unreleased ID.
+            _logger.LogDebug("Got unreleased song from ID: {Id}", id);
+            return FergunResult.FromError(_localizer["LyricsUnreleased", $"{song.ArtistNames} - {song.Title}"]);
         }
 
         if (string.IsNullOrEmpty(song.Lyrics))
         {
-            return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistName} - {song.Title}"]);
+            return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistNames} - {song.Title}"]);
         }
 
         var chunks = song.Lyrics.SplitWithoutWordBreaking(EmbedBuilder.MaxDescriptionLength).ToArray();
@@ -192,18 +184,18 @@ public class OtherModule : InteractionModuleBase
 
         PageBuilder GeneratePage(int index)
         {
-            string links = $"{Format.Url(_localizer["ViewOnMusixmatch"], song.Url)}  | {Format.Url(_localizer["ViewArtist"], song.ArtistUrl!)}";
+            string links = $"{Format.Url(_localizer["ViewOnGenius"], song.Url)} | {Format.Url(_localizer["ViewArtist"], song.PrimaryArtistUrl)}";
 
             // Discord doesn't support custom protocols in embeds (spotify://track/id)
             if (song.SpotifyTrackId is not null)
                 links += $" | {Format.Url(_localizer["OpenInSpotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
 
             return new PageBuilder()
-                .WithTitle($"{song.ArtistName} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
+                .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunks[index].ToString())
                 .AddField(_localizer["Links"], links)
-                .WithFooter(_localizer["MusixmatchPaginatorFooter", index + 1, chunks.Length])
+                .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
                 .WithColor(Color.Orange);
         }
     }
