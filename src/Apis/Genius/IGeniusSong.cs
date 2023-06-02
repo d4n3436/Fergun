@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Fergun.Apis.Genius;
+﻿namespace Fergun.Apis.Genius;
 
 /// <summary>
 /// Represents a Genius song.
@@ -54,15 +52,15 @@ public interface IGeniusSong
     /// <summary>
     /// Gets a URL pointing to the primary artist page.
     /// </summary>
-    public string? PrimaryArtistUrl { get; }
+    public string PrimaryArtistUrl { get; }
 
     /// <summary>
-    /// Gets the primary art color.
+    /// Gets the Spotify track ID.
     /// </summary>
-    public Color? PrimaryArtColor { get; }
+    public string? SpotifyTrackId { get; }
 
     /// <summary>
     /// Gets the lyrics of this song.
     /// </summary>
-    string? Lyrics { get; }
+    string Lyrics { get; }
 }

@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Genius;
 
@@ -9,7 +8,7 @@ namespace Fergun.Apis.Genius;
 public class GeniusSong : IGeniusSong
 {
     public GeniusSong(string artistNames, string headerImageUrl, int id, bool isInstrumental, string lyricsState,
-        string songArtImageUrl, string title, string url, string? primaryArtistUrl, Color? primaryArtColor, string? lyrics)
+        string songArtImageUrl, string title, string url, string primaryArtistUrl, string? spotifyTrackId, string lyrics)
     {
         ArtistNames = artistNames;
         HeaderImageUrl = headerImageUrl;
@@ -20,7 +19,7 @@ public class GeniusSong : IGeniusSong
         Title = title;
         Url = url;
         PrimaryArtistUrl = primaryArtistUrl;
-        PrimaryArtColor = primaryArtColor;
+        SpotifyTrackId = spotifyTrackId;
         Lyrics = lyrics;
     }
 
@@ -57,13 +56,13 @@ public class GeniusSong : IGeniusSong
     public string Url { get; }
 
     /// <inheritdoc/>
-    public string? PrimaryArtistUrl { get; }
+    public string PrimaryArtistUrl { get; }
 
     /// <inheritdoc/>
-    public Color? PrimaryArtColor { get; }
+    public string? SpotifyTrackId { get; }
 
     /// <inheritdoc/>
-    public string? Lyrics { get; }
+    public string Lyrics { get; }
 
     /// <summary>
     /// Returns the full title of this song.

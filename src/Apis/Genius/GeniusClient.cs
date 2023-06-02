@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,8 +17,20 @@ namespace Fergun.Apis.Genius;
 /// </summary>
 public sealed class GeniusClient : IGeniusClient, IDisposable
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
-    private static readonly Uri _apiEndpoint = new("https://genius.com/");
+    private const string GENIUS_LOGGED_OUT_TOKEN = "ZTejoT_ojOEasIkT9WrMBhBQOz6eYKK5QULCMECmOhvwqjRZ6WbpamFe3geHnvp3"; // Hardcoded token from Android app
+    private const string VERSION_NAME = "5.16.0";
+
+    private const string BOLD = "b";
+    private const string DFP_UNIT = "dfp-unit";
+    private const string HORIZONTAL_LINE = "hr";
+    private const string IMAGE = "img";
+    private const string ITALIC = "i";
+    private const string LINE_BREAK = "br";
+    private const string LINK = "a";
+    private const string UNDERLINE = "u";
+
+    private const string DefaultUserAgent = $"Genius/{VERSION_NAME} (Android)";
+    private static readonly Uri _apiEndpoint = new("https://api.genius.com/");
 
     private readonly HttpClient _httpClient;
     private bool _disposed;
@@ -46,11 +57,11 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         {
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
+
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Genius-Android-Version", VERSION_NAME);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", GENIUS_LOGGED_OUT_TOKEN);
+        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("X-Genius-Logged-Out", "true");
     }
-
-    private static ReadOnlySpan<byte> StartString => Encoding.UTF8.GetBytes("window.__PRELOADED_STATE__ = JSON.parse('");
-
-    private static ReadOnlySpan<byte> EndString => new[] { (byte)'\'', (byte)')', (byte)';', (byte)'\n' };
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default)
@@ -58,7 +69,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         EnsureNotDisposed();
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var response = await _httpClient.GetAsync(new Uri($"api/search?q={Uri.EscapeDataString(query)}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"search?q={Uri.EscapeDataString(query)}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
@@ -78,7 +89,6 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         EnsureNotDisposed();
         cancellationToken.ThrowIfCancellationRequested();
 
-        // The API doesn't provide the lyrics, so we scrape the lyrics page and extract the embedded JSON which contains the lyrics.
         using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -87,69 +97,36 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         }
 
         response.EnsureSuccessStatusCode();
-        byte[] bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-
-        int start = bytes.AsSpan().IndexOf(StartString);
-        if (start == -1)
-        {
-            throw new GeniusException("Failed the extract the embedded JSON from the lyrics page.");
-        }
-
-        start += StartString.Length;
-
-        int length = bytes.AsSpan(start).IndexOf(EndString);
-        if (length == -1)
-        {
-            throw new GeniusException("Failed the extract the embedded JSON from the lyrics page.");
-        }
-
-        string data = Encoding.UTF8.GetString(bytes.AsSpan(start, length));
-
-        var document = JsonDocument.Parse(Regex.Unescape(data));
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         var song = document
             .RootElement
-            .GetProperty("entities")
-            .GetProperty("songs")
-            .GetProperty(id.ToString());
+            .GetProperty("response")
+            .GetProperty("song");
 
-        string artistNames = song.GetProperty("artistNames").GetString() ?? throw new GeniusException("Unable to get the artist names.");
-        string headerImageUrl = song.GetProperty("headerImageUrl").GetString() ?? throw new GeniusException("Unable to get the song header image URL.");
+        string artistNames = song.GetProperty("artist_names").GetString() ?? throw new GeniusException("Unable to get the artist names.");
+        string headerImageUrl = song.GetProperty("header_image_url").GetString() ?? throw new GeniusException("Unable to get the song header image URL.");
         bool isInstrumental = song.GetProperty("instrumental").GetBoolean();
-        string lyricsState = song.GetProperty("lyricsState").GetString() ?? throw new GeniusException("Unable to get the lyrics state.");
-        string songArtImageUrl = song.GetProperty("songArtImageUrl").GetString() ?? throw new GeniusException("Unable to get the song art image URL.");
+        string lyricsState = song.GetProperty("lyrics_state").GetString() ?? throw new GeniusException("Unable to get the lyrics state.");
+        string songArtImageUrl = song.GetProperty("song_art_image_url").GetString() ?? throw new GeniusException("Unable to get the song art image URL.");
         string title = song.GetProperty("title").GetString() ?? throw new GeniusException("Unable to get the song title.");
         string url = song.GetProperty("url").GetString() ?? throw new GeniusException("Unable to get the lyrics page URL.");
-        string songArtPrimaryColor = song.GetProperty("songArtPrimaryColor").GetString() ?? throw new GeniusException("Unable to get the primary art color.");
-        Color? primaryColor = int.TryParse(songArtPrimaryColor.AsSpan().TrimStart('#'), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int color)
-            ? Color.FromArgb(color)
-            : default;
+        string? spotifyTrackId = song.GetProperty("spotify_uuid").GetString();
 
-        int primaryArtistId = song.GetProperty("primaryArtist").GetInt32();
-        string? primaryArtistUrl = document
-            .RootElement
-            .GetProperty("entities")
-            .GetProperty("artists")
-            .GetProperty(primaryArtistId.ToString())
+        string primaryArtistUrl = song
+            .GetProperty("primary_artist")
             .GetProperty("url")
-            .GetString();
+            .GetString() ?? throw new GeniusException("Unable to get the primary artist page URL.");
 
-        document.RootElement
-            .GetProperty("songPage")
-            .GetProperty("lyricsData")
-            .GetProperty("body")
-            .TryGetProperty("children", out var chunks);
+        var content = song.GetProperty("lyrics")
+            .GetProperty("dom");
 
-        StringBuilder? lyricsBuilder = null;
-
-        if (chunks.ValueKind != JsonValueKind.Undefined)
-        {
-            lyricsBuilder = new StringBuilder();
-            IterateChunks(chunks, lyricsBuilder);
-        }
+        var lyricsBuilder = new StringBuilder();
+        IterateContent(content, lyricsBuilder);
 
         return new GeniusSong(artistNames, headerImageUrl, id, isInstrumental, lyricsState,
-            songArtImageUrl, title, url, primaryArtistUrl, primaryColor, lyricsBuilder?.ToString());
+            songArtImageUrl, title, url, primaryArtistUrl, spotifyTrackId, lyricsBuilder.ToString());
     }
 
     /// <inheritdoc/>
@@ -164,50 +141,43 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         _disposed = true;
     }
 
-    private static void IterateChunks(in JsonElement element, in StringBuilder builder, bool appendStrings = true)
+    private static void IterateContent(in JsonElement element, StringBuilder builder)
     {
-        if (element.ValueKind == JsonValueKind.Array)
+        if (element.ValueKind == JsonValueKind.String)
         {
-            foreach (var child in element.EnumerateArray())
-            {
-                IterateChunks(child, builder);
-            }
+            builder.Append(element.GetString());
         }
-        else if (element.ValueKind == JsonValueKind.String)
+        else if (element.ValueKind == JsonValueKind.Object) // either tag or tag + children
         {
-            if (appendStrings)
+            var tag = element.GetProperty("tag");
+            (string markDownStart, string markDownEnd) = tag.GetString() switch
             {
-                builder.Append(element.GetString());
-            }
-        }
-        else if (element.ValueKind == JsonValueKind.Object)
-        {
-            if (element.TryGetProperty("tag", out var tag))
-            {
-                string markDownEq = tag.GetString() switch
-                {
-                    "a" => string.Empty,
-                    "i" => "*",
-                    "b" => "**",
-                    _ => "\n"
-                };
-                builder.Append(markDownEq);
-            }
+                ITALIC => ("*", "*"),
+                BOLD => ("**", "**"),
+                LINE_BREAK or HORIZONTAL_LINE or IMAGE or DFP_UNIT => ("\n", string.Empty),
+                UNDERLINE => ("__", "__"),
+                "h1" => ("\n# ", "\n"),
+                "h2" => ("\n## ", "\n"),
+                "h3" => ("\n### ", "\n"),
+                _ => (string.Empty, string.Empty)
+            };
 
-            foreach (var property in element.EnumerateObject())
+            if (builder.Length > 0 && builder[^1] is '*' or '_')
             {
-                IterateChunks(property.Value, builder, false);
+                builder.Append('\u200b'); // Append zero-witdh space to prevent markdown from breaking
+            }
+            builder.Append(markDownStart);
 
-                if (property.NameEquals("tag"))
+            if (element.TryGetProperty("children", out var children))
+            {
+                Debug.Assert(children.ValueKind == JsonValueKind.Array);
+
+                foreach (var child in children.EnumerateArray())
                 {
-                    string markDownEq = tag.GetString() switch
-                    {
-                        "i" => "*",
-                        "b" => "**",
-                        _ => string.Empty
-                    };
-                    builder.Append(markDownEq);
+                    IterateContent(child, builder);
                 }
+
+                builder.Append(markDownEnd);
             }
         }
     }
