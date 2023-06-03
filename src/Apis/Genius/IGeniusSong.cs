@@ -11,11 +11,6 @@ public interface IGeniusSong
     string ArtistNames { get; }
 
     /// <summary>
-    /// Gets the header image URL.
-    /// </summary>
-    string HeaderImageUrl { get; }
-
-    /// <summary>
     /// Gets the ID of this song.
     /// </summary>
     int Id { get; }
@@ -52,7 +47,7 @@ public interface IGeniusSong
     /// <summary>
     /// Gets a URL pointing to the primary artist page.
     /// </summary>
-    public string PrimaryArtistUrl { get; }
+    public string? PrimaryArtistUrl { get; }
 
     /// <summary>
     /// Gets the Spotify track ID.
@@ -62,5 +57,5 @@ public interface IGeniusSong
     /// <summary>
     /// Gets the lyrics of this song.
     /// </summary>
-    string Lyrics { get; }
+    string? Lyrics { get; }
 }

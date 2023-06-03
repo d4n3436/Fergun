@@ -7,11 +7,10 @@ namespace Fergun.Apis.Genius;
 /// </summary>
 public class GeniusSong : IGeniusSong
 {
-    public GeniusSong(string artistNames, string headerImageUrl, int id, bool isInstrumental, string lyricsState,
-        string songArtImageUrl, string title, string url, string primaryArtistUrl, string? spotifyTrackId, string lyrics)
+    public GeniusSong(string artistNames, int id, bool isInstrumental, string lyricsState,
+        string songArtImageUrl, string title, string url, string? primaryArtistUrl, string? spotifyTrackId, string? lyrics)
     {
         ArtistNames = artistNames;
-        HeaderImageUrl = headerImageUrl;
         Id = id;
         LyricsState = lyricsState;
         IsInstrumental = isInstrumental;
@@ -26,10 +25,6 @@ public class GeniusSong : IGeniusSong
     /// <inheritdoc/>
     [JsonPropertyName("artist_names")]
     public string ArtistNames { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("header_image_url")]
-    public string HeaderImageUrl { get; }
 
     /// <inheritdoc/>
     [JsonPropertyName("id")]
@@ -56,13 +51,13 @@ public class GeniusSong : IGeniusSong
     public string Url { get; }
 
     /// <inheritdoc/>
-    public string PrimaryArtistUrl { get; }
+    public string? PrimaryArtistUrl { get; }
 
     /// <inheritdoc/>
     public string? SpotifyTrackId { get; }
 
     /// <inheritdoc/>
-    public string Lyrics { get; }
+    public string? Lyrics { get; }
 
     /// <summary>
     /// Returns the full title of this song.

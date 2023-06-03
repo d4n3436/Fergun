@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -106,7 +107,6 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
             .GetProperty("song");
 
         string artistNames = song.GetProperty("artist_names").GetString() ?? throw new GeniusException("Unable to get the artist names.");
-        string headerImageUrl = song.GetProperty("header_image_url").GetString() ?? throw new GeniusException("Unable to get the song header image URL.");
         bool isInstrumental = song.GetProperty("instrumental").GetBoolean();
         string lyricsState = song.GetProperty("lyrics_state").GetString() ?? throw new GeniusException("Unable to get the lyrics state.");
         string songArtImageUrl = song.GetProperty("song_art_image_url").GetString() ?? throw new GeniusException("Unable to get the song art image URL.");
@@ -125,7 +125,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         var lyricsBuilder = new StringBuilder();
         IterateContent(content, lyricsBuilder);
 
-        return new GeniusSong(artistNames, headerImageUrl, id, isInstrumental, lyricsState,
+        return new GeniusSong(artistNames, id, isInstrumental, lyricsState,
             songArtImageUrl, title, url, primaryArtistUrl, spotifyTrackId, lyricsBuilder.ToString());
     }
 
@@ -141,25 +141,29 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         _disposed = true;
     }
 
-    private static void IterateContent(in JsonElement element, StringBuilder builder)
+    private static void IterateContent(in JsonElement element, StringBuilder builder, bool escape = true)
     {
         if (element.ValueKind == JsonValueKind.String)
         {
-            builder.Append(element.GetString());
+            string? value = element.GetString();
+            builder.Append(escape ? Format.Sanitize(value) : value);
         }
         else if (element.ValueKind == JsonValueKind.Object) // either tag or tag + children
         {
-            var tag = element.GetProperty("tag");
-            (string markDownStart, string markDownEnd) = tag.GetString() switch
+            string? tag = element.GetProperty("tag").GetString();
+            bool realLink = element.TryGetProperty("data", out var data) && data.TryGetProperty("real-link", out var realLinkProp) && realLinkProp.ValueEquals("true");
+
+            (string? markDownStart, string? markDownEnd) = tag switch
             {
                 ITALIC => ("*", "*"),
                 BOLD => ("**", "**"),
-                LINE_BREAK or HORIZONTAL_LINE or IMAGE or DFP_UNIT => ("\n", string.Empty),
+                LINE_BREAK or HORIZONTAL_LINE or IMAGE or DFP_UNIT => ("\n", null),
+                LINK when realLink => ("[", $"]({element.GetProperty("attributes").GetProperty("href").GetString()})"),
                 UNDERLINE => ("__", "__"),
                 "h1" => ("\n# ", "\n"),
                 "h2" => ("\n## ", "\n"),
                 "h3" => ("\n### ", "\n"),
-                _ => (string.Empty, string.Empty)
+                _ => (null, null)
             };
 
             if (builder.Length > 0 && builder[^1] is '*' or '_')
@@ -174,7 +178,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
                 foreach (var child in children.EnumerateArray())
                 {
-                    IterateContent(child, builder);
+                    IterateContent(child, builder, !realLink);
                 }
 
                 builder.Append(markDownEnd);
