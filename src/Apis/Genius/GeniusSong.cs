@@ -1,63 +1,26 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Genius;
 
-/// <summary>
-/// Represents a Genius song.
-/// </summary>
-public class GeniusSong : IGeniusSong
+/// <inheritdoc cref="IGeniusSong"/>
+public record GeniusSong(
+    [property: JsonPropertyName("artist_names")] string ArtistNames,
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("instrumental")] bool IsInstrumental,
+    [property: JsonPropertyName("lyrics_state")] string LyricsState,
+    [property: JsonPropertyName("song_art_image_url")] string SongArtImageUrl,
+    [property: JsonPropertyName("title")] string Title,
+    [property: JsonPropertyName("url")] string Url,
+    [property: JsonPropertyName("spotify_uuid")] string? SpotifyTrackId,
+    [property: JsonConverter(typeof(LyricsConverter))]
+    [property: JsonPropertyName("lyrics")] string? Lyrics,
+    [property: JsonPropertyName("primary_artist")]
+    [property: DebuggerBrowsable(DebuggerBrowsableState.Never)] GeniusPrimaryArtist PrimaryArtist) : IGeniusSong
 {
-    public GeniusSong(string artistNames, int id, bool isInstrumental, string lyricsState,
-        string songArtImageUrl, string title, string url, string? primaryArtistUrl, string? spotifyTrackId, string? lyrics)
-    {
-        ArtistNames = artistNames;
-        Id = id;
-        LyricsState = lyricsState;
-        IsInstrumental = isInstrumental;
-        SongArtImageUrl = songArtImageUrl;
-        Title = title;
-        Url = url;
-        PrimaryArtistUrl = primaryArtistUrl;
-        SpotifyTrackId = spotifyTrackId;
-        Lyrics = lyrics;
-    }
-
     /// <inheritdoc/>
-    [JsonPropertyName("artist_names")]
-    public string ArtistNames { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("id")]
-    public int Id { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("instrumental")]
-    public bool IsInstrumental { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("lyrics_state")]
-    public string LyricsState { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("song_art_image_url")]
-    public string SongArtImageUrl { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("title")]
-    public string Title { get; }
-
-    /// <inheritdoc/>
-    [JsonPropertyName("url")]
-    public string Url { get; }
-
-    /// <inheritdoc/>
-    public string? PrimaryArtistUrl { get; }
-
-    /// <inheritdoc/>
-    public string? SpotifyTrackId { get; }
-
-    /// <inheritdoc/>
-    public string? Lyrics { get; }
+    [JsonIgnore]
+    public string PrimaryArtistUrl => PrimaryArtist.Url;
 
     /// <summary>
     /// Returns the full title of this song.
