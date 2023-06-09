@@ -47,7 +47,7 @@ public interface IGeniusSong
     /// <summary>
     /// Gets a URL pointing to the primary artist page.
     /// </summary>
-    public string? PrimaryArtistUrl { get; }
+    public string PrimaryArtistUrl { get; }
 
     /// <summary>
     /// Gets the Spotify track ID.

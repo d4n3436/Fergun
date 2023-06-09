@@ -26,10 +26,10 @@ public class GeniusClientTests
             Assert.True(Uri.IsWellFormedUriString(x.SongArtImageUrl, UriKind.Absolute));
             Assert.NotEmpty(x.Title);
             Assert.True(Uri.IsWellFormedUriString(x.Url, UriKind.Absolute));
+            Assert.True(Uri.IsWellFormedUriString(x.PrimaryArtistUrl, UriKind.Absolute));
             Assert.NotNull(x.ToString());
 
             // Null for SearchSongsAsync
-            Assert.Null(x.PrimaryArtistUrl);
             Assert.Null(x.SpotifyTrackId);
             Assert.Null(x.Lyrics);
         });
