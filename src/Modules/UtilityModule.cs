@@ -94,7 +94,7 @@ public class UtilityModule : InteractionModuleBase
         {
             case AvatarType.FirstAvailable:
                 url = (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
-                title = user.ToString()!;
+                title = user.Format();
                 break;
 
             case AvatarType.Server:
@@ -104,7 +104,7 @@ public class UtilityModule : InteractionModuleBase
                     return FergunResult.FromError(_localizer["NoServerAvatar", user]);
                 }
 
-                title = $"{user} ({_localizer["Server"]})";
+                title = $"{user.Format()} ({_localizer["Server"]})";
                 break;
 
             case AvatarType.Global:
@@ -114,12 +114,12 @@ public class UtilityModule : InteractionModuleBase
                     return FergunResult.FromError(_localizer["NoGlobalAvatar", user]);
                 }
 
-                title = $"{user} ({_localizer["Global"]})";
+                title = $"{user.Format()} ({_localizer["Global"]})";
                 break;
 
             default:
                 url = user.GetDefaultAvatarUrl();
-                title = $"{user} ({_localizer["Default"]})";
+                title = $"{user.Format()} ({_localizer["Default"]})";
                 break;
         }
 
@@ -551,7 +551,7 @@ public class UtilityModule : InteractionModuleBase
 
         var builder = new EmbedBuilder()
             .WithTitle(_localizer["UserInfo"])
-            .AddField(_localizer["Name"], user.ToString())
+            .AddField(_localizer["Name"], user.Format())
             .AddField(_localizer["Nickname"], guildUser?.Nickname ?? $"({_localizer["None"]})")
             .AddField(_localizer["ID"], user.Id)
             .AddField(_localizer["Activities"], activities, true)

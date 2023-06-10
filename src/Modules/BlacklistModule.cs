@@ -34,7 +34,7 @@ public class BlacklistModule : InteractionModuleBase
         var dbUser = await _db.Users.FindAsync(user.Id);
         if (dbUser?.BlacklistStatus is BlacklistStatus.Blacklisted or BlacklistStatus.ShadowBlacklisted)
         {
-            return FergunResult.FromError(_localizer["UserAlreadyBlacklisted", user]);
+            return FergunResult.FromError(_localizer["UserAlreadyBlacklisted", user.Format()]);
         }
 
         if (dbUser is null)
@@ -47,10 +47,10 @@ public class BlacklistModule : InteractionModuleBase
         dbUser.BlacklistReason = reason;
 
         await _db.SaveChangesAsync();
-        _logger.LogInformation("User {User} ({Id}) has been added to the blacklist (shadow: {Shadow}).", user, user.Id, shadow);
+        _logger.LogInformation("User {User} ({Id}) has been added to the blacklist (shadow: {Shadow}).", user.Format(), user.Id, shadow);
 
         var builder = new EmbedBuilder()
-            .WithDescription(_localizer["UserBlacklisted", user])
+            .WithDescription(_localizer["UserBlacklisted", user.Format()])
             .WithColor(Color.Orange);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
@@ -64,17 +64,17 @@ public class BlacklistModule : InteractionModuleBase
         var dbUser = await _db.Users.FindAsync(user.Id);
         if (dbUser is null or { BlacklistStatus: BlacklistStatus.None })
         {
-            return FergunResult.FromError(_localizer["UserNotBlacklisted", user]);
+            return FergunResult.FromError(_localizer["UserNotBlacklisted", user.Format()]);
         }
 
         dbUser.BlacklistStatus = BlacklistStatus.None;
         dbUser.BlacklistReason = null;
 
         await _db.SaveChangesAsync();
-        _logger.LogInformation("User {User} ({Id}) has been removed from the blacklist.", user, user.Id);
+        _logger.LogInformation("User {User} ({Id}) has been removed from the blacklist.", user.Format(), user.Id);
 
         var builder = new EmbedBuilder()
-            .WithDescription(_localizer["UserRemovedFromBlacklist", user])
+            .WithDescription(_localizer["UserRemovedFromBlacklist", user.Format()])
             .WithColor(Color.Orange);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
