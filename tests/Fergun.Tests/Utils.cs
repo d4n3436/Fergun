@@ -33,13 +33,13 @@ internal static class Utils
         return localizerMock.Object;
     }
 
-    public static IUser CreateMockedUser(Faker? faker = null)
+    public static IUser CreateMockedUser(Faker? faker = null, bool pomelo = false)
     {
         faker ??= new Faker();
         var userMock = new Mock<IUser>();
 
         userMock.SetupGet(x => x.Username).Returns(faker.Internet.UserName());
-        userMock.SetupGet(x => x.DiscriminatorValue).Returns(faker.Random.UShort(1, 9999));
+        userMock.SetupGet(x => x.DiscriminatorValue).Returns(pomelo ? (ushort)0 : faker.Random.UShort(1, 9999));
         userMock.SetupGet(x => x.Discriminator).Returns(() => userMock.Object.DiscriminatorValue.ToString("D4"));
         userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(faker.Random.Number(3), () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
             .OrDefault(faker, 0.5f, CreateFakeCustomStatusGame(faker))).ToArray());
@@ -50,18 +50,17 @@ internal static class Utils
         userMock.SetupGet(x => x.IsBot).Returns(faker.Random.Bool());
         userMock.Setup(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>())).Returns(faker.Internet.Avatar().OrNull(faker));
         userMock.Setup(x => x.GetDefaultAvatarUrl()).Returns(faker.Internet.Avatar());
-        userMock.Setup(x => x.ToString()).Returns(() => $"{userMock.Object.Username}#{userMock.Object.Discriminator}");
+        userMock.Setup(x => x.ToString()).Returns(() => userMock.Object.DiscriminatorValue == 0 ? userMock.Object.Username : $"{userMock.Object.Username}#{userMock.Object.Discriminator}");
 
         return userMock.Object;
     }
-
-    public static IGuildUser CreateMockedGuildUser(Faker? faker = null)
+    public static IGuildUser CreateMockedGuildUser(Faker? faker = null, bool pomelo = false)
     {
         faker ??= new Faker();
         var userMock = new Mock<IGuildUser>();
 
         userMock.SetupGet(x => x.Username).Returns(faker.Internet.UserName());
-        userMock.SetupGet(x => x.DiscriminatorValue).Returns(faker.Random.UShort(1, 9999));
+        userMock.SetupGet(x => x.DiscriminatorValue).Returns(pomelo ? (ushort)0 : faker.Random.UShort(1, 9999));
         userMock.SetupGet(x => x.Discriminator).Returns(userMock.Object.DiscriminatorValue.ToString("D4"));
         userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(faker.Random.Number(3), () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
             .OrDefault(faker, 0.5f, CreateFakeCustomStatusGame(faker))).ToArray());
@@ -71,12 +70,12 @@ internal static class Utils
         userMock.SetupGet(x => x.Id).Returns(faker.Random.ULong());
         userMock.SetupGet(x => x.IsBot).Returns(faker.Random.Bool());
         userMock.SetupGet(x => x.Nickname).Returns(faker.Internet.UserName().OrNull(faker));
-        userMock.SetupGet(x => x.JoinedAt).Returns( faker.Date.PastOffset());
+        userMock.SetupGet(x => x.JoinedAt).Returns(faker.Date.PastOffset());
         userMock.SetupGet(x => x.PremiumSince).Returns(faker.Date.PastOffset().OrNull(faker));
         userMock.Setup(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>())).Returns(faker.Internet.Avatar());
         userMock.Setup(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>())).Returns(faker.Internet.Avatar());
         userMock.Setup(x => x.GetDefaultAvatarUrl()).Returns(faker.Internet.Avatar());
-        userMock.Setup(x => x.ToString()).Returns($"{userMock.Object.Username}#{userMock.Object.Discriminator}");
+        userMock.Setup(x => x.ToString()).Returns(() => userMock.Object.DiscriminatorValue == 0 ? userMock.Object.Username : $"{userMock.Object.Username}#{userMock.Object.Discriminator}");
 
         return userMock.Object;
     }
