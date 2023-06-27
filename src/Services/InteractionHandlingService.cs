@@ -275,7 +275,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (result.IsSuccess)
         {
             _logger.LogDebug("Executed Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context}",
-                name, context.User.Format(), context.User.Id, context.Display());
+                name, context.User, context.User.Id, context.Display());
         }
         else if (result.Error == InteractionCommandError.Exception)
         {
@@ -284,18 +284,18 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             if (exception is TimeoutRejectedException)
             {
                 _logger.LogWarning("The autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} was canceled because it exceeded the timeout.",
-                    name, context.User.Format(), context.User.Id, context.Display());
+                    name, context.User, context.User.Id, context.Display());
             }
             else
             {
                 _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception.",
-                    name, context.User.Format(), context.User.Id, context.Display());
+                    name, context.User, context.User.Id, context.Display());
             }
         }
         else
         {
             _logger.LogWarning("Failed to execute Autocomplete handler of command  \"{Name}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                name, context.User.Format(), context.User.Id, context.Display(), result.ErrorReason);
+                name, context.User, context.User.Id, context.Display(), result.ErrorReason);
         }
 
         return Task.CompletedTask;
@@ -336,7 +336,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
-                commandType, commandName, context.User.Format(), context.User.Id, context.Display());
+                commandType, commandName, context.User, context.User.Id, context.Display());
 
             return;
         }
@@ -354,7 +354,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             var exception = ((ExecuteResult)result).Exception;
 
             _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception.",
-                commandType, commandName, context.User.Format(), context.User.Id, context.Display());
+                commandType, commandName, context.User, context.User.Id, context.Display());
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
@@ -363,12 +363,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         else if (result.Error == InteractionCommandError.Unsuccessful)
         {
             _logger.LogInformation("Unsuccessful execution of {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                commandType, commandName, context.User.Format(), context.User.Id, context.Display(), englishMessage ?? message);
+                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                commandType, commandName, context.User.Format(), context.User.Id, context.Display(), englishMessage ?? message);
+                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
 
         var embed = new EmbedBuilder()

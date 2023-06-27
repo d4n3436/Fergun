@@ -61,6 +61,7 @@ public class UtilityModuleTests
         var result = await _moduleMock.Object.AvatarAsync(userMock.Object);
         Assert.True(result.IsSuccess);
 
+        userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
         if (userMock.Object.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()) is null)
         {
@@ -77,6 +78,7 @@ public class UtilityModuleTests
         var result = await _moduleMock.Object.AvatarAsync(guildUserMock.Object);
         Assert.True(result.IsSuccess);
 
+        guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
         VerifyRespondAsyncCall(guildUserMock.Object);
     }
@@ -88,6 +90,7 @@ public class UtilityModuleTests
         var result = await _moduleMock.Object.UserInfoAsync(userMock.Object);
         Assert.True(result.IsSuccess);
 
+        userMock.Verify(x => x.ToString());
         userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
         if (userMock.Object.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()) is null)
         {
@@ -110,6 +113,7 @@ public class UtilityModuleTests
         var result = await _moduleMock.Object.UserInfoAsync(guildUserMock.Object);
         Assert.True(result.IsSuccess);
 
+        guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
         guildUserMock.VerifyGet(x => x.Activities);
         guildUserMock.VerifyGet(x => x.ActiveClients);
