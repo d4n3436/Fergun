@@ -417,4 +417,13 @@
   <data name="Vote" xml:space="preserve">
     <value>Votar</value>
   </data>
+  <data name="avatar.type.default avatar.name" xml:space="preserve">
+    <value>Avatar predeterminado</value>
+  </data>
+  <data name="avatar.type.global (main) avatar.name" xml:space="preserve">
+    <value>Avatar global (principal)</value>
+  </data>
+  <data name="avatar.type.server avatar.name" xml:space="preserve">
+    <value>Avatar de servidor</value>
+  </data>
 </root>
