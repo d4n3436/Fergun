@@ -72,6 +72,11 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         byte[] page = await _httpClient.GetByteArrayAsync(new Uri(requestUrl), cancellationToken);
 
         var data = ExtractDataPack(page, ResultsCallbackStart).RootElement[1].EnumerateArray().Last()[1][8];
+
+        // No results for this image
+        if (data.GetArrayLength() < 9)
+            return Array.Empty<IGoogleLensResult>();
+
         var matches = data[8][0][12];
 
         return matches.EnumerateArray().Select(x => new GoogleLensResult(
