@@ -25,9 +25,9 @@ public class StringExtensionsTests
 
     [Theory]
     [MemberData(nameof(GetSplitStringData))]
-    public void String_SplitWithoutWordBreaking_Should_Not_Divide_Words(string str, int length)
+    public void String_SplitForPagination_Should_Not_Divide_Words(string str, int length)
     {
-        var split = str.SplitWithoutWordBreaking(length);
+        var split = str.SplitForPagination(length);
         string joined = string.Join(' ', split);
 
         Assert.Equal(str, joined);

@@ -135,7 +135,7 @@ public class OwnerModule : InteractionModuleBase
             return FergunResult.FromSilentError();
         }
 
-        var chunks = (result?.ToString() ?? string.Empty).SplitWithoutWordBreaking(EmbedFieldBuilder.MaxFieldValueLength - 9).ToArray();
+        var chunks = (result?.ToString() ?? string.Empty).SplitForPagination(EmbedFieldBuilder.MaxFieldValueLength - 9).ToArray();
 
         if (chunks.Length == 0)
         {

@@ -7,8 +7,16 @@ public static class StringExtensions
 {
     public static bool ContainsAny(this string str, string str0, string str1) => str.Contains(str0) || str.Contains(str1);
 
-    // From GTranslate
-    public static IEnumerable<ReadOnlyMemory<char>> SplitWithoutWordBreaking(this string text, int maxLength)
+    /// <summary>
+    /// Splits an string into chunks, each of at most <paramref name="maxLength"/> of length, in a way that is suitable for pagination.
+    /// The method tries to avoid breaking the text by spliting it with 3 separators in the following order:<br></br>
+    /// 2 newlines ("\n\n") -> 1 newline ('\n') -> 1 space (' ')<br></br>
+    /// If it's not possible to do so, the method will fallback to split the text without restrictions and continue with the next chunks.
+    /// </summary>
+    /// <param name="text">The text to split.</param>
+    /// <param name="maxLength">The max. length of the chunks.</param>
+    /// <returns>An enumerator that iterates over the chunks.</returns>
+    public static IEnumerable<ReadOnlyMemory<char>> SplitForPagination(this string text, int maxLength)
     {
         var current = text.AsMemory();
 
@@ -23,20 +31,29 @@ public static class StringExtensions
             }
             else
             {
-                index = current[..maxLength].Span.LastIndexOf(' ');
+                var portion = current[..(maxLength + 1)].Span;
+
+                index = portion.LastIndexOf("\n\n");
+                if (index == -1)
+                    index = portion.LastIndexOf('\n');
+                if (index == -1) 
+                    index = portion.LastIndexOf(' ');
+
                 length = index == -1 ? maxLength : index;
             }
 
-            var line = current[..length];
+            yield return current[..length];
 
-            // skip a single space if there's one
             if (index != -1)
             {
-                length++;
+                // Consume more newlines and spaces if any
+                while (length < current.Length && current.Span[length] is '\n' or ' ')
+                {
+                    length++;
+                }
             }
 
             current = current[length..];
-            yield return line;
         }
     }
 }

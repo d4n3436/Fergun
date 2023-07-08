@@ -165,7 +165,7 @@ public class OtherModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistNames} - {song.Title}"]);
         }
 
-        var chunks = song.Lyrics.SplitWithoutWordBreaking(EmbedBuilder.MaxDescriptionLength).ToArray();
+        var chunks = song.Lyrics.SplitForPagination(EmbedBuilder.MaxDescriptionLength).ToArray();
 
         var paginator = new LazyPaginatorBuilder()
             .AddUser(Context.User)
