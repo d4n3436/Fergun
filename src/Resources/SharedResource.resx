@@ -148,7 +148,7 @@
     <value>Error message: {0}</value>
   </data>
   <data name="ExpiredJumpInput" xml:space="preserve">
-    <value>Expired modal interaction. You must respond within {0} seconds.</value>
+    <value>Expired modal interaction. You must respond within {0} second(s).</value>
   </data>
   <data name="Input" xml:space="preserve">
     <value>Input</value>
@@ -193,7 +193,7 @@
     <value>Page {0} of {1}</value>
   </data>
   <data name="Ratelimited" xml:space="preserve">
-    <value>This command is on cooldown! Try again in {0} seconds.</value>
+    <value>This command is on cooldown! Try again in {0} second(s).</value>
   </data>
   <data name="Result" xml:space="preserve">
     <value>Result</value>

@@ -148,7 +148,7 @@
     <value>Mensaje de error: {0}</value>
   </data>
   <data name="ExpiredJumpInput" xml:space="preserve">
-    <value>Interacción de modal expirada. Debes responder en {0} segundos.</value>
+    <value>Interacción de modal expirada. Debes responder en {0} segundo(s).</value>
   </data>
   <data name="Input" xml:space="preserve">
     <value>Entrada</value>
@@ -193,7 +193,7 @@
     <value>Página {0} de {1}</value>
   </data>
   <data name="Ratelimited" xml:space="preserve">
-    <value>Espera {0} segundos antes de volver a usar este comando!</value>
+    <value>Espera {0} segundo(s) antes de volver a usar este comando!</value>
   </data>
   <data name="Result" xml:space="preserve">
     <value>Resultado</value>
