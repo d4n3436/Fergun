@@ -246,7 +246,7 @@ public class OtherModule : InteractionModuleBase
         {
             if (totalRamUsage > 0)
             {
-                string usagePercentage = ((double)processRamUsage / totalRamUsage).ToString("P2", _localizer.CurrentCulture);
+                string usagePercentage = ((double)processRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
                 string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
                 ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes().ToString(_localizer.CurrentCulture)} ({totalUsagePercentage})";
             }
