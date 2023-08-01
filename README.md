@@ -9,9 +9,9 @@ Have any questions or need help with the bot? Join the [support server](https://
 
 ## Features
 - Translate text from and to more than 140 languages using a robust translation module that is powered by popular translators from Google Translate, Microsoft Translator and Yandex Translate
-- Image search from Google, DuckDuckGo and Brave
-- Reverse image search from Bing and Yandex
-- Perform OCR to images using Bing and Yandex
+- Image search from Google and DuckDuckGo
+- Reverse image search from Google, Bing and Yandex
+- Perform OCR to images using Google, Bing and Yandex
 - Perform text-to-speech using Google and Microsoft Azure
 - Translate a text multiple times using different translators for bad translations
 - Get complete definitions of words from Dictionary.com
@@ -19,7 +19,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 - Get inspirational quotes from InspiroBot
 - Search or get random definitions from Urban Dictionary
 - Search and get Wikipedia articles
-- Search and get music lyrics from ~~Genius~~ Musixmatch
+- Search and get music lyrics from Genius
 - Search YouTube videos
 - Get user information and server/global/default avatar
 - Generate images of colors
