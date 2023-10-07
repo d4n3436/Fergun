@@ -115,8 +115,15 @@ public static class DictionaryFormatter
 
         if (!string.IsNullOrEmpty(entry.Origin))
         {
-            builder.Append($"**Origin of {entry.Entry}**\n{FormatHtml(entry.Origin)}\n\n");
+            builder.Append($"**Origin of {entry.Entry}**");
         }
+
+        if (entry.Homograph is not null)
+        {
+            builder.Append(SuperscriptDigits[entry.Homograph.Value]);
+        }
+
+        builder.Append($"\n{FormatHtml(entry.Origin)}\n\n");
 
         foreach (var note in entry.SupplementaryNotes)
         {
@@ -181,10 +188,6 @@ public static class DictionaryFormatter
                 else if (className.EndsWith("bold"))
                 {
                     builder.Append($"**{content}**");
-                }
-                else if (className == "luna-def-number")
-                {
-                    builder.Append($"\n**{content}**");
                 }
                 else
                 {
