@@ -249,7 +249,8 @@ public class UtilityModule : InteractionModuleBase
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("define", "Gets the definitions of a word from Dictionary.com (only English).")]
     public async Task<RuntimeResult> DefineAsync(
-        [Autocomplete(typeof(DictionaryAutocompleteHandler))] [Summary(description: "The word to get its defintions.")] string word)
+    [MaxLength(100)] [Autocomplete(typeof(DictionaryAutocompleteHandler))]
+    [Summary(description: "The word to get its defintions.")] string word)
     {
         await Context.Interaction.DeferAsync();
 
