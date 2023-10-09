@@ -180,7 +180,13 @@ public class OcrModule : InteractionModuleBase
     [ComponentInteraction("ocrtranslate", true)]
     public async Task<RuntimeResult> OcrTranslateAsync()
     {
-        string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
+        var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
+        if (embed is null)
+        {
+            return FergunResult.FromError(_localizer["EmbedNotFound"], true);
+        }
+
+        string text = embed.Description;
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 
@@ -190,7 +196,13 @@ public class OcrModule : InteractionModuleBase
     [ComponentInteraction("ocrtts", true)]
     public async Task<RuntimeResult> OcrTtsAsync()
     {
-        string text = ((IComponentInteraction)Context.Interaction).Message.Embeds.First().Description;
+        var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
+        if (embed is null)
+        {
+            return FergunResult.FromError(_localizer["EmbedNotFound"], true);
+        }
+
+        string text = embed.Description;
         int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
         text = text[startIndex..^3];
 

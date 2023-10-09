@@ -120,6 +120,9 @@
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Bing Visual Search</value>
   </data>
+  <data name="EmbedNotFound" xml:space="preserve">
+    <value>Embed not found.</value>
+  </data>
   <data name="GoogleLensOCR" xml:space="preserve">
     <value>Google Lens OCR</value>
   </data>

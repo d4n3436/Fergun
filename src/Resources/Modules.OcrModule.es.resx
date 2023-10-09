@@ -138,6 +138,9 @@
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Búsqueda Visual de Bing</value>
   </data>
+  <data name="EmbedNotFound" xml:space="preserve">
+    <value>Inserción no encontrada.</value>
+  </data>
   <data name="google.description" xml:space="preserve">
     <value>Realiza OCR a una imagen usando Google Lens.</value>
   </data>
