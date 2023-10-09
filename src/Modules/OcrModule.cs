@@ -122,7 +122,7 @@ public class OcrModule : InteractionModuleBase
         catch (YandexException e)
         {
             _logger.LogWarning(e, "Failed to perform Yandex OCR to url {Url}", url);
-            return FergunResult.FromError(_localizer[e.Message], ephemeral, interaction);
+            return FergunResult.FromError(_localizer["YandexOCRError"], ephemeral, interaction);
         }
 
         if (string.IsNullOrWhiteSpace(text))

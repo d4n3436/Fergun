@@ -58,10 +58,14 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
-        if (!response.IsSuccessStatusCode)
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException e)
         {
             string message = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            throw new YandexException(message);
+            throw new YandexException(message, e);
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);

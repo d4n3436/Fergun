@@ -210,4 +210,7 @@
   <data name="YandexOCR" xml:space="preserve">
     <value>OCR de Yandex</value>
   </data>
+  <data name="YandexOCRError" xml:space="preserve">
+    <value>No fue posible obtener una imagen en la URL especificada. Usa otra URL o inténtalo más tarde.</value>
+  </data>
 </root>

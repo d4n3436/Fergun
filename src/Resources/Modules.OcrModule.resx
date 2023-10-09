@@ -156,4 +156,7 @@
   <data name="YandexOCR" xml:space="preserve">
     <value>Yandex OCR</value>
   </data>
+  <data name="YandexOCRError" xml:space="preserve">
+    <value>Unable to find an image at the specified URL. Use a different URL or try again later.</value>
+  </data>
 </root>
