@@ -625,11 +625,6 @@ public class UtilityModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["WolframAlphaError", result.ErrorInfo!.StatusCode, result.ErrorInfo!.Message]);
         }
 
-        if (result.Type == WolframAlphaResultType.DidYouMean)
-        {
-            return FergunResult.FromError(_localizer["WolframAlphaDidYouMean", $"\n- {string.Join("\n- ", result.DidYouMeans.Select(x => x.Value))}"]);
-        }
-
         if (result.Type == WolframAlphaResultType.FutureTopic)
         {
             var embed = new EmbedBuilder()
@@ -643,7 +638,7 @@ public class UtilityModule : InteractionModuleBase
             return FergunResult.FromSuccess();
         }
 
-        if (result.Type == WolframAlphaResultType.NoResult)
+        if (result.Type is  WolframAlphaResultType.NoResult or WolframAlphaResultType.DidYouMean)
         {
             return FergunResult.FromError(_localizer["WolframAlphaNoResults"]);
         }
