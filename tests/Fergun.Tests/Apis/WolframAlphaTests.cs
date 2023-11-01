@@ -14,11 +14,12 @@ public class WolframAlphaTests
     private readonly IWolframAlphaClient _wolframAlphaClient = new WolframAlphaClient();
 
     [Theory]
-    [InlineData("2 +")]
-    [InlineData("1/6")]
-    public async Task GetAutocompleteResultsAsync_Returns_Valid_Results(string input)
+    [InlineData("2 +", "en")]
+    [InlineData("1/6", "es")]
+    [InlineData("2^2", "ja")]
+    public async Task GetAutocompleteResultsAsync_Returns_Valid_Results(string input, string language)
     {
-        var results = await _wolframAlphaClient.GetAutocompleteResultsAsync(input, CancellationToken.None);
+        var results = await _wolframAlphaClient.GetAutocompleteResultsAsync(input, language, CancellationToken.None);
 
         Assert.NotEmpty(results);
         Assert.All(results, Assert.NotEmpty);
@@ -28,7 +29,7 @@ public class WolframAlphaTests
     public async Task GetAutocompleteResultsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
         var cts = new CancellationTokenSource(0);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync(It.IsAny<string>(), cts.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync("test", "en", cts.Token));
     }
 
     [Fact]
@@ -83,7 +84,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_FutureTopic_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("Microsoft Windows", "en");
+        var result = await _wolframAlphaClient.SendQueryAsync("Microsoft Windows", "es");
 
         Assert.Equal(WolframAlphaResultType.FutureTopic, result.Type);
         Assert.NotNull(result.FutureTopic);
@@ -94,7 +95,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_No_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("oadf lds", "en");
+        var result = await _wolframAlphaClient.SendQueryAsync("oadf lds", "ja");
 
         Assert.Equal(WolframAlphaResultType.NoResult, result.Type);
     }
@@ -123,7 +124,7 @@ public class WolframAlphaTests
         (_wolframAlphaClient as IDisposable)?.Dispose();
         (_wolframAlphaClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.SendQueryAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
     }
 
