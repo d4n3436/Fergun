@@ -661,7 +661,8 @@ public class UtilityModule : InteractionModuleBase
                 // If there's data in plain text and there isn't a newline, use that instead
                 if (!string.IsNullOrEmpty(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
                 {
-                    text.AppendLine(subPod.PlainText);
+                    text.Append(subPod.PlainText);
+                    text.Append('\n');
                 }
                 else
                 {
@@ -675,7 +676,7 @@ public class UtilityModule : InteractionModuleBase
             }
 
             if (text.Length > 0)
-                topEmbed.AddField(pod.Title, text.ToString(), true);
+                topEmbed.AddField(pod.Title, text.ToString().Truncate(EmbedFieldBuilder.MaxFieldValueLength), true);
 
             if (subBuilders.Count > 0)
                 builders.Add(subBuilders);
