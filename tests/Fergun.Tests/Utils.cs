@@ -156,8 +156,8 @@ internal static class Utils
         yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<CancellationToken>())).ReturnsAsync(faker.Lorem.Sentence());
         yandexMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Error message."));
         
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(Enumerable.Empty<IYandexReverseImageSearchResult>);
-        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedYandexReverseImageSearchResult(faker)));
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<IYandexReverseImageSearchResult>);
+        yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedYandexReverseImageSearchResult(faker)).ToList());
         yandexMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<YandexSearchFilterMode>(), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Error message."));
 
         return yandexMock.Object;

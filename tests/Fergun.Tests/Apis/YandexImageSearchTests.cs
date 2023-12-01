@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using AngleSharp;
-using AngleSharp.Dom;
-using AngleSharp.Html.Dom;
 using Fergun.Apis.Yandex;
 using Moq;
 using Moq.Protected;
@@ -76,7 +72,7 @@ public class YandexImageSearchTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/0e/Landscape-2454891_960_720.jpg", YandexSearchFilterMode.Family)]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, YandexSearchFilterMode mode)
     {
-        var results = (await _yandexImageSearch.ReverseImageSearchAsync(url, mode)).ToArray();
+        var results = await _yandexImageSearch.ReverseImageSearchAsync(url, mode);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -105,88 +101,6 @@ public class YandexImageSearchTests
     }
 
     [Fact]
-    public async Task ReverseImageSearchAsync_Ignores_Invalid_Results()
-    {
-        string[] rawResults =
-        {
-            string.Empty,
-            "{[",
-            @"
-{
-    ""serp-item"":
-    {
-        ""img_href"": null
-    }
-}",
-            @"
-{
-    ""serp-item"":
-    {
-        ""img_href"": ""https://example.com/image.png"",
-        ""snippet"":
-        {
-            ""url"": null,
-            ""text"": ""sample text""
-        }
-    }
-}",
-            @"
-{
-    ""serp-item"":
-    {
-        ""img_href"": ""https://example.com/image.png"",
-        ""snippet"":
-        {
-            ""url"": ""https://example.com"",
-            ""text"": null
-        }
-    }
-}"
-        };
-
-        var context = BrowsingContext.New();
-        var document = await context.OpenNewAsync();
-        var serpList = document.CreateElement<IHtmlDivElement>();
-        serpList.ClassName = "serp-list";
-
-        serpList.Append(rawResults.Select(x =>
-        {
-            var item = document.CreateElement<IHtmlDivElement>();
-            item.ClassName = "serp-item";
-
-            item.SetAttribute("data-bem", x);
-            return (INode)item;
-        }).ToArray());
-
-        string html = serpList.ToHtml();
-
-        string json = $@"
-{{
-    ""blocks"":
-    [
-        {{
-            ""html"": ""{{{JsonEncodedText.Encode(html)}}}""
-        }}
-    ]
-}}";
-
-        var messageHandlerMock = new Mock<HttpMessageHandler>();
-
-        messageHandlerMock
-            .Protected()
-            .As<HttpClient>()
-            .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) });
-
-        var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
-
-        var results = (await yandexImageSearch.ReverseImageSearchAsync("https://example.com/image.png")).ToArray();
-
-        Assert.NotNull(results);
-        Assert.Empty(results);
-    }
-
-    [Fact]
     public async Task Disposed_YandexImageSearch_Usage_Throws_ObjectDisposedException()
     {
         (_yandexImageSearch as IDisposable)?.Dispose();
@@ -212,5 +126,19 @@ public class YandexImageSearchTests
 
         Assert.Equal("Custom message 2", exception3.Message);
         Assert.Same(innerException, exception3.InnerException);
+    }
+
+    [Theory]
+    [InlineData("\"{title:&quot;a&quot;}\"", "{title:\"a\"}")]
+    [InlineData("\"D&amp;D\"", "D&D")]
+    public void HtmlEncodingConverter_Returns_Expected_Values(string encodedString, string decodedString)
+    {
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new HtmlEncodingConverter());
+
+        string deserialized = JsonSerializer.Deserialize<string>(encodedString, options)!;
+
+        Assert.Equal(decodedString, deserialized);
+        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(decodedString, options));
     }
 }

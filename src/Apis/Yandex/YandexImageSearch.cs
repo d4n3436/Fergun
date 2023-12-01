@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -112,7 +111,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+    public async Task<IReadOnlyList<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
@@ -155,17 +154,26 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .RootElement
             .GetProperty("blocks")[0]
             .GetProperty("html")
-            .GetString() ?? string.Empty;
+            .GetString()!;
 
         var htmlDocument = await _parser.ParseDocumentAsync(html, cancellationToken).ConfigureAwait(false);
 
-        var rawItems = htmlDocument
-            .GetElementsByClassName("serp-list")
-            .FirstOrDefault()?
-            .GetElementsByClassName("serp-item")
-            .Select(x => x.GetAttribute("data-bem")) ?? Enumerable.Empty<string?>();
+        string json = htmlDocument
+            .GetElementsByClassName("cbir-similar-page").First()
+            .GetElementsByClassName("cbir-similar-page__content").First()
+            .GetElementsByClassName("Root").First()
+            .GetAttribute("data-state")!;
 
-        return EnumerateResults(rawItems);
+        using var data = JsonDocument.Parse(json);
+
+        return data.RootElement
+            .GetProperty("initialState")
+            .GetProperty("serpList")
+            .GetProperty("items")
+            .GetProperty("entities")
+            .EnumerateObject()
+            .Select(x => x.Value.GetProperty("viewerData").Deserialize<YandexReverseImageSearchResult>()!)
+            .ToArray();
     }
 
     /// <inheritdoc/>
@@ -178,43 +186,6 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private static IEnumerable<YandexReverseImageSearchResult> EnumerateResults(IEnumerable<string?> rawItems)
-    {
-        foreach (string? rawItem in rawItems)
-        {
-            if (string.IsNullOrEmpty(rawItem))
-                continue;
-
-            JsonDocument document;
-            try
-            {
-                document = JsonDocument.Parse(rawItem);
-            }
-            catch
-            {
-                continue;
-            }
-
-            var item = document.RootElement.GetPropertyOrDefault("serp-item");
-            var snippet = item.GetPropertyOrDefault("snippet");
-
-            string? url = item
-                .GetPropertyOrDefault("img_href")
-                .GetStringOrDefault();
-
-            string? sourceUrl = snippet.GetPropertyOrDefault("url").GetStringOrDefault();
-            string? title = snippet.GetPropertyOrDefault("title").GetStringOrDefault();
-            string? text = snippet.GetPropertyOrDefault("text").GetStringOrDefault();
-
-            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(sourceUrl) || string.IsNullOrEmpty(text))
-            {
-                continue;
-            }
-
-            yield return new YandexReverseImageSearchResult(url, sourceUrl, WebUtility.HtmlDecode(title), WebUtility.HtmlDecode(text));
-        }
     }
 
     private void EnsureNotDisposed()

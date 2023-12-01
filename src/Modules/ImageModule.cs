@@ -247,12 +247,11 @@ public class ImageModule : InteractionModuleBase
 
         bool isNsfw = Context.Channel.IsNsfw();
 
-        IYandexReverseImageSearchResult[] results;
+        IReadOnlyList<IYandexReverseImageSearchResult> results;
 
         try
         {
-            results = (await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family))
-                .ToArray();
+            results = await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family);
         }
         catch (YandexException e)
         {
@@ -260,13 +259,13 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 
-        if (results.Length == 0)
+        if (results.Count == 0)
         {
             return FergunResult.FromError(_localizer["NoResults"], ephemeral, interaction);
         }
 
         int count = multiImages ? 4 : 1;
-        int maxIndex = (int)Math.Ceiling((double)results.Length / count) - 1;
+        int maxIndex = (int)Math.Ceiling((double)results.Count / count) - 1;
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
