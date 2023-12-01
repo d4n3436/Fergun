@@ -59,7 +59,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 
     [Theory]
     [InlineData(208247352, false, false, false)] // Op - Under Attack (no lyrics, no cover image)
-    [InlineData(31029027, true, true, true)] // Guns N' Roses - Welcome To The Jungle (restricted everywhere)
+    [InlineData(84457474, true, true, true)] // Eminem - Without Me (restricted everywhere)
     public async Task GetSongAsync_Returns_Valid_Songs(int id, bool hasLyrics, bool hasSpotifyTrackId, bool restricted)
     {
         var result = await _musixmatchClient.GetSongAsync(id, CancellationToken.None);
@@ -175,9 +175,9 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
             .Protected()
             .As<HttpClient>()
             .Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() =>
+            .Returns(async () =>
             {
-                Thread.Sleep(2000);
+                await Task.Delay(2000);
                 return GetResponseMessage(successfulTokenResponse);
             });
 

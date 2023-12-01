@@ -8,7 +8,7 @@ namespace Fergun.Tests.Apis;
 
 public class UrbanDictionaryTests
 {
-    private readonly UrbanDictionary _urbanDictionary = new();
+    private readonly IUrbanDictionary _urbanDictionary = new UrbanDictionary();
 
     [InlineData("lol")]
     [InlineData("cringe")]
@@ -100,8 +100,8 @@ public class UrbanDictionaryTests
     [Fact]
     public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
     {
-        _urbanDictionary.Dispose();
-        _urbanDictionary.Dispose();
+        (_urbanDictionary as IDisposable)?.Dispose();
+        (_urbanDictionary as IDisposable)?.Dispose();
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionsAsync(It.IsAny<string>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetRandomDefinitionsAsync());
