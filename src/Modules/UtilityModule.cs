@@ -574,7 +574,7 @@ public class UtilityModule : InteractionModuleBase
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
-    public async Task<RuntimeResult> WikipediaAsync([Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(name: "query", description: "The search query.")] int id)
+    public async Task<RuntimeResult> WikipediaAsync([MaxValue(int.MaxValue)] [Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(name: "query", description: "The search query.")] int id)
     {
         await Context.Interaction.DeferAsync();
 
