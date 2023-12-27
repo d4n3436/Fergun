@@ -52,7 +52,7 @@ public class WolframAlphaResult : IWolframAlphaResult
 
     /// <inheritdoc cref="IWolframAlphaResult.FutureTopic"/>
     [JsonPropertyName("futuretopic")]
-    public WolframAlphaFutureTopic? FutureTopic { get;  }
+    public WolframAlphaFutureTopic? FutureTopic { get; }
 
     /// <inheritdoc cref="IWolframAlphaResult.ErrorInfo"/>
     [JsonPropertyName("error")]

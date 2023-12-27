@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using AutoBogus;
 using Xunit;
 
@@ -31,6 +30,6 @@ public class FergunOptionsTests
         Assert.Equal(options.ExtraEmotes, other.ExtraEmotes);
     }
 
-    public static IEnumerable<object[]> GetFergunOptionsTestData()
-        => AutoFaker.Generate<FergunOptions>(10).Select(x => new object[] { x });
+    public static TheoryData<FergunOptions> GetFergunOptionsTestData()
+        => AutoFaker.Generate<FergunOptions>(10).ToTheoryData();
 }

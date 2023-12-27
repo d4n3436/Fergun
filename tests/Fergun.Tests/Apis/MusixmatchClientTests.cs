@@ -10,7 +10,7 @@ using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Moq.Protected;
-using System.Collections.Generic;
+using AutoBogus;
 
 namespace Fergun.Tests.Apis;
 
@@ -104,7 +104,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     public async Task SearchSongsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
         var cts = new CancellationTokenSource(0);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.SearchSongsAsync(It.IsAny<string>(), It.IsAny<bool>(), cts.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<bool>(), cts.Token));
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     }
 
     [Fact]
-    public async Task Concurrent_SearchSongsAsync_Calls_Return_Valid_Resuls()
+    public async Task Concurrent_SearchSongsAsync_Calls_Return_Valid_Results()
     {
         var successfulTokenResponse = new
         {
@@ -209,7 +209,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         (_musixmatchClient as IDisposable)?.Dispose();
         (_musixmatchClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.SearchSongsAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.GetSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()));
     }
 
@@ -276,7 +276,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         Assert.Null(serverErrorException.Hint);
     }
 
-    public static IEnumerable<object[]> GetMockedMusixmatchClientSequences()
+    public static TheoryData<MusixmatchClient> GetMockedMusixmatchClientSequences()
     {
         var successfulTokenResponse = new
         {
@@ -384,9 +384,12 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         // triggering the retry policy and returning a new token.get response
 
         // We need clean MusixmatchClientStates (no rate-limits) for the tests
-        yield return new object[] { GetNewClient() };
-        yield return new object[] { GetNewClient() };
-        yield return new object[] { GetNewClient() };
+        return new TheoryData<MusixmatchClient>
+        {
+            GetNewClient(),
+            GetNewClient(),
+            GetNewClient()
+        };
 
         MusixmatchClient GetNewClient() => new(musixmatchHttpClient, new MusixmatchClientState(httpClientFactoryMock.Object), loggerMock.Object);
     }

@@ -1,6 +1,5 @@
 ﻿using Discord;
 using Moq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Localization;
 using Xunit;
 
@@ -50,19 +49,25 @@ public class FergunResultTests
         Assert.True(result.IsSilent);
     }
 
-    public static IEnumerable<object?[]> GetFergunResultData()
+    public static TheoryData<string, bool, IDiscordInteraction?> GetFergunResultData()
     {
         var interactionMock = new Mock<IDiscordInteraction>();
 
-        yield return new object?[] { "Error", true, null };
-        yield return new object?[] { "Error 2", false, interactionMock.Object };
+        return new TheoryData<string, bool, IDiscordInteraction?>
+        {
+            { "Error", true, null },
+            { "Error 2", false, interactionMock.Object }
+        };
     }
 
-    public static IEnumerable<object?[]> GetLocalizedFergunResultData()
+    public static TheoryData<LocalizedString, bool, IDiscordInteraction?> GetLocalizedFergunResultData()
     {
         var interactionMock = new Mock<IDiscordInteraction>();
 
-        yield return new object?[] { new LocalizedString("ErrorMessage", "Error message"), true, null };
-        yield return new object?[] { new LocalizedString("TestMessage", "Test message"), false, interactionMock.Object };
+        return new TheoryData<LocalizedString, bool, IDiscordInteraction?>
+        {
+            { new LocalizedString("ErrorMessage", "Error message"), true, null },
+            { new LocalizedString("TestMessage", "Test message"), false, interactionMock.Object }
+        };
     }
 }

@@ -220,7 +220,7 @@
     <value>Unknown paginator builder type</value>
   </data>
   <data name="UrlNotWellFormed" xml:space="preserve">
-    <value>The URL is not well formed.</value>
+    <value>The URL is not well-formed.</value>
   </data>
   <data name="UrlOrAttachmentRequired" xml:space="preserve">
     <value>A URL or attachment is required.</value>

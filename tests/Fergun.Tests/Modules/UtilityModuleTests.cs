@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
@@ -138,17 +137,17 @@ public class UtilityModuleTests
         => (embed.Image.GetValueOrDefault().Url ?? embed.Thumbnail.GetValueOrDefault().Url)
            == ((user as IGuildUser)?.GetGuildAvatarUrl() ?? user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 
-    public static IEnumerable<object[]> GetFakeUsers()
+    public static TheoryData<Mock<IUser>> GetFakeUsers()
     {
         var faker = new Faker();
 
-        return faker.MakeLazy(20, () => Utils.CreateMockedUser()).Select(x => new object[] { Mock.Get(x) });
+        return faker.MakeLazy(20, () => Utils.CreateMockedUser()).Select(Mock.Get).ToTheoryData();
     }
 
-    public static IEnumerable<object[]> GetFakeGuildUsers()
+    public static TheoryData<Mock<IGuildUser>> GetFakeGuildUsers()
     {
         var faker = new Faker();
 
-        return faker.MakeLazy(20, () => Utils.CreateMockedGuildUser()).Select(x => new object[] { Mock.Get(x) });
+        return faker.MakeLazy(20, () => Utils.CreateMockedGuildUser()).Select(Mock.Get).ToTheoryData();
     }
 }

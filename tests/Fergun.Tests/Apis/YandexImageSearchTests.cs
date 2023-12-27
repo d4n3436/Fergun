@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoBogus;
 using Fergun.Apis.Yandex;
 using Moq;
 using Moq.Protected;
@@ -106,8 +107,8 @@ public class YandexImageSearchTests
         (_yandexImageSearch as IDisposable)?.Dispose();
         (_yandexImageSearch as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(AutoFaker.Generate<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(AutoFaker.Generate<string>()));
     }
 
     [Fact]

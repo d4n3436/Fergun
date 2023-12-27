@@ -44,7 +44,7 @@ public static class HardwareInfo
     /// <summary>
     /// Gets the CPU usage for the current process.
     /// </summary>
-    /// <returns>The CPU usage in a the range 0 to 1.</returns>
+    /// <returns>The CPU usage in the range 0 to 1.</returns>
     public static async Task<double> GetCpuUsageAsync()
     {
         var startTime = DateTimeOffset.UtcNow;

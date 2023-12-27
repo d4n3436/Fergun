@@ -12,7 +12,7 @@ namespace Fergun.Preconditions;
 /// <summary>
 /// Requires the user to not be ratelimited on a module or command.
 /// </summary>
-public class RatelimitAttribute : PreconditionAttribute
+public sealed class RatelimitAttribute : PreconditionAttribute
 {
     private readonly int _times;
     private readonly TimeSpan _period;
@@ -20,7 +20,7 @@ public class RatelimitAttribute : PreconditionAttribute
     private static ulong _ownerId;
 
     /// <summary>
-    /// Initializes a new insance of the <see cref="RatelimitAttribute"/> class.
+    /// Initializes a new instance of the <see cref="RatelimitAttribute"/> class.
     /// </summary>
     /// <param name="times">The number of times the command can be executed per <paramref name="period"/>.</param>
     /// <param name="period">How often the executions are permitted.</param>

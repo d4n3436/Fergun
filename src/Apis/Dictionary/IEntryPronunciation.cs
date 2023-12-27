@@ -3,7 +3,7 @@
 namespace Fergun.Apis.Dictionary;
 
 /// <summary>
-/// Represents the pronunctiation data of a dictionary entry.
+/// Represents the pronunciation data of a dictionary entry.
 /// </summary>
 public interface IEntryPronunciation
 {
@@ -13,7 +13,7 @@ public interface IEntryPronunciation
     string Ipa { get; }
 
     /// <summary>
-    /// Gets a read-only list containg the spellings.
+    /// Gets a read-only list containing the spellings.
     /// </summary>
     IReadOnlyList<string> Spell { get; }
 

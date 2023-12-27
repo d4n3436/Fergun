@@ -26,7 +26,7 @@ public class BingVisualSearchTests
         Assert.All(results, x => Assert.NotNull(x.Url));
         Assert.All(results, x => Assert.NotNull(x.SourceUrl));
         Assert.All(results, x => Assert.NotNull(x.Text));
-        Assert.All(results, x => Assert.True(x.AccentColor.A == 0));
+        Assert.All(results, x => Assert.Equal(0, x.AccentColor.A));
         Assert.All(results, x => Assert.NotNull(x.ToString()));
         Assert.All(results, x =>
         {

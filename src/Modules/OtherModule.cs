@@ -10,7 +10,6 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Apis.Genius;
-using Fergun.Apis.Musixmatch;
 using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Hardware;
@@ -23,7 +22,6 @@ using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Polly.RateLimit;
 
 namespace Fergun.Modules;
 
@@ -36,18 +34,16 @@ public class OtherModule : InteractionModuleBase
     private readonly FergunOptions _fergunOptions;
     private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
-    private readonly IMusixmatchClient _musixmatchClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        InteractiveService interactive, IGeniusClient geniusClient, IMusixmatchClient musixmatchClient, HttpClient httpClient, FergunContext db)
+        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
         _geniusClient = geniusClient;
-        _musixmatchClient = musixmatchClient;
         _httpClient = httpClient;
         _interactive = interactive;
         _db = db;

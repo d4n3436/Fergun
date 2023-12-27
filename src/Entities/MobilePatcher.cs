@@ -29,7 +29,7 @@ public static class MobilePatcher
         harmony.Patch(original, new HarmonyMethod(prefix));
     }
 
-    public static void Prefix(in byte opCode, in object payload)
+    public static void Prefix(byte opCode, object payload)
     {
         if (opCode != 2) // Identify
             return;

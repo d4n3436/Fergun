@@ -6,6 +6,7 @@ using Moq;
 using Xunit;
 using System.Threading;
 using System.Text.Json;
+using AutoBogus;
 
 namespace Fergun.Tests.Apis;
 
@@ -124,8 +125,8 @@ public class WolframAlphaTests
         (_wolframAlphaClient as IDisposable)?.Dispose();
         (_wolframAlphaClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.SendQueryAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync(AutoFaker.Generate<string>(), AutoFaker.Generate<string>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wolframAlphaClient.SendQueryAsync(AutoFaker.Generate<string>(), AutoFaker.Generate<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
     }
 
     [Theory]
@@ -171,19 +172,25 @@ public class WolframAlphaTests
         Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize<IReadOnlyList<string>>(new[] { "test" }, options));
     }
 
-    public static IEnumerable<object?[]> GetWolframAlphaErrorInfoConverterData()
+    public static TheoryData<string, WolframAlphaErrorInfo?> GetWolframAlphaErrorInfoConverterData()
     {
-        yield return new object?[] {"true", null };
-        yield return new object?[] { "false", null };
-        yield return new object?[] { "{\"code\":\"1000\",\"msg\":\"error\"}", new WolframAlphaErrorInfo(1000, "error") };
+        return new TheoryData<string, WolframAlphaErrorInfo?>
+        {
+            { "true", null },
+            { "false", null },
+            { "{\"code\":\"1000\",\"msg\":\"error\"}", new WolframAlphaErrorInfo(1000, "error") }
+        };
     }
 
-    public static IEnumerable<object[]> ArrayOrObjectConverterData()
+    public static TheoryData<string, IReadOnlyList<WolframAlphaWarning>> ArrayOrObjectConverterData()
     {
         const string json = "{\"text\":\"Error message\"}";
         var suggestions = new[] { new WolframAlphaWarning("Error message") };
 
-        yield return new object[] { json, suggestions };
-        yield return new object[] { $"[{json}]", suggestions };
+        return new TheoryData<string, IReadOnlyList<WolframAlphaWarning>>
+        {
+            { json, suggestions },
+            { $"[{json}]", suggestions }
+        };
     }
 }

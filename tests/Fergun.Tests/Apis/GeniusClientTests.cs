@@ -1,4 +1,5 @@
-﻿using Fergun.Apis.Genius;
+﻿using AutoBogus;
+using Fergun.Apis.Genius;
 using Moq;
 using System;
 using System.Threading;
@@ -80,7 +81,7 @@ public class GeniusClientTests
     public async Task SearchSongsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
         var cts = new CancellationTokenSource(0);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => _geniusClient.SearchSongsAsync(It.IsAny<string>(), cts.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _geniusClient.SearchSongsAsync(AutoFaker.Generate<string>(), cts.Token));
     }
 
     [Fact]
@@ -96,7 +97,7 @@ public class GeniusClientTests
         (_geniusClient as IDisposable)?.Dispose();
         (_geniusClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _geniusClient.SearchSongsAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _geniusClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<CancellationToken>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _geniusClient.GetSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()));
     }
 

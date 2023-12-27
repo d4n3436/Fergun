@@ -8,7 +8,7 @@ using Discord;
 namespace Fergun.Apis.Dictionary;
 
 /// <summary>
-/// Contains methods that help formatting dictionary entries into markdown text that will be sent in a Discord embed.
+/// Contains methods that help formatting dictionary entries into Markdown text that will be sent in a Discord embed.
 /// </summary>
 public static class DictionaryFormatter
 {
@@ -149,7 +149,7 @@ public static class DictionaryFormatter
         var parser = new HtmlParser();
         using var document = parser.ParseDocument(htmlText);
 
-        if (!document.Body!.ChildNodes.Any())
+        if (document.Body!.ChildNodes.Length == 0)
         {
             return htmlText;
         }

@@ -3,10 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
-using Fergun.Interactive;
 using Fergun.Modules;
 using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
@@ -22,9 +20,6 @@ public class OcrModuleTests
     private readonly Mock<IGoogleLensClient> _googleLensMock = new();
     private readonly Mock<IYandexImageSearch> _yandexImageSearchMock = new();
     private readonly Mock<ILogger<OcrModule>> _loggerMock = new();
-    private readonly DiscordSocketClient _client = new();
-    private readonly InteractiveService _interactive;
-    private readonly InteractiveConfig _interactiveConfig = new() { DeferStopSelectionInteractions = false };
     private readonly IFergunLocalizer<OcrModule> _ocrLocalizer = Utils.CreateMockedLocalizer<OcrModule>();
     private readonly Mock<OcrModule> _moduleMock;
     private const string TextImageUrl = "https://example.com/image.png";
@@ -44,9 +39,7 @@ public class OcrModuleTests
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
         var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
 
-        _interactive = new InteractiveService(_client, _interactiveConfig);
-        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, _interactive,
-            _googleLensMock.Object, _yandexImageSearchMock.Object)) { CallBase = true };
+        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, _googleLensMock.Object, _yandexImageSearchMock.Object)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }

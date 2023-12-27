@@ -11,6 +11,7 @@ using Polly.Caching;
 using Polly.Caching.Memory;
 using Polly.Extensions.Http;
 using Polly.Registry;
+using Polly.Wrap;
 
 namespace Fergun.Extensions;
 
@@ -53,7 +54,7 @@ public static class ServiceCollectionExtensions
             });
     }
 
-    private static IAsyncPolicy<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
+    private static AsyncPolicyWrap<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
     {
         var cacheProvider = provider.GetRequiredService<IAsyncCacheProvider>().AsyncFor<TResult>();
         var policy = Policy.CacheAsync(cacheProvider, new SlidingTtl(TimeSpan.FromHours(2)));

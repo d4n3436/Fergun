@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Discord;
@@ -53,21 +52,21 @@ public class MessageExtensionsTests
         }
     }
 
-    public static IEnumerable<object[]> GetEmbeds()
+    public static TheoryData<Embed> GetEmbeds()
     {
-        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => new object[] { x.Build() });
+        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build()).ToTheoryData();
     }
 
-    public static IEnumerable<object[]> GetContentsAndEmbeds()
+    public static TheoryData<string, Embed> GetContentsAndEmbeds()
     {
-        return GetRandomStrings().Zip(GetEmbeds()).Select(x => new[] { x.First[0], x.Second[0] });
+        return GetRandomStrings().Zip(GetEmbeds()).Select(x => ((string)x.First[0], (Embed)x.Second[0])).ToTheoryData();
     }
 
-    public static IEnumerable<object[]> GetRandomStrings()
+    public static TheoryData<string> GetRandomStrings()
     {
         var faker = new Faker();
 
         return faker.MakeLazy(10, () => faker.Random.String2(2))
-            .Select(x => new object[] { x });
+            .ToTheoryData();
     }
 }

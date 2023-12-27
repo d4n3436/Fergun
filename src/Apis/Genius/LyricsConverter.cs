@@ -62,7 +62,7 @@ public class LyricsConverter : JsonConverter<string>
 
             if (builder.Length > 0 && builder[^1] is '*' or '_')
             {
-                builder.Append('\u200b'); // Append zero-witdh space to prevent markdown from breaking
+                builder.Append('\u200b'); // Append zero-width space to prevent markdown from breaking
             }
             builder.Append(markDownStart);
 
@@ -79,5 +79,4 @@ public class LyricsConverter : JsonConverter<string>
             }
         }
     }
-
 }

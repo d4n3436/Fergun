@@ -1,6 +1,4 @@
 ﻿using AutoBogus;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace Fergun.Tests.Entities;
@@ -25,6 +23,6 @@ public class StartupOptionsTests
         Assert.Equal(options.MobileStatus, other.MobileStatus);
     }
 
-    public static IEnumerable<object[]> GetStartupOptionsTestData()
-        => AutoFaker.Generate<StartupOptions>(10).Select(x => new object[] { x });
+    public static TheoryData<StartupOptions> GetStartupOptionsTestData()
+        => AutoFaker.Generate<StartupOptions>(10).ToTheoryData();
 }

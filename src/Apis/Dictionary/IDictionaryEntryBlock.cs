@@ -23,7 +23,7 @@ public interface IDictionaryEntryBlock
     string SupplementaryInfo { get; }
 
     /// <summary>
-    /// Gets the pronunctiation (specific for this part of speech).
+    /// Gets the pronunciation (specific for this part of speech).
     /// </summary>
     string Pronunciation { get; }
 }

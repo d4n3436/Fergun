@@ -1,5 +1,4 @@
 ﻿using AutoBogus;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -21,6 +20,6 @@ public class BotListOptionsTests
         Assert.True(options.Tokens.SequenceEqual(other.Tokens));
     }
 
-    public static IEnumerable<object[]> GetBotListOptionsTestData()
-        => AutoFaker.Generate<BotListOptions>(10).Select(x => new object[] { x });
+    public static TheoryData<BotListOptions> GetBotListOptionsTestData()
+        => AutoFaker.Generate<BotListOptions>(10).ToTheoryData();
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
@@ -58,9 +56,9 @@ public class UrbanModuleTests
 
     [Theory]
     [InlineData(null)]
-    public async Task SearchAsync_Returns_No_Definitions(string term)
+    public async Task SearchAsync_Returns_No_Definitions(string? term)
     {
-        var result = await _moduleMock.Object.SearchAsync(term);
+        var result = await _moduleMock.Object.SearchAsync(term!);
         Assert.False(result.IsSuccess);
 
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
@@ -95,5 +93,8 @@ public class UrbanModuleTests
         await Assert.ThrowsAsync<ArgumentException>(() => task);
     }
 
-    public static IEnumerable<object?[]> GetRandomWords() => AutoFaker.Generate<string>(10).Select(x => new object[] { x });
+    public static TheoryData<string> GetRandomWords()
+    {
+        return AutoFaker.Generate<string>(10).ToTheoryData();
+    }
 }

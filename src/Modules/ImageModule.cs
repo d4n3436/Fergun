@@ -37,7 +37,7 @@ public class ImageModule : InteractionModuleBase
     private readonly IYandexImageSearch _yandexImageSearch;
     private readonly IGoogleLensClient _googleLens;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer,IOptionsSnapshot<FergunOptions> fergunOptions, InteractiveService interactive,
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, InteractiveService interactive,
         GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch, IGoogleLensClient googleLens)
     {
         _logger = logger;
@@ -397,7 +397,6 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to delete the original interaction response.");
         }
 
-        bool isNsfw = Context.Channel.IsNsfw();
         IReadOnlyList<IGoogleLensResult> results;
 
         try

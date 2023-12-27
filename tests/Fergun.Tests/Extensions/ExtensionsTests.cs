@@ -3,7 +3,6 @@ using Fergun.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;
@@ -83,7 +82,7 @@ public class ExtensionsTests
         Assert.Equal(serialized, depth3Result);
     }
 
-    public static IEnumerable<object[]> GetIInteractionContextDisplayTestData()
+    public static TheoryData<IInteractionContext> GetIInteractionContextDisplayTestData()
     {
         var guildMock = new Mock<IGuild>();
         guildMock.SetupGet(x => x.Name)
@@ -125,8 +124,6 @@ public class ExtensionsTests
         contextMock3.SetupGet(x => x.Interaction)
             .Returns(interactionMock.Object);
 
-        yield return new object[] { contextMock1.Object };
-        yield return new object[] { contextMock2.Object };
-        yield return new object[] { contextMock3.Object };
+        return new TheoryData<IInteractionContext> { contextMock1.Object, contextMock2.Object, contextMock3.Object };
     }
 }

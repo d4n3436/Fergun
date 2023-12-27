@@ -8,12 +8,12 @@ namespace Fergun.Apis.Dictionary;
 public interface IEntryPronunciationAudio
 {
     /// <summary>
-    /// Gets an <see cref="Uri"/> pointing to the pronunctiation audio file in OGG.
+    /// Gets an <see cref="Uri"/> pointing to the pronunciation audio file in OGG.
     /// </summary>
     Uri Ogg { get; }
 
     /// <summary>
-    /// Gets an <see cref="Uri"/> pointing to the pronunctiation audio file in MPEG.
+    /// Gets an <see cref="Uri"/> pointing to the pronunciation audio file in MPEG.
     /// </summary>
     Uri Mpeg { get; }
 }

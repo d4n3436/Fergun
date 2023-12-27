@@ -1,4 +1,5 @@
-﻿using Fergun.Apis.Google;
+﻿using AutoBogus;
+using Fergun.Apis.Google;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -66,7 +67,7 @@ public class GoogleLensTests
         (_googleLens as IDisposable)?.Dispose();
         (_googleLens as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _googleLens.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<string?>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _googleLens.ReverseImageSearchAsync(AutoFaker.Generate<string>(), It.IsAny<string?>()));
     }
 
     [Fact]

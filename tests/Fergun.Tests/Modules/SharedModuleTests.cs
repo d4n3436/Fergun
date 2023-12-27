@@ -63,9 +63,9 @@ public class SharedModuleTests
     [InlineData("Microsoft", "tr", "es", true)]
     [InlineData("Yandex", "ru", "en", false)]
     [InlineData("Error", "fr", "it", true)]
-    public async Task TranslateAsync_Returns_Results_Or_Fails_Preconditions(string text, string target, string? source, bool ephemeral)
+    public async Task TranslateAsync_Returns_Results_Or_Fails_Preconditions(string? text, string target, string? source, bool ephemeral)
     {
-        var result = await _sharedModuleMock.Object.TranslateAsync(_interactionMock.Object, text, target, source, ephemeral);
+        var result = await _sharedModuleMock.Object.TranslateAsync(_interactionMock.Object, text!, target, source, ephemeral);
 
         _interactionMock.VerifyGet(x => x.UserLocale);
 

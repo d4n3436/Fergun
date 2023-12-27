@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Discord;
@@ -29,13 +28,13 @@ public class InteractionExtensionsTests
     [Theory]
     [InlineData("", "en")]
     [InlineData(null, "es")]
-    public void Interaction_GetLanguageCode_Should_Return_Default(string locale, string defaultLanguage)
+    public void Interaction_GetLanguageCode_Should_Return_Default(string? locale, string defaultLanguage)
     {
         var interactionMock = new Mock<IDiscordInteraction>();
-        interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
+        interactionMock.SetupGet(x => x.UserLocale).Returns(locale!);
         var interactionMock2 = new Mock<IDiscordInteraction>();
         interactionMock2.SetupGet(x => x.UserLocale).Returns((string)null!);
-        interactionMock2.SetupGet(x => x.GuildLocale).Returns(locale);
+        interactionMock2.SetupGet(x => x.GuildLocale).Returns(locale!);
 
         string language = interactionMock.Object.GetLanguageCode(defaultLanguage);
         string language2 = interactionMock2.Object.GetLanguageCode(defaultLanguage);
@@ -66,29 +65,29 @@ public class InteractionExtensionsTests
         Assert.True(success);
     }
 
-    public static IEnumerable<object?[]> GetLanguages()
+    public static TheoryData<string> GetLanguages()
     {
         var faker = new Faker();
 
         return Language.LanguageDictionary.Values
             .Select(x => x.ISO6391.Contains('-') ? x.ISO6391 : $"{x.ISO6391}-{faker.Random.String2(2)}")
-            .Append(null)
-            .Select(x => new object?[] { x });
+            .Append(null!)
+            .ToTheoryData();
     }
 
-    public static IEnumerable<object[]> GetLocales()
+    public static TheoryData<string> GetLocales()
     {
         var faker = new Faker();
 
         return faker.MakeLazy(10, () => faker.Random.RandomLocale().Replace('_', '-'))
-            .Select(x => new object[] { x });
+            .ToTheoryData();
     }
 
-    public static IEnumerable<object[]> GetRandomStrings()
+    public static TheoryData<string> GetRandomStrings()
     {
         var faker = new Faker();
 
         return faker.MakeLazy(10, () => faker.Random.String2(2))
-            .Select(x => new object[] { x });
+            .ToTheoryData();
     }
 }

@@ -23,7 +23,7 @@ public interface IDictionaryEntry
     int? Homograph { get; }
 
     /// <summary>
-    /// Gets the pronunctiation data.
+    /// Gets the pronunciation data.
     /// </summary>
     IEntryPronunciation? Pronunciation { get; }
 

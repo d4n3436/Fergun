@@ -43,7 +43,7 @@ public class DictionaryPaginator : BaseLazyPaginator
     public int CurrentCategoryIndex { get; set; }
 
     /// <summary>
-    /// Gets or sets the maximun part of speech index within an entry.
+    /// Gets or sets the maximum part of speech index within an entry.
     /// </summary>
     public int MaxCategoryIndex { get; set; }
 
@@ -58,7 +58,7 @@ public class DictionaryPaginator : BaseLazyPaginator
             { PaginatorAction.SkipToStart, "Previous definition" },
             { PaginatorAction.Backward, "Previous category" },
             { PaginatorAction.Forward, "Next category" },
-            { PaginatorAction.SkipToEnd, "Next definition" }, // words can have different IPA pronuctiation like bass
+            { PaginatorAction.SkipToEnd, "Next definition" }, // words can have different IPA pronunciation like bass
             { PaginatorAction.Jump, "More information" },
             { PaginatorAction.Exit, null }
         };

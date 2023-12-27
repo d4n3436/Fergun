@@ -8,10 +8,10 @@ public static class StringExtensions
     public static bool ContainsAny(this string str, string str0, string str1) => str.Contains(str0) || str.Contains(str1);
 
     /// <summary>
-    /// Splits an string into chunks, each of at most <paramref name="maxLength"/> of length, in a way that is suitable for pagination.
-    /// The method tries to avoid breaking the text by spliting it with 3 separators in the following order:<br></br>
-    /// 2 newlines ("\n\n") -> 1 newline ('\n') -> 1 space (' ')<br></br>
-    /// If it's not possible to do so, the method will fallback to split the text without restrictions and continue with the next chunks.
+    /// Splits a string into chunks, each of at most <paramref name="maxLength"/> of length, in a way that is suitable for pagination.<br/>
+    /// The method tries to avoid breaking the text by splitting it with 3 separators in the following order:<br/>
+    /// 2 newlines ("\n\n") -> 1 newline ('\n') -> 1 space (' ')<br/>
+    /// If it's not possible to do so, the method will fall back to split the text without restrictions and continue with the next chunks.
     /// </summary>
     /// <param name="text">The text to split.</param>
     /// <param name="maxLength">The max. length of the chunks.</param>

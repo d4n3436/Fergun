@@ -1,7 +1,5 @@
 using Bogus;
 using Fergun.Extensions;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;
@@ -33,10 +31,10 @@ public class StringExtensionsTests
         Assert.Equal(str, joined);
     }
 
-    public static IEnumerable<object[]> GetSplitStringData()
+    public static TheoryData<string, int> GetSplitStringData()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => (faker.Lorem.Sentence(100), faker.Random.Int(20, 30)))
-            .Select(x => new object[] { x.Item1, x.Item2 });
+            .ToTheoryData();
     }
 }

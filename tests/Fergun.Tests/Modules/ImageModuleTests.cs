@@ -127,9 +127,7 @@ public class ImageModuleTests
         var result = await _module.ReverseAsync(url, file, engine, multiImages);
         Assert.True(result.IsSuccess, result.ErrorReason);
 
-        _contextMock.VerifyGet(x => x.Channel);
         _interactionMock.VerifyGet(x => x.User);
-        channel.VerifyGet(x => x.IsNsfw);
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
         _interactionMock.Verify(x => x.FollowupWithFilesAsync(It.IsAny<IEnumerable<FileAttachment>>(), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
             It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
@@ -186,19 +184,19 @@ public class ImageModuleTests
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
     }
 
-    public static IEnumerable<object?[]> GetReverseImageSearchData()
+    public static TheoryData<string?, IAttachment?, ReverseImageSearchEngine, bool, bool> GetReverseImageSearchData()
     {
         var attachmentMock = new Mock<IAttachment>();
         attachmentMock.SetupGet(x => x.Url).Returns("https://example.com/image.png");
 
-        return new[]
+        return new TheoryData<string?, IAttachment?, ReverseImageSearchEngine, bool, bool>
         {
-            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Bing, false, false },
-            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Bing, true, true },
-            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Yandex, false, false },
-            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true },
-            new object?[] { "https://example.com/image.png", null, ReverseImageSearchEngine.Google, false, false },
-            new object?[] { null, attachmentMock.Object, ReverseImageSearchEngine.Google, true, true }
+            { "https://example.com/image.png", null, ReverseImageSearchEngine.Bing, false, false },
+            { null, attachmentMock.Object, ReverseImageSearchEngine.Bing, true, true },
+            { "https://example.com/image.png", null, ReverseImageSearchEngine.Yandex, false, false },
+            { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true },
+            { "https://example.com/image.png", null, ReverseImageSearchEngine.Google, false, false },
+            { null, attachmentMock.Object, ReverseImageSearchEngine.Google, true, true }
         };
     }
 }

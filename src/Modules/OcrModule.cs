@@ -8,7 +8,6 @@ using Discord.Interactions;
 using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
-using Fergun.Interactive;
 using Fergun.Preconditions;
 using Humanizer;
 using Microsoft.Extensions.Logging;
@@ -22,17 +21,15 @@ public class OcrModule : InteractionModuleBase
     private readonly ILogger<OcrModule> _logger;
     private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
-    private readonly InteractiveService _interactive;
     private readonly IGoogleLensClient _googleLens;
     private readonly IYandexImageSearch _yandexImageSearch;
 
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
-        InteractiveService interactive, IGoogleLensClient googleLens, IYandexImageSearch yandexImageSearch)
+        IGoogleLensClient googleLens, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
         _shared = shared;
-        _interactive = interactive;
         _googleLens = googleLens;
         _yandexImageSearch = yandexImageSearch;
     }

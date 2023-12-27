@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
@@ -26,7 +25,7 @@ public class AutocompleteHandlerTests
 
     [Theory]
     [MemberData(nameof(GetBraveTestData))]
-    public async Task BraveAutocomplete_Should_Return_Valid_Suggestions(string text)
+    public async Task BraveAutocomplete_Should_Return_Valid_Suggestions(string? text)
     {
         var handler = new BraveAutocompleteHandler();
         var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
@@ -50,7 +49,7 @@ public class AutocompleteHandlerTests
 
     [Theory]
     [MemberData(nameof(GetDuckDuckGoTestData))]
-    public async Task DuckDuckGoAutocomplete_Should_Return_Valid_Suggestions(string text, string locale, bool isNsfw)
+    public async Task DuckDuckGoAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale, bool isNsfw)
     {
         var handler = new DuckDuckGoAutocompleteHandler();
         var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
@@ -77,7 +76,7 @@ public class AutocompleteHandlerTests
 
     [Theory]
     [MemberData(nameof(GetGoogleTestData))]
-    public async Task GoogleAutocomplete_Should_Return_Valid_Suggestions(string text, string locale)
+    public async Task GoogleAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
     {
         var handler = new GoogleAutocompleteHandler();
         var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
@@ -102,7 +101,7 @@ public class AutocompleteHandlerTests
 
     [Theory]
     [MemberData(nameof(GetGoogleTestData))]
-    public async Task YouTubeAutocomplete_Should_Return_Valid_Suggestions(string text, string locale)
+    public async Task YouTubeAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
     {
         var handler = new YouTubeAutocompleteHandler();
         var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
@@ -127,7 +126,7 @@ public class AutocompleteHandlerTests
 
     [Theory]
     [MemberData(nameof(GetUrbanTestData))]
-    public async Task UrbanAutocomplete_Should_Return_Valid_Suggestions(string text)
+    public async Task UrbanAutocomplete_Should_Return_Valid_Suggestions(string? text)
     {
         var handler = new UrbanAutocompleteHandler();
         var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
@@ -196,36 +195,36 @@ public class AutocompleteHandlerTests
         return services.BuildServiceProvider();
     }
 
-    public static IEnumerable<object?[]> GetBraveTestData()
+    public static TheoryData<string?> GetBraveTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(5, () => faker.Random.String2(1))
-            .Append(string.Empty).Append(null).Select(x => new object?[] { x });
+            .Append(string.Empty).Append(null).ToTheoryData();
     }
 
-    public static IEnumerable<object?[]> GetDuckDuckGoTestData()
+    public static TheoryData<string?, string, bool> GetDuckDuckGoTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(5, () => faker.Music.Genre())
             .Append(string.Empty).Append(null)
             .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')), faker.MakeLazy(7, () => faker.Random.Bool()))
-            .Select(x => new object?[] { x.First, x.Second, x.Third });
+            .ToTheoryData();
     }
 
-    public static IEnumerable<object?[]> GetGoogleTestData()
+    public static TheoryData<string?, string> GetGoogleTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(5, () => faker.Music.Genre())
             .Append(string.Empty).Append(null)
             .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')))
-            .Select(x => new object?[] { x.First, x.Second });
+            .ToTheoryData();
     }
 
-    public static IEnumerable<object?[]> GetUrbanTestData()
+    public static TheoryData<string?> GetUrbanTestData()
     {
         var faker = new Faker();
         return faker.MakeLazy(5, () => faker.Hacker.Noun())
             .Append(string.Empty).Append(null)
-            .Select(x => new object?[] { x });
+            .ToTheoryData();
     }
 }

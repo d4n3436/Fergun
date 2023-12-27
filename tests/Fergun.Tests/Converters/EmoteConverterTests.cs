@@ -2,7 +2,6 @@
 using System;
 using Xunit;
 using Discord;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Fergun.Tests.Converters;
@@ -51,20 +50,20 @@ public class EmoteConverterTests
     }
 
     [Theory]
-    [InlineData((object)null!)]
+    [InlineData((object?)null)]
     [InlineData("")]
     [InlineData(123)]
     [InlineData("<:fff:0158395")]
-    public void EmoteConverter_ConvertFrom_Throws_Exception_On_Invalid_Emotes(object obj)
+    public void EmoteConverter_ConvertFrom_Throws_Exception_On_Invalid_Emotes(object? obj)
     {
         var converter = new EmoteConverter();
 
-        Assert.ThrowsAny<Exception>(() => converter.ConvertFrom(null, null, obj));
+        Assert.ThrowsAny<Exception>(() => converter.ConvertFrom(null, null, obj!));
     }
 
-    public static IEnumerable<object[]> GetConvertFromEmojiData() => new[] { "🙂", "ℹ️", "⚠️", "❌" }.Select(x => new object[] { x, new Emoji(x) });
+    public static TheoryData<string, Emoji> GetConvertFromEmojiData() => new[] { "🙂", "ℹ️", "⚠️", "❌" }.Select(x => (x, new Emoji(x))).ToTheoryData();
 
-    public static IEnumerable<object[]> GetConvertFromEmoteData()
+    public static TheoryData<string, Emote> GetConvertFromEmoteData()
     {
         return new[]
         {
@@ -72,6 +71,6 @@ public class EmoteConverterTests
             "<:LUL:961822449823572356>",
             "<a:loading:745805084655912213>",
             "<:thonk:893371354942652483>"
-        }.Select(x => new object[] { x, Emote.Parse(x) });
+        }.Select(x => ( x, Emote.Parse(x))).ToTheoryData();
     }
 }
