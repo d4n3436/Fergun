@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using GTranslate.Translators;
 using Moq;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net;
@@ -11,13 +10,13 @@ using System.Threading.Tasks;
 using GTranslate;
 using Moq.Protected;
 using Xunit;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Discord;
 using Fergun.Converters;
 using System;
 using Bogus.DataSets;
 using Discord.Interactions;
+using System.Text;
 
 namespace Fergun.Tests.Converters;
 
@@ -35,7 +34,7 @@ public class MicrosoftVoiceConverterTests
 
     [Theory]
     [MemberData(nameof(GetMicrosoftVoiceTestData))]
-    public async Task MicrosoftVoiceConverter_ReadAsync_Retuns_Successful_Result(MicrosoftVoice voice, bool isDefault)
+    public async Task MicrosoftVoiceConverter_ReadAsync_Returns_Successful_Result(MicrosoftVoice voice, bool isDefault)
     {
         var microsoftTranslator = CreateMockedMicrosoftTranslator(() =>
         {
@@ -77,7 +76,7 @@ public class MicrosoftVoiceConverterTests
     [InlineData(null, "en")]
     [InlineData("", "es")]
     [InlineData("\u200b", "it")]
-    public async Task MicrosoftVoiceConverter_ReadAsync_Retuns_Unsuccessful_Result(string voice, string locale)
+    public async Task MicrosoftVoiceConverter_ReadAsync_Returns_Unsuccessful_Result(string? voice, string locale)
     {
         var microsoftTranslator = CreateMockedMicrosoftTranslator(() => Task.FromCanceled<HttpResponseMessage>(CancellationToken.None));
         var localizer = Utils.CreateMockedLocalizer<SharedResource>();
@@ -96,7 +95,7 @@ public class MicrosoftVoiceConverterTests
         contextMock.SetupGet(x => x.Interaction).Returns(() => interactionMock.Object);
 
         var optionMock = new Mock<IApplicationCommandInteractionDataOption>();
-        optionMock.SetupGet(x => x.Value).Returns(() => voice);
+        optionMock.SetupGet(x => x.Value).Returns(() => voice!);
 
         var result = await converter.ReadAsync(contextMock.Object, optionMock.Object, services);
 
@@ -122,7 +121,7 @@ public class MicrosoftVoiceConverterTests
 
     private static HttpResponseMessage GetResponseMessage(byte[] data) => new(HttpStatusCode.OK) { Content = new ByteArrayContent(data) };
 
-    public static IEnumerable<object[]> GetMicrosoftVoiceTestData()
+    public static TheoryData<MicrosoftVoice, bool> GetMicrosoftVoiceTestData()
     {
         var faker = new Faker();
         var fakeVoices = faker.MakeLazy(10, () =>
@@ -133,10 +132,11 @@ public class MicrosoftVoiceConverterTests
             string genderStr = gender.ToString();
 
             return new MicrosoftVoice(displayName, $"{locale}-{displayName}Neural", genderStr, locale);
-        }).Select(x => new object[] { x, false });
+        }).Select(x => (x, false));
 
         return MicrosoftTranslator.DefaultVoices.Values
-            .Select(x => new object[] { x, true })
-            .Concat(fakeVoices);
+            .Select(x => (x, true))
+            .Concat(fakeVoices)
+            .ToTheoryData();
     }
 }
