@@ -83,12 +83,16 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         var matches = data[8][0][12];
 
-        return matches.EnumerateArray().Select(x => new GoogleLensResult(
+        return matches
+            .EnumerateArray()
+            .Where(x => x[0].GetArrayLength() != 0)
+            .Select(x => new GoogleLensResult(
             x[3].GetString()!,
             x[5].GetString()!,
             x[0][0].GetString()!,
             x[7].GetString()!,
-            x[15][0].GetString()!)).ToArray();
+            x[15][0].GetString()!))
+            .ToArray();
     }
 
     private static JsonDocument ExtractDataPack(byte[] page, ReadOnlySpan<byte> callbackStart)
