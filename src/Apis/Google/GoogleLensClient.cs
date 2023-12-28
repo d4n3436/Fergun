@@ -52,9 +52,13 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken);
 
-        var lines = ExtractDataPack(page, OcrCallbackStart).RootElement[3][4][0][0];
+        var data = ExtractDataPack(page, OcrCallbackStart).RootElement[3][4][0];
+        if (data.GetArrayLength() == 0)
+        {
+            return string.Empty;
+        }
 
-        return string.Join('\n', lines.EnumerateArray().Select(x => x.GetString()));
+        return string.Join('\n', data[0].EnumerateArray().Select(x => x.GetString()));
     }
 
     /// <inheritdoc/>
