@@ -166,14 +166,24 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         using var data = JsonDocument.Parse(json);
 
-        return data.RootElement
-            .GetProperty("initialState")
-            .GetProperty("serpList")
-            .GetProperty("items")
-            .GetProperty("entities")
-            .EnumerateObject()
-            .Select(x => x.Value.GetProperty("viewerData").Deserialize<YandexReverseImageSearchResult>()!)
-            .ToArray();
+        if (data.RootElement.TryGetProperty("initialState", out var initialState))
+        {
+            return initialState
+                .GetProperty("serpList")
+                .GetProperty("items")
+                .GetProperty("entities")
+                .EnumerateObject()
+                .Select(x => x.Value.GetProperty("viewerData").Deserialize<YandexReverseImageSearchResult>()!)
+                .ToArray();
+        }
+
+        // Old layout
+        return htmlDocument
+            .GetElementsByClassName("serp-list")
+            .FirstOrDefault()?
+            .GetElementsByClassName("serp-item")
+            .Select(x => JsonDocument.Parse(x.GetAttribute("data-bem")!).RootElement.GetProperty("serp-item").Deserialize<YandexReverseImageSearchResult>()!)
+            .ToArray() ?? Array.Empty<YandexReverseImageSearchResult>();
     }
 
     /// <inheritdoc/>
