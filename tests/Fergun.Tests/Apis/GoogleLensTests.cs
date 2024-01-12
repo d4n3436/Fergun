@@ -16,7 +16,7 @@ public class GoogleLensTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
-        string? text = await _googleLens.OcrAsync(url);
+        string text = await _googleLens.OcrAsync(url);
 
         Assert.NotNull(text);
         Assert.NotEmpty(text);

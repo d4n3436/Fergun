@@ -45,17 +45,15 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     /// <inheritdoc/>
     public async Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentNullException.ThrowIfNull(url);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         // Get CBIR ID
-        using var request = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://yandex.com/images-apphost/image-download?url={Uri.EscapeDataString(url)}&cbird=37&images_avatars_size=orig&images_avatars_namespace=images-cbir")
-        };
 
-        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        var uri = new Uri($"https://yandex.com/images-apphost/image-download?url={Uri.EscapeDataString(url)}&cbird=37&images_avatars_size=orig&images_avatars_namespace=images-cbir");
+
+        using var response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -81,15 +79,10 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetInt32();
 
         // Get OCR text
-        const string ocrJsonRequest = @"{""blocks"":[{""block"":{""block"":""i-react-ajax-adapter:ajax""},""params"":{""type"":""CbirOcr"",""subtype"":""legacy""},""version"":2}]}";
+        const string ocrJsonRequest = """{"blocks":[{"block":{"block":"i-react-ajax-adapter:ajax"},"params":{"type":"CbirOcr","subtype":"legacy"},"version":2}]}""";
 
-        using var ocrRequest = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://yandex.com/images/search?format=json&request={ocrJsonRequest}&rpt=ocr&cbir_id={imageShard}/{imageId}")
-        };
-
-        using var ocrResponse = await _httpClient.SendAsync(ocrRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        var ocrRequestUri = new Uri($"https://yandex.com/images/search?format=json&request={ocrJsonRequest}&rpt=ocr&cbir_id={imageShard}/{imageId}");
+        using var ocrResponse = await _httpClient.GetAsync(ocrRequestUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         ocrResponse.EnsureSuccessStatusCode();
 
         // A byte array is used because SendAsync returns a chunked response and the Stream from ReadAsStreamAsync is not seekable.
@@ -114,16 +107,15 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
     public async Task<IReadOnlyList<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentNullException.ThrowIfNull(url);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        const string imageSearchRequest = @"{""blocks"":[{""block"":""content_type_similar"",""params"":{},""version"":2}]}";
+        const string imageSearchRequest = """{"blocks":[{"block":"content_type_similar","params":{},"version":2}]}""";
 
-        using var request = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://yandex.com/images/search?rpt=imageview&url={Uri.EscapeDataString(url)}&cbir_page=similar&format=json&request={imageSearchRequest}")
-        };
+        using var request = new HttpRequestMessage();
+        request.Method = HttpMethod.Get;
+        request.RequestUri = new Uri($"https://yandex.com/images/search?rpt=imageview&url={Uri.EscapeDataString(url)}&cbir_page=similar&format=json&request={imageSearchRequest}");
 
         var now = DateTimeOffset.UtcNow;
 
@@ -183,7 +175,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .FirstOrDefault()?
             .GetElementsByClassName("serp-item")
             .Select(x => JsonDocument.Parse(x.GetAttribute("data-bem")!).RootElement.GetProperty("serp-item").Deserialize<YandexReverseImageSearchResult>()!)
-            .ToArray() ?? Array.Empty<YandexReverseImageSearchResult>();
+            .ToArray() ?? [];
     }
 
     /// <inheritdoc/>
@@ -196,13 +188,5 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(YandexImageSearch));
-        }
     }
 }

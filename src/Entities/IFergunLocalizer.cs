@@ -19,6 +19,4 @@ public interface IFergunLocalizer : IStringLocalizer
 /// Represents the generic variant of <see cref="IFergunLocalizer"/>.
 /// </summary>
 /// <typeparam name="T">The <see cref="Type"/> to provide strings for.</typeparam>
-public interface IFergunLocalizer<out T> : IFergunLocalizer, IStringLocalizer<T>
-{
-}
+public interface IFergunLocalizer<out T> : IFergunLocalizer, IStringLocalizer<T>;

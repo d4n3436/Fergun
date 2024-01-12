@@ -178,7 +178,7 @@ public class WolframAlphaTests
         {
             { "true", null },
             { "false", null },
-            { "{\"code\":\"1000\",\"msg\":\"error\"}", new WolframAlphaErrorInfo(1000, "error") }
+            { """{"code":"1000","msg":"error"}""", new WolframAlphaErrorInfo(1000, "error") }
         };
     }
 

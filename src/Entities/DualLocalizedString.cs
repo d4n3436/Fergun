@@ -37,7 +37,7 @@ public class DualLocalizedString : LocalizedString
 
     /// <inheritdoc cref="Create(IStringLocalizer, CultureInfo, string, object[])"/>
     public static DualLocalizedString Create(IStringLocalizer localizer, CultureInfo culture, string name) =>
-        Create(localizer, culture, name, Array.Empty<object>());
+        Create(localizer, culture, name, []);
 
     /// <summary>
     /// Creates a new <see cref="DualLocalizedString"/> using the provided values.

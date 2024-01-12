@@ -9,12 +9,12 @@ namespace Fergun.Extensions;
 public static class PaginatorExtensions
 {
     private static readonly PaginatorAction[] _defaultActions =
-    {
+    [
         PaginatorAction.Backward,
         PaginatorAction.Forward,
         PaginatorAction.Jump,
         PaginatorAction.Exit
-    };
+    ];
 
     /// <summary>
     /// Adds Fergun emotes.
@@ -61,7 +61,7 @@ public static class PaginatorExtensions
         };
 
         builder.WithJumpInputPrompt(localizer["JumpInputPrompt"]);
-        builder.WithJumpInputTextLabel(localizer["JumptInputTextLabel", 1, pageCount]);
+        builder.WithJumpInputTextLabel(localizer["JumpInputTextLabel", 1, pageCount]);
         builder.WithInvalidJumpInputMessage(localizer["InvalidJumpInput", 1, pageCount]);
         builder.WithJumpInputInUseMessage(localizer["JumpInputInUse"]);
         builder.WithExpiredJumpInputMessage(localizer["ExpiredJumpInput", builder.JumpInputTimeout.TotalSeconds]);

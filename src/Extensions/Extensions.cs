@@ -34,7 +34,8 @@ public static class Extensions
 
     public static string Dump<T>(this T obj, int maxDepth = 2)
     {
-        using var strWriter = new StringWriter { NewLine = "\n" };
+        using var strWriter = new StringWriter();
+        strWriter.NewLine = "\n";
         using var jsonWriter = new CustomJsonTextWriter(strWriter);
         var resolver = new CustomContractResolver(jsonWriter, maxDepth);
         var serializer = new JsonSerializer

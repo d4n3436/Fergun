@@ -60,7 +60,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         using var request = BuildRequest(url, "SimilarImages", safeSearch, language);
@@ -128,13 +128,5 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         request.Headers.Referrer = new Uri($"https://www.bing.com/images/search?view=detailv2&iss=sbi&q=imgurl:{url}");
 
         return request;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(BingVisualSearch));
-        }
     }
 }

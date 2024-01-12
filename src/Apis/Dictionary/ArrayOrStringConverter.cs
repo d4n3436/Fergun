@@ -16,7 +16,7 @@ public class ArrayOrStringConverter : JsonConverter<IReadOnlyList<string>>
         return reader.TokenType switch
         {
             JsonTokenType.StartArray => JsonSerializer.Deserialize<IReadOnlyList<string>>(ref reader)!,
-            JsonTokenType.String => reader.ValueTextEquals(ReadOnlySpan<byte>.Empty) ? Array.Empty<string>() : new[] { reader.GetString()! },
+            JsonTokenType.String => reader.ValueTextEquals(ReadOnlySpan<byte>.Empty) ? [] : [reader.GetString()!],
             JsonTokenType.Null => Array.Empty<string>(),
             _ => throw new JsonException("Token type must be either array, string or null.")
         };

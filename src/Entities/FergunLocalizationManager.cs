@@ -16,8 +16,8 @@ public sealed class FergunLocalizationManager : ILocalizationManager
 {
     private const string ModulesNamespace = "Fergun.Modules";
     private readonly IStringLocalizerFactory _localizerFactory;
-    private readonly Dictionary<ModuleInfo, Type> _types = new();
-    private readonly Dictionary<string, ModuleInfo> _modules = new(); // TODO: use Options pattern
+    private readonly Dictionary<ModuleInfo, Type> _types = [];
+    private readonly Dictionary<string, ModuleInfo> _modules = []; // TODO: use Options pattern
     private readonly Dictionary<string, string> _supportedLocales = new()
     {
         { "es", "es-ES" }

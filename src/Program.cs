@@ -77,7 +77,7 @@ var host = Host.CreateDefaultBuilder()
             FormatUsersInBidirectionalUnicode = false
         };
 
-        config.Token = context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>().Token;
+        config.Token = context.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>()!.Token;
     })
     .UseInteractionService((_, config) =>
     {
@@ -102,8 +102,14 @@ var host = Host.CreateDefaultBuilder()
         services.AddSingleton<FergunLocalizationManager>();
         services.AddHostedService<InteractionHandlingService>();
         services.AddHostedService<BotListService>();
+        services.ConfigureHttpClientDefaults(b =>
+        {
+            b.RemoveAllLoggers();
+            b.AddLogger<FergunHttpClientLogger>();
+        });
         services.AddSingleton(new InteractiveConfig { ReturnAfterSendingPaginator = true, DeferStopSelectionInteractions = false });
         services.AddSingleton<InteractiveService>();
+        services.AddSingleton<FergunHttpClientLogger>();
         services.AddHostedService<InteractiveServiceLoggerHost>();
         services.AddSingleton<MusixmatchClientState>();
         services.AddFergunPolicies();
@@ -196,7 +202,6 @@ var host = Host.CreateDefaultBuilder()
         services.AddTransient(s => new DuckDuckGoScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
         services.AddTransient<SharedModule>();
     })
-    .UseFergunRequestLogging()
     .Build();
 
 // Semi-automatic migration

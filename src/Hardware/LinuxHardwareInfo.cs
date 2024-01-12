@@ -140,12 +140,12 @@ public class LinuxHardwareInfo : IHardwareInfo
             }
             catch
             {
-                lines = Array.Empty<string>();
+                lines = [];
                 return false;
             }
         }
 
-        lines = Array.Empty<string>();
+        lines = [];
         return false;
     }
 

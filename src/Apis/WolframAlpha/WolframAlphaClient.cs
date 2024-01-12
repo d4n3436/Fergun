@@ -52,9 +52,9 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string input, string language, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(language);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://{GetSubdomain(language)}.wolframalpha.com/n/v1/api/autocomplete/?i={Uri.EscapeDataString(input)}&appid={AppId}"), cancellationToken).ConfigureAwait(false);
@@ -72,9 +72,9 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IWolframAlphaResult> SendQueryAsync(string input, string language, bool reinterpret = true, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
         ArgumentNullException.ThrowIfNull(input);
         ArgumentNullException.ThrowIfNull(language);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string escapedInput = Uri.EscapeDataString(input);
@@ -107,12 +107,4 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
             "ja" => "ja",
             _ => "www"
         };
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(WolframAlphaClient));
-        }
-    }
 }

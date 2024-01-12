@@ -168,7 +168,7 @@
   <data name="JumpInputPrompt" xml:space="preserve">
     <value>Ingresa un número de página</value>
   </data>
-  <data name="JumptInputTextLabel" xml:space="preserve">
+  <data name="JumpInputTextLabel" xml:space="preserve">
     <value>Número de página ({0}-{1})</value>
   </data>
   <data name="LanguageNotSupported" xml:space="preserve">

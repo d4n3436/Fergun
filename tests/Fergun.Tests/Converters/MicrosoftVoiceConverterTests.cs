@@ -16,13 +16,12 @@ using Fergun.Converters;
 using System;
 using Bogus.DataSets;
 using Discord.Interactions;
-using System.Text;
 
 namespace Fergun.Tests.Converters;
 
 public class MicrosoftVoiceConverterTests
 {
-    private static readonly byte[] _microsoftTokenResponse = Encoding.UTF8.GetBytes("{\"r\":\"westus\",\"t\":\"dGVzdA==.eyJleHAiOjIxNDc0ODM2NDd9.dGVzdA==\"}");
+    private static readonly byte[] _microsoftTokenResponse = """{"r":"westus","t":"dGVzdA==.eyJleHAiOjIxNDc0ODM2NDd9.dGVzdA=="}"""u8.ToArray();
 
     [Fact]
     public void MicrosoftVoiceConverter_GetDiscordType_Returns_String()
@@ -119,7 +118,7 @@ public class MicrosoftVoiceConverterTests
         return new MicrosoftTranslator(new HttpClient(messageHandlerMock.Object));
     }
 
-    private static HttpResponseMessage GetResponseMessage(byte[] data) => new(HttpStatusCode.OK) { Content = new ByteArrayContent(data) };
+    private static HttpResponseMessage GetResponseMessage(byte[] data) => new(HttpStatusCode.OK) { Content = new ReadOnlyMemoryContent(data) };
 
     public static TheoryData<MicrosoftVoice, bool> GetMicrosoftVoiceTestData()
     {

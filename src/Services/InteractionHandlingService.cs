@@ -44,7 +44,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _services = services;
         _testingGuildId = options.Value.TestingGuildId;
         _ownerCommandsGuildId = options.Value.OwnerCommandsGuildId;
-        _interactionService.LocalizationManager = _localizationManager; // Should be set while configuring the services but it's not possible
+        _interactionService.LocalizationManager = _localizationManager; // Should be set while configuring the services, but it's not possible
     }
 
     /// <inheritdoc />
@@ -303,7 +303,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
     private async Task HandleCommandExecutedAsync(string commandName, ApplicationCommandType? type, IInteractionContext context, IResult result)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (type is not null)
         {
@@ -383,14 +383,6 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         else
         {
             await interaction.RespondAsync(embed: embed, ephemeral: ephemeral);
-        }
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(InteractionHandlingService));
         }
     }
 }

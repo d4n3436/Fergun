@@ -6,7 +6,7 @@
 public readonly record struct MemoryStatus
 {
     /// <summary>
-    /// Gets the total physical, memory, in bytes.
+    /// Gets the total physical memory, in bytes.
     /// </summary>
     public long TotalPhysicalMemory { get; init; }
 

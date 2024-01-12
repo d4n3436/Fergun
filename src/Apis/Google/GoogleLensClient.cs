@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,9 +18,9 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
-    private static ReadOnlySpan<byte> ResultsCallbackStart => Encoding.UTF8.GetBytes("AF_initDataCallback({key: 'ds:0'");
-    private static ReadOnlySpan<byte> OcrCallbackStart => Encoding.UTF8.GetBytes("AF_initDataCallback({key: 'ds:1'");
-    private static ReadOnlySpan<byte> CallbackEnd => Encoding.UTF8.GetBytes(", sideChannel: {}});</script>");
+    private static ReadOnlySpan<byte> ResultsCallbackStart => "AF_initDataCallback({key: 'ds:0'"u8;
+    private static ReadOnlySpan<byte> OcrCallbackStart => "AF_initDataCallback({key: 'ds:1'"u8;
+    private static ReadOnlySpan<byte> CallbackEnd => ", sideChannel: {}});</script>"u8;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GoogleLensClient"/> class.
@@ -47,7 +46,8 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <inheritdoc/>
     public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentNullException.ThrowIfNull(url);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken);
@@ -64,7 +64,8 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IGoogleLensResult>> ReverseImageSearchAsync(string url, string? language = null, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentNullException.ThrowIfNull(url);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string requestUrl = $"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}";
@@ -148,13 +149,5 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(GoogleLensClient));
-        }
     }
 }

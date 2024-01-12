@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,7 +47,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanDefinition>> GetDefinitionsAsync(string term, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -57,7 +58,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanDefinition>> GetRandomDefinitionsAsync(CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri("random", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -68,7 +69,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     /// <inheritdoc/>
     public async Task<UrbanDefinition?> GetDefinitionAsync(int id, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?defid={id}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -81,7 +82,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanDefinition>> GetWordsOfTheDayAsync(CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri("words_of_the_day", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -92,17 +93,16 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     /// <inheritdoc/>
     public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string term, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
-        return (await JsonSerializer.DeserializeAsync<IReadOnlyList<string>>(stream, (JsonSerializerOptions?)null, cancellationToken).ConfigureAwait(false))!;
+        return (await _httpClient.GetFromJsonAsync<IReadOnlyList<string>>(new Uri($"autocomplete?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false))!;
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanAutocompleteResult>> GetAutocompleteResultsExtraAsync(string term, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete-extra?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -120,13 +120,5 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(UrbanDictionary));
-        }
     }
 }

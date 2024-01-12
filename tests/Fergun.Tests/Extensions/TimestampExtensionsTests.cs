@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Bogus;
 using Fergun.Extensions;
 using Xunit;
@@ -20,10 +18,10 @@ public class TimestampExtensionsTests
         Assert.Equal(timestamp, $"<t:{unixSeconds}:{style}>");
     }
 
-    public static IEnumerable<object[]> GetDatesAndStyles()
+    public static TheoryData<DateTimeOffset, char> GetDatesAndStyles()
     {
         var faker = new Faker();
         return faker.MakeLazy(10, () => (faker.Date.BetweenOffset(DateTimeOffset.MinValue, DateTimeOffset.MaxValue), faker.Random.Char()))
-            .Select(x => new object[] { x.Item1, x.Item2 });
+            .ToTheoryData();
     }
 }

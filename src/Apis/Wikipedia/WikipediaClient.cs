@@ -35,7 +35,7 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IWikipediaArticle?> GetArticleAsync(int id, string language, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://{language}.wikipedia.org/w/api.php?" +
@@ -71,7 +71,7 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IPartialWikipediaArticle>> SearchArticlesAsync(string query, string language, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://{language}.wikipedia.org/w/api.php?action=query&list=search&srsearch=intitle:{Uri.EscapeDataString(query)}&utf8&format=json&srprop=";
@@ -98,13 +98,5 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(WikipediaClient));
-        }
     }
 }

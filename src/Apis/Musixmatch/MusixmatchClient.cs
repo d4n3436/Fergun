@@ -54,7 +54,8 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IMusixmatchSong>> SearchSongsAsync(string query, bool onlyWithLyrics = true, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentException.ThrowIfNullOrEmpty(query);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://apic-desktop.musixmatch.com/ws/1.1/track.search?q_track_artist={Uri.EscapeDataString(query)}&s_track_rating=desc&format=json&app_id={AppId}&f_has_lyrics={(onlyWithLyrics ? 1 : 0)}&f_is_instrumental={(onlyWithLyrics ? 0 : 1)}";
@@ -74,7 +75,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     /// <inheritdoc/>
     public async Task<IMusixmatchSong?> GetSongAsync(int id, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         string url = $"https://apic-desktop.musixmatch.com/ws/1.1/macro.community.lyrics.get?track_id={id}&version=2&format=json&app_id={AppId}";
@@ -211,13 +212,5 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
 
         return document;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(MusixmatchClient));
-        }
     }
 }

@@ -27,7 +27,9 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IDictionaryWord>> GetSearchResultsAsync(string text, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        cancellationToken.ThrowIfCancellationRequested();
+
         var response = (await _httpClient.GetFromJsonAsync<DictionarySearchResponse>(new Uri($"https://thor-graphql.dictionary.com/v2/search?searchText={Uri.EscapeDataString(text)}"), cancellationToken).ConfigureAwait(false))!;
         return response.Data;
     }
@@ -35,7 +37,9 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
     /// <inheritdoc/>
     public async Task<IDictionaryResponse> GetDefinitionsAsync(string word, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        cancellationToken.ThrowIfCancellationRequested();
+
         return (await _httpClient.GetFromJsonAsync<DictionaryResponse>(new Uri($"https://api-portal.dictionary.com/dcom/pageData/{Uri.EscapeDataString(word)}"), cancellationToken).ConfigureAwait(false))!;
     }
 
@@ -49,13 +53,5 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(DictionaryClient));
-        }
     }
 }

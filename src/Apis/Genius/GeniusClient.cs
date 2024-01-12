@@ -56,7 +56,8 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IGeniusSong>> SearchSongsAsync(string query, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ArgumentException.ThrowIfNullOrEmpty(query);
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         var model = await _httpClient.GetFromJsonAsync<GeniusResponse<GeniusSearchResponse>>(new Uri($"search?q={Uri.EscapeDataString(query)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
@@ -67,7 +68,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
     /// <inheritdoc/>
     public async Task<IGeniusSong?> GetSongAsync(int id, CancellationToken cancellationToken = default)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
         using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
@@ -91,13 +92,5 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
 
         _httpClient.Dispose();
         _disposed = true;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(GeniusClient));
-        }
     }
 }

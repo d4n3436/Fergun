@@ -39,7 +39,7 @@ public sealed class MusixmatchClientState : IDisposable
     /// <exception cref="MusixmatchException">The API response is not successful.</exception>
     public async ValueTask<string> GetUserTokenAsync(bool refresh = false)
     {
-        EnsureNotDisposed();
+        ObjectDisposedException.ThrowIf(_disposed, this);
 
         if (!refresh && _userToken is not null)
         {
@@ -108,13 +108,5 @@ public sealed class MusixmatchClientState : IDisposable
         }
 
         return token;
-    }
-
-    private void EnsureNotDisposed()
-    {
-        if (_disposed)
-        {
-            throw new ObjectDisposedException(nameof(MusixmatchClientState));
-        }
     }
 }

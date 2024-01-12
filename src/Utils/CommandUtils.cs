@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Fergun.Utils;
 
@@ -8,8 +7,8 @@ public static class CommandUtils
 {
     public static string? RunCommand(string command)
     {
-        bool isLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
-        bool isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        bool isLinux = OperatingSystem.IsLinux();
+        bool isWindows = OperatingSystem.IsWindows();
         if (!isLinux && !isWindows)
             return null;
 
@@ -25,7 +24,8 @@ public static class CommandUtils
             WorkingDirectory = isLinux ? "/home" : string.Empty
         };
 
-        using var process = new Process { StartInfo = startInfo };
+        using var process = new Process();
+        process.StartInfo = startInfo;
         process.Start();
         process.WaitForExit(10000);
 
