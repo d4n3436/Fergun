@@ -30,9 +30,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Events;
-using Serilog.Filters;
-using Serilog.Sinks.SystemConsole.Themes;
 using YoutubeExplode.Search;
 
 // The current directory is changed so the SQLite database is stored in the current folder
@@ -72,15 +69,7 @@ builder.Services.AddDiscordShardedHost((config, _) =>
 builder.Services.AddInteractionService((config, _) => config.LogLevel = LogSeverity.Critical);
 
 builder.Logging.ClearProviders();
-builder.Services.AddSerilog(config =>
-{
-    config.MinimumLevel.Debug()
-        .Filter.ByExcluding(e => e.Level == LogEventLevel.Debug && Matching.FromSource("Discord.WebSocket.DiscordShardedClient").Invoke(e) && e.MessageTemplate.Render(e.Properties).ContainsAny("Connected to", "Disconnected from"))
-        .Filter.ByExcluding(e => e.Level <= LogEventLevel.Debug && (Matching.FromSource("Microsoft.Extensions.Http").Invoke(e) || Matching.FromSource("Microsoft.Extensions.Localization").Invoke(e)))
-        .Filter.ByExcluding(e => e.Level <= LogEventLevel.Information && Matching.FromSource("Microsoft.EntityFrameworkCore").Invoke(e))
-        .WriteTo.Console(LogEventLevel.Debug, theme: AnsiConsoleTheme.Literate)
-        .WriteTo.Async(logger => logger.File(Path.Combine(builder.Environment.ContentRootPath, "logs", "log-.txt"), LogEventLevel.Debug, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null));
-});
+builder.Services.AddSerilog(config => config.ReadFrom.Configuration(builder.Configuration));
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
