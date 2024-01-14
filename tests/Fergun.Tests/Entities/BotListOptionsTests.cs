@@ -1,4 +1,5 @@
 ﻿using AutoBogus;
+using Fergun.Configuration;
 using System.Linq;
 using Xunit;
 

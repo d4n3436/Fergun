@@ -10,6 +10,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Fergun.Apis.Genius;
+using Fergun.Configuration;
 using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Hardware;

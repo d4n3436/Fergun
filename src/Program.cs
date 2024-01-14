@@ -17,6 +17,7 @@ using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Apis.Yandex;
+using Fergun.Configuration;
 using Fergun.Converters;
 using Fergun.Data;
 using Fergun.Extensions;

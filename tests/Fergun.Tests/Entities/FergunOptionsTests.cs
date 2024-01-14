@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using AutoBogus;
+using Fergun.Configuration;
 using Xunit;
 
 namespace Fergun.Tests.Entities;

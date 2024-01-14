@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Discord;
+using Fergun.Configuration;
 using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 

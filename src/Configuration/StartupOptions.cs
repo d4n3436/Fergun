@@ -1,4 +1,4 @@
-﻿namespace Fergun;
+﻿namespace Fergun.Configuration;
 
 /// <summary>
 /// Represents startup settings.

@@ -6,7 +6,7 @@ using Discord;
 using Fergun.Converters;
 using Fergun.Interactive.Pagination;
 
-namespace Fergun;
+namespace Fergun.Configuration;
 
 /// <summary>
 /// Represents general Fergun settings.

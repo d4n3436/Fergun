@@ -2,7 +2,7 @@
 using Discord;
 using Fergun.Converters;
 
-namespace Fergun;
+namespace Fergun.Configuration;
 
 /// <summary>
 /// Contains extra emotes used in Fergun.

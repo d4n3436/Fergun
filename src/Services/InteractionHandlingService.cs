@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Fergun.Configuration;
 using Fergun.Converters;
 using Fergun.Data;
 using Fergun.Data.Models;

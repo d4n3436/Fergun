@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
+using Fergun.Configuration;
 using Fergun.Interactive;
 using Fergun.Modules;
 using GTranslate.Translators;

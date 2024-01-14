@@ -11,6 +11,7 @@ using Fergun.Apis.Bing;
 using Fergun.Apis.Google;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
+using Fergun.Configuration;
 using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;

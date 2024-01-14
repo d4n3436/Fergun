@@ -8,6 +8,7 @@ using Discord.Interactions;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
+using Fergun.Configuration;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
