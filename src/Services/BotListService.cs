@@ -79,7 +79,7 @@ public sealed class BotListService : BackgroundService
             using var httpClient = _httpClientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            _logger.LogDebug("Successfully updated {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount}).", botList, serverCount, shardCount);
+            _logger.LogInformation("Successfully updated {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount}).", botList, serverCount, shardCount);
         }
         catch (Exception e)
         {

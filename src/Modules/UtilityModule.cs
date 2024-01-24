@@ -39,7 +39,7 @@ namespace Fergun.Modules;
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class UtilityModule : InteractionModuleBase
 {
-    private static IReadOnlyCollection<RestApplicationCommand>? _cachedComands;
+    private static IReadOnlyCollection<RestApplicationCommand>? _cachedCommands;
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
@@ -131,6 +131,8 @@ public class UtilityModule : InteractionModuleBase
             Color = Color.Orange
         };
 
+        _logger.LogInformation("Displaying avatar of user {User} ({Id}), type: {Type}", user, user.Id, type);
+
         await Context.Interaction.RespondAsync(embed: builder.Build());
 
         return FergunResult.FromSuccess();
@@ -158,6 +160,8 @@ public class UtilityModule : InteractionModuleBase
 
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Performing bad translation (chain count: {Count})", chainCount);
+
         var languageChain = new List<ILanguage>(chainCount + 1);
         ILanguage? source = null;
         for (int i = 0; i < chainCount; i++)
@@ -182,7 +186,7 @@ public class UtilityModule : InteractionModuleBase
             ITranslationResult result;
             try
             {
-                _logger.LogInformation("Translating to: {Target}", target.ISO6391);
+                _logger.LogDebug("Translating to: {Target}", target.ISO6391);
                 result = await _translator.TranslateAsync(text, target);
             }
             catch (Exception e)
@@ -190,6 +194,7 @@ public class UtilityModule : InteractionModuleBase
                 _logger.LogWarning(e, "Error translating text {Text} ({Source} -> {Target})", text, source?.ISO6391 ?? "auto", target.ISO6391);
                 return FergunResult.FromError(e.Message);
             }
+
             if (i == 0)
             {
                 source = result.SourceLanguage;
@@ -225,6 +230,11 @@ public class UtilityModule : InteractionModuleBase
         if (color.IsEmpty)
         {
             color = System.Drawing.Color.FromArgb(Random.Shared.Next((int)(Color.MaxDecimalValue + 1)));
+            _logger.LogInformation("Sending image of generated color: {Color}", DisplayColor());
+        }
+        else
+        {
+            _logger.LogInformation("Sending image of color: {Color}", DisplayColor());
         }
 
         using var image = new Image<Rgba32>(500, 500);
@@ -237,7 +247,7 @@ public class UtilityModule : InteractionModuleBase
         string hex = $"{color.R:X2}{color.G:X2}{color.B:X2}";
 
         var builder = new EmbedBuilder()
-            .WithTitle($"#{hex}{(color.IsNamedColor ? $" ({color.Name})" : string.Empty)}")
+            .WithTitle(DisplayColor())
             .WithImageUrl($"attachment://{hex}.png")
             .WithFooter($"R: {color.R}, G: {color.G}, B: {color.B}")
             .WithColor((Color)color);
@@ -245,16 +255,19 @@ public class UtilityModule : InteractionModuleBase
         await Context.Interaction.RespondWithFileAsync(new FileAttachment(stream, $"{hex}.png"), embed: builder.Build());
 
         return FergunResult.FromSuccess();
+
+        string DisplayColor() => $"#{color.R:X2}{color.G:X2}{color.B:X2}{(color.IsNamedColor ? $" ({color.Name})" : string.Empty)}";
     }
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("define", "Gets the definitions of a word from Dictionary.com (only English).")]
     public async Task<RuntimeResult> DefineAsync(
     [MaxLength(100)] [Autocomplete(typeof(DictionaryAutocompleteHandler))]
-    [Summary(description: "The word to get its defintions.")] string word)
+    [Summary(description: "The word to get its definitions.")] string word)
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Requesting definitions for word \"{Word}\"", word);
         var result = await _dictionary.GetDefinitionsAsync(word);
 
         var entries = result.Data?.Content
@@ -265,6 +278,8 @@ public class UtilityModule : InteractionModuleBase
         {
             return FergunResult.FromError(_localizer["NoResults"]);
         }
+
+        _logger.LogDebug("Received dictionary response (sources: {Sources}, luna entry count: {Count})", string.Join(", ", result.Data!.Content.Select(x => x.Source)), entries.Count);
 
         var maxIndexes = new List<int>();
         var pages = new List<List<PageBuilder>>();
@@ -351,7 +366,7 @@ public class UtilityModule : InteractionModuleBase
     {
         var responseType = InteractionResponseType.ChannelMessageWithSource;
 
-        if (_cachedComands is null)
+        if (_cachedCommands is null)
         {
             responseType = InteractionResponseType.DeferredChannelMessageWithSource;
             await Context.Interaction.DeferAsync();
@@ -359,11 +374,13 @@ public class UtilityModule : InteractionModuleBase
 
         if (_startupOptions.TestingGuildId == 0)
         {
-            _cachedComands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGlobalApplicationCommands(true);
+            _logger.LogDebug("Requesting global commands from REST API");
+            _cachedCommands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGlobalApplicationCommands(true);
         }
         else
         {
-            _cachedComands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGuildApplicationCommands(_startupOptions.TestingGuildId, true);
+            _logger.LogDebug("Requesting testing guild commands ({TestingGuildId}) from REST API", _startupOptions.TestingGuildId);
+            _cachedCommands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGuildApplicationCommands(_startupOptions.TestingGuildId, true);
         }
 
         string description = _localizer["Fergun2Info"];
@@ -372,6 +389,7 @@ public class UtilityModule : InteractionModuleBase
 
         if (_fergunOptions.SupportServerUrl is not null)
         {
+            _logger.LogDebug("Adding support server link to embed");
             links.Add(Format.Url(_localizer["Support"], _fergunOptions.SupportServerUrl));
             description += $"\n\n{_localizer["Fergun2SupportInfo"]}";
         }
@@ -380,11 +398,13 @@ public class UtilityModule : InteractionModuleBase
 
         if (_fergunOptions.VoteUrl is not null)
         {
+            _logger.LogDebug("Adding vote link to embed");
             links.Add(Format.Url(_localizer["Vote"], _fergunOptions.VoteUrl));
         }
 
         if (_fergunOptions.DonationUrl is not null)
         {
+            _logger.LogDebug("Adding donation link to embed");
             links.Add(Format.Url(_localizer["Donate"], _fergunOptions.DonationUrl));
         }
 
@@ -442,7 +462,7 @@ public class UtilityModule : InteractionModuleBase
             string locale = Context.Interaction.UserLocale;
             if (module.IsSlashGroup)
             {
-                var group = _cachedComands
+                var group = _cachedCommands
                     .First(globalCommand => module.SlashGroupName == globalCommand.Name);
 
                 // Slash command mentions can't be localized
@@ -452,7 +472,7 @@ public class UtilityModule : InteractionModuleBase
             }
             else
             {
-                commandDescriptions = _cachedComands
+                commandDescriptions = _cachedCommands
                     .Where(globalCommand => module.SlashCommands.Any(slashCommand => globalCommand.Name == slashCommand.Name))
                     .OrderBy(x => x.NameLocalized ?? x.Name)
                     .Select(x => $"</{x.Name}:{x.Id}> - {x.DescriptionLocalizations.GetValueOrDefault(locale, x.Description)}");
@@ -484,6 +504,8 @@ public class UtilityModule : InteractionModuleBase
         var sw = Stopwatch.StartNew();
         await Context.Interaction.RespondAsync(embed: embed);
         sw.Stop();
+
+        _logger.LogDebug("Ping interaction took {Elapsed}ms to process", sw.ElapsedMilliseconds);
 
         embed = new EmbedBuilder()
             .WithDescription($"Pong! {sw.ElapsedMilliseconds}ms")
@@ -565,6 +587,8 @@ public class UtilityModule : InteractionModuleBase
             .WithThumbnailUrl(avatarUrl)
             .WithColor(Color.Orange);
 
+        _logger.LogInformation("Displaying user info of {User} ({Id})", user, user.Id);
+
         await Context.Interaction.RespondAsync(embed: builder.Build());
 
         return FergunResult.FromSuccess();
@@ -579,10 +603,12 @@ public class UtilityModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Requesting Wikipedia article (ID: {Id}, Language: {Language})", id, Context.Interaction.GetLanguageCode());
         var article = await _wikipediaClient.GetArticleAsync(id, Context.Interaction.GetLanguageCode());
 
         if (article is null)
         {
+            _logger.LogDebug("Wikipedia article with ID {Id} not found", id);
             return FergunResult.FromError(_localizer["UnableToGetArticle"]);
         }
 
@@ -619,7 +645,10 @@ public class UtilityModule : InteractionModuleBase
 
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
+        _logger.LogInformation("Sending Wolfram Alpha request (query: \"{Query}\", language: {Language})", input, Context.Interaction.GetLanguageCode());
         var result = await _wolframAlphaClient.SendQueryAsync(input, Context.Interaction.GetLanguageCode(), true, cts.Token);
+
+        _logger.LogInformation("Received Wolfram Alpha result (type: {Type}, pod count: {Count})", result.Type, result.Pods.Count);
 
         if (result.Type == WolframAlphaResultType.Error)
         {
@@ -639,9 +668,14 @@ public class UtilityModule : InteractionModuleBase
             return FergunResult.FromSuccess();
         }
 
-        if (result.Type is  WolframAlphaResultType.NoResult or WolframAlphaResultType.DidYouMean)
+        if (result.Type is WolframAlphaResultType.NoResult or WolframAlphaResultType.DidYouMean)
         {
             return FergunResult.FromError(_localizer["WolframAlphaNoResults"]);
+        }
+
+        if (result.Warnings.Count > 0)
+        {
+            _logger.LogDebug("Wolfram Alpha result warnings: {Warnings}", string.Join(", ", result.Warnings.Select(x => x.Text)));
         }
 
         var builders = new List<List<EmbedBuilder>>();
@@ -736,7 +770,10 @@ public class UtilityModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Requesting YouTube videos (query: \"{Query}\")", query);
         var videos = await _searchClient.GetVideosAsync(query).Take(10);
+
+        _logger.LogDebug("YouTube search result count: {Count}", videos.Count);
 
         switch (videos.Count)
         {

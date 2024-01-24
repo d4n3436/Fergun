@@ -80,6 +80,8 @@ public class OcrModule : InteractionModuleBase
             throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine));
         }
 
+        _logger.LogInformation("Sending OCR request (engine: {Engine}, URL: {Url})", ocrEngine, url);
+
         if (interaction is IComponentInteraction componentInteraction)
         {
             await componentInteraction.DeferLoadingAsync(ephemeral);
@@ -92,11 +94,14 @@ public class OcrModule : InteractionModuleBase
         try
         {
             if (originalInteraction is not null)
+            {
+                _logger.LogDebug("Deleting original interaction response");
                 await originalInteraction.DeleteOriginalResponseAsync();
+        }
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete the original interaction response.");
+            _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
         var stopwatch = Stopwatch.StartNew();
@@ -122,12 +127,13 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["YandexOCRError"], ephemeral, interaction);
         }
 
+        stopwatch.Stop();
+        _logger.LogDebug("Received OCR result after {Elapsed}ms", stopwatch.ElapsedMilliseconds);
+
         if (string.IsNullOrWhiteSpace(text))
         {
             return FergunResult.FromError(_localizer["OCRNoResults"], ephemeral, interaction);
         }
-
-        stopwatch.Stop();
 
         interaction.TryGetLanguage(out var language);
 
@@ -150,10 +156,13 @@ public class OcrModule : InteractionModuleBase
         string buttonText;
         if (language is null)
         {
+            _logger.LogDebug("Unable to get GTranslate language from user locale \"{Locale}\"", interaction.GetLocale());
             buttonText = _localizer["Translate"];
         }
         else
         {
+            _logger.LogDebug("Retrieved GTranslate language \"{Name}\" from code {Code}", language.Name, language.ISO6391);
+
             var localizedString = _localizer["TranslateTo", language.NativeName];
             if (localizedString.ResourceNotFound && language.ISO6391 != "en")
             {
@@ -177,6 +186,8 @@ public class OcrModule : InteractionModuleBase
     [ComponentInteraction("ocrtranslate", true)]
     public async Task<RuntimeResult> OcrTranslateAsync()
     {
+        _logger.LogInformation("Received translate request from OCR embed button");
+
         var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
         if (embed is null)
         {
@@ -193,6 +204,8 @@ public class OcrModule : InteractionModuleBase
     [ComponentInteraction("ocrtts", true)]
     public async Task<RuntimeResult> OcrTtsAsync()
     {
+        _logger.LogInformation("Received TTS request from OCR embed button");
+
         var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
         if (embed is null)
         {

@@ -59,6 +59,7 @@ public class SharedModule
             await interaction.DeferAsync(ephemeral);
         }
 
+        _logger.LogInformation("Performing translation ({Source} -> {Target}), ephemeral: {Ephemeral}", source ?? "auto", target, ephemeral);
         ITranslationResult result;
 
         try
@@ -71,6 +72,13 @@ public class SharedModule
             return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
 
+        _logger.LogDebug("Received translation from service: {Service}", result.Service);
+
+        if (source is null)
+        {
+            _logger.LogDebug("Detected language: {Name} ({Code})", result.SourceLanguage.Name, result.SourceLanguage.ISO6391);
+        }
+        
         string thumbnailUrl = result.Service switch
         {
             "BingTranslator" => Constants.BingTranslatorLogoUrl,
@@ -123,6 +131,8 @@ public class SharedModule
         {
             await interaction.DeferAsync(ephemeral);
         }
+
+        _logger.LogInformation("Performing TTS with {Translator} and language: {Name} ({Code}), ephemeral: {Ephemeral}", nameof(GoogleTranslator2), language.Name, language.ISO6391, ephemeral);
 
         await using var stream = await _googleTranslator2.TextToSpeechAsync(text, language);
         await interaction.FollowupWithFileAsync(new FileAttachment(stream, "tts.mp3"), ephemeral: ephemeral);

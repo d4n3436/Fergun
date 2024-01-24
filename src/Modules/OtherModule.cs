@@ -57,10 +57,14 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Requesting command stats from database");
+
         var commandStats = await _db.CommandStats
             .AsNoTracking()
             .OrderByDescending(x => x.UsageCount)
             .ToListAsync();
+
+        _logger.LogDebug("Command stats count: {Count}", commandStats.Count);
 
         if (commandStats.Count == 0)
         {
@@ -68,6 +72,7 @@ public class OtherModule : InteractionModuleBase
         }
 
         int maxIndex = (int)Math.Ceiling((double)commandStats.Count / 25) - 1;
+        _logger.LogDebug("Sending command stats paginator with {Count} pages", maxIndex + 1);
 
         var paginator = new LazyPaginatorBuilder()
             .AddUser(Context.User)
@@ -101,7 +106,10 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogDebug("Requesting URL from InspiroBot API");
+
         string url = await _httpClient.GetStringAsync(_inspiroBotUri);
+
         _logger.LogInformation("Obtained url from InspiroBot API: {Url}", url);
 
         var builder = new EmbedBuilder()
@@ -136,24 +144,27 @@ public class OtherModule : InteractionModuleBase
     public async Task<RuntimeResult> LyricsAsync([MaxValue(int.MaxValue)] [Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
+
+        _logger.LogInformation("Requesting song from Genius with ID {Id}", id);
         var song = await _geniusClient.GetSongAsync(id);
 
         if (song is null)
         {
+            _logger.LogDebug("Song with ID {Id} was not found", id);
             return FergunResult.FromError(_localizer["LyricsNotFound", id]);
         }
+
+        _logger.LogInformation("Retrieved song (title: \"{Title}\", is instrumental: {IsInstrumental}, lyrics state: {LyricsState})", song, song.IsInstrumental, song.LyricsState);
 
         if (song.IsInstrumental)
         {
             // This shouldn't be reachable unless someone manually passes an instrumental ID.
-            _logger.LogDebug("Got instrumental song from ID: {Id}", id);
             return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistNames} - {song.Title}"]);
         }
 
         if (song.LyricsState == "unreleased")
         {
             // This shouldn't be reachable unless someone manually passes an unreleased ID.
-            _logger.LogDebug("Got unreleased song from ID: {Id}", id);
             return FergunResult.FromError(_localizer["LyricsUnreleased", $"{song.ArtistNames} - {song.Title}"]);
         }
 
@@ -163,6 +174,7 @@ public class OtherModule : InteractionModuleBase
         }
 
         var chunks = song.Lyrics.SplitForPagination(EmbedBuilder.MaxDescriptionLength).ToArray();
+        _logger.LogDebug("Split lyrics into {Chunks}", "chunk".ToQuantity(chunks.Length));
 
         var paginator = new LazyPaginatorBuilder()
             .AddUser(Context.User)
@@ -204,14 +216,23 @@ public class OtherModule : InteractionModuleBase
 
         var owner = (await Context.Client.GetApplicationInfoAsync()).Owner;
 
+        _logger.LogInformation("Requesting hardware info ({Instance})", HardwareInfo.Instance);
         double cpuUsage = await HardwareInfo.GetCpuUsageAsync();
         string cpu = HardwareInfo.GetCpuName() ?? "?";
         string os = HardwareInfo.GetOperatingSystemName();
+
+        _logger.LogDebug("CPU: {Cpu}", cpu);
+        _logger.LogDebug("CPU Usage: {Usage}", cpuUsage.ToString("P0"));
+        _logger.LogDebug("Operating System: {OS}", os);
 
         var memoryStatus = HardwareInfo.GetMemoryStatus();
         long totalRamUsage = memoryStatus.UsedPhysicalMemory;
         long processRamUsage = memoryStatus.ProcessUsedMemory;
         long totalRam = memoryStatus.TotalPhysicalMemory;
+
+        _logger.LogDebug("Total RAM Usage: {TotalRamUsage}", memoryStatus.UsedPhysicalMemory.Bytes());
+        _logger.LogDebug("Process RAM Usage: {ProcessRamUsage}", memoryStatus.ProcessUsedMemory.Bytes());
+        _logger.LogDebug("Total RAM: {TotalRam}", memoryStatus.TotalPhysicalMemory.Bytes());
 
         IReadOnlyCollection<IGuild> guilds;
         int shards = 1;
@@ -234,8 +255,10 @@ public class OtherModule : InteractionModuleBase
         }
 
         int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
+        _logger.LogDebug("Total users: {TotalUsers}", totalUsers?.ToString() ?? "?");
 
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        _logger.LogDebug("Version: {Version}", version ?? "?");
 
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
         string ramUsage = processRamUsage.Bytes().ToString(_localizer.CurrentCulture);

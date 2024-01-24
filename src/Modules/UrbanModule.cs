@@ -12,6 +12,7 @@ using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
 using Humanizer;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
@@ -20,14 +21,16 @@ namespace Fergun.Modules;
 [Group("urban", "Urban Dictionary commands")]
 public class UrbanModule : InteractionModuleBase
 {
+    private readonly ILogger<UrbanModule> _logger;
     private readonly IFergunLocalizer<UrbanModule> _localizer;
     private readonly FergunOptions _fergunOptions;
     private readonly IUrbanDictionary _urbanDictionary;
     private readonly InteractiveService _interactive;
 
-    public UrbanModule(IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
+    public UrbanModule(ILogger<UrbanModule> logger, IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
         IUrbanDictionary urbanDictionary, InteractiveService interactive)
     {
+        _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
         _urbanDictionary = urbanDictionary;
@@ -50,6 +53,8 @@ public class UrbanModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        _logger.LogInformation("Sending Urban Dictionary search request (type: {Type}, term: {Term})", searchType, term ?? "(None)");
+
         var definitions = searchType switch
         {
             UrbanSearchType.Search => await _urbanDictionary.GetDefinitionsAsync(term!),
@@ -57,6 +62,8 @@ public class UrbanModule : InteractionModuleBase
             UrbanSearchType.WordsOfTheDay => await _urbanDictionary.GetWordsOfTheDayAsync(),
             _ => throw new ArgumentException(_localizer["InvalidSearchType"], nameof(searchType))
         };
+
+        _logger.LogDebug("Definition count: {Count}", definitions.Count);
 
         if (definitions.Count == 0)
         {

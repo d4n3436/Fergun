@@ -92,7 +92,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning(e, "The ready handler has thrown an exception.");
+                    _logger.LogWarning(e, "The ready handler has thrown an exception");
                 }
             });
         }
@@ -161,7 +161,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The interaction handler has thrown an exception.");
+                _logger.LogWarning(e, "The interaction handler has thrown an exception");
             }
         });
 
@@ -179,7 +179,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             case BlacklistStatus.Blacklisted when interaction.Type is InteractionType.ApplicationCommand or InteractionType.MessageComponent:
             {
-                _logger.LogInformation("Blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
+                _logger.LogDebug("Blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
 
                 var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
                 localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
@@ -198,7 +198,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
 
             case BlacklistStatus.ShadowBlacklisted:
-                _logger.LogInformation("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction.", interaction.User, interaction.User.Id);
+                _logger.LogDebug("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
                 return;
         }
 
@@ -216,7 +216,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
             }
         });
 
@@ -233,7 +233,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
             }
         });
 
@@ -253,7 +253,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception.");
+                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
             }
         });
 
@@ -284,12 +284,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
             if (exception is TimeoutRejectedException)
             {
-                _logger.LogWarning("The autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} was canceled because it exceeded the timeout.",
+                _logger.LogWarning("The autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} was canceled because it exceeded the timeout",
                     name, context.User, context.User.Id, context.Display());
             }
             else
             {
-                _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception.",
+                _logger.LogError(exception, "Failed to execute Autocomplete handler of command \"{Name}\" for {User} ({Id}) in {Context} due to an exception",
                     name, context.User, context.User.Id, context.Display());
             }
         }
@@ -354,7 +354,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             var exception = ((ExecuteResult)result).Exception;
 
-            _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception.",
+            _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception",
                 commandType, commandName, context.User, context.User.Id, context.Display());
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
@@ -379,10 +379,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
         if (context.Interaction.HasResponded)
         {
+            _logger.LogDebug("Sending command-executed response as followup (ephemeral: {Ephemeral})", ephemeral);
             await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral);
         }
         else
         {
+            _logger.LogDebug("Sending command-executed response (ephemeral: {Ephemeral})", ephemeral);
             await interaction.RespondAsync(embed: embed, ephemeral: ephemeral);
         }
     }

@@ -61,12 +61,12 @@ public class ImageModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
+        _logger.LogInformation("Sending Google Images request (query: \"{Query}\", is NSFW: {IsNsfw})", query, isNsfw);
 
         var images = (await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode()))
             .ToArray();
 
-        _logger.LogInformation("Image results: {Count}", images.Length);
+        _logger.LogDebug("Google Image result count: {Count}", images.Length);
 
         if (images.Length == 0)
         {
@@ -75,6 +75,7 @@ public class ImageModule : InteractionModuleBase
 
         int count = multiImages ? 4 : 1;
         int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
+        _logger.LogDebug("Sending Google Images paginator with {Count} pages (multi-images: {MultiImages})", maxIndex + 1, multiImages);
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
@@ -114,12 +115,12 @@ public class ImageModule : InteractionModuleBase
         await Context.Interaction.DeferAsync();
 
         bool isNsfw = Context.Channel.IsNsfw();
-        _logger.LogInformation("Query: \"{Query}\", is NSFW: {IsNsfw}", query, isNsfw);
+        _logger.LogInformation("Sending DuckDuckGo image request (query: \"{Query}\", is NSFW: {IsNsfw})", query, isNsfw);
 
         var images = (await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
             .ToArray();
 
-        _logger.LogInformation("Image results: {Count}", images.Length);
+        _logger.LogDebug("DuckDuckGo image result count: {Count}", images.Length);
 
         if (images.Length == 0)
         {
@@ -128,6 +129,7 @@ public class ImageModule : InteractionModuleBase
 
         int count = multiImages ? 4 : 1;
         int maxIndex = (int)Math.Ceiling((double)images.Length / count) - 1;
+        _logger.LogDebug("Sending DuckDuckGo image paginator with {Count} pages (multi-images: {MultiImages})", maxIndex + 1, multiImages);
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
@@ -215,6 +217,8 @@ public class ImageModule : InteractionModuleBase
     public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages,
         IDiscordInteraction interaction, IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
+        _logger.LogDebug("Performing reverse image search (engine: {Engine}, multi-images: {MultiImages}, ephemeral: {Ephemeral})", engine, multiImages, ephemeral);
+
         return engine switch
         {
             ReverseImageSearchEngine.Yandex => await YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
@@ -250,6 +254,7 @@ public class ImageModule : InteractionModuleBase
 
         IReadOnlyList<IYandexReverseImageSearchResult> results;
 
+        _logger.LogInformation("Sending Yandex reverse image search request (URL: {Url}, is NSFW: {IsNsfw})", url, isNsfw);
         try
         {
             results = await _yandexImageSearch.ReverseImageSearchAsync(url, isNsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family);
@@ -259,6 +264,8 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
             return FergunResult.FromError(e.Message, ephemeral, interaction);
         }
+
+        _logger.LogDebug("Yandex reverse image search result count: {Count}", results.Count);
 
         if (results.Count == 0)
         {
@@ -325,6 +332,7 @@ public class ImageModule : InteractionModuleBase
         bool isNsfw = Context.Channel.IsNsfw();
         IBingReverseImageSearchResult[] results;
 
+        _logger.LogInformation("Sending Bing reverse image search request (URL: {Url}, is NSFW: {IsNsfw}, language: {Language})", url, isNsfw, interaction.GetLanguageCode());
         try
         {
             results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict, interaction.GetLanguageCode()))
@@ -335,6 +343,8 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
             return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
+
+        _logger.LogDebug("Bing reverse image search result count: {Count}", results.Length);
 
         if (results.Length == 0)
         {
@@ -400,6 +410,7 @@ public class ImageModule : InteractionModuleBase
 
         IReadOnlyList<IGoogleLensResult> results;
 
+        _logger.LogInformation("Sending Google reverse image search request (URL: {Url}, language: {Language})", url, interaction.GetLanguageCode());
         try
         {
             results = await _googleLens.ReverseImageSearchAsync(url, interaction.GetLanguageCode());
@@ -409,6 +420,8 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to perform reverse image search to url {Url}", url);
             return FergunResult.FromError(_localizer["GoogleLensError"], ephemeral, interaction);
         }
+
+        _logger.LogDebug("Google reverse image search result count: {Count}", results.Count);
 
         if (results.Count == 0)
         {

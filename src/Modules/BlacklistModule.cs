@@ -47,7 +47,7 @@ public class BlacklistModule : InteractionModuleBase
         dbUser.BlacklistReason = reason;
 
         await _db.SaveChangesAsync();
-        _logger.LogInformation("User {User} ({Id}) has been added to the blacklist (shadow: {Shadow}).", user, user.Id, shadow);
+        _logger.LogInformation("User {User} ({Id}) has been added to the blacklist (reason: {Reason}, shadow: {Shadow}).", user, user.Id, reason ?? "(None)", shadow);
 
         var builder = new EmbedBuilder()
             .WithDescription(_localizer["UserBlacklisted", user])

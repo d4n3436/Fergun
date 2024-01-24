@@ -48,7 +48,7 @@ public class OwnerModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        _logger.LogInformation("Executing command: {Command}", command);
+        _logger.LogInformation("Executing command: \"{Command}\", no embed: {NoEmbed}", command, noEmbed);
         string? result = CommandUtils.RunCommand(command);
 
         if (string.IsNullOrWhiteSpace(result))
@@ -90,6 +90,7 @@ public class OwnerModule : InteractionModuleBase
             .AddTextInput(_localizer["Code"], "code", TextInputStyle.Paragraph, "2 + 2", required: true)
             .Build();
 
+        _logger.LogDebug("Sending eval modal");
         await Context.Interaction.RespondWithModalAsync(modal);
 
         var interactiveResult = await _interactive.NextInteractionAsync(x => x is SocketModal modalInteraction
@@ -107,8 +108,9 @@ public class OwnerModule : InteractionModuleBase
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         object result = null!;
         CompilationErrorException? exception = null;
-        var sw = Stopwatch.StartNew();
 
+        _logger.LogDebug("Evaluating C# code...");
+        var sw = Stopwatch.StartNew();
         try
         {
             result = await CSharpScript.EvaluateAsync(code.Trim('`'), _lazyOptions.Value, new EvalGlobals(Context, _services), null, cts.Token);
@@ -122,8 +124,14 @@ public class OwnerModule : InteractionModuleBase
             sw.Stop();
         }
 
-        if (exception is not null)
+        if (exception is null)
         {
+            _logger.LogDebug("Finished evaluation after {Elapsed}ms", sw.ElapsedMilliseconds);
+        }
+        else
+        {
+            _logger.LogDebug(exception, "Finished evaluation after {Elapsed}ms with exception", sw.ElapsedMilliseconds);
+
             var embed = new EmbedBuilder()
                 .WithTitle(_localizer["EvalResults"])
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
@@ -137,6 +145,7 @@ public class OwnerModule : InteractionModuleBase
         }
 
         var chunks = (result?.ToString() ?? string.Empty).SplitForPagination(EmbedFieldBuilder.MaxFieldValueLength - 9).ToArray();
+        _logger.LogDebug("Split evaluation result into {Chunks}", "chunk".ToQuantity(chunks.Length));
 
         if (chunks.Length == 0)
         {
