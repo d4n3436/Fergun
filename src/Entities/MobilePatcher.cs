@@ -22,11 +22,9 @@ public static class MobilePatcher
     public static void Patch()
     {
         var harmony = new Harmony(nameof(MobilePatcher));
-
         var original = AccessTools.Method("Discord.API.DiscordSocketApiClient:SendGatewayAsync");
-        var prefix = typeof(MobilePatcher).GetMethod(nameof(Prefix));
 
-        harmony.Patch(original, new HarmonyMethod(prefix));
+        harmony.Patch(original, new HarmonyMethod(Prefix));
     }
 
     public static void Prefix(byte opCode, object payload)
