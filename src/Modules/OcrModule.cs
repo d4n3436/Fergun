@@ -97,7 +97,7 @@ public class OcrModule : InteractionModuleBase
             {
                 _logger.LogDebug("Deleting original interaction response");
                 await originalInteraction.DeleteOriginalResponseAsync();
-        }
+            }
         }
         catch (Exception e)
         {
@@ -144,11 +144,11 @@ public class OcrModule : InteractionModuleBase
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
 
-        string embedText = $"**{_localizer["Output"]}**\n";
+        string embedText = $"**{_localizer["Output"]}**";
 
         var builder = new EmbedBuilder()
             .WithTitle(_localizer["OCRResults"])
-            .WithDescription($"{embedText}```{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6)}```")
+            .WithDescription($"{embedText}```\n{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 7)}```")
             .WithThumbnailUrl(url)
             .WithFooter(_localizer["OCRFooter", name, stopwatch.ElapsedMilliseconds], iconUrl)
             .WithColor(Color.Orange);
@@ -195,7 +195,7 @@ public class OcrModule : InteractionModuleBase
         }
 
         string text = embed.Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
+        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 4;
         text = text[startIndex..^3];
 
         return await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true);
@@ -213,7 +213,7 @@ public class OcrModule : InteractionModuleBase
         }
 
         string text = embed.Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 3;
+        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 4;
         text = text[startIndex..^3];
 
         return await _shared.GoogleTtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
