@@ -580,7 +580,7 @@ public class UtilityModule : InteractionModuleBase
             .AddField(_localizer["ID"], user.Id)
             .AddField(_localizer["Activities"], activities, true)
             .AddField(_localizer["ActiveClients"], clients, true)
-            .AddField(_localizer["IsBot"], user.IsBot)
+            .AddField(_localizer["IsBot"], _localizer[user.IsBot ? "Yes" : "No"])
             .AddField(_localizer["CreatedAt"], GetTimestamp(user.CreatedAt))
             .AddField(_localizer["ServerJoinDate"], GetTimestamp(guildUser?.JoinedAt))
             .AddField(_localizer["BoostingSince"], GetTimestamp(guildUser?.PremiumSince))
