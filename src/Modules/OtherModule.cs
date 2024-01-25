@@ -260,6 +260,14 @@ public class OtherModule : InteractionModuleBase
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         _logger.LogDebug("Version: {Version}", version ?? "?");
 
+        string[]? split = version?.Split('+');
+        string versionAndCommitLink = split?.Length switch
+        {
+            1 => split[0],
+            2 => $"{split[0]}+{Format.Url(split[1][..7], $"{Constants.GitHubRepositoryUrl}/commit/{split[1]}")}",
+            _ => "?"
+        };
+
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
         string ramUsage = processRamUsage.Bytes().ToString(_localizer.CurrentCulture);
         if (totalRam > 0)
@@ -284,7 +292,7 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["RAMUsage"], ramUsage, true)
             .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["BotVersion"], version is null ? "?" : $"v{version}", true)
+            .AddField(_localizer["BotVersion"], versionAndCommitLink, true)
             .AddField(_localizer["TotalServers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["TotalUsers"], $"{totalUsers?.ToString() ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString() ?? "?"})", true)
