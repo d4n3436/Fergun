@@ -56,26 +56,18 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     /// <inheritdoc />
     public IDictionary<string, string> GetAllNames(IList<string> key, LocalizationTarget destinationType) => GetValues(key, "name");
 
-    private static bool IsMatch(ReadOnlySpan<char> resourceName, ReadOnlySpan<char> groupName, IList<string> key, ReadOnlySpan<char> identifier)
+    private static bool IsMatch(string resourceName, string? groupName, IList<string> key, string identifier)
     {
-        var enumerator = new SpanSplitEnumerator<char>(resourceName, '.');
-        int i = 0;
+        // Localized string names have the structure "command.(parameter).(choice).identifier" where identifier is either "name" or "description"
+        // Examples:
+        // google.name
+        // google.query.description
+        // avatar.type.server.name
 
-        while (enumerator.MoveNext())
-        {
-            if (i == 0 && key.Count > 1 && groupName.SequenceEqual(key[i]))
-                i++;
+        string[] split = resourceName.Split('.');
+        var parts = groupName is null ? split : split.Prepend(groupName);
 
-            if (i > key.Count - 1)
-                return enumerator.IsFinished && enumerator.Current.SequenceEqual(identifier);
-
-            if (!enumerator.Current.SequenceEqual(key[i]))
-                return false;
-
-            i++;
-        }
-
-        return false;
+        return key.Append(identifier).SequenceEqual(parts);
     }
 
     private IDictionary<string, string> GetValues(IList<string> key, string identifier)
@@ -90,6 +82,8 @@ public sealed class FergunLocalizationManager : ILocalizationManager
         }
 
         var dictionary = new Dictionary<string, string>();
+
+        // Module-specific localizer
         var localizer = _localizerFactory.Create(type);
 
         foreach (string locale in _supportedLocales.Keys)
