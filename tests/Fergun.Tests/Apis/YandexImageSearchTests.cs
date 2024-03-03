@@ -17,7 +17,7 @@ public class YandexImageSearchTests
     private readonly IYandexImageSearch _yandexImageSearch = new YandexImageSearch();
 
     [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/01/Windows_fonts_most_used.jpg")]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {

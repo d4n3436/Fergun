@@ -38,7 +38,6 @@ public class BingVisualSearchTests
     }
 
     [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954475252027641886/tts.mp3")] // MP3 file
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task ReverseImageSearchAsync_Throws_BingException_If_Image_Is_Invalid(string url)

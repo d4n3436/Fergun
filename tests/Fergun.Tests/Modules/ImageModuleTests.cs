@@ -145,8 +145,8 @@ public class ImageModuleTests
     }
 
     [Theory]
-    [InlineData("", null, ReverseImageSearchEngine.Bing, true, false, "NoResults")]
-    [InlineData("", null, ReverseImageSearchEngine.Yandex, true, true, "NoResults")]
+    [InlineData("", null, ReverseImageSearchEngine.Bing, true, false, "UrlNotWellFormed")]
+    [InlineData("", null, ReverseImageSearchEngine.Yandex, true, true, "UrlNotWellFormed")]
     [InlineData(null, null, ReverseImageSearchEngine.Bing, false, true, "UrlOrAttachmentRequired")]
     [InlineData(null, null, ReverseImageSearchEngine.Yandex, false, true, "UrlOrAttachmentRequired")]
     public async Task ReverseAsync_Returns_No_Results(string? url, IAttachment? file, ReverseImageSearchEngine engine, bool multiImages, bool nsfw, string message)
@@ -165,7 +165,7 @@ public class ImageModuleTests
     [Fact]
     public async Task ReverseAsync_Throws_Exception_If_Invalid_Engine_Is_Passed()
     {
-        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("", It.IsAny<IAttachment>(), (ReverseImageSearchEngine)3, It.IsAny<bool>()));
+        await Assert.ThrowsAsync<ArgumentException>("engine", () => _module.ReverseAsync("https://example.com/image.png", It.IsAny<IAttachment>(), (ReverseImageSearchEngine)3, It.IsAny<bool>()));
     }
 
     [Theory]

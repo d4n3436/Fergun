@@ -12,7 +12,7 @@ public class GoogleLensTests
     private readonly IGoogleLensClient _googleLens = new GoogleLensClient();
 
     [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954474328324460544/lorem_ipsum.png")]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/01/Windows_fonts_most_used.jpg")]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
@@ -23,7 +23,6 @@ public class GoogleLensTests
     }
 
     [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954475252027641886/tts.mp3")] // MP3 file
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task OcrAsync_Throws_GoogleLensException_If_Image_Is_Invalid(string url)
@@ -51,7 +50,6 @@ public class GoogleLensTests
     }
 
     [Theory]
-    [InlineData("https://cdn.discordapp.com/attachments/838832564583661638/954475252027641886/tts.mp3")] // MP3 file
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task ReverseImageSearchAsync_Throws_GoogleLensException_If_Image_Is_Invalid(string url)
