@@ -217,6 +217,11 @@ public class ImageModule : InteractionModuleBase
     public async Task<RuntimeResult> ReverseAsync(string url, ReverseImageSearchEngine engine, bool multiImages,
         IDiscordInteraction interaction, IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
+        if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+        {
+            return FergunResult.FromError(_localizer["UrlNotWellFormed"], true, interaction);
+        }
+
         _logger.LogDebug("Performing reverse image search (engine: {Engine}, multi-images: {MultiImages}, ephemeral: {Ephemeral})", engine, multiImages, ephemeral);
 
         return engine switch
