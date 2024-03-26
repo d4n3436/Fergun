@@ -26,6 +26,8 @@ using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
+[IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class OtherModule : InteractionModuleBase
 {

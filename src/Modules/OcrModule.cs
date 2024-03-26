@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
+[IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, 20)]
 [Group("ocr", "OCR commands.")]
 public class OcrModule : InteractionModuleBase
