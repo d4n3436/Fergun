@@ -353,6 +353,10 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (result.Error == InteractionCommandError.Exception)
         {
             var exception = ((ExecuteResult)result).Exception;
+            if (exception is InteractionException { InnerException: not null } interactionException) // Why?
+            {
+                exception = interactionException.InnerException;
+            }
 
             _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception",
                 commandType, commandName, context.User, context.User.Id, context.Display());
