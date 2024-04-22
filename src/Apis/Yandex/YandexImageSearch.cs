@@ -150,11 +150,16 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         var htmlDocument = await _parser.ParseDocumentAsync(html, cancellationToken).ConfigureAwait(false);
 
-        string json = htmlDocument
-            .GetElementsByClassName("cbir-similar-page").First()
-            .GetElementsByClassName("cbir-similar-page__content").First()
-            .GetElementsByClassName("Root").First()
-            .GetAttribute("data-state")!;
+        string? json = htmlDocument
+            .GetElementsByClassName("cbir-similar-page").FirstOrDefault()?
+            .GetElementsByClassName("cbir-similar-page__content").FirstOrDefault()?
+            .GetElementsByClassName("Root").FirstOrDefault()?
+            .GetAttribute("data-state");
+
+        if (json is null)
+        {
+            return [];
+        }
 
         using var data = JsonDocument.Parse(json);
 
