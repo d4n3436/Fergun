@@ -1,7 +1,7 @@
 # Fergun
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE) [![Discord](https://discord.com/api/guilds/460627183501574144/widget.png)](https://discord.gg/V3TgaZRUPX)
 
-Fergun is an utility bot/application with lots of useful commands.
+Fergun is a utility bot/application with lots of useful commands.
 
 You can invite Fergun to your Discord server clicking [here](https://discord.com/oauth2/authorize?client_id=680507783359365121&scope=bot%20applications.commands).
 
