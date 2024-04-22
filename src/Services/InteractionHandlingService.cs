@@ -373,7 +373,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         }
 
         var embed = new EmbedBuilder()
-            .WithDescription($"⚠ {message}")
+            .WithDescription($"⚠️ {message}")
             .WithColor(Color.Orange)
             .Build();
 

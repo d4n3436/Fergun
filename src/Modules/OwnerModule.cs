@@ -135,7 +135,7 @@ public class OwnerModule : InteractionModuleBase
             var embed = new EmbedBuilder()
                 .WithTitle(_localizer["EvalResults"])
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
-                .AddField($"⚠ {_localizer["Output"]}", $"```cs\n{string.Join('\n', exception.Diagnostics).Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
+                .AddField($"⚠️ {_localizer["Output"]}", $"```cs\n{string.Join('\n', exception.Diagnostics).Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .WithColor(Color.Orange)
                 .Build();
 
