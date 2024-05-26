@@ -50,7 +50,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken);
+        byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken).ConfigureAwait(false);
 
         var data = ExtractDataPack(page, OcrCallbackStart).RootElement[3][4][0];
         if (data.GetArrayLength() == 0)
@@ -74,7 +74,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
             requestUrl += $"&hl={language}";
         }
 
-        byte[] page = await _httpClient.GetByteArrayAsync(new Uri(requestUrl), cancellationToken);
+        byte[] page = await _httpClient.GetByteArrayAsync(new Uri(requestUrl), cancellationToken).ConfigureAwait(false);
 
         var data = ExtractDataPack(page, ResultsCallbackStart).RootElement[1].EnumerateArray().Last()[1][8];
 

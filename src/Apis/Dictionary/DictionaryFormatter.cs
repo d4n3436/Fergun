@@ -23,6 +23,8 @@ public static class DictionaryFormatter
     /// <returns>The formatted text.</returns>
     public static string FormatEntry(IDictionaryEntry entry)
     {
+        ArgumentNullException.ThrowIfNull(entry);
+
         var builder = new StringBuilder($"**{entry.Entry}**");
 
         if (entry.Homograph is not null)
@@ -55,6 +57,8 @@ public static class DictionaryFormatter
     /// <returns>The formatted text.</returns>
     public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block)
     {
+        ArgumentNullException.ThrowIfNull(block);
+
         var builder = new StringBuilder();
 
         if (!string.IsNullOrEmpty(block.PartOfSpeech))
@@ -111,6 +115,8 @@ public static class DictionaryFormatter
     /// <returns>The formatted text.</returns>
     public static string FormatExtraInformation(IDictionaryEntry entry)
     {
+        ArgumentNullException.ThrowIfNull(entry);
+
         var builder = new StringBuilder();
 
         if (!string.IsNullOrEmpty(entry.Origin))
