@@ -131,7 +131,7 @@ public class UtilityModuleTests
     {
         _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(),
             It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(),
-            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>()), Times.Once);
+            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), Times.Once);
     }
 
     public static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)

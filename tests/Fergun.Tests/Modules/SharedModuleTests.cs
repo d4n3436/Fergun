@@ -81,7 +81,7 @@ public class SharedModuleTests
         _translatorMock.Verify(x => x.TranslateAsync(It.Is<string>(s => s == text), It.Is<string>(s => s == target), It.Is<string>(s => s == source)), passedPreconditions ? Times.Once : Times.Never);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), result.IsSuccess && passedPreconditions ? Times.Once : Times.Never);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), result.IsSuccess && passedPreconditions ? Times.Once : Times.Never);
     }
 
     [Theory]
@@ -101,7 +101,7 @@ public class SharedModuleTests
         _translatorMock.Verify(x => x.TranslateAsync(It.Is<string>(s => s == text), It.Is<string>(s => s == target), It.Is<string>(s => s == source)), Times.Once);
 
         _componentInteractionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), Times.Once);
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public class SharedModuleTests
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
 
         _interactionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), passedPreconditions ? Times.Once : Times.Never);
     }
 
     [Theory]
@@ -138,6 +138,6 @@ public class SharedModuleTests
         _componentInteractionMock.Verify(x => x.DeferLoadingAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Once);
 
         _componentInteractionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>()), Times.Once);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), Times.Once);
     }
 }
