@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Results;
 using GTranslate.Translators;
@@ -31,7 +30,7 @@ public class FergunTranslator : IFergunTranslator
     public string Name => nameof(FergunTranslator);
 
     /// <inheritdoc/>
-    public void Randomize(Random? rng = null) => _translators.Shuffle(rng);
+    public void Randomize(Random? rng = null) => (rng ?? Random.Shared).Shuffle(_translators);
 
     /// <inheritdoc />
     public Task<ITranslationResult> TranslateAsync(string text, string toLanguage, string? fromLanguage = null)
