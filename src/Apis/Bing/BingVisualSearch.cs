@@ -112,7 +112,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
     private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
     {
-        string jsonRequest = $"{{\"imageInfo\":{{\"url\":\"{url}\",\"source\":\"Url\"}},\"knowledgeRequest\":{{\"invokedSkills\":[\"{invokedSkill}\"]}}}}";
+        string jsonRequest = $$"""{"imageInfo":{"url":"{{url}}","source":"Url"},"knowledgeRequest":{"invokedSkills":["{{invokedSkill}}"]}}""";
         var content = new MultipartFormDataContent
         {
             { new StringContent(jsonRequest), "knowledgeRequest" }

@@ -140,7 +140,7 @@ public sealed class BotListService : BackgroundService
     {
         Method = HttpMethod.Post,
         RequestUri = new Uri($"https://top.gg/api/bots/{_discordClient.CurrentUser.Id}/stats"),
-        Content = new StringContent($"{{\"server_count\": {serverCount},\"shard_count\":{shardCount}}}", Encoding.UTF8, "application/json"),
+        Content = new StringContent($$"""{"server_count":{{serverCount}},"shard_count":{{shardCount}}}""", Encoding.UTF8, "application/json"),
         Headers =
         {
             Authorization = new AuthenticationHeaderValue(token)
@@ -151,7 +151,7 @@ public sealed class BotListService : BackgroundService
     {
         Method = HttpMethod.Post,
         RequestUri = new Uri($"https://discord.bots.gg/api/v1/bots/{_discordClient.CurrentUser.Id}/stats"),
-        Content = new StringContent($"{{\"guildCount\": {serverCount},\"shardCount\":{shardCount}}}", Encoding.UTF8, "application/json"),
+        Content = new StringContent($$"""{"guildCount":{{serverCount}},"shardCount":{{shardCount}}}""", Encoding.UTF8, "application/json"),
         Headers =
         {
             Authorization = new AuthenticationHeaderValue(token)

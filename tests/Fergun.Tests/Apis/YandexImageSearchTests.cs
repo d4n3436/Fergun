@@ -57,8 +57,8 @@ public class YandexImageSearchTests
             .Protected()
             .As<HttpClient>()
             .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"image_id\":\"test\",\"image_shard\":0}") })
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"type\":\"captcha\"}") });
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("""{"image_id":"test","image_shard":0}""") })
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("""{"type":"captcha"}""") });
 
         var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
 
@@ -92,7 +92,7 @@ public class YandexImageSearchTests
             .Protected()
             .As<HttpClient>()
             .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{\"type\":\"captcha\"}") });
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("""{"type":"captcha"}""") });
 
         var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
 
@@ -130,7 +130,7 @@ public class YandexImageSearchTests
     }
 
     [Theory]
-    [InlineData("\"{title:&quot;a&quot;}\"", "{title:\"a\"}")]
+    [InlineData("\"{title:&quot;a&quot;}\"", """{title:"a"}""")]
     [InlineData("\"D&amp;D\"", "D&D")]
     public void HtmlEncodingConverter_Returns_Expected_Values(string encodedString, string decodedString)
     {

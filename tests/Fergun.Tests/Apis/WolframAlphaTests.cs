@@ -184,7 +184,7 @@ public class WolframAlphaTests
 
     public static TheoryData<string, IReadOnlyList<WolframAlphaWarning>> ArrayOrObjectConverterData()
     {
-        const string json = "{\"text\":\"Error message\"}";
+        const string json = """{"text":"Error message"}""";
         var suggestions = new[] { new WolframAlphaWarning("Error message") };
 
         return new TheoryData<string, IReadOnlyList<WolframAlphaWarning>>
