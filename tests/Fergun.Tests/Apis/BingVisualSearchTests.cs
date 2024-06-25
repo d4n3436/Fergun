@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Fergun.Apis.Bing;
@@ -19,7 +18,7 @@ public class BingVisualSearchTests
     [InlineData("https://r.bing.com/rp/NFrQjXWivF4omoTPSU03A6aosg0.jpg", BingSafeSearchLevel.Strict, "es")]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch, string? language)
     {
-        var results = (await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language)).ToArray();
+        var results = await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);

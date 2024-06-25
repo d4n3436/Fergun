@@ -337,13 +337,12 @@ public class ImageModule : InteractionModuleBase
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
-        IBingReverseImageSearchResult[] results;
+        IReadOnlyList<IBingReverseImageSearchResult> results;
 
         _logger.LogInformation("Sending Bing reverse image search request (URL: {Url}, is NSFW: {IsNsfw}, language: {Language})", url, isNsfw, interaction.GetLanguageCode());
         try
         {
-            results = (await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict, interaction.GetLanguageCode()))
-                .ToArray();
+            results = await _bingVisualSearch.ReverseImageSearchAsync(url, isNsfw ? BingSafeSearchLevel.Off : BingSafeSearchLevel.Strict, interaction.GetLanguageCode());
         }
         catch (BingException e)
         {
@@ -351,15 +350,15 @@ public class ImageModule : InteractionModuleBase
             return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
 
-        _logger.LogDebug("Bing reverse image search result count: {Count}", results.Length);
+        _logger.LogDebug("Bing reverse image search result count: {Count}", results.Count);
 
-        if (results.Length == 0)
+        if (results.Count == 0)
         {
             return FergunResult.FromError(_localizer["NoResults"], ephemeral, interaction);
         }
 
         int count = multiImages ? 4 : 1;
-        int maxIndex = (int)Math.Ceiling((double)results.Length / count) - 1;
+        int maxIndex = (int)Math.Ceiling((double)results.Count / count) - 1;
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)

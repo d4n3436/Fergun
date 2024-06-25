@@ -127,8 +127,8 @@ internal static class Utils
         faker ??= new Faker();
         var bingMock = new Mock<IBingVisualSearch>();
 
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(Enumerable.Empty<IBingReverseImageSearchResult>);
-        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.MakeLazy(50, () => CreateMockedBingReverseImageSearchResult(faker)));
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == string.Empty), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(Array.Empty<IBingReverseImageSearchResult>);
+        bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => !string.IsNullOrEmpty(s)), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => faker.Make(50, () => CreateMockedBingReverseImageSearchResult(faker)).AsReadOnly());
         bingMock.Setup(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == "https://example.com/error"), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Error message."));
 
         return bingMock.Object;

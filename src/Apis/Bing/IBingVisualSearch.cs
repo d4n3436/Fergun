@@ -16,8 +16,8 @@ public interface IBingVisualSearch
     /// <param name="safeSearch">The safe search level.</param>
     /// <param name="language">The language of the results.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous search operation. The result contains an <see cref="IEnumerable{T}"/> of search results.</returns>
-    Task<IEnumerable<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous search operation. The result contains a read-only list of search results.</returns>
+    Task<IReadOnlyList<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default);
 }

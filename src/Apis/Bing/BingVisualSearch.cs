@@ -56,7 +56,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+    public async Task<IReadOnlyList<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default)
     {
@@ -83,19 +83,18 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             throw new BingException(message, imageCategory);
         }
 
-        var root = document.RootElement.Clone();
-
-        var rawItems = root
+        return document.RootElement
             .GetProperty("tags")
             .EnumerateArray()
             .Select(x => x.GetPropertyOrDefault("actions"))
             .SelectMany(x => x.EnumerateArrayOrEmpty())
-            .FirstOrDefault(x => x.GetPropertyOrDefault("actionType").GetStringOrDefault() == "VisualSearch")
+            .FirstOrDefault(x => x.TryGetProperty("actionType", out var actionTye) && actionTye.ValueEquals("VisualSearch"u8))
             .GetPropertyOrDefault("data")
             .GetPropertyOrDefault("value")
-            .EnumerateArrayOrEmpty();
-
-        return rawItems.Select(item => item.Deserialize<BingReverseImageSearchResult>()!);
+            .EnumerateArrayOrEmpty()
+            .Select(item => item.Deserialize<BingReverseImageSearchResult>()!)
+            .ToArray()
+            .AsReadOnly();
     }
 
     /// <inheritdoc/>
@@ -112,7 +111,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
 
     private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
     {
-        string jsonRequest = $$"""{"imageInfo":{"url":"{{url}}","source":"Url"},"knowledgeRequest":{"invokedSkills":["{{invokedSkill}}"]}}""";
+        string jsonRequest = $$$"""{"imageInfo":{"url":"{{{url}}}","source":"Url"},"knowledgeRequest":{"invokedSkills":["{{{invokedSkill}}}"]}}""";
         var content = new MultipartFormDataContent
         {
             { new StringContent(jsonRequest), "knowledgeRequest" }
