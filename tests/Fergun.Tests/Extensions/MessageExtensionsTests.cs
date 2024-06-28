@@ -30,7 +30,7 @@ public class MessageExtensionsTests
     {
         var messageMock = new Mock<IMessage>();
         messageMock.SetupGet(x => x.Content).Returns(content);
-        messageMock.SetupGet(x => x.Embeds).Returns(new[] { embed });
+        messageMock.SetupGet(x => x.Embeds).Returns([embed]);
 
         string[] parts = messageMock.Object.GetText().Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
@@ -44,6 +44,7 @@ public class MessageExtensionsTests
         {
             Assert.Equal(embed.Author.Value.Name, parts[index++]);
         }
+
         Assert.Equal(embed.Title, parts[index++]);
         Assert.Equal(embed.Description, parts[index]);
         if (embed.Footer is not null)

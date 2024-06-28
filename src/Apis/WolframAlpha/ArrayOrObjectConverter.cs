@@ -17,7 +17,7 @@ public class ArrayOrObjectConverter<T> : JsonConverter<IReadOnlyList<T>>
         return reader.TokenType switch
         {
             JsonTokenType.StartArray => JsonSerializer.Deserialize<IReadOnlyList<T>>(ref reader)!,
-            JsonTokenType.StartObject => new[] { JsonSerializer.Deserialize<T>(ref reader)! },
+            JsonTokenType.StartObject => [JsonSerializer.Deserialize<T>(ref reader)!],
             _ => throw new JsonException("Token type must be either array or object.")
         };
     }

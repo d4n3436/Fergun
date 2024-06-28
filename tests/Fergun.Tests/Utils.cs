@@ -55,6 +55,7 @@ internal static class Utils
 
         return userMock.Object;
     }
+
     public static IGuildUser CreateMockedGuildUser(Faker? faker = null, bool pomelo = false)
     {
         faker ??= new Faker();

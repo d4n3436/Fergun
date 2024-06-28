@@ -169,7 +169,7 @@ public class WolframAlphaTests
         options.Converters.Add(new ArrayOrObjectConverter<string>());
 
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IReadOnlyList<string>>("true", options));
-        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize<IReadOnlyList<string>>(new[] { "test" }, options));
+        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize<IReadOnlyList<string>>(["test"], options));
     }
 
     public static TheoryData<string, WolframAlphaErrorInfo?> GetWolframAlphaErrorInfoConverterData()

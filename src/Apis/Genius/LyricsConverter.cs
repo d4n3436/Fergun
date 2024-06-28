@@ -64,6 +64,7 @@ public class LyricsConverter : JsonConverter<string>
             {
                 builder.Append('\u200b'); // Append zero-width space to prevent markdown from breaking
             }
+
             builder.Append(markDownStart);
 
             if (element.TryGetProperty("children", out var children))

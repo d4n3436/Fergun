@@ -173,7 +173,7 @@ public static class DictionaryFormatter
                 {
                     builder.Append($"\n> *{content}*");
                 } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
-                else if (className == "superscript" && content.Length == 1 && content[0] >= '0' && content[0] <= '9')
+                else if (className == "superscript" && content is [>= '0' and <= '9'])
                 {
                     builder.Append(SuperscriptDigits[content[0] - '0']);
                 }
