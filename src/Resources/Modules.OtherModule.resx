@@ -151,7 +151,7 @@
     <value>Unable to get the lyrics of "{0}".</value>
   </data>
   <data name="LyricsInstrumental" xml:space="preserve">
-    <value>"{0}" is instrumental.</value>
+    <value>"{0}" is an instrumental song.</value>
   </data>
   <data name="LyricsNotFound" xml:space="preserve">
     <value>Unable to find a song with ID {0}. Use the autocomplete results.</value>
@@ -200,5 +200,20 @@
   </data>
   <data name="ViewOnMusixmatch" xml:space="preserve">
     <value>View on Musixmatch</value>
+  </data>
+  <data name="NoSpotifyActivity" xml:space="preserve">
+    <value>No Spotify activity detected.</value>
+  </data>
+  <data name="NoSongMatchFound" xml:space="preserve">
+    <value>Unable to get the lyrics of song "{0}".</value>
+  </data>
+  <data name="lyrics-spotify.description" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="UseSpotifyLyricsCommand" xml:space="preserve">
+    <value>ℹ️ Use {0} to easily get the lyrics of the song you're currently listening to.</value>
   </data>
 </root>

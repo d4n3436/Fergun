@@ -57,7 +57,7 @@ builder.Services.AddDiscordShardedHost((config, _) =>
     config.SocketConfig = new DiscordSocketConfig
     {
         LogLevel = LogSeverity.Verbose,
-        GatewayIntents = GatewayIntents.Guilds,
+        GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildPresences,
         UseInteractionSnowflakeDate = false,
         LogGatewayIntentWarnings = false,
         FormatUsersInBidirectionalUnicode = false
@@ -74,6 +74,7 @@ builder.Services.AddSerilog(config => config.ReadFrom.Configuration(builder.Conf
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
 builder.Services.AddSingleton<FergunLocalizationManager>();
+builder.Services.AddSingleton<ApplicationCommandCache>();
 builder.Services.AddHostedService<InteractionHandlingService>();
 builder.Services.AddHostedService<BotListService>();
 builder.Services.ConfigureHttpClientDefaults(b =>

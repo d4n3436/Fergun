@@ -27,6 +27,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 {
     private readonly DiscordShardedClient _shardedClient;
     private readonly InteractionService _interactionService;
+    private readonly ApplicationCommandCache _commandCache;
     private readonly FergunLocalizationManager _localizationManager;
     private readonly ILogger<InteractionHandlingService> _logger;
     private readonly IServiceProvider _services;
@@ -35,11 +36,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
     private bool _disposed;
 
-    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, FergunLocalizationManager localizationManager,
-        ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
+    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, ApplicationCommandCache commandCache,
+        FergunLocalizationManager localizationManager, ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
     {
         _shardedClient = client;
         _interactionService = interactionService;
+        _commandCache = commandCache;
         _localizationManager = localizationManager;
         _logger = logger;
         _services = services;
@@ -110,7 +112,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (_testingGuildId == 0)
         {
             _logger.LogInformation("Registering commands globally");
-            await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
+             _commandCache.CachedCommands = await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
 
             if (_ownerCommandsGuildId != 0)
             {
@@ -124,11 +126,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
             if (_testingGuildId == _ownerCommandsGuildId)
             {
-                await _interactionService.RegisterCommandsToGuildAsync(_testingGuildId);
+                _commandCache.CachedCommands = await _interactionService.RegisterCommandsToGuildAsync(_testingGuildId);
             }
             else
             {
-                await _interactionService.AddModulesToGuildAsync(_testingGuildId, true, modules.ToArray());
+                _commandCache.CachedCommands = await _interactionService.AddModulesToGuildAsync(_testingGuildId, true, modules.ToArray());
 
                 if (_ownerCommandsGuildId != 0)
                 {

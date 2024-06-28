@@ -6,6 +6,7 @@ namespace Fergun.Apis.Genius;
 /// <inheritdoc cref="IGeniusSong"/>
 public record GeniusSong(
     [property: JsonPropertyName("artist_names")] string ArtistNames,
+    [property: JsonPropertyName("primary_artist_names")] string PrimaryArtistNames,
     [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("instrumental")] bool IsInstrumental,
     [property: JsonPropertyName("lyrics_state")] string LyricsState,

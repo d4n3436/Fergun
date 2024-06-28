@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -18,6 +19,7 @@ using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
+using Fergun.Services;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.EntityFrameworkCore;
@@ -39,9 +41,10 @@ public class OtherModule : InteractionModuleBase
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
+    private readonly ApplicationCommandCache _commandCache;
 
     public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db)
+        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db, ApplicationCommandCache commandCache)
     {
         _logger = logger;
         _localizer = localizer;
@@ -50,6 +53,7 @@ public class OtherModule : InteractionModuleBase
         _httpClient = httpClient;
         _interactive = interactive;
         _db = db;
+        _commandCache = commandCache;
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
@@ -147,6 +151,64 @@ public class OtherModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
+        return await LyricsInternalAsync(id);
+    }
+
+    [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
+    [SlashCommand("lyrics-spotify", "Gets the lyrics of the song you're listening to on Spotify.")]
+    public async Task<RuntimeResult> LyricsSpotifyAsync()
+    {
+        var spotifyActivity = Context.User.Activities.OfType<SpotifyGame>().FirstOrDefault();
+        if (spotifyActivity is null)
+        {
+            return FergunResult.FromError(_localizer["NoSpotifyActivity"], true);
+        }
+
+        await Context.Interaction.DeferAsync();
+
+        string artist = spotifyActivity.Artists.First();
+        string title = RemoveTitleExtraInfo(spotifyActivity.TrackTitle);
+        string query = $"{artist} {title}";
+
+        _logger.LogInformation("Detected Spotify activity on user {User} ({UserId})", Context.User, Context.User.Id);
+        _logger.LogInformation("Searching for songs matching Spotify song \"{Song}\"", $"{artist} - {title}");
+
+        var results = await _geniusClient.SearchSongsAsync(query);
+
+        var match = results.FirstOrDefault(x =>
+            x.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) &&
+            x.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase));
+
+        if (match is not null)
+        {
+            _logger.LogInformation("Found exact match for Spotify song \"{Song}\"", match);
+            if (match.IsInstrumental)
+            {
+                return FergunResult.FromError(_localizer["LyricsInstrumental", match]);
+            }
+
+            if (match.LyricsState == "unreleased")
+            {
+                return FergunResult.FromError(_localizer["LyricsUnreleased", match]);
+            }
+        }
+        else
+        {
+            match = results.FirstOrDefault(x => !x.IsInstrumental && x.LyricsState != "unreleased" &&
+                (x.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) ||
+                x.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase)));
+        }
+
+        if (match is null)
+        {
+            return FergunResult.FromError(_localizer["NoSongMatchFound", $"{artist} - {title}"]);
+        }
+
+        return await LyricsInternalAsync(match.Id, false);
+    }
+
+    private async Task<RuntimeResult> LyricsInternalAsync(int id, bool checkSpotifyStatus = true)
+    {
         _logger.LogInformation("Requesting song from Genius with ID {Id}", id);
         var song = await _geniusClient.GetSongAsync(id);
 
@@ -175,6 +237,9 @@ public class OtherModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistNames} - {song.Title}"]);
         }
 
+        var spotifyLyricsCommand = _commandCache.CachedCommands.FirstOrDefault(x => x.Name == "lyrics-spotify");
+        Debug.Assert(spotifyLyricsCommand != null, "Expected /lyrics-spotify to be present");
+
         var chunks = song.Lyrics.SplitForPagination(EmbedBuilder.MaxDescriptionLength).ToArray();
         _logger.LogDebug("Split lyrics into {Chunks}", "chunk".ToQuantity(chunks.Length));
 
@@ -201,13 +266,36 @@ public class OtherModule : InteractionModuleBase
             if (song.SpotifyTrackId is not null)
                 links += $" | {Format.Url(_localizer["OpenInSpotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
 
-            return new PageBuilder()
+            var builder = new PageBuilder()
                 .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunks[index].ToString())
-                .AddField(_localizer["Links"], links)
                 .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
                 .WithColor(Color.Orange);
+
+            if (checkSpotifyStatus && IsSameSong())
+            {
+                var mention = $"</{spotifyLyricsCommand.Name}:{spotifyLyricsCommand.Id}>";
+                builder.AddField(_localizer["Note"], _localizer["UseSpotifyLyricsCommand", mention]);
+            }
+
+            builder.AddField(_localizer["Links"], links);
+
+            return builder;
+        }
+
+        bool IsSameSong()
+        {
+            var spotifyActivity = Context.User.Activities.OfType<SpotifyGame>().FirstOrDefault();
+            if (spotifyActivity is null)
+                return false;
+
+            string artist = spotifyActivity.Artists.First();
+            string title = RemoveTitleExtraInfo(spotifyActivity.TrackTitle);
+
+            return (song.SpotifyTrackId is not null && song.SpotifyTrackId == spotifyActivity.TrackId) ||
+                (song.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) &&
+                song.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 
@@ -310,5 +398,15 @@ public class OtherModule : InteractionModuleBase
         await Context.Interaction.FollowupAsync(embed: builder.Build());
 
         return FergunResult.FromSuccess();
+    }
+
+    [return: NotNullIfNotNull(nameof(input))]
+    private static string? RemoveTitleExtraInfo(string? input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        int index = input.IndexOf(" - ", StringComparison.Ordinal);
+        return index != -1 ? input[..index] : input;
     }
 }

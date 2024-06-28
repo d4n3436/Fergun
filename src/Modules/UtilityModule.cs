@@ -9,7 +9,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
-using Discord.Rest;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
@@ -20,6 +19,7 @@ using Fergun.Interactive.Pagination;
 using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
+using Fergun.Services;
 using GTranslate;
 using GTranslate.Results;
 using Humanizer;
@@ -41,7 +41,6 @@ namespace Fergun.Modules;
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class UtilityModule : InteractionModuleBase
 {
-    private static IReadOnlyCollection<RestApplicationCommand>? _cachedCommands;
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
@@ -51,28 +50,28 @@ public class UtilityModule : InteractionModuleBase
 
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
-    private readonly StartupOptions _startupOptions;
     private readonly FergunOptions _fergunOptions;
     private readonly SharedModule _shared;
     private readonly InteractionService _commands;
     private readonly InteractiveService _interactive;
+    private readonly ApplicationCommandCache _commandCache;
     private readonly IFergunTranslator _translator;
     private readonly IDictionaryClient _dictionary;
     private readonly SearchClient _searchClient;
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptions<StartupOptions> startupOptions,
-        IOptionsSnapshot<FergunOptions> fergunOptions, SharedModule shared, InteractionService commands, InteractiveService interactive,
-        IDictionaryClient dictionary, IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
+        SharedModule shared, InteractionService commands, InteractiveService interactive, ApplicationCommandCache commandCache, IDictionaryClient dictionary,
+        IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
     {
         _logger = logger;
         _localizer = localizer;
-        _startupOptions = startupOptions.Value;
         _fergunOptions = fergunOptions.Value;
         _shared = shared;
         _commands = commands;
         _interactive = interactive;
+        _commandCache = commandCache;
         _dictionary = dictionary;
         _translator = translator;
         _searchClient = searchClient;
@@ -366,25 +365,6 @@ public class UtilityModule : InteractionModuleBase
     [SlashCommand("help", "Information about Fergun.")]
     public async Task<RuntimeResult> HelpAsync()
     {
-        var responseType = InteractionResponseType.ChannelMessageWithSource;
-
-        if (_cachedCommands is null)
-        {
-            responseType = InteractionResponseType.DeferredChannelMessageWithSource;
-            await Context.Interaction.DeferAsync();
-        }
-
-        if (_startupOptions.TestingGuildId == 0)
-        {
-            _logger.LogDebug("Requesting global commands from REST API");
-            _cachedCommands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGlobalApplicationCommands(true);
-        }
-        else
-        {
-            _logger.LogDebug("Requesting testing guild commands ({TestingGuildId}) from REST API", _startupOptions.TestingGuildId);
-            _cachedCommands ??= await ((ShardedInteractionContext)Context).Client.Rest.GetGuildApplicationCommands(_startupOptions.TestingGuildId, true);
-        }
-
         string description = _localizer["Fergun2Info"];
 
         var links = new List<string>();
@@ -437,6 +417,7 @@ public class UtilityModule : InteractionModuleBase
 
         InteractiveMessageResult<ModuleOption?>? result = null;
         var interaction = Context.Interaction;
+        var responseType = InteractionResponseType.ChannelMessageWithSource;
 
         _logger.LogInformation("Displaying help menu to user {User} ({Id})", Context.User, Context.User.Id);
 
@@ -464,7 +445,7 @@ public class UtilityModule : InteractionModuleBase
             string locale = Context.Interaction.UserLocale;
             if (module.IsSlashGroup)
             {
-                var group = _cachedCommands
+                var group = _commandCache.CachedCommands
                     .First(globalCommand => module.SlashGroupName == globalCommand.Name);
 
                 // Slash command mentions can't be localized
@@ -474,7 +455,7 @@ public class UtilityModule : InteractionModuleBase
             }
             else
             {
-                commandDescriptions = _cachedCommands
+                commandDescriptions = _commandCache.CachedCommands
                     .Where(globalCommand => module.SlashCommands.Any(slashCommand => globalCommand.Name == slashCommand.Name))
                     .OrderBy(x => x.NameLocalized ?? x.Name)
                     .Select(x => $"</{x.Name}:{x.Id}> - {x.DescriptionLocalizations.GetValueOrDefault(locale, x.Description)}");

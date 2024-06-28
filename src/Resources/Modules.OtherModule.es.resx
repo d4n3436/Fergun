@@ -123,12 +123,6 @@
   <data name="BotVersion" xml:space="preserve">
     <value>Versión del bot</value>
   </data>
-  <data name="command-stats.description" xml:space="preserve">
-    <value>Muestra las estadísticas de uso de los comandos.</value>
-  </data>
-  <data name="command-stats.name" xml:space="preserve">
-    <value>estadísticas-de-comandos</value>
-  </data>
   <data name="CommandStats" xml:space="preserve">
     <value>Estadísticas de Comandos</value>
   </data>
@@ -141,18 +135,6 @@
   <data name="GeniusPaginatorFooter" xml:space="preserve">
     <value>Letra por Genius | Página {0} de {1}</value>
   </data>
-  <data name="inspirobot.description" xml:space="preserve">
-    <value>Envía una cita inspiradora.</value>
-  </data>
-  <data name="inspirobot.name" xml:space="preserve">
-    <value>inspirobot</value>
-  </data>
-  <data name="invite.description" xml:space="preserve">
-    <value>Invita Fergun a tu servidor.</value>
-  </data>
-  <data name="invite.name" xml:space="preserve">
-    <value>invitar</value>
-  </data>
   <data name="InviteDescription" xml:space="preserve">
     <value>Haga click en el botón de abajo para invitar a Fergun a tu servidor.</value>
   </data>
@@ -164,18 +146,6 @@
   </data>
   <data name="Links" xml:space="preserve">
     <value>Enlaces</value>
-  </data>
-  <data name="lyrics.description" xml:space="preserve">
-    <value>Obtiene la letra de una canción.</value>
-  </data>
-  <data name="lyrics.name" xml:space="preserve">
-    <value>letra</value>
-  </data>
-  <data name="lyrics.name.description" xml:space="preserve">
-    <value>El nombre de la canción.</value>
-  </data>
-  <data name="lyrics.name.name" xml:space="preserve">
-    <value>nombre</value>
   </data>
   <data name="LyricsEmpty" xml:space="preserve">
     <value>No es posible obtener la letra de "{0}".</value>
@@ -213,12 +183,6 @@
   <data name="ShardID" xml:space="preserve">
     <value>ID de shard</value>
   </data>
-  <data name="stats.description" xml:space="preserve">
-    <value>Envía las estadísticas del bot.</value>
-  </data>
-  <data name="stats.name" xml:space="preserve">
-    <value>estadísticas</value>
-  </data>
   <data name="TotalServers" xml:space="preserve">
     <value>Servidores Totales</value>
   </data>
@@ -236,5 +200,59 @@
   </data>
   <data name="ViewOnMusixmatch" xml:space="preserve">
     <value>Ver en Musixmatch</value>
+  </data>
+  <data name="NoSpotifyActivity" xml:space="preserve">
+    <value>No se ha detectado la actividad de Spotify.</value>
+  </data>
+  <data name="NoSongMatchFound" xml:space="preserve">
+    <value>No es posible obtener la letra de la canción "{0}".</value>
+  </data>
+  <data name="lyrics-spotify.description" xml:space="preserve">
+    <value>Obtiene la letra de la canción que estás escuchando en Spotify.</value>
+  </data>
+  <data name="command-stats.description" xml:space="preserve">
+    <value>Muestra las estadísticas de uso de los comandos.</value>
+  </data>
+  <data name="command-stats.name" xml:space="preserve">
+    <value>estadísticas-de-comandos</value>
+  </data>
+  <data name="inspirobot.description" xml:space="preserve">
+    <value>Envía una cita inspiradora.</value>
+  </data>
+  <data name="inspirobot.name" xml:space="preserve">
+    <value>inspirobot</value>
+  </data>
+  <data name="invite.description" xml:space="preserve">
+    <value>Invita Fergun a tu servidor.</value>
+  </data>
+  <data name="invite.name" xml:space="preserve">
+    <value>invitar</value>
+  </data>
+  <data name="lyrics.description" xml:space="preserve">
+    <value>Obtiene la letra de una canción.</value>
+  </data>
+  <data name="lyrics.name" xml:space="preserve">
+    <value>letra</value>
+  </data>
+  <data name="lyrics.name.description" xml:space="preserve">
+    <value>El nombre de la canción.</value>
+  </data>
+  <data name="lyrics.name.name" xml:space="preserve">
+    <value>nombre</value>
+  </data>
+  <data name="stats.description" xml:space="preserve">
+    <value>Envía las estadísticas del bot.</value>
+  </data>
+  <data name="stats.name" xml:space="preserve">
+    <value>estadísticas</value>
+  </data>
+  <data name="lyrics-spotify.name" xml:space="preserve">
+    <value>letra-spotify</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="UseSpotifyLyricsCommand" xml:space="preserve">
+    <value>ℹ️ Usa {0} para obtener fácilmente la letra de la canción que estás escuchando.</value>
   </data>
 </root>
