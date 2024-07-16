@@ -325,23 +325,22 @@ public class UtilityModule : InteractionModuleBase
             }
         }
 
-        var actions = new List<PaginatorAction>();
+        var paginatorBuilder = new DictionaryPaginatorBuilder();
 
         if (pages.Count > 1 || pages[0].Count > 1)
         {
-            actions.Add(PaginatorAction.Backward);
-            actions.Add(PaginatorAction.Forward);
+            paginatorBuilder.AddOption(PaginatorAction.Backward, _fergunOptions.PaginatorEmotes[PaginatorAction.Backward], "Previous category");
+            paginatorBuilder.AddOption(PaginatorAction.Forward, _fergunOptions.PaginatorEmotes[PaginatorAction.Forward], "Next category");
         }
 
         if (pages.Count > 1)
         {
-            actions.Add(PaginatorAction.SkipToStart);
-            actions.Add(PaginatorAction.SkipToEnd);
+            paginatorBuilder.AddOption(PaginatorAction.SkipToStart, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToStart], "Previous definition");
+            paginatorBuilder.AddOption(PaginatorAction.SkipToEnd, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToEnd], "Next definition");
         }
 
-        DictionaryPaginator? paginator = null;
-        paginator = new DictionaryPaginatorBuilder()
-            .AddUser(Context.User)
+        DictionaryPaginator paginator = null!;
+        paginator = paginatorBuilder.AddUser(Context.User)
             .WithPageFactory(GeneratePage)
             .WithCacheLoadedPages(false)
             .WithMaxPageIndex(pages.Count - 1)
@@ -350,8 +349,7 @@ public class UtilityModule : InteractionModuleBase
             .WithActionOnCancellation(ActionOnStop.DisableInput)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions, actions.ToArray())
-            .AddOption(_fergunOptions.ExtraEmotes.InfoEmote, PaginatorAction.Jump)
+            .AddOption(PaginatorAction.Jump, _fergunOptions.ExtraEmotes.InfoEmote, "More information", ButtonStyle.Secondary)
             .AddOption(_fergunOptions.PaginatorEmotes[PaginatorAction.Exit], PaginatorAction.Exit)
             .Build();
 
@@ -359,7 +357,7 @@ public class UtilityModule : InteractionModuleBase
 
         return FergunResult.FromSuccess();
 
-        PageBuilder GeneratePage(int entryIndex) => pages[entryIndex][paginator!.CurrentCategoryIndex];
+        PageBuilder GeneratePage(int entryIndex) => pages[entryIndex][paginator.CurrentCategoryIndex];
     }
 
     [SlashCommand("help", "Information about Fergun.")]

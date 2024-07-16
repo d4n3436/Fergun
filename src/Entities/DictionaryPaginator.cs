@@ -17,7 +17,6 @@ public class DictionaryPaginator : BaseLazyPaginator
 {
     private readonly IReadOnlyList<int> _maxCategoryIndexes;
     private readonly IReadOnlyList<IPage?> _extraInformation;
-    private Dictionary<PaginatorAction, string?>? _actions;
     private bool _isDisplayingExtraInfo;
 
     /// <summary>
@@ -53,16 +52,6 @@ public class DictionaryPaginator : BaseLazyPaginator
     /// <inheritdoc/>
     public override ComponentBuilder GetOrAddComponents(bool disableAll, ComponentBuilder? builder = null)
     {
-        _actions ??= new Dictionary<PaginatorAction, string?>
-        {
-            { PaginatorAction.SkipToStart, "Previous definition" },
-            { PaginatorAction.Backward, "Previous category" },
-            { PaginatorAction.Forward, "Next category" },
-            { PaginatorAction.SkipToEnd, "Next definition" }, // words can have different IPA pronunciation like bass
-            { PaginatorAction.Jump, "More information" },
-            { PaginatorAction.Exit, null }
-        };
-
         builder ??= new ComponentBuilder();
 
         for (int i = 0; i < ButtonFactories.Count; i++)
@@ -85,14 +74,8 @@ public class DictionaryPaginator : BaseLazyPaginator
                 _ => false
             };
 
-            var style = properties.Action switch
-            {
-                PaginatorAction.Exit => ButtonStyle.Danger,
-                PaginatorAction.Jump => ButtonStyle.Secondary,
-                _ => ButtonStyle.Primary
-            };
-
-            string? label = properties.Action == PaginatorAction.Jump && _isDisplayingExtraInfo ? "Go back" : _actions[properties.Action];
+            var style = properties.Style ?? (properties.Action == PaginatorAction.Exit ? ButtonStyle.Danger : ButtonStyle.Primary);
+            string? label = properties.Action == PaginatorAction.Jump && _isDisplayingExtraInfo ? "Go back" : properties.Text;
 
             var button = new ButtonBuilder()
                 .WithCustomId($"{i}_{(int)properties.Action}")
