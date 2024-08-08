@@ -5,9 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
+using Fergun.Apis.Bing;
 using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Extensions;
+using Fergun.Interactive;
+using Fergun.Interactive.Selection;
 using Fergun.Preconditions;
 using Humanizer;
 using Microsoft.Extensions.Logging;
@@ -23,20 +26,39 @@ public class OcrModule : InteractionModuleBase
     private readonly ILogger<OcrModule> _logger;
     private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
+    private readonly InteractiveService _interactive;
     private readonly IGoogleLensClient _googleLens;
+    private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared,
-        IGoogleLensClient googleLens, IYandexImageSearch yandexImageSearch)
+    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared, InteractiveService interactive,
+        IGoogleLensClient googleLens, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
         _shared = shared;
+        _interactive = interactive;
         _googleLens = googleLens;
+        _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
 
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
+
+    [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
+    public async Task<RuntimeResult> BingAsync([Summary(description: "The URL of an image.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Bing, file?.Url ?? url, Context.Interaction);
+
+    [SlashCommand("google", "Performs OCR to an image using Google Lens.")]
+    public async Task<RuntimeResult> GoogleAsync([Summary(description: "The URL of an image.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Google, file?.Url ?? url, Context.Interaction);
+
+    [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
+    public async Task<RuntimeResult> YandexAsync([Summary(description: "The URL of an image.")] string? url = null,
+        [Summary(description: "An image file.")] IAttachment? file = null)
+        => await OcrAsync(OcrEngine.Yandex, file?.Url ?? url, Context.Interaction);
 
     [MessageCommand("OCR")]
     public async Task<RuntimeResult> OcrAsync(IMessage message)
@@ -51,18 +73,28 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["NoImageUrlInMessage"], true);
         }
 
-        return await YandexAsync(url);
+        var page = new PageBuilder()
+            .WithTitle(_localizer["SelectOCREngine"])
+            .WithColor(Color.Orange);
+
+        var selection = new SelectionBuilder<OcrEngine>()
+            .AddUser(Context.User)
+            .WithOptions(Enum.GetValues<OcrEngine>())
+            .WithSelectionPage(page)
+            .Build();
+
+        var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
+
+        if (result.IsSuccess)
+        {
+            return await OcrAsync(result.Value, url, result.StopInteraction!, Context.Interaction, true);
+        }
+
+        // Attempt to disable the components
+        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
+
+        return FergunResult.FromSilentError();
     }
-
-    [SlashCommand("google", "Performs OCR to an image using Google Lens.")]
-    public async Task<RuntimeResult> GoogleAsync([Summary(description: "The URL of an image.")] string? url = null,
-        [Summary(description: "An image file.")] IAttachment? file = null)
-        => await OcrAsync(OcrEngine.Google, file?.Url ?? url, Context.Interaction);
-
-    [SlashCommand("yandex", "Performs OCR to an image using Yandex.")]
-    public async Task<RuntimeResult> YandexAsync([Summary(description: "The URL of an image.")] string? url = null,
-        [Summary(description: "An image file.")] IAttachment? file = null)
-        => await OcrAsync(OcrEngine.Yandex, file?.Url ?? url, Context.Interaction);
 
     public async Task<RuntimeResult> OcrAsync(OcrEngine ocrEngine, string? url, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
@@ -114,6 +146,7 @@ public class OcrModule : InteractionModuleBase
             text = ocrEngine switch
             {
                 OcrEngine.Google => await _googleLens.OcrAsync(url),
+                OcrEngine.Bing => await _bingVisualSearch.OcrAsync(url),
                 OcrEngine.Yandex => await _yandexImageSearch.OcrAsync(url),
                 _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
             };
@@ -122,6 +155,11 @@ public class OcrModule : InteractionModuleBase
         {
             _logger.LogWarning(e, "Failed to perform Google Lens OCR to url {Url}", url);
             return FergunResult.FromError(_localizer["GoogleLensOCRError"], ephemeral, interaction);
+        }
+        catch (BingException e)
+        {
+            _logger.LogWarning(e, "Failed to perform Bing OCR to url {Url}", url);
+            return FergunResult.FromError(e.ImageCategory is null ? e.Message : _localizer[$"Bing{e.ImageCategory}"], ephemeral, interaction);
         }
         catch (YandexException e)
         {
@@ -142,6 +180,7 @@ public class OcrModule : InteractionModuleBase
         (var name, string iconUrl) = ocrEngine switch
         {
             OcrEngine.Google => (_localizer["GoogleLensOCR"], Constants.GoogleLensLogoUrl),
+            OcrEngine.Bing => (_localizer["BingVisualSearch"], Constants.BingIconUrl),
             OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };

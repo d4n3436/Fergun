@@ -13,6 +13,11 @@ public enum OcrEngine
     Google,
 
     /// <summary>
+    /// Bing.
+    /// </summary>
+    Bing,
+
+    /// <summary>
     /// Yandex.
     /// </summary>
     Yandex

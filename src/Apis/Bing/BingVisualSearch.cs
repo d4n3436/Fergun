@@ -56,6 +56,49 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     }
 
     /// <inheritdoc/>
+    public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        using var request = BuildRequest(url, "OCR");
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
+
+        string? imageCategory = document
+            .RootElement
+            .GetPropertyOrDefault("imageQualityHints")
+            .FirstOrDefault()
+            .GetPropertyOrDefault("category")
+            .GetStringOrDefault();
+
+        if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out string? message))
+        {
+            throw new BingException(message, imageCategory);
+        }
+
+        var textRegions = document
+            .RootElement
+            .GetProperty("tags"u8)
+            .FirstOrDefault(x => x.TryGetProperty("displayName"u8, out var displayName) && displayName.ValueEquals("##TextRecognition"u8))
+            .GetPropertyOrDefault("actions")
+            .FirstOrDefault()
+            .GetPropertyOrDefault("data")
+            .GetPropertyOrDefault("regions")
+            .EnumerateArrayOrEmpty()
+            .Select(x => string.Join('\n',
+                x.GetPropertyOrDefault("lines")
+                    .EnumerateArrayOrEmpty()
+                    .Select(y => y.GetPropertyOrDefault("text").GetStringOrDefault())));
+
+        return string.Join("\n\n", textRegions);
+    }
+
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<IBingReverseImageSearchResult>> ReverseImageSearchAsync(string url,
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default)
@@ -88,7 +131,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
             .EnumerateArray()
             .Select(x => x.GetPropertyOrDefault("actions"))
             .SelectMany(x => x.EnumerateArrayOrEmpty())
-            .FirstOrDefault(x => x.TryGetProperty("actionType", out var actionTye) && actionTye.ValueEquals("VisualSearch"u8))
+            .FirstOrDefault(x => x.TryGetProperty("actionType"u8, out var actionType) && actionType.ValueEquals("VisualSearch"u8))
             .GetPropertyOrDefault("data")
             .GetPropertyOrDefault("value")
             .EnumerateArrayOrEmpty()
