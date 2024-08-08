@@ -80,6 +80,7 @@ public class OcrModule : InteractionModuleBase
         var selection = new SelectionBuilder<OcrEngine>()
             .AddUser(Context.User)
             .WithOptions(Enum.GetValues<OcrEngine>())
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithSelectionPage(page)
             .Build();
 
@@ -89,9 +90,6 @@ public class OcrModule : InteractionModuleBase
         {
             return await OcrAsync(result.Value, url, result.StopInteraction!, Context.Interaction, true);
         }
-
-        // Attempt to disable the components
-        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
 
         return FergunResult.FromSilentError();
     }
