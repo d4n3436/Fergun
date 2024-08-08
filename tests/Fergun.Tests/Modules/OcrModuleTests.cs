@@ -121,7 +121,7 @@ public class OcrModuleTests
     }
 
     [Fact]
-    public async Task OcrAsync_Returns_Warning_If_Url_Is_Invalid()
+    public async Task OcrAsync_Returns_Unsuccessful_Result_On_Empty_Image_Url()
     {
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
@@ -136,13 +136,13 @@ public class OcrModuleTests
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
 
-        var task = module.OcrAsync((OcrEngine)2, TextImageUrl, _interactionMock.Object, null, isEphemeral);
+        var task = module.OcrAsync((OcrEngine)3, TextImageUrl, _interactionMock.Object, null, isEphemeral);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => task);
+        await Assert.ThrowsAsync<ArgumentException>("ocrEngine", () => task);
     }
 
     [Fact]
-    public async Task OcrAsync_Returns_Warning_On_Exception()
+    public async Task OcrAsync_Returns_Unsuccessful_Result_On_Invalid_Image_Url()
     {
         var module = _moduleMock.Object;
         const bool isEphemeral = true;
