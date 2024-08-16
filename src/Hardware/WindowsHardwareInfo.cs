@@ -9,7 +9,7 @@ namespace Fergun.Hardware;
 /// Implements the <see cref="IHardwareInfo"/> interface through Windows-specific APIs.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public class WindowsHardwareInfo : IHardwareInfo
+public partial class WindowsHardwareInfo : IHardwareInfo
 {
     internal WindowsHardwareInfo()
     {
@@ -56,15 +56,15 @@ public class WindowsHardwareInfo : IHardwareInfo
         };
     }
 
-    [DllImport("KERNEL32.dll", ExactSpelling = true, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [SupportedOSPlatform("windows")]
+    [LibraryImport("KERNEL32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+    private static partial bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct MEMORYSTATUSEX
+internal ref struct MEMORYSTATUSEX
 {
     public uint dwLength;
     public uint dwMemoryLoad = default;
@@ -76,5 +76,5 @@ internal struct MEMORYSTATUSEX
     public ulong ullAvailVirtual = default;
     public ulong ullAvailExtendedVirtual = default;
 
-    public MEMORYSTATUSEX() => dwLength = (uint)Marshal.SizeOf<MEMORYSTATUSEX>();
+    public unsafe MEMORYSTATUSEX() => dwLength = (uint)sizeof(MEMORYSTATUSEX);
 }

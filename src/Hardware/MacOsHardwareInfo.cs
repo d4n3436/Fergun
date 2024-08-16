@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -10,11 +11,13 @@ namespace Fergun.Hardware;
 /// Implements the <see cref="IHardwareInfo"/> interface through macOS-specific APIs.
 /// </summary>
 [SupportedOSPlatform("macos")]
-public class MacOsHardwareInfo : IHardwareInfo
+public partial class MacOsHardwareInfo : IHardwareInfo
 {
     private const int ENOMEM = 12;
-    private const string CpuNameKey = "machdep.cpu.brand_string";
-    private const string MemSizeKey = "hw.memsize";
+
+    private static ReadOnlySpan<byte> CpuNameKey => "machdep.cpu.brand_string"u8;
+
+    private static ReadOnlySpan<byte> MemSizeKey => "hw.memsize"u8;
 
     internal MacOsHardwareInfo()
     {
@@ -23,14 +26,14 @@ public class MacOsHardwareInfo : IHardwareInfo
     /// <inheritdoc />
     public string? GetCpuName()
     {
-        ulong length = 0;
+        nint length = 0;
 
         if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not (0 or ENOMEM))
             return null;
 
-        byte[] buffer = new byte[length];
+        Span<byte> buffer = new byte[length];
         int code = sysctlbyname(CpuNameKey, buffer, ref length, null, 0);
-        return code == 0 ? Encoding.UTF8.GetString(buffer.AsSpan(0, buffer.Length - 1)) : null;
+        return code == 0 ? Encoding.UTF8.GetString(buffer[..^1]) : null;
     }
 
     /// <inheritdoc />
@@ -40,12 +43,12 @@ public class MacOsHardwareInfo : IHardwareInfo
     public MemoryStatus GetMemoryStatus()
     {
         long totalRam = 0;
-        ulong length = (uint)Marshal.SizeOf(totalRam);
-        byte[] buffer = new byte[length];
+        nint length = Marshal.SizeOf(totalRam);
+        Span<byte> buffer = new byte[length];
 
         if (sysctlbyname(MemSizeKey, buffer, ref length, null, 0) == 0)
         {
-            totalRam = BitConverter.ToInt64(buffer);
+            totalRam = BinaryPrimitives.ReadInt64LittleEndian(buffer);
         }
 
         return new MemoryStatus
@@ -55,8 +58,7 @@ public class MacOsHardwareInfo : IHardwareInfo
         };
     }
 
-    [DllImport("libc", BestFitMapping = false, CharSet = CharSet.Ansi, ExactSpelling = true, ThrowOnUnmappableChar = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     [SupportedOSPlatform("macos")]
-    private static extern int sysctlbyname([In, MarshalAs(UnmanagedType.LPStr)] string name, [In, Out] byte[]? oldp, ref ulong oldlenp, [In, Out] byte[]? newp, ulong newlen);
+    [LibraryImport("libc", StringMarshalling = StringMarshalling.Utf8)]
+    private static partial int sysctlbyname(ReadOnlySpan<byte> name, Span<byte> oldp, ref nint oldlenp, Span<byte> newp, nint newlen);
 }
