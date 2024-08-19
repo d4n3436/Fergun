@@ -17,7 +17,7 @@ namespace Fergun.Apis.Genius;
 public sealed class GeniusClient : IGeniusClient, IDisposable
 {
     private const string GENIUS_LOGGED_OUT_TOKEN = "ZTejoT_ojOEasIkT9WrMBhBQOz6eYKK5QULCMECmOhvwqjRZ6WbpamFe3geHnvp3"; // Hardcoded token from Android app
-    private const string VERSION_NAME = "5.16.0";
+    private const string VERSION_NAME = "7.3.0.4305";
 
     private const string DefaultUserAgent = $"Genius/{VERSION_NAME} (Android)";
     private static readonly Uri _apiEndpoint = new("https://api.genius.com/");
@@ -60,9 +60,9 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var model = await _httpClient.GetFromJsonAsync<GeniusResponse<GeniusSearchResponse>>(new Uri($"search?q={Uri.EscapeDataString(query)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
+        var model = await _httpClient.GetFromJsonAsync<GeniusResponse<GeniusSearchResponse>>(new Uri($"search?q={Uri.EscapeDataString(query)}&from_background=0", UriKind.Relative), cancellationToken).ConfigureAwait(false);
 
-        return Array.AsReadOnly(model!.Response.Hits.Select(x => x.Result).ToArray());
+        return model!.Response.Hits.Select(x => x.Result).ToArray().AsReadOnly();
     }
 
     /// <inheritdoc/>
@@ -71,7 +71,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var response = await _httpClient.GetAsync(new Uri($"songs/{id}", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"songs/{id}?from_background=0", UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
