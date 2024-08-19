@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp.Html.Parser;
-using Fergun.Extensions;
 
 namespace Fergun.Apis.Yandex;
 
@@ -70,12 +69,12 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         string? imageId = document
             .RootElement
-            .GetProperty("image_id")
+            .GetProperty("image_id"u8)
             .GetString();
 
         int imageShard = document
             .RootElement
-            .GetProperty("image_shard")
+            .GetProperty("image_shard"u8)
             .GetInt32();
 
         // Get OCR text
@@ -89,18 +88,18 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
         byte[] bytes = await ocrResponse.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
         using var ocrDocument = JsonDocument.Parse(bytes);
 
-        if (ocrDocument.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
+        if (ocrDocument.RootElement.TryGetProperty("type"u8, out var type) && type.ValueEquals("captcha"u8))
         {
             throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
         }
 
         return ocrDocument
             .RootElement
-            .GetProperty("blocks")[0] // There should be a single block, "i-react-ajax-adapter:ajax"
-            .GetProperty("params")
-            .GetPropertyOrDefault("adapterData")
-            .GetPropertyOrDefault("plainText")
-            .GetStringOrDefault();
+            .GetProperty("blocks"u8)[0] // There should be a single block, "i-react-ajax-adapter:ajax"
+            .GetProperty("params"u8)
+            .GetProperty("adapterData"u8)
+            .GetProperty("plainText"u8)
+            .GetString();
     }
 
     /// <inheritdoc/>
@@ -137,15 +136,15 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
-        if (document.RootElement.TryGetProperty("type", out var type) && type.ValueEquals("captcha"))
+        if (document.RootElement.TryGetProperty("type"u8, out var type) && type.ValueEquals("captcha"u8))
         {
             throw new YandexException("Yandex API returned a CAPTCHA. Try again later.");
         }
 
         string html = document
             .RootElement
-            .GetProperty("blocks")[0]
-            .GetProperty("html")
+            .GetProperty("blocks"u8)[0]
+            .GetProperty("html"u8)
             .GetString()!;
 
         var htmlDocument = await _parser.ParseDocumentAsync(html, cancellationToken).ConfigureAwait(false);
@@ -163,14 +162,14 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
 
         using var data = JsonDocument.Parse(json);
 
-        if (data.RootElement.TryGetProperty("initialState", out var initialState))
+        if (data.RootElement.TryGetProperty("initialState"u8, out var initialState))
         {
             return initialState
-                .GetProperty("serpList")
-                .GetProperty("items")
-                .GetProperty("entities")
+                .GetProperty("serpList"u8)
+                .GetProperty("items"u8)
+                .GetProperty("entities"u8)
                 .EnumerateObject()
-                .Select(x => x.Value.GetProperty("viewerData").Deserialize<YandexReverseImageSearchResult>()!)
+                .Select(x => x.Value.GetProperty("viewerData"u8).Deserialize<YandexReverseImageSearchResult>()!)
                 .ToArray();
         }
 
@@ -179,7 +178,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetElementsByClassName("serp-list")
             .FirstOrDefault()?
             .GetElementsByClassName("serp-item")
-            .Select(x => JsonDocument.Parse(x.GetAttribute("data-bem")!).RootElement.GetProperty("serp-item").Deserialize<YandexReverseImageSearchResult>()!)
+            .Select(x => JsonDocument.Parse(x.GetAttribute("data-bem")!).RootElement.GetProperty("serp-item"u8).Deserialize<YandexReverseImageSearchResult>()!)
             .ToArray() ?? [];
     }
 

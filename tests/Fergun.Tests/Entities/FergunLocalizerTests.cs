@@ -109,12 +109,15 @@ public class FergunLocalizerTests
 
         localizerMock
             .Setup(x => x[It.IsAny<string>(), It.IsAny<object[]>()])
-            .Returns<string, object[]>((s, p) => s == name
-                ? new LocalizedString(s, p.Length == 0 ? value : string.Format(value, p))
-                : new LocalizedString(s, string.Empty, true));
+            .Returns<string, object[]>((s, p) =>
+            {
+                if (s == name)
+                    return new LocalizedString(s, p.Length == 0 ? value : string.Format(value, p));
+                return new LocalizedString(s, string.Empty, true);
+            });
 
         localizerMock.Setup(x => x.GetAllStrings(It.IsAny<bool>()))
-            .Returns(() => new[] { new LocalizedString(name, value) });
+            .Returns(() => [new LocalizedString(name, value)]);
 
         localizerMock.SetupAllProperties();
 

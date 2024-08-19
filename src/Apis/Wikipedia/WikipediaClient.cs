@@ -57,10 +57,10 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
         var page = document.RootElement
-            .GetProperty("query")
-            .GetProperty("pages")[0];
+            .GetProperty("query"u8)
+            .GetProperty("pages"u8)[0];
 
-        if (page.TryGetProperty("missing", out var missing) && missing.GetBoolean())
+        if (page.TryGetProperty("missing"u8, out var missing) && missing.GetBoolean())
         {
             return null;
         }
@@ -83,8 +83,8 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
 
         return document
             .RootElement
-            .GetProperty("query")
-            .GetProperty("search")
+            .GetProperty("query"u8)
+            .GetProperty("search"u8)
             .Deserialize<IReadOnlyList<PartialWikipediaArticle>>()!;
     }
 

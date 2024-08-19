@@ -97,9 +97,9 @@ public sealed class MusixmatchClientState : IDisposable
 
         string? token = document
             .RootElement
-            .GetProperty("message")
-            .GetProperty("body")
-            .GetProperty("user_token")
+            .GetProperty("message"u8)
+            .GetProperty("body"u8)
+            .GetProperty("user_token"u8)
             .GetString();
 
         if (string.IsNullOrEmpty(token) || token == "UpgradeOnlyUpgradeOnlyUpgradeOnlyUpgradeOnly")

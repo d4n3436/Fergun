@@ -58,7 +58,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
             return string.Empty;
         }
 
-        return string.Join('\n', data[0].EnumerateArray().Select(x => x.GetString()));
+        return string.Join('\n', data[0].Deserialize<string[]>()!);
     }
 
     /// <inheritdoc/>

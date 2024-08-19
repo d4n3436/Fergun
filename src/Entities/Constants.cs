@@ -36,5 +36,15 @@ public static class Constants
 
     public const string GeniusLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/1114311596450254980/genius_logo.png";
 
+    public const string GoogleUrl = "https://google.com";
+
+    public const string DuckDuckGoUrl = "https://duckduckgo.com";
+
+    public const string YandexImageSearchUrl = "https://yandex.com/images";
+
+    public const string BingVisualSearchUrl = "https://www.bing.com/visualsearch";
+
+    public const string GoogleLensUrl = "https://lens.google.com";
+
     public const string ChromeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36";
 }

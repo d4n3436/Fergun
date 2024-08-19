@@ -36,11 +36,11 @@ public class FergunLocalizer : IFergunLocalizer
     /// <summary>
     /// Gets a read-only list containing the languages that Fergun supports.
     /// </summary>
-    public static IReadOnlyList<CultureInfo> SupportedCultures { get; } = new[]
-    {
+    public static IReadOnlyList<CultureInfo> SupportedCultures { get; } =
+    [
         CultureInfo.GetCultureInfo("en"),
         CultureInfo.GetCultureInfo("es")
-    };
+    ];
 
     /// <inheritdoc/>
     /// <remarks>Setting a value won't have an effect if the value is not in <see cref="SupportedCultures"/>.</remarks>

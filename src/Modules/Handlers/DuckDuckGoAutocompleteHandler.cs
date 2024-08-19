@@ -51,7 +51,7 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
         var results = document
             .RootElement
             .EnumerateArray()
-            .Select(x => new AutocompleteResult(x.GetProperty("phrase").GetString(), x.GetProperty("phrase").GetString()))
+            .Select(x => new AutocompleteResult(x.GetProperty("phrase"u8).GetString(), x.GetProperty("phrase"u8).GetString()))
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);

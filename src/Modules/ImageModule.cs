@@ -101,7 +101,7 @@ public class ImageModule : InteractionModuleBase
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["GoogleImagesSearch"])
-                .WithUrl(multiImages ? "https://google.com" : result.SourceUrl)
+                .WithUrl(multiImages ? Constants.GoogleUrl : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.GoogleLogoUrl)
                 .WithColor((Color)(result.Color ?? Color.Orange)));
@@ -155,7 +155,7 @@ public class ImageModule : InteractionModuleBase
             var builders = images.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
                 .WithDescription(_localizer["DuckDuckGoImageSearch"])
-                .WithUrl(multiImages ? "https://duckduckgo.com" : result.SourceUrl)
+                .WithUrl(multiImages ? Constants.DuckDuckGoUrl : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
                 .WithColor(Color.Orange));
@@ -228,14 +228,14 @@ public class ImageModule : InteractionModuleBase
 
         return engine switch
         {
-            ReverseImageSearchEngine.Yandex => await YandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
-            ReverseImageSearchEngine.Bing => await BingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
-            ReverseImageSearchEngine.Google => await GoogleAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Yandex => await ReverseYandexAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Bing => await ReverseBingAsync(url, multiImages, interaction, originalInteraction, ephemeral),
+            ReverseImageSearchEngine.Google => await ReverseGoogleAsync(url, multiImages, interaction, originalInteraction, ephemeral),
             _ => throw new ArgumentException(_localizer["InvalidImageSearchEngine"], nameof(engine))
         };
     }
 
-    public virtual async Task<RuntimeResult> YandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseYandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -304,7 +304,7 @@ public class ImageModule : InteractionModuleBase
             var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title?.Truncate(EmbedBuilder.MaxTitleLength) ?? string.Empty)
                 .WithDescription(result.Text)
-                .WithUrl(multiImages ? "https://yandex.com/images" : result.SourceUrl)
+                .WithUrl(multiImages ? Constants.YandexImageSearchUrl : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["YandexVisualSearchPaginatorFooter", index + 1, maxIndex + 1], Constants.YandexIconUrl)
@@ -314,7 +314,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task<RuntimeResult> BingAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseBingAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -381,7 +381,7 @@ public class ImageModule : InteractionModuleBase
 
             var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Text.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithUrl(multiImages ? "https://www.bing.com/visualsearch" : result.SourceUrl)
+                .WithUrl(multiImages ? Constants.BingVisualSearchUrl : result.SourceUrl)
                 .WithThumbnailUrl(url)
                 .WithDescription(result.FriendlyDomainName ?? (Uri.TryCreate(result.SourceUrl, UriKind.Absolute, out var uri) ? uri.Host : null))
                 .WithImageUrl(result.Url)
@@ -392,7 +392,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task<RuntimeResult> GoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseGoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -458,7 +458,7 @@ public class ImageModule : InteractionModuleBase
 
             var builders = results.Take(start..(start + count)).Select(result => new EmbedBuilder()
                 .WithTitle(result.Title.Truncate(EmbedBuilder.MaxTitleLength))
-                .WithUrl(multiImages ? "https://lens.google.com/" : result.SourcePageUrl)
+                .WithUrl(multiImages ? Constants.GoogleLensUrl : result.SourcePageUrl)
                 .WithThumbnailUrl(url)
                 .WithAuthor(result.SourceDomainName, result.SourceIconUrl)
                 .WithImageUrl(result.ThumbnailUrl)

@@ -63,9 +63,9 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 
         return document
             .RootElement
-            .GetProperty("results")
+            .GetProperty("results"u8)
             .EnumerateArray()
-            .Select(x => x.GetProperty("input").GetString()!)
+            .Select(x => x.GetProperty("input"u8).GetString()!)
             .ToArray();
     }
 
@@ -87,7 +87,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
-        return document.RootElement.GetProperty("queryresult").Deserialize<WolframAlphaResult>()!;
+        return document.RootElement.GetProperty("queryresult"u8).Deserialize<WolframAlphaResult>()!;
     }
 
     /// <inheritdoc/>

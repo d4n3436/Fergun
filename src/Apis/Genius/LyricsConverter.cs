@@ -26,7 +26,7 @@ public class LyricsConverter : JsonConverter<string>
     {
         var builder = new StringBuilder();
         var dom = JsonElement.ParseValue(ref reader)
-            .GetProperty("dom");
+            .GetProperty("dom"u8);
 
         IterateContent(dom, builder);
         return builder.ToString();
@@ -44,15 +44,15 @@ public class LyricsConverter : JsonConverter<string>
         }
         else if (element.ValueKind == JsonValueKind.Object) // either tag or tag + children
         {
-            string? tag = element.GetProperty("tag").GetString();
-            bool realLink = element.TryGetProperty("data", out var data) && data.TryGetProperty("real-link", out var realLinkProp) && realLinkProp.ValueEquals("true");
+            string? tag = element.GetProperty("tag"u8).GetString();
+            bool realLink = element.TryGetProperty("data"u8, out var data) && data.TryGetProperty("real-link"u8, out var realLinkProp) && realLinkProp.ValueEquals("true"u8);
 
             (string? markDownStart, string? markDownEnd) = tag switch
             {
                 ITALIC => ("*", "*"),
                 BOLD => ("**", "**"),
                 LINE_BREAK or HORIZONTAL_LINE or IMAGE or DFP_UNIT => ("\n", null),
-                LINK when realLink => ("[", $"]({element.GetProperty("attributes").GetProperty("href").GetString()})"),
+                LINK when realLink => ("[", $"]({element.GetProperty("attributes"u8).GetProperty("href"u8).GetString()})"),
                 UNDERLINE => ("__", "__"),
                 "h1" => ("\n# ", "\n"),
                 "h2" => ("\n## ", "\n"),
@@ -67,7 +67,7 @@ public class LyricsConverter : JsonConverter<string>
 
             builder.Append(markDownStart);
 
-            if (element.TryGetProperty("children", out var children))
+            if (element.TryGetProperty("children"u8, out var children))
             {
                 Debug.Assert(children.ValueKind == JsonValueKind.Array);
 

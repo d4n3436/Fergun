@@ -52,7 +52,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list"u8).Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <inheritdoc/>
@@ -63,7 +63,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri("random", UriKind.Relative), cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list"u8).Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <inheritdoc/>
@@ -74,7 +74,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?defid={id}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        var list = document.RootElement.GetProperty("list");
+        var list = document.RootElement.GetProperty("list"u8);
 
         return list.GetArrayLength() == 0 ? null : list[0].Deserialize<UrbanDefinition>()!;
     }
@@ -87,7 +87,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri("words_of_the_day", UriKind.Relative), cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        return document.RootElement.GetProperty("list").Deserialize<IReadOnlyList<UrbanDefinition>>()!;
+        return document.RootElement.GetProperty("list"u8).Deserialize<IReadOnlyList<UrbanDefinition>>()!;
     }
 
     /// <inheritdoc/>
@@ -107,7 +107,7 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 
         await using var stream = await _httpClient.GetStreamAsync(new Uri($"autocomplete-extra?term={Uri.EscapeDataString(term)}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        return document.RootElement.GetProperty("results").Deserialize<IReadOnlyList<UrbanAutocompleteResult>>()!;
+        return document.RootElement.GetProperty("results"u8).Deserialize<IReadOnlyList<UrbanAutocompleteResult>>()!;
     }
 
     /// <inheritdoc/>

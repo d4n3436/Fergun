@@ -64,11 +64,11 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         return document
             .RootElement
-            .GetProperty("message")
-            .GetProperty("body")
-            .GetProperty("track_list")
+            .GetProperty("message"u8)
+            .GetProperty("body"u8)
+            .GetProperty("track_list"u8)
             .EnumerateArray()
-            .Select(x => x.GetProperty("track").Deserialize<MusixmatchSong>()!)
+            .Select(x => x.GetProperty("track"u8).Deserialize<MusixmatchSong>()!)
             .ToArray();
     }
 
@@ -84,15 +84,15 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         var macroCalls = document
             .RootElement
-            .GetProperty("message")
-            .GetProperty("body")
-            .GetProperty("macro_calls")[0];
+            .GetProperty("message"u8)
+            .GetProperty("body"u8)
+            .GetProperty("macro_calls"u8)[0];
 
         var trackStatusCode = (HttpStatusCode)macroCalls
-            .GetProperty("track.get")
-            .GetProperty("message")
-            .GetProperty("header")
-            .GetProperty("status_code")
+            .GetProperty("track.get"u8)
+            .GetProperty("message"u8)
+            .GetProperty("header"u8)
+            .GetProperty("status_code"u8)
             .GetInt32();
 
         if (trackStatusCode == HttpStatusCode.NotFound)
@@ -101,43 +101,43 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
         }
 
         var lyricsStatusCode = (HttpStatusCode)macroCalls
-            .GetProperty("track.lyrics.get")
-            .GetProperty("message")
-            .GetProperty("header")
-            .GetProperty("status_code")
+            .GetProperty("track.lyrics.get"u8)
+            .GetProperty("message"u8)
+            .GetProperty("header"u8)
+            .GetProperty("status_code"u8)
             .GetInt32();
 
         var lyricsData = lyricsStatusCode == HttpStatusCode.NotFound ? default : macroCalls
-            .GetProperty("track.lyrics.get")
-            .GetProperty("message")
-            .GetProperty("body")
-            .GetProperty("lyrics");
+            .GetProperty("track.lyrics.get"u8)
+            .GetProperty("message"u8)
+            .GetProperty("body"u8)
+            .GetProperty("lyrics"u8);
 
         string? lyrics = lyricsStatusCode == HttpStatusCode.NotFound ? null : lyricsData
-            .GetProperty("lyrics_body")
+            .GetProperty("lyrics_body"u8)
             .GetString();
 
         var trackData = macroCalls
-            .GetProperty("track.get")
-            .GetProperty("message")
-            .GetProperty("body")
-            .GetProperty("track");
+            .GetProperty("track.get"u8)
+            .GetProperty("message"u8)
+            .GetProperty("body"u8)
+            .GetProperty("track"u8);
 
         bool isRestricted = lyricsStatusCode == HttpStatusCode.NotFound ? trackData
-            .GetProperty("restricted")
+            .GetProperty("restricted"u8)
             .GetInt32() != 0 : lyricsData
-            .GetProperty("restricted")
+            .GetProperty("restricted"u8)
             .GetInt32() != 0;
 
-        string artistName = trackData.GetProperty("artist_name").GetString()!;
-        bool isInstrumental = trackData.GetProperty("instrumental").GetInt32() != 0;
-        bool hasLyrics = trackData.GetProperty("has_lyrics").GetInt32() != 0;
-        string? songArtImageUrl = trackData.GetProperty("album_coverart_500x500").GetString();
-        string title = trackData.GetProperty("track_name").GetString()!;
-        int artistId = trackData.GetProperty("artist_id").GetInt32();
+        string artistName = trackData.GetProperty("artist_name"u8).GetString()!;
+        bool isInstrumental = trackData.GetProperty("instrumental"u8).GetInt32() != 0;
+        bool hasLyrics = trackData.GetProperty("has_lyrics"u8).GetInt32() != 0;
+        string? songArtImageUrl = trackData.GetProperty("album_coverart_500x500"u8).GetString();
+        string title = trackData.GetProperty("track_name"u8).GetString()!;
+        int artistId = trackData.GetProperty("artist_id"u8).GetInt32();
 
         string? spotifyTrackId = null;
-        if (trackData.TryGetProperty("track_spotify_id", out var trackIdProp))
+        if (trackData.TryGetProperty("track_spotify_id"u8, out var trackIdProp))
         {
             spotifyTrackId = trackIdProp.GetString();
         }
@@ -167,17 +167,17 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     internal static void ThrowIfNotSuccessful(in JsonElement body, string? path = null)
     {
         var header = body
-            .GetProperty("message")
-            .GetProperty("header");
+            .GetProperty("message"u8)
+            .GetProperty("header"u8);
 
         var statusCode = (HttpStatusCode)header
-            .GetProperty("status_code")
+            .GetProperty("status_code"u8)
             .GetInt32();
 
         if (statusCode is HttpStatusCode.OK or HttpStatusCode.NotFound) return;
 
         string? hint = header
-            .GetProperty("hint")
+            .GetProperty("hint"u8)
             .GetString();
 
         MusixmatchException.Throw(statusCode, path, hint);
@@ -198,8 +198,8 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         ThrowIfNotSuccessful(document.RootElement);
 
-        var body = document.RootElement.GetProperty("message").GetProperty("body");
-        if (body.TryGetProperty("macro_calls", out var macroCalls) && macroCalls.ValueKind == JsonValueKind.Array)
+        var body = document.RootElement.GetProperty("message"u8).GetProperty("body"u8);
+        if (body.TryGetProperty("macro_calls"u8, out var macroCalls) && macroCalls.ValueKind == JsonValueKind.Array)
         {
             foreach (var prop in macroCalls.EnumerateArray())
             {

@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Fergun.Extensions;
 
 namespace Fergun.Apis.Bing;
 
@@ -150,6 +149,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     private static JsonElement GetImageTag(JsonDocument document, string displayName) => document
         .RootElement
         .GetProperty("tags"u8)
+        .EnumerateArray()
         .FirstOrDefault(x => x.GetProperty("displayName"u8).ValueEquals(displayName));
 
     private static HttpRequestMessage BuildRequest(string url, string invokedSkill, BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null)
