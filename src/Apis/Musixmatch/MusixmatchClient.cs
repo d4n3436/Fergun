@@ -18,7 +18,7 @@ namespace Fergun.Apis.Musixmatch;
 public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 {
     private const string AppId = "web-desktop-app-v1.0"; // community-app-v1.0, web-desktop-app-v1.0, android-player-v1.0, mac-ios-v2.0
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
     private readonly AsyncRetryPolicy<JsonDocument> _retryPolicy;
     private readonly HttpClient _httpClient;
     private readonly MusixmatchClientState _state;

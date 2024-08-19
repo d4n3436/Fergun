@@ -13,7 +13,7 @@ namespace Fergun.Apis.Google;
 /// </summary>
 public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
 
     private readonly HttpClient _httpClient;
     private bool _disposed;

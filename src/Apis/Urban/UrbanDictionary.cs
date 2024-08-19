@@ -13,7 +13,7 @@ namespace Fergun.Apis.Urban;
 /// </summary>
 public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
 
     private static readonly Uri _apiEndpoint = new("https://api.urbandictionary.com/v0/");
 
