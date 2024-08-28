@@ -113,6 +113,10 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         }
 
         var defaultTag = GetImageTag(document, string.Empty);
+
+        if (defaultTag.ValueKind == JsonValueKind.Undefined)
+            return [];
+
         var visualSearchAction = defaultTag
             .GetProperty("actions"u8)
             .EnumerateArray()
