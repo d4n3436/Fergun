@@ -11,11 +11,11 @@ public class Command
     /// Gets or sets the name of this command.
     /// </summary>
     [Key]
+    [MaxLength(32)]
     public string Name { get; set; } = null!;
 
     /// <summary>
     /// Gets or sets the usage count.
     /// </summary>
-    [Required]
     public int UsageCount { get; set; }
 }

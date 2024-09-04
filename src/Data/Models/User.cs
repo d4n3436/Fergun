@@ -17,11 +17,11 @@ public class User : IEntity<ulong>
     /// <summary>
     /// Gets or sets the blacklist status.
     /// </summary>
-    [Required]
     public BlacklistStatus BlacklistStatus { get; set; }
 
     /// <summary>
     /// Gets or sets the blacklist reason.
     /// </summary>
+    [MaxLength(256)]
     public string? BlacklistReason { get; set; }
 }
