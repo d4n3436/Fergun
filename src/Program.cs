@@ -60,7 +60,8 @@ builder.Services.AddDiscordShardedHost((config, _) =>
         GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildPresences,
         UseInteractionSnowflakeDate = false,
         LogGatewayIntentWarnings = false,
-        FormatUsersInBidirectionalUnicode = false
+        FormatUsersInBidirectionalUnicode = false,
+        ResponseInternalTimeCheck = false
     };
 
     config.Token = builder.Configuration.GetSection(StartupOptions.Startup).Get<StartupOptions>()!.Token;
