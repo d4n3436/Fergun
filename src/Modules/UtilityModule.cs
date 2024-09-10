@@ -528,7 +528,7 @@ public class UtilityModule : InteractionModuleBase
         {
             activities = string.Join('\n', user.Activities.Select(x =>
                 x.Type == ActivityType.CustomStatus
-                    ? ((CustomStatusGame)x).ToString()
+                    ? x.ToString()
                     : $"{x.Type} {x.Name}"));
         }
 
