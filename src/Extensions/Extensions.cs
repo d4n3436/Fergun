@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Discord;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -27,7 +28,7 @@ public static class Extensions
         if (context.Channel is IGuildChannel guildChannel)
             displayMessage = $"{guildChannel.Guild.Name}/";
 
-        displayMessage += context.Channel?.Name ?? $"??? (Id: {context.Interaction.ChannelId})";
+        displayMessage += context.Channel?.Name ?? ((SocketInteraction)context.Interaction).InteractionChannel?.Name ?? $"??? (Id: {context.Interaction.ChannelId})";
 
         return displayMessage;
     }
