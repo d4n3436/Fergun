@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -120,7 +121,7 @@ public sealed class BotListService : BackgroundService
         }
 
         _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod}.",
-            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'"));
+            string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'", CultureInfo.InvariantCulture));
 
         using var timer = new PeriodicTimer(_options.UpdatePeriod);
         while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))

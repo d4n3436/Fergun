@@ -112,7 +112,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (_testingGuildId == 0)
         {
             _logger.LogInformation("Registering commands globally");
-             _commandCache.CachedCommands = await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
+            _commandCache.CachedCommands = await _interactionService.AddModulesGloballyAsync(true, modules.ToArray());
 
             if (_ownerCommandsGuildId != 0)
             {
@@ -180,24 +180,24 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         switch (user?.BlacklistStatus)
         {
             case BlacklistStatus.Blacklisted when interaction.Type is InteractionType.ApplicationCommand or InteractionType.MessageComponent:
-            {
-                _logger.LogDebug("Blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
+                {
+                    _logger.LogDebug("Blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
 
-                var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
-                localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
+                    var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
+                    localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
-                string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
-                    ? localizer["Blacklisted"]
-                    : localizer["BlacklistedWithReason", user.BlacklistReason];
+                    string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
+                        ? localizer["Blacklisted"]
+                        : localizer["BlacklistedWithReason", user.BlacklistReason];
 
-                var builder = new EmbedBuilder()
-                    .WithDescription($"❌ {description}")
-                    .WithColor(Color.Orange);
+                    var builder = new EmbedBuilder()
+                        .WithDescription($"❌ {description}")
+                        .WithColor(Color.Orange);
 
-                await interaction.RespondAsync(embed: builder.Build(), ephemeral: true);
+                    await interaction.RespondAsync(embed: builder.Build(), ephemeral: true);
 
-                return;
-            }
+                    return;
+                }
 
             case BlacklistStatus.ShadowBlacklisted:
                 _logger.LogDebug("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
@@ -333,7 +333,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
                 _cmdStatsSemaphore.Release();
             }
         }
-        
+
         string commandType = type?.ToString() ?? "Component";
 
         if (result.IsSuccess)

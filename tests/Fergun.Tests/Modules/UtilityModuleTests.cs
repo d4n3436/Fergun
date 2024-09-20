@@ -30,7 +30,7 @@ public class UtilityModuleTests
     private readonly IWolframAlphaClient _wolframAlphaClient = null!;
     private readonly IDictionaryClient _dictionaryClient = null!;
     private readonly Mock<UtilityModule> _moduleMock;
-    
+
     public UtilityModuleTests()
     {
         var commandCache = new ApplicationCommandCache();
@@ -40,7 +40,11 @@ public class UtilityModuleTests
         var interactionService = new InteractionService(client);
         var interactive = new InteractiveService(client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, shared, interactionService,
-            interactive, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient)) { CallBase = true };
+            interactive, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
+        {
+            CallBase = true
+        };
+
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }

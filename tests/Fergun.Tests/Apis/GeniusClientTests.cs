@@ -2,6 +2,7 @@
 using Fergun.Apis.Genius;
 using Moq;
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -80,14 +81,14 @@ public class GeniusClientTests
     [Fact]
     public async Task SearchSongsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _geniusClient.SearchSongsAsync(AutoFaker.Generate<string>(), cts.Token));
     }
 
     [Fact]
     public async Task GetSongAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _geniusClient.GetSongAsync(It.IsAny<int>(), cts.Token));
     }
 
@@ -104,7 +105,7 @@ public class GeniusClientTests
     [Fact]
     public void GeniusException_Has_Expected_Values()
     {
-        var innerException = new Exception();
+        var innerException = new HttpRequestException();
 
         var exception1 = new GeniusException();
         var exception2 = new GeniusException("Custom message");

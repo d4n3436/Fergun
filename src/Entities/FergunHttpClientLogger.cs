@@ -14,7 +14,6 @@ public partial class FergunHttpClientLogger : IHttpClientLogger
         _logger = logger;
     }
 
-
     /// <inheritdoc />
     public object? LogRequestStart(HttpRequestMessage request) => null;
 

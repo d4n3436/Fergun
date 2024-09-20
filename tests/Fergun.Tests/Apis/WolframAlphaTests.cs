@@ -13,6 +13,15 @@ namespace Fergun.Tests.Apis;
 public class WolframAlphaTests
 {
     private readonly IWolframAlphaClient _wolframAlphaClient = new WolframAlphaClient();
+    private readonly JsonSerializerOptions _wolframAlphaOptions = new();
+    private static readonly string[] _suggestionLevels = ["low", "medium", "high"];
+
+    public WolframAlphaTests()
+    {
+        _wolframAlphaOptions.Converters.Add(new WolframAlphaErrorInfoConverter());
+        _wolframAlphaOptions.Converters.Add(new ArrayOrObjectConverter<WolframAlphaWarning>());
+        _wolframAlphaOptions.Converters.Add(new ArrayOrObjectConverter<string>());
+    }
 
     [Theory]
     [InlineData("2 +", "en")]
@@ -29,7 +38,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task GetAutocompleteResultsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _wolframAlphaClient.GetAutocompleteResultsAsync("test", "en", cts.Token));
     }
 
@@ -77,7 +86,7 @@ public class WolframAlphaTests
         foreach (var suggestion in result.DidYouMeans)
         {
             Assert.InRange(suggestion.Score, 0, 1);
-            Assert.Contains(suggestion.Level, new[] { "low", "medium", "high" });
+            Assert.Contains(suggestion.Level, _suggestionLevels);
             Assert.NotEmpty(suggestion.Value);
         }
     }
@@ -115,7 +124,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _wolframAlphaClient.SendQueryAsync("test", "en", It.IsAny<bool>(), cts.Token));
     }
 
@@ -133,10 +142,7 @@ public class WolframAlphaTests
     [MemberData(nameof(GetWolframAlphaErrorInfoConverterData))]
     public void WolframAlphaErrorInfoConverter_Returns_Expected_Results(string input, WolframAlphaErrorInfo? expectedResult)
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new WolframAlphaErrorInfoConverter());
-
-        var result = JsonSerializer.Deserialize<WolframAlphaErrorInfo?>(input, options);
+        var result = JsonSerializer.Deserialize<WolframAlphaErrorInfo?>(input, _wolframAlphaOptions);
 
         Assert.Equal(expectedResult, result);
     }
@@ -145,10 +151,7 @@ public class WolframAlphaTests
     [MemberData(nameof(ArrayOrObjectConverterData))]
     public void ArrayOrObjectConverter_Returns_Expected_Results(string input, IReadOnlyList<WolframAlphaWarning> expectedResult)
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new ArrayOrObjectConverter<WolframAlphaWarning>());
-
-        var result = JsonSerializer.Deserialize<IReadOnlyList<WolframAlphaWarning>>(input, options);
+        var result = JsonSerializer.Deserialize<IReadOnlyList<WolframAlphaWarning>>(input, _wolframAlphaOptions);
 
         Assert.Equal(expectedResult, result);
     }
@@ -156,20 +159,14 @@ public class WolframAlphaTests
     [Fact]
     public void WolframAlphaErrorInfoConverter_Throws_NotSupportedException()
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new WolframAlphaErrorInfoConverter());
-
-        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(new WolframAlphaErrorInfo(0, "test"), options));
+        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(new WolframAlphaErrorInfo(0, "test"), _wolframAlphaOptions));
     }
 
     [Fact]
     public void ArrayOrObjectConverter_Throws_Exceptions()
     {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new ArrayOrObjectConverter<string>());
-
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IReadOnlyList<string>>("true", options));
-        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize<IReadOnlyList<string>>(["test"], options));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IReadOnlyList<string>>("true", _wolframAlphaOptions));
+        Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize<IReadOnlyList<string>>(["test"], _wolframAlphaOptions));
     }
 
     public static TheoryData<string, WolframAlphaErrorInfo?> GetWolframAlphaErrorInfoConverterData()

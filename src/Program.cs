@@ -94,7 +94,7 @@ builder.Services.AddFergunPolicies();
 builder.Services.AddHttpClient<IBingVisualSearch, BingVisualSearch>();
 builder.Services.AddHttpClient<IYandexImageSearch, YandexImageSearch>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false });
 builder.Services.AddHttpClient<IGoogleLensClient, GoogleLensClient>();
-builder.Services.AddHttpClient<IUrbanDictionary, UrbanDictionary>();
+builder.Services.AddHttpClient<IUrbanDictionaryClient, UrbanDictionaryClient>();
 builder.Services.AddHttpClient<IWikipediaClient, WikipediaClient>();
 builder.Services.AddHttpClient<IDictionaryClient, DictionaryClient>();
 builder.Services.AddHttpClient<IWolframAlphaClient, WolframAlphaClient>();

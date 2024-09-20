@@ -16,7 +16,7 @@ public class MessageExtensionsTests
     {
         var messageMock = new Mock<IMessage>();
         messageMock.SetupGet(x => x.Content).Returns(content);
-        messageMock.SetupGet(x => x.Embeds).Returns(Array.Empty<IEmbed>());
+        messageMock.SetupGet(x => x.Embeds).Returns([]);
 
         string text = messageMock.Object.GetText();
 

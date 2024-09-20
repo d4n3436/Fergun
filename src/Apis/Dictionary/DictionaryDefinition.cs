@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
@@ -22,7 +21,7 @@ public class DictionaryDefinition : IDictionaryDefinition
         PredefinitionContent = predefinitionContent;
         PostdefinitionContent = postdefinitionContent;
         Definition = definition;
-        Subdefinitions = subdefinitions ?? Array.Empty<DictionaryDefinition>();
+        Subdefinitions = subdefinitions ?? [];
     }
 
     /// <inheritdoc/>
@@ -47,13 +46,4 @@ public class DictionaryDefinition : IDictionaryDefinition
 
     /// <inheritdoc/>
     IReadOnlyList<IDictionaryDefinition> IDictionaryDefinition.Subdefinitions => Subdefinitions;
-
-    // Always empty
-    /*
-    [JsonPropertyName("synonyms")]
-    public string Synonyms { get; init; }
-
-    [JsonPropertyName("antonyms")]
-    public string Antonyms { get; init; }
-    */
 }

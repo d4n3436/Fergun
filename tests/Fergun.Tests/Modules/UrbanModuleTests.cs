@@ -19,7 +19,7 @@ public class UrbanModuleTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<IDiscordInteraction> _interactionMock = new();
-    private readonly IUrbanDictionary _urbanDictionary = Utils.CreateMockedUrbanDictionaryApi();
+    private readonly IUrbanDictionaryClient _urbanDictionary = Utils.CreateMockedUrbanDictionaryApi();
     private readonly Mock<UrbanModule> _moduleMock;
     private readonly DiscordSocketClient _client = new();
     private readonly InteractiveConfig _interactiveConfig = new() { ReturnAfterSendingPaginator = true };

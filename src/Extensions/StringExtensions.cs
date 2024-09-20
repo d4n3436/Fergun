@@ -36,7 +36,7 @@ public static class StringExtensions
                 index = portion.LastIndexOf("\n\n");
                 if (index == -1)
                     index = portion.LastIndexOf('\n');
-                if (index == -1) 
+                if (index == -1)
                     index = portion.LastIndexOf(' ');
 
                 length = index == -1 ? maxLength : index;

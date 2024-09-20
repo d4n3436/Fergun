@@ -34,7 +34,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         {
             foreach (string line in lines)
             {
-                if (line.StartsWith(modelName))
+                if (line.StartsWith(modelName, StringComparison.Ordinal))
                 {
                     cpuName = line.AsSpan(modelName.Length).Trim(": ").ToString();
                     break;
@@ -67,7 +67,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         {
             foreach (string line in lines)
             {
-                if (line.StartsWith(prettyNameId))
+                if (line.StartsWith(prettyNameId, StringComparison.Ordinal))
                 {
                     osName = line.AsSpan(prettyNameId.Length).Trim('"').ToString();
                     break;

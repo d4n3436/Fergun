@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.WolframAlpha;
@@ -22,9 +21,9 @@ public class WolframAlphaResult : IWolframAlphaResult
         IReadOnlyList<WolframAlphaWarning>? warnings, WolframAlphaFutureTopic? futureTopic, WolframAlphaErrorInfo? errorInfo)
     {
         IsSuccess = isSuccess;
-        Pods = pods ?? Array.Empty<WolframAlphaPod>();
-        DidYouMeans = didYouMeans ?? Array.Empty<WolframAlphaQuerySuggestion>();
-        Warnings = warnings ?? Array.Empty<WolframAlphaWarning>();
+        Pods = pods ?? [];
+        DidYouMeans = didYouMeans ?? [];
+        Warnings = warnings ?? [];
         FutureTopic = futureTopic;
         ErrorInfo = errorInfo;
     }

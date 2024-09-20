@@ -147,7 +147,7 @@ public class UtilityModule : InteractionModuleBase
     [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("bad-translator", "Passes a text through multiple, different translators.")]
     public async Task<RuntimeResult> BadTranslatorAsync([Summary(description: "The text to use.")] string text,
-        [Summary(description: "The amount of times to translate the text (2-10).")] [MinValue(2)] [MaxValue(10)] int chainCount = 8)
+        [Summary(description: "The amount of times to translate the text (2-10).")][MinValue(2)][MaxValue(10)] int chainCount = 8)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -511,8 +511,8 @@ public class UtilityModule : InteractionModuleBase
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("translate", "Translates a text.")]
     public async Task<RuntimeResult> TranslateAsync([Summary(description: "The text to translate.")] string text,
-        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Target language (name, code or alias).")] string target,
-        [Autocomplete(typeof(TranslateAutocompleteHandler))] [Summary(description: "Source language (name, code or alias).")] string? source = null,
+        [Autocomplete(typeof(TranslateAutocompleteHandler))][Summary(description: "Target language (name, code or alias).")] string target,
+        [Autocomplete(typeof(TranslateAutocompleteHandler))][Summary(description: "Source language (name, code or alias).")] string? source = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.TranslateAsync(Context.Interaction, text, target, source, ephemeral);
 
@@ -577,7 +577,7 @@ public class UtilityModule : InteractionModuleBase
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("wikipedia", "Searches for Wikipedia articles.")]
-    public async Task<RuntimeResult> WikipediaAsync([MaxValue(int.MaxValue)] [Autocomplete(typeof(WikipediaAutocompleteHandler))] [Summary(name: "query", description: "The search query.")] int id)
+    public async Task<RuntimeResult> WikipediaAsync([MaxValue(int.MaxValue)][Autocomplete(typeof(WikipediaAutocompleteHandler))][Summary(name: "query", description: "The search query.")] int id)
     {
         await Context.Interaction.DeferAsync();
 
@@ -617,7 +617,7 @@ public class UtilityModule : InteractionModuleBase
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("wolfram", "Asks Wolfram|Alpha about something.")]
-    public async Task<RuntimeResult> WolframAlphaAsync([Autocomplete(typeof(WolframAlphaAutocompleteHandler))] [Summary(description: "Something to calculate or know about.")] string input)
+    public async Task<RuntimeResult> WolframAlphaAsync([Autocomplete(typeof(WolframAlphaAutocompleteHandler))][Summary(description: "Something to calculate or know about.")] string input)
     {
         await Context.Interaction.DeferAsync();
 
@@ -744,7 +744,7 @@ public class UtilityModule : InteractionModuleBase
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("youtube", "Sends a paginator containing YouTube videos.")]
-    public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))] [Summary(description: "The search query.")] string query)
+    public async Task<RuntimeResult> YouTubeAsync([Autocomplete(typeof(YouTubeAutocompleteHandler))][Summary(description: "The search query.")] string query)
     {
         await Context.Interaction.DeferAsync();
 

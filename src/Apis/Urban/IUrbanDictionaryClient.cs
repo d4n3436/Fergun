@@ -7,7 +7,7 @@ namespace Fergun.Apis.Urban;
 /// <summary>
 /// Represents an Urban Dictionary API.
 /// </summary>
-public interface IUrbanDictionary
+public interface IUrbanDictionaryClient
 {
     /// <summary>
     /// Gets definitions for a term.

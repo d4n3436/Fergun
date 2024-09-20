@@ -9,7 +9,7 @@ public interface IGeniusSong
     /// Gets the artist names.
     /// </summary>
     string ArtistNames { get; }
-     
+
     /// <summary>
     /// Gets the primary artist names.
     /// </summary>

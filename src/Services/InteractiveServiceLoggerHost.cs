@@ -14,14 +14,14 @@ namespace Fergun.Services;
 public class InteractiveServiceLoggerHost : IHostedService
 {
     private readonly InteractiveService _interactive;
-    private readonly ILogger<InteractiveService> _logger;
+    private readonly ILogger<InteractiveServiceLoggerHost> _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="InteractiveServiceLoggerHost"/> class.
     /// </summary>
     /// <param name="interactive">The <see cref="InteractiveService"/>.</param>
     /// <param name="logger">The logger.</param>
-    public InteractiveServiceLoggerHost(InteractiveService interactive, ILogger<InteractiveService> logger)
+    public InteractiveServiceLoggerHost(InteractiveService interactive, ILogger<InteractiveServiceLoggerHost> logger)
     {
         _interactive = interactive;
         _logger = logger;

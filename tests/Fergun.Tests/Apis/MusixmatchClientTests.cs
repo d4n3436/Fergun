@@ -35,7 +35,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 
         Assert.All(results, x =>
         {
-            Assert.NotEmpty(x.ArtistName); 
+            Assert.NotEmpty(x.ArtistName);
             Assert.True(x.Id >= 0);
             Assert.NotEmpty(x.SongArtImageUrl);
             Assert.True(Uri.IsWellFormedUriString(x.SongArtImageUrl, UriKind.Absolute));
@@ -103,14 +103,14 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     [Fact]
     public async Task SearchSongsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<bool>(), cts.Token));
     }
 
     [Fact]
     public async Task GetSongAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
         await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.GetSongAsync(It.IsAny<int>(), cts.Token));
     }
 
@@ -126,11 +126,14 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     {
         var successfulTokenResponse = new
         {
-            message = new {
-                header = new {
+            message = new
+            {
+                header = new
+                {
                     status_code = 200
                 },
-                body = new {
+                body = new
+                {
                     user_token = "token"
                 }
             }
@@ -138,14 +141,20 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 
         var successfulResponse = new
         {
-            message = new {
-                header = new {
+            message = new
+            {
+                header = new
+                {
                     status_code = 200
                 },
-                body = new {
-                    track_list = new[] {
-                        new {
-                            track = new {
+                body = new
+                {
+                    track_list = new[]
+                    {
+                        new
+                        {
+                            track = new
+                            {
                                 artist_name = "Artist",
                                 track_id = 1,
                                 instrumental = false,
@@ -248,7 +257,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     [Fact]
     public void MusixmatchException_Has_Expected_Values()
     {
-        var innerException = new Exception();
+        var innerException = new HttpRequestException();
 
         var exception1 = new MusixmatchException();
         var exception2 = new MusixmatchException("Custom message 2");
@@ -270,7 +279,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         var captchaException = Assert.Throws<MusixmatchException>(() => MusixmatchException.Throw(HttpStatusCode.Forbidden, "track.get", "captcha"));
         var renewException = Assert.Throws<MusixmatchException>(() => MusixmatchException.Throw(HttpStatusCode.Unauthorized, "lyrics.get", "renew"));
         var serverErrorException = Assert.Throws<MusixmatchException>(() => MusixmatchException.Throw(HttpStatusCode.InternalServerError, "token.get", null));
-        
+
         Assert.Equal("captcha", captchaException.Hint);
         Assert.Equal("renew", renewException.Hint);
         Assert.Null(serverErrorException.Hint);
@@ -280,23 +289,29 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     {
         var successfulTokenResponse = new
         {
-           message = new {
-               header = new {
-                   status_code = 200
-               },
-               body = new {
-                   user_token = "token"
-               }
-           }
+            message = new
+            {
+                header = new
+                {
+                    status_code = 200
+                },
+                body = new
+                {
+                    user_token = "token"
+                }
+            }
         };
 
         var emptyTokenResponse = new
         {
-            message = new {
-                header = new {
+            message = new
+            {
+                header = new
+                {
                     status_code = 200
                 },
-                body = new {
+                body = new
+                {
                     user_token = ""
                 }
             }
@@ -319,16 +334,24 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 
         var renewTokenResponse = new
         {
-            message = new {
-                header = new {
+            message = new
+            {
+                header = new
+                {
                     status_code = 200
                 },
-                body = new {
-                    macro_calls = new[] {
-                        new {
-                            track_get = new {
-                                message = new {
-                                    header = new {
+                body = new
+                {
+                    macro_calls = new[]
+                    {
+                        new
+                        {
+                            track_get = new
+                            {
+                                message = new
+                                {
+                                    header = new
+                                    {
                                         status_code = 403,
                                         hint = "renew"
                                     },
@@ -343,8 +366,10 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 
         var serverErrorResponse = new
         {
-            message = new {
-                header = new {
+            message = new
+            {
+                header = new
+                {
                     status_code = 500,
                     hint = (string?)null
                 },
@@ -384,12 +409,10 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         // triggering the retry policy and returning a new token.get response
 
         // We need clean MusixmatchClientStates (no rate-limits) for the tests
-        return new TheoryData<MusixmatchClient>
-        {
+        return new TheoryData<MusixmatchClient>(
             GetNewClient(),
             GetNewClient(),
-            GetNewClient()
-        };
+            GetNewClient());
 
         MusixmatchClient GetNewClient() => new(musixmatchHttpClient, new MusixmatchClientState(httpClientFactoryMock.Object), loggerMock.Object);
     }

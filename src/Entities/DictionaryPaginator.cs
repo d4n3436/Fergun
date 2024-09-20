@@ -91,8 +91,8 @@ public class DictionaryPaginator : BaseLazyPaginator
     }
 
     /// <inheritdoc/>
-    public override ValueTask<bool> ApplyActionAsync(PaginatorAction action) =>
-        action switch
+    public override ValueTask<bool> ApplyActionAsync(PaginatorAction action)
+        => action switch
         {
             PaginatorAction.Backward => SetCategoryIndexAsync(CurrentCategoryIndex - 1),
             PaginatorAction.Forward => SetCategoryIndexAsync(CurrentCategoryIndex + 1),

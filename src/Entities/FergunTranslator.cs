@@ -11,9 +11,11 @@ namespace Fergun;
 /// <summary>
 /// Represents an aggregation of translators where the order of the translators can be randomized.
 /// </summary>
+#pragma warning disable CA1001 // The translators can't be disposed because we don't own them
 public class FergunTranslator : IFergunTranslator
+#pragma warning restore CA1001
 {
-    internal readonly ITranslator[] _translators;
+    internal readonly ITranslator[] Translators;
     private readonly AggregateTranslator _innerTranslator;
 
     /// <summary>
@@ -22,15 +24,15 @@ public class FergunTranslator : IFergunTranslator
     /// <param name="translators">The translators.</param>
     public FergunTranslator(IEnumerable<ITranslator> translators)
     {
-        _translators = translators.ToArray();
-        _innerTranslator = new AggregateTranslator(_translators);
+        Translators = translators.ToArray();
+        _innerTranslator = new AggregateTranslator(Translators);
     }
 
     /// <inheritdoc/>
     public string Name => nameof(FergunTranslator);
 
     /// <inheritdoc/>
-    public void Randomize(Random? rng = null) => (rng ?? Random.Shared).Shuffle(_translators);
+    public void Randomize(Random? rng = null) => (rng ?? Random.Shared).Shuffle(Translators);
 
     /// <inheritdoc />
     public Task<ITranslationResult> TranslateAsync(string text, string toLanguage, string? fromLanguage = null)

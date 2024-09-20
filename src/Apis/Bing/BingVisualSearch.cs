@@ -69,7 +69,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
-       string? imageCategory = GetImageCategory(document);
+        string? imageCategory = GetImageCategory(document);
         if (imageCategory is not null && _imageCategories.TryGetValue(imageCategory, out string? message))
         {
             throw new BingException(message, imageCategory);

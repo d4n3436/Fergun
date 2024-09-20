@@ -21,7 +21,7 @@ public class FergunTranslatorTests
         _innerTranslatorMock.Setup(x => x.IsLanguageSupported(It.IsAny<ILanguage>()))
             .Returns(true);
 
-        _fergunTranslator = new FergunTranslator(new[] { _innerTranslatorMock.Object, Mock.Of<ITranslator>() });
+        _fergunTranslator = new FergunTranslator([_innerTranslatorMock.Object, Mock.Of<ITranslator>()]);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class FergunTranslatorTests
     {
         _fergunTranslator.Randomize(new Random(0));
 
-        Assert.NotSame(_innerTranslatorMock.Object, _fergunTranslator._translators[0]);
+        Assert.NotSame(_innerTranslatorMock.Object, _fergunTranslator.Translators[0]);
     }
 
     [Fact]

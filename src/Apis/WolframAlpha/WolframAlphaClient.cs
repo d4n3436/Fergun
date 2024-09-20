@@ -100,8 +100,8 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         _disposed = true;
     }
 
-    private static string GetSubdomain(string language) =>
-        language switch
+    private static string GetSubdomain(string language)
+        => language switch
         {
             "es" => "es",
             "ja" => "ja",

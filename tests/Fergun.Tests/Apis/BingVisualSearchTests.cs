@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Fergun.Apis.Bing;
 using Moq;
+using System.Net.Http;
 using Xunit;
 
 namespace Fergun.Tests.Apis;
@@ -80,7 +81,7 @@ public class BingVisualSearchTests
     [Fact]
     public void BingException_Has_Expected_Values()
     {
-        var innerException = new Exception();
+        var innerException = new HttpRequestException();
 
         var exception1 = new BingException();
         var exception2 = new BingException("Custom message");

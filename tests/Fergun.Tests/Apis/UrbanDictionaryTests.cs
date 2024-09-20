@@ -8,7 +8,7 @@ namespace Fergun.Tests.Apis;
 
 public class UrbanDictionaryTests
 {
-    private readonly IUrbanDictionary _urbanDictionary = new UrbanDictionary();
+    private readonly IUrbanDictionaryClient _urbanDictionary = new UrbanDictionaryClient();
 
     [InlineData("lol")]
     [InlineData("cringe")]

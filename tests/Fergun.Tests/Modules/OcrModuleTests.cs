@@ -50,7 +50,8 @@ public class OcrModuleTests
 
         var interactive = new InteractiveService(_client, _interactiveConfig);
         _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, interactive,
-            _googleLensMock.Object, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object)) { CallBase = true };
+            _googleLensMock.Object, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object))
+        { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }
@@ -62,7 +63,7 @@ public class OcrModuleTests
         _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
         Assert.Equal("en", _ocrLocalizer.CurrentCulture.TwoLetterISOLanguageName);
     }
-    
+
     [Theory]
     [InlineData(TextImageUrl, true)]
     [InlineData(EmptyImageUrl, false)]

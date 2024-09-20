@@ -176,7 +176,7 @@ public class AutocompleteHandlerTests
         }
     }
 
-    private static IServiceProvider GetServiceProvider()
+    private static ServiceProvider GetServiceProvider()
     {
         var services = new ServiceCollection()
             .AddFergunPolicies();
@@ -184,7 +184,7 @@ public class AutocompleteHandlerTests
         services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30));
 
-        services.AddHttpClient<IUrbanDictionary, UrbanDictionary>()
+        services.AddHttpClient<IUrbanDictionaryClient, UrbanDictionaryClient>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

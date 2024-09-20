@@ -38,7 +38,8 @@ public class ImageModuleTests
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
         _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive,
-            _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch, _googleLens)) { CallBase = true };
+            _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch, _googleLens))
+        { CallBase = true };
 
         _module = _moduleMock.Object;
         _interactionMock.SetupGet(x => x.User).Returns(() => Utils.CreateMockedUser());
@@ -117,8 +118,12 @@ public class ImageModuleTests
 
     [Theory]
     [MemberData(nameof(GetReverseImageSearchData))]
-    public async Task ReverseAsync_Sends_Paginator(string? url, IAttachment? file, ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
+    public async Task ReverseAsync_Sends_Paginator(string? url, string? attachmentUrl, ReverseImageSearchEngine engine, bool multiImages, bool nsfw)
     {
+        var fileMock = new Mock<IAttachment>();
+        fileMock.SetupGet(x => x.Url).Returns(attachmentUrl!);
+        var file = attachmentUrl is null ? null : fileMock.Object;
+
         var channel = new Mock<ITextChannel>();
         channel.SetupGet(x => x.IsNsfw).Returns(nsfw);
         _contextMock.SetupGet(x => x.Channel).Returns(channel.Object);
@@ -184,19 +189,16 @@ public class ImageModuleTests
         _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => !b), It.IsAny<RequestOptions>()), Times.Once);
     }
 
-    public static TheoryData<string?, IAttachment?, ReverseImageSearchEngine, bool, bool> GetReverseImageSearchData()
+    public static TheoryData<string?, string?, ReverseImageSearchEngine, bool, bool> GetReverseImageSearchData()
     {
-        var attachmentMock = new Mock<IAttachment>();
-        attachmentMock.SetupGet(x => x.Url).Returns("https://example.com/image.png");
-
-        return new TheoryData<string?, IAttachment?, ReverseImageSearchEngine, bool, bool>
+        return new TheoryData<string?, string?, ReverseImageSearchEngine, bool, bool>
         {
             { "https://example.com/image.png", null, ReverseImageSearchEngine.Bing, false, false },
-            { null, attachmentMock.Object, ReverseImageSearchEngine.Bing, true, true },
+            { null, "https://example.com/image.png", ReverseImageSearchEngine.Bing, true, true },
             { "https://example.com/image.png", null, ReverseImageSearchEngine.Yandex, false, false },
-            { null, attachmentMock.Object, ReverseImageSearchEngine.Yandex, true, true },
+            { null, "https://example.com/image.png", ReverseImageSearchEngine.Yandex, true, true },
             { "https://example.com/image.png", null, ReverseImageSearchEngine.Google, false, false },
-            { null, attachmentMock.Object, ReverseImageSearchEngine.Google, true, true }
+            { null, "https://example.com/image.png", ReverseImageSearchEngine.Google, true, true }
         };
     }
 }

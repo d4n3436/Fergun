@@ -80,7 +80,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         // No results for this image
         if (data.GetArrayLength() < 9)
-            return Array.Empty<IGoogleLensResult>();
+            return [];
 
         var matches = data[8][0][12];
 

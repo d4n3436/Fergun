@@ -147,7 +147,7 @@ public class OtherModule : InteractionModuleBase
 
     [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
-    public async Task<RuntimeResult> LyricsAsync([MaxValue(int.MaxValue)] [Autocomplete(typeof(GeniusAutocompleteHandler))] [Summary(name: "name", description: "The name of the song.")] int id)
+    public async Task<RuntimeResult> LyricsAsync([MaxValue(int.MaxValue)][Autocomplete(typeof(GeniusAutocompleteHandler))][Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
 
@@ -176,8 +176,8 @@ public class OtherModule : InteractionModuleBase
         var results = await _geniusClient.SearchSongsAsync(query);
 
         var match = results.FirstOrDefault(x =>
-            x.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) &&
-            x.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase));
+            x.PrimaryArtistNames.Equals(artist, StringComparison.OrdinalIgnoreCase) &&
+            x.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
 
         if (match is not null)
         {
@@ -195,8 +195,8 @@ public class OtherModule : InteractionModuleBase
         else
         {
             match = results.FirstOrDefault(x => !x.IsInstrumental && x.LyricsState != "unreleased" &&
-                (x.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) ||
-                x.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase)));
+                (x.PrimaryArtistNames.Equals(artist, StringComparison.OrdinalIgnoreCase) ||
+                x.Title.Equals(title, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (match is null)
@@ -275,7 +275,7 @@ public class OtherModule : InteractionModuleBase
 
             if (checkSpotifyStatus && IsSameSong())
             {
-                var mention = $"</{spotifyLyricsCommand.Name}:{spotifyLyricsCommand.Id}>";
+                string mention = $"</{spotifyLyricsCommand.Name}:{spotifyLyricsCommand.Id}>";
                 builder.AddField(_localizer["Note"], _localizer["UseSpotifyLyricsCommand", mention]);
             }
 
@@ -294,8 +294,8 @@ public class OtherModule : InteractionModuleBase
             string title = RemoveTitleExtraInfo(spotifyActivity.TrackTitle);
 
             return (song.SpotifyTrackId is not null && song.SpotifyTrackId == spotifyActivity.TrackId) ||
-                (song.PrimaryArtistNames.Equals(artist, StringComparison.InvariantCultureIgnoreCase) &&
-                song.Title.Equals(title, StringComparison.InvariantCultureIgnoreCase));
+                (song.PrimaryArtistNames.Equals(artist, StringComparison.OrdinalIgnoreCase) &&
+                song.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -312,7 +312,7 @@ public class OtherModule : InteractionModuleBase
         string os = HardwareInfo.GetOperatingSystemName();
 
         _logger.LogDebug("CPU: {Cpu}", cpu);
-        _logger.LogDebug("CPU Usage: {Usage}", cpuUsage.ToString("P0"));
+        _logger.LogDebug("CPU Usage: {Usage}", cpuUsage.ToString("P0", CultureInfo.InvariantCulture));
         _logger.LogDebug("Operating System: {OS}", os);
 
         var memoryStatus = HardwareInfo.GetMemoryStatus();
@@ -345,7 +345,7 @@ public class OtherModule : InteractionModuleBase
         }
 
         int? totalUsers = guilds.Sum(x => x.ApproximateMemberCount ?? (x as SocketGuild)?.MemberCount);
-        _logger.LogDebug("Total users: {TotalUsers}", totalUsers?.ToString() ?? "?");
+        _logger.LogDebug("Total users: {TotalUsers}", totalUsers?.ToString(CultureInfo.InvariantCulture) ?? "?");
 
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         _logger.LogDebug("Version: {Version}", version ?? "?");
@@ -385,7 +385,7 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["BotVersion"], versionAndCommitLink, true)
             .AddField(_localizer["TotalServers"], $"{guilds.Count} (Shard: {shard?.Guilds?.Count ?? guilds.Count})", true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["TotalUsers"], $"{totalUsers?.ToString() ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString() ?? "?"})", true)
+            .AddField(_localizer["TotalUsers"], $"{totalUsers?.ToString(CultureInfo.InvariantCulture) ?? "?"} (Shard: {(totalUsersInShard ?? totalUsers)?.ToString(CultureInfo.InvariantCulture) ?? "?"})", true)
             .AddField(_localizer["ShardID"], shardId, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("Shards", shards, true)

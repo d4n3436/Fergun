@@ -2,6 +2,7 @@
 using Fergun.Apis.Google;
 using Moq;
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -71,7 +72,7 @@ public class GoogleLensTests
     [Fact]
     public void GoogleLensException_Has_Expected_Values()
     {
-        var innerException = new Exception();
+        var innerException = new HttpRequestException();
 
         var exception1 = new GoogleLensException();
         var exception2 = new GoogleLensException("Custom message");

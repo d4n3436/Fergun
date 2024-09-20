@@ -30,7 +30,7 @@ public class UrbanDefinition
         Date = date;
         Permalink = permalink;
         ThumbsUp = thumbsUp;
-        SoundUrls = soundUrls ?? Array.Empty<string>();
+        SoundUrls = soundUrls ?? [];
         Author = author;
         Word = word;
         Id = id;

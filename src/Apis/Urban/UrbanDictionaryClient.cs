@@ -11,7 +11,7 @@ namespace Fergun.Apis.Urban;
 /// <summary>
 /// Represents an API wrapper for Urban Dictionary.
 /// </summary>
-public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
+public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
 {
     private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
 
@@ -21,18 +21,18 @@ public sealed class UrbanDictionary : IDisposable, IUrbanDictionary
     private bool _disposed;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UrbanDictionary"/> class.
+    /// Initializes a new instance of the <see cref="UrbanDictionaryClient"/> class.
     /// </summary>
-    public UrbanDictionary()
+    public UrbanDictionaryClient()
         : this(new HttpClient())
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UrbanDictionary"/> class using the specified <see cref="HttpClient"/>.
+    /// Initializes a new instance of the <see cref="UrbanDictionaryClient"/> class using the specified <see cref="HttpClient"/>.
     /// </summary>
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
-    public UrbanDictionary(HttpClient httpClient)
+    public UrbanDictionaryClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
 

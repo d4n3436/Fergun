@@ -3,6 +3,7 @@ using Fergun.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;
@@ -45,7 +46,7 @@ public class ExtensionsTests
         }
         else
         {
-            Assert.Contains(context.Interaction.ChannelId.ToString()!, result);
+            Assert.Contains(context.Interaction.ChannelId?.ToString(CultureInfo.InvariantCulture)!, result);
         }
     }
 
@@ -124,6 +125,6 @@ public class ExtensionsTests
         contextMock3.SetupGet(x => x.Interaction)
             .Returns(interactionMock.Object);
 
-        return new TheoryData<IInteractionContext> { contextMock1.Object, contextMock2.Object, contextMock3.Object };
+        return new TheoryData<IInteractionContext>(contextMock1.Object, contextMock2.Object, contextMock3.Object);
     }
 }

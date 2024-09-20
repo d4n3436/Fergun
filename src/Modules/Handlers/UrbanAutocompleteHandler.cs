@@ -28,7 +28,7 @@ public class UrbanAutocompleteHandler : AutocompleteHandler
 
         var urbanDictionary = scope
             .ServiceProvider
-            .GetRequiredService<IUrbanDictionary>();
+            .GetRequiredService<IUrbanDictionaryClient>();
 
         var policy = scope
             .ServiceProvider

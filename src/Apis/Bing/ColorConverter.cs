@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers.Text;
 using System.Drawing;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,5 +18,5 @@ public class ColorConverter : JsonConverter<Color>
 
     /// <inheritdoc/>
     public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.ToArgb().ToString("X"));
+        => writer.WriteStringValue(value.ToArgb().ToString("X", CultureInfo.InvariantCulture));
 }

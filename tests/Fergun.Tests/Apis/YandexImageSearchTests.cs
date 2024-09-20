@@ -114,7 +114,7 @@ public class YandexImageSearchTests
     [Fact]
     public void YandexException_Has_Expected_Values()
     {
-        var innerException = new Exception();
+        var innerException = new HttpRequestException();
 
         var exception1 = new YandexException();
         var exception2 = new YandexException("Custom message");

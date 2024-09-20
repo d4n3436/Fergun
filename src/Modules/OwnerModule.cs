@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -85,7 +86,7 @@ public class OwnerModule : InteractionModuleBase
     public async Task<RuntimeResult> EvalAsync()
     {
         var modal = new ModalBuilder()
-            .WithCustomId(Context.Interaction.Id.ToString())
+            .WithCustomId(Context.Interaction.Id.ToString(CultureInfo.InvariantCulture))
             .WithTitle(_localizer["EvalPrompt"])
             .AddTextInput(_localizer["Code"], "code", TextInputStyle.Paragraph, "2 + 2", required: true)
             .Build();
@@ -94,7 +95,7 @@ public class OwnerModule : InteractionModuleBase
         await Context.Interaction.RespondWithModalAsync(modal);
 
         var interactiveResult = await _interactive.NextInteractionAsync(x => x is SocketModal modalInteraction
-        && modalInteraction.Data.CustomId == Context.Interaction.Id.ToString(), null, TimeSpan.FromMinutes(2));
+        && modalInteraction.Data.CustomId == Context.Interaction.Id.ToString(CultureInfo.InvariantCulture), null, TimeSpan.FromMinutes(2));
 
         if (!interactiveResult.IsSuccess)
         {

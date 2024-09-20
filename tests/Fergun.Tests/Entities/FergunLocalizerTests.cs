@@ -112,7 +112,7 @@ public class FergunLocalizerTests
             .Returns<string, object[]>((s, p) =>
             {
                 if (s == name)
-                    return new LocalizedString(s, p.Length == 0 ? value : string.Format(value, p));
+                    return new LocalizedString(s, p.Length == 0 ? value : string.Format(CultureInfo.InvariantCulture, value, p));
                 return new LocalizedString(s, string.Empty, true);
             });
 

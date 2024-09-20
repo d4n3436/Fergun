@@ -78,7 +78,7 @@ public class SharedModule
         {
             _logger.LogDebug("Detected language: {Name} ({Code})", result.SourceLanguage.Name, result.SourceLanguage.ISO6391);
         }
-        
+
         string thumbnailUrl = result.Service switch
         {
             "BingTranslator" => Constants.BingTranslatorLogoUrl,

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Text;
 using Discord;
 
@@ -27,7 +28,7 @@ public static class MessageExtensions
                 string value = field.Value.Trim().Replace("\u200b", string.Empty);
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(value))
                 {
-                    builder.Append($"{name}: {value}");
+                    builder.Append(CultureInfo.InvariantCulture, $"{name}: {value}");
                     builder.Append('\n');
                 }
             }
