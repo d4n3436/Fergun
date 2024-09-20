@@ -210,6 +210,12 @@
   <data name="lyrics-spotify.description" xml:space="preserve">
     <value>Obtiene la letra de la canción que estás escuchando en Spotify.</value>
   </data>
+  <data name="Note" xml:space="preserve">
+    <value>Nota</value>
+  </data>
+  <data name="UseSpotifyLyricsCommand" xml:space="preserve">
+    <value>ℹ️ Usa {0} para obtener fácilmente la letra de la canción que estás escuchando.</value>
+  </data>
   <data name="command-stats.description" xml:space="preserve">
     <value>Muestra las estadísticas de uso de los comandos.</value>
   </data>
@@ -249,10 +255,7 @@
   <data name="lyrics-spotify.name" xml:space="preserve">
     <value>letra-spotify</value>
   </data>
-  <data name="Note" xml:space="preserve">
-    <value>Nota</value>
-  </data>
-  <data name="UseSpotifyLyricsCommand" xml:space="preserve">
-    <value>ℹ️ Usa {0} para obtener fácilmente la letra de la canción que estás escuchando.</value>
+  <data name="HelpMenuPlaceholder" xml:space="preserve">
+    <value>Selecciona una categoría</value>
   </data>
 </root>

@@ -216,4 +216,7 @@
   <data name="UseSpotifyLyricsCommand" xml:space="preserve">
     <value>ℹ️ Use {0} to easily get the lyrics of the song you're currently listening to.</value>
   </data>
+  <data name="HelpMenuPlaceholder" xml:space="preserve">
+    <value>Select a category</value>
+  </data>
 </root>

@@ -388,12 +388,12 @@ public class UtilityModule : InteractionModuleBase
             links.Add(Format.Url(_localizer["Donate"], _fergunOptions.DonationUrl));
         }
 
-        string joinedLinks = string.Join(" | ", links);
-
         var page = new PageBuilder()
             .WithTitle(_localizer["FergunHelp"])
             .WithDescription(description)
             .WithColor(Color.Orange);
+
+        string joinedLinks = string.Join(" | ", links);
 
         if (!string.IsNullOrEmpty(joinedLinks))
         {
@@ -413,31 +413,28 @@ public class UtilityModule : InteractionModuleBase
         var modules = _commands.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule))
             .ToDictionary(x => x.Name, x => x);
 
-        InteractiveMessageResult<ModuleOption?>? result = null;
-        var interaction = Context.Interaction;
-        var responseType = InteractionResponseType.ChannelMessageWithSource;
-
         _logger.LogInformation("Displaying help menu to user {User} ({Id})", Context.User, Context.User.Id);
 
-        while (result is null || result.Status == InteractiveStatus.Success)
+        var menu = new MenuSelectionBuilder<ModuleOption>()
+            .AddUser(Context.User)
+            .WithOptions(categories)
+            .WithEmoteConverter(x => x.Emote)
+            .WithStringConverter(x => x.Name)
+            .WithPlaceholder(_localizer["HelpMenuPlaceholder"])
+            .WithInputHandler(SetModule)
+            .WithSetDefaultValues(true)
+            .WithInputType(InputType.SelectMenus)
+            .WithSelectionPage(page)
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .Build();
+
+        await _interactive.SendSelectionAsync(menu, Context.Interaction, _fergunOptions.SelectionTimeout);
+
+        return FergunResult.FromSuccess();
+
+        IPage SetModule(ModuleOption option)
         {
-            var selection = new SelectionBuilder<ModuleOption>()
-                .AddUser(Context.User)
-                .WithOptions(categories)
-                .WithEmoteConverter(x => x.Emote)
-                .WithStringConverter(x => x.Name)
-                .WithInputType(InputType.SelectMenus)
-                .WithSelectionPage(page)
-                .WithActionOnTimeout(ActionOnStop.DisableInput)
-                .Build();
-
-            result = await _interactive.SendSelectionAsync(selection, interaction, _fergunOptions.SelectionTimeout, responseType);
-
-            if (!result.IsSuccess) break;
-
-            responseType = InteractionResponseType.UpdateMessage;
-            interaction = result.StopInteraction!;
-            var module = modules[result.Value.Name.Name];
+            var module = modules[option.Name.Name];
             IEnumerable<string> commandDescriptions;
 
             string locale = Context.Interaction.UserLocale;
@@ -459,9 +456,9 @@ public class UtilityModule : InteractionModuleBase
                     .Select(x => $"</{x.Name}:{x.Id}> - {x.DescriptionLocalizations.GetValueOrDefault(locale, x.Description)}");
             }
 
-            page = new PageBuilder()
-                .WithTitle($"{result.Value.Emote} {_localizer[result.Value.Name]}")
-                .WithDescription(_localizer[result.Value.Description])
+            var builder = new PageBuilder()
+                .WithTitle($"{option.Emote} {_localizer[option.Name]}")
+                .WithDescription(_localizer[option.Description])
                 .AddField(_localizer["Commands"], string.Join('\n', commandDescriptions))
                 .WithColor(Color.Orange);
 
@@ -469,9 +466,9 @@ public class UtilityModule : InteractionModuleBase
             {
                 page.AddField(_localizer["Links"], joinedLinks);
             }
-        }
 
-        return FergunResult.FromSuccess();
+            return builder.Build();
+        }
     }
 
     [SlashCommand("ping", "Sends the response time of the bot.")]
