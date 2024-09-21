@@ -2,6 +2,7 @@
 using System.Linq;
 using Discord;
 using Fergun.Configuration;
+using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 
@@ -61,6 +62,7 @@ public static class PaginatorExtensions
             _ => throw new ArgumentException(localizer["UnknownPaginatorBuilderType"], nameof(builder))
         };
 
+        builder.WithRestrictedPageFactory(users => new PageBuilder().WithDescription(localizer["RestrictedPaginatorInputMessage", users.First().Mention]).WithColor(Color.Orange).Build());
         builder.WithJumpInputPrompt(localizer["JumpInputPrompt"]);
         builder.WithJumpInputTextLabel(localizer["JumpInputTextLabel", 1, pageCount]);
         builder.WithInvalidJumpInputMessage(localizer["InvalidJumpInput", 1, pageCount]);

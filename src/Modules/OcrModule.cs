@@ -82,6 +82,7 @@ public class OcrModule : InteractionModuleBase
             .WithOptions(Enum.GetValues<OcrEngine>())
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithSelectionPage(page)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);

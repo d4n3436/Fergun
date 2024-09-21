@@ -255,7 +255,4 @@
   <data name="lyrics-spotify.name" xml:space="preserve">
     <value>letra-spotify</value>
   </data>
-  <data name="HelpMenuPlaceholder" xml:space="preserve">
-    <value>Selecciona una categoría</value>
-  </data>
 </root>

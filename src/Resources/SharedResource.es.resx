@@ -231,4 +231,10 @@
   <data name="Yes" xml:space="preserve">
     <value>Sí</value>
   </data>
+  <data name="RestrictedPaginatorInputMessage" xml:space="preserve">
+    <value>🚫 Sólo {0} puede interactuar con este paginador.</value>
+  </data>
+  <data name="RestrictedSelectionInputMessage" xml:space="preserve">
+    <value>🚫 Sólo {0} puede interactuar con esta selección.</value>
+  </data>
 </root>

@@ -426,6 +426,7 @@ public class UtilityModule : InteractionModuleBase
             .WithInputType(InputType.SelectMenus)
             .WithSelectionPage(page)
             .WithActionOnTimeout(ActionOnStop.DisableInput)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         await _interactive.SendSelectionAsync(menu, Context.Interaction, _fergunOptions.SelectionTimeout);

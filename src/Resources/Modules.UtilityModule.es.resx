@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Fergun2Info" xml:space="preserve">
-    <value>Fergun es un bot de utilidad con muchos comandos útiles y poderosos como traducción, búsqueda de imágenes, búsqueda inversa de imágenes, OCR, TTS y más.</value>
-  </data>
-  <data name="LanguageChain" xml:space="preserve">
-    <value>Cadena de Idiomas</value>
-  </data>
-  <data name="ChainCountMustBeInRange" xml:space="preserve">
-    <value>El número de cadenas debe estar entre {0} y {1} (inclusivo).</value>
-  </data>
   <data name="ActiveClients" xml:space="preserve">
     <value>Clientes Activos</value>
   </data>
@@ -135,29 +126,59 @@
   <data name="BoostingSince" xml:space="preserve">
     <value>Mejorando desde</value>
   </data>
+  <data name="CategorySelection" xml:space="preserve">
+    <value>Selecciona una categoría para obtener información acerca de sus comandos.</value>
+  </data>
+  <data name="ChainCountMustBeInRange" xml:space="preserve">
+    <value>El número de cadenas debe estar entre {0} y {1} (inclusivo).</value>
+  </data>
+  <data name="Commands" xml:space="preserve">
+    <value>Comandos</value>
+  </data>
   <data name="CreatedAt" xml:space="preserve">
     <value>Creado En</value>
-  </data>
-  <data name="IsBot" xml:space="preserve">
-    <value>Es Bot</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>Nombre</value>
-  </data>
-  <data name="ServerJoinDate" xml:space="preserve">
-    <value>Fecha de ingreso al servidor</value>
-  </data>
-  <data name="UserInfo" xml:space="preserve">
-    <value>Información de usuario</value>
   </data>
   <data name="Default" xml:space="preserve">
     <value>Predeterminado</value>
   </data>
+  <data name="Donate" xml:space="preserve">
+    <value>Donar</value>
+  </data>
+  <data name="Fergun2Info" xml:space="preserve">
+    <value>Fergun es un bot de utilidad con muchos comandos útiles y poderosos como traducción, búsqueda de imágenes, búsqueda inversa de imágenes, OCR, TTS y más.</value>
+  </data>
+  <data name="Fergun2SupportInfo" xml:space="preserve">
+    <value>Si tiene alguna pregunta sobre el bot o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
+  </data>
+  <data name="FergunHelp" xml:space="preserve">
+    <value>Ayuda de Fergun</value>
+  </data>
   <data name="Global" xml:space="preserve">
     <value>Global</value>
   </data>
-  <data name="Server" xml:space="preserve">
-    <value>Servidor</value>
+  <data name="ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="ImageModule" xml:space="preserve">
+    <value>Comandos de búsqueda de imágenes</value>
+  </data>
+  <data name="ImageModuleDescription" xml:space="preserve">
+    <value>Comandos que buscan y muestran imágenes de varias fuentes. También contiene comandos de búsqueda inversa de imágenes.</value>
+  </data>
+  <data name="IsBot" xml:space="preserve">
+    <value>Es Bot</value>
+  </data>
+  <data name="LanguageChain" xml:space="preserve">
+    <value>Cadena de Idiomas</value>
+  </data>
+  <data name="Links" xml:space="preserve">
+    <value>Enlaces</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Nickname" xml:space="preserve">
+    <value>Apodo</value>
   </data>
   <data name="NoGlobalAvatar" xml:space="preserve">
     <value>{0} no tiene un avatar global (principal).</value>
@@ -165,11 +186,71 @@
   <data name="NoServerAvatar" xml:space="preserve">
     <value>{0} no tiene un avatar de servidor.</value>
   </data>
-  <data name="Fergun2SupportInfo" xml:space="preserve">
-    <value>Si tiene alguna pregunta sobre el bot o tiene alguna sugerencia, no dude en unirse al servidor de soporte.</value>
+  <data name="OcrModule" xml:space="preserve">
+    <value>Comandos de OCR</value>
+  </data>
+  <data name="OcrModuleDescription" xml:space="preserve">
+    <value>Comandos que extraen texto de imágenes. Los comandos también contienen funcionalidad de TTS y traducción.</value>
+  </data>
+  <data name="OtherModule" xml:space="preserve">
+    <value>Otros comandos</value>
+  </data>
+  <data name="OtherModuleDescription" xml:space="preserve">
+    <value>Comandos que no se sitúan bien en otros módulos.</value>
+  </data>
+  <data name="Server" xml:space="preserve">
+    <value>Servidor</value>
+  </data>
+  <data name="ServerJoinDate" xml:space="preserve">
+    <value>Fecha de ingreso al servidor</value>
   </data>
   <data name="Support" xml:space="preserve">
     <value>Soporte</value>
+  </data>
+  <data name="TtsModule" xml:space="preserve">
+    <value>Comandos de TTS</value>
+  </data>
+  <data name="TtsModuleDescription" xml:space="preserve">
+    <value>Contiene comandos que convierten texto a voz.</value>
+  </data>
+  <data name="UnableToGetArticle" xml:space="preserve">
+    <value>No se pudo obtener el artículo.</value>
+  </data>
+  <data name="UrbanModule" xml:space="preserve">
+    <value>Comandos de Urban Dictionary</value>
+  </data>
+  <data name="UrbanModuleDescription" xml:space="preserve">
+    <value>Comandos que buscan y muestran significados de Urban Dictionary.</value>
+  </data>
+  <data name="UserInfo" xml:space="preserve">
+    <value>Información de usuario</value>
+  </data>
+  <data name="UtilityModule" xml:space="preserve">
+    <value>Comandos de utilidad</value>
+  </data>
+  <data name="UtilityModuleDescription" xml:space="preserve">
+    <value>Comandos generales de utilidad.</value>
+  </data>
+  <data name="Vote" xml:space="preserve">
+    <value>Votar</value>
+  </data>
+  <data name="WikipediaSearch" xml:space="preserve">
+    <value>Búsqueda de Wikipedia</value>
+  </data>
+  <data name="WolframAlphaDidYouMean" xml:space="preserve">
+    <value>No se encontraron resultados. Quisiste decir...{0}</value>
+  </data>
+  <data name="WolframAlphaError" xml:space="preserve">
+    <value>No se pudo obtener los resultados. Código de estado: {0}. Mensaje de error: {1}</value>
+  </data>
+  <data name="WolframAlphaNoResults" xml:space="preserve">
+    <value>Wolfram|Alpha no entiende su consulta.</value>
+  </data>
+  <data name="WolframAlphaPaginatorFooter" xml:space="preserve">
+    <value>Resultados de WolframAlpha | Página {0} de {1}</value>
+  </data>
+  <data name="WolframAlphaResults" xml:space="preserve">
+    <value>Resultados de Wolfram|Alpha</value>
   </data>
   <data name="avatar.description" xml:space="preserve">
     <value>Muesta el avatar de un usuario.</value>
@@ -312,12 +393,6 @@
   <data name="Translate Text.name" xml:space="preserve">
     <value>Traducir Texto</value>
   </data>
-  <data name="WolframAlphaError" xml:space="preserve">
-    <value>No se pudo obtener los resultados. Código de estado: {0}. Mensaje de error: {1}</value>
-  </data>
-  <data name="WolframAlphaDidYouMean" xml:space="preserve">
-    <value>No se encontraron resultados. Quisiste decir...{0}</value>
-  </data>
   <data name="wolfram.description" xml:space="preserve">
     <value>Pregunta a Wolfram|Alpha sobre algo.</value>
   </data>
@@ -329,21 +404,6 @@
   </data>
   <data name="wolfram.name" xml:space="preserve">
     <value>wolfram</value>
-  </data>
-  <data name="WolframAlphaPaginatorFooter" xml:space="preserve">
-    <value>Resultados de WolframAlpha | Página {0} de {1}</value>
-  </data>
-  <data name="WolframAlphaNoResults" xml:space="preserve">
-    <value>Wolfram|Alpha no entiende su consulta.</value>
-  </data>
-  <data name="WolframAlphaResults" xml:space="preserve">
-    <value>Resultados de Wolfram|Alpha</value>
-  </data>
-  <data name="UnableToGetArticle" xml:space="preserve">
-    <value>No se pudo obtener el artículo.</value>
-  </data>
-  <data name="WikipediaSearch" xml:space="preserve">
-    <value>Búsqueda de Wikipedia</value>
   </data>
   <data name="define.description" xml:space="preserve">
     <value>Obtiene las definiciones de una palabra de Dictionary.com (sólo en Inglés).</value>
@@ -357,66 +417,6 @@
   <data name="define.word.name" xml:space="preserve">
     <value>palabra</value>
   </data>
-  <data name="ID" xml:space="preserve">
-    <value>ID</value>
-  </data>
-  <data name="Nickname" xml:space="preserve">
-    <value>Apodo</value>
-  </data>
-  <data name="ImageModule" xml:space="preserve">
-    <value>Comandos de búsqueda de imágenes</value>
-  </data>
-  <data name="ImageModuleDescription" xml:space="preserve">
-    <value>Comandos que buscan y muestran imágenes de varias fuentes. También contiene comandos de búsqueda inversa de imágenes.</value>
-  </data>
-  <data name="OcrModule" xml:space="preserve">
-    <value>Comandos de OCR</value>
-  </data>
-  <data name="OcrModuleDescription" xml:space="preserve">
-    <value>Comandos que extraen texto de imágenes. Los comandos también contienen funcionalidad de TTS y traducción.</value>
-  </data>
-  <data name="OtherModule" xml:space="preserve">
-    <value>Otros comandos</value>
-  </data>
-  <data name="OtherModuleDescription" xml:space="preserve">
-    <value>Comandos que no se sitúan bien en otros módulos.</value>
-  </data>
-  <data name="TtsModule" xml:space="preserve">
-    <value>Comandos de TTS</value>
-  </data>
-  <data name="TtsModuleDescription" xml:space="preserve">
-    <value>Contiene comandos que convierten texto a voz.</value>
-  </data>
-  <data name="UrbanModule" xml:space="preserve">
-    <value>Comandos de Urban Dictionary</value>
-  </data>
-  <data name="UrbanModuleDescription" xml:space="preserve">
-    <value>Comandos que buscan y muestran significados de Urban Dictionary.</value>
-  </data>
-  <data name="UtilityModule" xml:space="preserve">
-    <value>Comandos de utilidad</value>
-  </data>
-  <data name="UtilityModuleDescription" xml:space="preserve">
-    <value>Comandos generales de utilidad.</value>
-  </data>
-  <data name="CategorySelection" xml:space="preserve">
-    <value>Selecciona una categoría para obtener información acerca de sus comandos.</value>
-  </data>
-  <data name="Commands" xml:space="preserve">
-    <value>Comandos</value>
-  </data>
-  <data name="Donate" xml:space="preserve">
-    <value>Donar</value>
-  </data>
-  <data name="FergunHelp" xml:space="preserve">
-    <value>Ayuda de Fergun</value>
-  </data>
-  <data name="Links" xml:space="preserve">
-    <value>Enlaces</value>
-  </data>
-  <data name="Vote" xml:space="preserve">
-    <value>Votar</value>
-  </data>
   <data name="avatar.type.default avatar.name" xml:space="preserve">
     <value>Avatar predeterminado</value>
   </data>
@@ -425,5 +425,8 @@
   </data>
   <data name="avatar.type.server avatar.name" xml:space="preserve">
     <value>Avatar de servidor</value>
+  </data>
+  <data name="HelpMenuPlaceholder" xml:space="preserve">
+    <value>Selecciona una categoría</value>
   </data>
 </root>

@@ -184,13 +184,12 @@ public class ImageModule : InteractionModuleBase
         var selection = new SelectionBuilder<ReverseImageSearchEngine>()
             .AddUser(Context.User)
             .WithOptions(Enum.GetValues<ReverseImageSearchEngine>())
+            .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithSelectionPage(page)
+            .WithLocalizedPrompts(_localizer)
             .Build();
 
         var result = await _interactive.SendSelectionAsync(selection, Context.Interaction, TimeSpan.FromMinutes(1), ephemeral: true);
-
-        // Attempt to disable the components
-        _ = Context.Interaction.ModifyOriginalResponseAsync(x => x.Components = selection.GetOrAddComponents(true).Build());
 
         if (result.IsSuccess)
         {

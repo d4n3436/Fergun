@@ -252,4 +252,7 @@
   <data name="WolframAlphaResults" xml:space="preserve">
     <value>Wolfram|Alpha Results</value>
   </data>
+  <data name="HelpMenuPlaceholder" xml:space="preserve">
+    <value>Select a category</value>
+  </data>
 </root>
