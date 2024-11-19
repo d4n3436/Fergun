@@ -91,7 +91,14 @@ public static class DictionaryFormatter
 
             foreach (var subDefinition in def.Subdefinitions)
             {
-                definition.Append(CultureInfo.InvariantCulture, $"\n\u200b \u200b \u200b \u200b - {FormatHtml(subDefinition.Definition, true)}");
+                definition.Append(CultureInfo.InvariantCulture, $"\n\u200b \u200b \u200b \u200b - ");
+
+                if (!string.IsNullOrEmpty(subDefinition.PredefinitionContent))
+                {
+                    definition.Append(CultureInfo.InvariantCulture, $"{FormatHtml(subDefinition.PredefinitionContent)} ");
+                }
+
+                definition.Append(FormatHtml(subDefinition.Definition, true));
             }
 
             definition.Append("\n\n");
@@ -203,6 +210,7 @@ public static class DictionaryFormatter
             }
             else if (element is IHtmlAnchorElement anchor)
             {
+                // This currently won't handle nested tags like <a href="/browse/back" class="luna-xref" data-linkid="nn1ov4">back<sup>2</sup> (def. 7)</a>.
                 builder.Append(CultureInfo.InvariantCulture, $"[{anchor.Text}](https://dictionary.com{anchor.GetAttribute("href")})");
             }
             else
