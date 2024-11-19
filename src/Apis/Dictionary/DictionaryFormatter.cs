@@ -172,7 +172,7 @@ public static class DictionaryFormatter
 
                 if (className == "luna-example italic" && newLineExample)
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"\n> *{content}*");
+                    builder.Append(CultureInfo.InvariantCulture, $"\n> _{content}_");
                 } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
                 else if (className == "superscript" && content is [>= '0' and <= '9'])
                 {
@@ -190,7 +190,7 @@ public static class DictionaryFormatter
                 }
                 else if (className.EndsWith("italic", StringComparison.Ordinal) || className.EndsWith("pos", StringComparison.Ordinal))
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"*{content}*");
+                    builder.Append(CultureInfo.InvariantCulture, $"_{content}_");
                 }
                 else if (className.EndsWith("bold", StringComparison.Ordinal))
                 {
