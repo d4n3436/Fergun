@@ -164,6 +164,7 @@ public class DictionaryPaginator : BaseLazyPaginator
                 catch
                 {
                     _isDisplayingExtraInfo = false;
+                    throw;
                 }
 
                 return InteractiveInputStatus.Success;
