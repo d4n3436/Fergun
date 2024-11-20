@@ -45,5 +45,5 @@ public interface IDictionaryEntry
     /// <summary>
     /// Gets the variant spellings.
     /// </summary>
-    IReadOnlyList<string> VariantSpellings { get; }
+    IReadOnlyList<string>? VariantSpellings { get; }
 }

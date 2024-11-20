@@ -271,16 +271,16 @@ public class UtilityModule : InteractionModuleBase
         _logger.LogInformation("Requesting definitions for word \"{Word}\"", word);
         var result = await _dictionary.GetDefinitionsAsync(word);
 
-        var entries = result.Data?.Content
-            .FirstOrDefault(content => content.Source == "luna")?
-            .Entries;
+        var group = result.Data?.Content
+            .FirstOrDefault(content => content.Source is "luna" or "collins");
 
-        if (entries is null)
+        if (group is null)
         {
             return FergunResult.FromError(_localizer["NoResults"]);
         }
 
-        _logger.LogDebug("Received dictionary response (sources: {Sources}, luna entry count: {Count})", string.Join(", ", result.Data!.Content.Select(x => x.Source)), entries.Count);
+        var entries = group.Entries;
+        _logger.LogDebug("Received dictionary response (source(s): {Sources}, {Source} entry count: {Count})", string.Join(", ", result.Data!.Content.Select(x => x.Source)), group.Source, entries.Count);
 
         var maxIndexes = new List<int>();
         var pages = new List<List<PageBuilder>>();
@@ -310,7 +310,7 @@ public class UtilityModule : InteractionModuleBase
             maxIndexes.Add(innerPages.Count - 1);
 
             string extraInfo = DictionaryFormatter.FormatExtraInformation(entry);
-            if (!string.IsNullOrEmpty(extraInfo))
+            if (!string.IsNullOrWhiteSpace(extraInfo))
             {
                 var extraInfoPage = new PageBuilder()
                     .WithDescription(extraInfo.Truncate(EmbedBuilder.MaxDescriptionLength))

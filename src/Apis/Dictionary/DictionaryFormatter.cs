@@ -26,7 +26,7 @@ public static class DictionaryFormatter
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        var builder = new StringBuilder($"**{entry.Entry}**");
+        var builder = new StringBuilder($"\u200b**{entry.Entry}**\u200b");
 
         if (entry.Homograph is not null)
         {
@@ -36,16 +36,13 @@ public static class DictionaryFormatter
         builder.Append(' ');
         builder.AppendJoin(' ', entry.EntryVariants.Select(x => FormatHtml(x)));
 
-        if (entry.Pronunciation is not null)
+        if (!string.IsNullOrEmpty(entry.Pronunciation?.Ipa))
         {
-            if (entry.Pronunciation.Spell.Count > 0)
-            {
-                builder.AppendJoin(' ', entry.Pronunciation.Spell.Select(x => $"[ {FormatHtml(x).Trim()} ]"));
-            }
-            else if (!string.IsNullOrEmpty(entry.Pronunciation.Ipa))
-            {
-                builder.Append(CultureInfo.InvariantCulture, $"/ {FormatHtml(entry.Pronunciation.Ipa).Trim()} /");
-            }
+            builder.Append(CultureInfo.InvariantCulture, $"/ {FormatHtml(entry.Pronunciation.Ipa).Trim()} /");
+        }
+        else if (entry.Pronunciation?.Spell?.Count > 0)
+        {
+            builder.AppendJoin(' ', entry.Pronunciation.Spell.Select(x => $"[ {FormatHtml(x).Trim()} ]"));
         }
 
         return builder.ToString();
@@ -82,23 +79,28 @@ public static class DictionaryFormatter
                 definition.Append(CultureInfo.InvariantCulture, $"{FormatHtml(def.PredefinitionContent)} ");
             }
 
-            definition.Append(FormatHtml(def.Definition, true));
+            definition.Append(def.Definition is null ? '\u200b' : FormatHtml(def.Definition, true)); // null on groups
 
             if (!string.IsNullOrEmpty(def.PostdefinitionContent))
             {
-                definition.Append(CultureInfo.InvariantCulture, $": {FormatHtml(def.PostdefinitionContent)}");
+                definition.Append(CultureInfo.InvariantCulture, $" {FormatHtml(def.PostdefinitionContent, true)}"); // collins puts examples here while luna puts it inside the definition
             }
 
             foreach (var subDefinition in def.Subdefinitions)
             {
-                definition.Append(CultureInfo.InvariantCulture, $"\n\u200b \u200b \u200b \u200b - ");
+                definition.Append(CultureInfo.InvariantCulture, $"\n  - ");
 
                 if (!string.IsNullOrEmpty(subDefinition.PredefinitionContent))
                 {
                     definition.Append(CultureInfo.InvariantCulture, $"{FormatHtml(subDefinition.PredefinitionContent)} ");
                 }
 
-                definition.Append(FormatHtml(subDefinition.Definition, true));
+                definition.Append(FormatHtml(subDefinition.Definition, true, true));
+
+                if (!string.IsNullOrEmpty(subDefinition.PostdefinitionContent))
+                {
+                    definition.Append(CultureInfo.InvariantCulture, $" {FormatHtml(subDefinition.PostdefinitionContent, true, true)}");
+                }
             }
 
             definition.Append("\n\n");
@@ -129,7 +131,7 @@ public static class DictionaryFormatter
 
         if (!string.IsNullOrEmpty(entry.Origin))
         {
-            builder.Append(CultureInfo.InvariantCulture, $"**Origin of {entry.Entry}**");
+            builder.Append(CultureInfo.InvariantCulture, $"\u200b**Origin of {entry.Entry}**\u200b");
         }
 
         if (entry.Homograph is not null)
@@ -137,16 +139,19 @@ public static class DictionaryFormatter
             builder.Append(SuperscriptDigits[entry.Homograph.Value]);
         }
 
-        builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");
-
+        if (!string.IsNullOrEmpty(entry.Origin))
+        {
+            builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");
+        }
+        
         foreach (var note in entry.SupplementaryNotes)
         {
-            builder.Append(CultureInfo.InvariantCulture, $"**{note.Type}**\n");
+            builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n");
             builder.AppendJoin('\n', note.Content.Select(x => FormatHtml(x)));
             builder.Append("\n\n");
         }
 
-        foreach (string spelling in entry.VariantSpellings)
+        foreach (string spelling in entry.VariantSpellings ?? [])
         {
             builder.Append(FormatHtml(spelling));
             builder.Append('\n');
@@ -155,10 +160,10 @@ public static class DictionaryFormatter
         return builder.ToString();
     }
 
-    private static string FormatHtml(string htmlText, bool newLineExample = false)
+    private static string FormatHtml(string? htmlText, bool newLineExample = false, bool isSubdefinition = false)
     {
         if (string.IsNullOrEmpty(htmlText))
-            return htmlText;
+            return string.Empty;
 
         var parser = new HtmlParser();
         using var document = parser.ParseDocument(htmlText);
@@ -177,9 +182,9 @@ public static class DictionaryFormatter
                 string className = span.ClassName ?? string.Empty;
                 string content = span.TextContent;
 
-                if (className == "luna-example italic" && newLineExample)
+                if (className is "luna-example italic" or "example italic" && newLineExample)
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"\n> _{content}_");
+                    builder.Append(isSubdefinition ? $"\n      -# > \u200b*{content}*\u200b" : $"\n> \u200b*{content}*\u200b");
                 } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
                 else if (className == "superscript" && content is [>= '0' and <= '9'])
                 {
@@ -197,11 +202,11 @@ public static class DictionaryFormatter
                 }
                 else if (className.EndsWith("italic", StringComparison.Ordinal) || className.EndsWith("pos", StringComparison.Ordinal))
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"_{content}_");
+                    builder.Append(CultureInfo.InvariantCulture, $"\u200b*{content}*\u200b");
                 }
                 else if (className.EndsWith("bold", StringComparison.Ordinal))
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"**{content}**");
+                    builder.Append(CultureInfo.InvariantCulture, $"\u200b**{content}**\u200b");
                 }
                 else
                 {

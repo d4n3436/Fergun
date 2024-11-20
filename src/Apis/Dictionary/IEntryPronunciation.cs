@@ -15,7 +15,7 @@ public interface IEntryPronunciation
     /// <summary>
     /// Gets a read-only list containing the spellings.
     /// </summary>
-    IReadOnlyList<string> Spell { get; }
+    IReadOnlyList<string>? Spell { get; }
 
     /// <summary>
     /// Gets the audio data.

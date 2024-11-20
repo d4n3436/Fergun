@@ -15,7 +15,7 @@ public class DictionaryDefinition : IDictionaryDefinition
     /// <param name="definition">The definition itself.</param>
     /// <param name="subdefinitions">The sub-definitions.</param>
     public DictionaryDefinition(int order, string predefinitionContent, string postdefinitionContent,
-        string definition, IReadOnlyList<DictionaryDefinition>? subdefinitions)
+        string? definition, IReadOnlyList<DictionaryDefinition>? subdefinitions)
     {
         Order = order;
         PredefinitionContent = predefinitionContent;
@@ -38,7 +38,7 @@ public class DictionaryDefinition : IDictionaryDefinition
 
     /// <inheritdoc/>
     [JsonPropertyName("definition")]
-    public string Definition { get; }
+    public string? Definition { get; }
 
     /// <inheritdoc cref="IDictionaryDefinition.Subdefinitions"/>
     [JsonPropertyName("subdefinitions")]

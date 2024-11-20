@@ -25,7 +25,7 @@ public interface IDictionaryDefinition
     /// <summary>
     /// Gets the definition itself.
     /// </summary>
-    string Definition { get; }
+    string? Definition { get; }
 
     /// <summary>
     /// Gets the sub-definitions.
