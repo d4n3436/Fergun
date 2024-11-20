@@ -295,7 +295,7 @@ public class UtilityModule : InteractionModuleBase
             for (int j = 0; j < entry.PartOfSpeechBlocks.Count; j++)
             {
                 var block = entry.PartOfSpeechBlocks[j];
-                string description = DictionaryFormatter.FormatPartOfSpeechBlock(block);
+                string description = DictionaryFormatter.FormatPartOfSpeechBlock(block, entry);
 
                 var builder = new PageBuilder()
                     .WithTitle(title)

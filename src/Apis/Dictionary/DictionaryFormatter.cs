@@ -36,15 +36,6 @@ public static class DictionaryFormatter
         builder.Append(' ');
         builder.AppendJoin(' ', entry.EntryVariants.Select(x => FormatHtml(x)));
 
-        if (!string.IsNullOrEmpty(entry.Pronunciation?.Ipa))
-        {
-            builder.Append(CultureInfo.InvariantCulture, $"/ {FormatHtml(entry.Pronunciation.Ipa).Trim()} /");
-        }
-        else if (entry.Pronunciation?.Spell?.Count > 0)
-        {
-            builder.AppendJoin(' ', entry.Pronunciation.Spell.Select(x => $"[ {FormatHtml(x).Trim()} ]"));
-        }
-
         return builder.ToString();
     }
 
@@ -52,12 +43,24 @@ public static class DictionaryFormatter
     /// Formats a part of speech block.
     /// </summary>
     /// <param name="block">The part of speech block.</param>
+    /// <param name="entry">The parent entry.</param>
     /// <returns>The formatted text.</returns>
-    public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block)
+    public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry)
     {
         ArgumentNullException.ThrowIfNull(block);
 
         var builder = new StringBuilder();
+
+        if (!string.IsNullOrEmpty(entry.Pronunciation?.Ipa))
+        {
+            builder.Append(CultureInfo.InvariantCulture, $"/{FormatHtml(entry.Pronunciation.Ipa).Trim()}/");
+        }
+        else if (entry.Pronunciation?.Spell?.Count > 0)
+        {
+            builder.AppendJoin(' ', entry.Pronunciation.Spell.Select(x => $"[{FormatHtml(x).Trim()}]"));
+        }
+
+        builder.Append('\n');
 
         if (!string.IsNullOrEmpty(block.PartOfSpeech))
         {
@@ -184,7 +187,7 @@ public static class DictionaryFormatter
 
                 if (className is "luna-example italic" or "example italic" && newLineExample)
                 {
-                    builder.Append(isSubdefinition ? $"\n      -# > \u200b*{content}*\u200b" : $"\n> \u200b*{content}*\u200b");
+                    builder.Append(isSubdefinition ? $"\n    -# > \u200b*{content}*\u200b" : $"\n> \u200b*{content}*\u200b");
                 } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
                 else if (className == "superscript" && content is [>= '0' and <= '9'])
                 {

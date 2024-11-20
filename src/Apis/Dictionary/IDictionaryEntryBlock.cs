@@ -21,9 +21,4 @@ public interface IDictionaryEntryBlock
     /// Gets the supplementary info.
     /// </summary>
     string SupplementaryInfo { get; }
-
-    /// <summary>
-    /// Gets the pronunciation (specific for this part of speech).
-    /// </summary>
-    string Pronunciation { get; }
 }

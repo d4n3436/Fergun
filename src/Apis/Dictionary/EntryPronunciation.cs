@@ -7,9 +7,4 @@ namespace Fergun.Apis.Dictionary;
 public record EntryPronunciation(
     [property: JsonPropertyName("ipa")] string Ipa,
     [property: JsonConverter(typeof(ArrayOrStringConverter))]
-    [property: JsonPropertyName("spell")] IReadOnlyList<string>? Spell, // example with array response: bass
-    [property: JsonPropertyName("audio")] EntryPronunciationAudio? Audio) : IEntryPronunciation
-{
-    /// <inheritdoc/>
-    IEntryPronunciationAudio? IEntryPronunciation.Audio => Audio;
-}
+    [property: JsonPropertyName("spell")] IReadOnlyList<string>? Spell) : IEntryPronunciation; // example with array response: bass
