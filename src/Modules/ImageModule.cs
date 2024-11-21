@@ -111,7 +111,8 @@ public class ImageModule : InteractionModuleBase
     }
 
     [SlashCommand("duckduckgo", "Searches for images from DuckDuckGo and displays them in a paginator.")]
-    public async Task<RuntimeResult> DuckDuckGoAsync([Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+    public async Task<RuntimeResult> DuckDuckGoAsync(
+        [Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][MaxLength(DuckDuckGoScraper.MaxQueryLength)][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();
