@@ -673,7 +673,7 @@ public class UtilityModule : InteractionModuleBase
             foreach (var subPod in pod.SubPods.Take(9))
             {
                 // If there's data in plain text and there isn't a newline, use that instead
-                if (!string.IsNullOrEmpty(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
+                if (!string.IsNullOrWhiteSpace(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
                 {
                     text.Append(subPod.PlainText);
                     text.Append('\n');
