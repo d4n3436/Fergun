@@ -9,6 +9,7 @@ public record DictionaryEntry([property: JsonPropertyName("entry")] string Entry
     [property: JsonPropertyName("entryVariants")] IReadOnlyList<string> EntryVariants,
     [property: JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     [property: JsonPropertyName("homograph")] int? Homograph,
+    [property: JsonConverter(typeof(PronunciationConverter))]
     [property: JsonPropertyName("pronunciation")] EntryPronunciation? Pronunciation,
     [property: JsonPropertyName("posBlocks")] IReadOnlyList<DictionaryEntryBlock> PartOfSpeechBlocks,
     [property: JsonPropertyName("origin")] string Origin,
