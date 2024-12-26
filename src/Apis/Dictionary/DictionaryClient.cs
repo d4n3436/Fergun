@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading;
@@ -40,7 +41,13 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        return (await _httpClient.GetFromJsonAsync<DictionaryResponse>(new Uri($"https://api-portal.dictionary.com/dcom/pageData/{Uri.EscapeDataString(word)}"), cancellationToken).ConfigureAwait(false))!;
+        using var response = await _httpClient.GetAsync(new Uri($"https://api-portal.dictionary.com/dcom/pageData/{Uri.EscapeDataString(word)}"), cancellationToken).ConfigureAwait(false);
+        if (response.StatusCode != HttpStatusCode.NotFound)
+        {
+            response.EnsureSuccessStatusCode();
+        }
+
+        return (await response.Content.ReadFromJsonAsync<DictionaryResponse>(cancellationToken).ConfigureAwait(false))!;
     }
 
     /// <inheritdoc/>
