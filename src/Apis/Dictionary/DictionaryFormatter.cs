@@ -147,7 +147,7 @@ public static class DictionaryFormatter
             builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");
         }
         
-        foreach (var note in entry.SupplementaryNotes)
+        foreach (var note in entry.SupplementaryNotes ?? [])
         {
             builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n");
             builder.AppendJoin('\n', note.Content.Select(x => FormatHtml(x)));

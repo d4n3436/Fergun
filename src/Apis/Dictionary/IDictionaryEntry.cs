@@ -40,7 +40,7 @@ public interface IDictionaryEntry
     /// <summary>
     /// Gets the supplementary notes.
     /// </summary>
-    IReadOnlyList<IEntrySupplementaryNote> SupplementaryNotes { get; }
+    IReadOnlyList<IEntrySupplementaryNote>? SupplementaryNotes { get; }
 
     /// <summary>
     /// Gets the variant spellings.
