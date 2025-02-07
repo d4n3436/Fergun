@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Fergun.Apis.Google;
 
@@ -13,14 +15,13 @@ namespace Fergun.Apis.Google;
 /// </summary>
 public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Linux; Android 14; Google Pixel 9 Pro XL; 3854511) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
 
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
-    private static ReadOnlySpan<byte> ResultsCallbackStart => "AF_initDataCallback({key: 'ds:0'"u8;
-    private static ReadOnlySpan<byte> OcrCallbackStart => "AF_initDataCallback({key: 'ds:1'"u8;
-    private static ReadOnlySpan<byte> CallbackEnd => ", sideChannel: {}});</script>"u8;
+    private static ReadOnlySpan<byte> ImageResultsStart => "(function(){var m="u8;
+    private static ReadOnlySpan<byte> ImageResultsEnd => ";var a=m;"u8;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GoogleLensClient"/> class.
@@ -50,15 +51,48 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        byte[] page = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), cancellationToken).ConfigureAwait(false);
+        var response = await _httpClient.GetAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
-        var data = ExtractDataPack(page, OcrCallbackStart).RootElement[3][4][0];
-        if (data.GetArrayLength() == 0)
+        var parameters = HttpUtility.ParseQueryString(response.RequestMessage!.RequestUri!.Query);
+        string? vsrid = parameters["vsrid"];
+        string? gsessionid = parameters["gsessionid"];
+
+        if (string.IsNullOrEmpty(vsrid) || string.IsNullOrEmpty(gsessionid))
+        {
+            throw new GoogleLensException("Failed to extract the required query parameters.");
+        }
+
+        ReadOnlyMemory<byte> bytes = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/qfmetadata?vsrid={vsrid}&gsessionid={gsessionid}"), cancellationToken).ConfigureAwait(false);
+        var document = JsonDocument.Parse(bytes[6..]); // Skip magic chars
+
+        var root = document.RootElement[0][2];
+        if (root[0].ValueKind == JsonValueKind.Null)
         {
             return string.Empty;
         }
 
-        return string.Join('\n', data[0].Deserialize<string[]>()!);
+        var builder = new StringBuilder();
+        var textParagraphs = root[0][0];
+
+        foreach (var paragraph in textParagraphs.EnumerateArray())
+        {
+            var lines = paragraph[1];
+            foreach (var line in lines.EnumerateArray())
+            {
+                var tokens = line[0];
+                foreach (var token in tokens.EnumerateArray())
+                {
+                    builder.Append(token[1]);
+                    builder.Append(token[2]);
+                }
+
+                builder.Append('\n');
+            }
+
+            builder.Append('\n');
+        }
+
+        return builder.ToString();
     }
 
     /// <inheritdoc/>
@@ -76,58 +110,47 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         byte[] page = await _httpClient.GetByteArrayAsync(new Uri(requestUrl), cancellationToken).ConfigureAwait(false);
 
-        var data = ExtractDataPack(page, ResultsCallbackStart).RootElement[1].EnumerateArray().Last()[1][8];
+        var data = ExtractDataPack(page);
 
-        // No results for this image
-        if (data.GetArrayLength() < 9)
-            return [];
+        return data
+            .RootElement
+            .EnumerateObject()
+            .Where(x => x.Value.GetArrayLength() == 8 && x.Value[0].TryGetInt32(out int val) && val == 1)
+            .Select(x =>
+            {
+                var item = x.Value[1];
+                var props = item[6].GetProperty("2003");
 
-        var matches = data[8][0][12];
-
-        return matches
-            .EnumerateArray()
-            .Where(x => x[0].GetArrayLength() != 0)
-            .Select(x => new GoogleLensResult(
-            x[3].GetString()!,
-            x[5].GetString()!,
-            x[0][0].GetString()!,
-            x[7].GetString()!,
-            x[15][0].GetString()!))
+                return new GoogleLensResult(
+                    props[3].GetString()!,
+                    props[2].GetString()!,
+                    item[3][0].GetString()!,
+                    props[12].GetString()!,
+                    $"https://www.google.com/s2/favicons?sz=64&domain_url={props[17].GetString()!}");
+            })
             .ToArray();
     }
 
-    private static JsonDocument ExtractDataPack(byte[] page, ReadOnlySpan<byte> callbackStart)
+    private static JsonDocument ExtractDataPack(byte[] page)
     {
         // Extract the JSON data pack from the page.
         var span = page.AsSpan();
 
-        int callbackStartIndex = span.IndexOf(callbackStart);
-        if (callbackStartIndex == -1)
-        {
-            throw new GoogleLensException("Failed to extract the data pack.");
-        }
-
-        int start = span[callbackStartIndex..].IndexOf((byte)'[');
+        int start = span.IndexOf(ImageResultsStart);
         if (start == -1)
         {
             throw new GoogleLensException("Failed to extract the data pack.");
         }
 
-        start += callbackStartIndex;
+        start += ImageResultsStart.Length;
 
-        int callbackEndIndex = span[start..].IndexOf(CallbackEnd);
-        if (callbackEndIndex == -1)
-        {
-            throw new GoogleLensException("Failed to extract the data pack.");
-        }
-
-        int end = span[..(callbackEndIndex + start)].LastIndexOf((byte)']') + 1;
+        int end = span[start..].IndexOf(ImageResultsEnd);
         if (end == -1)
         {
             throw new GoogleLensException("Failed to extract the data pack.");
         }
 
-        var rawObject = page.AsMemory(start, end - start);
+        var rawObject = page.AsMemory(start, end);
 
         try
         {
