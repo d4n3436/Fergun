@@ -15,12 +15,12 @@ public interface IDictionaryEntry
     /// <summary>
     /// Gets the variants of the entry.
     /// </summary>
-    IReadOnlyList<string> EntryVariants { get; }
+    IReadOnlyList<string>? EntryVariants { get; }
 
     /// <summary>
     /// Gets the current homograph number.
     /// </summary>
-    int? Homograph { get; }
+    string? Homograph { get; }
 
     /// <summary>
     /// Gets the pronunciation data.

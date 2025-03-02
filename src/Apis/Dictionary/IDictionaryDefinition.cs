@@ -8,9 +8,14 @@ namespace Fergun.Apis.Dictionary;
 public interface IDictionaryDefinition
 {
     /// <summary>
-    /// Gets the order of this definition.
+    /// Gets the order number of this definition.
     /// </summary>
-    int Order { get; }
+    int? Ordinal { get; }
+
+    /// <summary>
+    /// Gets the order number of this definition.
+    /// </summary>
+    int? Order { get; }
 
     /// <summary>
     /// Gets the content that is displayed before the definition.

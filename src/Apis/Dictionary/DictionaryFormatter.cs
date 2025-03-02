@@ -30,11 +30,11 @@ public static class DictionaryFormatter
 
         if (entry.Homograph is not null)
         {
-            builder.Append(SuperscriptDigits[entry.Homograph.Value]);
+            builder.Append(ToSuperscript(entry.Homograph));
         }
 
         builder.Append(' ');
-        builder.AppendJoin(' ', entry.EntryVariants.Select(x => FormatHtml(x)));
+        builder.AppendJoin(' ', entry.EntryVariants?.Select(x => FormatHtml(x)) ?? []);
 
         return builder.ToString();
     }
@@ -76,7 +76,9 @@ public static class DictionaryFormatter
 
         foreach (var def in block.Definitions)
         {
-            var definition = new StringBuilder($"{def.Order}. ");
+            int order = def.Ordinal ?? def.Order ?? throw new ArgumentException($"Neither Ordinal nor Order were present on definition of \"{entry.Entry}\".");
+
+            var definition = new StringBuilder($"{order}. ");
             if (!string.IsNullOrEmpty(def.PredefinitionContent))
             {
                 definition.Append(CultureInfo.InvariantCulture, $"{FormatHtml(def.PredefinitionContent)} ");
@@ -139,7 +141,7 @@ public static class DictionaryFormatter
 
         if (entry.Homograph is not null)
         {
-            builder.Append(SuperscriptDigits[entry.Homograph.Value]);
+            builder.Append(ToSuperscript(entry.Homograph));
         }
 
         if (!string.IsNullOrEmpty(entry.Origin))
@@ -161,6 +163,17 @@ public static class DictionaryFormatter
         }
 
         return builder.ToString();
+    }
+
+    private static string ToSuperscript(string digits)
+    {
+        return string.Create(digits.Length, digits, (span, state) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                span[i] = SuperscriptDigits[state[i] - '0'];
+            }
+        });
     }
 
     private static string FormatHtml(string? htmlText, bool newLineExample = false, bool isSubdefinition = false)
