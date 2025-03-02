@@ -27,11 +27,11 @@ public class BingVisualSearchTests
     [Theory]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
-    public async Task OcrAsync_Throws_BingException_If_Image_Is_Invalid(string url)
+    public async Task OcrAsync_Returns_No_Text_If_Image_Is_Invalid(string url)
     {
-        var task = _bingVisualSearch.OcrAsync(url);
+        string text = await _bingVisualSearch.OcrAsync(url);
 
-        await Assert.ThrowsAsync<BingException>(() => task);
+        Assert.Empty(text);
     }
 
     [Theory]
@@ -61,11 +61,11 @@ public class BingVisualSearchTests
     [Theory]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/2/29/Suru_Bog_10000px.jpg")] // 10000px image
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
-    public async Task ReverseImageSearchAsync_Throws_BingException_If_Image_Is_Invalid(string url)
+    public async Task ReverseImageSearchAsync_Returns_Empty_Results_If_Image_Is_Invalid(string url)
     {
-        var task = _bingVisualSearch.ReverseImageSearchAsync(url);
+        var results = await _bingVisualSearch.ReverseImageSearchAsync(url);
 
-        await Assert.ThrowsAsync<BingException>(() => task);
+        Assert.Empty(results);
     }
 
     [Fact]
