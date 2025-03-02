@@ -44,7 +44,9 @@ public class GoogleAutocompleteHandler : AutocompleteHandler
         var results = document
             .RootElement[1]
             .EnumerateArray()
-            .Select(x => new AutocompleteResult(x.GetString(), x.GetString()))
+            .Select(x => x.GetString()!)
+            .Where(x => x.Length <= 100)
+            .Select(x => new AutocompleteResult(x, x))
             .Take(25);
 
         return AutocompletionResult.FromSuccess(results);
