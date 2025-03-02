@@ -128,6 +128,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
                     props[12].GetString()!,
                     $"https://www.google.com/s2/favicons?sz=64&domain_url={props[17].GetString()!}");
             })
+            .Where(x => x.ThumbnailUrl.StartsWith("http")) // Skip image URL with x-raw-image protocol
             .ToArray();
     }
 
