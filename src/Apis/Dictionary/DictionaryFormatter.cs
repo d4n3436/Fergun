@@ -137,18 +137,15 @@ public static class DictionaryFormatter
         if (!string.IsNullOrEmpty(entry.Origin))
         {
             builder.Append(CultureInfo.InvariantCulture, $"\u200b**Origin of {entry.Entry}**\u200b");
-        }
 
-        if (entry.Homograph is not null)
-        {
-            builder.Append(ToSuperscript(entry.Homograph));
-        }
+            if (entry.Homograph is not null)
+            {
+                builder.Append(ToSuperscript(entry.Homograph));
+            }
 
-        if (!string.IsNullOrEmpty(entry.Origin))
-        {
             builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");
         }
-        
+
         foreach (var note in entry.SupplementaryNotes ?? [])
         {
             builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n");
@@ -229,7 +226,7 @@ public static class DictionaryFormatter
                     builder.Append(content);
                 }
             }
-            else if (element is IHtmlAnchorElement anchor)
+            else if (element is IHtmlAnchorElement anchor && !string.IsNullOrEmpty(anchor.Text))
             {
                 // This currently won't handle nested tags like <a href="/browse/back" class="luna-xref" data-linkid="nn1ov4">back<sup>2</sup> (def. 7)</a>.
                 builder.Append(CultureInfo.InvariantCulture, $"[{anchor.Text}](https://dictionary.com{anchor.GetAttribute("href")})");
