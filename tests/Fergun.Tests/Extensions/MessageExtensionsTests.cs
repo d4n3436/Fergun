@@ -4,6 +4,7 @@ using Bogus;
 using Discord;
 using Fergun.Extensions;
 using Moq;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;
@@ -53,14 +54,14 @@ public class MessageExtensionsTests
         }
     }
 
-    public static TheoryData<Embed> GetEmbeds()
+    public static IEnumerable<Embed> GetEmbeds()
     {
-        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build()).ToTheoryData();
+        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build());
     }
 
     public static TheoryData<string, Embed> GetContentsAndEmbeds()
     {
-        return GetRandomStrings().Zip(GetEmbeds()).Select(x => ((string)x.First[0], (Embed)x.Second[0])).ToTheoryData();
+        return GetRandomStrings().Cast<string>().Zip(GetEmbeds()).ToTheoryData();
     }
 
     public static TheoryData<string> GetRandomStrings()
