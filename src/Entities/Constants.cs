@@ -1,4 +1,6 @@
-﻿namespace Fergun;
+﻿using Fergun.Interactive;
+
+namespace Fergun;
 
 public static class Constants
 {
@@ -47,4 +49,8 @@ public static class Constants
     public const string GoogleLensUrl = "https://lens.google.com";
 
     public const string ChromeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
+
+    public const ActionOnStop DefaultPaginatorActionOnCancel = ActionOnStop.DeleteMessage;
+
+    public const ActionOnStop DefaultPaginatorActionOnTimeout = ActionOnStop.DisableInput;
 }
