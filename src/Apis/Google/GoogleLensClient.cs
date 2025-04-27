@@ -119,7 +119,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
             .Select(x =>
             {
                 var item = x.Value[1];
-                var props = item[6].GetProperty("2003");
+                var props = item[item.GetArrayLength() - 1].GetProperty("2003");
 
                 return new GoogleLensResult(
                     props[3].GetString()!,
@@ -128,7 +128,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
                     props[12].GetString()!,
                     $"https://www.google.com/s2/favicons?sz=64&domain_url={props[17].GetString()!}");
             })
-            .Where(x => x.ThumbnailUrl.StartsWith("http")) // Skip image URL with x-raw-image protocol
+            .Where(x => x.ThumbnailUrl.StartsWith(Uri.UriSchemeHttp)) // Skip image URL with x-raw-image protocol
             .ToArray();
     }
 
