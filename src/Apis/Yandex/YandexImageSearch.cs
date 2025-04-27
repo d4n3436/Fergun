@@ -153,6 +153,8 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetElementsByClassName("cbir-similar-page").FirstOrDefault()?
             .GetElementsByClassName("cbir-similar-page__content").FirstOrDefault()?
             .GetElementsByClassName("Root").FirstOrDefault()?
+            .GetAttribute("data-state") ?? htmlDocument
+            .GetElementsByClassName("Root").FirstOrDefault()?
             .GetAttribute("data-state");
 
         if (json is null)
