@@ -271,7 +271,7 @@ public class OtherModule : InteractionModuleBase
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunks[index].ToString())
                 .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
-                .WithColor(Color.Orange);
+                .WithColor((Color)song.SongArtPrimaryColor.GetValueOrDefault(Color.Orange));
 
             if (checkSpotifyStatus && IsSameSong())
             {

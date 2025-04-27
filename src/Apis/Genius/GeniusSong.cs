@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Genius;
@@ -11,6 +12,8 @@ public record GeniusSong(
     [property: JsonPropertyName("instrumental")] bool IsInstrumental,
     [property: JsonPropertyName("lyrics_state")] string LyricsState,
     [property: JsonPropertyName("song_art_image_url")] string SongArtImageUrl,
+    [property: JsonConverter(typeof(ColorConverter))]
+    [property: JsonPropertyName("song_art_primary_color")] Color? SongArtPrimaryColor,
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("url")] string Url,
     [property: JsonPropertyName("spotify_uuid")] string? SpotifyTrackId,

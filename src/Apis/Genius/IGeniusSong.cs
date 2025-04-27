@@ -1,4 +1,6 @@
-﻿namespace Fergun.Apis.Genius;
+﻿using System.Drawing;
+
+namespace Fergun.Apis.Genius;
 
 /// <summary>
 /// Represents a Genius song.
@@ -38,6 +40,11 @@ public interface IGeniusSong
     /// Gets the song art image URL.
     /// </summary>
     string SongArtImageUrl { get; }
+
+    /// <summary>
+    /// Gets the primary song art color.
+    /// </summary>
+    Color? SongArtPrimaryColor { get; }
 
     /// <summary>
     /// Gets the title of this song.
