@@ -15,7 +15,7 @@ namespace Fergun.Apis.WolframAlpha;
 /// </summary>
 public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36";
+    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
 
     // This AppID is the result of an algorithm in the Android app that takes 2 byte arrays,
     // the first one comes from the values of the resource keys "app_one_id", "id_2_app", "appid_three", "four_appid"
