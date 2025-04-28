@@ -255,4 +255,7 @@
   <data name="lyrics-spotify.name" xml:space="preserve">
     <value>letra-spotify</value>
   </data>
+  <data name="HowToConnectSpotify" xml:space="preserve">
+    <value>Cómo conectar Spotify a Discord</value>
+  </data>
 </root>

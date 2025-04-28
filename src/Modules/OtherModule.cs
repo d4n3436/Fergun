@@ -161,7 +161,11 @@ public class OtherModule : InteractionModuleBase
         var spotifyActivity = Context.User.Activities.OfType<SpotifyGame>().FirstOrDefault();
         if (spotifyActivity is null)
         {
-            return FergunResult.FromError(_localizer["NoSpotifyActivity"], true);
+            var components = new ComponentBuilder()
+                .WithButton(_localizer["HowToConnectSpotify"], null, ButtonStyle.Link, null, "https://support.discord.com/hc/articles/360000167212-Discord-Spotify-Connection")
+                .Build();
+
+            return FergunResult.FromError(_localizer["NoSpotifyActivity"], true, null, components);
         }
 
         await Context.Interaction.DeferAsync();
