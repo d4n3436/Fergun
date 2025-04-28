@@ -28,4 +28,9 @@ public interface IFergunResult : IResult
     /// Gets the interaction that should be responded to.
     /// </summary>
     IDiscordInteraction? Interaction { get; }
+
+    /// <summary>
+    /// Gets the optional components that will be included in the response.
+    /// </summary>
+    MessageComponent? Components { get; }
 }

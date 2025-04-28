@@ -351,6 +351,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         string? englishMessage = ((result as IFergunResult)?.LocalizedErrorReason as DualLocalizedString)?.EnglishValue;
         bool ephemeral = (result as IFergunResult)?.IsEphemeral ?? true;
         var interaction = (result as IFergunResult)?.Interaction ?? context.Interaction;
+        var components = (result as IFergunResult)?.Components;
 
         if (result.Error == InteractionCommandError.Exception)
         {
@@ -386,12 +387,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (context.Interaction.HasResponded)
         {
             _logger.LogDebug("Sending command-executed response as followup (ephemeral: {Ephemeral})", ephemeral);
-            await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral);
+            await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral, components: components);
         }
         else
         {
             _logger.LogDebug("Sending command-executed response (ephemeral: {Ephemeral})", ephemeral);
-            await interaction.RespondAsync(embed: embed, ephemeral: ephemeral);
+            await interaction.RespondAsync(embed: embed, ephemeral: ephemeral, components: components);
         }
     }
 }
