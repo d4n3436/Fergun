@@ -31,6 +31,10 @@ public class OcrModule : InteractionModuleBase
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
+    private const int OcrTextId = 10;
+    private const string OcrTranslateKey = "ocr-translate";
+    private const string OcrTtsKey = "ocr-tts";
+
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared, InteractiveService interactive,
         IGoogleLensClient googleLens, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
@@ -174,34 +178,21 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["OCRNoResults"], ephemeral, interaction);
         }
 
-        interaction.TryGetLanguage(out var language);
+        var emotes = await Context.Client.GetApplicationEmotesAsync();
 
-        (var name, string iconUrl) = ocrEngine switch
+        var (ocrEngineName, iconEmote) = ocrEngine switch
         {
-            OcrEngine.Google => (_localizer["GoogleLensOCR"], Constants.GoogleLensLogoUrl),
-            OcrEngine.Bing => (_localizer["BingVisualSearch"], Constants.BingIconUrl),
-            OcrEngine.Yandex => (_localizer["YandexOCR"], Constants.YandexIconUrl),
+            OcrEngine.Google => (_localizer["GoogleLensOCR"], emotes.FirstOrDefault(x => x.Name == Constants.GoogleLensIconEmoteName)),
+            OcrEngine.Bing => (_localizer["BingVisualSearch"], emotes.FirstOrDefault(x => x.Name == Constants.BingIconEmoteName)),
+            OcrEngine.Yandex => (_localizer["YandexOCR"], emotes.FirstOrDefault(x => x.Name == Constants.YandexIconEmoteName)),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
 
-        string embedText = $"**{_localizer["Output"]}**";
-
-        var builder = new EmbedBuilder()
-            .WithTitle(_localizer["OCRResults"])
-            .WithDescription($"{embedText}```\n{text.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 7)}```")
-            .WithThumbnailUrl(url)
-            .WithFooter(_localizer["OCRFooter", name, stopwatch.ElapsedMilliseconds], iconUrl)
-            .WithColor(Color.Orange);
-
-        string buttonText;
-        if (language is null)
+        string translateText;
+        if (interaction.TryGetLanguage(out var language))
         {
-            _logger.LogDebug("Unable to get GTranslate language from user locale \"{Locale}\"", interaction.GetLocale());
-            buttonText = _localizer["Translate"];
-        }
-        else
-        {
-            _logger.LogDebug("Retrieved GTranslate language \"{Name}\" from code {Code}", language.Name, language.ISO6391);
+            _logger.LogDebug("Retrieved GTranslate language \"{Name}\" from code {Code}", language.Name,
+                language.ISO6391);
 
             var localizedString = _localizer["TranslateTo", language.NativeName];
             if (localizedString.ResourceNotFound && language.ISO6391 != "en")
@@ -209,52 +200,70 @@ public class OcrModule : InteractionModuleBase
                 localizedString = _localizer["TranslateToWithNativeName", language.Name, language.NativeName];
             }
 
-            buttonText = localizedString.Value;
+            translateText = localizedString;
+        }
+        else
+        {
+            _logger.LogDebug("Unable to get GTranslate language from user locale \"{Locale}\"",
+                interaction.GetLocale());
+
+            translateText = _localizer["Translate"];
         }
 
-        var components = new ComponentBuilder()
-            .WithButton(buttonText, "ocrtranslate", ButtonStyle.Secondary)
-            .WithButton("TTS", "ocrtts", ButtonStyle.Secondary)
+        string title = $"## {_localizer["OCRResults"]}";
+        string inputText = $"## {_localizer["InputImage"]}";
+        string footer = $"-# {iconEmote} {_localizer["OCRFooter", ocrEngineName, stopwatch.ElapsedMilliseconds]}";
+
+        var components = new ComponentBuilderV2()
+            .WithContainer(new ContainerBuilder()
+                .WithTextDisplay(title)
+                .WithTextDisplay($"```{text.Replace('`', '´').Truncate(4000 - 6 - title.Length - inputText.Length - footer.Length)}```", OcrTextId)
+                .WithActionRow([
+                    new ButtonBuilder(translateText, OcrTranslateKey, ButtonStyle.Secondary),
+                    new ButtonBuilder("TTS", OcrTtsKey, ButtonStyle.Secondary)
+                ])
+                .WithAccentColor(Color.Orange))
+            .WithContainer(new ContainerBuilder()
+                .WithTextDisplay(inputText)
+                .WithMediaGallery([new MediaGalleryItemProperties(url, _localizer["InputImage"])])
+                .WithTextDisplay(footer)
+                .WithAccentColor(Color.Orange))
             .Build();
 
-        await interaction.FollowupAsync(embed: builder.Build(), components: components, ephemeral: ephemeral);
+        await interaction.FollowupAsync(components: components, ephemeral: ephemeral);
 
         return FergunResult.FromSuccess();
     }
 
     // Note: Components interactions share the same ratelimit, probably a bug
-    [ComponentInteraction("ocrtranslate", true)]
+    [ComponentInteraction(OcrTranslateKey, true)]
     public async Task<RuntimeResult> OcrTranslateAsync()
     {
-        _logger.LogInformation("Received translate request from OCR embed button");
+        _logger.LogInformation("Received translate request from OCR component button");
 
-        var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
-        if (embed is null)
+        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.OfType<ContainerComponent>().FirstOrDefault()?.FindComponentById<TextDisplayComponent>(OcrTextId);
+        if (textComponent is null)
         {
-            return FergunResult.FromError(_localizer["EmbedNotFound"], true);
+            return FergunResult.FromError(_localizer["TextNotFound"], true);
         }
 
-        string text = embed.Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 4;
-        text = text[startIndex..^3];
+        string text = textComponent.Content.Trim('`');
 
         return await _shared.TranslateAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), ephemeral: true);
     }
 
-    [ComponentInteraction("ocrtts", true)]
+    [ComponentInteraction(OcrTtsKey, true)]
     public async Task<RuntimeResult> OcrTtsAsync()
     {
-        _logger.LogInformation("Received TTS request from OCR embed button");
+        _logger.LogInformation("Received TTS request from OCR component button");
 
-        var embed = ((IComponentInteraction)Context.Interaction).Message.Embeds.FirstOrDefault();
-        if (embed is null)
+        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.OfType<ContainerComponent>().FirstOrDefault()?.FindComponentById<TextDisplayComponent>(OcrTextId);
+        if (textComponent is null)
         {
-            return FergunResult.FromError(_localizer["EmbedNotFound"], true);
+            return FergunResult.FromError(_localizer["TextNotFound"], true);
         }
 
-        string text = embed.Description;
-        int startIndex = text.IndexOf('`', StringComparison.Ordinal) + 4;
-        text = text[startIndex..^3];
+        string text = textComponent.Content.Trim('`');
 
         return await _shared.GoogleTtsAsync(Context.Interaction, text, Context.Interaction.GetLanguageCode(), true);
     }

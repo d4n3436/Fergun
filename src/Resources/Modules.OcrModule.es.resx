@@ -117,47 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="bing.description" xml:space="preserve">
-    <value>Realiza OCR a una imagen usando la Búsqueda Visual de Bing.</value>
-  </data>
-  <data name="bing.file.description" xml:space="preserve">
-    <value>Un archivo de imagen.</value>
-  </data>
-  <data name="bing.file.name" xml:space="preserve">
-    <value>archivo</value>
-  </data>
-  <data name="bing.name" xml:space="preserve">
-    <value>bing</value>
-  </data>
-  <data name="bing.url.description" xml:space="preserve">
-    <value>La URL de una imagen.</value>
-  </data>
-  <data name="bing.url.name" xml:space="preserve">
-    <value>url</value>
-  </data>
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Búsqueda Visual de Bing</value>
   </data>
-  <data name="EmbedNotFound" xml:space="preserve">
-    <value>Inserción no encontrada.</value>
-  </data>
-  <data name="google.description" xml:space="preserve">
-    <value>Realiza OCR a una imagen usando Google Lens.</value>
-  </data>
-  <data name="google.file.description" xml:space="preserve">
-    <value>Un archivo de imagen.</value>
-  </data>
-  <data name="google.file.name" xml:space="preserve">
-    <value>archivo</value>
-  </data>
-  <data name="google.name" xml:space="preserve">
-    <value>google</value>
-  </data>
-  <data name="google.url.description" xml:space="preserve">
-    <value>La URL de una imagen.</value>
-  </data>
-  <data name="google.url.name" xml:space="preserve">
-    <value>url</value>
+  <data name="TextNotFound" xml:space="preserve">
+    <value>Texto no encontrado.</value>
   </data>
   <data name="GoogleLensOCR" xml:space="preserve">
     <value>OCR de Google Lens</value>
@@ -189,6 +153,48 @@
   <data name="TranslateToWithNativeName" xml:space="preserve">
     <value>Traducir a {0} ({1})</value>
   </data>
+  <data name="YandexOCR" xml:space="preserve">
+    <value>OCR de Yandex</value>
+  </data>
+  <data name="YandexOCRError" xml:space="preserve">
+    <value>No fue posible obtener una imagen en la URL especificada. Usa otra URL o inténtalo más tarde.</value>
+  </data>
+  <data name="bing.description" xml:space="preserve">
+    <value>Realiza OCR a una imagen usando la Búsqueda Visual de Bing.</value>
+  </data>
+  <data name="bing.file.description" xml:space="preserve">
+    <value>Un archivo de imagen.</value>
+  </data>
+  <data name="bing.file.name" xml:space="preserve">
+    <value>archivo</value>
+  </data>
+  <data name="bing.name" xml:space="preserve">
+    <value>bing</value>
+  </data>
+  <data name="bing.url.description" xml:space="preserve">
+    <value>La URL de una imagen.</value>
+  </data>
+  <data name="bing.url.name" xml:space="preserve">
+    <value>url</value>
+  </data>
+  <data name="google.description" xml:space="preserve">
+    <value>Realiza OCR a una imagen usando Google Lens.</value>
+  </data>
+  <data name="google.file.description" xml:space="preserve">
+    <value>Un archivo de imagen.</value>
+  </data>
+  <data name="google.file.name" xml:space="preserve">
+    <value>archivo</value>
+  </data>
+  <data name="google.name" xml:space="preserve">
+    <value>google</value>
+  </data>
+  <data name="google.url.description" xml:space="preserve">
+    <value>La URL de una imagen.</value>
+  </data>
+  <data name="google.url.name" xml:space="preserve">
+    <value>url</value>
+  </data>
   <data name="yandex.description" xml:space="preserve">
     <value>Realiza OCR a una imagen usando Yandex.</value>
   </data>
@@ -207,10 +213,7 @@
   <data name="yandex.url.name" xml:space="preserve">
     <value>url</value>
   </data>
-  <data name="YandexOCR" xml:space="preserve">
-    <value>OCR de Yandex</value>
-  </data>
-  <data name="YandexOCRError" xml:space="preserve">
-    <value>No fue posible obtener una imagen en la URL especificada. Usa otra URL o inténtalo más tarde.</value>
+  <data name="InputImage" xml:space="preserve">
+    <value>Imagen de entrada</value>
   </data>
 </root>

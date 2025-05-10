@@ -12,6 +12,8 @@ public static class Constants
 
     public const string GoogleLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890326437268168704/unknown.png";
 
+    public const string GoogleLensIconEmoteName = "google_lens_icon";
+
     public const string GoogleLensLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/1113265509899702293/google_lens.png";
 
     public const string GoogleTranslateLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/838833843917029446/googletranslate.png";
@@ -28,7 +30,11 @@ public static class Constants
 
     public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/944755022816763914/unknown.png";
 
+    public const string BingIconEmoteName = "bing_icon";
+
     public const string BingIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/949767220232339507/Bing_Icon.png";
+
+    public const string YandexIconEmoteName = "yandex_icon";
 
     public const string YandexIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/954428306533523476/Yandex_Icon.png";
 

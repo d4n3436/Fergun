@@ -120,8 +120,8 @@
   <data name="BingVisualSearch" xml:space="preserve">
     <value>Bing Visual Search</value>
   </data>
-  <data name="EmbedNotFound" xml:space="preserve">
-    <value>Embed not found.</value>
+  <data name="TextNotFound" xml:space="preserve">
+    <value>Text not found.</value>
   </data>
   <data name="GoogleLensOCR" xml:space="preserve">
     <value>Google Lens OCR</value>
@@ -158,5 +158,8 @@
   </data>
   <data name="YandexOCRError" xml:space="preserve">
     <value>Unable to find an image at the specified URL. Use a different URL or try again later.</value>
+  </data>
+  <data name="InputImage" xml:space="preserve">
+    <value>Input Image</value>
   </data>
 </root>

@@ -131,16 +131,18 @@ public class OtherModule : InteractionModuleBase
     [SlashCommand("invite", "Invite Fergun to your server.")]
     public async Task<RuntimeResult> InviteAsync()
     {
-        var builder = new EmbedBuilder()
-            .WithDescription(_localizer["InviteDescription"])
-            .WithColor(Color.Orange);
-
         ulong applicationId = (await Context.Client.GetApplicationInfoAsync()).Id;
 
-        var button = new ComponentBuilder()
-            .WithButton(_localizer["InviteFergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands");
+        var components = new ComponentBuilderV2()
+            .WithContainer(new ContainerBuilder()
+                .WithTextDisplay(_localizer["InviteDescription"])
+                .WithActionRow([
+                    new ButtonBuilder(_localizer["InviteFergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands")
+                ])
+                .WithAccentColor(Color.Orange))
+            .Build();
 
-        await Context.Interaction.RespondAsync(embed: builder.Build(), components: button.Build());
+        await Context.Interaction.RespondAsync(components: components);
 
         return FergunResult.FromSuccess();
     }
