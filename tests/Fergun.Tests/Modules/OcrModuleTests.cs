@@ -80,7 +80,7 @@ public class OcrModuleTests
         _googleLensMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), success ? Times.Once : Times.Never);
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
     }
 
     [Theory]
@@ -99,7 +99,7 @@ public class OcrModuleTests
         _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), success ? Times.Once : Times.Never);
+                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
     }
 
     [Theory]
@@ -118,7 +118,7 @@ public class OcrModuleTests
         _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
 
         _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>()), success ? Times.Once : Times.Never);
+                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
     }
 
     [Fact]
