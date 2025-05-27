@@ -41,6 +41,9 @@ namespace Fergun.Modules;
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
 public class UtilityModule : InteractionModuleBase
 {
+    private const string DictionaryCategoryKey = "dictionary-category";
+    private const string DictionaryExtraInformationKey = "dictionary-extra-information";
+
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
@@ -282,9 +285,8 @@ public class UtilityModule : InteractionModuleBase
         var entries = group.Entries;
         _logger.LogDebug("Received dictionary response (source(s): {Sources}, {Source} entry count: {Count})", string.Join(", ", result.Data!.Content.Select(x => x.Source)), group.Source, entries.Count);
 
-        var maxIndexes = new List<int>();
         var pages = new List<List<PageBuilder>>();
-        var extraInfos = new List<IPage?>();
+        var extraInfos = new List<PageBuilder?>();
 
         for (int i = 0; i < entries.Count; i++)
         {
@@ -307,15 +309,13 @@ public class UtilityModule : InteractionModuleBase
             }
 
             pages.Add(innerPages);
-            maxIndexes.Add(innerPages.Count - 1);
 
             string extraInfo = DictionaryFormatter.FormatExtraInformation(entry);
             if (!string.IsNullOrWhiteSpace(extraInfo))
             {
                 var extraInfoPage = new PageBuilder()
                     .WithDescription(extraInfo.Truncate(EmbedBuilder.MaxDescriptionLength))
-                    .WithColor(Color.Blue)
-                    .Build();
+                    .WithColor(Color.Blue);
 
                 extraInfos.Add(extraInfoPage);
             }
@@ -325,39 +325,114 @@ public class UtilityModule : InteractionModuleBase
             }
         }
 
-        var paginatorBuilder = new DictionaryPaginatorBuilder();
+        var state = new DictionaryPaginatorState(pages, extraInfos);
 
-        if (pages.Count > 1 || pages[0].Count > 1)
-        {
-            paginatorBuilder.AddOption(PaginatorAction.Backward, _fergunOptions.PaginatorEmotes[PaginatorAction.Backward], "Previous category");
-            paginatorBuilder.AddOption(PaginatorAction.Forward, _fergunOptions.PaginatorEmotes[PaginatorAction.Forward], "Next category");
-        }
-
-        if (pages.Count > 1)
-        {
-            paginatorBuilder.AddOption(PaginatorAction.SkipToStart, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToStart], "Previous definition");
-            paginatorBuilder.AddOption(PaginatorAction.SkipToEnd, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToEnd], "Next definition");
-        }
-
-        DictionaryPaginator paginator = null!;
-        paginator = paginatorBuilder.AddUser(Context.User)
+        var paginator = new ComponentPaginatorBuilder()
+            .AddUser(Context.User)
             .WithPageFactory(GeneratePage)
-            .WithCacheLoadedPages(false)
-            .WithMaxPageIndex(pages.Count - 1)
-            .WithMaxCategoryIndexes(maxIndexes)
-            .WithExtraInformation(extraInfos)
+            .WithPageCount(pages.Count)
+            .WithUserState(state)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
-            .WithFooter(PaginatorFooter.None)
-            .AddOption(PaginatorAction.Jump, _fergunOptions.ExtraEmotes.InfoEmote, "More information", ButtonStyle.Secondary)
-            .AddOption(_fergunOptions.PaginatorEmotes[PaginatorAction.Exit], PaginatorAction.Exit)
             .Build();
 
         await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20), InteractionResponseType.DeferredChannelMessageWithSource);
 
         return FergunResult.FromSuccess();
 
-        PageBuilder GeneratePage(int entryIndex) => pages[entryIndex][paginator.CurrentCategoryIndex];
+        IPage GeneratePage(IComponentPaginator p)
+        {
+            int row = 0;
+            if (p.CurrentPageIndex != state.LastPageIndex)
+            {
+                // Reset the current category index to avoid out of range exceptions
+                state.LastPageIndex = p.CurrentPageIndex;
+                state.CurrentCategoryIndex = 0;
+            }
+
+            var categories = state.Pages[p.CurrentPageIndex];
+            var extraInfoPage = state.ExtraInformation[p.CurrentPageIndex];
+            PageBuilder? currentPage = null;
+
+            var builder = new ComponentBuilder();
+            if (state.IsDisplayingExtraInfo)
+            {
+                currentPage = extraInfoPage;
+            }
+            else
+            {
+                // Navigation of inner pages (categories)
+                if (pages.Count > 1 || pages[0].Count > 1)
+                {
+                    builder.WithButton("Previous category", $"{DictionaryCategoryKey}:-1", ButtonStyle.Secondary,
+                        _fergunOptions.PaginatorEmotes[PaginatorAction.Backward], null, state.CurrentCategoryIndex == 0 ||  p.ShouldDisable());
+
+                    builder.WithButton("Next category", $"{DictionaryCategoryKey}:1", ButtonStyle.Secondary,
+                        _fergunOptions.PaginatorEmotes[PaginatorAction.Forward], null, state.CurrentCategoryIndex == categories.Count - 1 || p.ShouldDisable());
+
+                    row++;
+                }
+
+                // Navigation of outer set of pages (definitions)
+                if (pages.Count > 1)
+                {
+                    builder.AddPreviousButton(p, "Previous definition", ButtonStyle.Secondary, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToStart], row);
+                    builder.AddNextButton(p, "Next definition", ButtonStyle.Secondary, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToEnd], row);
+
+                    row++;
+                }
+            }
+
+            if (extraInfoPage is not null)
+            {
+                builder.WithButton(state.IsDisplayingExtraInfo ? "Go back" : "More information", DictionaryExtraInformationKey,
+                    ButtonStyle.Secondary, _fergunOptions.ExtraEmotes.InfoEmote, null, p.ShouldDisable(), row);
+            }
+
+            builder.AddStopButton(p, emote: _fergunOptions.PaginatorEmotes[PaginatorAction.Exit], row: row);
+
+            currentPage ??= categories[state.CurrentCategoryIndex];
+
+            return currentPage
+                .WithComponents(builder.Build())
+                .Build();
+        }
+    }
+
+    [ComponentInteraction($"{DictionaryCategoryKey}:*")]
+    public async Task<RuntimeResult> SetDictionaryCategoryAsync(int increment)
+    {
+        var interaction = (IComponentInteraction)Context.Interaction;
+        if (!_interactive.TryGetComponentPaginator(interaction.Message, out var paginator) || !paginator.CanInteract(Context.User))
+        {
+            await Context.Interaction.DeferAsync(true);
+            return FergunResult.FromSuccess();
+        }
+
+        var state = paginator.GetUserState<DictionaryPaginatorState>();
+
+        state.CurrentCategoryIndex += increment; // Shouldn't set an invalid value since the buttons are disabled when the index it's at the limits
+        await paginator.RenderPageAsync(interaction);
+
+        return FergunResult.FromSuccess();
+    }
+
+    [ComponentInteraction(DictionaryExtraInformationKey)]
+    public async Task<RuntimeResult> InvertDictionaryExtraInfoAsync()
+    {
+        var interaction = (IComponentInteraction)Context.Interaction;
+        if (!_interactive.TryGetComponentPaginator(interaction.Message, out var paginator) || !paginator.CanInteract(Context.User))
+        {
+            await Context.Interaction.DeferAsync(true);
+            return FergunResult.FromSuccess();
+        }
+
+        var state = paginator.GetUserState<DictionaryPaginatorState>();
+
+        state.IsDisplayingExtraInfo = !state.IsDisplayingExtraInfo;
+        await paginator.RenderPageAsync(interaction);
+
+        return FergunResult.FromSuccess();
     }
 
     [SlashCommand("help", "Information about Fergun.")]
