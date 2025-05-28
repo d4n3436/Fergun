@@ -241,7 +241,7 @@ public class OcrModule : InteractionModuleBase
     {
         _logger.LogInformation("Received translate request from OCR component button");
 
-        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.OfType<ContainerComponent>().FirstOrDefault()?.FindComponentById<TextDisplayComponent>(OcrTextId);
+        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.FindComponentById<TextDisplayComponent>(OcrTextId);
         if (textComponent is null)
         {
             return FergunResult.FromError(_localizer["TextNotFound"], true);
@@ -257,7 +257,7 @@ public class OcrModule : InteractionModuleBase
     {
         _logger.LogInformation("Received TTS request from OCR component button");
 
-        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.OfType<ContainerComponent>().FirstOrDefault()?.FindComponentById<TextDisplayComponent>(OcrTextId);
+        var textComponent = ((IComponentInteraction)Context.Interaction).Message.Components.FindComponentById<TextDisplayComponent>(OcrTextId);
         if (textComponent is null)
         {
             return FergunResult.FromError(_localizer["TextNotFound"], true);
