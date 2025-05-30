@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using Discord;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <summary>
-/// Contains methods that help formatting dictionary entries into Markdown text that will be sent in a Discord embed.
+/// Contains methods that help formatting dictionary entries into Markdown text that will be sent in Discord.
 /// </summary>
 public static class DictionaryFormatter
 {
@@ -26,7 +25,7 @@ public static class DictionaryFormatter
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        var builder = new StringBuilder($"\u200b**{entry.Entry}**\u200b");
+        var builder = new StringBuilder($"## \u200b**{entry.Entry}**\u200b");
 
         if (entry.Homograph is not null)
         {
@@ -44,8 +43,9 @@ public static class DictionaryFormatter
     /// </summary>
     /// <param name="block">The part of speech block.</param>
     /// <param name="entry">The parent entry.</param>
+    /// <param name="maxLength">The max. length of the formatted text.</param>
     /// <returns>The formatted text.</returns>
-    public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry)
+    public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry, int maxLength)
     {
         ArgumentNullException.ThrowIfNull(block);
 
@@ -110,7 +110,7 @@ public static class DictionaryFormatter
 
             definition.Append("\n\n");
 
-            if (builder.Length + definition.Length <= EmbedBuilder.MaxDescriptionLength)
+            if (builder.Length + definition.Length <= maxLength)
             {
                 builder.Append(definition);
             }
@@ -136,7 +136,7 @@ public static class DictionaryFormatter
 
         if (!string.IsNullOrEmpty(entry.Origin))
         {
-            builder.Append(CultureInfo.InvariantCulture, $"\u200b**Origin of {entry.Entry}**\u200b");
+            builder.Append(CultureInfo.InvariantCulture, $"### \u200b**Origin of {entry.Entry}**\u200b");
 
             if (entry.Homograph is not null)
             {

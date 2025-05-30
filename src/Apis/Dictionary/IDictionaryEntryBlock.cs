@@ -15,7 +15,7 @@ public interface IDictionaryEntryBlock
     /// <summary>
     /// Gets the part of speech.
     /// </summary>
-    string PartOfSpeech { get; }
+    string? PartOfSpeech { get; }
 
     /// <summary>
     /// Gets the supplementary info.
