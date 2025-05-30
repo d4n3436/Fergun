@@ -15,7 +15,7 @@ namespace Fergun.Apis.WolframAlpha;
 /// </summary>
 public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
 {
-    private const string DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
+    private const string DefaultUserAgent = "Wolfram Alpha Classic Android App 1.4.25.20250523525";
 
     // This AppID is the result of an algorithm in the Android app that takes 2 byte arrays,
     // the first one comes from the values of the resource keys "app_one_id", "id_2_app", "appid_three", "four_appid"
@@ -58,7 +58,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://{GetSubdomain(language)}.wolframalpha.com/n/v1/api/autocomplete/?i={Uri.EscapeDataString(input)}&appid={AppId}"), cancellationToken).ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://{GetSubdomain(language)}.wolframalpha.com/n/v1/api/autocomplete/?appid={AppId}&i={Uri.EscapeDataString(input)}"), cancellationToken).ConfigureAwait(false);
 
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
@@ -67,7 +67,8 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
             .GetProperty("results"u8)
             .EnumerateArray()
             .Select(x => x.GetProperty("input"u8).GetString()!)
-            .ToArray();
+            .ToArray()
+            .AsReadOnly();
     }
 
     /// <inheritdoc/>
@@ -84,7 +85,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
         byte[] bytes = MD5.HashData(Encoding.UTF8.GetBytes($"{SecretKey}appid{AppId}input{escapedInput}outputjsonreinterpret{reinterpret}"));
         string signature = Convert.ToHexString(bytes);
 
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://{GetSubdomain(language)}.wolframalpha.com/api/v2/query.jsp?appid={AppId}&input={escapedInput}&reinterpret={reinterpret}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
+        await using var stream = await _httpClient.GetStreamAsync(new Uri($"https://api.wolframalpha.com/v2/query.jsp?appid={AppId}&input={escapedInput}&reinterpret={reinterpret}&output=json&sig={signature}"), cancellationToken).ConfigureAwait(false);
 
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
 
