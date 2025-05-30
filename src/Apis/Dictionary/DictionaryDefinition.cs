@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IDictionaryDefinition"/>
+[UsedImplicitly]
 public class DictionaryDefinition : IDictionaryDefinition
 {
     /// <summary>

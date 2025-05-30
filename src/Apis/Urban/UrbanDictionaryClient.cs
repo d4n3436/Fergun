@@ -34,6 +34,7 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public UrbanDictionaryClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
 
         _httpClient.BaseAddress ??= _apiEndpoint;
@@ -47,6 +48,7 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanDefinition>> GetDefinitionsAsync(string term, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(term);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -93,6 +95,7 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
     /// <inheritdoc/>
     public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string term, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(term);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -102,6 +105,7 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanAutocompleteResult>> GetAutocompleteResultsExtraAsync(string term, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(term);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

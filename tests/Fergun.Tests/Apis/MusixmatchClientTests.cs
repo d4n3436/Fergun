@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using Moq.Protected;
 using AutoBogus;
+using JetBrains.Annotations;
 
 namespace Fergun.Tests.Apis;
 
@@ -421,6 +422,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         => new(HttpStatusCode.OK) { Content = new ByteArrayContent(JsonSerializer.SerializeToUtf8Bytes(obj)) };
 }
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public class MusixmatchClientStateFixture
 {
     public MusixmatchClientStateFixture()

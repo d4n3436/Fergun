@@ -26,7 +26,8 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="GoogleLensClient"/> class.
     /// </summary>
-    public GoogleLensClient() : this(new HttpClient())
+    public GoogleLensClient()
+        : this(new HttpClient())
     {
     }
 
@@ -36,6 +37,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public GoogleLensClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
@@ -47,7 +49,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <inheritdoc/>
     public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        ArgumentException.ThrowIfNullOrEmpty(url);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -98,7 +100,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IGoogleLensResult>> ReverseImageSearchAsync(string url, string? language = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(url);
+        ArgumentException.ThrowIfNullOrEmpty(url);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

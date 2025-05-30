@@ -26,7 +26,7 @@ public partial class MacOsHardwareInfo : IHardwareInfo
     /// <inheritdoc />
     public string? GetCpuName()
     {
-        nint length = 0;
+        int length = 0;
 
         if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not (0 or ENOMEM))
             return null;
@@ -43,8 +43,8 @@ public partial class MacOsHardwareInfo : IHardwareInfo
     public MemoryStatus GetMemoryStatus()
     {
         long totalRam = 0;
-        nint length = Marshal.SizeOf(totalRam);
-        Span<byte> buffer = new byte[length];
+        int length = sizeof(long);
+        Span<byte> buffer = stackalloc byte[length];
 
         if (sysctlbyname(MemSizeKey, buffer, ref length, null, 0) == 0)
         {
@@ -60,5 +60,5 @@ public partial class MacOsHardwareInfo : IHardwareInfo
 
     [SupportedOSPlatform("macos")]
     [LibraryImport("libc", StringMarshalling = StringMarshalling.Utf8)]
-    private static partial int sysctlbyname(ReadOnlySpan<byte> name, Span<byte> oldp, ref nint oldlenp, Span<byte> newp, nint newlen);
+    private static partial int sysctlbyname(ReadOnlySpan<byte> name, Span<byte> oldp, ref int oldlenp, Span<byte> newp, int newlen);
 }

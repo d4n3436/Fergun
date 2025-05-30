@@ -103,12 +103,12 @@ public class UrbanDictionaryTests
         (_urbanDictionary as IDisposable)?.Dispose();
         (_urbanDictionary as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionsAsync(It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionsAsync("test"));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetRandomDefinitionsAsync());
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionAsync(It.IsAny<int>()));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetWordsOfTheDayAsync());
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsAsync(It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsExtraAsync(It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsAsync("test"));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsExtraAsync("test"));
     }
 
     private static void AssertDefinitionProperties(UrbanDefinition definition)

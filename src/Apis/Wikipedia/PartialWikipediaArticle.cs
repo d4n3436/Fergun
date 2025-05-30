@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using JetBrains.Annotations;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Wikipedia;
 
 /// <summary>
 /// Represents a class containing the minimal information used to identify a Wikipedia article.
 /// </summary>
+[UsedImplicitly]
 public class PartialWikipediaArticle : IPartialWikipediaArticle
 {
     /// <summary>

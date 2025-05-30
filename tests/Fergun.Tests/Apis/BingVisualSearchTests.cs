@@ -74,8 +74,8 @@ public class BingVisualSearchTests
         (_bingVisualSearch as IDisposable)?.Dispose();
         (_bingVisualSearch as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync(It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync(It.IsAny<string>(), It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync("https://example.com/image.png"));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync("https://example.com/image.png", It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
     }
 
     [Fact]

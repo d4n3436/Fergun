@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IEntrySupplementaryNote"/>
+[UsedImplicitly]
 public record EntrySupplementaryNote(
     [property: JsonPropertyName("type")] string Type,
     [property: JsonConverter(typeof(ArrayOrStringConverter))]

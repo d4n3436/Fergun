@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IDictionaryEntryGroup"/>
+[UsedImplicitly]
 public record DictionaryEntryGroup(
     [property: JsonPropertyName("source")] string Source,
     [property: JsonPropertyName("entries")] IReadOnlyList<DictionaryEntry> Entries) : IDictionaryEntryGroup

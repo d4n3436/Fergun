@@ -1,8 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using JetBrains.Annotations;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IDictionaryWord"/>
+[UsedImplicitly]
 public record DictionaryWord(
     [property: JsonPropertyName("displayText")] string DisplayText,
     [property: JsonPropertyName("reference")] DictionaryWordReference Reference) : IDictionaryWord

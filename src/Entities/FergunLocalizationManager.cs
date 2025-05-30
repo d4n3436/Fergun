@@ -18,6 +18,7 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     private readonly IStringLocalizerFactory _localizerFactory;
     private readonly Dictionary<ModuleInfo, Type> _types = [];
     private readonly Dictionary<string, ModuleInfo> _modules = []; // TODO: use Options pattern
+
     private readonly Dictionary<string, string> _supportedLocales = new()
     {
         { "es", "es-ES" }

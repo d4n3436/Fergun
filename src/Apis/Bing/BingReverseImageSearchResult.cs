@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using JetBrains.Annotations;
+using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Bing;
@@ -6,6 +7,7 @@ namespace Fergun.Apis.Bing;
 /// <summary>
 /// Represents a Bing reverse image search result.
 /// </summary>
+[UsedImplicitly]
 public class BingReverseImageSearchResult : IBingReverseImageSearchResult
 {
     /// <summary>

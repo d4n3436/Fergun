@@ -45,6 +45,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public BingVisualSearch(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
 
         _httpClient.BaseAddress ??= _apiEndpoint;
@@ -58,6 +59,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
     /// <inheritdoc/>
     public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(url);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -95,6 +97,7 @@ public sealed class BingVisualSearch : IBingVisualSearch, IDisposable
         BingSafeSearchLevel safeSearch = BingSafeSearchLevel.Moderate, string? language = null,
         CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(url);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

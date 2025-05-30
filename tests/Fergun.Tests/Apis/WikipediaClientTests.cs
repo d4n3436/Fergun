@@ -61,7 +61,7 @@ public class WikipediaClientTests
         (_wikipediaClient as IDisposable)?.Dispose();
         (_wikipediaClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), It.IsAny<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync(It.IsAny<string>(), It.IsAny<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), "en"));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync("test", "en"));
     }
 }

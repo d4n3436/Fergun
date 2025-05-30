@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IDictionaryEntryBlock"/>
+[UsedImplicitly]
 public record DictionaryEntryBlock(
     [property: JsonPropertyName("definitions")] IReadOnlyList<DictionaryDefinition> Definitions,
     [property: JsonPropertyName("pos")] string? PartOfSpeech,

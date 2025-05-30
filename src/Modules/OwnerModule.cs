@@ -13,6 +13,7 @@ using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Utils;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [RequireOwner]
 public class OwnerModule : InteractionModuleBase
 {

@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
@@ -90,7 +91,7 @@ public class FergunLocalizerTests
             new LocalizedString("SharedResource", "Shared Value {0}")
         };
 
-        Assert.All(strings, (localized, index) =>
+        Assert.All(strings, [AssertionMethod] (localized, index) =>
         {
             Assert.Equal(localized.Name, actualStrings[index].Name);
             Assert.Equal(localized.Value, actualStrings[index].Value);

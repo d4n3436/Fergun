@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using JetBrains.Annotations;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Wikipedia;
 
 /// <summary>
 /// Represents a Wikipedia image.
 /// </summary>
+[UsedImplicitly]
 public class WikipediaImage : IWikipediaImage
 {
     /// <summary>

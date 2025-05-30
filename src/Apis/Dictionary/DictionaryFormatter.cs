@@ -48,6 +48,7 @@ public static class DictionaryFormatter
     public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry, int maxLength)
     {
         ArgumentNullException.ThrowIfNull(block);
+        ArgumentNullException.ThrowIfNull(entry);
 
         var builder = new StringBuilder();
 

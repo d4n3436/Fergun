@@ -7,10 +7,12 @@ using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
 using GTranslate;
 using GTranslate.Translators;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, Constants.GlobalRatelimitPeriod)]

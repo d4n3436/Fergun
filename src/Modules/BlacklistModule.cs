@@ -5,10 +5,12 @@ using Discord.Interactions;
 using Fergun.Data;
 using Fergun.Data.Models;
 using Fergun.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [RequireOwner]
 [Group("blacklist", "Blacklist commands.")]
 public class BlacklistModule : InteractionModuleBase

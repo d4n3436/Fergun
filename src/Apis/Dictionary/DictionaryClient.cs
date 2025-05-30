@@ -22,12 +22,14 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public DictionaryClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IDictionaryWord>> GetSearchResultsAsync(string text, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(text);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -38,6 +40,7 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
     /// <inheritdoc/>
     public async Task<IDictionaryResponse> GetDefinitionsAsync(string word, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(word);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

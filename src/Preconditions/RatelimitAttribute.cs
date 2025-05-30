@@ -4,6 +4,7 @@ using Fergun.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -33,7 +34,7 @@ public sealed class RatelimitAttribute : PreconditionAttribute
             TimeMeasure.Seconds => TimeSpan.FromSeconds(period),
             TimeMeasure.Minutes => TimeSpan.FromMinutes(period),
             TimeMeasure.Hours => TimeSpan.FromHours(period),
-            _ => throw new ArgumentException("Invalid time measure value.", nameof(period))
+            _ => throw new UnreachableException()
         };
     }
 

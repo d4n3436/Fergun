@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +16,7 @@ public interface IYandexImageSearch
     /// <param name="url">The URL of an image.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous OCR operation. The result contains the recognized text.</returns>
-    Task<string?> OcrAsync(string url, CancellationToken cancellationToken = default);
+    Task<string?> OcrAsync([StringSyntax(StringSyntaxAttribute.Uri)] string url, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Performs reverse image search to the specified image URL.
@@ -24,6 +25,6 @@ public interface IYandexImageSearch
     /// <param name="mode">The search filter mode.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous search operation. The result contains a read-only list of search results.</returns>
-    Task<IReadOnlyList<IYandexReverseImageSearchResult>> ReverseImageSearchAsync(string url,
+    Task<IReadOnlyList<IYandexReverseImageSearchResult>> ReverseImageSearchAsync([StringSyntax(StringSyntaxAttribute.Uri)] string url,
         YandexSearchFilterMode mode = YandexSearchFilterMode.Moderate, CancellationToken cancellationToken = default);
 }

@@ -22,12 +22,14 @@ using Fergun.Preconditions;
 using Fergun.Services;
 using Humanizer;
 using Humanizer.Localisation;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]

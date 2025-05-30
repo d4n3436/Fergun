@@ -39,6 +39,7 @@ public sealed class GeniusClient : IGeniusClient, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public GeniusClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
 
         _httpClient.BaseAddress ??= _apiEndpoint;

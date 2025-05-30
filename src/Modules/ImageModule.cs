@@ -19,11 +19,13 @@ using GScraper;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
@@ -235,7 +237,7 @@ public class ImageModule : InteractionModuleBase
         };
     }
 
-    public virtual async Task<RuntimeResult> ReverseYandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public async Task<RuntimeResult> ReverseYandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -314,7 +316,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task<RuntimeResult> ReverseBingAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public async Task<RuntimeResult> ReverseBingAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -392,7 +394,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public virtual async Task<RuntimeResult> ReverseGoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public async Task<RuntimeResult> ReverseGoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)

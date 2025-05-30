@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using JetBrains.Annotations;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Urban;
 
 /// <summary>
 /// Represent an Urban Dictionary autocomplete result.
 /// </summary>
+[UsedImplicitly]
 public class UrbanAutocompleteResult
 {
     /// <summary>

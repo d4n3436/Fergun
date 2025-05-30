@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Dictionary;
 
 /// <inheritdoc cref="IDictionaryEntry"/>
+[UsedImplicitly]
 public record DictionaryEntry([property: JsonPropertyName("entry")] string Entry,
     [property: JsonConverter(typeof(ArrayOrStringConverter))]
     [property: JsonPropertyName("entryVariants")] IReadOnlyList<string>? EntryVariants,

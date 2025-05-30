@@ -41,6 +41,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public WolframAlphaClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
 
         if (_httpClient.DefaultRequestHeaders.UserAgent.Count == 0)
@@ -52,8 +53,8 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<string>> GetAutocompleteResultsAsync(string input, string language, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(language);
+        ArgumentException.ThrowIfNullOrEmpty(input);
+        ArgumentException.ThrowIfNullOrEmpty(language);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -72,8 +73,8 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IWolframAlphaResult> SendQueryAsync(string input, string language, bool reinterpret = true, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(input);
-        ArgumentNullException.ThrowIfNull(language);
+        ArgumentException.ThrowIfNullOrEmpty(input);
+        ArgumentException.ThrowIfNullOrEmpty(language);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

@@ -23,6 +23,7 @@ using Fergun.Services;
 using GTranslate;
 using GTranslate.Results;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
@@ -36,6 +37,7 @@ using Color = Discord.Color;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
@@ -46,6 +48,7 @@ public class UtilityModule : InteractionModuleBase
 
     private static readonly DrawingOptions _cachedDrawingOptions = new();
     private static readonly PngEncoder _cachedPngEncoder = new() { CompressionLevel = PngCompressionLevel.BestCompression, SkipMetadata = true };
+
     private static readonly Lazy<Language[]> _lazyFilteredLanguages = new(() => Language.LanguageDictionary
         .Values
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
@@ -614,7 +617,7 @@ public class UtilityModule : InteractionModuleBase
         return FergunResult.FromSuccess();
 
         static string GetTimestamp(DateTimeOffset? dateTime)
-            => dateTime == null ? "N/A" : $"{dateTime.Value.ToDiscordTimestamp()} ({dateTime.Value.ToDiscordTimestamp('R')})";
+            => dateTime == null ? "N/A" : $"{TimestampTag.FromDateTimeOffset(dateTime.Value)} ({TimestampTag.FromDateTimeOffset(dateTime.Value).ToString(TimestampTagStyles.Relative)})";
     }
 
     [Ratelimit(2, Constants.GlobalRatelimitPeriod)]

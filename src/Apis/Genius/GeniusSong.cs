@@ -1,10 +1,12 @@
-﻿using System.Diagnostics;
+﻿using JetBrains.Annotations;
+using System.Diagnostics;
 using System.Drawing;
 using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.Genius;
 
 /// <inheritdoc cref="IGeniusSong"/>
+[UsedImplicitly]
 public record GeniusSong(
     [property: JsonPropertyName("artist_names")] string ArtistNames,
     [property: JsonPropertyName("primary_artist_names")] string PrimaryArtistNames,

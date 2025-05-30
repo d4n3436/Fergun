@@ -13,10 +13,12 @@ using Fergun.Interactive;
 using Fergun.Interactive.Selection;
 using Fergun.Preconditions;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 namespace Fergun.Modules;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, 20)]

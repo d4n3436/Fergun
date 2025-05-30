@@ -33,6 +33,10 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     /// <param name="logger">The logger.</param>
     public MusixmatchClient(HttpClient httpClient, MusixmatchClientState state, ILogger<MusixmatchClient> logger)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(logger);
+
         _httpClient = httpClient;
         _state = state;
         _logger = logger;

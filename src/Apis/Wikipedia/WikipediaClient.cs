@@ -29,12 +29,14 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
     /// <param name="httpClient">An instance of <see cref="HttpClient"/>.</param>
     public WikipediaClient(HttpClient httpClient)
     {
+        ArgumentNullException.ThrowIfNull(httpClient);
         _httpClient = httpClient;
     }
 
     /// <inheritdoc/>
     public async Task<IWikipediaArticle?> GetArticleAsync(int id, string language, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(language);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -71,6 +73,8 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IReadOnlyList<IPartialWikipediaArticle>> SearchArticlesAsync(string query, string language, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(query);
+        ArgumentException.ThrowIfNullOrEmpty(language);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 

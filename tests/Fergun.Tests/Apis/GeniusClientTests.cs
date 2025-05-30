@@ -1,5 +1,6 @@
 ﻿using AutoBogus;
 using Fergun.Apis.Genius;
+using JetBrains.Annotations;
 using Moq;
 using System;
 using System.Net.Http;
@@ -20,7 +21,7 @@ public class GeniusClientTests
     {
         var results = await _geniusClient.SearchSongsAsync(query);
 
-        Assert.All(results, x =>
+        Assert.All(results, [AssertionMethod] (x) =>
         {
             Assert.NotEmpty(x.ArtistNames);
             Assert.True(x.Id > 0);

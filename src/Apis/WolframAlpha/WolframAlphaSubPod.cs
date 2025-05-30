@@ -1,8 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using JetBrains.Annotations;
+using System.Text.Json.Serialization;
 
 namespace Fergun.Apis.WolframAlpha;
 
 /// <inheritdoc cref="IWolframAlphaSubPod"/>
+[UsedImplicitly]
 public record WolframAlphaSubPod(
     [property: JsonPropertyName("img")] WolframAlphaImageData Image,
     [property: JsonPropertyName("plaintext")] string PlainText,

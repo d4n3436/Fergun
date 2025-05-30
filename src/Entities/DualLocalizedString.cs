@@ -52,11 +52,8 @@ public class DualLocalizedString : LocalizedString
         Thread.CurrentThread.CurrentUICulture = culture;
         var localized = localizer[name, arguments];
 
-        if (culture.Equals(EnglishCulture))
-        {
-            return new DualLocalizedString(localized, localized.Value);
-        }
-
-        return new DualLocalizedString(localized, localizer, name, arguments);
+        return culture.Equals(EnglishCulture)
+            ? new DualLocalizedString(localized, localized.Value)
+            : new DualLocalizedString(localized, localizer, name, arguments);
     }
 }
