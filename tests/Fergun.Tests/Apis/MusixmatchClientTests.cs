@@ -1,17 +1,17 @@
-﻿using System.Threading.Tasks;
-using System.Threading;
-using System;
+﻿using System;
 using System.Net;
-using Xunit;
-using Fergun.Apis.Musixmatch;
-using Moq;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using Moq.Protected;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoBogus;
+using Fergun.Apis.Musixmatch;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Moq.Protected;
+using Xunit;
 
 namespace Fergun.Tests.Apis;
 

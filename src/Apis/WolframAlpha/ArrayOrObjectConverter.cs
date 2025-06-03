@@ -13,14 +13,12 @@ public class ArrayOrObjectConverter<T> : JsonConverter<IReadOnlyList<T>>
 {
     /// <inheritdoc />
     public override IReadOnlyList<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        return reader.TokenType switch
+        => reader.TokenType switch
         {
             JsonTokenType.StartArray => JsonSerializer.Deserialize<IReadOnlyList<T>>(ref reader)!,
             JsonTokenType.StartObject => [JsonSerializer.Deserialize<T>(ref reader)!],
             _ => throw new JsonException("Token type must be either array or object.")
         };
-    }
 
     /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, IReadOnlyList<T> value, JsonSerializerOptions options)

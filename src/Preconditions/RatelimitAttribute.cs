@@ -1,12 +1,12 @@
-﻿using Discord;
-using Discord.Interactions;
-using Fergun.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Interactions;
+using Fergun.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Preconditions;
 
@@ -18,7 +18,6 @@ public sealed class RatelimitAttribute : PreconditionAttribute
     private readonly int _times;
     private readonly TimeSpan _period;
     private readonly ConcurrentDictionary<ulong, RatelimitInfo> _ratelimits = new();
-    private static ulong _ownerId;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RatelimitAttribute"/> class.
@@ -41,12 +40,11 @@ public sealed class RatelimitAttribute : PreconditionAttribute
     /// <inheritdoc/>
     public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
     {
-        if (_ownerId == 0)
-            _ownerId = (await context.Client.GetApplicationInfoAsync()).Owner.Id;
+        ulong ownerId = (await context.Client.GetApplicationInfoAsync()).Owner.Id;
 
         ulong userId = context.User.Id;
 
-        if (userId == _ownerId)
+        if (userId == ownerId)
             return PreconditionResult.FromSuccess();
 
         var ratelimit = _ratelimits.GetOrAdd(userId, static _ => new RatelimitInfo());

@@ -42,17 +42,14 @@ public class TranslateAutocompleteHandler : AutocompleteHandler
             languages = languages
                 .Where(x => language.IsServiceSupported(x.SupportedServices));
         }
-        else
-        {
-            if (context.Interaction.TryGetLanguage(out var userLanguage) && (string.IsNullOrEmpty(text) ||
+        else if (context.Interaction.TryGetLanguage(out var userLanguage) && (string.IsNullOrEmpty(text) ||
                 userLanguage.Name.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
                 userLanguage.NativeName.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
                 userLanguage.ISO6391.StartsWith(text, StringComparison.OrdinalIgnoreCase) ||
                 userLanguage.ISO6393.StartsWith(text, StringComparison.OrdinalIgnoreCase)))
-            {
-                // Move language to top
-                languages = languages.Where(x => !x.Equals(userLanguage)).Prepend(userLanguage);
-            }
+        {
+            // Move language to top
+            languages = languages.Where(x => !x.Equals(userLanguage)).Prepend(userLanguage);
         }
 
         var array = languages.ToArray();

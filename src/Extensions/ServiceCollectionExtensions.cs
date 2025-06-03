@@ -26,8 +26,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection.</returns>
     public static IServiceCollection AddFergunPolicies(this IServiceCollection services)
-    {
-        return services.AddMemoryCache()
+        => services.AddMemoryCache()
             .AddSingleton<IAsyncCacheProvider, MemoryCacheProvider>()
             .AddSingleton<IReadOnlyPolicyRegistry<string>, PolicyRegistry>(provider =>
             {
@@ -52,7 +51,6 @@ public static class ServiceCollectionExtensions
                     { "DictionaryPolicy", provider.CreateAutocompletePolicy<IReadOnlyList<IDictionaryWord>>() }
                 };
             });
-    }
 
     private static AsyncPolicyWrap<TResult> CreateAutocompletePolicy<TResult>(this IServiceProvider provider)
     {

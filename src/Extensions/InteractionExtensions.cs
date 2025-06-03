@@ -22,10 +22,8 @@ public static class InteractionExtensions
     }
 
     public static bool TryGetLanguage(this IDiscordInteraction interaction, [MaybeNullWhen(false)] out Language language)
-    {
-        return Language.TryGetLanguage(interaction.GetLocale(), out language) ||
-               Language.TryGetLanguage(interaction.GetLanguageCode(), out language);
-    }
+        => Language.TryGetLanguage(interaction.GetLocale(), out language) ||
+        Language.TryGetLanguage(interaction.GetLanguageCode(), out language);
 
     public static string GetLocale(this IDiscordInteraction interaction, string defaultLocale = "en-US")
         => interaction.UserLocale ?? interaction.GuildLocale ?? defaultLocale;

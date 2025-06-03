@@ -180,24 +180,21 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         switch (user?.BlacklistStatus)
         {
             case BlacklistStatus.Blacklisted when interaction.Type is InteractionType.ApplicationCommand or InteractionType.MessageComponent:
-                {
-                    _logger.LogDebug("Blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
+                _logger.LogDebug("Blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
 
-                    var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
-                    localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
+                var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
+                localizer.CurrentCulture = CultureInfo.GetCultureInfo(interaction.GetLanguageCode());
 
-                    string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
-                        ? localizer["Blacklisted"]
-                        : localizer["BlacklistedWithReason", user.BlacklistReason];
+                string description = string.IsNullOrWhiteSpace(user.BlacklistReason)
+                    ? localizer["Blacklisted"]
+                    : localizer["BlacklistedWithReason", user.BlacklistReason];
 
-                    var builder = new EmbedBuilder()
-                        .WithDescription($"❌ {description}")
-                        .WithColor(Color.Orange);
+                var builder = new EmbedBuilder()
+                    .WithDescription($"❌ {description}")
+                    .WithColor(Color.Orange);
 
-                    await interaction.RespondAsync(embed: builder.Build(), ephemeral: true);
-
-                    return;
-                }
+                await interaction.RespondAsync(ephemeral: true, embed: builder.Build());
+                return;
 
             case BlacklistStatus.ShadowBlacklisted:
                 _logger.LogDebug("Shadow-blacklisted user {User} ({UserId}) tried to execute an interaction", interaction.User, interaction.User.Id);
@@ -387,12 +384,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         if (context.Interaction.HasResponded)
         {
             _logger.LogDebug("Sending command-executed response as followup (ephemeral: {Ephemeral})", ephemeral);
-            await interaction.FollowupAsync(embed: embed, ephemeral: ephemeral, components: components);
+            await interaction.FollowupAsync(ephemeral: ephemeral, components: components, embed: embed);
         }
         else
         {
             _logger.LogDebug("Sending command-executed response (ephemeral: {Ephemeral})", ephemeral);
-            await interaction.RespondAsync(embed: embed, ephemeral: ephemeral, components: components);
+            await interaction.RespondAsync(ephemeral: ephemeral, components: components, embed: embed);
         }
     }
 }

@@ -8,10 +8,10 @@ public enum BotList
     /// <summary>
     /// Top.gg.
     /// </summary>
-    TopGg,
+    TopGg = 0,
 
     /// <summary>
     /// Discord Bots.
     /// </summary>
-    DiscordBots
+    DiscordBots = 1
 }

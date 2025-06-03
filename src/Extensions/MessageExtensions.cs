@@ -13,14 +13,15 @@ public static class MessageExtensions
 
         if (message.Embeds.Count > 0)
         {
-            builder.Append('\n');
             var embed = message.Embeds.First();
-            builder.Append(embed.Author?.Name);
-            builder.Append('\n');
-            builder.Append(embed.Title);
-            builder.Append('\n');
-            builder.Append(embed.Description);
-            builder.Append('\n');
+
+            builder.Append('\n')
+                .Append(embed.Author?.Name)
+                .Append('\n')
+                .Append(embed.Title)
+                .Append('\n')
+                .Append(embed.Description)
+                .Append('\n');
 
             foreach (var field in embed.Fields)
             {
@@ -28,8 +29,8 @@ public static class MessageExtensions
                 string value = field.Value.Trim().Replace("\u200b", string.Empty);
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(value))
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"{name}: {value}");
-                    builder.Append('\n');
+                    builder.Append(CultureInfo.InvariantCulture, $"{name}: {value}")
+                        .Append('\n');
                 }
             }
 

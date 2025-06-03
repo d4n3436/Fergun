@@ -26,10 +26,7 @@ public sealed class MusixmatchClientState : IDisposable
     /// Initializes a new instance of the <see cref="MusixmatchClientState"/> class.
     /// </summary>
     /// <param name="httpClientFactory">The factory of <see cref="HttpClient"/> instances.</param>
-    public MusixmatchClientState(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
+    public MusixmatchClientState(IHttpClientFactory httpClientFactory) => _httpClientFactory = httpClientFactory;
 
     /// <summary>
     /// Returns a cached user token, or obtains a new one and caches it.

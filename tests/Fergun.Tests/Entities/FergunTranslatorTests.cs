@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using GTranslate;
 using GTranslate.Translators;
 using Moq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Fergun.Tests.Entities;

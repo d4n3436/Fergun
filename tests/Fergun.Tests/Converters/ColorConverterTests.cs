@@ -1,10 +1,10 @@
-﻿using Discord;
+﻿using System;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Interactions;
 using Fergun.Converters;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System;
-using System.Threading.Tasks;
-using Discord.Interactions;
 using Xunit;
 using Color = System.Drawing.Color;
 

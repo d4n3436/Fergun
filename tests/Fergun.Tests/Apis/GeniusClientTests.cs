@@ -1,11 +1,11 @@
-﻿using AutoBogus;
-using Fergun.Apis.Genius;
-using JetBrains.Annotations;
-using Moq;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoBogus;
+using Fergun.Apis.Genius;
+using JetBrains.Annotations;
+using Moq;
 using Xunit;
 
 namespace Fergun.Tests.Apis;

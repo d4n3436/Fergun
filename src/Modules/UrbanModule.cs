@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,15 +98,16 @@ public class UrbanModule : InteractionModuleBase
             description.Append(Format.Sanitize(definition.Definition));
             if (definition.Example.Length > 0)
             {
-                description.Append("\n\n");
-                description.Append(Format.Italics(Format.Sanitize(definition.Example.Trim())));
+                description.Append("\n\n")
+                    .Append(Format.Italics(Format.Sanitize(definition.Example.Trim())));
             }
 
             string footer = searchType switch
             {
+                UrbanSearchType.Search => _localizer["UrbanPaginatorFooter", i + 1, definitions.Count],
                 UrbanSearchType.Random => _localizer["UrbanRandomPaginatorFooter", i + 1, definitions.Count],
                 UrbanSearchType.WordsOfTheDay => _localizer["UrbanWordsOfTheDayPaginatorFooter", definition.Date!, i + 1, definitions.Count],
-                _ => _localizer["UrbanPaginatorFooter", i + 1, definitions.Count]
+                _ => throw new UnreachableException()
             };
 
             return new PageBuilder()

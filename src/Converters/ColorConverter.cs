@@ -54,7 +54,10 @@ public class ColorConverter : TypeConverter<Color>
 
     private static bool TryParseInt32(ReadOnlySpan<char> str, bool tryParseAsHexFirst, out int result)
     {
-        bool success = int.TryParse(str, tryParseAsHexFirst ? NumberStyles.HexNumber : NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
-        return success ? success : int.TryParse(str, tryParseAsHexFirst ? NumberStyles.Integer : NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
+        var styles = tryParseAsHexFirst ? NumberStyles.HexNumber : NumberStyles.Integer;
+        bool success = int.TryParse(str, styles, CultureInfo.InvariantCulture, out result);
+
+        styles = tryParseAsHexFirst ? NumberStyles.Integer : NumberStyles.HexNumber;
+        return success ? success : int.TryParse(str, styles, CultureInfo.InvariantCulture, out result);
     }
 }

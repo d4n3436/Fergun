@@ -1,6 +1,6 @@
-﻿using JetBrains.Annotations;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace Fergun.Apis.Bing;
 

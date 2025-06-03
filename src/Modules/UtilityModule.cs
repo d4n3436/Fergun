@@ -125,6 +125,7 @@ public class UtilityModule : InteractionModuleBase
                 title = $"{user} ({_localizer["Global"]})";
                 break;
 
+            case AvatarType.Default:
             default:
                 url = user.GetDefaultAvatarUrl();
                 title = $"{user} ({_localizer["Default"]})";
@@ -219,7 +220,7 @@ public class UtilityModule : InteractionModuleBase
 
         var embed = new EmbedBuilder()
             .WithTitle("Bad translator")
-            .WithDescription($"{embedText}{text.Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length)}")
+            .WithDescription(embedText + text.Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length))
             .WithThumbnailUrl(Constants.BadTranslatorLogoUrl)
             .WithColor(Color.Orange)
             .Build();
@@ -719,8 +720,8 @@ public class UtilityModule : InteractionModuleBase
                 // If there's data in plain text and there isn't a newline, use that instead
                 if (!string.IsNullOrWhiteSpace(subPod.PlainText) && !subPod.PlainText.Contains('\n'))
                 {
-                    text.Append(subPod.PlainText);
-                    text.Append('\n');
+                    text.Append(subPod.PlainText)
+                        .Append('\n');
                 }
                 else
                 {

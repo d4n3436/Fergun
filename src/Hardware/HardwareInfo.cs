@@ -55,7 +55,6 @@ public static class HardwareInfo
         var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
         double cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
         double totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        double cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-        return cpuUsageTotal;
+        return cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
     }
 }

@@ -108,7 +108,11 @@ public sealed class BotListService : BackgroundService
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var botLists = _options.Tokens.Where(x => string.IsNullOrWhiteSpace(x.Value)).Select(x => x.Key).ToArray();
+        var botLists = _options.Tokens
+            .Where(x => string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => x.Key)
+            .ToArray();
+
         foreach (var botList in botLists)
         {
             _options.Tokens.Remove(botList);

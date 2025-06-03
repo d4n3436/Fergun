@@ -50,7 +50,6 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
         cancellationToken.ThrowIfCancellationRequested();
 
         // Get CBIR ID
-
         var uri = new Uri($"https://yandex.com/images-apphost/image-download?url={Uri.EscapeDataString(url)}&cbird=37&images_avatars_size=orig&images_avatars_namespace=images-cbir");
 
         using var response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);

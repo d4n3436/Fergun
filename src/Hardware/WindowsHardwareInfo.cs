@@ -67,14 +67,14 @@ public partial class WindowsHardwareInfo : IHardwareInfo
 internal ref struct MEMORYSTATUSEX
 {
     public uint dwLength;
-    public uint dwMemoryLoad = 0;
-    public ulong ullTotalPhys = 0;
-    public ulong ullAvailPhys = 0;
-    public ulong ullTotalPageFile = 0;
-    public ulong ullAvailPageFile = 0;
-    public ulong ullTotalVirtual = 0;
-    public ulong ullAvailVirtual = 0;
-    public ulong ullAvailExtendedVirtual = 0;
+    public uint dwMemoryLoad;
+    public ulong ullTotalPhys;
+    public ulong ullAvailPhys;
+    public ulong ullTotalPageFile;
+    public ulong ullAvailPageFile;
+    public ulong ullTotalVirtual;
+    public ulong ullAvailVirtual;
+    public ulong ullAvailExtendedVirtual;
 
     public unsafe MEMORYSTATUSEX() => dwLength = (uint)sizeof(MEMORYSTATUSEX);
 }

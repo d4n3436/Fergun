@@ -1,7 +1,7 @@
-﻿using JetBrains.Annotations;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace Fergun.Apis.Genius;
 

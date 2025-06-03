@@ -1,6 +1,6 @@
-﻿using JetBrains.Annotations;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace Fergun.Apis.Dictionary;
 
@@ -11,8 +11,8 @@ public class DictionaryDefinition : IDictionaryDefinition
     /// <summary>
     /// Initializes a new instance of the <see cref="DictionaryDefinition"/> class.
     /// </summary>
-    ///  <param name="ordinal">The order number of this definition.</param>
-    /// <param name="order">The order number of this definition.</param>
+    /// <param name="ordinal">The order number of this definition.</param>
+    /// <param name="order">The order number of this definition (used when <paramref name="order"/> is not present).</param>
     /// <param name="predefinitionContent">The content that is displayed before <see cref="Definition"/>.</param>
     /// <param name="postdefinitionContent">The content that is displayed after <see cref="Definition"/>.</param>
     /// <param name="definition">The definition itself.</param>

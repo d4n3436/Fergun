@@ -1,21 +1,21 @@
-﻿using Bogus;
-using GTranslate.Translators;
-using Moq;
+﻿using System;
 using System.Linq;
-using System.Net.Http;
 using System.Net;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Bogus;
+using Bogus.DataSets;
+using Discord;
+using Discord.Interactions;
+using Fergun.Converters;
 using GTranslate;
+using GTranslate.Translators;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Moq.Protected;
 using Xunit;
-using Microsoft.Extensions.DependencyInjection;
-using Discord;
-using Fergun.Converters;
-using System;
-using Bogus.DataSets;
-using Discord.Interactions;
 
 namespace Fergun.Tests.Converters;
 

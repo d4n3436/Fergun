@@ -1,5 +1,5 @@
-﻿using JetBrains.Annotations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace Fergun.Apis.Genius;
 

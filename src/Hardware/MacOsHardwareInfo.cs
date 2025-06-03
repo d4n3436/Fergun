@@ -15,13 +15,13 @@ public partial class MacOsHardwareInfo : IHardwareInfo
 {
     private const int ENOMEM = 12;
 
-    private static ReadOnlySpan<byte> CpuNameKey => "machdep.cpu.brand_string"u8;
-
-    private static ReadOnlySpan<byte> MemSizeKey => "hw.memsize"u8;
-
     internal MacOsHardwareInfo()
     {
     }
+
+    private static ReadOnlySpan<byte> CpuNameKey => "machdep.cpu.brand_string"u8;
+
+    private static ReadOnlySpan<byte> MemSizeKey => "hw.memsize"u8;
 
     /// <inheritdoc />
     public string? GetCpuName()

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Fergun.Apis.Bing;
 using Moq;
-using System.Net.Http;
 using Xunit;
 
 namespace Fergun.Tests.Apis;

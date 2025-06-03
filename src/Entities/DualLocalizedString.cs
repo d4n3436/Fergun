@@ -8,7 +8,7 @@ namespace Fergun;
 /// <summary>
 /// Represents a <see cref="LocalizedString"/> that also includes a localized English value.
 /// </summary>
-public class DualLocalizedString : LocalizedString
+public sealed class DualLocalizedString : LocalizedString
 {
     private readonly Lazy<string> _lazyEnglishValue;
 

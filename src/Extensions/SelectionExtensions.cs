@@ -1,8 +1,8 @@
-﻿using Discord;
+﻿using System.Linq;
+using Discord;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
 using Microsoft.Extensions.Localization;
-using System.Linq;
 
 namespace Fergun.Extensions;
 

@@ -1,6 +1,6 @@
-﻿using Fergun.Hardware;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Fergun.Hardware;
 using Xunit;
 
 namespace Fergun.Tests.Hardware;

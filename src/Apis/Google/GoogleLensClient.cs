@@ -20,9 +20,6 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
-    private static ReadOnlySpan<byte> ImageResultsStart => "(function(){var m="u8;
-    private static ReadOnlySpan<byte> ImageResultsEnd => ";var a=m;"u8;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="GoogleLensClient"/> class.
     /// </summary>
@@ -45,6 +42,10 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DefaultUserAgent);
         }
     }
+
+    private static ReadOnlySpan<byte> ImageResultsStart => "(function(){var m="u8;
+
+    private static ReadOnlySpan<byte> ImageResultsEnd => ";var a=m;"u8;
 
     /// <inheritdoc/>
     public async Task<string> OcrAsync(string url, CancellationToken cancellationToken = default)
@@ -84,8 +85,8 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
                 var tokens = line[0];
                 foreach (var token in tokens.EnumerateArray())
                 {
-                    builder.Append(token[1]);
-                    builder.Append(token[2]);
+                    builder.Append(token[1])
+                        .Append(token[2]);
                 }
 
                 builder.Append('\n');
@@ -134,6 +135,18 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
             .ToArray();
     }
 
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _httpClient.Dispose();
+        _disposed = true;
+    }
+
     private static JsonDocument ExtractDataPack(byte[] page)
     {
         // Extract the JSON data pack from the page.
@@ -163,17 +176,5 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         {
             throw new GoogleLensException("Failed to unpack the image object data.", e);
         }
-    }
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _httpClient.Dispose();
-        _disposed = true;
     }
 }

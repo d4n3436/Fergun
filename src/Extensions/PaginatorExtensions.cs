@@ -51,6 +51,7 @@ public static class PaginatorExtensions
     /// <param name="builder">The paginator builder.</param>
     /// <param name="localizer">The localizer.</param>
     /// <returns>This builder.</returns>
+    /// <exception cref="ArgumentException">Thrown when the builder type is unknown.</exception>
     public static TBuilder WithLocalizedPrompts<TPaginator, TBuilder>(this PaginatorBuilder<TPaginator, TBuilder> builder, IStringLocalizer localizer)
         where TPaginator : Paginator
         where TBuilder : PaginatorBuilder<TPaginator, TBuilder>

@@ -1,6 +1,6 @@
 ﻿using Discord;
-using Moq;
 using Microsoft.Extensions.Localization;
+using Moq;
 using Xunit;
 
 namespace Fergun.Tests.Entities;

@@ -10,15 +10,15 @@ public enum OcrEngine
     /// <summary>
     /// Google.
     /// </summary>
-    Google,
+    Google = 0,
 
     /// <summary>
     /// Bing.
     /// </summary>
-    Bing,
+    Bing = 1,
 
     /// <summary>
     /// Yandex.
     /// </summary>
-    Yandex
+    Yandex = 2
 }

@@ -57,6 +57,7 @@ public class MusixmatchException : Exception
     /// <param name="statusCode">The status code.</param>
     /// <param name="path">The path.</param>
     /// <param name="hint">A hint from the API that describes the error.</param>
+    /// <exception cref="MusixmatchException">Always thrown.</exception>
     [DoesNotReturn]
     public static void Throw(HttpStatusCode statusCode, string? path, string? hint)
     {

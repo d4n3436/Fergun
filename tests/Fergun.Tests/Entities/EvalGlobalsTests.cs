@@ -1,6 +1,6 @@
-﻿using Discord;
+﻿using System;
+using Discord;
 using Moq;
-using System;
 using Xunit;
 
 namespace Fergun.Tests.Entities;

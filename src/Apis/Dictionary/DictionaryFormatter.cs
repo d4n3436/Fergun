@@ -32,10 +32,9 @@ public static class DictionaryFormatter
             builder.Append(ToSuperscript(entry.Homograph));
         }
 
-        builder.Append(' ');
-        builder.AppendJoin(' ', entry.EntryVariants?.Select(x => FormatHtml(x)) ?? []);
-
-        return builder.ToString();
+        return builder.Append(' ')
+            .AppendJoin(' ', entry.EntryVariants?.Select(x => FormatHtml(x)) ?? [])
+            .ToString();
     }
 
     /// <summary>
@@ -45,6 +44,7 @@ public static class DictionaryFormatter
     /// <param name="entry">The parent entry.</param>
     /// <param name="maxLength">The max. length of the formatted text.</param>
     /// <returns>The formatted text.</returns>
+    /// <exception cref="ArgumentException">Thrown when neither <see cref="IDictionaryDefinition.Ordinal"/> nor <see cref="IDictionaryDefinition.Order"/> are present.</exception>
     public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry, int maxLength)
     {
         ArgumentNullException.ThrowIfNull(block);
@@ -94,7 +94,7 @@ public static class DictionaryFormatter
 
             foreach (var subDefinition in def.Subdefinitions)
             {
-                definition.Append(CultureInfo.InvariantCulture, $"\n  - ");
+                definition.Append("\n  - ");
 
                 if (!string.IsNullOrEmpty(subDefinition.PredefinitionContent))
                 {
@@ -149,30 +149,28 @@ public static class DictionaryFormatter
 
         foreach (var note in entry.SupplementaryNotes ?? [])
         {
-            builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n");
-            builder.AppendJoin('\n', note.Content.Select(x => FormatHtml(x)));
-            builder.Append("\n\n");
+            builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n")
+                .AppendJoin('\n', note.Content.Select(x => FormatHtml(x)))
+                .Append("\n\n");
         }
 
         foreach (string spelling in entry.VariantSpellings ?? [])
         {
-            builder.Append(FormatHtml(spelling));
-            builder.Append('\n');
+            builder.Append(FormatHtml(spelling))
+                .Append('\n');
         }
 
         return builder.ToString();
     }
 
     private static string ToSuperscript(string digits)
-    {
-        return string.Create(digits.Length, digits, (span, state) =>
+        => string.Create(digits.Length, digits, (span, state) =>
         {
             for (int i = 0; i < span.Length; i++)
             {
                 span[i] = SuperscriptDigits[state[i] - '0'];
             }
         });
-    }
 
     private static string FormatHtml(string? htmlText, bool newLineExample = false, bool isSubdefinition = false)
     {

@@ -1,8 +1,8 @@
-﻿using Fergun.Converters;
-using System;
-using Xunit;
-using Discord;
+﻿using System;
 using System.Linq;
+using Discord;
+using Fergun.Converters;
+using Xunit;
 
 namespace Fergun.Tests.Converters;
 

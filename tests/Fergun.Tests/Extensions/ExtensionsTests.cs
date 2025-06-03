@@ -1,9 +1,9 @@
-﻿using Discord;
+﻿using System;
+using System.Globalization;
+using Discord;
 using Fergun.Extensions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Globalization;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;

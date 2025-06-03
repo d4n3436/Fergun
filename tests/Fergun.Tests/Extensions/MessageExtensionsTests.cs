@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Bogus;
 using Discord;
 using Fergun.Extensions;
 using Moq;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Fergun.Tests.Extensions;

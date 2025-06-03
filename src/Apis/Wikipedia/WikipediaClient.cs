@@ -62,12 +62,9 @@ public sealed class WikipediaClient : IWikipediaClient, IDisposable
             .GetProperty("query"u8)
             .GetProperty("pages"u8)[0];
 
-        if (page.TryGetProperty("missing"u8, out var missing) && missing.GetBoolean())
-        {
-            return null;
-        }
-
-        return page.Deserialize<WikipediaArticle>()!;
+        return page.TryGetProperty("missing"u8, out var missing) && missing.GetBoolean()
+            ? null
+            : page.Deserialize<WikipediaArticle>()!;
     }
 
     /// <inheritdoc/>

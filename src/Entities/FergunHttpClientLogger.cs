@@ -9,19 +9,14 @@ public partial class FergunHttpClientLogger : IHttpClientLogger
 {
     private readonly ILogger<FergunHttpClientLogger> _logger;
 
-    public FergunHttpClientLogger(ILogger<FergunHttpClientLogger> logger)
-    {
-        _logger = logger;
-    }
+    public FergunHttpClientLogger(ILogger<FergunHttpClientLogger> logger) => _logger = logger;
 
     /// <inheritdoc />
     public object? LogRequestStart(HttpRequestMessage request) => null;
 
     /// <inheritdoc />
     public void LogRequestStop(object? context, HttpRequestMessage request, HttpResponseMessage response, TimeSpan elapsed)
-    {
-        Log.RequestEnd(_logger, request.Method, Log.GetUriString(request.RequestUri), (int)response.StatusCode, elapsed.TotalMilliseconds);
-    }
+        => Log.RequestEnd(_logger, request.Method, Log.GetUriString(request.RequestUri), (int)response.StatusCode, elapsed.TotalMilliseconds);
 
     /// <inheritdoc />
     public void LogRequestFailed(object? context, HttpRequestMessage request, HttpResponseMessage? response, Exception exception,
@@ -35,10 +30,8 @@ public partial class FergunHttpClientLogger : IHttpClientLogger
         internal static partial void RequestEnd(ILogger logger, HttpMethod httpMethod, string? uri, int statusCode, double elapsedMilliseconds);
 
         internal static string? GetUriString(Uri? requestUri)
-        {
-            return requestUri?.IsAbsoluteUri == true
+            => requestUri?.IsAbsoluteUri == true
                 ? requestUri.AbsoluteUri
                 : requestUri?.ToString();
-        }
     }
 }

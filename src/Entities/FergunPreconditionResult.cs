@@ -7,7 +7,7 @@ namespace Fergun;
 /// <summary>
 /// Represents the default implementation of <see cref="IFergunResult"/> for command preconditions.
 /// </summary>
-public class FergunPreconditionResult : PreconditionResult, IFergunResult
+public sealed class FergunPreconditionResult : PreconditionResult, IFergunResult
 {
     private FergunPreconditionResult(InteractionCommandError? error, string reason, bool isEphemeral, bool isSilent, IDiscordInteraction? interaction, MessageComponent? components)
         : base(error, reason)

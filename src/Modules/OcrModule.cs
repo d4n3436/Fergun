@@ -25,6 +25,10 @@ namespace Fergun.Modules;
 [Group("ocr", "OCR commands.")]
 public class OcrModule : InteractionModuleBase
 {
+    private const int OcrTextId = 10;
+    private const string OcrTranslateKey = "ocr-translate";
+    private const string OcrTtsKey = "ocr-tts";
+
     private readonly ILogger<OcrModule> _logger;
     private readonly IFergunLocalizer<OcrModule> _localizer;
     private readonly SharedModule _shared;
@@ -32,10 +36,6 @@ public class OcrModule : InteractionModuleBase
     private readonly IGoogleLensClient _googleLens;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
-
-    private const int OcrTextId = 10;
-    private const string OcrTranslateKey = "ocr-translate";
-    private const string OcrTtsKey = "ocr-tts";
 
     public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared, InteractiveService interactive,
         IGoogleLensClient googleLens, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
@@ -232,7 +232,7 @@ public class OcrModule : InteractionModuleBase
                 .WithAccentColor(Color.Orange))
             .Build();
 
-        await interaction.FollowupAsync(components: components, ephemeral: ephemeral);
+        await interaction.FollowupAsync(ephemeral: ephemeral, components: components);
 
         return FergunResult.FromSuccess();
     }

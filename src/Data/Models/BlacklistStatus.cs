@@ -8,15 +8,15 @@ public enum BlacklistStatus
     /// <summary>
     /// The user is not blacklisted.
     /// </summary>
-    None,
+    None = 0,
 
     /// <summary>
     /// The user is blacklisted.
     /// </summary>
-    Blacklisted,
+    Blacklisted = 1,
 
     /// <summary>
     /// The user is "shadow"-blacklisted. The user shouldn't be notified that they're blacklisted.
     /// </summary>
-    ShadowBlacklisted
+    ShadowBlacklisted = 2
 }

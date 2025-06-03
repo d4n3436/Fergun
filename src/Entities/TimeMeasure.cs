@@ -8,15 +8,15 @@ public enum TimeMeasure
     /// <summary>
     /// Seconds.
     /// </summary>
-    Seconds,
+    Seconds = 0,
 
     /// <summary>
     /// Minutes.
     /// </summary>
-    Minutes,
+    Minutes = 1,
 
     /// <summary>
     /// Hours.
     /// </summary>
-    Hours
+    Hours = 2
 }

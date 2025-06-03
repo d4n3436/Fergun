@@ -1,9 +1,9 @@
-﻿using AutoBogus;
-using Fergun.Apis.Google;
-using Moq;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AutoBogus;
+using Fergun.Apis.Google;
+using Moq;
 using Xunit;
 
 namespace Fergun.Tests.Apis;

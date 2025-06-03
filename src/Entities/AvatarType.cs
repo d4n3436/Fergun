@@ -11,23 +11,23 @@ public enum AvatarType
     /// The first available avatar (Server, then Global, then Default).
     /// </summary>
     [Hide]
-    FirstAvailable,
+    FirstAvailable = 0,
 
     /// <summary>
     /// Server avatar.
     /// </summary>
     [ChoiceDisplay("Server avatar")]
-    Server,
+    Server = 1,
 
     /// <summary>
     /// Global (main) avatar.
     /// </summary>
     [ChoiceDisplay("Global (main) avatar")]
-    Global,
+    Global = 2,
 
     /// <summary>
     /// Default avatar.
     /// </summary>
     [ChoiceDisplay("Default avatar")]
-    Default
+    Default = 3
 }

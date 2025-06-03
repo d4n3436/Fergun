@@ -7,7 +7,7 @@ namespace Fergun;
 /// <summary>
 /// Represents the default implementation of <see cref="IFergunResult"/> for commands.
 /// </summary>
-public class FergunResult : RuntimeResult, IFergunResult
+public sealed class FergunResult : RuntimeResult, IFergunResult
 {
     private FergunResult(InteractionCommandError? error, string reason, bool isEphemeral, bool isSilent, IDiscordInteraction? interaction, MessageComponent? components)
         : base(error, reason)

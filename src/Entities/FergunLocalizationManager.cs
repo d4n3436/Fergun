@@ -64,7 +64,6 @@ public sealed class FergunLocalizationManager : ILocalizationManager
         // google.name
         // google.query.description
         // avatar.type.server.name
-
         string[] split = resourceName.Split('.');
         var parts = groupName is null ? split : split.Prepend(groupName);
 
@@ -89,8 +88,7 @@ public sealed class FergunLocalizationManager : ILocalizationManager
 
         foreach (string locale in _supportedLocales.Keys)
         {
-            var cultureInfo = CultureInfo.GetCultureInfo(locale);
-            Thread.CurrentThread.CurrentUICulture = cultureInfo;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(locale);
 
             foreach (var localizedString in localizer.GetAllStrings(false))
             {

@@ -215,98 +215,6 @@ public class OtherModule : InteractionModuleBase
         return await LyricsInternalAsync(match.Id, false);
     }
 
-    private async Task<RuntimeResult> LyricsInternalAsync(int id, bool checkSpotifyStatus = true)
-    {
-        _logger.LogInformation("Requesting song from Genius with ID {Id}", id);
-        var song = await _geniusClient.GetSongAsync(id);
-
-        if (song is null)
-        {
-            _logger.LogDebug("Song with ID {Id} was not found", id);
-            return FergunResult.FromError(_localizer["LyricsNotFound", id]);
-        }
-
-        _logger.LogInformation("Retrieved song (title: \"{Title}\", is instrumental: {IsInstrumental}, lyrics state: {LyricsState})", song, song.IsInstrumental, song.LyricsState);
-
-        if (song.IsInstrumental)
-        {
-            // This shouldn't be reachable unless someone manually passes an instrumental ID.
-            return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistNames} - {song.Title}"]);
-        }
-
-        if (song.LyricsState == "unreleased")
-        {
-            // This shouldn't be reachable unless someone manually passes an unreleased ID.
-            return FergunResult.FromError(_localizer["LyricsUnreleased", $"{song.ArtistNames} - {song.Title}"]);
-        }
-
-        if (string.IsNullOrEmpty(song.Lyrics))
-        {
-            return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistNames} - {song.Title}"]);
-        }
-
-        var spotifyLyricsCommand = _commandCache.CachedCommands.FirstOrDefault(x => x.Name == "lyrics-spotify");
-        Debug.Assert(spotifyLyricsCommand != null, "Expected /lyrics-spotify to be present");
-
-        var chunks = song.Lyrics.SplitForPagination(EmbedBuilder.MaxDescriptionLength).ToArray();
-        _logger.LogDebug("Split lyrics into {Chunks}", "chunk".ToQuantity(chunks.Length));
-
-        var paginator = new LazyPaginatorBuilder()
-            .AddUser(Context.User)
-            .WithPageFactory(GeneratePage)
-            .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
-            .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
-            .WithMaxPageIndex(chunks.Length - 1)
-            .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
-            .WithLocalizedPrompts(_localizer)
-            .Build();
-
-        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20), InteractionResponseType.DeferredChannelMessageWithSource);
-
-        return FergunResult.FromSuccess();
-
-        PageBuilder GeneratePage(int index)
-        {
-            string links = $"{Format.Url(_localizer["ViewOnGenius"], song.Url)} | {Format.Url(_localizer["ViewArtist"], song.PrimaryArtistUrl)}";
-
-            // Discord doesn't support custom protocols in embeds (spotify://track/id)
-            if (song.SpotifyTrackId is not null)
-                links += $" | {Format.Url(_localizer["OpenInSpotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
-
-            var builder = new PageBuilder()
-                .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
-                .WithThumbnailUrl(song.SongArtImageUrl)
-                .WithDescription(chunks[index].ToString())
-                .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
-                .WithColor((Color)song.SongArtPrimaryColor.GetValueOrDefault(Color.Orange));
-
-            if (checkSpotifyStatus && IsSameSong())
-            {
-                string mention = $"</{spotifyLyricsCommand.Name}:{spotifyLyricsCommand.Id}>";
-                builder.AddField(_localizer["Note"], _localizer["UseSpotifyLyricsCommand", mention]);
-            }
-
-            builder.AddField(_localizer["Links"], links);
-
-            return builder;
-        }
-
-        bool IsSameSong()
-        {
-            var spotifyActivity = Context.User.Activities.OfType<SpotifyGame>().FirstOrDefault();
-            if (spotifyActivity is null)
-                return false;
-
-            string artist = spotifyActivity.Artists.First();
-            string title = RemoveTitleExtraInfo(spotifyActivity.TrackTitle);
-
-            return (song.SpotifyTrackId is not null && song.SpotifyTrackId == spotifyActivity.TrackId) ||
-                (song.PrimaryArtistNames.Equals(artist, StringComparison.OrdinalIgnoreCase) &&
-                song.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
-        }
-    }
-
     [SlashCommand("stats", "Sends the stats of the bot.")]
     public async Task<RuntimeResult> StatsAsync()
     {
@@ -416,5 +324,97 @@ public class OtherModule : InteractionModuleBase
 
         int index = input.IndexOf(" - ", StringComparison.Ordinal);
         return index != -1 ? input[..index] : input;
+    }
+
+    private async Task<RuntimeResult> LyricsInternalAsync(int id, bool checkSpotifyStatus = true)
+    {
+        _logger.LogInformation("Requesting song from Genius with ID {Id}", id);
+        var song = await _geniusClient.GetSongAsync(id);
+
+        if (song is null)
+        {
+            _logger.LogDebug("Song with ID {Id} was not found", id);
+            return FergunResult.FromError(_localizer["LyricsNotFound", id]);
+        }
+
+        _logger.LogInformation("Retrieved song (title: \"{Title}\", is instrumental: {IsInstrumental}, lyrics state: {LyricsState})", song, song.IsInstrumental, song.LyricsState);
+
+        if (song.IsInstrumental)
+        {
+            // This shouldn't be reachable unless someone manually passes an instrumental ID.
+            return FergunResult.FromError(_localizer["LyricsInstrumental", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
+        if (song.LyricsState == "unreleased")
+        {
+            // This shouldn't be reachable unless someone manually passes an unreleased ID.
+            return FergunResult.FromError(_localizer["LyricsUnreleased", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
+        if (string.IsNullOrEmpty(song.Lyrics))
+        {
+            return FergunResult.FromError(_localizer["LyricsEmpty", $"{song.ArtistNames} - {song.Title}"]);
+        }
+
+        var spotifyLyricsCommand = _commandCache.CachedCommands.FirstOrDefault(x => x.Name == "lyrics-spotify");
+        Debug.Assert(spotifyLyricsCommand != null, "Expected /lyrics-spotify to be present");
+
+        var chunks = song.Lyrics.SplitForPagination(EmbedBuilder.MaxDescriptionLength).ToArray();
+        _logger.LogDebug("Split lyrics into {Chunks}", "chunk".ToQuantity(chunks.Length));
+
+        var paginator = new LazyPaginatorBuilder()
+            .AddUser(Context.User)
+            .WithPageFactory(GeneratePage)
+            .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
+            .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
+            .WithMaxPageIndex(chunks.Length - 1)
+            .WithFooter(PaginatorFooter.None)
+            .WithFergunEmotes(_fergunOptions)
+            .WithLocalizedPrompts(_localizer)
+            .Build();
+
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20), InteractionResponseType.DeferredChannelMessageWithSource);
+
+        return FergunResult.FromSuccess();
+
+        PageBuilder GeneratePage(int index)
+        {
+            string links = $"{Format.Url(_localizer["ViewOnGenius"], song.Url)} | {Format.Url(_localizer["ViewArtist"], song.PrimaryArtistUrl)}";
+
+            // Discord doesn't support custom protocols in embeds (spotify://track/id)
+            if (song.SpotifyTrackId is not null)
+                links += $" | {Format.Url(_localizer["OpenInSpotify"], $"https://open.spotify.com/track/{song.SpotifyTrackId}?go=1")}";
+
+            var builder = new PageBuilder()
+                .WithTitle($"{song.ArtistNames} - {song.Title}".Truncate(EmbedBuilder.MaxTitleLength))
+                .WithThumbnailUrl(song.SongArtImageUrl)
+                .WithDescription(chunks[index].ToString())
+                .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
+                .WithColor((Color)(song.SongArtPrimaryColor ?? Color.Orange));
+
+            if (checkSpotifyStatus && IsSameSong())
+            {
+                string mention = $"</{spotifyLyricsCommand.Name}:{spotifyLyricsCommand.Id}>";
+                builder.AddField(_localizer["Note"], _localizer["UseSpotifyLyricsCommand", mention]);
+            }
+
+            builder.AddField(_localizer["Links"], links);
+
+            return builder;
+        }
+
+        bool IsSameSong()
+        {
+            var spotifyActivity = Context.User.Activities.OfType<SpotifyGame>().FirstOrDefault();
+            if (spotifyActivity is null)
+                return false;
+
+            string artist = spotifyActivity.Artists.First();
+            string title = RemoveTitleExtraInfo(spotifyActivity.TrackTitle);
+
+            return (song.SpotifyTrackId is not null && song.SpotifyTrackId == spotifyActivity.TrackId) ||
+                (song.PrimaryArtistNames.Equals(artist, StringComparison.OrdinalIgnoreCase) &&
+                song.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

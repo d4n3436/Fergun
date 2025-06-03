@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Localization;
-using Moq;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Threading;
+using Microsoft.Extensions.Localization;
+using Moq;
 using Xunit;
 
 namespace Fergun.Tests.Entities;

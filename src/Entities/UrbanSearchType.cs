@@ -10,15 +10,15 @@ public enum UrbanSearchType
     /// <summary>
     /// Regular search.
     /// </summary>
-    Search,
+    Search = 0,
 
     /// <summary>
     /// Random words search.
     /// </summary>
-    Random,
+    Random = 1,
 
     /// <summary>
     /// Get the words of the day.
     /// </summary>
-    WordsOfTheDay
+    WordsOfTheDay = 2
 }

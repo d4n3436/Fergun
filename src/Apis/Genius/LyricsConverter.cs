@@ -69,7 +69,7 @@ public class LyricsConverter : JsonConverter<string>
 
             if (element.TryGetProperty("children"u8, out var children))
             {
-                Debug.Assert(children.ValueKind == JsonValueKind.Array);
+                Debug.Assert(children.ValueKind == JsonValueKind.Array, $"Expected {nameof(children)} to be an array.");
 
                 foreach (var child in children.EnumerateArray())
                 {

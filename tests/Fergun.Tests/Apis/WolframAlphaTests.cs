@@ -1,12 +1,12 @@
-﻿using Fergun.Apis.WolframAlpha;
-using System.Threading.Tasks;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoBogus;
+using Fergun.Apis.WolframAlpha;
 using Moq;
 using Xunit;
-using System.Threading;
-using System.Text.Json;
-using AutoBogus;
 
 namespace Fergun.Tests.Apis;
 

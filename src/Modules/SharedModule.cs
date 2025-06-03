@@ -101,12 +101,12 @@ public class SharedModule
             .WithThumbnailUrl(thumbnailUrl)
             .WithColor(Color.Orange);
 
-        await interaction.FollowupAsync(embed: builder.Build(), ephemeral: ephemeral);
+        await interaction.FollowupAsync(ephemeral: ephemeral, embed: builder.Build());
 
         return FergunResult.FromSuccess();
 
         static string DisplayName(ILanguage language)
-            => $"{language.Name}{(language is not Language lang || lang.NativeName == language.Name ? string.Empty : $" ({lang.NativeName})")}";
+            => language.Name + (language is not Language lang || lang.NativeName == language.Name ? string.Empty : $" ({lang.NativeName})");
     }
 
     public async Task<RuntimeResult> GoogleTtsAsync(IDiscordInteraction interaction, string text, string target, bool ephemeral = false)

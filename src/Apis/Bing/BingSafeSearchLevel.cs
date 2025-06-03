@@ -8,15 +8,15 @@ public enum BingSafeSearchLevel
     /// <summary>
     /// Return images with adult content. The thumbnail images are clear (non-fuzzy).
     /// </summary>
-    Off,
+    Off = 0,
 
     /// <summary>
     /// Do not return images with adult content.
     /// </summary>
-    Moderate,
+    Moderate = 1,
 
     /// <summary>
     /// Do not return images with adult content.
     /// </summary>
-    Strict
+    Strict = 2
 }

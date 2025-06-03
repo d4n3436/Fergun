@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
-using System;
 
 namespace Fergun.Extensions;
 

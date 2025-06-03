@@ -15,7 +15,7 @@ public interface IWolframAlphaResult
     /// <summary>
     /// Gets a value indicating whether the result is successful.
     /// </summary>
-    public bool IsSuccess { get; }
+    bool IsSuccess { get; }
 
     /// <summary>
     /// Gets a read-only list containing alternative queries.
