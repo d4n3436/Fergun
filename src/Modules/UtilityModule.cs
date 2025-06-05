@@ -359,7 +359,7 @@ public class UtilityModule : InteractionModuleBase
                     .AddStopButton(p, emote: _emotes.ExitEmote))
                 .WithSeparator()
                 .WithTextDisplay(footer)
-                .WithAccentColor(Color.Blue);
+                .WithAccentColor(new Color(0x0049D7));
 
             var components = new ComponentBuilderV2()
                 .WithContainer(container)
