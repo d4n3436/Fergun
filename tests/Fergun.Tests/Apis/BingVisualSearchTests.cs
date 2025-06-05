@@ -14,8 +14,7 @@ public class BingVisualSearchTests
     private readonly IBingVisualSearch _bingVisualSearch = new BingVisualSearch();
 
     [Theory]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/01/Windows_fonts_most_used.jpg")]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Lorem_ipsum_design.svg/1008px-Lorem_ipsum_design.svg.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
         string text = await _bingVisualSearch.OcrAsync(url);
