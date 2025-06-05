@@ -74,7 +74,7 @@ public sealed class WolframAlphaClient : IWolframAlphaClient, IDisposable
     /// <inheritdoc/>
     public async Task<IWolframAlphaResult> SendQueryAsync(string input, string language, bool reinterpret = true, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrEmpty(input);
+        ArgumentNullException.ThrowIfNull(input); // Allow empty string for testing
         ArgumentException.ThrowIfNullOrEmpty(language);
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
