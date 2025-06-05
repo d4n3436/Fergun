@@ -10,6 +10,7 @@ using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
+using Fergun.Services;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
 using Microsoft.Extensions.Logging;
@@ -34,10 +35,11 @@ public class ImageModuleTests
 
     public ImageModuleTests()
     {
+        var emoteProvider = Mock.Of<FergunEmoteProvider>();
         var logger = Mock.Of<ILogger<ImageModule>>();
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, new InteractiveConfig { DeferStopSelectionInteractions = false, ReturnAfterSendingPaginator = true });
-        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, interactive,
+        _moduleMock = new Mock<ImageModule>(() => new ImageModule(logger, _localizer, options, emoteProvider, interactive,
             _googleScraper, _duckDuckGoScraper, _bingVisualSearch, _yandexImageSearch, _googleLens))
         { CallBase = true };
 

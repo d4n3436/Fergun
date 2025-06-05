@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using AutoBogus;
+﻿using AutoBogus;
 using Fergun.Configuration;
 using Xunit;
 
@@ -18,8 +17,6 @@ public class FergunOptionsTests
             DonationUrl = options.DonationUrl,
             PaginatorTimeout = options.PaginatorTimeout,
             SelectionTimeout = options.SelectionTimeout,
-            PaginatorEmotes = options.PaginatorEmotes,
-            ExtraEmotes = options.ExtraEmotes
         };
 
         Assert.Equal(options.SupportServerUrl, other.SupportServerUrl);
@@ -27,8 +24,6 @@ public class FergunOptionsTests
         Assert.Equal(options.DonationUrl, other.DonationUrl);
         Assert.Equal(options.PaginatorTimeout, other.PaginatorTimeout);
         Assert.Equal(options.SelectionTimeout, other.SelectionTimeout);
-        Assert.True(options.PaginatorEmotes.SequenceEqual(other.PaginatorEmotes));
-        Assert.Equal(options.ExtraEmotes, other.ExtraEmotes);
     }
 
     public static TheoryData<FergunOptions> GetFergunOptionsTestData()

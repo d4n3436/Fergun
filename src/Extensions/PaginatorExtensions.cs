@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Discord;
-using Fergun.Configuration;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Fergun.Services;
 using Microsoft.Extensions.Localization;
 
 namespace Fergun.Extensions;
@@ -24,21 +24,22 @@ public static class PaginatorExtensions
     /// <typeparam name="TPaginator">The type of the paginator.</typeparam>
     /// <typeparam name="TBuilder">The type of the paginator builder.</typeparam>
     /// <param name="builder">A paginator builder.</param>
-    /// <param name="options">The interactive options.</param>
+    /// <param name="emotes">The emote provider.</param>
     /// <param name="actions">The actions to add. If null. The default actions will be added.</param>
     /// <returns>This builder.</returns>
     public static TBuilder WithFergunEmotes<TPaginator, TBuilder>(this PaginatorBuilder<TPaginator, TBuilder> builder,
-        FergunOptions options, PaginatorAction[]? actions = null)
+        FergunEmoteProvider emotes, PaginatorAction[]? actions = null)
         where TPaginator : Paginator
         where TBuilder : PaginatorBuilder<TPaginator, TBuilder>
     {
         actions ??= _defaultActions;
 
-        var buttons = options
-            .PaginatorEmotes
-            .Where(x => actions.Contains(x.Key))
-            .OrderBy(x => Array.IndexOf(actions, x.Key))
-            .Select(x => new PaginatorButton(x.Value, x.Key, x.Key == PaginatorAction.Exit ? ButtonStyle.Danger : ButtonStyle.Secondary));
+        var buttons = actions
+            .Select(action => new PaginatorButton(
+                emotes.GetEmote(action),
+                action,
+                action == PaginatorAction.Exit ? ButtonStyle.Danger : ButtonStyle.Secondary
+            ));
 
         return builder.WithOptions(buttons);
     }

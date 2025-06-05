@@ -12,6 +12,7 @@ using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
 using Fergun.Preconditions;
+using Fergun.Services;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -31,17 +32,19 @@ public class OcrModule : InteractionModuleBase
 
     private readonly ILogger<OcrModule> _logger;
     private readonly IFergunLocalizer<OcrModule> _localizer;
+    private readonly FergunEmoteProvider _emotes;
     private readonly SharedModule _shared;
     private readonly InteractiveService _interactive;
     private readonly IGoogleLensClient _googleLens;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, SharedModule shared, InteractiveService interactive,
+    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, FergunEmoteProvider emotes, SharedModule shared, InteractiveService interactive,
         IGoogleLensClient googleLens, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
     {
         _logger = logger;
         _localizer = localizer;
+        _emotes = emotes;
         _shared = shared;
         _interactive = interactive;
         _googleLens = googleLens;
@@ -180,13 +183,11 @@ public class OcrModule : InteractionModuleBase
             return FergunResult.FromError(_localizer["OCRNoResults"], ephemeral, interaction);
         }
 
-        var emotes = await Context.Client.GetApplicationEmotesAsync();
-
         var (ocrEngineName, iconEmote) = ocrEngine switch
         {
-            OcrEngine.Google => (_localizer["GoogleLensOCR"], emotes.FirstOrDefault(x => x.Name == Constants.GoogleLensIconEmoteName)),
-            OcrEngine.Bing => (_localizer["BingVisualSearch"], emotes.FirstOrDefault(x => x.Name == Constants.BingIconEmoteName)),
-            OcrEngine.Yandex => (_localizer["YandexOCR"], emotes.FirstOrDefault(x => x.Name == Constants.YandexIconEmoteName)),
+            OcrEngine.Google => (_localizer["GoogleLensOCR"], _emotes.GoogleLensIconEmote),
+            OcrEngine.Bing => (_localizer["BingVisualSearch"], _emotes.BingIconEmote),
+            OcrEngine.Yandex => (_localizer["YandexOCR"], _emotes.YandexIconEmote),
             _ => throw new ArgumentException(_localizer["InvalidOCREngine"], nameof(ocrEngine))
         };
 

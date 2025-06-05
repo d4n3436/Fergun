@@ -11,6 +11,7 @@ using Fergun.Configuration;
 using Fergun.Extensions;
 using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
+using Fergun.Services;
 using Fergun.Utils;
 using Humanizer;
 using JetBrains.Annotations;
@@ -35,15 +36,17 @@ public class OwnerModule : InteractionModuleBase
     private readonly IFergunLocalizer<OwnerModule> _localizer;
     private readonly InteractiveService _interactive;
     private readonly FergunOptions _fergunOptions;
+    private readonly FergunEmoteProvider _emotes;
 
     public OwnerModule(IServiceProvider services, ILogger<OwnerModule> logger, IFergunLocalizer<OwnerModule> localizer,
-        InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions)
+        InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes)
     {
         _services = services;
         _logger = logger;
         _localizer = localizer;
         _interactive = interactive;
         _fergunOptions = fergunOptions.Value;
+        _emotes = emotes;
     }
 
     [SlashCommand("cmd", "Executes a command.")]
@@ -172,7 +175,7 @@ public class OwnerModule : InteractionModuleBase
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(chunks.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithLocalizedPrompts(_localizer)
             .Build();
 

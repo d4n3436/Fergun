@@ -57,6 +57,7 @@ public class UtilityModule : InteractionModuleBase
     private readonly ILogger<UtilityModule> _logger;
     private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly FergunOptions _fergunOptions;
+    private readonly FergunEmoteProvider _emotes;
     private readonly SharedModule _shared;
     private readonly InteractionService _commands;
     private readonly InteractiveService _interactive;
@@ -67,13 +68,14 @@ public class UtilityModule : InteractionModuleBase
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes,
         SharedModule shared, InteractionService commands, InteractiveService interactive, ApplicationCommandCache commandCache, IDictionaryClient dictionary,
         IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
+        _emotes = emotes;
         _shared = shared;
         _commands = commands;
         _interactive = interactive;
@@ -346,15 +348,15 @@ public class UtilityModule : InteractionModuleBase
                 if (entries.Count > 1)
                 {
                     container.WithActionRow(new ActionRowBuilder()
-                        .AddPreviousButton(p, "Previous definition", ButtonStyle.Secondary, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToStart])
-                        .AddNextButton(p, "Next definition", ButtonStyle.Secondary, _fergunOptions.PaginatorEmotes[PaginatorAction.SkipToEnd]));
+                        .AddPreviousButton(p, "Previous definition", ButtonStyle.Secondary, _emotes.SkipToStartEmote)
+                        .AddNextButton(p, "Next definition", ButtonStyle.Secondary, _emotes.SkipToEndEmote));
                 }
             }
 
             container.WithActionRow(new ActionRowBuilder()
                     .WithButton(state.IsDisplayingExtraInfo ? "Go back" : "More information", DictionaryExtraInformationKey,
-                        ButtonStyle.Secondary, _fergunOptions.ExtraEmotes.InfoEmote, null, string.IsNullOrEmpty(extraInfo) || p.ShouldDisable())
-                    .AddStopButton(p, emote: _fergunOptions.PaginatorEmotes[PaginatorAction.Exit]))
+                        ButtonStyle.Secondary, _emotes.InfoEmote, null, string.IsNullOrEmpty(extraInfo) || p.ShouldDisable())
+                    .AddStopButton(p, emote: _emotes.ExitEmote))
                 .WithSeparator()
                 .WithTextDisplay(footer)
                 .WithAccentColor(Color.Blue);
@@ -748,7 +750,7 @@ public class UtilityModule : InteractionModuleBase
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(builders.Count == 0 ? 0 : builders.Count - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -816,7 +818,7 @@ public class UtilityModule : InteractionModuleBase
                     .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
                     .WithMaxPageIndex(videos.Count - 1)
                     .WithFooter(PaginatorFooter.None)
-                    .WithFergunEmotes(_fergunOptions)
+                    .WithFergunEmotes(_emotes)
                     .WithLocalizedPrompts(_localizer)
                     .Build();
 

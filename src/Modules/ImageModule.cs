@@ -15,6 +15,7 @@ using Fergun.Interactive.Pagination;
 using Fergun.Interactive.Selection;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
+using Fergun.Services;
 using GScraper;
 using GScraper.DuckDuckGo;
 using GScraper.Google;
@@ -35,6 +36,7 @@ public class ImageModule : InteractionModuleBase
     private readonly ILogger<ImageModule> _logger;
     private readonly IFergunLocalizer<ImageModule> _localizer;
     private readonly FergunOptions _fergunOptions;
+    private readonly FergunEmoteProvider _emotes;
     private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
@@ -42,12 +44,13 @@ public class ImageModule : InteractionModuleBase
     private readonly IYandexImageSearch _yandexImageSearch;
     private readonly IGoogleLensClient _googleLens;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, InteractiveService interactive,
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes, InteractiveService interactive,
         GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch, IGoogleLensClient googleLens)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
+        _emotes = emotes;
         _interactive = interactive;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
@@ -83,7 +86,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)
@@ -138,7 +141,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)
@@ -286,7 +289,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)
@@ -364,7 +367,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)
@@ -441,7 +444,7 @@ public class ImageModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)

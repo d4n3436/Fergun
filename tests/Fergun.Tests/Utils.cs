@@ -12,7 +12,6 @@ using Fergun.Apis.Google;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
 using Fergun.Configuration;
-using Fergun.Interactive.Pagination;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -249,14 +248,7 @@ internal static class Utils
         var mock = new Mock<IOptionsSnapshot<FergunOptions>>();
         var faker = new Faker<FergunOptions>()
             .RuleFor(x => x.PaginatorTimeout, f => f.Date.Timespan())
-            .RuleFor(x => x.SelectionTimeout, f => f.Date.Timespan())
-            .RuleFor(x => x.PaginatorEmotes, f => new Dictionary<PaginatorAction, IEmote>
-            {
-                { PaginatorAction.Backward, Emoji.Parse("◀️") }, // Valid emoji
-                { PaginatorAction.Forward, Emote.Parse($"<:forward:{f.Random.ULong()}>") }, // Valid emote
-                { PaginatorAction.Jump, new Emoji("123") }, // Invalid emote
-                { PaginatorAction.Exit, Emoji.Parse("🛑") }
-            });
+            .RuleFor(x => x.SelectionTimeout, f => f.Date.Timespan());
 
         mock.Setup(x => x.Value).Returns(() => faker.Generate());
 

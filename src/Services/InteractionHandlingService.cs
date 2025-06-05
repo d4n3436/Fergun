@@ -28,6 +28,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     private readonly DiscordShardedClient _shardedClient;
     private readonly InteractionService _interactionService;
     private readonly ApplicationCommandCache _commandCache;
+    private readonly FergunEmoteProvider _emotes;
     private readonly FergunLocalizationManager _localizationManager;
     private readonly ILogger<InteractionHandlingService> _logger;
     private readonly IServiceProvider _services;
@@ -36,12 +37,13 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     private readonly SemaphoreSlim _cmdStatsSemaphore = new(1, 1);
     private bool _disposed;
 
-    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, ApplicationCommandCache commandCache,
+    public InteractionHandlingService(DiscordShardedClient client, InteractionService interactionService, ApplicationCommandCache commandCache, FergunEmoteProvider emotes,
         FergunLocalizationManager localizationManager, ILogger<InteractionHandlingService> logger, IServiceProvider services, IOptions<StartupOptions> options)
     {
         _shardedClient = client;
         _interactionService = interactionService;
         _commandCache = commandCache;
+        _emotes = emotes;
         _localizationManager = localizationManager;
         _logger = logger;
         _services = services;
@@ -139,6 +141,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
                 }
             }
         }
+
+        var emotes = await _shardedClient.Rest.GetApplicationEmotesAsync();
+        _emotes.SetEmotes(emotes);
+
+        _logger.LogDebug("Retrieved {Count} application emotes", emotes.Count);
     }
 
     /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using Discord;
@@ -16,7 +15,6 @@ using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Apis.Yandex;
 using Fergun.Configuration;
-using Fergun.Converters;
 using Fergun.Data;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -38,7 +36,6 @@ Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
 var builder = Host.CreateApplicationBuilder();
 
-TypeDescriptor.AddAttributes(typeof(IEmote), new TypeConverterAttribute(typeof(EmoteConverter)));
 builder.Services.AddOptions<StartupOptions>().BindConfiguration(StartupOptions.Startup)
     .PostConfigure(startup =>
     {
@@ -76,6 +73,7 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.AddTransient(typeof(IFergunLocalizer<>), typeof(FergunLocalizer<>));
 builder.Services.AddSingleton<FergunLocalizationManager>();
 builder.Services.AddSingleton<ApplicationCommandCache>();
+builder.Services.AddSingleton<FergunEmoteProvider>();
 builder.Services.AddHostedService<InteractionHandlingService>();
 builder.Services.AddHostedService<BotListService>();
 builder.Services.ConfigureHttpClientDefaults(b =>

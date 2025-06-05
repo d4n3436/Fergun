@@ -9,6 +9,7 @@ using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
 using Fergun.Interactive;
 using Fergun.Modules;
+using Fergun.Services;
 using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -44,12 +45,13 @@ public class OcrModuleTests
         _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
         _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Invalid image."));
 
+        var emoteProvider = Mock.Of<FergunEmoteProvider>();
         var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
         var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
 
         var interactive = new InteractiveService(_client, _interactiveConfig);
-        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, shared, interactive,
+        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, emoteProvider, shared, interactive,
             _googleLensMock.Object, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object))
         { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);

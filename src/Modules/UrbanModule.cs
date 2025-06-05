@@ -12,6 +12,7 @@ using Fergun.Interactive;
 using Fergun.Interactive.Pagination;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
+using Fergun.Services;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
@@ -29,15 +30,17 @@ public class UrbanModule : InteractionModuleBase
     private readonly ILogger<UrbanModule> _logger;
     private readonly IFergunLocalizer<UrbanModule> _localizer;
     private readonly FergunOptions _fergunOptions;
+    private readonly FergunEmoteProvider _emotes;
     private readonly IUrbanDictionaryClient _urbanDictionary;
     private readonly InteractiveService _interactive;
 
     public UrbanModule(ILogger<UrbanModule> logger, IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        IUrbanDictionaryClient urbanDictionary, InteractiveService interactive)
+        FergunEmoteProvider emotes, IUrbanDictionaryClient urbanDictionary, InteractiveService interactive)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
+        _emotes = emotes;
         _urbanDictionary = urbanDictionary;
         _interactive = interactive;
     }
@@ -77,7 +80,7 @@ public class UrbanModule : InteractionModuleBase
 
         var paginator = new LazyPaginatorBuilder()
             .WithPageFactory(GeneratePage)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithActionOnCancellation(Constants.DefaultPaginatorActionOnCancel)
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(definitions.Count - 1)

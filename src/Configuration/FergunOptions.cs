@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Discord;
-using Fergun.Converters;
-using Fergun.Interactive.Pagination;
 
 namespace Fergun.Configuration;
 
@@ -45,15 +40,4 @@ public class FergunOptions
     /// Gets the default selection timeout.
     /// </summary>
     public TimeSpan SelectionTimeout { get; init; }
-
-    /// <summary>
-    /// Gets the dictionary of paginator emotes.
-    /// </summary>
-    [TypeConverter(typeof(EmoteConverter))]
-    public IDictionary<PaginatorAction, IEmote> PaginatorEmotes { get; init; } = new Dictionary<PaginatorAction, IEmote>();
-
-    /// <summary>
-    /// Gets the extra emotes.
-    /// </summary>
-    public ExtraEmotes ExtraEmotes { get; init; } = new();
 }

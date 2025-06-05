@@ -33,13 +33,15 @@ public class UtilityModuleTests
 
     public UtilityModuleTests()
     {
+        var emoteProvider = Mock.Of<FergunEmoteProvider>();
         var commandCache = new ApplicationCommandCache();
         var options = Utils.CreateMockedFergunOptions();
         var client = new DiscordSocketClient();
         SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
         var interactionService = new InteractionService(client);
         var interactive = new InteractiveService(client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
-        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, shared, interactionService,
+
+        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, emoteProvider, shared, interactionService,
             interactive, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
         {
             CallBase = true

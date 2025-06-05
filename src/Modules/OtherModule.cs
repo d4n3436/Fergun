@@ -39,18 +39,20 @@ public class OtherModule : InteractionModuleBase
     private readonly ILogger<OtherModule> _logger;
     private readonly IFergunLocalizer<OtherModule> _localizer;
     private readonly FergunOptions _fergunOptions;
+    private readonly FergunEmoteProvider _emotes;
     private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
     private readonly ApplicationCommandCache _commandCache;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes,
         InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db, ApplicationCommandCache commandCache)
     {
         _logger = logger;
         _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
+        _emotes = emotes;
         _geniusClient = geniusClient;
         _httpClient = httpClient;
         _interactive = interactive;
@@ -89,7 +91,7 @@ public class OtherModule : InteractionModuleBase
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(maxIndex)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
@@ -369,7 +371,7 @@ public class OtherModule : InteractionModuleBase
             .WithActionOnTimeout(Constants.DefaultPaginatorActionOnTimeout)
             .WithMaxPageIndex(chunks.Length - 1)
             .WithFooter(PaginatorFooter.None)
-            .WithFergunEmotes(_fergunOptions)
+            .WithFergunEmotes(_emotes)
             .WithLocalizedPrompts(_localizer)
             .Build();
 
