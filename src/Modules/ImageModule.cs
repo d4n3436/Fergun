@@ -237,7 +237,7 @@ public class ImageModule : InteractionModuleBase
         };
     }
 
-    public async Task<RuntimeResult> ReverseYandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseYandexAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -316,7 +316,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public async Task<RuntimeResult> ReverseBingAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseBingAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)
@@ -394,7 +394,7 @@ public class ImageModule : InteractionModuleBase
         }
     }
 
-    public async Task<RuntimeResult> ReverseGoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
+    public virtual async Task<RuntimeResult> ReverseGoogleAsync(string url, bool multiImages, IDiscordInteraction interaction,
         IDiscordInteraction? originalInteraction = null, bool ephemeral = false)
     {
         if (interaction is IComponentInteraction componentInteraction)

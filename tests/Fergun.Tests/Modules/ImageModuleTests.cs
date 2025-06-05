@@ -147,6 +147,11 @@ public class ImageModuleTests
             _moduleMock.Verify(x => x.ReverseYandexAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
             Mock.Get(_yandexImageSearch).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<YandexSearchFilterMode>(l => l == (nsfw ? YandexSearchFilterMode.None : YandexSearchFilterMode.Family)), It.IsAny<CancellationToken>()), Times.Once);
         }
+        else if (engine == ReverseImageSearchEngine.Google)
+        {
+            _moduleMock.Verify(x => x.ReverseGoogleAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.Is<bool>(b => b == multiImages), It.IsAny<IDiscordInteraction>(), It.IsAny<IDiscordInteraction?>(), It.Is<bool>(b => !b)), Times.Once);
+            Mock.Get(_googleLens).Verify(x => x.ReverseImageSearchAsync(It.Is<string>(s => s == (file == null ? url : file.Url)), It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
     }
 
     [Theory]
