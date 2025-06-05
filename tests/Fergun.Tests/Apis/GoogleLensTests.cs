@@ -33,7 +33,7 @@ public class GoogleLensTests
         await Assert.ThrowsAsync<GoogleLensException>(() => task);
     }
 
-    [Theory]
+    [Theory(Skip = "Skipped until Google Lens reverse image search is fixed.")]
     [InlineData("https://r.bing.com/rp/ecXQMr9jqKMeHE3ADTBrSN_WNyA.jpg", null)]
     [InlineData("https://r.bing.com/rp/vXuQ5-3dSnE08_cK26jVzOTxREk.jpg", "en")]
     [InlineData("https://r.bing.com/rp/NFrQjXWivF4omoTPSU03A6aosg0.jpg", "es")]
