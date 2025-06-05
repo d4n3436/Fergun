@@ -28,7 +28,7 @@ public static class HostExtensions
         {
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             db.Database.Migrate();
-            logger.LogInformation("Applied {Migrations}.", "pending database migration".ToQuantity(pendingMigrations));
+            logger.LogInformation("Applied {Migrations}", "pending database migration".ToQuantity(pendingMigrations));
         }
 
         return host;

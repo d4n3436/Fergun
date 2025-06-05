@@ -256,7 +256,7 @@ public class ImageModule : InteractionModuleBase
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete the original interaction response.");
+            _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
@@ -335,7 +335,7 @@ public class ImageModule : InteractionModuleBase
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete the original interaction response.");
+            _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
         bool isNsfw = Context.Channel.IsNsfw();
@@ -413,7 +413,7 @@ public class ImageModule : InteractionModuleBase
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to delete the original interaction response.");
+            _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
         IReadOnlyList<IGoogleLensResult> results;

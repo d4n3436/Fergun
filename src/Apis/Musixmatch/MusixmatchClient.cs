@@ -45,7 +45,7 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
             .Handle<MusixmatchException>(x => x.Hint is "renew" or "captcha")
             .RetryAsync(async (result, _) =>
             {
-                _logger.LogWarning(result.Exception, "Got exception with hint \"{Hint}\". Requesting a new user token...", ((MusixmatchException)result.Exception).Hint);
+                _logger.LogWarning(result.Exception, "Got exception with hint \"{Hint}\", requesting a new user token...", ((MusixmatchException)result.Exception).Hint);
                 await _state.GetUserTokenAsync(refresh: true).ConfigureAwait(false);
             });
 

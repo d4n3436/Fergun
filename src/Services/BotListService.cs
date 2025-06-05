@@ -80,11 +80,11 @@ public sealed class BotListService : BackgroundService
             using var httpClient = _httpClientFactory.CreateClient();
             using var response = await httpClient.SendAsync(request).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            _logger.LogInformation("Successfully updated {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount}).", botList, serverCount, shardCount);
+            _logger.LogInformation("Successfully updated {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount})", botList, serverCount, shardCount);
         }
         catch (Exception e)
         {
-            _logger.LogWarning(e, "Failed to update {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount}).", botList, serverCount, shardCount);
+            _logger.LogWarning(e, "Failed to update {BotList} bot stats (server count: {ServerCount}, shard count: {ShardCount})", botList, serverCount, shardCount);
 
             if (e is HttpRequestException { StatusCode: HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.NotFound } requestException)
             {
@@ -92,14 +92,14 @@ public sealed class BotListService : BackgroundService
 
                 if (statusCode == HttpStatusCode.NotFound)
                 {
-                    _logger.LogInformation("Got status code {StatusCode} ({StatusCodeName}), make sure the bot is listed on {BotList}.", statusCode.ToString("D"), statusCode, botList);
+                    _logger.LogInformation("Got status code {StatusCode} ({StatusCodeName}), make sure the bot is listed on {BotList}", statusCode.ToString("D"), statusCode, botList);
                 }
                 else
                 {
-                    _logger.LogInformation("Got status code {StatusCode} ({StatusCodeName}), make sure the token is valid.", statusCode.ToString("D"), statusCode);
+                    _logger.LogInformation("Got status code {StatusCode} ({StatusCodeName}), make sure the token is valid", statusCode.ToString("D"), statusCode);
                 }
 
-                _logger.LogInformation("Bot stats will not be sent to {BotList} API.", botList);
+                _logger.LogInformation("Bot stats will not be sent to {BotList} API", botList);
                 _options.Tokens.Remove(botList);
             }
         }
@@ -120,11 +120,11 @@ public sealed class BotListService : BackgroundService
 
         if (_options.Tokens.Count == 0)
         {
-            _logger.LogInformation("Bot list service started. No bot stats will be updated because no tokens were provided.");
+            _logger.LogInformation("Bot list service started, no bot stats will be updated because no tokens were provided");
             return;
         }
 
-        _logger.LogInformation("Bot list service started. Updating stats for {BotLists} every {UpdatePeriod}.",
+        _logger.LogInformation("Bot list service started, updating stats for {BotLists} every {UpdatePeriod}",
             string.Join(", ", _options.Tokens.Keys), _options.UpdatePeriod.ToString("h'h 'm'm 's's'", CultureInfo.InvariantCulture));
 
         using var timer = new PeriodicTimer(_options.UpdatePeriod);
