@@ -18,6 +18,8 @@ public class FergunEmoteProvider
 
     private const string YandexIconEmoteName = "yandex_icon";
 
+    private const string DictionaryComIconEmoteName = "dictionary_com_icon";
+
     private const string SkipToStartEmoteName = "skip_to_start";
 
     private const string BackwardEmoteName = "backward";
@@ -60,6 +62,11 @@ public class FergunEmoteProvider
     /// Gets the emote representing the Yandex icon.
     /// </summary>
     public IEmote? YandexIconEmote { get; private set; }
+
+    /// <summary>
+    /// Gets the emote representing the Dictionary.com icon.
+    /// </summary>
+    public IEmote? DictionaryComIconEmote { get; private set; }
 
     /// <summary>
     /// Gets the emote representing the button used to skip to the first paginator page. Defaults to the rewind emoji (⏮).
@@ -107,6 +114,7 @@ public class FergunEmoteProvider
         GoogleLensIconEmote = emotes.FirstOrDefault(x => x.Name == GoogleLensIconEmoteName);
         BingIconEmote = emotes.FirstOrDefault(x => x.Name == BingIconEmoteName);
         YandexIconEmote = emotes.FirstOrDefault(x => x.Name == YandexIconEmoteName);
+        DictionaryComIconEmote = emotes.FirstOrDefault(x => x.Name == DictionaryComIconEmoteName);
 
         SkipToStartEmote = emotes.FirstOrDefault(x => x.Name == SkipToStartEmoteName) ?? _defaultSkipToStartEmote;
         BackwardEmote = emotes.FirstOrDefault(x => x.Name == BackwardEmoteName) ?? _defaultBackwardEmote;

@@ -325,7 +325,7 @@ public class UtilityModule : InteractionModuleBase
                 .ToList();
 
             string extraInfo = DictionaryFormatter.FormatExtraInformation(entry);
-            string footer = $"-# Dictionary.com results | Definition {p.CurrentPageIndex + 1} of {entries.Count}";
+            string footer = $"-# {_emotes.DictionaryComIconEmote} Dictionary.com results | Definition {p.CurrentPageIndex + 1} of {entries.Count}";
 
             var container = new ContainerBuilder();
 
