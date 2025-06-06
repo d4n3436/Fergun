@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers.Text;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,6 +17,7 @@ public class ColorConverter : JsonConverter<Color>
         => Utf8Parser.TryParse(reader.ValueSpan.TrimStart((byte)'#'), out int color, out _, 'X') ? Color.FromArgb(color) : default;
 
     /// <inheritdoc/>
+    [ExcludeFromCodeCoverage(Justification = "Converter is only used for deserialization.")]
     public override void Write(Utf8JsonWriter writer, Color value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.ToArgb().ToString("X", CultureInfo.InvariantCulture));
+        => throw new NotSupportedException();
 }

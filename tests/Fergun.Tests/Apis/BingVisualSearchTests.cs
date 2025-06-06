@@ -85,6 +85,7 @@ public class BingVisualSearchTests
         var exception1 = new BingException();
         var exception2 = new BingException("Custom message");
         var exception3 = new BingException("Custom message 2", innerException);
+        var exception4 = new BingException("Custom message 3", "ImageByteSizeExceedsLimit");
 
         Assert.Null(exception1.InnerException);
 
@@ -93,6 +94,10 @@ public class BingVisualSearchTests
 
         Assert.Equal("Custom message 2", exception3.Message);
         Assert.Same(innerException, exception3.InnerException);
+
+        Assert.Equal("Custom message 3", exception4.Message);
+        Assert.Equal("ImageByteSizeExceedsLimit", exception4.ImageCategory);
+        Assert.Null(exception4.InnerException);
     }
 
     [Theory]

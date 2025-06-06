@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -33,7 +34,9 @@ public class LyricsConverter : JsonConverter<string>
     }
 
     /// <inheritdoc/>
-    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options) => throw new NotSupportedException();
+    [ExcludeFromCodeCoverage(Justification = "Converter is only used for deserialization.")]
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        => throw new NotSupportedException();
 
     private static void IterateContent(in JsonElement element, StringBuilder builder, bool escape = true)
     {
