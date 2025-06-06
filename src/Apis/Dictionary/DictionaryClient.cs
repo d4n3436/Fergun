@@ -33,7 +33,10 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var response = (await _httpClient.GetFromJsonAsync<DictionarySearchResponse>(new Uri($"https://thor-graphql.dictionary.com/v2/search?searchText={Uri.EscapeDataString(text)}"), cancellationToken).ConfigureAwait(false))!;
+        IDictionarySearchResponse response = (await _httpClient.GetFromJsonAsync<DictionarySearchResponse>(
+            new Uri($"https://thor-graphql.dictionary.com/v2/search?searchText={Uri.EscapeDataString(text)}"),
+            cancellationToken).ConfigureAwait(false))!;
+
         return response.Data;
     }
 

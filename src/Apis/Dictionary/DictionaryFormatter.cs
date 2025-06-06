@@ -14,8 +14,6 @@ public static class DictionaryFormatter
 {
     private static ReadOnlySpan<char> SuperscriptDigits => "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079";
 
-    private static ReadOnlySpan<char> SmallCapsChars => "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ";
-
     /// <summary>
     /// Formats the title of an entry.
     /// </summary>
@@ -55,10 +53,6 @@ public static class DictionaryFormatter
         if (!string.IsNullOrEmpty(entry.Pronunciation?.Ipa))
         {
             builder.Append(CultureInfo.InvariantCulture, $"/{FormatHtml(entry.Pronunciation.Ipa).Trim()}/");
-        }
-        else if (entry.Pronunciation?.Spell?.Count > 0)
-        {
-            builder.AppendJoin(' ', entry.Pronunciation.Spell.Select(x => $"[{FormatHtml(x).Trim()}]"));
         }
 
         builder.Append('\n');
@@ -147,19 +141,6 @@ public static class DictionaryFormatter
             builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");
         }
 
-        foreach (var note in entry.SupplementaryNotes ?? [])
-        {
-            builder.Append(CultureInfo.InvariantCulture, $"\u200b**{note.Type}**\u200b\n")
-                .AppendJoin('\n', note.Content.Select(x => FormatHtml(x)))
-                .Append("\n\n");
-        }
-
-        foreach (string spelling in entry.VariantSpellings ?? [])
-        {
-            builder.Append(FormatHtml(spelling))
-                .Append('\n');
-        }
-
         return builder.ToString();
     }
 
@@ -172,19 +153,13 @@ public static class DictionaryFormatter
             }
         });
 
-    private static string FormatHtml(string? htmlText, bool newLineExample = false, bool isSubdefinition = false)
+    private static string FormatHtml(string? htmlText, bool newLineExample = false, bool isSubDefinition = false)
     {
         if (string.IsNullOrEmpty(htmlText))
             return string.Empty;
 
         var parser = new HtmlParser();
         using var document = parser.ParseDocument(htmlText);
-
-        if (document.Body!.ChildNodes.Length == 0)
-        {
-            return htmlText;
-        }
-
         var builder = new StringBuilder();
 
         foreach (var element in document.Body!.ChildNodes)
@@ -196,21 +171,7 @@ public static class DictionaryFormatter
 
                 if (className is "luna-example italic" or "example italic" && newLineExample)
                 {
-                    builder.Append(isSubdefinition ? $"\n    -# > \u200b*{content}*\u200b" : $"\n> \u200b*{content}*\u200b");
-                } // Sometimes there's text instead of numbers in a superscript class (e.g., satire)
-                else if (className == "superscript" && content is [>= '0' and <= '9'])
-                {
-                    builder.Append(SuperscriptDigits[content[0] - '0']);
-                }
-                else if (className == "luna-wud small-caps")
-                {
-                    builder.Append(string.Create(content.Length, content, (converted, state) =>
-                    {
-                        for (int i = 0; i < converted.Length; i++)
-                        {
-                            converted[i] = state[i] is >= 'a' and <= 'z' ? SmallCapsChars[state[i] - 'a'] : state[i];
-                        }
-                    }));
+                    builder.Append(isSubDefinition ? $"\n    -# > \u200b*{content}*\u200b" : $"\n> \u200b*{content}*\u200b");
                 }
                 else if (className.EndsWith("italic", StringComparison.Ordinal) || className.EndsWith("pos", StringComparison.Ordinal))
                 {

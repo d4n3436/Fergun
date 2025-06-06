@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Fergun.Apis.Dictionary;
+﻿namespace Fergun.Apis.Dictionary;
 
 /// <summary>
 /// Represents the pronunciation data of a dictionary entry.
@@ -11,9 +9,4 @@ public interface IEntryPronunciation
     /// Gets the IPA transcription.
     /// </summary>
     string Ipa { get; }
-
-    /// <summary>
-    /// Gets a read-only list containing the spellings.
-    /// </summary>
-    IReadOnlyList<string>? Spell { get; }
 }
