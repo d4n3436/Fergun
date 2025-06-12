@@ -1,14 +1,22 @@
 ﻿using System;
-using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Discord;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Fergun.Extensions;
 
 public static class Extensions
 {
+    private static readonly JsonSerializerOptions _cachedOptions = new()
+    {
+        WriteIndented = true,
+        NewLine = "\n",
+        ReferenceHandler = ReferenceHandler.IgnoreCycles, 
+    };
+
     public static LogLevel ToLogLevel(this LogSeverity logSeverity)
         => logSeverity switch
         {
@@ -33,19 +41,6 @@ public static class Extensions
         return displayMessage;
     }
 
-    public static string Dump<T>(this T obj, int maxDepth = 2)
-    {
-        using var strWriter = new StringWriter();
-        strWriter.NewLine = "\n";
-        using var jsonWriter = new CustomJsonTextWriter(strWriter);
-        var resolver = new CustomContractResolver(jsonWriter, maxDepth);
-        var serializer = new JsonSerializer
-        {
-            ContractResolver = resolver,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            Formatting = Formatting.Indented
-        };
-        serializer.Serialize(jsonWriter, obj);
-        return strWriter.ToString();
-    }
+    [UsedImplicitly]
+    public static string Dump<T>(this T obj) => JsonSerializer.Serialize(obj, _cachedOptions);
 }

@@ -55,7 +55,7 @@ public class ExtensionsTests
     {
         const string serialized = "{\n  \"one\": {\n    \"two\": {}\n  }\n}";
 
-        var depth2Obj = new
+        var obj = new
         {
             one = new
             {
@@ -65,22 +65,9 @@ public class ExtensionsTests
             }
         };
 
-        var depth3Obj = new
-        {
-            one = new
-            {
-                two = new
-                {
-                    test = "removed"
-                }
-            }
-        };
+        string result = obj.Dump();
 
-        string depth2Result = depth2Obj.Dump();
-        string depth3Result = depth3Obj.Dump();
-
-        Assert.Equal(serialized, depth2Result);
-        Assert.Equal(serialized, depth3Result);
+        Assert.Equal(serialized, result);
     }
 
     public static TheoryData<IInteractionContext> GetIInteractionContextDisplayTestData()
