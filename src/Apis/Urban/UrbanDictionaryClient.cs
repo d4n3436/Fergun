@@ -78,7 +78,7 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
         using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
         var list = document.RootElement.GetProperty("list"u8);
 
-        return list.GetArrayLength() == 0 ? null : list[0].Deserialize<UrbanDefinition>()!;
+        return list.Deserialize<IReadOnlyList<UrbanDefinition>>()!?[0];
     }
 
     /// <inheritdoc/>

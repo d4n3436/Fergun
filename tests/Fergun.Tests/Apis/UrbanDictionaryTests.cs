@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Fergun.Apis.Urban;
 using Moq;
@@ -48,11 +50,11 @@ public class UrbanDictionaryTests
     [InlineData(int.MaxValue)]
     [InlineData(0)]
     [Theory]
-    public async Task GetDefinitionAsync_Returns_Null_If_Id_Is_Invalid(int id)
+    public async Task GetDefinitionAsync_Returns_InternalServerError_If_Id_Is_Invalid(int id)
     {
-        var definition = await _urbanDictionary.GetDefinitionAsync(id);
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _urbanDictionary.GetDefinitionAsync(id));
 
-        Assert.Null(definition);
+        Assert.Equal(HttpStatusCode.InternalServerError, exception.StatusCode);
     }
 
     [Fact]
