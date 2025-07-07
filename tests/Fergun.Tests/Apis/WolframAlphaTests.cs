@@ -59,7 +59,6 @@ public class WolframAlphaTests
             Assert.All(pod.SubPods, Assert.NotNull);
             Assert.NotEmpty(pod.Title);
             Assert.NotEmpty(pod.Id);
-            Assert.True(pod.Position > 0);
 
             foreach (var subPod in pod.SubPods)
             {

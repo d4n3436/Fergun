@@ -18,11 +18,6 @@ public interface IWolframAlphaPod
     string Title { get; }
 
     /// <summary>
-    /// Gets the position of this pod.
-    /// </summary>
-    int Position { get; }
-
-    /// <summary>
     /// Gets the sub-pods.
     /// </summary>
     IReadOnlyList<IWolframAlphaSubPod> SubPods { get; }
