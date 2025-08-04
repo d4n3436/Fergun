@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Fergun.Apis.Dictionary;
+﻿namespace Fergun.Apis.Dictionary;
 
 /// <summary>
 /// Represents the dictionary response data.
@@ -8,7 +6,7 @@ namespace Fergun.Apis.Dictionary;
 public interface IDictionaryResponseData
 {
     /// <summary>
-    /// Gets a read-only list containing a group of entries from a specific source.
+    /// Gets an object containing the group of entries for the word.
     /// </summary>
-    IReadOnlyList<IDictionaryEntryGroup> Content { get; }
+    IDictionaryContent Content { get; }
 }

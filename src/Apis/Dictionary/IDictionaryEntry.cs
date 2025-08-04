@@ -20,7 +20,7 @@ public interface IDictionaryEntry
     /// <summary>
     /// Gets the current homograph number.
     /// </summary>
-    string? Homograph { get; }
+    int? Homograph { get; }
 
     /// <summary>
     /// Gets the pronunciation data.

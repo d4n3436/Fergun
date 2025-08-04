@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
@@ -27,12 +26,10 @@ public static class DictionaryFormatter
 
         if (entry.Homograph is not null)
         {
-            builder.Append(ToSuperscript(entry.Homograph));
+            builder.Append(ToSuperscript(entry.Homograph.ToString()!));
         }
 
-        return builder.Append(' ')
-            .AppendJoin(' ', entry.EntryVariants?.Select(x => FormatHtml(x)) ?? [])
-            .ToString();
+        return builder.ToString();
     }
 
     /// <summary>
@@ -42,7 +39,6 @@ public static class DictionaryFormatter
     /// <param name="entry">The parent entry.</param>
     /// <param name="maxLength">The max. length of the formatted text.</param>
     /// <returns>The formatted text.</returns>
-    /// <exception cref="ArgumentException">Thrown when neither <see cref="IDictionaryDefinition.Ordinal"/> nor <see cref="IDictionaryDefinition.Order"/> are present.</exception>
     public static string FormatPartOfSpeechBlock(IDictionaryEntryBlock block, IDictionaryEntry entry, int maxLength)
     {
         ArgumentNullException.ThrowIfNull(block);
@@ -69,11 +65,11 @@ public static class DictionaryFormatter
             builder.Append("\n\n");
         }
 
-        foreach (var def in block.Definitions)
+        for (int i = 0; i < block.Definitions.Count; i++)
         {
-            int order = def.Ordinal ?? def.Order ?? throw new ArgumentException($"Neither Ordinal nor Order were present on definition of \"{entry.Entry}\".");
+            var def = block.Definitions[i];
 
-            var definition = new StringBuilder($"{order}. ");
+            var definition = new StringBuilder($"{i + 1}. ");
             if (!string.IsNullOrEmpty(def.PredefinitionContent))
             {
                 definition.Append(CultureInfo.InvariantCulture, $"{FormatHtml(def.PredefinitionContent)} ");
@@ -135,7 +131,7 @@ public static class DictionaryFormatter
 
             if (entry.Homograph is not null)
             {
-                builder.Append(ToSuperscript(entry.Homograph));
+                builder.Append(ToSuperscript(entry.Homograph.ToString()!));
             }
 
             builder.Append(CultureInfo.InvariantCulture, $"\n{FormatHtml(entry.Origin)}\n\n");

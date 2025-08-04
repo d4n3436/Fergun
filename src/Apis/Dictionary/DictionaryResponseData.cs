@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using JetBrains.Annotations;
 
 namespace Fergun.Apis.Dictionary;
@@ -7,8 +6,8 @@ namespace Fergun.Apis.Dictionary;
 /// <inheritdoc cref="IDictionaryResponseData"/>
 [UsedImplicitly]
 public record DictionaryResponseData(
-    [property: JsonPropertyName("content")] IReadOnlyList<DictionaryEntryGroup> Content) : IDictionaryResponseData // luna is not always present
+    [property: JsonPropertyName("content")] DictionaryContent Content) : IDictionaryResponseData
 {
     /// <inheritdoc/>
-    IReadOnlyList<IDictionaryEntryGroup> IDictionaryResponseData.Content => Content;
+    IDictionaryContent IDictionaryResponseData.Content => Content;
 }

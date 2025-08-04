@@ -36,12 +36,11 @@ public class DictionaryClientTests
         Assert.NotNull(result);
         Assert.NotNull(result.Data);
         Assert.NotNull(result.Data.Content);
-        Assert.NotEmpty(result.Data.Content);
 
         // Only groups from "luna" or "collins" are supported
-        var groups = result.Data.Content
-            .Where(content => content.Source is "luna" or "collins")
-            .ToArray();
+        var groups = new[] { result.Data.Content?.Luna, result.Data.Content?.Collins }
+        .Where(x => x is not null)
+        .ToArray();
 
         Assert.NotEmpty(groups);
 
@@ -60,7 +59,7 @@ public class DictionaryClientTests
 
                 if (entry.Homograph is not null)
                 {
-                    Assert.Matches("^[0-9]+$", entry.Homograph);
+                    Assert.Matches("^[0-9]+$", entry.Homograph.ToString());
                 }
 
                 Assert.NotEmpty(DictionaryFormatter.FormatEntry(entry));
@@ -79,7 +78,6 @@ public class DictionaryClientTests
                     Assert.All(block.Definitions,[AssertionMethod] (definition) =>
                     {
                         Assert.NotNull(definition);
-                        Assert.False(definition.Ordinal is null && definition.Order is null);
 
                         if (definition.Subdefinitions?.Count > 0)
                         {
@@ -149,7 +147,7 @@ public class DictionaryClientTests
     [Fact]
     public async Task CanceledToken_Throws_InvalidOperationException()
     {
-        var cts = new CancellationTokenSource(0);
+        using var cts = new CancellationTokenSource(0);
 
         await Assert.ThrowsAsync<OperationCanceledException>(() => _dictionary.GetDefinitionsAsync("test", cts.Token));
         await Assert.ThrowsAsync<OperationCanceledException>(() => _dictionary.GetSearchResultsAsync("test", cts.Token));

@@ -47,7 +47,7 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        using var response = await _httpClient.GetAsync(new Uri($"https://api-portal.dictionary.com/dcom/pageData/{Uri.EscapeDataString(word)}"), cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"https://mobile-api.dictionary.com/1/dictionary/data/full?slug={Uri.EscapeDataString(word)}&context=dcom"), cancellationToken).ConfigureAwait(false);
         if (response.StatusCode != HttpStatusCode.NotFound)
         {
             response.EnsureSuccessStatusCode();

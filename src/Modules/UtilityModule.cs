@@ -280,8 +280,7 @@ public class UtilityModule : InteractionModuleBase
         _logger.LogInformation("Requesting definitions for word \"{Word}\"", word);
         var result = await _dictionary.GetDefinitionsAsync(word);
 
-        var group = result.Data?.Content
-            .FirstOrDefault(content => content.Source is "luna" or "collins");
+        var group = result.Data?.Content?.Luna ?? result.Data?.Content?.Collins;
 
         if (group is null)
         {
@@ -289,7 +288,7 @@ public class UtilityModule : InteractionModuleBase
         }
 
         var entries = group.Entries;
-        _logger.LogDebug("Received dictionary response (source(s): {Sources}, {Source} entry count: {Count})", string.Join(", ", result.Data!.Content.Select(x => x.Source)), group.Source, entries.Count);
+        _logger.LogDebug("Received dictionary response ({Source} entry count: {Count})", group.Source, entries.Count);
 
         var state = new DictionaryPaginatorState();
 
