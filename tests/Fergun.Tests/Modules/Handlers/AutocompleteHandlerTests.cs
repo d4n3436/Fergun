@@ -188,7 +188,7 @@ public class AutocompleteHandlerTests
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 
-        services.AddHttpClient<IWikipediaClient, WikipediaClient>()
+        services.AddHttpClient<IWikipediaClient, WikipediaClient>(client => client.DefaultRequestHeaders.UserAgent.ParseAdd(DiscordConfig.UserAgent))
             .SetHandlerLifetime(TimeSpan.FromMinutes(30))
             .AddRetryPolicy();
 

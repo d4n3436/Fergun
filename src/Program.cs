@@ -93,7 +93,7 @@ builder.Services.AddHttpClient<IBingVisualSearch, BingVisualSearch>();
 builder.Services.AddHttpClient<IYandexImageSearch, YandexImageSearch>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false });
 builder.Services.AddHttpClient<IGoogleLensClient, GoogleLensClient>();
 builder.Services.AddHttpClient<IUrbanDictionaryClient, UrbanDictionaryClient>();
-builder.Services.AddHttpClient<IWikipediaClient, WikipediaClient>();
+builder.Services.AddHttpClient<IWikipediaClient, WikipediaClient>(client => client.DefaultRequestHeaders.UserAgent.ParseAdd(DiscordConfig.UserAgent));
 builder.Services.AddHttpClient<IDictionaryClient, DictionaryClient>();
 builder.Services.AddHttpClient<IWolframAlphaClient, WolframAlphaClient>();
 builder.Services.AddHttpClient<IGeniusClient, GeniusClient>().ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false });

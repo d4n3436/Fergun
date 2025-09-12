@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Discord;
 using Fergun.Apis.Wikipedia;
 using Moq;
 using Xunit;
@@ -8,7 +10,7 @@ namespace Fergun.Tests.Apis;
 
 public class WikipediaClientTests
 {
-    private readonly IWikipediaClient _wikipediaClient = new WikipediaClient();
+    private readonly IWikipediaClient _wikipediaClient = new WikipediaClient(GetHttpClient());
 
     [Theory]
     [InlineData(11846, "en")] // Guitar
@@ -63,5 +65,13 @@ public class WikipediaClientTests
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), "en"));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync("test", "en"));
+    }
+
+    private static HttpClient GetHttpClient()
+    {
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DiscordConfig.UserAgent);
+
+        return httpClient;
     }
 }
