@@ -189,7 +189,7 @@ public class ImageModule : InteractionModuleBase
 
         var selection = new SelectionBuilder<ReverseImageSearchEngine>()
             .AddUser(Context.User)
-            .WithOptions(Enum.GetValues<ReverseImageSearchEngine>())
+            .WithOptions(Enum.GetValues<ReverseImageSearchEngine>().Where(x => x != ReverseImageSearchEngine.Google).ToArray()) // TODO: Remove when Google Lens reverse image search is fixed
             .WithActionOnTimeout(ActionOnStop.DisableInput)
             .WithSelectionPage(page)
             .WithLocalizedPrompts(_localizer)

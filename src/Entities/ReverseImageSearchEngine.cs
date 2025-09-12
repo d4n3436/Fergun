@@ -1,4 +1,5 @@
-﻿using Fergun.Modules;
+﻿using Discord.Interactions;
+using Fergun.Modules;
 
 namespace Fergun;
 
@@ -20,5 +21,6 @@ public enum ReverseImageSearchEngine
     /// <summary>
     /// Google.
     /// </summary>
+    [Hide] // TODO: Remove when Google Lens reverse image search is fixed
     Google = 2
 }
