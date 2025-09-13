@@ -314,27 +314,28 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
         if (type is not null)
         {
-            await _cmdStatsSemaphore.WaitAsync();
+            await using var scope = _services.CreateAsyncScope();
+            await using var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
 
-            try
+            int updated = await db.CommandStats
+                .Where(x => x.Name == commandName)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.UsageCount, p => p.UsageCount + 1));
+
+            if (updated == 0)
             {
-                await using var scope = _services.CreateAsyncScope();
-                var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
-                var dbCommand = await db.CommandStats.FirstOrDefaultAsync(x => x.Name == commandName);
+                await _cmdStatsSemaphore.WaitAsync();
 
-                if (dbCommand is null)
+                try
                 {
-                    dbCommand = new Command { Name = commandName };
-                    await db.AddAsync(dbCommand);
+                    var dbCommand = new Command { Name = commandName, UsageCount = 1 };
+
+                    await db.CommandStats.AddAsync(dbCommand);
+                    await db.SaveChangesAsync();
                 }
-
-                dbCommand.UsageCount++;
-
-                await db.SaveChangesAsync();
-            }
-            finally
-            {
-                _cmdStatsSemaphore.Release();
+                finally
+                {
+                    _cmdStatsSemaphore.Release();
+                }
             }
         }
 
