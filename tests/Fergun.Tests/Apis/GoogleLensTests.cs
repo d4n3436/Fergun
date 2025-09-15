@@ -17,7 +17,7 @@ public class GoogleLensTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
-        string text = await _googleLens.OcrAsync(url);
+        string text = await _googleLens.OcrAsync(url, TestContext.Current.CancellationToken);
 
         Assert.NotNull(text);
         Assert.NotEmpty(text);
@@ -28,7 +28,7 @@ public class GoogleLensTests
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task OcrAsync_Throws_GoogleLensException_If_Image_Is_Invalid(string url)
     {
-        var task = _googleLens.OcrAsync(url);
+        var task = _googleLens.OcrAsync(url, TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<GoogleLensException>(() => task);
     }
@@ -39,7 +39,7 @@ public class GoogleLensTests
     [InlineData("https://r.bing.com/rp/NFrQjXWivF4omoTPSU03A6aosg0.jpg", "es")]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, string? language)
     {
-        var results = await _googleLens.ReverseImageSearchAsync(url, language);
+        var results = await _googleLens.ReverseImageSearchAsync(url, language, TestContext.Current.CancellationToken);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -55,7 +55,7 @@ public class GoogleLensTests
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task ReverseImageSearchAsync_Throws_GoogleLensException_If_Image_Is_Invalid(string url)
     {
-        var task = _googleLens.ReverseImageSearchAsync(url);
+        var task = _googleLens.ReverseImageSearchAsync(url, cancellationToken: TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<GoogleLensException>(() => task);
     }
@@ -66,7 +66,7 @@ public class GoogleLensTests
         (_googleLens as IDisposable)?.Dispose();
         (_googleLens as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _googleLens.ReverseImageSearchAsync(AutoFaker.Generate<string>(), It.IsAny<string?>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _googleLens.ReverseImageSearchAsync(AutoFaker.Generate<string>(), It.IsAny<string?>(), TestContext.Current.CancellationToken));
     }
 
     [Fact]

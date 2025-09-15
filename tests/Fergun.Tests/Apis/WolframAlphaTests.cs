@@ -45,7 +45,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_Successful_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("Chicag", "en");
+        var result = await _wolframAlphaClient.SendQueryAsync("Chicag", "en", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(WolframAlphaResultType.Success, result.Type);
         Assert.NotEmpty(result.Warnings);
@@ -77,7 +77,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_DidYouMean_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("kitten danger", "en", false);
+        var result = await _wolframAlphaClient.SendQueryAsync("kitten danger", "en", false, TestContext.Current.CancellationToken);
 
         Assert.Equal(WolframAlphaResultType.DidYouMean, result.Type);
         Assert.NotEmpty(result.DidYouMeans);
@@ -93,7 +93,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_FutureTopic_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("Microsoft Windows", "es");
+        var result = await _wolframAlphaClient.SendQueryAsync("Microsoft Windows", "es", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(WolframAlphaResultType.FutureTopic, result.Type);
         Assert.NotNull(result.FutureTopic);
@@ -104,7 +104,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_No_Result()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync("oadf lds", "ja");
+        var result = await _wolframAlphaClient.SendQueryAsync("oadf lds", "ja", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(WolframAlphaResultType.NoResult, result.Type);
     }
@@ -112,7 +112,7 @@ public class WolframAlphaTests
     [Fact]
     public async Task SendQueryAsync_Returns_Error()
     {
-        var result = await _wolframAlphaClient.SendQueryAsync(string.Empty, "en");
+        var result = await _wolframAlphaClient.SendQueryAsync(string.Empty, "en", cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(WolframAlphaResultType.Error, result.Type);
         Assert.NotNull(result.ErrorInfo);

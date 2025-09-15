@@ -19,7 +19,7 @@ public class GeniusClientTests
     [InlineData("music")]
     public async Task SearchSongsAsync_Returns_Valid_Songs(string query)
     {
-        var results = await _geniusClient.SearchSongsAsync(query);
+        var results = await _geniusClient.SearchSongsAsync(query, TestContext.Current.CancellationToken);
 
         Assert.All(results, [AssertionMethod] (x) =>
         {
@@ -46,7 +46,7 @@ public class GeniusClientTests
     [InlineData(3925554, true, false, false)] // Alan Walker - Faded (Instrumental)
     public async Task GetSongAsync_Returns_Valid_Songs(int id, bool isInstrumental, bool hasSpotifyTrackId, bool isUnreleased)
     {
-        var result = await _geniusClient.GetSongAsync(id);
+        var result = await _geniusClient.GetSongAsync(id, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.NotEmpty(result.ArtistNames);
@@ -74,7 +74,7 @@ public class GeniusClientTests
     [Fact]
     public async Task GetSongAsync_With_Invalid_Id_Returns_Null_Song()
     {
-        var result = await _geniusClient.GetSongAsync(0);
+        var result = await _geniusClient.GetSongAsync(0, TestContext.Current.CancellationToken);
 
         Assert.Null(result);
     }

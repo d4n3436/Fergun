@@ -31,7 +31,7 @@ public class DictionaryClientTests
     [InlineData("satire")]
     public async Task GetDefinitionsAsync_ReturnsValidResults(string word)
     {
-        var result = await _dictionary.GetDefinitionsAsync(word);
+        var result = await _dictionary.GetDefinitionsAsync(word, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Data);
@@ -103,7 +103,7 @@ public class DictionaryClientTests
     [InlineData("run")]
     public async Task GetSearchResultsAsync_ReturnsValidResults(string word)
     {
-        var results = await _dictionary.GetSearchResultsAsync(word);
+        var results = await _dictionary.GetSearchResultsAsync(word, TestContext.Current.CancellationToken);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -130,8 +130,8 @@ public class DictionaryClientTests
     [Fact]
     public async Task Empty_Parameters_Throws_ArgumentException()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => _dictionary.GetDefinitionsAsync(string.Empty));
-        await Assert.ThrowsAsync<ArgumentException>(() => _dictionary.GetSearchResultsAsync(string.Empty));
+        await Assert.ThrowsAsync<ArgumentException>(() => _dictionary.GetDefinitionsAsync(string.Empty, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ArgumentException>(() => _dictionary.GetSearchResultsAsync(string.Empty, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -140,8 +140,8 @@ public class DictionaryClientTests
         (_dictionary as IDisposable)?.Dispose();
         (_dictionary as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _dictionary.GetDefinitionsAsync("test"));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _dictionary.GetSearchResultsAsync("test"));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _dictionary.GetDefinitionsAsync("test", TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _dictionary.GetSearchResultsAsync("test", TestContext.Current.CancellationToken));
     }
 
     [Fact]

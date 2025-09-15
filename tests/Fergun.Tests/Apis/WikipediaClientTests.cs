@@ -17,7 +17,7 @@ public class WikipediaClientTests
     [InlineData(3328953, "es")] // Wikipedia
     public async Task GetArticleAsync_Returns_Valid_Article(int id, string language)
     {
-        var article = await _wikipediaClient.GetArticleAsync(id, language);
+        var article = await _wikipediaClient.GetArticleAsync(id, language, TestContext.Current.CancellationToken);
 
         Assert.NotNull(article);
         Assert.NotNull(article.Title);
@@ -39,7 +39,7 @@ public class WikipediaClientTests
     [InlineData(1, "es")]
     public async Task GetArticleAsync_Returns_Null_Article(int id, string language)
     {
-        var article = await _wikipediaClient.GetArticleAsync(id, language);
+        var article = await _wikipediaClient.GetArticleAsync(id, language, TestContext.Current.CancellationToken);
 
         Assert.Null(article);
     }
@@ -50,7 +50,7 @@ public class WikipediaClientTests
     [InlineData("c", "fr")]
     public async Task SearchArticlesAsync_Returns_Results(string term, string language)
     {
-        var results = await _wikipediaClient.SearchArticlesAsync(term, language);
+        var results = await _wikipediaClient.SearchArticlesAsync(term, language, TestContext.Current.CancellationToken);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -63,8 +63,8 @@ public class WikipediaClientTests
         (_wikipediaClient as IDisposable)?.Dispose();
         (_wikipediaClient as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), "en"));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync("test", "en"));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.GetArticleAsync(It.IsAny<int>(), "en", TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _wikipediaClient.SearchArticlesAsync("test", "en", TestContext.Current.CancellationToken));
     }
 
     private static HttpClient GetHttpClient()

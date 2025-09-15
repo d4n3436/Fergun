@@ -17,7 +17,7 @@ public class BingVisualSearchTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Lorem_ipsum_design.svg/1008px-Lorem_ipsum_design.svg.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
-        string text = await _bingVisualSearch.OcrAsync(url);
+        string text = await _bingVisualSearch.OcrAsync(url, TestContext.Current.CancellationToken);
 
         Assert.NotNull(text);
         Assert.NotEmpty(text);
@@ -28,7 +28,7 @@ public class BingVisualSearchTests
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task OcrAsync_Returns_No_Text_If_Image_Is_Invalid(string url)
     {
-        string text = await _bingVisualSearch.OcrAsync(url);
+        string text = await _bingVisualSearch.OcrAsync(url, TestContext.Current.CancellationToken);
 
         Assert.Empty(text);
     }
@@ -39,7 +39,7 @@ public class BingVisualSearchTests
     [InlineData("https://r.bing.com/rp/NFrQjXWivF4omoTPSU03A6aosg0.jpg", BingSafeSearchLevel.Strict, "es")]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, BingSafeSearchLevel safeSearch, string? language)
     {
-        var results = await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language);
+        var results = await _bingVisualSearch.ReverseImageSearchAsync(url, safeSearch, language, TestContext.Current.CancellationToken);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -62,7 +62,7 @@ public class BingVisualSearchTests
     [InlineData("https://simpl.info/bigimage/bigImage.jpg")] // 91 MB file
     public async Task ReverseImageSearchAsync_Returns_Empty_Results_If_Image_Is_Invalid(string url)
     {
-        var results = await _bingVisualSearch.ReverseImageSearchAsync(url);
+        var results = await _bingVisualSearch.ReverseImageSearchAsync(url, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Empty(results);
     }
@@ -73,8 +73,8 @@ public class BingVisualSearchTests
         (_bingVisualSearch as IDisposable)?.Dispose();
         (_bingVisualSearch as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync("https://example.com/image.png"));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync("https://example.com/image.png", It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.OcrAsync("https://example.com/image.png", TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _bingVisualSearch.ReverseImageSearchAsync("https://example.com/image.png", It.IsAny<BingSafeSearchLevel>(), It.IsAny<string?>(), TestContext.Current.CancellationToken));
     }
 
     [Fact]

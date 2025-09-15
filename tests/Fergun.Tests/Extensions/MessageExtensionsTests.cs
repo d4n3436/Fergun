@@ -12,7 +12,7 @@ namespace Fergun.Tests.Extensions;
 public class MessageExtensionsTests
 {
     [Theory]
-    [MemberData(nameof(GetRandomStrings))]
+    [MemberData(nameof(GetRandomStringsData))]
     public void IMessage_GetText_Should_Return_Text_From_Content(string content)
     {
         var messageMock = new Mock<IMessage>();
@@ -61,14 +61,15 @@ public class MessageExtensionsTests
 
     public static TheoryData<string, Embed> GetContentsAndEmbeds()
     {
-        return GetRandomStrings().Cast<string>().Zip(GetEmbeds()).ToTheoryData();
+        return GetRandomStrings().Zip(GetEmbeds()).ToTheoryData();
     }
 
-    public static TheoryData<string> GetRandomStrings()
+    public static IEnumerable<string> GetRandomStrings()
     {
         var faker = new Faker();
 
-        return faker.MakeLazy(10, () => faker.Random.String2(2))
-            .ToTheoryData();
+        return faker.MakeLazy(10, () => faker.Random.String2(2));
     }
+
+    public static TheoryData<string> GetRandomStringsData() => GetRandomStrings().ToTheoryData();
 }

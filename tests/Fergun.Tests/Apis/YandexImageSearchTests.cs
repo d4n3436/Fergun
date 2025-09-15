@@ -21,7 +21,7 @@ public class YandexImageSearchTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/5/57/Lorem_Ipsum_Helvetica.png")]
     public async Task OcrAsync_Returns_Text(string url)
     {
-        string? text = await _yandexImageSearch.OcrAsync(url);
+        string? text = await _yandexImageSearch.OcrAsync(url, TestContext.Current.CancellationToken);
 
         Assert.NotNull(text);
         Assert.NotEmpty(text);
@@ -42,7 +42,7 @@ public class YandexImageSearchTests
 
         var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
 
-        var task = yandexImageSearch.OcrAsync("https://example.com");
+        var task = yandexImageSearch.OcrAsync("https://example.com", TestContext.Current.CancellationToken);
 
         var exception = await Assert.ThrowsAsync<YandexException>(() => task);
         Assert.Equal(message, exception.Message);
@@ -62,7 +62,7 @@ public class YandexImageSearchTests
 
         var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
 
-        var task = yandexImageSearch.OcrAsync("https://example.com");
+        var task = yandexImageSearch.OcrAsync("https://example.com", TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<YandexException>(() => task);
     }
@@ -73,7 +73,7 @@ public class YandexImageSearchTests
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/0e/Landscape-2454891_960_720.jpg", YandexSearchFilterMode.Family)]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, YandexSearchFilterMode mode)
     {
-        var results = await _yandexImageSearch.ReverseImageSearchAsync(url, mode);
+        var results = await _yandexImageSearch.ReverseImageSearchAsync(url, mode, TestContext.Current.CancellationToken);
 
         Assert.NotNull(results);
         Assert.NotEmpty(results);
@@ -96,7 +96,7 @@ public class YandexImageSearchTests
 
         var yandexImageSearch = new YandexImageSearch(new HttpClient(messageHandlerMock.Object));
 
-        var task = yandexImageSearch.ReverseImageSearchAsync("https://example.com/image.png");
+        var task = yandexImageSearch.ReverseImageSearchAsync("https://example.com/image.png", cancellationToken: TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<YandexException>(() => task);
     }
@@ -107,8 +107,8 @@ public class YandexImageSearchTests
         (_yandexImageSearch as IDisposable)?.Dispose();
         (_yandexImageSearch as IDisposable)?.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(AutoFaker.Generate<string>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(AutoFaker.Generate<string>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.OcrAsync(AutoFaker.Generate<string>(), TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _yandexImageSearch.ReverseImageSearchAsync(AutoFaker.Generate<string>(), cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
