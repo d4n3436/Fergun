@@ -8,18 +8,19 @@ You can invite Fergun to your Discord server clicking [here](https://discord.com
 Have any questions or need help with the bot? Join the [support server](https://discord.gg/V3TgaZRUPX).
 
 ## Features
-- Translate text from and to more than 140 languages using a robust translation module that is powered by popular translators from Google Translate, Microsoft Translator and Yandex Translate
+- Translate text from and to more than 140 languages using a robust translation module that is powered by popular translators like Google Translate, Microsoft Translator and Yandex Translate
 - Image search from Google and DuckDuckGo
-- Reverse image search from Google, Bing and Yandex
-- Perform OCR to images using Google, Bing and Yandex
+- Reverse image search using Google, Bing and Yandex
+- Perform OCR on images using Google, Bing and Yandex
 - Perform text-to-speech using Google and Microsoft Azure
 - Translate a text multiple times using different translators for bad translations
 - Get complete definitions of words from Dictionary.com
-- Get complete solutions to your problems using Wolfram Alpha
+- Get complete answers to your queries using Wolfram Alpha
 - Get inspirational quotes from InspiroBot
-- Search or get random definitions from Urban Dictionary
-- Search and get Wikipedia articles
-- Search and get music lyrics from Genius
+- Search for or get random definitions from Urban Dictionary
+- Search for Wikipedia articles
+- Search for song lyrics from Genius
+- Get the lyrics of the song you're listening to on Spotify
 - Search YouTube videos
 - Get user information and server/global/default avatar
 - Generate images of colors
@@ -60,7 +61,7 @@ Have any questions or need help with the bot? Join the [support server](https://
   
 * Start the bot by double clicking `Fergun.exe` or with the command `dotnet Fergun.dll`.
 
-  The application should create the SQLite database automatically and start the bot.
+  The application should automatically create the SQLite database and start the bot.
 
 * To start using Fergun, simply type `/` in a server with the bot and use its commands.
 
