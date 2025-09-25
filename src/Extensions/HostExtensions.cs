@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using Fergun.Data;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,8 @@ public static class HostExtensions
     /// <returns>The host.</returns>
     public static IHost ApplyMigrations(this IHost host)
     {
+        Directory.CreateDirectory("data");
+
         using var scope = host.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
         int pendingMigrations = db.Database.GetPendingMigrations().Count();

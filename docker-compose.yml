@@ -1,0 +1,15 @@
+services:
+  fergun:
+    container_name: fergun
+    build: .
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+    volumes:
+      - ./src/appsettings.Production.json:/app/appsettings.Production.json
+      - fergun_logs:/app/logs
+      - fergun_db:/app/data
+    restart: unless-stopped
+
+volumes:
+  fergun_db:
+  fergun_logs:
