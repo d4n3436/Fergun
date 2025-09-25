@@ -277,14 +277,14 @@ public class OtherModule : InteractionModuleBase
         };
 
         var elapsed = DateTimeOffset.UtcNow - Process.GetCurrentProcess().StartTime;
-        string ramUsage = processRamUsage.Bytes().ToString(_localizer.CurrentCulture);
+        string ramUsage = processRamUsage.Bytes().ToString(CultureInfo.InvariantCulture);
         if (totalRam > 0)
         {
             if (totalRamUsage > 0)
             {
-                string usagePercentage = ((double)processRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
-                string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", _localizer.CurrentCulture);
-                ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes().ToString(_localizer.CurrentCulture)} ({totalUsagePercentage})";
+                string usagePercentage = ((double)processRamUsage / totalRam).ToString("P2", CultureInfo.InvariantCulture);
+                string totalUsagePercentage = ((double)totalRamUsage / totalRam).ToString("P2", CultureInfo.InvariantCulture);
+                ramUsage += $" ({usagePercentage}) / {totalRamUsage.Bytes().ToString(CultureInfo.InvariantCulture)} ({totalUsagePercentage})";
             }
 
             ramUsage += $" / {totalRam.Bytes()}";
@@ -295,7 +295,7 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["OperatingSystem"], os, true)
             .AddField("\u200b", "\u200b", true)
             .AddField("CPU", cpu, true)
-            .AddField(_localizer["CPUUsage"], cpuUsage.ToString("P0", _localizer.CurrentCulture), true)
+            .AddField(_localizer["CPUUsage"], cpuUsage.ToString("P0", CultureInfo.InvariantCulture), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["RAMUsage"], ramUsage, true)
             .AddField(_localizer["Library"], $"Discord.Net v{DiscordConfig.Version}", true)

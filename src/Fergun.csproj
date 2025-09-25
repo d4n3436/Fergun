@@ -8,6 +8,8 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <Version>2.0-beta</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PredefinedCulturesOnly>false</PredefinedCulturesOnly>
   </PropertyGroup>
 
   <ItemGroup>
