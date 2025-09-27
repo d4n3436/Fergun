@@ -9,7 +9,7 @@ namespace Fergun.Apis.Dictionary;
 public record DictionaryEntryBlock(
     [property: JsonPropertyName("definitions")] IReadOnlyList<DictionaryDefinition> Definitions,
     [property: JsonPropertyName("pos")] string? PartOfSpeech,
-    [property: JsonPropertyName("posSupplementaryInfo")] string SupplementaryInfo) : IDictionaryEntryBlock
+    [property: JsonPropertyName("posSupplementaryInfo")] string? SupplementaryInfo) : IDictionaryEntryBlock
 {
     /// <inheritdoc/>
     IReadOnlyList<IDictionaryDefinition> IDictionaryEntryBlock.Definitions => Definitions;

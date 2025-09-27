@@ -319,8 +319,17 @@ public class UtilityModule : InteractionModuleBase
             var options = entry
                 .PartOfSpeechBlocks
                 .Select((x, i) =>
-                    new SelectMenuOptionBuilder((x.PartOfSpeech ?? (x.SupplementaryInfo.Length == 0 ? entry.Entry : x.SupplementaryInfo)).Truncate(SelectMenuOptionBuilder.MaxSelectLabelLength),
-                        i.ToString(), isDefault: i == state.CurrentCategoryIndex))
+                {
+                    string? label = (x.PartOfSpeech?.Length ?? 0, x.SupplementaryInfo?.Length ?? 0) switch
+                    {
+                        (0, 0) => entry.Entry,
+                        (0, _) => x.SupplementaryInfo,
+                        (_, _) => x.PartOfSpeech,
+                    };
+
+                    return new SelectMenuOptionBuilder(label.Truncate(SelectMenuOptionBuilder.MaxSelectLabelLength),
+                                            i.ToString(), isDefault: i == state.CurrentCategoryIndex);
+                })
                 .ToList();
 
             string extraInfo = DictionaryFormatter.FormatExtraInformation(entry);

@@ -20,5 +20,5 @@ public interface IDictionaryEntryBlock
     /// <summary>
     /// Gets the supplementary info.
     /// </summary>
-    string SupplementaryInfo { get; }
+    string? SupplementaryInfo { get; }
 }
