@@ -30,13 +30,13 @@ public class LinuxHardwareInfo : IHardwareInfo
 
         string? cpuName = null;
 
-        if (TryReadFileLines(CpuInfoPath, out string[] lines))
+        if (TryReadFileLines(CpuInfoPath, out ReadOnlySpan<string> lines))
         {
             foreach (string line in lines)
             {
                 if (line.StartsWith(modelName, StringComparison.Ordinal))
                 {
-                    cpuName = line.AsSpan(modelName.Length).Trim(": ").ToString();
+                    cpuName = line.AsSpan(modelName.Length).Trim(" \t:").ToString();
                     break;
                 }
             }
@@ -63,7 +63,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         const string prettyNameId = "PRETTY_NAME=";
 
         string osName = string.Empty;
-        if (TryReadFileLines(OsReleasePath, out string[] lines))
+        if (TryReadFileLines(OsReleasePath, out ReadOnlySpan<string> lines))
         {
             foreach (string line in lines)
             {
@@ -92,7 +92,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         long totalMemory = 0;
         long availableMemory = 0;
 
-        if (TryReadFileLines(MemInfoPath, out string[] lines))
+        if (TryReadFileLines(MemInfoPath, out ReadOnlySpan<string> lines))
         {
             foreach (string line in lines)
             {
@@ -129,7 +129,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         }
     }
 
-    private static bool TryReadFileLines(string path, out string[] lines)
+    private static bool TryReadFileLines(string path, out ReadOnlySpan<string> lines)
     {
         if (File.Exists(path))
         {
