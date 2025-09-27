@@ -69,7 +69,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         var document = JsonDocument.Parse(bytes[6..]); // Skip magic chars
 
         var root = document.RootElement[0][2];
-        if (root[0].ValueKind == JsonValueKind.Null)
+        if (root.GetArrayLength() == 0 || root[0].ValueKind == JsonValueKind.Null)
         {
             return string.Empty;
         }
