@@ -30,7 +30,7 @@ public class LinuxHardwareInfo : IHardwareInfo
 
         string? cpuName = null;
 
-        if (TryReadFileLines(CpuInfoPath, out ReadOnlySpan<string> lines))
+        if (TryReadFileLines(CpuInfoPath, out var lines))
         {
             foreach (string line in lines)
             {
@@ -63,7 +63,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         const string prettyNameId = "PRETTY_NAME=";
 
         string osName = string.Empty;
-        if (TryReadFileLines(OsReleasePath, out ReadOnlySpan<string> lines))
+        if (TryReadFileLines(OsReleasePath, out var lines))
         {
             foreach (string line in lines)
             {
@@ -92,7 +92,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         long totalMemory = 0;
         long availableMemory = 0;
 
-        if (TryReadFileLines(MemInfoPath, out ReadOnlySpan<string> lines))
+        if (TryReadFileLines(MemInfoPath, out var lines))
         {
             foreach (string line in lines)
             {
@@ -164,17 +164,32 @@ public class LinuxHardwareInfo : IHardwareInfo
             CreateNoWindow = true
         };
 
-        using var process = Process.Start(processInfo);
-        if (process is null)
-            return false;
+        Process? process = null;
+        try
+        {
+            process = Process.Start(processInfo);
 
-        if (!process.WaitForExit(10000))
-            return false;
+            if (process is null)
+                return false;
 
-        if (process.ExitCode != 0)
-            return false;
+            if (!process.WaitForExit(10000))
+                return false;
 
-        output = process.StandardOutput.ReadToEnd();
+            if (process.ExitCode != 0)
+                return false;
+
+            output = process.StandardOutput.ReadToEnd();
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine("Failed to start process\n{0}", e);
+            return false;
+        }
+        finally
+        {
+            process?.Dispose();
+        }
+
         return true;
     }
 }
