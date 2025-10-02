@@ -1,14 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /app
 
-# Copy everything
-COPY . ./
-# Restore as distinct layers
-RUN dotnet restore src/Fergun.csproj
-# Build and publish a release
-RUN dotnet publish src/Fergun.csproj -o out
+# copy csproj and restore as distinct layers
+COPY src/Fergun.csproj .
+RUN dotnet restore
 
-# Build runtime image
+# copy everything else and build app
+COPY src/ .
+RUN dotnet publish -o out --no-restore
+
+# final stage/image
 FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
 WORKDIR /app
 COPY --from=build /app/out .
