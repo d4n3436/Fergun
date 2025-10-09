@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Configuration;
 using Fergun.Extensions;
 using Fergun.Interactive;
@@ -31,6 +30,8 @@ public class OwnerModule : InteractionModuleBase
         .WithImports("System.Linq", "Discord", "Discord.Rest", "Discord.Interactions",
             "Fergun", "Fergun.Data", "Fergun.Modules", "Fergun.Extensions", "Microsoft.Extensions.DependencyInjection"));
 
+    private const string EvalModalKey = "eval-modal";
+
     private readonly IServiceProvider _services;
     private readonly ILogger<OwnerModule> _logger;
     private readonly IFergunLocalizer<OwnerModule> _localizer;
@@ -48,6 +49,8 @@ public class OwnerModule : InteractionModuleBase
         _fergunOptions = fergunOptions.Value;
         _emotes = emotes;
     }
+
+    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("cmd", "Starts a process and displays the output.")]
     public async Task<RuntimeResult> CmdAsync(
@@ -98,29 +101,22 @@ public class OwnerModule : InteractionModuleBase
     [SlashCommand("eval", "Evaluates C# code.")]
     public async Task<RuntimeResult> EvalAsync()
     {
-        var modal = new ModalBuilder()
-            .WithCustomId(Context.Interaction.Id.ToString(CultureInfo.InvariantCulture))
-            .WithTitle(_localizer["EvalPrompt"])
-            .AddTextInput(_localizer["Code"], "code", TextInputStyle.Paragraph, "2 + 2", required: true)
-            .Build();
-
         _logger.LogDebug("Sending eval modal");
-        await Context.Interaction.RespondWithModalAsync(modal);
 
-        var interactiveResult = await _interactive.NextInteractionAsync(x => x is SocketModal modalInteraction
-        && modalInteraction.Data.CustomId == Context.Interaction.Id.ToString(CultureInfo.InvariantCulture), null, TimeSpan.FromMinutes(2));
+        await Context.Interaction.RespondWithModalAsync<EvalModal>(EvalModalKey,
+            modifyModal: b => b.WithTitle(_localizer["EvalPrompt"]).UpdateTextInput(EvalModal.CodeCustomId, t => t.Label = _localizer["Code"]));
 
-        if (!interactiveResult.IsSuccess)
-        {
-            return FergunResult.FromError(_localizer["ModalTimeout"]);
-        }
+        return FergunResult.FromSuccess();
+    }
 
-        await interactiveResult.Value.DeferAsync();
+    [ModalInteraction(EvalModalKey)]
+    public async Task<RuntimeResult> SubmitCodeAsync(EvalModal modal)
+    {
+        await Context.Interaction.DeferAsync();
 
-        string code = ((SocketModal)interactiveResult.Value).Data.Components.First().Value;
-
+        string code = modal.Code;
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        object result = null!;
+        object? result = null;
         CompilationErrorException? exception = null;
 
         _logger.LogDebug("Evaluating C# code...");
@@ -133,10 +129,8 @@ public class OwnerModule : InteractionModuleBase
         {
             exception = e;
         }
-        finally
-        {
-            sw.Stop();
-        }
+
+        sw.Stop();
 
         if (exception is null)
         {
@@ -153,9 +147,9 @@ public class OwnerModule : InteractionModuleBase
                 .WithColor(Color.Orange)
                 .Build();
 
-            await interactiveResult.Value.FollowupAsync(embed: embed);
+            await Context.Interaction.FollowupAsync(embed: embed);
 
-            return FergunResult.FromSilentError();
+            return FergunResult.FromSuccess();
         }
 
         var chunks = (result?.ToString() ?? string.Empty).SplitForPagination(EmbedFieldBuilder.MaxFieldValueLength - 9).ToArray();
@@ -171,9 +165,9 @@ public class OwnerModule : InteractionModuleBase
                 .WithColor(Color.Orange)
                 .Build();
 
-            await interactiveResult.Value.FollowupAsync(embed: embed);
+            await Context.Interaction.FollowupAsync(embed: embed);
 
-            return FergunResult.FromSilentError();
+            return FergunResult.FromSuccess();
         }
 
         var paginator = new LazyPaginatorBuilder()
@@ -187,7 +181,7 @@ public class OwnerModule : InteractionModuleBase
             .WithLocalizedPrompts(_localizer)
             .Build();
 
-        await _interactive.SendPaginatorAsync(paginator, interactiveResult.Value, TimeSpan.FromMinutes(20),
+        await _interactive.SendPaginatorAsync(paginator, Context.Interaction, TimeSpan.FromMinutes(20),
             InteractionResponseType.DeferredChannelMessageWithSource, cancellationToken: CancellationToken.None);
 
         return FergunResult.FromSuccess();

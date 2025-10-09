@@ -58,6 +58,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _interactionService.SlashCommandExecuted += SlashCommandExecutedAsync;
         _interactionService.ContextCommandExecuted += ContextCommandExecutedAsync;
         _interactionService.ComponentCommandExecuted += ComponentCommandExecutedAsync;
+        _interactionService.ModalCommandExecuted += ModalCommandExecutedAsync;
         _interactionService.AutocompleteHandlerExecuted += AutocompleteHandlerExecutedAsync;
         _shardedClient.InteractionCreated += InteractionCreatedAsync;
 
@@ -218,11 +219,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             try
             {
-                await HandleCommandExecutedAsync(slashCommand.ToString(), slashCommand.CommandType, context, result);
+                await HandleCommandExecutedAsync(slashCommand.ToString(), InteractionCommandType.Slash, context, result);
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
+                _logger.LogWarning(e, "The slash-command-executed handler has thrown an exception");
             }
         });
 
@@ -235,11 +236,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             try
             {
-                await HandleCommandExecutedAsync(contextCommand.Name, contextCommand.CommandType, context, result);
+                await HandleCommandExecutedAsync(contextCommand.Name, contextCommand.CommandType.ToInteractionCommandType(), context, result);
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
+                _logger.LogWarning(e, "The context-command-executed handler has thrown an exception");
             }
         });
 
@@ -255,11 +256,31 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         {
             try
             {
-                await HandleCommandExecutedAsync(componentCommand.Name, null, context, result);
+                await HandleCommandExecutedAsync(componentCommand.Name, InteractionCommandType.Component, context, result);
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "The command-executed handler has thrown an exception");
+                _logger.LogWarning(e, "The component-command-executed handler has thrown an exception");
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private Task ModalCommandExecutedAsync(ModalCommandInfo? modalCommand, IInteractionContext context, IResult result)
+    {
+        if (modalCommand is null)
+            return Task.CompletedTask;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await HandleCommandExecutedAsync(modalCommand.Name, InteractionCommandType.Modal, context, result);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e, "The modal-command-executed handler has thrown an exception");
             }
         });
 
@@ -308,11 +329,11 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    private async Task HandleCommandExecutedAsync(string commandName, ApplicationCommandType? type, IInteractionContext context, IResult result)
+    private async Task HandleCommandExecutedAsync(string commandName, InteractionCommandType type, IInteractionContext context, IResult result)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (type is not null)
+        if (type.IsApplicationCommand())
         {
             await using var scope = _services.CreateAsyncScope();
             await using var db = scope.ServiceProvider.GetRequiredService<FergunContext>();
@@ -339,12 +360,10 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
         }
 
-        string commandType = type?.ToString() ?? "Component";
-
         if (result.IsSuccess)
         {
             _logger.LogInformation("Executed {Type} Command \"{Command}\" for {User} ({Id}) in {Context}",
-                commandType, commandName, context.User, context.User.Id, context.Display());
+                type, commandName, context.User, context.User.Id, context.Display());
 
             return;
         }
@@ -367,7 +386,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
             }
 
             _logger.LogError(exception, "Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context} due to an exception",
-                commandType, commandName, context.User, context.User.Id, context.Display());
+                type, commandName, context.User, context.User.Id, context.Display());
 
             var localizer = _services.GetRequiredService<IFergunLocalizer<SharedResource>>();
             localizer.CurrentCulture = CultureInfo.GetCultureInfo(context.Interaction.GetLanguageCode());
@@ -376,12 +395,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         else if (result.Error == InteractionCommandError.Unsuccessful)
         {
             _logger.LogInformation("Unsuccessful execution of {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
+                type, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
         else
         {
             _logger.LogWarning("Failed to execute {Type} Command \"{Command}\" for {User} ({Id}) in {Context}. Reason: {Reason}",
-                commandType, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
+                type, commandName, context.User, context.User.Id, context.Display(), englishMessage ?? message);
         }
 
         var embed = new EmbedBuilder()

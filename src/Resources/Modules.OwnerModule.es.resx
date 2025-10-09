@@ -135,9 +135,6 @@
   <data name="EvalResults" xml:space="preserve">
     <value>Resultados de eval</value>
   </data>
-  <data name="ModalTimeout" xml:space="preserve">
-    <value>Tardaste demasiado en responder!</value>
-  </data>
   <data name="NoOutput" xml:space="preserve">
     <value>Sin salida.</value>
   </data>
