@@ -62,7 +62,12 @@ public class OwnerModule : InteractionModuleBase
 
         if (string.IsNullOrWhiteSpace(result))
         {
-            await Context.Interaction.FollowupAsync(_localizer["NoOutput"]);
+            var embed = new EmbedBuilder()
+                .WithDescription($"ℹ️ {_localizer["NoOutput"]}")
+                .WithColor(Color.Orange)
+                .Build();
+
+            await Context.Interaction.FollowupAsync(embed: embed);
         }
         else
         {

@@ -139,6 +139,6 @@
     <value>You took too long to respond!</value>
   </data>
   <data name="NoOutput" xml:space="preserve">
-    <value>No Output</value>
+    <value>No output.</value>
   </data>
 </root>
