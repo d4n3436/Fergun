@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="cmd.command.description" xml:space="preserve">
-    <value>El comando a ejecutar.</value>
-  </data>
-  <data name="cmd.command.name" xml:space="preserve">
-    <value>comando</value>
-  </data>
-  <data name="cmd.description" xml:space="preserve">
-    <value>Ejecuta un comando.</value>
-  </data>
-  <data name="cmd.name" xml:space="preserve">
-    <value>cmd</value>
-  </data>
-  <data name="cmd.no-embed.description" xml:space="preserve">
-    <value>Sin embed.</value>
-  </data>
-  <data name="cmd.no-embed.name" xml:space="preserve">
-    <value>sin-embed</value>
-  </data>
   <data name="Code" xml:space="preserve">
     <value>Código</value>
   </data>
@@ -143,12 +125,6 @@
   </data>
   <data name="ElapsedTime" xml:space="preserve">
     <value>Tiempo transcurrido: {0}ms</value>
-  </data>
-  <data name="eval.description" xml:space="preserve">
-    <value>Evalúa código en C#.</value>
-  </data>
-  <data name="eval.name" xml:space="preserve">
-    <value>eval</value>
   </data>
   <data name="EvalPaginatorFooter" xml:space="preserve">
     <value>Tiempo transcurrido: {0}ms | Página {1} de {2}</value>
@@ -164,5 +140,35 @@
   </data>
   <data name="NoOutput" xml:space="preserve">
     <value>Sin salida.</value>
+  </data>
+  <data name="cmd.arguments.name" xml:space="preserve">
+    <value>argumentos</value>
+  </data>
+  <data name="cmd.file-name.description" xml:space="preserve">
+    <value>El nombre del proceso a iniciar.</value>
+  </data>
+  <data name="cmd.file-name.name" xml:space="preserve">
+    <value>nombre-de-archivo</value>
+  </data>
+  <data name="cmd.description" xml:space="preserve">
+    <value>Inicia un proceso y muestra la salida.</value>
+  </data>
+  <data name="cmd.name" xml:space="preserve">
+    <value>cmd</value>
+  </data>
+  <data name="cmd.no-embed.description" xml:space="preserve">
+    <value>Sin embed.</value>
+  </data>
+  <data name="cmd.no-embed.name" xml:space="preserve">
+    <value>sin-embed</value>
+  </data>
+  <data name="eval.description" xml:space="preserve">
+    <value>Evalúa código en C#.</value>
+  </data>
+  <data name="eval.name" xml:space="preserve">
+    <value>eval</value>
+  </data>
+  <data name="cmd.arguments.description" xml:space="preserve">
+    <value>Los argumentos a usar.</value>
   </data>
 </root>

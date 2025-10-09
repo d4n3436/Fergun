@@ -49,13 +49,16 @@ public class OwnerModule : InteractionModuleBase
         _emotes = emotes;
     }
 
-    [SlashCommand("cmd", "Executes a command.")]
-    public async Task<RuntimeResult> CmdAsync([Summary(description: "The command to execute.")] string command, [Summary(description: "No embed.")] bool noEmbed = false)
+    [SlashCommand("cmd", "Starts a process and displays the output.")]
+    public async Task<RuntimeResult> CmdAsync(
+        [Summary(description: "The name of the file to start.")] string fileName,
+        [Summary(description: "The arguments to use.")] string? arguments = null,
+        [Summary(description: "No embed.")] bool noEmbed = false)
     {
         await Context.Interaction.DeferAsync();
 
-        _logger.LogInformation("Executing command: \"{Command}\", no embed: {NoEmbed}", command, noEmbed);
-        string? result = CommandUtils.RunCommand(command);
+        _logger.LogInformation("Starting process: {FileName} with arguments: {Arguments}, no embed: {NoEmbed}", fileName, arguments ?? "(None)", noEmbed);
+        string? result = await CommandUtils.StartProcessAsync(fileName, arguments);
 
         if (string.IsNullOrWhiteSpace(result))
         {

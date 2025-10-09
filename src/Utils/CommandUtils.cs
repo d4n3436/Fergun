@@ -1,36 +1,30 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Fergun.Utils;
 
 public static class CommandUtils
 {
-    public static string? RunCommand(string command)
+    public static async Task<string?> StartProcessAsync(string fileName, string? arguments = null)
     {
-        bool isLinux = OperatingSystem.IsLinux();
-        bool isWindows = OperatingSystem.IsWindows();
-        if (!isLinux && !isWindows)
-            return null;
-
-        string escapedArgs = command.Replace("\"", "\\\"", StringComparison.Ordinal);
         var startInfo = new ProcessStartInfo
         {
-            FileName = isLinux ? "/bin/bash" : "cmd.exe",
-            Arguments = isLinux ? $"-c \"{escapedArgs}\"" : $"/c {escapedArgs}",
+            FileName = fileName,
+            Arguments = arguments,
             RedirectStandardOutput = true,
-            RedirectStandardError = true,
             UseShellExecute = false,
-            CreateNoWindow = true,
-            WorkingDirectory = isLinux ? "/home" : string.Empty
+            CreateNoWindow = true
         };
 
         using var process = new Process();
         process.StartInfo = startInfo;
         process.Start();
-        process.WaitForExit(10000);
 
-        return process.ExitCode == 0
-            ? process.StandardOutput.ReadToEnd()
-            : process.StandardError.ReadToEnd();
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await process.WaitForExitAsync(cts.Token);
+
+        return await process.StandardOutput.ReadToEndAsync(cts.Token);
     }
 }
