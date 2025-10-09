@@ -34,7 +34,7 @@ public sealed class DictionaryClient : IDictionaryClient, IDisposable
         cancellationToken.ThrowIfCancellationRequested();
 
         IDictionarySearchResponse response = (await _httpClient.GetFromJsonAsync<DictionarySearchResponse>(
-            new Uri($"https://thor-graphql.dictionary.com/v2/search?searchText={Uri.EscapeDataString(text)}"),
+            new Uri($"https://mobile-api.dictionary.com/1/words/search?searchText={Uri.EscapeDataString(text)}&context=dcom"),
             cancellationToken).ConfigureAwait(false))!;
 
         return response.Data;
