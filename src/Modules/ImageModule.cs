@@ -62,7 +62,7 @@ public class ImageModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
-    public async Task<RuntimeResult> GoogleAsync([Autocomplete(typeof(GoogleAutocompleteHandler))][Summary(description: "The query to search.")] string query,
+    public async Task<RuntimeResult> GoogleAsync([Autocomplete<GoogleAutocompleteHandler>][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();
@@ -117,7 +117,7 @@ public class ImageModule : InteractionModuleBase
 
     [SlashCommand("duckduckgo", "Searches for images from DuckDuckGo and displays them in a paginator.")]
     public async Task<RuntimeResult> DuckDuckGoAsync(
-        [Autocomplete(typeof(DuckDuckGoAutocompleteHandler))][MaxLength(DuckDuckGoScraper.MaxQueryLength)][Summary(description: "The query to search.")] string query,
+        [Autocomplete<DuckDuckGoAutocompleteHandler>][MaxLength(DuckDuckGoScraper.MaxQueryLength)][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
         await Context.Interaction.DeferAsync();

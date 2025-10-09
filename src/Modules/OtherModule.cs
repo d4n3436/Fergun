@@ -153,7 +153,7 @@ public class OtherModule : InteractionModuleBase
 
     [Ratelimit(1, Constants.GlobalRatelimitPeriod)]
     [SlashCommand("lyrics", "Gets the lyrics of a song.")]
-    public async Task<RuntimeResult> LyricsAsync([MaxValue(int.MaxValue)][Autocomplete(typeof(GeniusAutocompleteHandler))][Summary(name: "name", description: "The name of the song.")] int id)
+    public async Task<RuntimeResult> LyricsAsync([MaxValue(int.MaxValue)][Autocomplete<GeniusAutocompleteHandler>][Summary(name: "name", description: "The name of the song.")] int id)
     {
         await Context.Interaction.DeferAsync();
 

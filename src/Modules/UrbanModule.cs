@@ -48,7 +48,7 @@ public class UrbanModule : InteractionModuleBase
     public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("search", "Searches for definitions for a term in Urban Dictionary.")]
-    public async Task<RuntimeResult> SearchAsync([Autocomplete(typeof(UrbanAutocompleteHandler))][Summary(description: "The term to search.")] string term)
+    public async Task<RuntimeResult> SearchAsync([Autocomplete<UrbanAutocompleteHandler>][Summary(description: "The term to search.")] string term)
         => await SearchAndSendAsync(UrbanSearchType.Search, term);
 
     [SlashCommand("random", "Gets random definitions from Urban Dictionary.")]

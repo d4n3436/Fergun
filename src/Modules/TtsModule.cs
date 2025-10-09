@@ -40,13 +40,13 @@ public class TtsModule : InteractionModuleBase
 
     [SlashCommand("google", "Converts text into synthesized speech using Google.")]
     public async Task<RuntimeResult> GoogleAsync([Summary(description: "The text to convert.")] string text,
-        [Autocomplete(typeof(TtsAutocompleteHandler))][Summary(description: "The target language.")] string? target = null,
+        [Autocomplete<TtsAutocompleteHandler>][Summary(description: "The target language.")] string? target = null,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
         => await _shared.GoogleTtsAsync(Context.Interaction, text, target ?? Context.Interaction.GetLanguageCode(), ephemeral);
 
     [SlashCommand("microsoft", "Converts text into synthesized speech using Microsoft Azure.")]
     public async Task<RuntimeResult> MicrosoftAsync([Summary(description: "The text to convert.")] string text,
-        [Autocomplete(typeof(MicrosoftTtsAutocompleteHandler))][Summary(description: "The target voice.")] MicrosoftVoice voice,
+        [Autocomplete<MicrosoftTtsAutocompleteHandler>][Summary(description: "The target voice.")] MicrosoftVoice voice,
         [Summary(description: "Whether to respond ephemerally.")] bool ephemeral = false)
     {
         if (string.IsNullOrWhiteSpace(text))
