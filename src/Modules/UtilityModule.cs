@@ -519,7 +519,7 @@ public class UtilityModule : InteractionModuleBase
 
             if (!string.IsNullOrEmpty(joinedLinks))
             {
-                page.AddField(_localizer["Links"], joinedLinks);
+                builder.AddField(_localizer["Links"], joinedLinks);
             }
 
             return builder.Build();
