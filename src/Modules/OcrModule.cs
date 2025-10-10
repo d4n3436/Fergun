@@ -84,7 +84,7 @@ public class OcrModule : InteractionModuleBase
 
         var page = new PageBuilder()
             .WithTitle(_localizer["SelectOCREngine"])
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         var selection = new SelectionBuilder<OcrEngine>()
             .AddUser(Context.User)
@@ -225,12 +225,12 @@ public class OcrModule : InteractionModuleBase
                     new ButtonBuilder(translateText, OcrTranslateKey, ButtonStyle.Secondary),
                     new ButtonBuilder("TTS", OcrTtsKey, ButtonStyle.Secondary)
                 ])
-                .WithAccentColor(Color.Orange))
+                .WithAccentColor(Constants.DefaultColor))
             .WithContainer(new ContainerBuilder()
                 .WithTextDisplay(inputText)
                 .WithMediaGallery([new MediaGalleryItemProperties(url, _localizer["InputImage"])])
                 .WithTextDisplay(footer)
-                .WithAccentColor(Color.Orange))
+                .WithAccentColor(Constants.DefaultColor))
             .Build();
 
         await interaction.FollowupAsync(ephemeral: ephemeral, components: components);

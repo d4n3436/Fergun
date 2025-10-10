@@ -67,7 +67,7 @@ public class OwnerModule : InteractionModuleBase
         {
             var embed = new EmbedBuilder()
                 .WithDescription($"ℹ️ {_localizer["NoOutput"]}")
-                .WithColor(Color.Orange)
+                .WithColor(Constants.DefaultColor)
                 .Build();
 
             await Context.Interaction.FollowupAsync(embed: embed);
@@ -88,7 +88,7 @@ public class OwnerModule : InteractionModuleBase
                 embed = new EmbedBuilder()
                     .WithTitle(_localizer["CommandOutput"])
                     .WithDescription(sanitized)
-                    .WithColor(Color.Orange)
+                    .WithColor(Constants.DefaultColor)
                     .Build();
             }
 
@@ -144,7 +144,7 @@ public class OwnerModule : InteractionModuleBase
                 .WithTitle(_localizer["EvalResults"])
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .AddField($"⚠️ {_localizer["Output"]}", $"```cs\n{string.Join('\n', exception.Diagnostics).Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
-                .WithColor(Color.Orange)
+                .WithColor(Constants.DefaultColor)
                 .Build();
 
             await Context.Interaction.FollowupAsync(embed: embed);
@@ -162,7 +162,7 @@ public class OwnerModule : InteractionModuleBase
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .AddField(_localizer["Output"], $"({_localizer["None"]})")
                 .WithFooter(_localizer["ElapsedTime", sw.ElapsedMilliseconds])
-                .WithColor(Color.Orange)
+                .WithColor(Constants.DefaultColor)
                 .Build();
 
             await Context.Interaction.FollowupAsync(embed: embed);
@@ -195,7 +195,7 @@ public class OwnerModule : InteractionModuleBase
                 .AddField(_localizer["Input"], $"```cs\n{code.Truncate(EmbedFieldBuilder.MaxFieldValueLength - 9)}```")
                 .AddField(_localizer["Output"], $"```cs\n{chunk}```")
                 .WithFooter(_localizer["EvalPaginatorFooter", sw.ElapsedMilliseconds, index + 1, chunks.Length])
-                .WithColor(Color.Orange);
+                .WithColor(Constants.DefaultColor);
         }
     }
 }

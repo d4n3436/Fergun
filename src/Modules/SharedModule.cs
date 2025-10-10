@@ -99,7 +99,7 @@ public class SharedModule
             .WithTitle(_localizer["TranslationResult"])
             .WithDescription($"{embedText}```{translation}```")
             .WithThumbnailUrl(thumbnailUrl)
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         await interaction.FollowupAsync(ephemeral: ephemeral, embed: builder.Build());
 

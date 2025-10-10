@@ -109,7 +109,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? Constants.GoogleUrl : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.GoogleLogoUrl)
-                .WithColor((Color)(result.Color ?? Color.Orange)));
+                .WithColor((Color)(result.Color ?? Constants.DefaultColor)));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
@@ -164,7 +164,7 @@ public class ImageModule : InteractionModuleBase
                 .WithUrl(multiImages ? Constants.DuckDuckGoUrl : result.SourceUrl)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1], Constants.DuckDuckGoLogoUrl)
-                .WithColor(Color.Orange));
+                .WithColor(Constants.DefaultColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
@@ -185,7 +185,7 @@ public class ImageModule : InteractionModuleBase
 
         var page = new PageBuilder()
             .WithTitle(_localizer["SelectImageSearchEngine"])
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         var selection = new SelectionBuilder<ReverseImageSearchEngine>()
             .AddUser(Context.User)
@@ -313,7 +313,7 @@ public class ImageModule : InteractionModuleBase
                 .WithThumbnailUrl(url)
                 .WithImageUrl(result.Url)
                 .WithFooter(_localizer["YandexVisualSearchPaginatorFooter", index + 1, maxIndex + 1], Constants.YandexIconUrl)
-                .WithColor(Color.Orange));
+                .WithColor(Constants.DefaultColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }
@@ -468,7 +468,7 @@ public class ImageModule : InteractionModuleBase
                 .WithAuthor(result.SourceDomainName, result.SourceIconUrl)
                 .WithImageUrl(result.ThumbnailUrl)
                 .WithFooter(_localizer["GoogleLensPaginatorFooter", index + 1, maxIndex + 1], Constants.GoogleLensLogoUrl)
-                .WithColor(Color.Orange));
+                .WithColor(Constants.DefaultColor));
 
             return new MultiEmbedPageBuilder().WithBuilders(builders);
         }

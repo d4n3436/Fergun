@@ -122,7 +122,7 @@ public class UrbanModule : InteractionModuleBase
                 .AddField("👎", definition.ThumbsDown, true)
                 .WithFooter(footer, Constants.UrbanDictionaryIconUrl)
                 .WithTimestamp(definition.WrittenOn)
-                .WithColor(Color.Orange); // 0x10151BU 0x1B2936U
+                .WithColor(Constants.DefaultColor);
         }
     }
 }

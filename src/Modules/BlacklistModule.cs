@@ -53,7 +53,7 @@ public class BlacklistModule : InteractionModuleBase
 
         var builder = new EmbedBuilder()
             .WithDescription(_localizer["UserBlacklisted", user])
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
 
@@ -77,7 +77,7 @@ public class BlacklistModule : InteractionModuleBase
 
         var builder = new EmbedBuilder()
             .WithDescription(_localizer["UserRemovedFromBlacklist", user])
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         await Context.Interaction.RespondAsync(embed: builder.Build());
 

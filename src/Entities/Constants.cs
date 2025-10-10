@@ -1,4 +1,5 @@
-﻿using Fergun.Interactive;
+﻿using Discord;
+using Fergun.Interactive;
 
 namespace Fergun;
 
@@ -53,4 +54,6 @@ public static class Constants
     public const ActionOnStop DefaultPaginatorActionOnCancel = ActionOnStop.DeleteMessage;
 
     public const ActionOnStop DefaultPaginatorActionOnTimeout = ActionOnStop.DisableInput;
+
+    public static readonly Color DefaultColor = Color.Orange;
 }

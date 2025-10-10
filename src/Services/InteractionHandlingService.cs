@@ -199,7 +199,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
                 var builder = new EmbedBuilder()
                     .WithDescription($"❌ {description}")
-                    .WithColor(Color.Orange);
+                    .WithColor(Constants.DefaultColor);
 
                 await interaction.RespondAsync(ephemeral: true, embed: builder.Build());
                 return;
@@ -405,7 +405,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
 
         var embed = new EmbedBuilder()
             .WithDescription($"⚠️ {message}")
-            .WithColor(Color.Orange)
+            .WithColor(Constants.DefaultColor)
             .Build();
 
         if (context.Interaction.HasResponded)

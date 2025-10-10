@@ -107,7 +107,7 @@ public class OtherModule : InteractionModuleBase
                 .WithTitle(_localizer["CommandStats"])
                 .WithDescription(string.Join('\n', commandStats.Take(start..(start + 25)).Select((x, i) => $"{start + i + 1}. `{x.Name}`: {x.UsageCount}")))
                 .WithFooter(_localizer["PaginatorFooter", index + 1, maxIndex + 1])
-                .WithColor(Color.Orange);
+                .WithColor(Constants.DefaultColor);
         }
     }
 
@@ -125,7 +125,7 @@ public class OtherModule : InteractionModuleBase
         var builder = new EmbedBuilder()
             .WithTitle("InspiroBot")
             .WithImageUrl(url)
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         await Context.Interaction.FollowupAsync(embed: builder.Build());
 
@@ -143,7 +143,7 @@ public class OtherModule : InteractionModuleBase
                 .WithActionRow([
                     new ButtonBuilder(_localizer["InviteFergun"], style: ButtonStyle.Link, url: $"https://discord.com/oauth2/authorize?client_id={applicationId}&scope=bot%20applications.commands")
                 ])
-                .WithAccentColor(Color.Orange))
+                .WithAccentColor(Constants.DefaultColor))
             .Build();
 
         await Context.Interaction.RespondAsync(components: components);
@@ -309,9 +309,8 @@ public class OtherModule : InteractionModuleBase
             .AddField("Shards", shards, true)
             .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day, TimeUnit.Second), true)
             .AddField("\u200b", "\u200b", true)
-            .AddField(_localizer["BotOwner"], owner, true);
-
-        builder.WithColor(Color.Orange);
+            .AddField(_localizer["BotOwner"], owner, true)
+            .WithColor(Constants.DefaultColor);
 
         await Context.Interaction.FollowupAsync(embed: builder.Build());
 
@@ -392,7 +391,7 @@ public class OtherModule : InteractionModuleBase
                 .WithThumbnailUrl(song.SongArtImageUrl)
                 .WithDescription(chunks[index].ToString())
                 .WithFooter(_localizer["GeniusPaginatorFooter", index + 1, chunks.Length], Constants.GeniusLogoUrl)
-                .WithColor((Color)(song.SongArtPrimaryColor ?? Color.Orange));
+                .WithColor((Color)(song.SongArtPrimaryColor ?? Constants.DefaultColor));
 
             if (checkSpotifyStatus && IsSameSong())
             {

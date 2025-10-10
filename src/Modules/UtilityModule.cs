@@ -134,16 +134,15 @@ public class UtilityModule : InteractionModuleBase
                 break;
         }
 
-        var builder = new EmbedBuilder
-        {
-            Title = title,
-            ImageUrl = url,
-            Color = Color.Orange
-        };
+        var embed = new EmbedBuilder()
+            .WithTitle(title)
+            .WithImageUrl(url)
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
         _logger.LogInformation("Displaying avatar of user {User} ({Id}), type: {Type}", user, user.Id, type);
 
-        await Context.Interaction.RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: embed);
 
         return FergunResult.FromSuccess();
     }
@@ -224,7 +223,7 @@ public class UtilityModule : InteractionModuleBase
             .WithTitle("Bad translator")
             .WithDescription(embedText + text.Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length))
             .WithThumbnailUrl(Constants.BadTranslatorLogoUrl)
-            .WithColor(Color.Orange)
+            .WithColor(Constants.DefaultColor)
             .Build();
 
         await Context.Interaction.FollowupAsync(embed: embed);
@@ -446,7 +445,7 @@ public class UtilityModule : InteractionModuleBase
         var page = new PageBuilder()
             .WithTitle(_localizer["FergunHelp"])
             .WithDescription(description)
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         string joinedLinks = string.Join(" | ", links);
 
@@ -516,7 +515,7 @@ public class UtilityModule : InteractionModuleBase
                 .WithTitle($"{option.Emote} {_localizer[option.Name]}")
                 .WithDescription(_localizer[option.Description])
                 .AddField(_localizer["Commands"], string.Join('\n', commandDescriptions))
-                .WithColor(Color.Orange);
+                .WithColor(Constants.DefaultColor);
 
             if (!string.IsNullOrEmpty(joinedLinks))
             {
@@ -532,7 +531,7 @@ public class UtilityModule : InteractionModuleBase
     {
         var embed = new EmbedBuilder()
             .WithDescription("Pong!")
-            .WithColor(Color.Orange)
+            .WithColor(Constants.DefaultColor)
             .Build();
 
         var sw = Stopwatch.StartNew();
@@ -543,7 +542,7 @@ public class UtilityModule : InteractionModuleBase
 
         embed = new EmbedBuilder()
             .WithDescription($"Pong! {sw.ElapsedMilliseconds}ms")
-            .WithColor(Color.Orange)
+            .WithColor(Constants.DefaultColor)
             .Build();
 
         await Context.Interaction.ModifyOriginalResponseAsync(x => x.Embed = embed);
@@ -619,7 +618,7 @@ public class UtilityModule : InteractionModuleBase
             .AddField(_localizer["ServerJoinDate"], GetTimestamp(guildUser?.JoinedAt))
             .AddField(_localizer["BoostingSince"], GetTimestamp(guildUser?.PremiumSince))
             .WithThumbnailUrl(avatarUrl)
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         _logger.LogInformation("Displaying user info of {User} ({Id})", user, user.Id);
 
@@ -652,7 +651,7 @@ public class UtilityModule : InteractionModuleBase
             .WithThumbnailUrl($"https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/Wikipedia-logo-v2-{Context.Interaction.GetLanguageCode()}.png")
             .WithDescription(article.Extract.Truncate(EmbedBuilder.MaxDescriptionLength))
             .WithFooter(_localizer["WikipediaSearch"])
-            .WithColor(Color.Orange);
+            .WithColor(Constants.DefaultColor);
 
         if (Context.Channel.IsNsfw() && article.Image is not null)
         {

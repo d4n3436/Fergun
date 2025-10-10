@@ -21,7 +21,7 @@ public static class SelectionExtensions
         where TSelection : BaseSelection<TOption>
         where TBuilder : BaseSelectionBuilder<TSelection, TOption, TBuilder>
     {
-        builder.WithRestrictedPageFactory(users => new PageBuilder().WithDescription(localizer["RestrictedSelectionInputMessage", users.First().Mention]).WithColor(Color.Orange).Build());
+        builder.WithRestrictedPageFactory(users => new PageBuilder().WithDescription(localizer["RestrictedSelectionInputMessage", users.First().Mention]).WithColor(Constants.DefaultColor).Build());
 
         return (TBuilder)builder;
     }
