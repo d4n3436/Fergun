@@ -253,7 +253,7 @@
     <value>Resultados de Wolfram|Alpha</value>
   </data>
   <data name="avatar.description" xml:space="preserve">
-    <value>Muesta el avatar de un usuario.</value>
+    <value>Muestra el avatar de un usuario.</value>
   </data>
   <data name="avatar.name" xml:space="preserve">
     <value>avatar</value>
@@ -322,7 +322,7 @@
     <value>Traduce un texto.</value>
   </data>
   <data name="translate.ephemeral.description" xml:space="preserve">
-    <value>Si responder efímeramente.</value>
+    <value>Si responder de manera efímera.</value>
   </data>
   <data name="translate.ephemeral.name" xml:space="preserve">
     <value>efímero</value>

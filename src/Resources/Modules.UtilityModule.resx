@@ -211,7 +211,7 @@
     <value>TTS commands</value>
   </data>
   <data name="TtsModuleDescription" xml:space="preserve">
-    <value>Commands that synthetize speech from text input. </value>
+    <value>Commands that synthesize speech from text input. </value>
   </data>
   <data name="UnableToGetArticle" xml:space="preserve">
     <value>Unable to get the article.</value>

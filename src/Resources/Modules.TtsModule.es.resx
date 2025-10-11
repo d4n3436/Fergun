@@ -121,7 +121,7 @@
     <value>Convierte texto en voz sintetizada usando Google.</value>
   </data>
   <data name="google.ephemeral.description" xml:space="preserve">
-    <value>Si responder efímeramente.</value>
+    <value>Si responder de manera efímera.</value>
   </data>
   <data name="google.ephemeral.name" xml:space="preserve">
     <value>efímero</value>
@@ -145,7 +145,7 @@
     <value>Convierte texto en voz sintetizada usando Microsoft Azure.</value>
   </data>
   <data name="microsoft.ephemeral.description" xml:space="preserve">
-    <value>Si responder efímeramente.</value>
+    <value>Si responder de manera efímera.</value>
   </data>
   <data name="microsoft.ephemeral.name" xml:space="preserve">
     <value>efímero</value>

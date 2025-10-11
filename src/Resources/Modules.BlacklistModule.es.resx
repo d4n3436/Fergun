@@ -124,7 +124,7 @@
     <value>agregar</value>
   </data>
   <data name="add.reason.description" xml:space="preserve">
-    <value>La razón del listamiento.</value>
+    <value>La razón de la inclusión.</value>
   </data>
   <data name="add.reason.name" xml:space="preserve">
     <value>razón</value>
