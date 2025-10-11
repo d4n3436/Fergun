@@ -81,7 +81,7 @@ public class FergunEmoteProvider
     /// <summary>
     /// Gets the emote representing the button used to go the next paginator page. Defaults to the right arrow emoji (▶️).
     /// </summary>
-    public IEmote ForwardEmote { get; private set; } =_defaultForwardEmote;
+    public IEmote ForwardEmote { get; private set; } = _defaultForwardEmote;
 
     /// <summary>
     /// Gets the emote representing the button used to skip to the last paginator page. Defaults to the fast-forward emoji (⏭).

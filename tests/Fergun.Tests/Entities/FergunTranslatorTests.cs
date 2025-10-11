@@ -35,7 +35,7 @@ public class FergunTranslatorTests
     {
         _fergunTranslator.Randomize(new Random(0));
 
-        Assert.NotSame(_innerTranslatorMock.Object, _fergunTranslator.Translators[0]);
+        Assert.NotSame(_innerTranslatorMock.Object, _fergunTranslator._translators[0]);
     }
 
     [Fact]

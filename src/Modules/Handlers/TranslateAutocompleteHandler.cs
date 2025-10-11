@@ -7,10 +7,12 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class TranslateAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />

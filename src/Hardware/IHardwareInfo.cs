@@ -1,14 +1,14 @@
 ﻿namespace Fergun.Hardware;
 
 /// <summary>
-/// Provides methods to get information about the system hardware.
+/// Provides methods to retrieve information about the system hardware.
 /// </summary>
 public interface IHardwareInfo
 {
     /// <summary>
     /// Gets the CPU name.
     /// </summary>
-    /// <returns>The CPU name, or null if it's not available.</returns>
+    /// <returns>The CPU name, or <see langword="null"/> if it's not available.</returns>
     string? GetCpuName();
 
     /// <summary>

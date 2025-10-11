@@ -7,8 +7,6 @@ namespace Fergun.Apis.Dictionary;
 /// <inheritdoc cref="IDictionaryEntry"/>
 [UsedImplicitly]
 public record DictionaryEntry([property: JsonPropertyName("entry")] string Entry,
-    [property: JsonConverter(typeof(ArrayOrStringConverter))]
-    [property: JsonPropertyName("entryVariants")] IReadOnlyList<string>? EntryVariants,
     [property: JsonPropertyName("homograph")] int? Homograph,
     [property: JsonConverter(typeof(PronunciationConverter))]
     [property: JsonPropertyName("pronunciation")] EntryPronunciation? Pronunciation,

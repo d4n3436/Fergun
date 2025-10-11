@@ -28,10 +28,7 @@ public sealed class FergunLocalizationManager : ILocalizationManager
     /// Initializes a new instance of the <see cref="FergunLocalizationManager"/> class.
     /// </summary>
     /// <param name="localizerFactory">The localizer factory.</param>
-    public FergunLocalizationManager(IStringLocalizerFactory localizerFactory)
-    {
-        _localizerFactory = localizerFactory;
-    }
+    public FergunLocalizationManager(IStringLocalizerFactory localizerFactory) => _localizerFactory = localizerFactory;
 
     /// <summary>
     /// Loads and caches the modules.

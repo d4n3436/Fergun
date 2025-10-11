@@ -81,9 +81,9 @@ public class SharedModule
 
         string thumbnailUrl = result.Service switch
         {
-            "BingTranslator" => Constants.BingTranslatorLogoUrl,
-            "MicrosoftTranslator" => Constants.MicrosoftAzureLogoUrl,
-            "YandexTranslator" => Constants.YandexTranslateLogoUrl,
+            nameof(BingTranslator) => Constants.BingTranslatorLogoUrl,
+            nameof(MicrosoftTranslator) => Constants.MicrosoftAzureLogoUrl,
+            nameof(YandexTranslator) => Constants.YandexTranslateLogoUrl,
             _ => Constants.GoogleTranslateLogoUrl
         };
 
@@ -95,13 +95,14 @@ public class SharedModule
 
         string translation = result.Translation.Replace('`', '´').Truncate(EmbedBuilder.MaxDescriptionLength - embedText.Length - 6);
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle(_localizer["TranslationResult"])
             .WithDescription($"{embedText}```{translation}```")
             .WithThumbnailUrl(thumbnailUrl)
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
-        await interaction.FollowupAsync(ephemeral: ephemeral, embed: builder.Build());
+        await interaction.FollowupAsync(ephemeral: ephemeral, embed: embed);
 
         return FergunResult.FromSuccess();
 

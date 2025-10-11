@@ -7,12 +7,14 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class WolframAlphaAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />

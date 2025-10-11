@@ -8,10 +8,12 @@ using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate;
 using GTranslate.Translators;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class TtsAutocompleteHandler : AutocompleteHandler
 {
     public override Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)

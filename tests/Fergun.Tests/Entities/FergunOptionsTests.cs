@@ -16,7 +16,7 @@ public class FergunOptionsTests
             VoteUrl = options.VoteUrl,
             DonationUrl = options.DonationUrl,
             PaginatorTimeout = options.PaginatorTimeout,
-            SelectionTimeout = options.SelectionTimeout,
+            SelectionTimeout = options.SelectionTimeout
         };
 
         Assert.Equal(options.SupportServerUrl, other.SupportServerUrl);

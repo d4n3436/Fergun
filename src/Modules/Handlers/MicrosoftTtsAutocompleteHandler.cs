@@ -5,10 +5,12 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 using GTranslate.Translators;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class MicrosoftTtsAutocompleteHandler : AutocompleteHandler
 {
     public override async Task<AutocompletionResult> GenerateSuggestionsAsync(IInteractionContext context, IAutocompleteInteraction autocompleteInteraction, IParameterInfo parameter, IServiceProvider services)

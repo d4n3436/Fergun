@@ -51,11 +51,12 @@ public class BlacklistModule : InteractionModuleBase
         await _db.SaveChangesAsync();
         _logger.LogInformation("User {User} ({Id}) has been added to the blacklist (reason: {Reason}, shadow: {Shadow})", user, user.Id, reason ?? "(None)", shadow);
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithDescription(_localizer["UserBlacklisted", user])
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
-        await Context.Interaction.RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: embed);
 
         return FergunResult.FromSuccess();
     }
@@ -75,11 +76,12 @@ public class BlacklistModule : InteractionModuleBase
         await _db.SaveChangesAsync();
         _logger.LogInformation("User {User} ({Id}) has been removed from the blacklist", user, user.Id);
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithDescription(_localizer["UserRemovedFromBlacklist", user])
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
-        await Context.Interaction.RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: embed);
 
         return FergunResult.FromSuccess();
     }

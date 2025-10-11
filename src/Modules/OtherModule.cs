@@ -122,12 +122,13 @@ public class OtherModule : InteractionModuleBase
 
         _logger.LogInformation("Obtained url from InspiroBot API: {Url}", url);
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle("InspiroBot")
             .WithImageUrl(url)
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
-        await Context.Interaction.FollowupAsync(embed: builder.Build());
+        await Context.Interaction.FollowupAsync(embed: embed);
 
         return FergunResult.FromSuccess();
     }
@@ -226,8 +227,8 @@ public class OtherModule : InteractionModuleBase
 
         _logger.LogInformation("Requesting hardware info ({Instance})", HardwareInfo.Instance);
         double cpuUsage = await HardwareInfo.GetCpuUsageAsync();
-        string cpu = HardwareInfo.GetCpuName() ?? "?";
-        string os = HardwareInfo.GetOperatingSystemName();
+        string cpu = HardwareInfo.CpuName ?? "?";
+        string os = HardwareInfo.OperatingSystemName;
 
         _logger.LogDebug("CPU: {Cpu}", cpu);
         _logger.LogDebug("CPU Usage: {Usage}", cpuUsage.ToString("P0", CultureInfo.InvariantCulture));
@@ -290,7 +291,7 @@ public class OtherModule : InteractionModuleBase
             ramUsage += $" / {totalRam.Bytes()}";
         }
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle(_localizer["FergunStats"])
             .AddField(_localizer["OperatingSystem"], os, true)
             .AddField("\u200b", "\u200b", true)
@@ -310,9 +311,10 @@ public class OtherModule : InteractionModuleBase
             .AddField(_localizer["Uptime"], elapsed.Humanize(3, _localizer.CurrentCulture, TimeUnit.Day, TimeUnit.Second), true)
             .AddField("\u200b", "\u200b", true)
             .AddField(_localizer["BotOwner"], owner, true)
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
-        await Context.Interaction.FollowupAsync(embed: builder.Build());
+        await Context.Interaction.FollowupAsync(embed: embed);
 
         return FergunResult.FromSuccess();
     }

@@ -120,8 +120,32 @@
   <data name="BingVisualSearchPaginatorFooter" xml:space="preserve">
     <value>Búsqueda Visual de Bing | Página {0} de {1}</value>
   </data>
+  <data name="BraveImageSearch" xml:space="preserve">
+    <value>Búsqueda de imágenes en Brave</value>
+  </data>
+  <data name="DuckDuckGoImageSearch" xml:space="preserve">
+    <value>Búsqueda de imágenes en DuckDuckGo</value>
+  </data>
+  <data name="GoogleImagesSearch" xml:space="preserve">
+    <value>Búsqueda de Google Imágenes</value>
+  </data>
+  <data name="GoogleLensError" xml:space="preserve">
+    <value>No fue posible obtener los resultados de búsqueda. Usa otra URL o inténtalo más tarde.</value>
+  </data>
+  <data name="GoogleLensPaginatorFooter" xml:space="preserve">
+    <value>Google Lens | Página {0} de {1}</value>
+  </data>
+  <data name="InvalidImageSearchEngine" xml:space="preserve">
+    <value>Motor de búsqueda de imágenes inválido.</value>
+  </data>
+  <data name="SelectImageSearchEngine" xml:space="preserve">
+    <value>Selecciona un motor de búsqueda de imágenes</value>
+  </data>
+  <data name="YandexVisualSearchPaginatorFooter" xml:space="preserve">
+    <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
+  </data>
   <data name="brave.description" xml:space="preserve">
-    <value>Búsca imágenes de Brave y los muestra en un paginador.</value>
+    <value>Busca imágenes de Brave y los muestra en un paginador.</value>
   </data>
   <data name="brave.multi-images.description" xml:space="preserve">
     <value>Si se muestran múltiples imágenes en una sola página.</value>
@@ -138,11 +162,8 @@
   <data name="brave.query.name" xml:space="preserve">
     <value>consulta</value>
   </data>
-  <data name="BraveImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en Brave</value>
-  </data>
   <data name="duckduckgo.description" xml:space="preserve">
-    <value>Búsca imágenes de DuckDuckGo y los muestra en un paginador.</value>
+    <value>Busca imágenes de DuckDuckGo y los muestra en un paginador.</value>
   </data>
   <data name="duckduckgo.multi-images.description" xml:space="preserve">
     <value>Si se muestran múltiples imágenes en una sola página.</value>
@@ -159,11 +180,8 @@
   <data name="duckduckgo.query.name" xml:space="preserve">
     <value>consulta</value>
   </data>
-  <data name="DuckDuckGoImageSearch" xml:space="preserve">
-    <value>Búsqueda de imágenes en DuckDuckGo</value>
-  </data>
   <data name="google.description" xml:space="preserve">
-    <value>Búsca imágenes de Google Imágenes y los muestra en un paginador.</value>
+    <value>Busca imágenes de Google Imágenes y los muestra en un paginador.</value>
   </data>
   <data name="google.multi-images.description" xml:space="preserve">
     <value>Si se muestran múltiples imágenes en una sola página.</value>
@@ -180,23 +198,11 @@
   <data name="google.query.name" xml:space="preserve">
     <value>consulta</value>
   </data>
-  <data name="GoogleImagesSearch" xml:space="preserve">
-    <value>Búsqueda de Google Imágenes</value>
-  </data>
-  <data name="GoogleLensError" xml:space="preserve">
-    <value>No fue posible obtener los resultados de búsqueda. Usa otra URL o inténtalo más tarde.</value>
-  </data>
-  <data name="GoogleLensPaginatorFooter" xml:space="preserve">
-    <value>Google Lens | Página {0} de {1}</value>
-  </data>
-  <data name="InvalidImageSearchEngine" xml:space="preserve">
-    <value>Motor de búsqueda de imágenes inválido.</value>
-  </data>
   <data name="Reverse Image Search.name" xml:space="preserve">
     <value>Buscar por imagen</value>
   </data>
   <data name="reverse.description" xml:space="preserve">
-    <value>Búsqueda inversa de imagen.</value>
+    <value>Realiza una búsqueda inversa de imagen y muestra los resultados en un paginador.</value>
   </data>
   <data name="reverse.engine.description" xml:space="preserve">
     <value>El motor de búsqueda. El predeterminado es Yandex.</value>
@@ -224,11 +230,5 @@
   </data>
   <data name="reverse.url.name" xml:space="preserve">
     <value>url</value>
-  </data>
-  <data name="SelectImageSearchEngine" xml:space="preserve">
-    <value>Selecciona un motor de búsqueda de imágenes</value>
-  </data>
-  <data name="YandexVisualSearchPaginatorFooter" xml:space="preserve">
-    <value>Búsqueda Visual de Yandex | Página {0} de {1}</value>
   </data>
 </root>

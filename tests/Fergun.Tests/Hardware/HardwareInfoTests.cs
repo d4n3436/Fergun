@@ -23,7 +23,7 @@ public class HardwareInfoTests
     [Fact]
     public void HardwareInfo_GetCpuName_Returns_Expected_Value()
     {
-        string? cpuName = HardwareInfo.GetCpuName();
+        string? cpuName = HardwareInfo.CpuName;
 
         if (HardwareInfo.Instance is UnknownHardwareInfo)
         {
@@ -39,7 +39,7 @@ public class HardwareInfoTests
     [Fact]
     public void HardwareInfo_GetOperatingSystemName_Is_Not_Null()
     {
-        string osName = HardwareInfo.GetOperatingSystemName();
+        string osName = HardwareInfo.OperatingSystemName;
 
         Assert.NotNull(osName);
         Assert.NotEmpty(osName);

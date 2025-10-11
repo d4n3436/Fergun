@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Dictionary;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class DictionaryAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />

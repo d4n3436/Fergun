@@ -15,13 +15,7 @@ public static class MessageExtensions
         {
             var embed = message.Embeds.First();
 
-            builder.Append('\n')
-                .Append(embed.Author?.Name)
-                .Append('\n')
-                .Append(embed.Title)
-                .Append('\n')
-                .Append(embed.Description)
-                .Append('\n');
+            builder.Append($"\n{embed.Author?.Name}\n{embed.Title}\n{embed.Description}\n");
 
             foreach (var field in embed.Fields)
             {
@@ -29,8 +23,7 @@ public static class MessageExtensions
                 string value = field.Value.Trim().Replace("\u200b", string.Empty);
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(value))
                 {
-                    builder.Append(CultureInfo.InvariantCulture, $"{name}: {value}")
-                        .Append('\n');
+                    builder.Append(CultureInfo.InvariantCulture, $"{name}: {value}\n");
                 }
             }
 

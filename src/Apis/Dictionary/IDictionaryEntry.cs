@@ -13,11 +13,6 @@ public interface IDictionaryEntry
     string Entry { get; }
 
     /// <summary>
-    /// Gets the variants of the entry.
-    /// </summary>
-    IReadOnlyList<string>? EntryVariants { get; }
-
-    /// <summary>
     /// Gets the current homograph number.
     /// </summary>
     int? Homograph { get; }

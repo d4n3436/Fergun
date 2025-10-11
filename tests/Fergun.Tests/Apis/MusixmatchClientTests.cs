@@ -17,15 +17,10 @@ namespace Fergun.Tests.Apis;
 
 public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
 {
-    private readonly MusixmatchClientStateFixture _fixture;
     private readonly IMusixmatchClient _musixmatchClient;
     private readonly Mock<ILogger<MusixmatchClient>> _loggerMock = new();
 
-    public MusixmatchClientTests(MusixmatchClientStateFixture fixture)
-    {
-        _fixture = fixture;
-        _musixmatchClient = new MusixmatchClient(new HttpClient(), _fixture.State, _loggerMock.Object);
-    }
+    public MusixmatchClientTests(MusixmatchClientStateFixture fixture) => _musixmatchClient = new MusixmatchClient(new HttpClient(), fixture.State, _loggerMock.Object);
 
     [Theory]
     [InlineData("thriller", true)]

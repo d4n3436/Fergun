@@ -84,7 +84,19 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    public Task ReadyAsync(DiscordSocketClient client)
+    /// <summary>
+    /// Disposes the <see cref="SemaphoreSlim"/> used by this instance.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _cmdStatsSemaphore.Dispose();
+        _disposed = true;
+    }
+
+    private Task ReadyAsync(DiscordSocketClient client)
     {
         if (_shardedClient.Shards.All(x => x.ConnectionState == ConnectionState.Connected))
         {
@@ -105,7 +117,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
-    public async Task ReadyAsync()
+    private async Task ReadyAsync()
     {
         var modules = _interactionService.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule));
         var ownerModules = _interactionService.Modules
@@ -149,18 +161,6 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
         _logger.LogDebug("Retrieved {Count} application emotes", emotes.Count);
     }
 
-    /// <summary>
-    /// Disposes the <see cref="SemaphoreSlim"/> used by this instance.
-    /// </summary>
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        _cmdStatsSemaphore.Dispose();
-        _disposed = true;
-    }
-
     private Task InteractionCreatedAsync(SocketInteraction interaction)
     {
         _ = Task.Run(async () =>
@@ -197,11 +197,12 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
                     ? localizer["Blacklisted"]
                     : localizer["BlacklistedWithReason", user.BlacklistReason];
 
-                var builder = new EmbedBuilder()
+                var embed = new EmbedBuilder()
                     .WithDescription($"❌ {description}")
-                    .WithColor(Constants.DefaultColor);
+                    .WithColor(Constants.DefaultColor)
+                    .Build();
 
-                await interaction.RespondAsync(ephemeral: true, embed: builder.Build());
+                await interaction.RespondAsync(ephemeral: true, embed: embed);
                 return;
 
             case BlacklistStatus.ShadowBlacklisted:

@@ -255,13 +255,14 @@ public class UtilityModule : InteractionModuleBase
 
         string hex = $"{color.R:X2}{color.G:X2}{color.B:X2}";
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle(DisplayColor())
             .WithImageUrl($"attachment://{hex}.png")
             .WithFooter($"R: {color.R}, G: {color.G}, B: {color.B}")
-            .WithColor((Color)color);
+            .WithColor((Color)color)
+            .Build();
 
-        await Context.Interaction.RespondWithFileAsync(new FileAttachment(stream, $"{hex}.png"), embed: builder.Build());
+        await Context.Interaction.RespondWithFileAsync(new FileAttachment(stream, $"{hex}.png"), embed: embed);
 
         return FergunResult.FromSuccess();
 
@@ -323,7 +324,7 @@ public class UtilityModule : InteractionModuleBase
                     {
                         (0, 0) => entry.Entry,
                         (0, _) => x.SupplementaryInfo,
-                        (_, _) => x.PartOfSpeech,
+                        (_, _) => x.PartOfSpeech
                     };
 
                     return new SelectMenuOptionBuilder(label.Truncate(SelectMenuOptionBuilder.MaxSelectLabelLength),
@@ -454,15 +455,15 @@ public class UtilityModule : InteractionModuleBase
             page.AddField(_localizer["Links"], joinedLinks);
         }
 
-        var categories = new List<ModuleOption>(6)
-        {
+        ModuleOption[] categories =
+        [
             new(new Emoji("🛠️"), _localizer[nameof(UtilityModule)], _localizer[$"{nameof(UtilityModule)}Description"]),
             new(new Emoji("🔍"), _localizer[nameof(ImageModule)], _localizer[$"{nameof(ImageModule)}Description"]),
             new(new Emoji("📄"), _localizer[nameof(OcrModule)], _localizer[$"{nameof(OcrModule)}Description"]),
             new(new Emoji("🔊"), _localizer[nameof(TtsModule)], _localizer[$"{nameof(TtsModule)}Description"]),
             new(new Emoji("📖"), _localizer[nameof(UrbanModule)], _localizer[$"{nameof(UrbanModule)}Description"]),
             new(new Emoji("💡"), _localizer[nameof(OtherModule)], _localizer[$"{nameof(OtherModule)}Description"])
-        };
+        ];
 
         var modules = _commands.Modules.Where(x => x.Name is not nameof(OwnerModule) and not nameof(BlacklistModule))
             .ToDictionary(x => x.Name, x => x);
@@ -606,7 +607,7 @@ public class UtilityModule : InteractionModuleBase
         var guildUser = user as IGuildUser;
         string avatarUrl = guildUser?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(ImageFormat.Auto, 2048) ?? user.GetDefaultAvatarUrl();
 
-        var builder = new EmbedBuilder()
+        var embed = new EmbedBuilder()
             .WithTitle(_localizer["UserInfo"])
             .AddField(_localizer["Name"], user.ToString())
             .AddField(_localizer["Nickname"], guildUser?.Nickname ?? $"({_localizer["None"]})")
@@ -618,11 +619,12 @@ public class UtilityModule : InteractionModuleBase
             .AddField(_localizer["ServerJoinDate"], GetTimestamp(guildUser?.JoinedAt))
             .AddField(_localizer["BoostingSince"], GetTimestamp(guildUser?.PremiumSince))
             .WithThumbnailUrl(avatarUrl)
-            .WithColor(Constants.DefaultColor);
+            .WithColor(Constants.DefaultColor)
+            .Build();
 
         _logger.LogInformation("Displaying user info of {User} ({Id})", user, user.Id);
 
-        await Context.Interaction.RespondAsync(embed: builder.Build());
+        await Context.Interaction.RespondAsync(embed: embed);
 
         return FergunResult.FromSuccess();
 

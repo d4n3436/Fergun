@@ -25,8 +25,6 @@ public static class Constants
 
     public const string DuckDuckGoLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890323046286651402/unknown.png";
 
-    public const string BraveLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890323194504937522/unknown.png";
-
     public const string BadTranslatorLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/944755022816763914/unknown.png";
 
     public const string BingIconUrl = "https://cdn.discordapp.com/attachments/838832564583661638/949767220232339507/Bing_Icon.png";

@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />

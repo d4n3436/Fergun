@@ -205,7 +205,7 @@ public class ImageModule : InteractionModuleBase
         return FergunResult.FromSilentError();
     }
 
-    [SlashCommand("reverse", "Reverse image search.")]
+    [SlashCommand("reverse", "Performs a reverse image search and displays the results in a paginator.")]
     public async Task<RuntimeResult> ReverseAsync([Summary(description: "The URL of an image.")] string? url = null,
         [Summary(description: "An image file.")] IAttachment? file = null,
         [Summary(description: $"The search engine. The default is {nameof(ReverseImageSearchEngine.Yandex)}.")] ReverseImageSearchEngine engine = ReverseImageSearchEngine.Yandex,

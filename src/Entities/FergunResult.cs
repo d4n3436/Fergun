@@ -20,9 +20,7 @@ public sealed class FergunResult : RuntimeResult, IFergunResult
 
     private FergunResult(InteractionCommandError? error, LocalizedString reason, bool isEphemeral, bool isSilent, IDiscordInteraction? interaction, MessageComponent? components)
         : this(error, (string)reason, isEphemeral, isSilent, interaction, components)
-    {
-        LocalizedErrorReason = reason;
-    }
+        => LocalizedErrorReason = reason;
 
     /// <inheritdoc/>
     public LocalizedString? LocalizedErrorReason { get; }

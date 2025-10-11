@@ -22,7 +22,6 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
     private readonly AsyncRetryPolicy<JsonDocument> _retryPolicy;
     private readonly HttpClient _httpClient;
     private readonly MusixmatchClientState _state;
-    private readonly ILogger<MusixmatchClient> _logger;
     private bool _disposed;
 
     /// <summary>
@@ -39,13 +38,12 @@ public sealed class MusixmatchClient : IMusixmatchClient, IDisposable
 
         _httpClient = httpClient;
         _state = state;
-        _logger = logger;
 
         _retryPolicy = Policy<JsonDocument>
             .Handle<MusixmatchException>(x => x.Hint is "renew" or "captcha")
             .RetryAsync(async (result, _) =>
             {
-                _logger.LogWarning(result.Exception, "Got exception with hint \"{Hint}\", requesting a new user token...", ((MusixmatchException)result.Exception).Hint);
+                logger.LogWarning(result.Exception, "Got exception with hint \"{Hint}\", requesting a new user token...", ((MusixmatchException)result.Exception).Hint);
                 await _state.GetUserTokenAsync(refresh: true).ConfigureAwait(false);
             });
 

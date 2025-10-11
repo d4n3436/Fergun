@@ -132,17 +132,6 @@ public class UtilityModuleTests
         VerifyRespondAsyncCall(guildUserMock.Object);
     }
 
-    internal void VerifyRespondAsyncCall(IUser user)
-    {
-        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(),
-            It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(),
-            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Once);
-    }
-
-    public static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)
-        => (embed.Image.GetValueOrDefault().Url ?? embed.Thumbnail.GetValueOrDefault().Url)
-           == ((user as IGuildUser)?.GetGuildAvatarUrl() ?? user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
-
     public static TheoryData<Mock<IUser>> GetFakeUsers()
     {
         var faker = new Faker();
@@ -156,4 +145,15 @@ public class UtilityModuleTests
 
         return faker.MakeLazy(20, () => Utils.CreateMockedGuildUser()).Select(Mock.Get).ToTheoryData();
     }
+
+    private void VerifyRespondAsyncCall(IUser user)
+    {
+        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(),
+            It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(),
+            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Once);
+    }
+
+    private static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)
+        => (embed.Image.GetValueOrDefault().Url ?? embed.Thumbnail.GetValueOrDefault().Url)
+           == ((user as IGuildUser)?.GetGuildAvatarUrl() ?? user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
 }

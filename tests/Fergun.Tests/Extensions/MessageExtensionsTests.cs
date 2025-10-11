@@ -54,22 +54,22 @@ public class MessageExtensionsTests
         }
     }
 
-    public static IEnumerable<Embed> GetEmbeds()
-    {
-        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build());
-    }
-
     public static TheoryData<string, Embed> GetContentsAndEmbeds()
     {
         return GetRandomStrings().Zip(GetEmbeds()).ToTheoryData();
     }
 
-    public static IEnumerable<string> GetRandomStrings()
+    public static TheoryData<string> GetRandomStringsData() => GetRandomStrings().ToTheoryData();
+
+    private static IEnumerable<string> GetRandomStrings()
     {
         var faker = new Faker();
 
         return faker.MakeLazy(10, () => faker.Random.String2(2));
     }
 
-    public static TheoryData<string> GetRandomStringsData() => GetRandomStrings().ToTheoryData();
+    private static IEnumerable<Embed> GetEmbeds()
+    {
+        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build());
+    }
 }

@@ -14,7 +14,7 @@ public static class Extensions
     {
         WriteIndented = true,
         NewLine = "\n",
-        ReferenceHandler = ReferenceHandler.IgnoreCycles, 
+        ReferenceHandler = ReferenceHandler.IgnoreCycles
     };
 
     public static LogLevel ToLogLevel(this LogSeverity logSeverity)

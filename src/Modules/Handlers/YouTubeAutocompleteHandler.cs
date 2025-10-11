@@ -8,12 +8,14 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Registry;
 
 namespace Fergun.Modules.Handlers;
 
+[UsedImplicitly]
 public class YouTubeAutocompleteHandler : AutocompleteHandler
 {
     /// <inheritdoc />

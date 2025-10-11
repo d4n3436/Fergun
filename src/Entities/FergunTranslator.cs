@@ -15,7 +15,7 @@ namespace Fergun;
 public class FergunTranslator : IFergunTranslator
 #pragma warning restore CA1001
 {
-    internal readonly ITranslator[] Translators;
+    internal readonly ITranslator[] _translators;
     private readonly AggregateTranslator _innerTranslator;
 
     /// <summary>
@@ -24,15 +24,15 @@ public class FergunTranslator : IFergunTranslator
     /// <param name="translators">The translators.</param>
     public FergunTranslator(IEnumerable<ITranslator> translators)
     {
-        Translators = translators.ToArray();
-        _innerTranslator = new AggregateTranslator(Translators);
+        _translators = translators.ToArray();
+        _innerTranslator = new AggregateTranslator(_translators);
     }
 
     /// <inheritdoc/>
     public string Name => nameof(FergunTranslator);
 
     /// <inheritdoc/>
-    public void Randomize(Random? rng = null) => (rng ?? Random.Shared).Shuffle(Translators);
+    public void Randomize(Random? rng = null) => (rng ?? Random.Shared).Shuffle(_translators);
 
     /// <inheritdoc />
     public Task<ITranslationResult> TranslateAsync(string text, string toLanguage, string? fromLanguage = null)

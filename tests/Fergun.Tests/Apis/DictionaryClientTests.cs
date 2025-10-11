@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
@@ -59,7 +60,7 @@ public class DictionaryClientTests
 
                 if (entry.Homograph is not null)
                 {
-                    Assert.Matches("^[0-9]+$", entry.Homograph.ToString());
+                    Assert.Matches("^[0-9]+$", entry.Homograph.Value.ToString(CultureInfo.InvariantCulture));
                 }
 
                 Assert.NotEmpty(DictionaryFormatter.FormatEntry(entry));
@@ -75,7 +76,7 @@ public class DictionaryClientTests
                     Assert.NotEmpty(formattedBlock);
                     Assert.InRange(formattedBlock.Length, 1, 1000);
 
-                    Assert.All(block.Definitions,[AssertionMethod] (definition) =>
+                    Assert.All(block.Definitions, [AssertionMethod] (definition) =>
                     {
                         Assert.NotNull(definition);
 

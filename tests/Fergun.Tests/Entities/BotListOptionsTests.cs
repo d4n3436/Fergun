@@ -18,7 +18,7 @@ public class BotListOptionsTests
         };
 
         Assert.Equal(options.UpdatePeriod, other.UpdatePeriod);
-        Assert.True(options.Tokens.SequenceEqual(other.Tokens));
+        Assert.True(options.Tokens.Keys.SequenceEqual(other.Tokens.Keys));
     }
 
     public static TheoryData<BotListOptions> GetBotListOptionsTestData()
