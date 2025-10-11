@@ -4,7 +4,7 @@ using System.Reflection;
 using Discord.WebSocket;
 using HarmonyLib;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Represents the mobile patcher.

@@ -2,7 +2,7 @@
 using System.Globalization;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Localization;
 
 /// <summary>
 /// Represents a <see cref="IStringLocalizer"/> with a current culture which can be changed.

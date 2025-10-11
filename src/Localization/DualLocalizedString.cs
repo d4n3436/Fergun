@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Threading;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Localization;
 
 /// <summary>
 /// Represents a <see cref="LocalizedString"/> that also includes a localized English value.

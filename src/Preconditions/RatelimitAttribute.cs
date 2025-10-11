@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
+using Fergun.Common;
 using Fergun.Extensions;
+using Fergun.Localization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Fergun.Preconditions;

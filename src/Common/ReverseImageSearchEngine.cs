@@ -1,7 +1,7 @@
 ﻿using Discord.Interactions;
 using Fergun.Modules;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the reverse image search engines used in <see cref="ImageModule"/>.

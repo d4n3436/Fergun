@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Fergun.Common;
 using Fergun.Interactive;
 using Fergun.Interactive.Selection;
 using Microsoft.Extensions.Localization;

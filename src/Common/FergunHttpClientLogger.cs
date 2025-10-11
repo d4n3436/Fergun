@@ -3,7 +3,7 @@ using System.Net.Http;
 using Microsoft.Extensions.Http.Logging;
 using Microsoft.Extensions.Logging;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 public partial class FergunHttpClientLogger : IHttpClientLogger
 {

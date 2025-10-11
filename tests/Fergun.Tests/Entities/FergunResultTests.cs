@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Fergun.Common;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;

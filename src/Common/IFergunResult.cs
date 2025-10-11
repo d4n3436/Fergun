@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Provides extra information on how command results should be handled.

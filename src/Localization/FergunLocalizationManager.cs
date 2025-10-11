@@ -7,7 +7,7 @@ using System.Threading;
 using Discord.Interactions;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Localization;
 
 /// <summary>
 /// Represents a localization manager that uses <see cref="IStringLocalizerFactory"/> to obtain the localized resources.

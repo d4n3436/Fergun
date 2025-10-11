@@ -2,9 +2,11 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
+using Fergun.Common;
 using Fergun.Data;
 using Fergun.Data.Models;
 using Fergun.Extensions;
+using Fergun.Localization;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 

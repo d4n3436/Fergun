@@ -6,7 +6,7 @@ using GTranslate;
 using GTranslate.Results;
 using GTranslate.Translators;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Represents an aggregation of translators where the order of the translators can be randomized.

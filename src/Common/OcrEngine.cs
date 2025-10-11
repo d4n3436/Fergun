@@ -1,6 +1,6 @@
 ﻿using Fergun.Modules;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the OCR engines used in <see cref="OcrModule"/>.

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Localization;
 
 /// <summary>
 /// Represents the default implementation of <see cref="IFergunLocalizer"/>.

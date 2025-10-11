@@ -1,6 +1,6 @@
 ﻿using Fergun.Modules;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the search types in Urban Dictionary. Used on <see cref="UrbanModule"/>.

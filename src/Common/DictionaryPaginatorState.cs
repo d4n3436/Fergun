@@ -1,4 +1,4 @@
-﻿namespace Fergun;
+﻿namespace Fergun.Common;
 
 public class DictionaryPaginatorState
 {

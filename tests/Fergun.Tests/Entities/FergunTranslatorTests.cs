@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Fergun.Common;
 using GTranslate;
 using GTranslate.Translators;
 using Moq;

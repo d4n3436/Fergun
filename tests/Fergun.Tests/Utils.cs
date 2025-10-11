@@ -12,6 +12,7 @@ using Fergun.Apis.Google;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Yandex;
 using Fergun.Configuration;
+using Fergun.Localization;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Moq;

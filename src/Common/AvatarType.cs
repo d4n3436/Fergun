@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the types of avatars.

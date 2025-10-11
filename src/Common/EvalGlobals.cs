@@ -1,7 +1,7 @@
 ﻿using System;
 using Discord;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Represents the global state used in the /eval command.

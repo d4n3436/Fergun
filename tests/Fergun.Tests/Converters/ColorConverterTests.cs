@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Converters;
+using Fergun.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;

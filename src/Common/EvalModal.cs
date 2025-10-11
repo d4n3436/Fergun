@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using JetBrains.Annotations;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 [UsedImplicitly]
 public class EvalModal : IModal

@@ -1,5 +1,6 @@
 ﻿using System;
 using Discord;
+using Fergun.Common;
 using Moq;
 using Xunit;
 

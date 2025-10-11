@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using Fergun.Localization;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Localization;
 using Moq;

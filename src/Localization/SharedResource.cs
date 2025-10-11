@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Fergun;
+namespace Fergun.Localization;
 
 /// <summary>
 /// Used for shared localization.

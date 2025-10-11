@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Fergun.Common;
+using Fergun.Localization;
 using Fergun.Modules;
 using GTranslate;
 using GTranslate.Results;

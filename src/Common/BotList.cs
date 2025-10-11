@@ -1,4 +1,4 @@
-﻿namespace Fergun;
+﻿namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the bot lists.

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Discord;
+using Fergun.Common;
 
 namespace Fergun.Extensions;
 

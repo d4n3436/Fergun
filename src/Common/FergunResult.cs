@@ -2,7 +2,7 @@
 using Discord.Interactions;
 using Microsoft.Extensions.Localization;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Represents the default implementation of <see cref="IFergunResult"/> for commands.

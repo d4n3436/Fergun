@@ -6,6 +6,7 @@ using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
+using Fergun.Common;
 using Fergun.Extensions;
 using Fergun.Modules.Handlers;
 using Microsoft.Extensions.DependencyInjection;

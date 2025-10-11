@@ -10,6 +10,7 @@ using Bogus.DataSets;
 using Discord;
 using Discord.Interactions;
 using Fergun.Converters;
+using Fergun.Localization;
 using GTranslate;
 using GTranslate.Translators;
 using Microsoft.Extensions.DependencyInjection;

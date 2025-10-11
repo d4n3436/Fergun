@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Threading;
+using Fergun.Localization;
 using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;

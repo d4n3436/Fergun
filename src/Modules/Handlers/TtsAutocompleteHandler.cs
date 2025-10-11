@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
+using Fergun.Localization;
 using GTranslate;
 using GTranslate.Translators;
 using JetBrains.Annotations;

@@ -1,7 +1,7 @@
 ﻿using Discord;
 using Fergun.Interactive;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 public static class Constants
 {

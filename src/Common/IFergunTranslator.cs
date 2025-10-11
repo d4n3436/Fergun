@@ -1,7 +1,7 @@
 ﻿using System;
 using GTranslate.Translators;
 
-namespace Fergun;
+namespace Fergun.Common;
 
 /// <summary>
 /// Provides methods to modify of the order of translators.

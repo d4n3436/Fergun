@@ -1,4 +1,4 @@
-﻿namespace Fergun;
+﻿namespace Fergun.Common;
 
 /// <summary>
 /// Specifies the time units for command ratelimits.

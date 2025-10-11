@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Extensions;
+using Fergun.Localization;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using Color = System.Drawing.Color;
