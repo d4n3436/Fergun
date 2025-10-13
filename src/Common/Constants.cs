@@ -9,8 +9,6 @@ public static class Constants
 
     public const int GlobalCommandUsesPerPeriod = 3;
 
-    public const string GitHubRepositoryUrl = "https://github.com/d4n3436/Fergun";
-
     public const string GoogleLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/890326437268168704/unknown.png";
 
     public const string GoogleLensLogoUrl = "https://cdn.discordapp.com/attachments/838832564583661638/1113265509899702293/google_lens.png";

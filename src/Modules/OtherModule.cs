@@ -270,12 +270,16 @@ public class OtherModule : InteractionModuleBase
 
         string? version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
         _logger.LogDebug("Version: {Version}", version ?? "?");
+        
+        var metadata = Assembly.GetExecutingAssembly()
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(x => x.Key is "RepositoryUrl");
 
         string[]? split = version?.Split('+');
         string versionAndCommitLink = split?.Length switch
         {
             1 => split[0],
-            2 => $"{split[0]}+{Format.Url(split[1][..7], $"{Constants.GitHubRepositoryUrl}/commit/{split[1]}")}",
+            2 when metadata?.Value is not null => $"{split[0]}+{Format.Url(split[1][..7], $"{metadata.Value}/commit/{split[1]}")}",
             _ => "?"
         };
 
