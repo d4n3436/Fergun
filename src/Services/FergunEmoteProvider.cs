@@ -51,22 +51,22 @@ public class FergunEmoteProvider
     /// <summary>
     /// Gets the emote representing the Google Lens icon.
     /// </summary>
-    public IEmote? GoogleLensIconEmote { get; private set; }
+    public Emote? GoogleLensIconEmote { get; private set; }
 
     /// <summary>
     /// Gets the emote representing the Bing icon.
     /// </summary>
-    public IEmote? BingIconEmote { get; private set; }
+    public Emote? BingIconEmote { get; private set; }
 
     /// <summary>
     /// Gets the emote representing the Yandex icon.
     /// </summary>
-    public IEmote? YandexIconEmote { get; private set; }
+    public Emote? YandexIconEmote { get; private set; }
 
     /// <summary>
     /// Gets the emote representing the Dictionary.com icon.
     /// </summary>
-    public IEmote? DictionaryComIconEmote { get; private set; }
+    public Emote? DictionaryComIconEmote { get; private set; }
 
     /// <summary>
     /// Gets the emote representing the button used to skip to the first paginator page. Defaults to the rewind emoji (⏮).
@@ -107,7 +107,7 @@ public class FergunEmoteProvider
     /// Sets the emotes for use in this provider.
     /// </summary>
     /// <param name="emotes">A read-only collection of emotes.</param>
-    public void SetEmotes(IReadOnlyCollection<IEmote> emotes)
+    public void SetEmotes(IReadOnlyCollection<Emote> emotes)
     {
         ArgumentNullException.ThrowIfNull(emotes);
 
