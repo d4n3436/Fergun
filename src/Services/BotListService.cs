@@ -3,7 +3,8 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
+using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -127,7 +128,7 @@ public sealed class BotListService : BackgroundService
     {
         Method = HttpMethod.Post,
         RequestUri = new Uri($"https://top.gg/api/bots/{_discordClient.CurrentUser.Id}/stats"),
-        Content = new StringContent($$"""{"server_count":{{serverCount}},"shard_count":{{shardCount}}}""", Encoding.UTF8, "application/json"),
+        Content = JsonContent.Create(new TopGgServerStatsRequest(serverCount, shardCount)),
         Headers =
         {
             Authorization = new AuthenticationHeaderValue(token)
@@ -138,10 +139,14 @@ public sealed class BotListService : BackgroundService
     {
         Method = HttpMethod.Post,
         RequestUri = new Uri($"https://discord.bots.gg/api/v1/bots/{_discordClient.CurrentUser.Id}/stats"),
-        Content = new StringContent($$"""{"guildCount":{{serverCount}},"shardCount":{{shardCount}}}""", Encoding.UTF8, "application/json"),
+        Content = JsonContent.Create(new DiscordBotsStatsRequest(serverCount, shardCount)),
         Headers =
         {
             Authorization = new AuthenticationHeaderValue(token)
         }
     };
 }
+
+file record TopGgServerStatsRequest([property: JsonPropertyName("server_count")] int ServerCount, [property: JsonPropertyName("shard_count")] int ShardCount);
+
+file record DiscordBotsStatsRequest([property: JsonPropertyName("guildCount")] int GuildCount, [property: JsonPropertyName("shardCount")] int ShardCount);
