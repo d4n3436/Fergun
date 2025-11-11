@@ -6,17 +6,22 @@ namespace Fergun.Extensions;
 
 public static class InteractionCommandTypeExtensions
 {
-    public static InteractionCommandType ToInteractionCommandType(this ApplicationCommandType type)
+    extension(ApplicationCommandType type)
     {
-        return type switch
+        public InteractionCommandType ToInteractionCommandType()
         {
-            ApplicationCommandType.Slash => InteractionCommandType.Slash,
-            ApplicationCommandType.User => InteractionCommandType.User,
-            ApplicationCommandType.Message => InteractionCommandType.Message,
-            _ => throw new UnreachableException()
-        };
+            return type switch
+            {
+                ApplicationCommandType.Slash => InteractionCommandType.Slash,
+                ApplicationCommandType.User => InteractionCommandType.User,
+                ApplicationCommandType.Message => InteractionCommandType.Message,
+                _ => throw new UnreachableException()
+            };
+        }
     }
 
-    public static bool IsApplicationCommand(this InteractionCommandType commandType)
-        => commandType is InteractionCommandType.Slash or InteractionCommandType.User or InteractionCommandType.Message;
+    extension(InteractionCommandType type)
+    {
+        public bool IsApplicationCommand => type is InteractionCommandType.Slash or InteractionCommandType.User or InteractionCommandType.Message;
+    }
 }

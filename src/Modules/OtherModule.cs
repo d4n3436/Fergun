@@ -255,7 +255,7 @@ public class OtherModule : InteractionModuleBase
         {
             guilds = shardedContext.Client.Guilds;
             shards = shardedContext.Client.Shards.Count;
-            shardId = Context.Channel.IsPrivate() ? 0 : shardedContext.Client.GetShardIdFor(Context.Guild);
+            shardId = Context.Channel.IsPrivate ? 0 : shardedContext.Client.GetShardIdFor(Context.Guild);
             shard = shardedContext.Client.GetShard(shardId);
             totalUsersInShard = shard.Guilds.Sum(x => x.MemberCount);
         }

@@ -15,7 +15,6 @@ public class FergunLocalizer : IFergunLocalizer
 {
     private readonly IStringLocalizer _localizer;
     private readonly IStringLocalizer<SharedResource> _sharedLocalizer;
-    private CultureInfo _currentCulture = DefaultCulture;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FergunLocalizer"/> class.
@@ -46,15 +45,15 @@ public class FergunLocalizer : IFergunLocalizer
     /// <remarks>Setting a value won't have an effect if the value is not in <see cref="SupportedCultures"/>.</remarks>
     public CultureInfo CurrentCulture
     {
-        get => _currentCulture;
+        get;
         set
         {
             if (SupportedCultures.Contains(value))
             {
-                _currentCulture = value;
+                field = value;
             }
         }
-    }
+    } = DefaultCulture;
 
     /// <inheritdoc/>
     public LocalizedString this[string name]

@@ -5,7 +5,7 @@ namespace Fergun.Common;
 /// <summary>
 /// Specifies the types of commands in the <see cref="InteractionService"/>.
 /// </summary>
-public enum InteractionCommandType : byte
+public enum InteractionCommandType
 {
     /// <summary>
     /// A Slash command.

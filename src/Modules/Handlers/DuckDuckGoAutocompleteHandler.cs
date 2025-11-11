@@ -41,7 +41,7 @@ public class DuckDuckGoAutocompleteHandler : AutocompleteHandler
             locale = $"{temp[1]}-{temp[0]}";
         }
 
-        bool isNsfw = context.Channel.IsNsfw();
+        bool isNsfw = context.Channel.IsNsfw;
 
         string url = $"https://duckduckgo.com/ac/?q={Uri.EscapeDataString(text)}&kl={locale}&p={(isNsfw ? -1 : 1)}";
 

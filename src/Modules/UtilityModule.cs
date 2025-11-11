@@ -657,7 +657,7 @@ public class UtilityModule : InteractionModuleBase
             .WithFooter(_localizer["WikipediaSearch"])
             .WithColor(Constants.DefaultColor);
 
-        if (Context.Channel.IsNsfw() && article.Image is not null)
+        if (Context.Channel.IsNsfw && article.Image is not null)
         {
             if (article.Image.Width >= 500 && article.Image.Height >= 500)
             {

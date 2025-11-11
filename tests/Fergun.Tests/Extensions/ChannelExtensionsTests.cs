@@ -18,9 +18,9 @@ public class ChannelExtensionsTests
 
         var channelMock3 = new Mock<IDMChannel>();
 
-        Assert.True(channelMock1.Object.IsNsfw());
-        Assert.False(channelMock2.Object.IsNsfw());
-        Assert.False(channelMock3.Object.IsNsfw());
+        Assert.True(channelMock1.Object.IsNsfw);
+        Assert.False(channelMock2.Object.IsNsfw);
+        Assert.False(channelMock3.Object.IsNsfw);
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class ChannelExtensionsTests
         var channelMock2 = new Mock<ITextChannel>();
         var channelMock3 = new Mock<IDMChannel>();
 
-        Assert.False(channelMock1.Object.IsPrivate());
-        Assert.False(channelMock2.Object.IsPrivate());
-        Assert.True(channelMock3.Object.IsPrivate());
+        Assert.False(channelMock1.Object.IsPrivate);
+        Assert.False(channelMock2.Object.IsPrivate);
+        Assert.True(channelMock3.Object.IsPrivate);
     }
 }

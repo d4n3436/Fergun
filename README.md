@@ -32,7 +32,7 @@ Have any questions or need help with the bot? Join the [support server](https://
 
 ### 0. Prerequisites
 * A Discord bot application (You can create one [here](https://discord.com/developers/applications)).
-* [.NET 8 SDK](https://dotnet.microsoft.com/download)
+* [.NET 10 SDK](https://dotnet.microsoft.com/download)
 
 ### 1. Build and run the bot
 * Clone the repository:
@@ -46,7 +46,7 @@ Have any questions or need help with the bot? Join the [support server](https://
   
 * Go to the build output folder: 
   ```
-  cd src/bin/Release/net8.0
+  cd src/bin/Release/net10.0
   ```
   
 * Open `appsettings.json` with a text editor and set the application token:

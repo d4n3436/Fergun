@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -10,7 +10,7 @@ COPY . .
 RUN dotnet publish src/Fergun.csproj -o out --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine
+FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine
 WORKDIR /app
 COPY --from=build /app/out .
 ENTRYPOINT ["dotnet", "Fergun.dll"]

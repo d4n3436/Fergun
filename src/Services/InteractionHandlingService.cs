@@ -336,7 +336,7 @@ public sealed class InteractionHandlingService : IHostedService, IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (type.IsApplicationCommand())
+        if (type.IsApplicationCommand)
         {
             await using var scope = _services.CreateAsyncScope();
             await using var db = scope.ServiceProvider.GetRequiredService<FergunContext>();

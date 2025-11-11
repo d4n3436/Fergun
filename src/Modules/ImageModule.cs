@@ -69,7 +69,7 @@ public class ImageModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        bool isNsfw = Context.Channel.IsNsfw();
+        bool isNsfw = Context.Channel.IsNsfw;
         _logger.LogInformation("Sending Google Images request (query: \"{Query}\", is NSFW: {IsNsfw})", query, isNsfw);
 
         var images = (await _googleScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict, language: Context.Interaction.GetLanguageCode()))
@@ -124,7 +124,7 @@ public class ImageModule : InteractionModuleBase
     {
         await Context.Interaction.DeferAsync();
 
-        bool isNsfw = Context.Channel.IsNsfw();
+        bool isNsfw = Context.Channel.IsNsfw;
         _logger.LogInformation("Sending DuckDuckGo image request (query: \"{Query}\", is NSFW: {IsNsfw})", query, isNsfw);
 
         var images = (await _duckDuckGoScraper.GetImagesAsync(query, isNsfw ? SafeSearchLevel.Off : SafeSearchLevel.Strict))
@@ -264,7 +264,7 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
-        bool isNsfw = Context.Channel.IsNsfw();
+        bool isNsfw = Context.Channel.IsNsfw;
 
         IReadOnlyList<IYandexReverseImageSearchResult> results;
 
@@ -343,7 +343,7 @@ public class ImageModule : InteractionModuleBase
             _logger.LogWarning(e, "Failed to delete the original interaction response");
         }
 
-        bool isNsfw = Context.Channel.IsNsfw();
+        bool isNsfw = Context.Channel.IsNsfw;
         IReadOnlyList<IBingReverseImageSearchResult> results;
 
         _logger.LogInformation("Sending Bing reverse image search request (URL: {Url}, is NSFW: {IsNsfw}, language: {Language})", url, isNsfw, interaction.GetLanguageCode());

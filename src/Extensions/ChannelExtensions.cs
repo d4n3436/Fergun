@@ -4,7 +4,13 @@ namespace Fergun.Extensions;
 
 public static class ChannelExtensions
 {
-    public static bool IsPrivate(this IChannel channel) => channel is IPrivateChannel;
+    extension(IChannel channel)
+    {
+        public bool IsPrivate => channel is IPrivateChannel;
+    }
 
-    public static bool IsNsfw(this IMessageChannel channel) => channel is ITextChannel { IsNsfw: true };
+    extension(IMessageChannel channel)
+    {
+        public bool IsNsfw => channel is ITextChannel { IsNsfw: true };
+    }
 }

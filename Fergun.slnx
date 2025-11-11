@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Fergun.csproj" />
+  <Project Path="tests/Fergun.Tests/Fergun.Tests.csproj" />
+</Solution>
