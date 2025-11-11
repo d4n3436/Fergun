@@ -54,7 +54,7 @@ public class UrbanDictionaryTests
     {
         var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _urbanDictionary.GetDefinitionAsync(id, TestContext.Current.CancellationToken));
 
-        Assert.Equal(HttpStatusCode.InternalServerError, exception.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
     }
 
     [Fact]

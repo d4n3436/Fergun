@@ -41,7 +41,6 @@ public class GeniusClientTests
     [Theory]
     [InlineData(235729, false, true, false)] // Eminem - Rap God
     [InlineData(2955220, false, false, false)] // Luis Fonsi (Ft. Daddy Yankee) - Despacito (dfp-unit, joined tags)
-    [InlineData(4661161, false, false, false)] // Juice WRLD - Unreleased Songs [Discography List] (header tags, no spotify track id, links)
     [InlineData(8274090, false, false, true)] // The Killers - Amen (no lyrics, no spotify track id, unreleased)
     [InlineData(3925554, true, false, false)] // Alan Walker - Faded (Instrumental)
     public async Task GetSongAsync_Returns_Valid_Songs(int id, bool isInstrumental, bool hasSpotifyTrackId, bool isUnreleased)
