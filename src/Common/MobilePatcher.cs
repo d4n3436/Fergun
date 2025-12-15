@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using Discord.WebSocket;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 
 namespace Fergun.Common;
@@ -11,11 +9,6 @@ namespace Fergun.Common;
 /// </summary>
 public static class MobilePatcher
 {
-    private static readonly Type _identifyParams =
-        typeof(BaseSocketClient).Assembly.GetType("Discord.API.Gateway.IdentifyParams", true)!;
-
-    private static readonly PropertyInfo? _property = _identifyParams.GetProperty("Properties");
-
     /// <summary>
     /// Patches Discord.Net to display the mobile status.
     /// </summary>
@@ -32,17 +25,18 @@ public static class MobilePatcher
         if (opCode != 2) // Identify
             return;
 
-        if (payload.GetType() != _identifyParams)
-            return;
+        var properties = GetProperties(payload);
 
-        if (_property?.GetValue(payload) is not IDictionary<string, string> props
-            || !props.TryGetValue("$device", out string? device)
+        if (!properties.TryGetValue("$device", out string? device)
             || device != "Discord.Net")
         {
             return;
         }
 
-        props["$os"] = "android";
-        props["$browser"] = "Discord Android";
+        properties["$os"] = "android";
+        properties["$browser"] = "Discord Android";
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Properties")]
+    private static extern IDictionary<string, string> GetProperties([UnsafeAccessorType("Discord.API.Gateway.IdentifyParams, Discord.Net.WebSocket")] object instance);
 }
