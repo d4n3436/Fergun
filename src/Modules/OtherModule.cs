@@ -23,7 +23,6 @@ using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
 using Fergun.Services;
 using Humanizer;
-using Humanizer.Localisation;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

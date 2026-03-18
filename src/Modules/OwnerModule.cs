@@ -106,7 +106,11 @@ public class OwnerModule : InteractionModuleBase
         _logger.LogDebug("Sending eval modal");
 
         await Context.Interaction.RespondWithModalAsync<EvalModal>(EvalModalKey,
-            modifyModal: b => b.WithTitle(_localizer["EvalPrompt"]).UpdateTextInput(EvalModal.CodeCustomId, t => t.Label = _localizer["Code"]));
+            modifyModal: b =>
+            {
+                b.WithTitle(_localizer["EvalPrompt"]);
+                b.Components.OfType<LabelBuilder>().First(x => x.Component is TextInputBuilder { CustomId: EvalModal.CodeCustomId }).WithLabel(_localizer["Code"]);
+            });
 
         return FergunResult.FromSuccess();
     }
