@@ -54,7 +54,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var response = await _httpClient.GetAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+        using var response = await _httpClient.GetAsync(new Uri($"https://lens.google.com/uploadbyurl?url={Uri.EscapeDataString(url)}"), HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
 
         var parameters = HttpUtility.ParseQueryString(response.RequestMessage!.RequestUri!.Query);
         string? vsrid = parameters["vsrid"];
@@ -66,7 +66,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
         }
 
         ReadOnlyMemory<byte> bytes = await _httpClient.GetByteArrayAsync(new Uri($"https://lens.google.com/qfmetadata?vsrid={vsrid}&gsessionid={gsessionid}"), cancellationToken).ConfigureAwait(false);
-        var document = JsonDocument.Parse(bytes[6..]); // Skip magic chars
+        using var document = JsonDocument.Parse(bytes[6..]); // Skip magic chars
 
         var root = document.RootElement[0][2];
         if (root.GetArrayLength() == 0 || root[0].ValueKind == JsonValueKind.Null)
@@ -113,7 +113,7 @@ public sealed class GoogleLensClient : IGoogleLensClient, IDisposable
 
         byte[] page = await _httpClient.GetByteArrayAsync(new Uri(requestUrl), cancellationToken).ConfigureAwait(false);
 
-        var data = ExtractDataPack(page);
+        using var data = ExtractDataPack(page);
 
         return data
             .RootElement
