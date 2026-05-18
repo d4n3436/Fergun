@@ -36,27 +36,6 @@ public class UrbanDictionaryTests
         Assert.All(definitions, AssertDefinitionProperties);
     }
 
-    [InlineData(871139)]
-    [InlineData(15369452)]
-    [Theory]
-    public async Task GetDefinitionAsync_Returns_Definition(int id)
-    {
-        var definition = await _urbanDictionary.GetDefinitionAsync(id, TestContext.Current.CancellationToken);
-
-        Assert.NotNull(definition);
-        Assert.Equal(id, definition.Id);
-    }
-
-    [InlineData(int.MaxValue)]
-    [InlineData(0)]
-    [Theory]
-    public async Task GetDefinitionAsync_Returns_InternalServerError_If_Id_Is_Invalid(int id)
-    {
-        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _urbanDictionary.GetDefinitionAsync(id, TestContext.Current.CancellationToken));
-
-        Assert.Equal(HttpStatusCode.NotFound, exception.StatusCode);
-    }
-
     [Fact]
     public async Task GetWordsOfTheDayAsync_Returns_Definitions()
     {
@@ -107,7 +86,6 @@ public class UrbanDictionaryTests
 
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionsAsync("test", TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetRandomDefinitionsAsync(TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionAsync(It.IsAny<int>(), TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetWordsOfTheDayAsync(TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsAsync("test", TestContext.Current.CancellationToken));
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsExtraAsync("test", TestContext.Current.CancellationToken));

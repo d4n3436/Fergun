@@ -69,19 +69,6 @@ public sealed class UrbanDictionaryClient : IDisposable, IUrbanDictionaryClient
     }
 
     /// <inheritdoc/>
-    public async Task<UrbanDefinition?> GetDefinitionAsync(int id, CancellationToken cancellationToken = default)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        await using var stream = await _httpClient.GetStreamAsync(new Uri($"define?defid={id}", UriKind.Relative), cancellationToken).ConfigureAwait(false);
-        using var document = await JsonDocument.ParseAsync(stream, default, cancellationToken).ConfigureAwait(false);
-        var list = document.RootElement.GetProperty("list"u8);
-
-        return list.Deserialize<IReadOnlyList<UrbanDefinition>>()!?[0];
-    }
-
-    /// <inheritdoc/>
     public async Task<IReadOnlyList<UrbanDefinition>> GetWordsOfTheDayAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

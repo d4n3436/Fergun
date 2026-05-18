@@ -25,14 +25,6 @@ public interface IUrbanDictionaryClient
     Task<IReadOnlyList<UrbanDefinition>> GetRandomDefinitionsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets a definition by its ID.
-    /// </summary>
-    /// <param name="id">The ID of the definition.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation. The result contains the definition, or <c>null</c> if not found.</returns>
-    Task<UrbanDefinition?> GetDefinitionAsync(int id, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Gets the words of the day.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
