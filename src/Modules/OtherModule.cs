@@ -34,34 +34,25 @@ namespace Fergun.Modules;
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
-public class OtherModule : InteractionModuleBase
+public class OtherModule : FergunModuleBase<OtherModule>
 {
     private static readonly Uri _inspiroBotUri = new("https://inspirobot.me/api?generate=true");
-    private readonly ILogger<OtherModule> _logger;
-    private readonly IFergunLocalizer<OtherModule> _localizer;
     private readonly FergunOptions _fergunOptions;
-    private readonly FergunEmoteProvider _emotes;
-    private readonly InteractiveService _interactive;
     private readonly IGeniusClient _geniusClient;
     private readonly HttpClient _httpClient;
     private readonly FergunContext _db;
     private readonly ApplicationCommandCache _commandCache;
 
-    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes,
-        InteractiveService interactive, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db, ApplicationCommandCache commandCache)
+    public OtherModule(ILogger<OtherModule> logger, IFergunLocalizer<OtherModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive,
+        IOptionsSnapshot<FergunOptions> fergunOptions, IGeniusClient geniusClient, HttpClient httpClient, FergunContext db, ApplicationCommandCache commandCache)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _emotes = emotes;
         _geniusClient = geniusClient;
         _httpClient = httpClient;
-        _interactive = interactive;
         _db = db;
         _commandCache = commandCache;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("command-stats", "Displays the command usage stats.")]
     public async Task<RuntimeResult> CommandStatsAsync()

@@ -1,12 +1,13 @@
-﻿using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Common;
 using Fergun.Extensions;
+using Fergun.Interactive;
 using Fergun.Localization;
 using Fergun.Modules.Handlers;
 using Fergun.Preconditions;
+using Fergun.Services;
 using GTranslate;
 using GTranslate.Translators;
 using JetBrains.Annotations;
@@ -19,22 +20,18 @@ namespace Fergun.Modules;
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("tts", "TTS commands.")]
-public class TtsModule : InteractionModuleBase
+public class TtsModule : FergunModuleBase<TtsModule>
 {
-    private readonly ILogger<TtsModule> _logger;
-    private readonly IFergunLocalizer<TtsModule> _localizer;
     private readonly SharedModule _shared;
     private readonly MicrosoftTranslator _microsoftTranslator;
 
-    public TtsModule(ILogger<TtsModule> logger, IFergunLocalizer<TtsModule> localizer, SharedModule shared, MicrosoftTranslator microsoftTranslator)
+    public TtsModule(ILogger<TtsModule> logger, IFergunLocalizer<TtsModule> localizer, FergunEmoteProvider emotes,
+        InteractiveService interactive, SharedModule shared, MicrosoftTranslator microsoftTranslator)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _shared = shared;
         _microsoftTranslator = microsoftTranslator;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [MessageCommand("TTS")]
     public async Task<RuntimeResult> TtsAsync(IMessage message)

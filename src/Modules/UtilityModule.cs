@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -43,7 +42,7 @@ namespace Fergun.Modules;
 [CommandContextType(InteractionContextType.BotDm, InteractionContextType.PrivateChannel, InteractionContextType.Guild)]
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(Constants.GlobalCommandUsesPerPeriod, Constants.GlobalRatelimitPeriod)]
-public class UtilityModule : InteractionModuleBase
+public class UtilityModule : FergunModuleBase<UtilityModule>
 {
     private const string DictionaryCategoryKey = "dictionary-category";
     private const string DictionaryExtraInformationKey = "dictionary-extra-information";
@@ -56,13 +55,9 @@ public class UtilityModule : InteractionModuleBase
         .Where(x => x.SupportedServices == (TranslationServices.Google | TranslationServices.Bing | TranslationServices.Yandex | TranslationServices.Microsoft))
         .ToArray());
 
-    private readonly ILogger<UtilityModule> _logger;
-    private readonly IFergunLocalizer<UtilityModule> _localizer;
     private readonly FergunOptions _fergunOptions;
-    private readonly FergunEmoteProvider _emotes;
     private readonly SharedModule _shared;
     private readonly InteractionService _commands;
-    private readonly InteractiveService _interactive;
     private readonly ApplicationCommandCache _commandCache;
     private readonly IFergunTranslator _translator;
     private readonly IDictionaryClient _dictionary;
@@ -70,17 +65,14 @@ public class UtilityModule : InteractionModuleBase
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
-    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes,
-        SharedModule shared, InteractionService commands, InteractiveService interactive, ApplicationCommandCache commandCache, IDictionaryClient dictionary,
+    public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive,
+        IOptionsSnapshot<FergunOptions> fergunOptions, SharedModule shared, InteractionService commands, ApplicationCommandCache commandCache, IDictionaryClient dictionary,
         IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _emotes = emotes;
         _shared = shared;
         _commands = commands;
-        _interactive = interactive;
         _commandCache = commandCache;
         _dictionary = dictionary;
         _translator = translator;
@@ -88,8 +80,6 @@ public class UtilityModule : InteractionModuleBase
         _wikipediaClient = wikipediaClient;
         _wolframAlphaClient = wolframAlphaClient;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [UserCommand("Avatar")]
     public async Task<RuntimeResult> AvatarUserCommandAsync(IUser user)

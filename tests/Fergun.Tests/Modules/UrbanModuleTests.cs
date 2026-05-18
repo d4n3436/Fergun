@@ -34,7 +34,7 @@ public class UrbanModuleTests
         var options = Utils.CreateMockedFergunOptions();
         var interactive = new InteractiveService(_client, _interactiveConfig);
 
-        _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(Mock.Of<ILogger<UrbanModule>>(), _localizer, options, emoteProvider, _urbanDictionary, interactive)) { CallBase = true };
+        _moduleMock = new Mock<UrbanModule>(() => new UrbanModule(Mock.Of<ILogger<UrbanModule>>(), _localizer, emoteProvider, interactive, options, _urbanDictionary)) { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
         _contextMock.SetupGet(x => x.User).Returns(() => AutoFaker.Generate<IUser>(b => b.WithBinder(new MoqBinder())));
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);

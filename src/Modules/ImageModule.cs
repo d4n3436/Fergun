@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -33,35 +32,26 @@ namespace Fergun.Modules;
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("img", "Image search commands.")]
-public class ImageModule : InteractionModuleBase
+public class ImageModule : FergunModuleBase<ImageModule>
 {
-    private readonly ILogger<ImageModule> _logger;
-    private readonly IFergunLocalizer<ImageModule> _localizer;
     private readonly FergunOptions _fergunOptions;
-    private readonly FergunEmoteProvider _emotes;
-    private readonly InteractiveService _interactive;
     private readonly GoogleScraper _googleScraper;
     private readonly DuckDuckGoScraper _duckDuckGoScraper;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
     private readonly IGoogleLensClient _googleLens;
 
-    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes, InteractiveService interactive,
+    public ImageModule(ILogger<ImageModule> logger, IFergunLocalizer<ImageModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions,
         GoogleScraper googleScraper, DuckDuckGoScraper duckDuckGoScraper, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch, IGoogleLensClient googleLens)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _emotes = emotes;
-        _interactive = interactive;
         _googleScraper = googleScraper;
         _duckDuckGoScraper = duckDuckGoScraper;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
         _googleLens = googleLens;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
     public async Task<RuntimeResult> GoogleAsync([Autocomplete<GoogleAutocompleteHandler>][Summary(description: "The query to search.")] string query,

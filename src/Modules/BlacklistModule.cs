@@ -1,12 +1,12 @@
-﻿using System.Globalization;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Interactions;
 using Fergun.Common;
 using Fergun.Data;
 using Fergun.Data.Models;
-using Fergun.Extensions;
+using Fergun.Interactive;
 using Fergun.Localization;
+using Fergun.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
@@ -15,20 +15,15 @@ namespace Fergun.Modules;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [RequireOwner]
 [Group("blacklist", "Blacklist commands.")]
-public class BlacklistModule : InteractionModuleBase
+public class BlacklistModule : FergunModuleBase<BlacklistModule>
 {
-    private readonly ILogger<BlacklistModule> _logger;
-    private readonly IFergunLocalizer<BlacklistModule> _localizer;
     private readonly FergunContext _db;
 
-    public BlacklistModule(ILogger<BlacklistModule> logger, IFergunLocalizer<BlacklistModule> localizer, FergunContext db)
+    public BlacklistModule(ILogger<BlacklistModule> logger, IFergunLocalizer<BlacklistModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive, FergunContext db)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _db = db;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("add", "Adds a user to the blacklist.")]
     public async Task<RuntimeResult> AddAsync([Summary(description: "The user to add.")] IUser user,

@@ -53,7 +53,7 @@ public class OcrModuleTests
         var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
 
         var interactive = new InteractiveService(_client, _interactiveConfig);
-        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, emoteProvider, shared, interactive,
+        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, emoteProvider, interactive, shared,
             _googleLensMock.Object, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object))
         { CallBase = true };
         _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);

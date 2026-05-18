@@ -43,8 +43,8 @@ public class UtilityModuleTests
         var interactionService = new InteractionService(client);
         var interactive = new InteractiveService(client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
 
-        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, options, emoteProvider, shared, interactionService,
-            interactive, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
+        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, emoteProvider, interactive, options, shared,
+            interactionService, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
         {
             CallBase = true
         };

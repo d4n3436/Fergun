@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +24,7 @@ namespace Fergun.Modules;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 [RequireOwner]
-public class OwnerModule : InteractionModuleBase
+public class OwnerModule : FergunModuleBase<OwnerModule>
 {
     private static readonly Lazy<ScriptOptions> _lazyOptions = new(() => ScriptOptions.Default
         .AddReferences(typeof(OwnerModule).Assembly)
@@ -35,24 +34,15 @@ public class OwnerModule : InteractionModuleBase
     private const string EvalModalKey = "eval-modal";
 
     private readonly IServiceProvider _services;
-    private readonly ILogger<OwnerModule> _logger;
-    private readonly IFergunLocalizer<OwnerModule> _localizer;
-    private readonly InteractiveService _interactive;
     private readonly FergunOptions _fergunOptions;
-    private readonly FergunEmoteProvider _emotes;
 
-    public OwnerModule(IServiceProvider services, ILogger<OwnerModule> logger, IFergunLocalizer<OwnerModule> localizer,
-        InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions, FergunEmoteProvider emotes)
+    public OwnerModule(ILogger<OwnerModule> logger, IFergunLocalizer<OwnerModule> localizer, FergunEmoteProvider emotes,
+        InteractiveService interactive, IServiceProvider services, IOptionsSnapshot<FergunOptions> fergunOptions)
+        : base(logger, localizer, emotes, interactive)
     {
         _services = services;
-        _logger = logger;
-        _localizer = localizer;
-        _interactive = interactive;
         _fergunOptions = fergunOptions.Value;
-        _emotes = emotes;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("cmd", "Starts a process and displays the output.")]
     public async Task<RuntimeResult> CmdAsync(

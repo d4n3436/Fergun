@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Fergun.Apis.Urban;
-using Moq;
 using Xunit;
 
 namespace Fergun.Tests.Apis;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -27,27 +26,18 @@ namespace Fergun.Modules;
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, Constants.GlobalRatelimitPeriod)]
 [Group("urban", "Urban Dictionary commands")]
-public class UrbanModule : InteractionModuleBase
+public class UrbanModule : FergunModuleBase<UrbanModule>
 {
-    private readonly ILogger<UrbanModule> _logger;
-    private readonly IFergunLocalizer<UrbanModule> _localizer;
     private readonly FergunOptions _fergunOptions;
-    private readonly FergunEmoteProvider _emotes;
     private readonly IUrbanDictionaryClient _urbanDictionary;
-    private readonly InteractiveService _interactive;
 
-    public UrbanModule(ILogger<UrbanModule> logger, IFergunLocalizer<UrbanModule> localizer, IOptionsSnapshot<FergunOptions> fergunOptions,
-        FergunEmoteProvider emotes, IUrbanDictionaryClient urbanDictionary, InteractiveService interactive)
+    public UrbanModule(ILogger<UrbanModule> logger, IFergunLocalizer<UrbanModule> localizer, FergunEmoteProvider emotes,
+        InteractiveService interactive, IOptionsSnapshot<FergunOptions> fergunOptions, IUrbanDictionaryClient urbanDictionary)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
         _fergunOptions = fergunOptions.Value;
-        _emotes = emotes;
         _urbanDictionary = urbanDictionary;
-        _interactive = interactive;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("search", "Searches for definitions for a term in Urban Dictionary.")]
     public async Task<RuntimeResult> SearchAsync([Autocomplete<UrbanAutocompleteHandler>][Summary(description: "The term to search.")] string term)

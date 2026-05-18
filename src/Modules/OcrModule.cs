@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -26,35 +25,26 @@ namespace Fergun.Modules;
 [IntegrationType(ApplicationIntegrationType.UserInstall, ApplicationIntegrationType.GuildInstall)]
 [Ratelimit(2, 20)]
 [Group("ocr", "OCR commands.")]
-public class OcrModule : InteractionModuleBase
+public class OcrModule : FergunModuleBase<OcrModule>
 {
     private const int OcrTextId = 10;
     private const string OcrTranslateKey = "ocr-translate";
     private const string OcrTtsKey = "ocr-tts";
 
-    private readonly ILogger<OcrModule> _logger;
-    private readonly IFergunLocalizer<OcrModule> _localizer;
-    private readonly FergunEmoteProvider _emotes;
     private readonly SharedModule _shared;
-    private readonly InteractiveService _interactive;
     private readonly IGoogleLensClient _googleLens;
     private readonly IBingVisualSearch _bingVisualSearch;
     private readonly IYandexImageSearch _yandexImageSearch;
 
-    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, FergunEmoteProvider emotes, SharedModule shared, InteractiveService interactive,
+    public OcrModule(ILogger<OcrModule> logger, IFergunLocalizer<OcrModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive, SharedModule shared,
         IGoogleLensClient googleLens, IBingVisualSearch bingVisualSearch, IYandexImageSearch yandexImageSearch)
+        : base(logger, localizer, emotes, interactive)
     {
-        _logger = logger;
-        _localizer = localizer;
-        _emotes = emotes;
         _shared = shared;
-        _interactive = interactive;
         _googleLens = googleLens;
         _bingVisualSearch = bingVisualSearch;
         _yandexImageSearch = yandexImageSearch;
     }
-
-    public override void BeforeExecute(ICommandInfo command) => _localizer.CurrentCulture = CultureInfo.GetCultureInfo(Context.Interaction.GetLanguageCode());
 
     [SlashCommand("bing", "Performs OCR to an image using Bing Visual Search.")]
     public async Task<RuntimeResult> BingAsync([Summary(description: "The URL of an image.")] string? url = null,
