@@ -11,7 +11,7 @@ public class Command
     /// Gets or sets the name of this command.
     /// </summary>
     [Key]
-    [MaxLength(32)]
+    [MaxLength(100)]
     public string Name { get; set; } = null!;
 
     /// <summary>

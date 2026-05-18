@@ -32,7 +32,7 @@ public class BlacklistModule : InteractionModuleBase
 
     [SlashCommand("add", "Adds a user to the blacklist.")]
     public async Task<RuntimeResult> AddAsync([Summary(description: "The user to add.")] IUser user,
-        [Summary(description: "The blacklist reason.")] string? reason = null,
+        [Summary(description: "The blacklist reason.")][MaxLength(User.MaxBlacklistReasonLength)] string? reason = null,
         [Summary(description: "Whether the user should be \"shadow\"-blacklisted.")] bool shadow = false)
     {
         var dbUser = await _db.Users.FindAsync(user.Id);

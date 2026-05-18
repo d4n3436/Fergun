@@ -9,6 +9,8 @@ namespace Fergun.Data.Models;
 /// </summary>
 public class User : IEntity<ulong>
 {
+    public const int MaxBlacklistReasonLength = 256;
+
     /// <inheritdoc/>
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -22,6 +24,6 @@ public class User : IEntity<ulong>
     /// <summary>
     /// Gets or sets the blacklist reason.
     /// </summary>
-    [MaxLength(256)]
+    [MaxLength(MaxBlacklistReasonLength)]
     public string? BlacklistReason { get; set; }
 }
