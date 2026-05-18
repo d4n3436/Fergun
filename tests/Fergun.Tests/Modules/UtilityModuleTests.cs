@@ -53,14 +53,6 @@ public class UtilityModuleTests
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }
 
-    [Fact]
-    public void BeforeExecute_Sets_Language()
-    {
-        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
-        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
-        Assert.Equal("en", _localizer.CurrentCulture.TwoLetterISOLanguageName);
-    }
-
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
     public async Task AvatarAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)

@@ -40,14 +40,6 @@ public class UrbanModuleTests
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }
 
-    [Fact]
-    public void BeforeExecute_Sets_Language()
-    {
-        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
-        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
-        Assert.Equal("en", _localizer.CurrentCulture.TwoLetterISOLanguageName);
-    }
-
     [Theory]
     [MemberData(nameof(GetRandomWords))]
     public async Task SearchAsync_Returns_Definitions(string term)

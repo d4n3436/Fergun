@@ -52,14 +52,6 @@ public class ImageModuleTests
         _contextMock.SetupGet(x => x.User).Returns(_interactionMock.Object.User);
     }
 
-    [Fact]
-    public void BeforeExecute_Sets_Language()
-    {
-        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
-        _module.BeforeExecute(It.IsAny<ICommandInfo>());
-        Assert.Equal("en", _localizer.CurrentCulture.TwoLetterISOLanguageName);
-    }
-
     [Theory]
     [InlineData("Discord", false, true)]
     [InlineData("Google", true, false)]

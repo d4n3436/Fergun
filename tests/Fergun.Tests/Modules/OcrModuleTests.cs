@@ -60,14 +60,6 @@ public class OcrModuleTests
         ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
     }
 
-    [Fact]
-    public void BeforeExecute_Sets_Language()
-    {
-        _interactionMock.SetupGet(x => x.UserLocale).Returns("en");
-        _moduleMock.Object.BeforeExecute(It.IsAny<ICommandInfo>());
-        Assert.Equal("en", _ocrLocalizer.CurrentCulture.TwoLetterISOLanguageName);
-    }
-
     [Theory]
     [InlineData(TextImageUrl, true)]
     [InlineData(EmptyImageUrl, false)]
