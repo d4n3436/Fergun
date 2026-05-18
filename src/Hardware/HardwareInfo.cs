@@ -9,23 +9,19 @@ namespace Fergun.Hardware;
 /// </summary>
 public static class HardwareInfo
 {
-    private static readonly Lazy<IHardwareInfo> _lazyInstance = new(InitializeInstance);
-    private static readonly Lazy<string?> _lazyCpuName = new(Instance.GetCpuName);
-    private static readonly Lazy<string> _lazyOsName = new(Instance.GetOperatingSystemName);
-
     /// <summary>
     /// Gets the inner (OS-specific) <see cref="IHardwareInfo"/> instance.
     /// </summary>
-    public static IHardwareInfo Instance => _lazyInstance.Value;
+    public static IHardwareInfo Instance { get; } = InitializeInstance();
 
-    /// <inheritdoc cref="IHardwareInfo.GetCpuName"/>
-    public static string? CpuName => _lazyCpuName.Value;
+    /// <inheritdoc cref="IHardwareInfo.CpuName"/>
+    public static string? CpuName => Instance.CpuName;
 
-    /// <inheritdoc cref="IHardwareInfo.GetOperatingSystemName"/>
-    public static string OperatingSystemName => _lazyOsName.Value;
+    /// <inheritdoc cref="IHardwareInfo.OperatingSystemName"/>
+    public static string OperatingSystemName => Instance.OperatingSystemName;
 
     /// <inheritdoc cref="IHardwareInfo.GetMemoryStatus"/>
-    public static MemoryStatus GetMemoryStatus() => _lazyInstance.Value.GetMemoryStatus();
+    public static MemoryStatus GetMemoryStatus() => Instance.GetMemoryStatus();
 
     /// <summary>
     /// Gets the CPU usage for the current process.
@@ -33,15 +29,14 @@ public static class HardwareInfo
     /// <returns>The CPU usage in the range 0 to 1.</returns>
     public static async Task<double> GetCpuUsageAsync()
     {
-        var startTime = DateTimeOffset.UtcNow;
-        var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        var startTimestamp = Stopwatch.GetTimestamp();
+        var startCpuUsage = Environment.CpuUsage.TotalTime;
         await Task.Delay(500);
 
-        var endTime = DateTimeOffset.UtcNow;
-        var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+        var endCpuUsage = Environment.CpuUsage.TotalTime;
+        var elapsed = Stopwatch.GetElapsedTime(startTimestamp);
         double cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-        double totalMsPassed = (endTime - startTime).TotalMilliseconds;
-        return cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+        return cpuUsedMs / (Environment.ProcessorCount * elapsed.TotalMilliseconds);
     }
 
     private static IHardwareInfo InitializeInstance()

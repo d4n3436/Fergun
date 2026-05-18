@@ -12,18 +12,53 @@ namespace Fergun.Hardware;
 /// Implements the <see cref="IHardwareInfo"/> interface through Linux-specific APIs.
 /// </summary>
 [SupportedOSPlatform("linux")]
-public class LinuxHardwareInfo : IHardwareInfo
+public sealed class LinuxHardwareInfo : IHardwareInfo
 {
     private const string CpuInfoPath = "/proc/cpuinfo";
     private const string OsReleasePath = "/etc/os-release";
     private const string MemInfoPath = "/proc/meminfo";
+
+    private readonly Lazy<string?> _lazyCpuName = new(GetCpuName);
+    private readonly Lazy<string> _lazyOsName = new(GetOperatingSystemName);
 
     internal LinuxHardwareInfo()
     {
     }
 
     /// <inheritdoc/>
-    public string? GetCpuName()
+    public string? CpuName => _lazyCpuName.Value;
+
+    /// <inheritdoc/>
+    public string OperatingSystemName => _lazyOsName.Value;
+
+    /// <inheritdoc/>
+    public MemoryStatus GetMemoryStatus()
+    {
+        const string memTotalId = "MemTotal:";
+        const string memAvailable = "MemAvailable:";
+
+        long totalMemory = 0;
+        long availableMemory = 0;
+
+        if (TryReadFileLines(MemInfoPath, out var lines))
+        {
+            foreach (string line in lines)
+            {
+                GetMemInfoData(line, memTotalId, ref totalMemory);
+                GetMemInfoData(line, memAvailable, ref availableMemory);
+            }
+        }
+
+        return new MemoryStatus
+        {
+            TotalPhysicalMemory = totalMemory,
+            AvailablePhysicalMemory = availableMemory,
+            UsedPhysicalMemory = totalMemory - availableMemory,
+            ProcessUsedMemory = Process.GetCurrentProcess().WorkingSet64
+        };
+    }
+
+    private static string? GetCpuName()
     {
         const string modelName = "model name";
         const string modelName2 = "Model name:";
@@ -57,8 +92,7 @@ public class LinuxHardwareInfo : IHardwareInfo
         return cpuName;
     }
 
-    /// <inheritdoc/>
-    public string GetOperatingSystemName()
+    private static string GetOperatingSystemName()
     {
         const string prettyNameId = "PRETTY_NAME=";
 
@@ -81,33 +115,6 @@ public class LinuxHardwareInfo : IHardwareInfo
         }
 
         return osName;
-    }
-
-    /// <inheritdoc/>
-    public MemoryStatus GetMemoryStatus()
-    {
-        const string memTotalId = "MemTotal:";
-        const string memAvailable = "MemAvailable:";
-
-        long totalMemory = 0;
-        long availableMemory = 0;
-
-        if (TryReadFileLines(MemInfoPath, out var lines))
-        {
-            foreach (string line in lines)
-            {
-                GetMemInfoData(line, memTotalId, ref totalMemory);
-                GetMemInfoData(line, memAvailable, ref availableMemory);
-            }
-        }
-
-        return new MemoryStatus
-        {
-            TotalPhysicalMemory = totalMemory,
-            AvailablePhysicalMemory = availableMemory,
-            UsedPhysicalMemory = totalMemory - availableMemory,
-            ProcessUsedMemory = Process.GetCurrentProcess().WorkingSet64
-        };
     }
 
     private static void GetMemInfoData(ReadOnlySpan<char> line, ReadOnlySpan<char> start, ref long data)

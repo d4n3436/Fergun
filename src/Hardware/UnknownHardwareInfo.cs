@@ -13,10 +13,10 @@ public sealed class UnknownHardwareInfo : IHardwareInfo
     }
 
     /// <inheritdoc />
-    public string? GetCpuName() => null;
+    public string? CpuName => null;
 
     /// <inheritdoc />
-    public string GetOperatingSystemName() => RuntimeInformation.OSDescription;
+    public string OperatingSystemName => RuntimeInformation.OSDescription;
 
     /// <inheritdoc />
     public MemoryStatus GetMemoryStatus() => new()

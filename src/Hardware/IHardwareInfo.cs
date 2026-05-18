@@ -8,14 +8,14 @@ public interface IHardwareInfo
     /// <summary>
     /// Gets the CPU name.
     /// </summary>
-    /// <returns>The CPU name, or <see langword="null"/> if it's not available.</returns>
-    string? GetCpuName();
+    /// <value>The CPU name, or <see langword="null"/> if it's not available.</value>
+    string? CpuName { get; }
 
     /// <summary>
     /// Gets the name of the operating system (or the distribution's name on Linux if possible).
     /// </summary>
-    /// <returns>The name of the operating system or distribution.</returns>
-    string GetOperatingSystemName();
+    /// <value>The name of the operating system or distribution.</value>
+    string OperatingSystemName { get; }
 
     /// <summary>
     /// Gets information of the current memory state of the system.

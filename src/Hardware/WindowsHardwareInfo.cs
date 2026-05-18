@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -9,30 +10,19 @@ namespace Fergun.Hardware;
 /// Implements the <see cref="IHardwareInfo"/> interface through Windows-specific APIs.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public partial class WindowsHardwareInfo : IHardwareInfo
+public sealed partial class WindowsHardwareInfo : IHardwareInfo
 {
+    private readonly Lazy<string?> _lazyCpuName = new(GetCpuName);
+
     internal WindowsHardwareInfo()
     {
     }
 
     /// <inheritdoc/>
-    public string? GetCpuName()
-    {
-        string? cpuName = null;
-
-        using var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
-        using var objects = searcher.Get();
-
-        foreach (var mo in objects)
-        {
-            cpuName = mo["Name"].ToString();
-        }
-
-        return cpuName;
-    }
+    public string? CpuName => _lazyCpuName.Value;
 
     /// <inheritdoc/>
-    public string GetOperatingSystemName() => RuntimeInformation.OSDescription;
+    public string OperatingSystemName => RuntimeInformation.OSDescription;
 
     /// <inheritdoc/>
     public MemoryStatus GetMemoryStatus()
@@ -54,6 +44,21 @@ public partial class WindowsHardwareInfo : IHardwareInfo
             UsedPhysicalMemory = totalMemory - availableMemory,
             ProcessUsedMemory = Process.GetCurrentProcess().PrivateMemorySize64
         };
+    }
+
+    private static string? GetCpuName()
+    {
+        string? cpuName = null;
+
+        using var searcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
+        using var objects = searcher.Get();
+
+        foreach (var mo in objects)
+        {
+            cpuName = mo["Name"].ToString();
+        }
+
+        return cpuName;
     }
 
     [SupportedOSPlatform("windows")]

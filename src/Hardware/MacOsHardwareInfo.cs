@@ -11,9 +11,11 @@ namespace Fergun.Hardware;
 /// Implements the <see cref="IHardwareInfo"/> interface through macOS-specific APIs.
 /// </summary>
 [SupportedOSPlatform("macos")]
-public partial class MacOsHardwareInfo : IHardwareInfo
+public sealed partial class MacOsHardwareInfo : IHardwareInfo
 {
     private const int ENOMEM = 12;
+
+    private readonly Lazy<string?> _lazyCpuName = new(GetCpuName);
 
     internal MacOsHardwareInfo()
     {
@@ -24,20 +26,10 @@ public partial class MacOsHardwareInfo : IHardwareInfo
     private static ReadOnlySpan<byte> MemSizeKey => "hw.memsize"u8;
 
     /// <inheritdoc />
-    public string? GetCpuName()
-    {
-        int length = 0;
-
-        if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not (0 or ENOMEM))
-            return null;
-
-        Span<byte> buffer = new byte[length];
-        int code = sysctlbyname(CpuNameKey, buffer, ref length, null, 0);
-        return code == 0 ? Encoding.UTF8.GetString(buffer[..^1]) : null;
-    }
+    public string? CpuName => _lazyCpuName.Value;
 
     /// <inheritdoc />
-    public string GetOperatingSystemName() => $"macOS {Environment.OSVersion.Version}";
+    public string OperatingSystemName => $"macOS {Environment.OSVersion.Version}";
 
     /// <inheritdoc />
     public MemoryStatus GetMemoryStatus()
@@ -56,6 +48,18 @@ public partial class MacOsHardwareInfo : IHardwareInfo
             TotalPhysicalMemory = totalRam,
             ProcessUsedMemory = Process.GetCurrentProcess().WorkingSet64
         };
+    }
+
+    private static string? GetCpuName()
+    {
+        int length = 0;
+
+        if (sysctlbyname(CpuNameKey, null, ref length, null, 0) is not (0 or ENOMEM))
+            return null;
+
+        Span<byte> buffer = new byte[length];
+        int code = sysctlbyname(CpuNameKey, buffer, ref length, null, 0);
+        return code == 0 ? Encoding.UTF8.GetString(buffer[..^1]) : null;
     }
 
     [SupportedOSPlatform("macos")]
