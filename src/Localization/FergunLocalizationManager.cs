@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Discord.Interactions;
+using Fergun.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace Fergun.Localization;
 
@@ -16,19 +18,20 @@ public sealed class FergunLocalizationManager : ILocalizationManager
 {
     private const string ModulesNamespace = "Fergun.Modules";
     private readonly IStringLocalizerFactory _localizerFactory;
+    private readonly IDictionary<string, string> _supportedLocales;
     private readonly Dictionary<ModuleInfo, Type> _types = [];
-    private readonly Dictionary<string, ModuleInfo> _modules = []; // TODO: use Options pattern
-
-    private readonly Dictionary<string, string> _supportedLocales = new()
-    {
-        { "es", "es-ES" }
-    };
+    private readonly Dictionary<string, ModuleInfo> _modules = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FergunLocalizationManager"/> class.
     /// </summary>
     /// <param name="localizerFactory">The localizer factory.</param>
-    public FergunLocalizationManager(IStringLocalizerFactory localizerFactory) => _localizerFactory = localizerFactory;
+    /// <param name="options">The localization options.</param>
+    public FergunLocalizationManager(IStringLocalizerFactory localizerFactory, IOptions<FergunLocalizationOptions> options)
+    {
+        _localizerFactory = localizerFactory;
+        _supportedLocales = options.Value.SupportedLocales;
+    }
 
     /// <summary>
     /// Loads and caches the modules.

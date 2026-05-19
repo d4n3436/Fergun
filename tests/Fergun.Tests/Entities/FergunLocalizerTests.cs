@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
 using System.Linq;
+using Fergun.Configuration;
 using Fergun.Localization;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -10,13 +12,19 @@ namespace Fergun.Tests.Entities;
 
 public class FergunLocalizerTests
 {
+    private static IOptions<FergunLocalizationOptions> CreateOptions(params (string culture, string discordLocale)[] locales)
+        => Options.Create(new FergunLocalizationOptions
+        {
+            SupportedLocales = locales.ToDictionary(l => l.culture, l => l.discordLocale)
+        });
+
     [Fact]
     public void FergunLocalizer_Index_Accessor_Returns_Localized_String()
     {
         var localizerMock = CreateMockedLocalizer<FergunLocalizerTests>("Resource", "Value {0}");
         var sharedLocalizerMock = CreateMockedLocalizer<SharedResource>("SharedResource", "Shared Value {0}");
 
-        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object);
+        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object, CreateOptions());
 
         var localizedString = localizerMock.Object["Resource"];
         var actualLocalizedString = fergunLocalizer["Resource"];
@@ -42,7 +50,7 @@ public class FergunLocalizerTests
         var localizerMock = CreateMockedLocalizer<FergunLocalizerTests>("Resource2", "Value 2 {0}");
         var sharedLocalizerMock = CreateMockedLocalizer<SharedResource>("SharedResource2", "Shared Value 2 {0}");
 
-        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object);
+        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object, CreateOptions());
 
         var localizedString = localizerMock.Object["Resource2", "test"];
         var actualLocalizedString = fergunLocalizer["Resource2", "test"];
@@ -68,7 +76,7 @@ public class FergunLocalizerTests
         var localizer = Mock.Of<IStringLocalizer<FergunLocalizerTests>>();
         var sharedLocalizer = Mock.Of<IStringLocalizer<SharedResource>>();
 
-        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizer, sharedLocalizer);
+        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizer, sharedLocalizer, CreateOptions(("es", "es-ES")));
 
         Assert.Equal(fergunLocalizer.CurrentCulture, FergunLocalizer.DefaultCulture);
 
@@ -83,7 +91,7 @@ public class FergunLocalizerTests
         var localizerMock = CreateMockedLocalizer<FergunLocalizerTests>("Resource", "Value {0}");
         var sharedLocalizerMock = CreateMockedLocalizer<SharedResource>("SharedResource", "Shared Value {0}");
 
-        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object);
+        var fergunLocalizer = new FergunLocalizer<FergunLocalizerTests>(localizerMock.Object, sharedLocalizerMock.Object, CreateOptions());
 
         var strings = fergunLocalizer.GetAllStrings().ToArray();
         var actualStrings = new[]

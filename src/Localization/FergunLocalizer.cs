@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Fergun.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace Fergun.Localization;
 
@@ -21,10 +23,12 @@ public class FergunLocalizer : IFergunLocalizer
     /// </summary>
     /// <param name="localizer">The target localizer.</param>
     /// <param name="sharedLocalizer">The shared localizer.</param>
-    public FergunLocalizer(IStringLocalizer localizer, IStringLocalizer<SharedResource> sharedLocalizer)
+    /// <param name="options">The localization options.</param>
+    public FergunLocalizer(IStringLocalizer localizer, IStringLocalizer<SharedResource> sharedLocalizer, IOptions<FergunLocalizationOptions> options)
     {
         _localizer = localizer;
         _sharedLocalizer = sharedLocalizer;
+        SupportedCultures = [DefaultCulture, ..options.Value.SupportedLocales.Keys.Select(CultureInfo.GetCultureInfo)];
     }
 
     /// <summary>
@@ -35,11 +39,8 @@ public class FergunLocalizer : IFergunLocalizer
     /// <summary>
     /// Gets a read-only list containing the languages that Fergun supports.
     /// </summary>
-    public static IReadOnlyList<CultureInfo> SupportedCultures { get; } =
-    [
-        CultureInfo.GetCultureInfo("en"),
-        CultureInfo.GetCultureInfo("es")
-    ];
+    /// <remarks>Always includes <see cref="DefaultCulture"/> (English) plus every entry from <see cref="FergunLocalizationOptions.SupportedLocales"/>.</remarks>
+    public IReadOnlyList<CultureInfo> SupportedCultures { get; }
 
     /// <inheritdoc/>
     /// <remarks>Setting a value won't have an effect if the value is not in <see cref="SupportedCultures"/>.</remarks>
@@ -93,8 +94,9 @@ public class FergunLocalizer<T> : FergunLocalizer, IFergunLocalizer<T>
     /// </summary>
     /// <param name="localizer">The target localizer.</param>
     /// <param name="sharedLocalizer">The shared localizer.</param>
-    public FergunLocalizer(IStringLocalizer<T> localizer, IStringLocalizer<SharedResource> sharedLocalizer)
-        : base(localizer, sharedLocalizer)
+    /// <param name="options">The localization options.</param>
+    public FergunLocalizer(IStringLocalizer<T> localizer, IStringLocalizer<SharedResource> sharedLocalizer, IOptions<FergunLocalizationOptions> options)
+        : base(localizer, sharedLocalizer, options)
     {
     }
 }

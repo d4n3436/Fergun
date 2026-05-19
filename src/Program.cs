@@ -47,6 +47,7 @@ builder.Services.AddOptions<StartupOptions>().BindConfiguration(StartupOptions.S
     });
 builder.Services.AddOptions<BotListOptions>().BindConfiguration(BotListOptions.BotList);
 builder.Services.AddOptions<FergunOptions>().BindConfiguration(FergunOptions.Fergun);
+builder.Services.AddOptions<FergunLocalizationOptions>().BindConfiguration(FergunLocalizationOptions.Localization);
 
 builder.Services.AddSqlite<FergunContext>(builder.Configuration.GetConnectionString("FergunDatabase"));
 
