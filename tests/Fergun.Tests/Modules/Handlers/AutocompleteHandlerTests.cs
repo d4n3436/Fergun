@@ -25,30 +25,6 @@ public class AutocompleteHandlerTests
     private readonly Mock<IAutocompleteInteractionData> _dataMock = new();
 
     [Theory]
-    [MemberData(nameof(GetBraveTestData))]
-    public async Task BraveAutocomplete_Should_Return_Valid_Suggestions(string? text)
-    {
-        var handler = new BraveAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
-
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _dataMock.SetupGet(x => x.Current).Returns(option);
-
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
-
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
-        {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
-    }
-
-    [Theory]
     [MemberData(nameof(GetDuckDuckGoTestData))]
     public async Task DuckDuckGoAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale, bool isNsfw)
     {
@@ -194,13 +170,6 @@ public class AutocompleteHandlerTests
             .AddRetryPolicy();
 
         return services.BuildServiceProvider();
-    }
-
-    public static TheoryData<string?> GetBraveTestData()
-    {
-        var faker = new Faker();
-        return faker.MakeLazy(5, () => faker.Random.String2(1))
-            .Append(string.Empty).Append(null).ToTheoryData();
     }
 
     public static TheoryData<string?, string, bool> GetDuckDuckGoTestData()

@@ -15,7 +15,7 @@ public class PronunciationConverter : JsonConverter<EntryPronunciation>
         => reader.TokenType switch
         {
             JsonTokenType.String => new EntryPronunciation(reader.GetString()!),
-            JsonTokenType.StartObject => JsonSerializer.Deserialize<EntryPronunciation>(ref reader)!, // HACK: options is not passed to avoid a stack overflow
+            JsonTokenType.StartObject => JsonSerializer.Deserialize<EntryPronunciation>(ref reader, options)!,
             _ => throw new JsonException("Token type must be either string or object.")
         };
 

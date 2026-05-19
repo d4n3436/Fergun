@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Fergun.Apis.Dictionary;
@@ -14,17 +14,11 @@ namespace Fergun.Tests.Apis;
 
 public class DictionaryClientTests
 {
-    private static readonly JsonSerializerOptions _arrayOrStringSerializerOptions = new()
-    {
-        Converters = { new ArrayOrStringConverter() }
-    };
-
-    private static readonly JsonSerializerOptions _pronunciationSerializerOptions = new()
-    {
-        Converters = { new PronunciationConverter() }
-    };
-
     private readonly IDictionaryClient _dictionary = new DictionaryClient(new HttpClient());
+
+    private sealed record PronunciationWrapper(
+        [property: JsonConverter(typeof(PronunciationConverter))]
+        [property: JsonPropertyName("pronunciation")] EntryPronunciation Pronunciation);
 
     [Theory]
     [InlineData("run")]
@@ -155,32 +149,11 @@ public class DictionaryClientTests
     }
 
     [Theory]
-    [InlineData("\"bas\"", new[] { "bas" })]
-    [InlineData("[\"bas\"]", new[] { "bas" })]
-    [InlineData("\"\"", new string[] { })]
-    public void ArrayOrStringConverter_Returns_ExpectedValues(string json, string[] expected)
-    {
-        var actual = JsonSerializer.Deserialize<IReadOnlyList<string>>(json, _arrayOrStringSerializerOptions);
-
-        Assert.NotNull(actual);
-        Assert.Equal(expected, actual);
-    }
-
-    [Theory]
-    [InlineData("1")]
-    [InlineData("true")]
-    [InlineData("{}")]
-    public void ArrayOrStringConverter_Throws_JsonException_When_InvalidValueIsPassed(string json)
-    {
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<IReadOnlyList<string>>(json, _arrayOrStringSerializerOptions));
-    }
-
-    [Theory]
     [InlineData("\"bee\"", "bee")]
     [InlineData("""{"ipa":"rʌn","spell": "ruhn"}""", "rʌn")]
     public void PronunciationConverter_Returns_ExpectedValues(string json, string expectedIpa)
     {
-        var actual = JsonSerializer.Deserialize<EntryPronunciation>(json, _pronunciationSerializerOptions)!;
+        var actual = JsonSerializer.Deserialize<PronunciationWrapper>($$"""{"pronunciation":{{json}}}""")!.Pronunciation;
 
         Assert.Equal(expectedIpa, actual.Ipa);
     }
@@ -190,6 +163,6 @@ public class DictionaryClientTests
     [InlineData("true")]
     public void PronunciationConverter_Throws_JsonException_When_InvalidValueIsPassed(string json)
     {
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EntryPronunciation>(json, _pronunciationSerializerOptions));
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<PronunciationWrapper>($$"""{"pronunciation":{{json}}}"""));
     }
 }

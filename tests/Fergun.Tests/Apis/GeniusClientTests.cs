@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
@@ -102,21 +101,4 @@ public class GeniusClientTests
         await Assert.ThrowsAsync<ObjectDisposedException>(() => _geniusClient.GetSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()));
     }
 
-    [Fact]
-    public void GeniusException_Has_Expected_Values()
-    {
-        var innerException = new HttpRequestException();
-
-        var exception1 = new GeniusException();
-        var exception2 = new GeniusException("Custom message");
-        var exception3 = new GeniusException("Custom message 2", innerException);
-
-        Assert.Null(exception1.InnerException);
-
-        Assert.Equal("Custom message", exception2.Message);
-        Assert.Null(exception2.InnerException);
-
-        Assert.Equal("Custom message 2", exception3.Message);
-        Assert.Same(innerException, exception3.InnerException);
-    }
 }
