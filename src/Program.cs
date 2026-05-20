@@ -107,14 +107,12 @@ builder.Services.AddHttpClient<ITranslator, YandexTranslator>();
 builder.Services.AddHttpClient<ITranslator, MicrosoftTranslator>();
 builder.Services.AddHttpClient<SearchClient>();
 builder.Services.AddHttpClient<OtherModule>();
-builder.Services.AddHttpClient(nameof(GoogleScraper));
-builder.Services.AddHttpClient(nameof(DuckDuckGoScraper)).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false });
+builder.Services.AddHttpClient<GoogleScraper>();
+builder.Services.AddHttpClient<DuckDuckGoScraper>();
 builder.Services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent));
 
 builder.Services.AddSingleton(s => new MicrosoftTranslator(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(MicrosoftTranslator)))); // Singleton used in TtsModule and MicrosoftVoiceConverter
 builder.Services.AddTransient<IFergunTranslator, FergunTranslator>();
-builder.Services.AddTransient(s => new GoogleScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(GoogleScraper))));
-builder.Services.AddTransient(s => new DuckDuckGoScraper(s.GetRequiredService<IHttpClientFactory>().CreateClient(nameof(DuckDuckGoScraper))));
 builder.Services.AddTransient<SharedModule>();
 
 var host = builder.Build();
