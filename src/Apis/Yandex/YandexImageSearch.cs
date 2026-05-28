@@ -78,7 +78,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetInt32();
 
         // Get OCR text
-        const string ocrJsonRequest = """{"blocks":[{"block":{"block":"i-react-ajax-adapter:ajax"},"params":{"type":"CbirOcr","subtype":"legacy"},"version":2}]}""";
+        const string ocrJsonRequest = """{"blocks":[{"block":{"block":"i-react-ajax-adapter:ajax"},"params":{"type":"ImagesApp","ajaxKey":"cbirPage/fetchOcrData"},"version":2}]}""";
 
         var ocrRequestUri = new Uri($"https://yandex.com/images/search?format=json&request={ocrJsonRequest}&rpt=ocr&cbir_id={imageShard}/{imageId}");
         using var ocrResponse = await _httpClient.GetAsync(ocrRequestUri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
@@ -98,6 +98,7 @@ public sealed class YandexImageSearch : IYandexImageSearch, IDisposable
             .GetProperty("blocks"u8)[0] // There should be a single block, "i-react-ajax-adapter:ajax"
             .GetProperty("params"u8)
             .GetProperty("adapterData"u8)
+            .GetProperty("cbirOcr"u8)
             .GetProperty("plainText"u8)
             .GetString();
     }
