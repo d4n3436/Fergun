@@ -68,7 +68,7 @@ public class YandexImageSearchTests
     }
 
     [Theory]
-    [InlineData("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Cat_November_2010-1a.jpg/1200px-Cat_November_2010-1a.jpg", YandexSearchFilterMode.None)]
+    [InlineData("https://upload.wikimedia.org/wikipedia/commons/4/4d/Cat_November_2010-1a.jpg", YandexSearchFilterMode.None)]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/1/18/Dog_Breeds.jpg", YandexSearchFilterMode.Moderate)]
     [InlineData("https://upload.wikimedia.org/wikipedia/commons/0/0e/Landscape-2454891_960_720.jpg", YandexSearchFilterMode.Family)]
     public async Task ReverseImageSearchAsync_Returns_Results(string url, YandexSearchFilterMode mode)
