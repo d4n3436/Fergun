@@ -37,7 +37,7 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     }
 
     [Theory]
-    [MemberData(nameof(GetMockedMusixmatchClientSequences))]
+    [MemberData(nameof(GetMockedMusixmatchClientSequences), DisableDiscoveryEnumeration = true)]
     public async Task GetSongAsync_Throws_MusixmatchException_When_Api_Calls_Are_Not_Successful(MusixmatchClient musixmatchClient)
     {
         await Assert.ThrowsAsync<MusixmatchException>(async () => await musixmatchClient.GetSongAsync(It.IsAny<int>(), TestContext.Current.CancellationToken));

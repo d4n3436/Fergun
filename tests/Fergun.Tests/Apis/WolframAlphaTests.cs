@@ -47,7 +47,7 @@ public class WolframAlphaTests
     }
 
     [Theory]
-    [MemberData(nameof(GetWolframAlphaErrorInfoConverterData))]
+    [MemberData(nameof(GetWolframAlphaErrorInfoConverterData), DisableDiscoveryEnumeration = true)]
     public void WolframAlphaErrorInfoConverter_Returns_Expected_Results(string input, WolframAlphaErrorInfo? expectedResult)
     {
         var result = JsonSerializer.Deserialize<WolframAlphaErrorInfo?>(input, _wolframAlphaOptions);
@@ -56,7 +56,7 @@ public class WolframAlphaTests
     }
 
     [Theory]
-    [MemberData(nameof(ArrayOrObjectConverterData))]
+    [MemberData(nameof(ArrayOrObjectConverterData), DisableDiscoveryEnumeration = true)]
     public void ArrayOrObjectConverter_Returns_Expected_Results(string input, IReadOnlyList<WolframAlphaWarning> expectedResult)
     {
         var result = JsonSerializer.Deserialize<IReadOnlyList<WolframAlphaWarning>>(input, _wolframAlphaOptions);

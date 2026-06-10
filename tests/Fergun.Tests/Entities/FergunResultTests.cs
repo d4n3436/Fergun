@@ -9,7 +9,7 @@ namespace Fergun.Tests.Entities;
 public class FergunResultTests
 {
     [Theory]
-    [MemberData(nameof(GetFergunResultData))]
+    [MemberData(nameof(GetFergunResultData), DisableDiscoveryEnumeration = true)]
     public void FergunResult_FromError_Has_Expected_Values(string reason, bool isEphemeral, IDiscordInteraction? interaction)
     {
         var result = FergunResult.FromError(reason, isEphemeral, interaction);
@@ -20,7 +20,7 @@ public class FergunResultTests
     }
 
     [Theory]
-    [MemberData(nameof(GetLocalizedFergunResultData))]
+    [MemberData(nameof(GetLocalizedFergunResultData), DisableDiscoveryEnumeration = true)]
     public void FergunResult_Localized_FromError_Has_Expected_Values(LocalizedString reason, bool isEphemeral, IDiscordInteraction? interaction)
     {
         var result = FergunResult.FromError(reason, isEphemeral, interaction);

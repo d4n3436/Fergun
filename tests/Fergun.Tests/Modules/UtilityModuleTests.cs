@@ -44,7 +44,7 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeUsers))]
+    [MemberData(nameof(GetFakeUsers), DisableDiscoveryEnumeration = true)]
     public async Task AvatarAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
         var result = await Module.AvatarAsync(userMock.Object);
@@ -61,7 +61,7 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeGuildUsers))]
+    [MemberData(nameof(GetFakeGuildUsers), DisableDiscoveryEnumeration = true)]
     public async Task AvatarAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
         var result = await Module.AvatarAsync(guildUserMock.Object);
@@ -73,7 +73,7 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeUsers))]
+    [MemberData(nameof(GetFakeUsers), DisableDiscoveryEnumeration = true)]
     public async Task UserInfoAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
         var result = await Module.UserInfoAsync(userMock.Object);
@@ -96,7 +96,7 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeGuildUsers))]
+    [MemberData(nameof(GetFakeGuildUsers), DisableDiscoveryEnumeration = true)]
     public async Task UserInfoAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
         var result = await Module.UserInfoAsync(guildUserMock.Object);

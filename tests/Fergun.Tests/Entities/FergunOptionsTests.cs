@@ -7,7 +7,7 @@ namespace Fergun.Tests.Entities;
 public class FergunOptionsTests
 {
     [Theory]
-    [MemberData(nameof(GetFergunOptionsTestData))]
+    [MemberData(nameof(GetFergunOptionsTestData), DisableDiscoveryEnumeration = true)]
     public void FergunOptions_Properties_Has_Expected_Values(FergunOptions options)
     {
         var other = new FergunOptions

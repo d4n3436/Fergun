@@ -33,7 +33,7 @@ public class MicrosoftVoiceConverterTests
     }
 
     [Theory]
-    [MemberData(nameof(GetMicrosoftVoiceTestData))]
+    [MemberData(nameof(GetMicrosoftVoiceTestData), DisableDiscoveryEnumeration = true)]
     public async Task MicrosoftVoiceConverter_ReadAsync_Returns_Successful_Result(MicrosoftVoice voice, bool isDefault)
     {
         var microsoftTranslator = CreateMockedMicrosoftTranslator(() =>

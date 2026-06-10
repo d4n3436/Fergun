@@ -31,7 +31,7 @@ public class ExtensionsTests
     }
 
     [Theory]
-    [MemberData(nameof(GetIInteractionContextDisplayTestData))]
+    [MemberData(nameof(GetIInteractionContextDisplayTestData), DisableDiscoveryEnumeration = true)]
     public void IInteractionContext_Display_Contains_Required_Info(IInteractionContext context)
     {
         string result = context.Display();

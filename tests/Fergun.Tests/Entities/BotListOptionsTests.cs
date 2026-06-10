@@ -8,7 +8,7 @@ namespace Fergun.Tests.Entities;
 public class BotListOptionsTests
 {
     [Theory]
-    [MemberData(nameof(GetBotListOptionsTestData))]
+    [MemberData(nameof(GetBotListOptionsTestData), DisableDiscoveryEnumeration = true)]
     public void BotListOptions_Properties_Has_Expected_Values(BotListOptions options)
     {
         var other = new BotListOptions

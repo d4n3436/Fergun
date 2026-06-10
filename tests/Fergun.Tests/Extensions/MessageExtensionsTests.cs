@@ -26,7 +26,7 @@ public class MessageExtensionsTests
     }
 
     [Theory]
-    [MemberData(nameof(GetContentsAndEmbeds))]
+    [MemberData(nameof(GetContentsAndEmbeds), DisableDiscoveryEnumeration = true)]
     public void IMessage_GetText_Should_Return_Text_From_Content_And_Embed(string content, Embed embed)
     {
         var messageMock = new Mock<IMessage>();

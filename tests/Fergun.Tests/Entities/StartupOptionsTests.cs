@@ -7,7 +7,7 @@ namespace Fergun.Tests.Entities;
 public class StartupOptionsTests
 {
     [Theory]
-    [MemberData(nameof(GetStartupOptionsTestData))]
+    [MemberData(nameof(GetStartupOptionsTestData), DisableDiscoveryEnumeration = true)]
     public void StartupOptions_Properties_Has_Expected_Values(StartupOptions options)
     {
         var other = new StartupOptions
