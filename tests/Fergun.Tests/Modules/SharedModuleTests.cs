@@ -78,12 +78,11 @@ public class SharedModuleTests
             Assert.Equal(result.IsSuccess, passedPreconditions);
         }
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
+        _interactionMock.VerifyDeferAsync(ephemeral, passedPreconditions ? Times.Once() : Times.Never());
 
         _translatorMock.Verify(x => x.TranslateAsync(It.Is<string>(s => s == text), It.Is<string>(s => s == target), It.Is<string>(s => s == source)), passedPreconditions ? Times.Once : Times.Never);
 
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), result.IsSuccess && passedPreconditions ? Times.Once : Times.Never);
+        _interactionMock.VerifyFollowupAsync(ephemeral, result.IsSuccess && passedPreconditions ? Times.Once() : Times.Never());
     }
 
     [Theory]
@@ -97,15 +96,16 @@ public class SharedModuleTests
 
         _componentInteractionMock.VerifyGet(x => x.UserLocale);
 
-        _componentInteractionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Never);
-        _componentInteractionMock.Verify(x => x.DeferLoadingAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Once);
+        _componentInteractionMock.VerifyDeferAsync(ephemeral, Times.Never());
+        _componentInteractionMock.VerifyDeferLoadingAsync(ephemeral, Times.Once());
 
         _translatorMock.Verify(x => x.TranslateAsync(It.Is<string>(s => s == text), It.Is<string>(s => s == target), It.Is<string>(s => s == source)), Times.Once);
 
-        _componentInteractionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Once);
+        _componentInteractionMock.VerifyFollowupAsync(ephemeral, Times.Once());
     }
 
+    // Uses a real GoogleTranslator2
+    [Trait("Category", "Integration")]
     [Theory]
     [InlineData("", "en", true)]
     [InlineData("test", "foobar", false)]
@@ -121,12 +121,13 @@ public class SharedModuleTests
         bool passedPreconditions = !string.IsNullOrWhiteSpace(text) && Language.TryGetLanguage(target, out var language) && GoogleTranslator2.TextToSpeechLanguages.Contains(language);
         Assert.Equal(passedPreconditions, result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), passedPreconditions ? Times.Once : Times.Never);
+        _interactionMock.VerifyDeferAsync(ephemeral, passedPreconditions ? Times.Once() : Times.Never());
 
-        _interactionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), passedPreconditions ? Times.Once : Times.Never);
+        _interactionMock.VerifyFollowupWithFileAsync("tts.mp3", ephemeral, passedPreconditions ? Times.Once() : Times.Never());
     }
 
+    // Uses a real GoogleTranslator2
+    [Trait("Category", "Integration")]
     [Theory]
     [InlineData("Привет, мир", "ru", true)]
     [InlineData("Bonjour le monde", "fr", false)]
@@ -136,10 +137,9 @@ public class SharedModuleTests
 
         _componentInteractionMock.VerifyGet(x => x.UserLocale);
 
-        _componentInteractionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Never);
-        _componentInteractionMock.Verify(x => x.DeferLoadingAsync(It.Is<bool>(b => b == ephemeral), It.IsAny<RequestOptions>()), Times.Once);
+        _componentInteractionMock.VerifyDeferAsync(ephemeral, Times.Never());
+        _componentInteractionMock.VerifyDeferLoadingAsync(ephemeral, Times.Once());
 
-        _componentInteractionMock.Verify(x => x.FollowupWithFileAsync(It.Is<FileAttachment>(f => f.FileName == "tts.mp3"), It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == ephemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Once);
+        _componentInteractionMock.VerifyFollowupWithFileAsync("tts.mp3", ephemeral, Times.Once());
     }
 }

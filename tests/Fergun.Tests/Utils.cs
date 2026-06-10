@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using AutoBogus;
@@ -16,13 +18,40 @@ using Fergun.Localization;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using Moq;
+using Moq.Protected;
 
 namespace Fergun.Tests;
 
 internal static class Utils
 {
-    public static T CreateInstance<T>(params object?[]? args) where T : class
+    public static T CreateNonPublicInstance<T>(params object?[]? args) where T : class
         => (T)Activator.CreateInstance(typeof(T), BindingFlags.NonPublic | BindingFlags.Instance, null, args, CultureInfo.InvariantCulture)!;
+    
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> backed by a mocked <see cref="HttpMessageHandler"/> that returns the
+    /// supplied <paramref name="responses"/> in order, one per request.
+    /// </summary>
+    public static HttpClient CreateMockedHttpClient(IEnumerable<HttpResponseMessage> responses)
+    {
+        var handlerMock = new Mock<HttpMessageHandler>();
+        var sequence = handlerMock
+            .Protected()
+            .As<HttpClient>()
+            .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()));
+
+        foreach (var response in responses)
+        {
+            sequence = sequence.ReturnsAsync(response);
+        }
+
+        return new HttpClient(handlerMock.Object);
+    }
+
+    /// <summary>
+    /// Creates an <see cref="HttpClient"/> that returns the given status/body pairs in order.
+    /// </summary>
+    public static HttpClient CreateMockedHttpClient(params (HttpStatusCode Status, string Content)[] responses)
+        => CreateMockedHttpClient(Array.ConvertAll(responses, r => new HttpResponseMessage(r.Status) { Content = new StringContent(r.Content) }));
 
     public static IFergunLocalizer<T> CreateMockedLocalizer<T>()
     {
@@ -86,7 +115,7 @@ internal static class Utils
     {
         faker ??= new Faker();
 
-        var status = CreateInstance<CustomStatusGame>();
+        var status = CreateNonPublicInstance<CustomStatusGame>();
         status.SetPropertyValue(x => x.Emote, Emote.Parse($"<:{faker.Random.String2(10)}:{faker.Random.ULong()}>"));
         status.SetPropertyValue(x => x.State, faker.Hacker.IngVerb());
         status.SetPropertyValue(x => x.Type, ActivityType.CustomStatus);

@@ -22,7 +22,7 @@ namespace Fergun.Tests.Converters;
 
 public class MicrosoftVoiceConverterTests
 {
-    private static readonly byte[] _microsoftTokenResponse = """{"r":"westus","t":"dGVzdA==.eyJleHAiOjIxNDc0ODM2NDd9.dGVzdA=="}"""u8.ToArray();
+    private static readonly byte[] MicrosoftTokenResponse = """{"r":"westus","t":"dGVzdA==.eyJleHAiOjIxNDc0ODM2NDd9.dGVzdA=="}"""u8.ToArray();
 
     [Fact]
     public void MicrosoftVoiceConverter_GetDiscordType_Returns_String()
@@ -113,7 +113,7 @@ public class MicrosoftVoiceConverterTests
             .Protected()
             .As<HttpClient>()
             .SetupSequence(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => GetResponseMessage(_microsoftTokenResponse))
+            .ReturnsAsync(() => GetResponseMessage(MicrosoftTokenResponse))
             .Returns(getVoicesFunc);
 
         return new MicrosoftTranslator(new HttpClient(messageHandlerMock.Object));

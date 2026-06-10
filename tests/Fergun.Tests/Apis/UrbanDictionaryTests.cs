@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Net;
 using System.Threading.Tasks;
 using Fergun.Apis.Urban;
 using Xunit;
@@ -7,101 +8,50 @@ namespace Fergun.Tests.Apis;
 
 public class UrbanDictionaryTests
 {
-    private readonly IUrbanDictionaryClient _urbanDictionary = new UrbanDictionaryClient();
-
-    [InlineData("lol")]
-    [InlineData("cringe")]
-    [InlineData("yikes")]
-    [InlineData("bruh")]
-    [Theory]
-    public async Task GetDefinitionsAsync_Returns_Definitions(string term)
+    [Fact]
+    public async Task GetDefinitionsAsync_Parses_Fixture()
     {
-        var definitions = await _urbanDictionary.GetDefinitionsAsync(term, TestContext.Current.CancellationToken);
+        var httpClient = Utils.CreateMockedHttpClient((HttpStatusCode.OK, UrbanTestData.DefinitionsResponse));
+        var urbanDictionary = new UrbanDictionaryClient(httpClient);
 
-        Assert.NotNull(definitions);
-        Assert.NotEmpty(definitions);
-        Assert.All(definitions, AssertDefinitionProperties);
+        var definitions = await urbanDictionary.GetDefinitionsAsync("test", TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, definitions.Count);
+        Assert.All(definitions, x => Assert.Equal("test", x.Word));
+
+        var first = definitions[0];
+        Assert.Equal(123, first.Id);
+        Assert.Equal(42, first.ThumbsUp);
+        Assert.Equal(7, first.ThumbsDown);
+        Assert.Equal("tester", first.Author);
+        Assert.Null(first.Date);
+        Assert.Equal("2021-05-06", definitions[1].Date);
+        Assert.Equal("Word = test, Definition = A procedure intended to establish the quality, performance, or reliability of something.", first.ToString());
     }
 
     [Fact]
-    public async Task GetRandomDefinitionsAsync_Returns_Definitions()
+    public async Task GetDefinitionsAsync_Throws_ArgumentException_On_Empty_Term()
     {
-        var definitions = await _urbanDictionary.GetRandomDefinitionsAsync(TestContext.Current.CancellationToken);
+        var urbanDictionary = new UrbanDictionaryClient(Utils.CreateMockedHttpClient());
 
-        Assert.NotNull(definitions);
-        Assert.NotEmpty(definitions);
-        Assert.All(definitions, AssertDefinitionProperties);
+        await Assert.ThrowsAsync<ArgumentException>(() => urbanDictionary.GetDefinitionsAsync(string.Empty, TestContext.Current.CancellationToken));
     }
 
     [Fact]
-    public async Task GetWordsOfTheDayAsync_Returns_Definitions()
-    {
-        var definitions = await _urbanDictionary.GetWordsOfTheDayAsync(TestContext.Current.CancellationToken);
-
-        Assert.NotNull(definitions);
-        Assert.NotEmpty(definitions);
-        Assert.All(definitions, x => Assert.NotNull(x.Date));
-        Assert.All(definitions, x => Assert.NotEmpty(x.Date!));
-        Assert.All(definitions, AssertDefinitionProperties);
-    }
-
-    [InlineData("lo")]
-    [InlineData("g")]
-    [InlineData("h")]
-    [InlineData("s")]
-    [Theory]
-    public async Task GetAutocompleteResultsAsync_Returns_Results(string term)
-    {
-        var results = await _urbanDictionary.GetAutocompleteResultsAsync(term, TestContext.Current.CancellationToken);
-
-        Assert.NotNull(results);
-        Assert.All(results, Assert.NotNull);
-        Assert.All(results, Assert.NotEmpty);
-    }
-
-    [InlineData("lo")]
-    [InlineData("g")]
-    [InlineData("s")]
-    [Theory]
-    public async Task GetAutocompleteResultsExtraAsync_Returns_Results(string term)
-    {
-        var results = await _urbanDictionary.GetAutocompleteResultsExtraAsync(term, TestContext.Current.CancellationToken);
-
-        Assert.NotNull(results);
-        Assert.All(results, x => Assert.NotNull(x.Term));
-        Assert.All(results, x => Assert.NotEmpty(x.Term));
-        Assert.All(results, x => Assert.NotNull(x.Preview));
-        Assert.All(results, x => Assert.NotEmpty(x.Preview));
-        Assert.All(results, x => Assert.NotNull(x.ToString()));
-    }
+    public void Constructor_Throws_ArgumentNullException_If_HttpClient_Is_Null()
+        => Assert.Throws<ArgumentNullException>(() => new UrbanDictionaryClient(null!));
 
     [Fact]
     public async Task Disposed_UrbanDictionary_Usage_Throws_ObjectDisposedException()
     {
-        (_urbanDictionary as IDisposable)?.Dispose();
-        (_urbanDictionary as IDisposable)?.Dispose();
+        var urbanDictionary = new UrbanDictionaryClient(Utils.CreateMockedHttpClient());
+        urbanDictionary.Dispose();
+        urbanDictionary.Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetDefinitionsAsync("test", TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetRandomDefinitionsAsync(TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetWordsOfTheDayAsync(TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsAsync("test", TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _urbanDictionary.GetAutocompleteResultsExtraAsync("test", TestContext.Current.CancellationToken));
-    }
-
-    private static void AssertDefinitionProperties(UrbanDefinition definition)
-    {
-        Assert.NotNull(definition.Word);
-        Assert.NotEmpty(definition.Word);
-        Assert.NotNull(definition.Definition);
-        Assert.NotEmpty(definition.Definition);
-        Assert.NotNull(definition.Permalink);
-        Assert.NotEmpty(definition.Permalink);
-        Assert.NotNull(definition.Author);
-        Assert.NotNull(definition.SoundUrls);
-        Assert.NotNull(definition.Example);
-        Assert.True(definition.ThumbsDown >= 0);
-        Assert.True(definition.ThumbsUp >= 0);
-        Assert.NotEqual(default, definition.WrittenOn);
-        Assert.NotNull(definition.ToString());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => urbanDictionary.GetDefinitionsAsync("test", TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => urbanDictionary.GetRandomDefinitionsAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => urbanDictionary.GetWordsOfTheDayAsync(TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => urbanDictionary.GetAutocompleteResultsAsync("test", TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => urbanDictionary.GetAutocompleteResultsExtraAsync("test", TestContext.Current.CancellationToken));
     }
 }

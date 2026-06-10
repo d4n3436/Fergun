@@ -1,10 +1,9 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
@@ -21,43 +20,34 @@ using YoutubeExplode.Search;
 
 namespace Fergun.Tests.Modules;
 
-public class UtilityModuleTests
+public class UtilityModuleTests : ModuleTestBase<UtilityModule>
 {
-    private readonly Mock<IInteractionContext> _contextMock = new();
-    private readonly Mock<IDiscordInteraction> _interactionMock = new();
-    private readonly IFergunLocalizer<UtilityModule> _localizer = Utils.CreateMockedLocalizer<UtilityModule>();
     private readonly GoogleTranslator2 _googleTranslator2 = new();
     private readonly SearchClient _searchClient = new(new HttpClient());
     private readonly IWikipediaClient _wikipediaClient = null!;
     private readonly IWolframAlphaClient _wolframAlphaClient = null!;
     private readonly IDictionaryClient _dictionaryClient = null!;
-    private readonly Mock<UtilityModule> _moduleMock;
 
     public UtilityModuleTests()
     {
-        var emoteProvider = Mock.Of<FergunEmoteProvider>();
         var commandCache = new ApplicationCommandCache();
         var options = Utils.CreateMockedFergunOptions();
-        var client = new DiscordSocketClient();
-        SharedModule shared = new(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
-        var interactionService = new InteractionService(client);
-        var interactive = new InteractiveService(client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
+        var shared = new SharedModule(Mock.Of<ILogger<SharedModule>>(), Utils.CreateMockedLocalizer<SharedResource>(), Mock.Of<IFergunTranslator>(), _googleTranslator2);
+        var interactionService = new InteractionService(Client);
+        var interactive = new InteractiveService(Client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
 
-        _moduleMock = new Mock<UtilityModule>(() => new UtilityModule(Mock.Of<ILogger<UtilityModule>>(), _localizer, emoteProvider, interactive, options, shared,
+        SetupModule(new Mock<UtilityModule>(() => new UtilityModule(Logger, Localizer, Emotes, interactive, options, shared,
             interactionService, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
         {
             CallBase = true
-        };
-
-        _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
-        ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
+        });
     }
 
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
     public async Task AvatarAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        var result = await _moduleMock.Object.AvatarAsync(userMock.Object);
+        var result = await Module.AvatarAsync(userMock.Object);
         Assert.True(result.IsSuccess);
 
         userMock.Verify(x => x.ToString());
@@ -67,26 +57,26 @@ public class UtilityModuleTests
             userMock.Verify(x => x.GetDefaultAvatarUrl());
         }
 
-        VerifyRespondAsyncCall(userMock.Object);
+        VerifyAvatarEmbed(userMock.Object);
     }
 
     [Theory]
     [MemberData(nameof(GetFakeGuildUsers))]
     public async Task AvatarAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        var result = await _moduleMock.Object.AvatarAsync(guildUserMock.Object);
+        var result = await Module.AvatarAsync(guildUserMock.Object);
         Assert.True(result.IsSuccess);
 
         guildUserMock.Verify(x => x.ToString());
         guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
-        VerifyRespondAsyncCall(guildUserMock.Object);
+        VerifyAvatarEmbed(guildUserMock.Object);
     }
 
     [Theory]
     [MemberData(nameof(GetFakeUsers))]
     public async Task UserInfoAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
     {
-        var result = await _moduleMock.Object.UserInfoAsync(userMock.Object);
+        var result = await Module.UserInfoAsync(userMock.Object);
         Assert.True(result.IsSuccess);
 
         userMock.Verify(x => x.ToString());
@@ -102,14 +92,14 @@ public class UtilityModuleTests
         userMock.VerifyGet(x => x.IsBot);
         userMock.VerifyGet(x => x.CreatedAt);
 
-        VerifyRespondAsyncCall(userMock.Object);
+        VerifyAvatarEmbed(userMock.Object);
     }
 
     [Theory]
     [MemberData(nameof(GetFakeGuildUsers))]
     public async Task UserInfoAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
     {
-        var result = await _moduleMock.Object.UserInfoAsync(guildUserMock.Object);
+        var result = await Module.UserInfoAsync(guildUserMock.Object);
         Assert.True(result.IsSuccess);
 
         guildUserMock.Verify(x => x.ToString());
@@ -123,7 +113,7 @@ public class UtilityModuleTests
         guildUserMock.VerifyGet(x => x.JoinedAt);
         guildUserMock.VerifyGet(x => x.PremiumSince);
 
-        VerifyRespondAsyncCall(guildUserMock.Object);
+        VerifyAvatarEmbed(guildUserMock.Object);
     }
 
     public static TheoryData<Mock<IUser>> GetFakeUsers()
@@ -140,12 +130,8 @@ public class UtilityModuleTests
         return faker.MakeLazy(20, () => Utils.CreateMockedGuildUser()).Select(Mock.Get).ToTheoryData();
     }
 
-    private void VerifyRespondAsyncCall(IUser user)
-    {
-        _interactionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(),
-            It.IsAny<bool>(), It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(),
-            It.Is<Embed>(e => EmbedImageUrlIsUserAvatarUrl(user, e)), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Once);
-    }
+    private void VerifyAvatarEmbed(IUser user)
+        => InteractionMock.VerifyRespondAsync(e => EmbedImageUrlIsUserAvatarUrl(user, e), Times.Once());
 
     private static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)
         => (embed.Image.GetValueOrDefault().Url ?? embed.Thumbnail.GetValueOrDefault().Url)

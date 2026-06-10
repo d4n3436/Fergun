@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Google;
 using Fergun.Apis.Yandex;
@@ -11,7 +9,6 @@ using Fergun.Common;
 using Fergun.Interactive;
 using Fergun.Localization;
 using Fergun.Modules;
-using Fergun.Services;
 using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,121 +16,65 @@ using Xunit;
 
 namespace Fergun.Tests.Modules;
 
-public class OcrModuleTests
+public class OcrModuleTests : ModuleTestBase<OcrModule>
 {
-    private readonly Mock<IInteractionContext> _contextMock = new();
-    private readonly Mock<IDiscordInteraction> _interactionMock = new();
     private readonly Mock<IGoogleLensClient> _googleLensMock = new();
     private readonly Mock<IBingVisualSearch> _bingVisualSearchMock = new();
     private readonly Mock<IYandexImageSearch> _yandexImageSearchMock = new();
-    private readonly Mock<ILogger<OcrModule>> _loggerMock = new();
-    private readonly DiscordSocketClient _client = new();
-    private readonly InteractiveConfig _interactiveConfig = new() { DeferStopSelectionInteractions = false };
-    private readonly IFergunLocalizer<OcrModule> _ocrLocalizer = Utils.CreateMockedLocalizer<OcrModule>();
-    private readonly Mock<OcrModule> _moduleMock;
-    private const string TextImageUrl = "https://example.com/image.png";
-    private const string EmptyImageUrl = "https://example.com/empty.png";
-    private const string InvalidImageUrl = "https://example.com/file.bin";
 
     public OcrModuleTests()
     {
-        _googleLensMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync("test");
-        _googleLensMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
-        _googleLensMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new GoogleLensException("Invalid image."));
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync("test");
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
-        _bingVisualSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Invalid image."));
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == TextImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync("test");
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == EmptyImageUrl), It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
-        _yandexImageSearchMock.Setup(x => x.OcrAsync(It.Is<string>(s => s == InvalidImageUrl), It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Invalid image."));
+        // Each engine's OcrAsync returns text for TextImageUrl, empty for EmptyImageUrl, and throws for InvalidImageUrl
+        _googleLensMock.Setup(x => x.OcrAsync(TestData.TextImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync("test");
+        _googleLensMock.Setup(x => x.OcrAsync(TestData.EmptyImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        _googleLensMock.Setup(x => x.OcrAsync(TestData.InvalidImageUrl, It.IsAny<CancellationToken>())).ThrowsAsync(new GoogleLensException("Invalid image."));
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(TestData.TextImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync("test");
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(TestData.EmptyImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        _bingVisualSearchMock.Setup(x => x.OcrAsync(TestData.InvalidImageUrl, It.IsAny<CancellationToken>())).ThrowsAsync(new BingException("Invalid image."));
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(TestData.TextImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync("test");
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(TestData.EmptyImageUrl, It.IsAny<CancellationToken>())).ReturnsAsync(string.Empty);
+        _yandexImageSearchMock.Setup(x => x.OcrAsync(TestData.InvalidImageUrl, It.IsAny<CancellationToken>())).ThrowsAsync(new YandexException("Invalid image."));
 
-        var emoteProvider = Mock.Of<FergunEmoteProvider>();
-        var sharedLogger = Mock.Of<ILogger<SharedModule>>();
         var sharedLocalizer = Utils.CreateMockedLocalizer<SharedResource>();
-        var shared = new SharedModule(sharedLogger, sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
+        var shared = new SharedModule(Mock.Of<ILogger<SharedModule>>(), sharedLocalizer, Mock.Of<IFergunTranslator>(), new GoogleTranslator2());
 
-        var interactive = new InteractiveService(_client, _interactiveConfig);
-        _moduleMock = new Mock<OcrModule>(() => new OcrModule(_loggerMock.Object, _ocrLocalizer, emoteProvider, interactive, shared,
+        var interactive = new InteractiveService(Client, new InteractiveConfig { DeferStopSelectionInteractions = false });
+
+        SetupModule(new Mock<OcrModule>(() => new OcrModule(Logger, Localizer, Emotes, interactive, shared,
             _googleLensMock.Object, _bingVisualSearchMock.Object, _yandexImageSearchMock.Object))
-        { CallBase = true };
-        _contextMock.SetupGet(x => x.Interaction).Returns(_interactionMock.Object);
-        ((IInteractionModuleBase)_moduleMock.Object).SetContext(_contextMock.Object);
+        { CallBase = true });
     }
 
     [Theory]
-    [InlineData(TextImageUrl, true)]
-    [InlineData(EmptyImageUrl, false)]
-    public async Task GoogleAsync_Uses_GoogleLens(string url, bool success)
+    [InlineData(OcrEngine.Google, TestData.TextImageUrl, true)]
+    [InlineData(OcrEngine.Google, TestData.EmptyImageUrl, false)]
+    [InlineData(OcrEngine.Bing, TestData.TextImageUrl, true)]
+    [InlineData(OcrEngine.Bing, TestData.EmptyImageUrl, false)]
+    [InlineData(OcrEngine.Yandex, TestData.TextImageUrl, true)]
+    [InlineData(OcrEngine.Yandex, TestData.EmptyImageUrl, false)]
+    public async Task SlashCommand_Uses_Matching_Engine(OcrEngine engine, string url, bool success)
     {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = false;
+        const bool ephemeral = false; // The slash commands always defer non-ephemerally
 
-        var result = await module.GoogleAsync(url);
+        var result = await InvokeSlashCommandAsync(engine, url);
         Assert.Equal(success, result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
-
-        _googleLensMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
-    }
-
-    [Theory]
-    [InlineData(TextImageUrl, true)]
-    [InlineData(EmptyImageUrl, false)]
-    public async Task BingAsync_Uses_BingVisualSearch(string url, bool success)
-    {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = false;
-
-        var result = await module.BingAsync(url);
-        Assert.Equal(success, result.IsSuccess);
-
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
-
-        _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
-    }
-
-    [Theory]
-    [InlineData(TextImageUrl, true)]
-    [InlineData(EmptyImageUrl, false)]
-    public async Task YandexAsync_Uses_YandexImageSearch(string url, bool success)
-    {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = false;
-
-        var result = await module.YandexAsync(url);
-        Assert.Equal(success, result.IsSuccess);
-
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
-
-        _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), Times.Once);
-
-        _interactionMock.Verify(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.Is<bool>(b => b == isEphemeral),
-                It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), success ? Times.Once : Times.Never);
+        InteractionMock.VerifyDeferAsync(ephemeral, Times.Once());
+        VerifyEngineCalled(engine, url, Times.Once());
+        InteractionMock.VerifyFollowupAsync(ephemeral, success ? Times.Once() : Times.Never());
     }
 
     [Fact]
     public async Task OcrAsync_Returns_Unsuccessful_Result_On_Empty_Image_Url()
     {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = true;
-
-        var result = await module.OcrAsync(It.IsAny<OcrEngine>(), string.Empty, _interactionMock.Object, null, isEphemeral);
+        var result = await Module.OcrAsync(OcrEngine.Google, string.Empty, InteractionMock.Object, ephemeral: true);
         Assert.False(result.IsSuccess);
     }
 
     [Fact]
     public async Task Invalid_OcrEngine_Throws_ArgumentException()
     {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = true;
-
-        var task = module.OcrAsync((OcrEngine)3, TextImageUrl, _interactionMock.Object, null, isEphemeral);
+        var task = Module.OcrAsync((OcrEngine)3, TestData.TextImageUrl, InteractionMock.Object, ephemeral: true);
 
         await Assert.ThrowsAsync<ArgumentException>("ocrEngine", () => task);
     }
@@ -141,12 +82,37 @@ public class OcrModuleTests
     [Fact]
     public async Task OcrAsync_Returns_Unsuccessful_Result_On_Invalid_Image_Url()
     {
-        var module = _moduleMock.Object;
-        const bool isEphemeral = true;
+        const bool ephemeral = true;
 
-        var result = await module.OcrAsync(It.IsAny<OcrEngine>(), InvalidImageUrl, _interactionMock.Object, null, isEphemeral);
+        var result = await Module.OcrAsync(OcrEngine.Google, TestData.InvalidImageUrl, InteractionMock.Object, null, ephemeral);
         Assert.False(result.IsSuccess);
 
-        _interactionMock.Verify(x => x.DeferAsync(It.Is<bool>(b => b == isEphemeral), It.IsAny<RequestOptions>()), Times.Once);
+        InteractionMock.VerifyDeferAsync(ephemeral, Times.Once());
+    }
+
+    private Task<RuntimeResult> InvokeSlashCommandAsync(OcrEngine engine, string url) => engine switch
+    {
+        OcrEngine.Google => Module.GoogleAsync(url),
+        OcrEngine.Bing => Module.BingAsync(url),
+        OcrEngine.Yandex => Module.YandexAsync(url),
+        _ => throw new ArgumentOutOfRangeException(nameof(engine))
+    };
+
+    private void VerifyEngineCalled(OcrEngine engine, string url, Times times)
+    {
+        switch (engine)
+        {
+            case OcrEngine.Google:
+                _googleLensMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), times);
+                break;
+            case OcrEngine.Bing:
+                _bingVisualSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), times);
+                break;
+            case OcrEngine.Yandex:
+                _yandexImageSearchMock.Verify(x => x.OcrAsync(It.Is<string>(s => s == url), It.IsAny<CancellationToken>()), times);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(engine));
+        }
     }
 }

@@ -15,7 +15,8 @@ using Xunit;
 
 namespace Fergun.Tests.Modules.Handlers;
 
-public class AutocompleteHandlerTests
+[Trait("Category", "Integration")]
+public class AutocompleteHandlerIntegrationTests
 {
     private readonly Mock<IInteractionContext> _contextMock = new();
     private readonly Mock<ITextChannel> _channelMock = new();
@@ -29,7 +30,7 @@ public class AutocompleteHandlerTests
     public async Task DuckDuckGoAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale, bool isNsfw)
     {
         var handler = new DuckDuckGoAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
 
         _contextMock.SetupGet(x => x.Channel).Returns(_channelMock.Object);
         _channelMock.SetupGet(x => x.IsNsfw).Returns(isNsfw);
@@ -56,7 +57,7 @@ public class AutocompleteHandlerTests
     public async Task GoogleAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
     {
         var handler = new GoogleAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
 
         _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
         _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
@@ -81,7 +82,7 @@ public class AutocompleteHandlerTests
     public async Task YouTubeAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
     {
         var handler = new YouTubeAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
 
         _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
         _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
@@ -106,7 +107,7 @@ public class AutocompleteHandlerTests
     public async Task UrbanAutocomplete_Should_Return_Valid_Suggestions(string? text)
     {
         var handler = new UrbanAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
 
         _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
         _dataMock.SetupGet(x => x.Current).Returns(option);
@@ -133,7 +134,7 @@ public class AutocompleteHandlerTests
     public async Task WikipediaAutocomplete_Should_Return_Valid_Suggestions(string text, string locale)
     {
         var handler = new WikipediaAutocompleteHandler();
-        var option = Utils.CreateInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
 
         _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
         _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
