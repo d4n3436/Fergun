@@ -44,96 +44,136 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeUsers), DisableDiscoveryEnumeration = true)]
-    public async Task AvatarAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
+    [MemberData(nameof(GetUserSeeds))]
+    public async Task AvatarAsync_Returns_Embed_With_FirstAvailable_Avatar(int seed)
     {
-        var result = await Module.AvatarAsync(userMock.Object);
+        var user = Utils.CreateMockedUser(new Faker { Random = new Randomizer(seed) });
+
+        var result = await Module.AvatarAsync(user);
         Assert.True(result.IsSuccess);
 
-        userMock.Verify(x => x.ToString());
-        userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
-        if (userMock.Object.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()) is null)
-        {
-            userMock.Verify(x => x.GetDefaultAvatarUrl());
-        }
-
-        VerifyAvatarEmbed(userMock.Object);
+        InteractionMock.VerifyRespondAsync(e => e.Title == user.ToString(), Times.Once());
+        InteractionMock.VerifyRespondAsync(e => e.Image.GetValueOrDefault().Url == ExpectedAvatarUrl(user), Times.Once());
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeGuildUsers), DisableDiscoveryEnumeration = true)]
-    public async Task AvatarAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
+    [MemberData(nameof(GetUserSeeds))]
+    public async Task AvatarAsync_Returns_Embed_With_Guild_Avatar(int seed)
     {
-        var result = await Module.AvatarAsync(guildUserMock.Object);
+        var guildUser = Utils.CreateMockedGuildUser(new Faker { Random = new Randomizer(seed) });
+
+        var result = await Module.AvatarAsync(guildUser);
         Assert.True(result.IsSuccess);
 
-        guildUserMock.Verify(x => x.ToString());
-        guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
-        VerifyAvatarEmbed(guildUserMock.Object);
+        string? expectedUrl = guildUser.GetGuildAvatarUrl(size: 2048);
+        Mock.Get(guildUser).Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
+        InteractionMock.VerifyRespondAsync(e => e.Image.GetValueOrDefault().Url == expectedUrl, Times.Once());
+    }
+
+    [Fact]
+    public async Task AvatarAsync_Uses_Custom_Avatar_When_Present()
+    {
+        var user = Utils.CreateMockedUser(hasAvatar: true);
+
+        var result = await Module.AvatarAsync(user);
+        Assert.True(result.IsSuccess);
+
+        string? expectedUrl = user.GetAvatarUrl(size: 2048);
+        InteractionMock.VerifyRespondAsync(e => e.Image.GetValueOrDefault().Url == expectedUrl, Times.Once());
+    }
+
+    [Fact]
+    public async Task AvatarAsync_Falls_Back_To_Default_Avatar_When_Absent()
+    {
+        var user = Utils.CreateMockedUser(hasAvatar: false);
+
+        var result = await Module.AvatarAsync(user);
+        Assert.True(result.IsSuccess);
+
+        Mock.Get(user).Verify(x => x.GetDefaultAvatarUrl());
+        InteractionMock.VerifyRespondAsync(e => e.Image.GetValueOrDefault().Url == user.GetDefaultAvatarUrl(), Times.Once());
+    }
+
+    [Fact]
+    public async Task AvatarAsync_Server_Returns_Error_When_User_Has_No_Guild_Avatar()
+    {
+        var user = Utils.CreateMockedUser(); // plain IUser: no guild avatar
+
+        var result = await Module.AvatarAsync(user, AvatarType.Server);
+
+        Assert.False(result.IsSuccess);
+        InteractionMock.Verify(x => x.RespondAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(),
+            It.IsAny<AllowedMentions>(), It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AvatarAsync_Global_Returns_Error_When_User_Has_No_Avatar()
+    {
+        var user = Utils.CreateMockedUser(hasAvatar: false);
+
+        var result = await Module.AvatarAsync(user, AvatarType.Global);
+
+        Assert.False(result.IsSuccess);
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeUsers), DisableDiscoveryEnumeration = true)]
-    public async Task UserInfoAsync_Should_Return_Embed_With_Avatar(Mock<IUser> userMock)
+    [MemberData(nameof(GetUserSeeds))]
+    public async Task UserInfoAsync_Returns_Embed_With_User_Fields(int seed)
     {
-        var result = await Module.UserInfoAsync(userMock.Object);
+        var user = Utils.CreateMockedUser(new Faker { Random = new Randomizer(seed) });
+
+        var result = await Module.UserInfoAsync(user);
         Assert.True(result.IsSuccess);
 
-        userMock.Verify(x => x.ToString());
-        userMock.Verify(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
-        if (userMock.Object.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()) is null)
-        {
-            userMock.Verify(x => x.GetDefaultAvatarUrl());
-        }
-
-        userMock.VerifyGet(x => x.Activities);
-        userMock.VerifyGet(x => x.ActiveClients);
-        userMock.VerifyGet(x => x.Id);
-        userMock.VerifyGet(x => x.IsBot);
-        userMock.VerifyGet(x => x.CreatedAt);
-
-        VerifyAvatarEmbed(userMock.Object);
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "Name" && f.Value == user.ToString()), Times.Once());
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "ID" && f.Value == user.Id.ToString()), Times.Once());
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "IsBot" && f.Value == (user.IsBot ? "Yes" : "No")), Times.Once());
+        InteractionMock.VerifyRespondAsync(e => e.Thumbnail.GetValueOrDefault().Url == ExpectedAvatarUrl(user), Times.Once());
     }
 
     [Theory]
-    [MemberData(nameof(GetFakeGuildUsers), DisableDiscoveryEnumeration = true)]
-    public async Task UserInfoAsync_Should_Return_Embed_With_Guild_Avatar(Mock<IGuildUser> guildUserMock)
+    [MemberData(nameof(GetUserSeeds))]
+    public async Task UserInfoAsync_Returns_Embed_With_Guild_Fields(int seed)
     {
-        var result = await Module.UserInfoAsync(guildUserMock.Object);
+        var guildUser = Utils.CreateMockedGuildUser(new Faker { Random = new Randomizer(seed) });
+
+        var result = await Module.UserInfoAsync(guildUser);
         Assert.True(result.IsSuccess);
 
-        guildUserMock.Verify(x => x.ToString());
-        guildUserMock.Verify(x => x.GetGuildAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>()));
-        guildUserMock.VerifyGet(x => x.Activities);
-        guildUserMock.VerifyGet(x => x.ActiveClients);
-        guildUserMock.VerifyGet(x => x.Id);
-        guildUserMock.VerifyGet(x => x.IsBot);
-        guildUserMock.VerifyGet(x => x.CreatedAt);
-        guildUserMock.VerifyGet(x => x.Nickname);
-        guildUserMock.VerifyGet(x => x.JoinedAt);
-        guildUserMock.VerifyGet(x => x.PremiumSince);
-
-        VerifyAvatarEmbed(guildUserMock.Object);
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "Name" && f.Value == guildUser.ToString()), Times.Once());
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "Nickname" && f.Value == (guildUser.Nickname ?? "(None)")), Times.Once());
+        string? expectedUrl = guildUser.GetGuildAvatarUrl(size: 2048);
+        InteractionMock.VerifyRespondAsync(e => e.Thumbnail.GetValueOrDefault().Url == expectedUrl, Times.Once());
     }
 
-    public static TheoryData<Mock<IUser>> GetFakeUsers()
+    [Fact]
+    public async Task UserInfoAsync_Renders_None_For_User_Without_Activities()
     {
-        var faker = new Faker();
+        var user = Utils.CreateMockedUser(activityCount: 0);
 
-        return faker.MakeLazy(20, () => Utils.CreateMockedUser()).Select(Mock.Get).ToTheoryData();
+        var result = await Module.UserInfoAsync(user);
+        Assert.True(result.IsSuccess);
+
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "Activities" && f.Value == "(None)"), Times.Once());
     }
 
-    public static TheoryData<Mock<IGuildUser>> GetFakeGuildUsers()
+    [Theory]
+    [InlineData(true)] // pomelo username (no discriminator)
+    [InlineData(false)] // legacy username#0000
+    public async Task UserInfoAsync_Name_Field_Uses_ToString_Format(bool pomelo)
     {
-        var faker = new Faker();
+        var user = Utils.CreateMockedUser(pomelo: pomelo);
 
-        return faker.MakeLazy(20, () => Utils.CreateMockedGuildUser()).Select(Mock.Get).ToTheoryData();
+        var result = await Module.UserInfoAsync(user);
+        Assert.True(result.IsSuccess);
+
+        string expectedName = pomelo ? user.Username : $"{user.Username}#{user.Discriminator}";
+        Assert.Equal(expectedName, user.ToString());
+        InteractionMock.VerifyRespondAsync(e => e.Fields.Any(f => f.Name == "Name" && f.Value == expectedName), Times.Once());
     }
 
-    private void VerifyAvatarEmbed(IUser user)
-        => InteractionMock.VerifyRespondAsync(e => EmbedImageUrlIsUserAvatarUrl(user, e), Times.Once());
+    public static TheoryData<int> GetUserSeeds() => Enumerable.Range(1, 20).ToTheoryData();
 
-    private static bool EmbedImageUrlIsUserAvatarUrl(IUser user, Embed embed)
-        => (embed.Image.GetValueOrDefault().Url ?? embed.Thumbnail.GetValueOrDefault().Url)
-           == ((user as IGuildUser)?.GetGuildAvatarUrl() ?? user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl());
+    private static string ExpectedAvatarUrl(IUser user)
+        => (user as IGuildUser)?.GetGuildAvatarUrl(size: 2048) ?? user.GetAvatarUrl(size: 2048) ?? user.GetDefaultAvatarUrl();
 }

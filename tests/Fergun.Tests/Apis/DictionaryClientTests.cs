@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -15,6 +16,46 @@ public class DictionaryClientTests
     private sealed record PronunciationWrapper(
         [property: JsonConverter(typeof(PronunciationConverter))]
         [property: JsonPropertyName("pronunciation")] EntryPronunciation Pronunciation);
+
+    [Fact]
+    public async Task GetDefinitionsAsync_Parses_Luna_Group()
+    {
+        var client = new DictionaryClient(Utils.CreateMockedHttpClient((HttpStatusCode.OK, DictionaryTestData.DefinitionsResponse)));
+
+        var response = await client.GetDefinitionsAsync("test", TestContext.Current.CancellationToken);
+
+        Assert.NotNull(response.Data);
+        var luna = response.Data.Content.Luna;
+        Assert.NotNull(luna);
+        Assert.Null(response.Data.Content.Collins);
+
+        var entry = Assert.Single(luna.Entries);
+        Assert.Equal("test", entry.Entry);
+        Assert.Equal(1, entry.Homograph);
+        Assert.NotNull(entry.Pronunciation);
+        Assert.Equal("tɛst", entry.Pronunciation.Ipa);
+
+        var block = Assert.Single(entry.PartOfSpeechBlocks);
+        Assert.Equal("noun", block.PartOfSpeech);
+        var definition = Assert.Single(block.Definitions);
+        Assert.Equal("a procedure intended to establish the quality of something", definition.Definition);
+
+        // The formatter must produce non-empty markdown from the parsed entry.
+        Assert.NotEmpty(DictionaryFormatter.FormatEntry(entry));
+    }
+
+    [Fact]
+    public async Task GetSearchResultsAsync_Parses_Words()
+    {
+        var client = new DictionaryClient(Utils.CreateMockedHttpClient((HttpStatusCode.OK, DictionaryTestData.SearchResponse)));
+
+        var results = await client.GetSearchResultsAsync("test", TestContext.Current.CancellationToken);
+
+        var word = Assert.Single(results);
+        Assert.Equal("test", word.DisplayText);
+        Assert.Equal("test", word.Reference.Identifier);
+        Assert.Equal("luna", word.Reference.Type);
+    }
 
     [Fact]
     public void Constructor_Throws_ArgumentNullException_IfHttpClientIsNull()

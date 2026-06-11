@@ -22,5 +22,5 @@ public class BotListOptionsTests
     }
 
     public static TheoryData<BotListOptions> GetBotListOptionsTestData()
-        => AutoFaker.Generate<BotListOptions>(10).ToTheoryData();
+        => new AutoFaker<BotListOptions>().UseSeed(42).Generate(10).ToTheoryData();
 }

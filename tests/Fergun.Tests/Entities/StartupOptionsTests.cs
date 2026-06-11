@@ -25,5 +25,5 @@ public class StartupOptionsTests
     }
 
     public static TheoryData<StartupOptions> GetStartupOptionsTestData()
-        => AutoFaker.Generate<StartupOptions>(10).ToTheoryData();
+        => new AutoFaker<StartupOptions>().UseSeed(42).Generate(10).ToTheoryData();
 }

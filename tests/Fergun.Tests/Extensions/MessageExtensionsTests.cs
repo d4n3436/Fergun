@@ -63,13 +63,14 @@ public class MessageExtensionsTests
 
     private static IEnumerable<string> GetRandomStrings()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
 
-        return faker.MakeLazy(10, () => faker.Random.String2(2));
+        // Distinct to keep the test count stable
+        return faker.MakeLazy(10, () => faker.Random.String2(2)).Distinct();
     }
 
     private static IEnumerable<Embed> GetEmbeds()
     {
-        return new Faker().MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build());
+        return new Faker { Random = new Randomizer(42) }.MakeLazy(10, Utils.CreateFakeEmbedBuilder).Select(x => x.Build());
     }
 }

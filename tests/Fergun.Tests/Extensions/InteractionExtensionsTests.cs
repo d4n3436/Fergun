@@ -67,7 +67,7 @@ public class InteractionExtensionsTests
 
     public static TheoryData<string> GetLanguages()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
 
         return Language.LanguageDictionary.Values
             .Select(x => x.ISO6391.Contains('-') ? x.ISO6391 : $"{x.ISO6391}-{faker.Random.String2(2)}")
@@ -77,7 +77,7 @@ public class InteractionExtensionsTests
 
     public static TheoryData<string> GetLocales()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
 
         return faker.MakeLazy(10, () => faker.Random.RandomLocale().Replace('_', '-'))
             .ToTheoryData();
@@ -85,7 +85,7 @@ public class InteractionExtensionsTests
 
     public static TheoryData<string> GetRandomStrings()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
 
         return faker.MakeLazy(10, () => faker.Random.String2(2))
             .ToTheoryData();

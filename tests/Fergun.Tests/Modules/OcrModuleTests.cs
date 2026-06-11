@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Interactions;
 using Fergun.Apis.Bing;
 using Fergun.Apis.Google;
@@ -65,6 +68,24 @@ public class OcrModuleTests : ModuleTestBase<OcrModule>
     }
 
     [Fact]
+    public async Task SlashCommand_Renders_Recognized_Text_In_Response()
+    {
+        MessageComponent? captured = null;
+        InteractionMock
+            .Setup(x => x.FollowupAsync(It.IsAny<string>(), It.IsAny<Embed[]>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<AllowedMentions>(),
+                It.IsAny<MessageComponent>(), It.IsAny<Embed>(), It.IsAny<RequestOptions>(), It.IsAny<PollProperties>(), It.IsAny<MessageFlags>()))
+            .Callback<string, Embed[], bool, bool, AllowedMentions, MessageComponent, Embed, RequestOptions, PollProperties, MessageFlags>(
+                (_, _, _, _, _, components, _, _, _, _) => captured = components)
+            .ReturnsAsync(Mock.Of<IUserMessage>());
+
+        var result = await Module.GoogleAsync(TestData.TextImageUrl);
+        Assert.True(result.IsSuccess);
+
+        Assert.NotNull(captured);
+        Assert.Contains(captured.Components.SelectMany(GetTextContent), content => content.Contains("test"));
+    }
+
+    [Fact]
     public async Task OcrAsync_Returns_Unsuccessful_Result_On_Empty_Image_Url()
     {
         var result = await Module.OcrAsync(OcrEngine.Google, string.Empty, InteractionMock.Object, ephemeral: true);
@@ -89,6 +110,14 @@ public class OcrModuleTests : ModuleTestBase<OcrModule>
 
         InteractionMock.VerifyDeferAsync(ephemeral, Times.Once());
     }
+    
+    private static IEnumerable<string> GetTextContent(IMessageComponent component) => component switch
+    {
+        TextDisplayComponent text => [text.Content],
+        ContainerComponent container => container.Components.SelectMany(GetTextContent),
+        ActionRowComponent row => row.Components.SelectMany(GetTextContent),
+        _ => []
+    };
 
     private Task<RuntimeResult> InvokeSlashCommandAsync(OcrEngine engine, string url) => engine switch
     {

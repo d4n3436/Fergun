@@ -63,39 +63,47 @@ internal static class Utils
         return localizerMock.Object;
     }
 
-    public static IUser CreateMockedUser(Faker? faker = null, bool pomelo = false)
+    public static IUser CreateMockedUser(Faker? faker = null, bool pomelo = false, bool? hasAvatar = null, int? activityCount = null)
     {
         faker ??= new Faker();
         var userMock = new Mock<IUser>();
+        int activities = activityCount ?? faker.Random.Number(3);
 
         userMock.SetupGet(x => x.Username).Returns(faker.Internet.UserName());
         userMock.SetupGet(x => x.DiscriminatorValue).Returns(pomelo ? (ushort)0 : faker.Random.UShort(1, 9999));
         userMock.SetupGet(x => x.Discriminator).Returns(() => userMock.Object.DiscriminatorValue.ToString("D4", CultureInfo.InvariantCulture));
-        userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(faker.Random.Number(3), () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
+        userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(activities, () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
             .OrDefault(faker, 0.5f, CreateFakeCustomStatusGame(faker))).ToArray());
-        userMock.SetupGet(x => x.ActiveClients).Returns(faker.MakeLazy(faker.Random.Number(3),
+        userMock.SetupGet(x => x.ActiveClients).Returns(faker.MakeLazy(activities,
             () => faker.PickRandom(Enum.GetValues<ClientType>()).OrDefault(faker, 0.5f, (ClientType)3)).ToArray());
         userMock.SetupGet(x => x.CreatedAt).Returns(faker.Date.PastOffset(5));
         userMock.SetupGet(x => x.Id).Returns(faker.Random.ULong());
         userMock.SetupGet(x => x.IsBot).Returns(faker.Random.Bool());
-        userMock.Setup(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>())).Returns(faker.Internet.Avatar().OrNull(faker));
+        string? avatarUrl = hasAvatar switch
+        {
+            true => faker.Internet.Avatar(),
+            false => null,
+            null => faker.Internet.Avatar().OrNull(faker)
+        };
+        userMock.Setup(x => x.GetAvatarUrl(It.IsAny<ImageFormat>(), It.IsAny<ushort>())).Returns(avatarUrl!);
         userMock.Setup(x => x.GetDefaultAvatarUrl()).Returns(faker.Internet.Avatar());
         userMock.Setup(x => x.ToString()).Returns(() => userMock.Object.DiscriminatorValue == 0 ? userMock.Object.Username : $"{userMock.Object.Username}#{userMock.Object.Discriminator}");
 
         return userMock.Object;
     }
 
-    public static IGuildUser CreateMockedGuildUser(Faker? faker = null, bool pomelo = false)
+    public static IGuildUser CreateMockedGuildUser(Faker? faker = null, bool pomelo = false, int? activityCount = null)
     {
         faker ??= new Faker();
         var userMock = new Mock<IGuildUser>();
+        int activities = activityCount ?? faker.Random.Number(3);
 
         userMock.SetupGet(x => x.Username).Returns(faker.Internet.UserName());
         userMock.SetupGet(x => x.DiscriminatorValue).Returns(pomelo ? (ushort)0 : faker.Random.UShort(1, 9999));
         userMock.SetupGet(x => x.Discriminator).Returns(userMock.Object.DiscriminatorValue.ToString("D4", CultureInfo.InvariantCulture));
-        userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(faker.Random.Number(3), () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
+        userMock.SetupGet(x => x.Activities).Returns(faker.MakeLazy(activities, () => new Game(faker.Hacker.IngVerb(), faker.Random.Enum(ActivityType.CustomStatus))
             .OrDefault(faker, 0.5f, CreateFakeCustomStatusGame(faker))).ToArray());
-        userMock.SetupGet(x => x.ActiveClients).Returns(faker.MakeLazy(faker.Random.Number(3),
+        userMock.SetupGet(x => x.ActiveClients).Returns(faker.MakeLazy(activities,
             () => faker.PickRandom(Enum.GetValues<ClientType>()).OrDefault(faker, 0.5f, (ClientType)3)).ToArray());
         userMock.SetupGet(x => x.CreatedAt).Returns(faker.Date.PastOffset(5));
         userMock.SetupGet(x => x.Id).Returns(faker.Random.ULong());

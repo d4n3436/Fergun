@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoBogus;
 using Fergun.Apis.Musixmatch;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,17 +22,12 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     public MusixmatchClientTests(MusixmatchClientStateFixture fixture) => _musixmatchClient = new MusixmatchClient(new HttpClient(), fixture.State, _loggerMock.Object);
 
     [Fact]
-    public async Task SearchSongsAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
+    public async Task Operations_Throw_OperationCanceledException_With_Canceled_Token()
     {
         using var cts = new CancellationTokenSource(0);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<bool>(), cts.Token));
-    }
 
-    [Fact]
-    public async Task GetSongAsync_Throws_OperationCanceledException_With_Canceled_CancellationToken()
-    {
-        using var cts = new CancellationTokenSource(0);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.GetSongAsync(It.IsAny<int>(), cts.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.SearchSongsAsync("test", false, cts.Token));
+        await Assert.ThrowsAsync<OperationCanceledException>(() => _musixmatchClient.GetSongAsync(0, cts.Token));
     }
 
     [Theory]
@@ -137,11 +131,11 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
     [Fact]
     public async Task Disposed_MusixmatchClient_Usage_Throws_ObjectDisposedException()
     {
-        (_musixmatchClient as IDisposable)?.Dispose();
-        (_musixmatchClient as IDisposable)?.Dispose();
+        ((IDisposable)_musixmatchClient).Dispose();
+        ((IDisposable)_musixmatchClient).Dispose();
 
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.SearchSongsAsync(AutoFaker.Generate<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.GetSongAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.SearchSongsAsync("test", false, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => _musixmatchClient.GetSongAsync(0, TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -205,6 +199,72 @@ public class MusixmatchClientTests : IClassFixture<MusixmatchClientStateFixture>
         Assert.Equal("captcha", captchaException.Hint);
         Assert.Equal("renew", renewException.Hint);
         Assert.Null(serverErrorException.Hint);
+    }
+
+    [Fact]
+    public async Task SearchSongsAsync_Parses_Song_Fields_From_Response()
+    {
+        var response = new
+        {
+            message = new
+            {
+                header = new { status_code = 200 },
+                body = new
+                {
+                    track_list = new[]
+                    {
+                        new
+                        {
+                            track = new
+                            {
+                                artist_name = "Eminem",
+                                track_id = 84457474,
+                                instrumental = false,
+                                has_lyrics = true,
+                                restricted = false,
+                                album_coverart_500x500 = "https://example.com/cover.png",
+                                track_name = "Without Me",
+                                track_share_url = "https://example.com/share"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        var client = CreateClientReturning(response);
+
+        var results = await client.SearchSongsAsync("without me", false, TestContext.Current.CancellationToken);
+
+        var song = Assert.Single(results);
+        Assert.Equal("Eminem", song.ArtistName);
+        Assert.Equal("Without Me", song.Title);
+        Assert.Equal(84457474, song.Id);
+        Assert.True(song.HasLyrics);
+        Assert.False(song.IsInstrumental);
+        Assert.True(Uri.IsWellFormedUriString(song.SongArtImageUrl, UriKind.Absolute));
+        Assert.Equal("Eminem - Without Me", song.ToString());
+    }
+
+    // Builds a client whose Musixmatch endpoint returns the given response and whose state endpoint returns a valid token.
+    private static MusixmatchClient CreateClientReturning(object musixmatchResponse)
+    {
+        var tokenResponse = new { message = new { header = new { status_code = 200 }, body = new { user_token = "token" } } };
+
+        var musixmatchHandler = new Mock<HttpMessageHandler>();
+        musixmatchHandler.Protected().As<HttpClient>()
+            .Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => GetResponseMessage(musixmatchResponse));
+
+        var stateHandler = new Mock<HttpMessageHandler>();
+        stateHandler.Protected().As<HttpClient>()
+            .Setup(x => x.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => GetResponseMessage(tokenResponse));
+
+        var factory = new Mock<IHttpClientFactory>();
+        factory.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(() => new HttpClient(stateHandler.Object));
+
+        return new MusixmatchClient(new HttpClient(musixmatchHandler.Object), new MusixmatchClientState(factory.Object), Mock.Of<ILogger<MusixmatchClient>>());
     }
 
     public static TheoryData<MusixmatchClient> GetMockedMusixmatchClientSequences()

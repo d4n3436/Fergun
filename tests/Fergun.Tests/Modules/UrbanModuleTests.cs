@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
@@ -77,5 +78,5 @@ public class UrbanModuleTests : ModuleTestBase<UrbanModule>
     }
 
     public static TheoryData<string> GetRandomWords()
-        => AutoFaker.Generate<string>(10).ToTheoryData();
+        => Enumerable.Range(0, 10).Select(i => $"word{i}").ToTheoryData();
 }

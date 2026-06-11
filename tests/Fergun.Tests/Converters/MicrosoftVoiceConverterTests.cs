@@ -123,7 +123,7 @@ public class MicrosoftVoiceConverterTests
 
     public static TheoryData<MicrosoftVoice, bool> GetMicrosoftVoiceTestData()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
         var fakeVoices = faker.MakeLazy(10, () =>
         {
             var gender = faker.PickRandom<Name.Gender>();

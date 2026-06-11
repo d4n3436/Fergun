@@ -27,5 +27,5 @@ public class FergunOptionsTests
     }
 
     public static TheoryData<FergunOptions> GetFergunOptionsTestData()
-        => AutoFaker.Generate<FergunOptions>(10).ToTheoryData();
+        => new AutoFaker<FergunOptions>().UseSeed(42).Generate(10).ToTheoryData();
 }

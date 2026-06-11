@@ -67,7 +67,7 @@ public class DictionaryClientIntegrationTests
                     {
                         Assert.NotNull(definition);
 
-                        if (definition.Subdefinitions?.Count > 0)
+                        if (definition.Subdefinitions.Count > 0)
                         {
                             Assert.All(definition.Subdefinitions, [AssertionMethod] (subDefinition) =>
                             {

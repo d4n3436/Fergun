@@ -9,8 +9,16 @@ namespace Fergun.Tests.Apis;
 [Trait("Category", "Integration")]
 public class WikipediaClientIntegrationTests
 {
-    private readonly IWikipediaClient _wikipediaClient = new WikipediaClient(GetHttpClient());
+    private readonly IWikipediaClient _wikipediaClient;
 
+    public WikipediaClientIntegrationTests()
+    {
+        var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DiscordConfig.UserAgent);
+        
+        _wikipediaClient =  new WikipediaClient(httpClient);
+    }
+    
     [Theory]
     [InlineData(11846, "en")] // Guitar
     [InlineData(3328953, "es")] // Wikipedia
@@ -54,13 +62,5 @@ public class WikipediaClientIntegrationTests
         Assert.NotNull(results);
         Assert.NotEmpty(results);
         Assert.All(results, Assert.NotNull);
-    }
-
-    private static HttpClient GetHttpClient()
-    {
-        var httpClient = new HttpClient();
-        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(DiscordConfig.UserAgent);
-
-        return httpClient;
     }
 }

@@ -18,7 +18,7 @@ public class StringExtensionsTests
 
     public static TheoryData<string, int> GetSplitStringData()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
         return faker.MakeLazy(10, () => (faker.Lorem.Sentence(100), faker.Random.Int(20, 30)))
             .ToTheoryData();
     }

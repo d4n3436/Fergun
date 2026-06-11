@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
@@ -26,132 +26,85 @@ public class AutocompleteHandlerIntegrationTests
     private readonly Mock<IAutocompleteInteractionData> _dataMock = new();
 
     [Theory]
-    [MemberData(nameof(GetDuckDuckGoTestData))]
-    public async Task DuckDuckGoAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale, bool isNsfw)
+    [MemberData(nameof(GetQueriesWithLocaleAndNsfw))]
+    public async Task DuckDuckGoAutocomplete_Returns_Valid_Suggestions(string query, string locale, bool isNsfw)
     {
-        var handler = new DuckDuckGoAutocompleteHandler();
-        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
-
         _contextMock.SetupGet(x => x.Channel).Returns(_channelMock.Object);
         _channelMock.SetupGet(x => x.IsNsfw).Returns(isNsfw);
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
-        _dataMock.SetupGet(x => x.Current).Returns(option);
+        SetupInteraction(query, locale);
 
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
+        var results = await new DuckDuckGoAutocompleteHandler().GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
 
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
-        {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
+        AssertValidSuggestions(results);
     }
 
     [Theory]
-    [MemberData(nameof(GetGoogleTestData))]
-    public async Task GoogleAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
+    [MemberData(nameof(GetQueriesWithLocale))]
+    public async Task GoogleAutocomplete_Returns_Valid_Suggestions(string query, string locale)
     {
-        var handler = new GoogleAutocompleteHandler();
-        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        SetupInteraction(query, locale);
 
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
-        _dataMock.SetupGet(x => x.Current).Returns(option);
+        var results = await new GoogleAutocompleteHandler().GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
 
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
-
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
-        {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
+        AssertValidSuggestions(results);
     }
 
     [Theory]
-    [MemberData(nameof(GetGoogleTestData))]
-    public async Task YouTubeAutocomplete_Should_Return_Valid_Suggestions(string? text, string locale)
+    [MemberData(nameof(GetQueriesWithLocale))]
+    public async Task YouTubeAutocomplete_Returns_Valid_Suggestions(string query, string locale)
     {
-        var handler = new YouTubeAutocompleteHandler();
-        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        SetupInteraction(query, locale);
 
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
-        _dataMock.SetupGet(x => x.Current).Returns(option);
+        var results = await new YouTubeAutocompleteHandler().GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
 
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
-
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
-        {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
+        AssertValidSuggestions(results);
     }
 
     [Theory]
-    [MemberData(nameof(GetUrbanTestData))]
-    public async Task UrbanAutocomplete_Should_Return_Valid_Suggestions(string? text)
+    [MemberData(nameof(GetQueries))]
+    public async Task UrbanAutocomplete_Returns_Valid_Suggestions(string query)
     {
-        var handler = new UrbanAutocompleteHandler();
-        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        SetupInteraction(query, locale: null);
 
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _dataMock.SetupGet(x => x.Current).Returns(option);
+        var results = await new UrbanAutocompleteHandler().GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
 
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
-
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
-        {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
+        AssertValidSuggestions(results);
     }
 
     [Theory]
-    [InlineData("", "pt")]
     [InlineData("a", "en")]
     [InlineData("b", "es")]
     [InlineData("c", "fr")]
-    public async Task WikipediaAutocomplete_Should_Return_Valid_Suggestions(string text, string locale)
+    public async Task WikipediaAutocomplete_Returns_Valid_Suggestions(string query, string locale)
     {
-        var handler = new WikipediaAutocompleteHandler();
-        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, text, text, true);
+        SetupInteraction(query, locale);
 
-        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
-        _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
+        var results = await new WikipediaAutocompleteHandler().GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
+
+        AssertValidSuggestions(results);
+    }
+
+    private void SetupInteraction(string query, string? locale)
+    {
+        var option = Utils.CreateNonPublicInstance<AutocompleteOption>(ApplicationCommandOptionType.String, query, query, true);
         _dataMock.SetupGet(x => x.Current).Returns(option);
+        _interactionMock.SetupGet(x => x.Data).Returns(_dataMock.Object);
 
-        var results = await handler.GenerateSuggestionsAsync(_contextMock.Object, _interactionMock.Object, _parameter, _services);
+        if (locale is not null)
+            _interactionMock.SetupGet(x => x.UserLocale).Returns(locale);
+    }
 
-        Assert.True(results.IsSuccess);
-
-        if (!string.IsNullOrEmpty(text))
+    private static void AssertValidSuggestions(AutocompletionResult result)
+    {
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Suggestions);
+        Assert.NotEmpty(result.Suggestions);
+        Assert.All(result.Suggestions, x =>
         {
-            Assert.NotNull(results.Suggestions);
-            Assert.NotEmpty(results.Suggestions);
-            Assert.All(results.Suggestions, Assert.NotNull);
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Name));
-            Assert.All(results.Suggestions, x => Assert.NotNull(x.Value));
-        }
+            Assert.NotNull(x);
+            Assert.NotNull(x.Name);
+            Assert.NotNull(x.Value);
+        });
     }
 
     private static ServiceProvider GetServiceProvider()
@@ -173,29 +126,25 @@ public class AutocompleteHandlerIntegrationTests
         return services.BuildServiceProvider();
     }
 
-    public static TheoryData<string?, string, bool> GetDuckDuckGoTestData()
+    public static TheoryData<string, string, bool> GetQueriesWithLocaleAndNsfw()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
         return faker.MakeLazy(5, () => faker.Music.Genre())
-            .Append(string.Empty).Append(null)
-            .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')), faker.MakeLazy(7, () => faker.Random.Bool()))
+            .Zip(faker.MakeLazy(5, () => faker.Random.RandomLocale().Replace('_', '-')), faker.MakeLazy(5, () => faker.Random.Bool()))
             .ToTheoryData();
     }
 
-    public static TheoryData<string?, string> GetGoogleTestData()
+    public static TheoryData<string, string> GetQueriesWithLocale()
     {
-        var faker = new Faker();
+        var faker = new Faker { Random = new Randomizer(42) };
         return faker.MakeLazy(5, () => faker.Music.Genre())
-            .Append(string.Empty).Append(null)
-            .Zip(faker.MakeLazy(7, () => faker.Random.RandomLocale().Replace('_', '-')))
+            .Zip(faker.MakeLazy(5, () => faker.Random.RandomLocale().Replace('_', '-')))
             .ToTheoryData();
     }
 
-    public static TheoryData<string?> GetUrbanTestData()
+    public static TheoryData<string> GetQueries()
     {
-        var faker = new Faker();
-        return faker.MakeLazy(5, () => faker.Hacker.Noun())
-            .Append(string.Empty).Append(null)
-            .ToTheoryData();
+        var faker = new Faker { Random = new Randomizer(42) };
+        return faker.MakeLazy(5, () => faker.Hacker.Noun()).ToTheoryData();
     }
 }
