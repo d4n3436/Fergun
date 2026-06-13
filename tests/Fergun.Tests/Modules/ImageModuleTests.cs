@@ -36,7 +36,7 @@ public class ImageModuleTests : ModuleTestBase<ImageModule>
         ContextMock.SetupGet(x => x.User).Returns(InteractionMock.Object.User);
     }
 
-    [Theory(Skip = "Skipped until Google Image Search is fixed.")] // TODO: Remove when Google Image Search is fixed
+    [Theory]
     [InlineData("Discord", false, true)]
     [InlineData("Google", true, false)]
     public async Task GoogleAsync_Sends_Paginator(string query, bool multiImages, bool nsfw)
@@ -50,7 +50,7 @@ public class ImageModuleTests : ModuleTestBase<ImageModule>
         InteractionMock.VerifyFollowupWithFilesAsync(Times.Once());
     }
 
-    [Fact(Skip = "Skipped until Google Image Search is fixed.")]
+    [Fact]
     public async Task GoogleAsync_Returns_No_Results()
     {
         var result = await Module.GoogleAsync(" ");

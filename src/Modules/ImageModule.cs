@@ -53,7 +53,7 @@ public class ImageModule : FergunModuleBase<ImageModule>
         _googleLens = googleLens;
     }
 
-    // TODO: Add slash command attribute after fixing image search
+    [SlashCommand("google", "Searches for images from Google Images and displays them in a paginator.")]
     public async Task<RuntimeResult> GoogleAsync([Autocomplete<GoogleAutocompleteHandler>][Summary(description: "The query to search.")] string query,
         [Summary(description: "Whether to display multiple images in a single page.")] bool multiImages = false)
     {
