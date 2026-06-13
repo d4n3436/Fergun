@@ -11,6 +11,7 @@ using Discord.Interactions;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
+using Fergun.Apis.YouTube;
 using Fergun.Common;
 using Fergun.Configuration;
 using Fergun.Extensions;
@@ -32,8 +33,6 @@ using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using YoutubeExplode.Common;
-using YoutubeExplode.Search;
 using Color = Discord.Color;
 
 namespace Fergun.Modules;
@@ -61,13 +60,13 @@ public class UtilityModule : FergunModuleBase<UtilityModule>
     private readonly ApplicationCommandCache _commandCache;
     private readonly IFergunTranslator _translator;
     private readonly IDictionaryClient _dictionary;
-    private readonly SearchClient _searchClient;
+    private readonly IYouTubeClient _youTubeClient;
     private readonly IWikipediaClient _wikipediaClient;
     private readonly IWolframAlphaClient _wolframAlphaClient;
 
     public UtilityModule(ILogger<UtilityModule> logger, IFergunLocalizer<UtilityModule> localizer, FergunEmoteProvider emotes, InteractiveService interactive,
         IOptionsSnapshot<FergunOptions> fergunOptions, SharedModule shared, InteractionService commands, ApplicationCommandCache commandCache, IDictionaryClient dictionary,
-        IFergunTranslator translator, SearchClient searchClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
+        IFergunTranslator translator, IYouTubeClient youTubeClient, IWikipediaClient wikipediaClient, IWolframAlphaClient wolframAlphaClient)
         : base(logger, localizer, emotes, interactive)
     {
         _fergunOptions = fergunOptions.Value;
@@ -76,7 +75,7 @@ public class UtilityModule : FergunModuleBase<UtilityModule>
         _commandCache = commandCache;
         _dictionary = dictionary;
         _translator = translator;
-        _searchClient = searchClient;
+        _youTubeClient = youTubeClient;
         _wikipediaClient = wikipediaClient;
         _wolframAlphaClient = wolframAlphaClient;
     }
@@ -798,7 +797,7 @@ public class UtilityModule : FergunModuleBase<UtilityModule>
         await Context.Interaction.DeferAsync();
 
         _logger.LogInformation("Requesting YouTube videos (query: \"{Query}\")", query);
-        var videos = await _searchClient.GetVideosAsync(query).Take(10);
+        var videos = await _youTubeClient.SearchVideosAsync(query);
 
         _logger.LogDebug("YouTube search result count: {Count}", videos.Count);
 

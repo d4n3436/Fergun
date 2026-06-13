@@ -13,6 +13,7 @@ using Fergun.Apis.Urban;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
 using Fergun.Apis.Yandex;
+using Fergun.Apis.YouTube;
 using Fergun.Common;
 using Fergun.Configuration;
 using Fergun.Data;
@@ -29,7 +30,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using YoutubeExplode.Search;
 
 // The current directory is changed so the SQLite database is stored in the current folder
 // instead of the project folder (if the data source path is relative).
@@ -105,7 +105,7 @@ builder.Services.AddHttpClient<ITranslator, GoogleTranslator2>();
 builder.Services.AddHttpClient<GoogleTranslator2>(); // Registered twice so the one added as "itself" can be used in SharedModule
 builder.Services.AddHttpClient<ITranslator, YandexTranslator>();
 builder.Services.AddHttpClient<ITranslator, MicrosoftTranslator>();
-builder.Services.AddHttpClient<SearchClient>();
+builder.Services.AddHttpClient<IYouTubeClient, YouTubeClient>();
 builder.Services.AddHttpClient<OtherModule>();
 builder.Services.AddHttpClient<GoogleScraper>();
 builder.Services.AddHttpClient<DuckDuckGoScraper>();

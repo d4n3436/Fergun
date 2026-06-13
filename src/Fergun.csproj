@@ -45,7 +45,6 @@
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
     <PackageReference Include="System.Management" Version="10.0.9" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.9" />
-    <PackageReference Include="YoutubeExplode" Version="[6.2.1]" />
   </ItemGroup>
 
   <ItemGroup>

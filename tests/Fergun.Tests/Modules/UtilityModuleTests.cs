@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
 using Discord;
@@ -7,6 +6,7 @@ using Discord.Interactions;
 using Fergun.Apis.Dictionary;
 using Fergun.Apis.Wikipedia;
 using Fergun.Apis.WolframAlpha;
+using Fergun.Apis.YouTube;
 using Fergun.Common;
 using Fergun.Interactive;
 using Fergun.Localization;
@@ -16,14 +16,13 @@ using GTranslate.Translators;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using YoutubeExplode.Search;
 
 namespace Fergun.Tests.Modules;
 
 public class UtilityModuleTests : ModuleTestBase<UtilityModule>
 {
     private readonly GoogleTranslator2 _googleTranslator2 = new();
-    private readonly SearchClient _searchClient = new(new HttpClient());
+    private readonly IYouTubeClient _youTubeClient = Mock.Of<IYouTubeClient>();
     private readonly IWikipediaClient _wikipediaClient = null!;
     private readonly IWolframAlphaClient _wolframAlphaClient = null!;
     private readonly IDictionaryClient _dictionaryClient = null!;
@@ -37,7 +36,7 @@ public class UtilityModuleTests : ModuleTestBase<UtilityModule>
         var interactive = new InteractiveService(Client, new InteractiveConfig { ReturnAfterSendingPaginator = true });
 
         SetupModule(new Mock<UtilityModule>(() => new UtilityModule(Logger, Localizer, Emotes, interactive, options, shared,
-            interactionService, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _searchClient, _wikipediaClient, _wolframAlphaClient))
+            interactionService, commandCache, _dictionaryClient, Mock.Of<IFergunTranslator>(), _youTubeClient, _wikipediaClient, _wolframAlphaClient))
         {
             CallBase = true
         });
