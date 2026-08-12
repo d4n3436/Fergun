@@ -107,7 +107,7 @@ builder.Services.AddHttpClient<ITranslator, YandexTranslator>();
 builder.Services.AddHttpClient<ITranslator, MicrosoftTranslator>();
 builder.Services.AddHttpClient<IYouTubeClient, YouTubeClient>();
 builder.Services.AddHttpClient<OtherModule>();
-builder.Services.AddHttpClient<GoogleScraper>();
+builder.Services.AddHttpClient<GoogleScraper>().AddForbiddenRetryPolicy();
 builder.Services.AddHttpClient<DuckDuckGoScraper>();
 builder.Services.AddHttpClient("autocomplete", client => client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.ChromeUserAgent));
 
