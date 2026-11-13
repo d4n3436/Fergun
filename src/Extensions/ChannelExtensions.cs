@@ -11,6 +11,6 @@ public static class ChannelExtensions
 
     extension(IMessageChannel channel)
     {
-        public bool IsNsfw => channel is ITextChannel { IsNsfw: true };
+        public bool IsNsfw => channel is ITextChannel { IsNsfw: true } or IGuildChannel { Guild.NsfwLevel: NsfwLevel.AgeRestricted };
     }
 }
